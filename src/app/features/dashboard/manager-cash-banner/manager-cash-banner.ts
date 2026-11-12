@@ -23,6 +23,8 @@ export class ManagerCashBanner {
 
     // une session clôturée aujourd'hui compte comme une caisse fermée
     isOpen = computed(() => this.cash()?.status === "OPEN");
+    // clôturée aujourd'hui : la caisse ne se rouvre que le lendemain
+    closedToday = computed(() => this.cash()?.status === "CLOSED");
     canSell = computed(() => !this.loading() && !this.error() && this.isOpen());
 
     openedAt = computed(() => {

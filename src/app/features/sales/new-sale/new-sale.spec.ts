@@ -188,7 +188,7 @@ describe("NewSale", () => {
         await render({ cash: null });
         await add(0);
 
-        expect(text()).toContain("demandez au propriétaire de l'ouvrir");
+        expect(text()).toContain("ouvrez-la pour enregistrer une vente");
         expect(submitBtn().disabled).toBe(true);
     });
 

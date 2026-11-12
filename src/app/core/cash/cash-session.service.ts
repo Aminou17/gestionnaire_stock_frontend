@@ -45,12 +45,14 @@ export class CashSessionService {
 
     // sessionDate : YYYY-MM-DD de la session à clôturer (celle du jour, ou une oubliée)
     // closingNote : obligatoire quand le montant compté diffère du solde attendu
-    close(sessionDate: string, actualAmount: number, closingNote = "") {
+    // sessionId : seulement pour l'admin qui ferme la caisse oubliée d'un autre
+    close(sessionDate: string, actualAmount: number, closingNote = "", sessionId?: number) {
         return this.http
             .post<ClosedCash>(`${API_URL}/cash_sessions/close`, {
                 sessionDate,
                 actualAmount,
                 closingNote,
+                ...(sessionId ? { sessionId } : {}),
             })
             .pipe(map((res) => ({ ...res, difference: Number(res.difference) })));
     }

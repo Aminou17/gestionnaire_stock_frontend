@@ -499,6 +499,18 @@ app-page-header {
     cursor: progress;
 }
 
+.closed-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.closed-note app-icon {
+    flex: none;
+    margin-top: 1px;
+}
+
 .cart-bar {
     display: none;
 }

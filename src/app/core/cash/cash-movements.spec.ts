@@ -18,7 +18,7 @@ const movement = (overrides: Partial<CashMovement>): CashMovement => ({
 describe("cash movements", () => {
     it("should label sales, refunds and manual movements", () => {
         expect(getMovementLabel(movement({ reference_type: "sale", reference_id: 12 }))).toBe(
-            "Vente n° 12",
+            "Vente #12",
         );
         expect(
             getMovementLabel(
@@ -28,7 +28,7 @@ describe("cash movements", () => {
                     reference_id: 12,
                 }),
             ),
-        ).toBe("Remboursement de la vente n° 12");
+        ).toBe("Remboursement de la vente #12");
         expect(getMovementLabel(movement({ type: "DEPOSIT" }))).toBe("Ajout d'argent");
         expect(getMovementLabel(movement({ type: "EXPENSE" }))).toBe("Dépense");
         expect(getMovementLabel(movement({ type: "WITHDRAWAL" }))).toBe("Retrait");

@@ -203,15 +203,6 @@
             (retry)="sales.reload()"
         />
 
-        <app-recent-activity
-            class="m-activity"
-            title="Mon activité récente"
-            [items]="activityList()"
-            [loading]="activity.isLoading()"
-            [error]="!!activity.error()"
-            (retry)="activity.reload()"
-        />
-
         @if (cashOpen()) {
             <div class="m-close">
                 <a routerLink="/cash" class="btn btn-outline close-cash">

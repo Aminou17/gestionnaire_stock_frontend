@@ -7,6 +7,7 @@ import {
     ValidationErrors,
     Validators,
 } from "@angular/forms";
+import { ActivatedRoute } from "@angular/router";
 import { filter } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
@@ -59,6 +60,13 @@ export class SettingsAccount implements HasUnsavedChanges {
     passwordMessage = signal<{ ok: boolean; text: string } | null>(null);
 
     constructor() {
+        // le bouton Changer le mot de passe des paramètres arrive ici avec #password
+        if (inject(ActivatedRoute).snapshot.fragment === "password") {
+            setTimeout(() =>
+                document.getElementById("password")?.scrollIntoView({ block: "start" }),
+            );
+        }
+
         // dirty est faux après un reset : seule une saisie de l'utilisateur efface le message
         this.profileForm.valueChanges
             .pipe(

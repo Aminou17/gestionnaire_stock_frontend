@@ -52,6 +52,18 @@ export interface CashSessionPage {
     pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 
+export interface TeamSession {
+    id: number;
+    status: "OPEN" | "CLOSED";
+    openedBy: number;
+    openedByName: string | null;
+    openedAt: string;
+    closedAt: string | null;
+    difference: number | null;
+    explanationPending: boolean;
+    salesTotal: number;
+}
+
 // partie caisse de /dashboard/summary
 // balance et openingAmount valent null pour le gérant quand la clôture est à l'aveugle
 export interface CashToday {
@@ -68,8 +80,12 @@ export interface CashToday {
         id: number;
         sessionDate: string;
         openedAt: string;
+        openedBy: number;
+        openedByName: string | null;
         balance: number | null;
     } | null;
+    // caisses du jour de toute l'équipe, réservées à l'admin
+    teamSessions: TeamSession[] | null;
     pendingExplanation: {
         id: number;
         sessionDate: string;

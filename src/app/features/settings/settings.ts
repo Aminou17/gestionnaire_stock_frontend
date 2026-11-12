@@ -79,14 +79,8 @@ const GROUPS: SettingsGroup[] = [
         ],
     },
     {
-        title: "Compte et préférences",
+        title: "Préférences",
         links: [
-            {
-                path: "account",
-                icon: "user",
-                label: "Mon compte",
-                description: "Votre nom, votre email et votre mot de passe",
-            },
             {
                 path: "appearance",
                 icon: "palette",

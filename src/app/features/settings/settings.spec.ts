@@ -60,15 +60,14 @@ describe("Settings", () => {
             "/cash",
             "/sales",
             "/export",
-            "/account",
             "/appearance",
         ]);
     });
 
-    it("should only offer the account and the appearance to the manager", async () => {
+    it("should only offer the appearance to the manager", async () => {
         await render(false);
 
-        expect(hrefs()).toEqual(["/account", "/appearance"]);
+        expect(hrefs()).toEqual(["/appearance"]);
     });
 
     it("should show the current theme", async () => {

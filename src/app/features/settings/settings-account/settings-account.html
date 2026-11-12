@@ -11,7 +11,7 @@
         <span class="section-icon"><app-icon name="user" [size]="20" /></span>
         <div>
             <h2>Profil</h2>
-            <p class="muted">Votre rôle : {{ auth.roleLabel() }}. Il ne se modifie pas ici.</p>
+            <p class="muted">{{ auth.roleLabel() }}</p>
         </div>
     </div>
 
@@ -82,7 +82,7 @@
     </div>
 </form>
 
-<form class="card section" [formGroup]="passwordForm" (ngSubmit)="savePassword()" novalidate>
+<form id="password" class="card section" [formGroup]="passwordForm" (ngSubmit)="savePassword()" novalidate>
     <div class="section-head">
         <span class="section-icon"><app-icon name="key" [size]="20" /></span>
         <div>

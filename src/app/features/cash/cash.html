@@ -44,13 +44,23 @@
         <div class="alert alert-warning banner" role="alert">
             <app-icon name="alert" />
             <span>
-                La caisse du <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas
-                été clôturée.
+                @if (isOwn(previous.openedBy)) {
+                    Votre caisse du
+                } @else {
+                    La caisse de {{ previous.openedByName ?? "un collègue" }} du
+                }
+                <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas été clôturée.
             </span>
             <button
                 type="button"
                 class="link-btn"
-                (click)="closeDialog.open(previous.sessionDate, previous.balance)"
+                (click)="
+                    closeDialog.open(
+                        previous.sessionDate,
+                        previous.balance,
+                        isOwn(previous.openedBy) ? undefined : previous.id
+                    )
+                "
             >
                 La clôturer
             </button>
@@ -86,7 +96,7 @@
                 @if (cash(); as cash) {
                     <div class="status-head">
                         <span class="badge" [class]="isOpen() ? 'badge-success' : 'badge-neutral'">
-                            {{ isOpen() ? "Caisse ouverte" : "Caisse clôturée" }}
+                            {{ isOpen() ? "Ma caisse ouverte" : "Ma caisse clôturée" }}
                         </span>
                         <small class="muted">
                             Ouverte à {{ cash.openedAt | date: "HH:mm" }}
@@ -139,8 +149,8 @@
                         }
                     } @else {
                         <p class="muted note">
-                            La caisse du jour est clôturée. Une nouvelle caisse pourra être ouverte
-                            demain.
+                            Votre caisse du jour est clôturée. Vous pourrez ouvrir une nouvelle
+                            caisse demain.
                         </p>
                         <a [routerLink]="['/cash/sessions', cash.id]" class="btn btn-outline">
                             Voir le détail de la journée
@@ -148,26 +158,60 @@
                     }
                 } @else {
                     <div class="status-head">
-                        <span class="badge badge-neutral">Caisse fermée</span>
+                        <span class="badge badge-neutral">Ma caisse est fermée</span>
                     </div>
                     <div class="balance">
-                        <small>Aucune caisse ouverte aujourd'hui</small>
+                        <small>Vous n'avez pas ouvert votre caisse aujourd'hui</small>
                     </div>
-                    @if (auth.isAdmin()) {
-                        <div class="actions">
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                (click)="openDialog.open()"
-                            >
-                                Ouvrir la caisse
-                            </button>
-                        </div>
-                    } @else {
-                        <p class="muted note">Demandez au propriétaire d'ouvrir la caisse.</p>
-                    }
+                    <div class="actions">
+                        <button type="button" class="btn btn-primary" (click)="openDialog.open()">
+                            Ouvrir la caisse
+                        </button>
+                    </div>
                 }
             </section>
+
+            @if (auth.isAdmin() && team().length > 0) {
+                <section class="card panel team" aria-label="Caisses de l'équipe">
+                    <div class="card-header">
+                        <h2>Caisses du jour</h2>
+                    </div>
+                    <ul class="team-list">
+                        @for (member of team(); track member.id) {
+                            <li>
+                                <a [routerLink]="['/cash/sessions', member.id]" class="team-row">
+                                    <span class="team-name">
+                                        <strong>{{ member.openedByName ?? "—" }}</strong>
+                                        <small class="muted"
+                                            >Ventes en espèces {{ member.salesTotal | fcfa }}</small
+                                        >
+                                    </span>
+                                    <span class="team-state">
+                                        @if (member.status === "OPEN") {
+                                            <span class="badge badge-success">Ouverte</span>
+                                        } @else {
+                                            <span class="badge badge-neutral">Clôturée</span>
+                                            @if (member.explanationPending) {
+                                                <span class="badge badge-warning"
+                                                    >Écart à expliquer</span
+                                                >
+                                            } @else if (member.difference !== null) {
+                                                <strong
+                                                    class="gap"
+                                                    [class.in]="member.difference > 0"
+                                                    [class.out]="member.difference < 0"
+                                                >
+                                                    Écart {{ member.difference | fcfa: true }}
+                                                </strong>
+                                            }
+                                        }
+                                    </span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
 
             <!-- le gérant peut seulement ajouter de l'argent -->
             @if (isOpen()) {

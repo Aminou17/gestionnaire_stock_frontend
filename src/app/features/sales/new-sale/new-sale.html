@@ -14,11 +14,11 @@
 } @else if (cashClosed()) {
     <div class="alert alert-warning banner" role="alert">
         <app-icon name="alert" />
-        @if (auth.isAdmin()) {
-            <span>La caisse est fermée : ouvrez-la pour enregistrer une vente.</span>
-            <a routerLink="/cash">Ouvrir la caisse</a>
+        @if (cashClosedToday()) {
+            <span>Votre caisse du jour est clôturée : les ventes reprennent demain.</span>
         } @else {
-            <span>La caisse est fermée : demandez au propriétaire de l'ouvrir.</span>
+            <span>Votre caisse est fermée : ouvrez-la pour enregistrer une vente.</span>
+            <a routerLink="/cash">Ouvrir la caisse</a>
         }
     </div>
 }
@@ -390,6 +390,18 @@
                         }
                     }
                 </div>
+            }
+            @if (cashClosed()) {
+                <p class="alert alert-warning closed-note" role="alert">
+                    <app-icon name="alert" />
+                    <span>
+                        La vente ne peut pas être validée : votre caisse est
+                        {{ cashClosedToday() ? "clôturée pour aujourd'hui." : "fermée." }}
+                        @if (!cashClosedToday()) {
+                            <a routerLink="/cash">Ouvrir la caisse</a>
+                        }
+                    </span>
+                </p>
             }
             <button
                 type="button"

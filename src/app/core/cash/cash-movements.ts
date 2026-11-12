@@ -9,8 +9,8 @@ export const isIncome = (movement: CashMovement) =>
     movement.type === "SALE" || movement.type === "DEPOSIT";
 
 export const getMovementLabel = (movement: CashMovement) => {
-    if (movement.type === "SALE") return `Vente n° ${movement.reference_id}`;
-    if (isRefund(movement)) return `Remboursement de la vente n° ${movement.reference_id}`;
+    if (movement.type === "SALE") return `Vente #${movement.reference_id}`;
+    if (isRefund(movement)) return `Remboursement de la vente #${movement.reference_id}`;
     const base =
         movement.type === "DEPOSIT"
             ? "Ajout d'argent"

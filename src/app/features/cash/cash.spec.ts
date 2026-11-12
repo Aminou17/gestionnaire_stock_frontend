@@ -66,6 +66,7 @@ describe("Cash", () => {
             cash: openCash,
             previousOpenSession: null,
             pendingExplanation: null,
+            teamSessions: null,
             blindClose: false,
             ...today,
         };
@@ -125,9 +126,9 @@ describe("Cash", () => {
     it("should show the balance and the day's movements when the cash is open", async () => {
         await render();
 
-        expect(text()).toContain("Caisseouverte");
+        expect(text()).toContain("Macaisseouverte");
         expect(text()).toContain("9500F");
-        expect(text()).toContain("Venten°12");
+        expect(text()).toContain("Vente#12");
         expect(text()).toContain("Fonddecaisse5000F");
         expect(text()).toContain("Ventesenespèces4500F");
         expect(buttons()).toContain("Nouvelle vente");
@@ -190,16 +191,16 @@ describe("Cash", () => {
     it("should offer to open the cash register to the owner when it is closed", async () => {
         await render({ today: { cash: null } });
 
-        expect(text()).toContain("Caissefermée");
+        expect(text()).toContain("Macaisseestfermée");
         expect(buttons()).toContain("Ouvrir la caisse");
         expect(buttons()).not.toContain("Nouvelle vente");
     });
 
-    it("should ask the manager to call the owner when the cash is closed", async () => {
+    it("should let the manager open the cash when it is closed", async () => {
         await render({ isAdmin: false, today: { cash: null } });
 
-        expect(text()).toContain("Demandezaupropriétaired'ouvrirlacaisse");
-        expect(buttons()).not.toContain("Ouvrir la caisse");
+        expect(text()).toContain("Ouvrirlacaisse");
+        expect(buttons()).toContain("Ouvrir la caisse");
     });
 
     it("should show the counted amount, the gap and its explanation once closed", async () => {
@@ -215,7 +216,7 @@ describe("Cash", () => {
             }),
         });
 
-        expect(text()).toContain("Caisseclôturée");
+        expect(text()).toContain("Macaisseclôturée");
         expect(text()).toContain("Montantcompté9000F");
         expect(text()).toContain("Écart−500F");
         expect(text()).toContain("Explication:Erreurdemonnaie");
@@ -230,6 +231,8 @@ describe("Cash", () => {
                     id: 3,
                     sessionDate: "2026-11-09",
                     openedAt: "2026-11-09T08:00:00",
+                    openedBy: 1,
+                    openedByName: "Awa",
                     balance: 12000,
                 },
             },
@@ -237,6 +240,47 @@ describe("Cash", () => {
 
         expect(el.querySelector('[role="alert"]')?.textContent).toContain("n'a pas été clôturée");
         expect(buttons()).toContain("La clôturer");
+    });
+
+    it("should name the person whose cash register was forgotten open", async () => {
+        await render({
+            today: {
+                previousOpenSession: {
+                    id: 3,
+                    sessionDate: "2026-11-09",
+                    openedAt: "2026-11-09T08:00:00",
+                    openedBy: 7,
+                    openedByName: "Kevin Bakala",
+                    balance: 12000,
+                },
+            },
+        });
+
+        expect(el.querySelector('[role="alert"]')?.textContent).toContain("Kevin Bakala");
+    });
+
+    it("should list the cash registers of the team for the owner", async () => {
+        await render({
+            today: {
+                teamSessions: [
+                    {
+                        id: 5,
+                        status: "CLOSED",
+                        openedBy: 7,
+                        openedByName: "Kevin Bakala",
+                        openedAt: "2026-11-12T08:00:00",
+                        closedAt: "2026-11-12T18:00:00",
+                        difference: -1500,
+                        explanationPending: false,
+                        salesTotal: 42000,
+                    },
+                ],
+            },
+        });
+
+        const team = el.querySelector(".team");
+        expect(team?.textContent).toContain("Kevin Bakala");
+        expect(team?.textContent).toContain("Écart");
     });
 
     it("should let the person who closed explain a pending gap", async () => {
@@ -287,7 +331,7 @@ describe("Cash", () => {
         await render({ failToday: true });
 
         expect(text()).toContain("Impossibledechargerl'étatdelacaisse.");
-        expect(text()).not.toContain("Caissefermée");
+        expect(text()).not.toContain("Macaisseestfermée");
         expect(buttons()).toContain("Réessayer");
     });
 });

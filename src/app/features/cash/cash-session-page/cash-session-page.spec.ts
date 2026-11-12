@@ -88,7 +88,7 @@ describe("CashSessionPage", () => {
         expect(text()).toContain("Montantattendu12000F");
         expect(text()).toContain("Montantcompté11500F");
         expect(text()).toContain("ClôturéeparAwaK.");
-        expect(text()).toContain("Venten°8");
+        expect(text()).toContain("Vente#8");
     });
 
     it("should not show a gap for a session that is still open", async () => {
