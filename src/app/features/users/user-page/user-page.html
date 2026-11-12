@@ -1,0 +1,209 @@
+<app-page-header
+    [title]="data()?.name ?? 'Utilisateur'"
+    section="Administration"
+    back="/users"
+    backLabel="Retour aux utilisateurs"
+/>
+
+<section class="card sheet">
+    @if (user.isLoading() && !data()) {
+        @for (i of [1, 2, 3, 4]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (!data() && (user.error() || notFound())) {
+        <div class="empty">
+            @if (notFound()) {
+                Cet utilisateur est introuvable.
+                <a routerLink="/users" class="btn btn-outline btn-sm">Retour aux utilisateurs</a>
+            } @else {
+                Impossible de charger l'utilisateur.
+                <button type="button" class="btn btn-outline btn-sm" (click)="user.reload()">
+                    Réessayer
+                </button>
+            }
+        </div>
+    } @else if (data(); as user) {
+        <div class="identity" [class.inactive]="!user.is_active">
+            <span class="avatar" aria-hidden="true">{{ getInitials(user.name) }}</span>
+            <div>
+                <h2>{{ user.name }}</h2>
+                <div class="tags">
+                    <span
+                        class="badge"
+                        [class.badge-primary]="user.role === 'admin'"
+                        [class.role-manager]="user.role !== 'admin'"
+                    >
+                        {{ getRoleLabel(user.role) }}
+                    </span>
+                    @if (isMe()) {
+                        <span class="me">Vous</span>
+                    }
+                    @if (!user.is_active) {
+                        <span class="badge badge-neutral">Supprimé</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <dl>
+            <div>
+                <dt>Email</dt>
+                <dd>
+                    <a class="contact-link" [href]="'mailto:' + user.email">
+                        <app-icon name="mail" [size]="16" />
+                        {{ user.email }}
+                    </a>
+                </dd>
+            </div>
+            <div>
+                <dt>Dernière connexion</dt>
+                <dd [class.muted]="!user.last_login_at">{{ lastLogin() }}</dd>
+            </div>
+            @if (!user.is_active) {
+                <div>
+                    <dt>Suppression</dt>
+                    <dd>{{ deletion().replace("Supprimé le ", "Le ") }}</dd>
+                </div>
+            }
+            <div>
+                <dt>Ajouté le</dt>
+                <dd>{{ user.created_at | date: "d MMMM y" }}</dd>
+            </div>
+        </dl>
+
+        @if (user.is_active) {
+            <div class="manage">
+                <button type="button" class="btn btn-sm edit" (click)="editUser()">
+                    <app-icon name="edit" [size]="16" />
+                    Modifier
+                </button>
+                @if (isMe()) {
+                    <a routerLink="/settings/account" class="btn btn-sm edit">
+                        <app-icon name="key" [size]="16" />
+                        Mon mot de passe
+                    </a>
+                } @else {
+                    <button type="button" class="btn btn-sm edit" (click)="resetPassword()">
+                        <app-icon name="key" [size]="16" />
+                        Nouveau mot de passe
+                    </button>
+                    <button type="button" class="btn btn-sm danger" (click)="askDelete()">
+                        <app-icon name="trash" [size]="16" />
+                        Supprimer
+                    </button>
+                }
+            </div>
+        } @else {
+            @if (restoreError()) {
+                <div class="alert alert-error restore-error" role="alert">
+                    {{ restoreError() }}
+                </div>
+            }
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="restoring()"
+                    (click)="restoreUser()"
+                >
+                    @if (restoring()) {
+                        <span class="spinner"></span>
+                    } @else {
+                        <app-icon name="undo" [size]="18" />
+                    }
+                    Restaurer l'accès
+                </button>
+            </div>
+        }
+
+        <h2 class="section-title">Activité récente</h2>
+        @if (activity.isLoading() && !activity.hasValue()) {
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        } @else if (activity.error()) {
+            <p class="muted activity-error">
+                Impossible de charger l'activité.
+                <button type="button" class="btn btn-outline btn-sm" (click)="activity.reload()">
+                    Réessayer
+                </button>
+            </p>
+        } @else if (activity.hasValue()) {
+            @if (activity.value().length === 0) {
+                <p class="muted no-activity">Aucune action enregistrée pour le moment.</p>
+            } @else {
+                @for (day of activityDays(); track day.key) {
+                    <h3 class="day">{{ day.label }}</h3>
+                    <ul class="activity">
+                        @for (item of day.items; track item.id) {
+                            <li [class.failed]="item.result === 'FAILURE'">
+                                <span class="icon" aria-hidden="true">
+                                    <app-icon [name]="getActivityIcon(item.action)" [size]="16" />
+                                </span>
+                                <span class="label">
+                                    {{ getActivityLabel(item.action) }}
+                                    @if (item.result === "FAILURE") {
+                                        <small class="failed-tag">Échec</small>
+                                    }
+                                </span>
+                                <small class="muted">{{ item.created_at | date: "HH:mm" }}</small>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        }
+    }
+</section>
+
+@if (data()?.is_active) {
+    <app-user-form (saved)="onSaved()" />
+}
+
+<!-- on ne supprime pas son propre compte et son mot de passe se change dans Mon compte -->
+@if (data()?.is_active && !isMe()) {
+    <app-password-dialog />
+
+    <dialog
+        #confirmBox
+        class="confirm"
+        aria-labelledby="user-delete-title"
+        (click)="onConfirmBackdrop($event)"
+        (cancel)="onConfirmCancel($event)"
+    >
+        <div class="confirm-body">
+            <h2 id="user-delete-title">Supprimer cet utilisateur ?</h2>
+            <p class="muted">
+                {{ data()?.name }} ne pourra plus se connecter et sera déconnecté tout de suite. Ses
+                ventes, ses caisses et tout son historique sont conservés. Vous pourrez le restaurer
+                plus tard.
+            </p>
+
+            @if (deleteError()) {
+                <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+            }
+
+            <div class="confirm-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="deleting()"
+                    (click)="closeConfirm()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    [disabled]="deleting()"
+                    (click)="deleteUser()"
+                >
+                    @if (deleting()) {
+                        <span class="spinner"></span>
+                    }
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </dialog>
+}

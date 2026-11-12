@@ -1,0 +1,95 @@
+<button
+    #button
+    type="button"
+    class="icon-btn"
+    [attr.aria-label]="total() > 0 ? 'Notifications, ' + total() + ' à traiter' : 'Notifications'"
+    aria-controls="notifications-panel"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+>
+    <app-icon name="bell" />
+    @if (total() > 0) {
+        <span class="dot">{{ total() }}</span>
+    }
+</button>
+
+@if (open()) {
+    <div class="panel" id="notifications-panel">
+        <h2>Notifications</h2>
+
+        <section>
+            <h3>Stock</h3>
+            @if (stock.loading()) {
+                <p class="none muted">Chargement…</p>
+            } @else if (stock.failed()) {
+                <p class="none muted">
+                    Impossible de charger les alertes de stock.
+                    <button type="button" class="retry" (click)="stock.reload()">Réessayer</button>
+                </p>
+            } @else if (stock.count() > 0) {
+                <a routerLink="/alerts" class="item" (click)="close()">
+                    <span class="icon warning"><app-icon name="alert" [size]="16" /></span>
+                    <span class="text">
+                        <strong>
+                            {{ stock.count() }} produit{{ stock.count() > 1 ? "s" : "" }} à
+                            réapprovisionner
+                        </strong>
+                        <small class="muted">Voir les alertes de stock</small>
+                    </span>
+                </a>
+            } @else {
+                <p class="none muted">Tout est en ordre.</p>
+            }
+        </section>
+
+        <section>
+            <h3>Sécurité</h3>
+            @if (security.loading()) {
+                <p class="none muted">Chargement…</p>
+            } @else if (security.failed()) {
+                <p class="none muted">
+                    Impossible de charger les échecs du jour.
+                    <button type="button" class="retry" (click)="security.reload()">
+                        Réessayer
+                    </button>
+                </p>
+            } @else if (security.count() > 0) {
+                <a
+                    routerLink="/audit-logs"
+                    [queryParams]="{ result: 'FAILURE' }"
+                    class="item"
+                    (click)="close()"
+                >
+                    <span class="icon danger"><app-icon name="ban" [size]="16" /></span>
+                    <span class="text">
+                        <strong>
+                            {{ security.count() }} échec{{ security.count() > 1 ? "s" : "" }}
+                            aujourd'hui
+                        </strong>
+                        <small class="muted">Connexions ratées et accès refusés</small>
+                    </span>
+                </a>
+
+                <ul class="latest">
+                    @for (item of latest(); track item.key) {
+                        <li>
+                            <span>
+                                {{ item.text }}
+                                @if (item.count > 1) {
+                                    <strong>×{{ item.count }}</strong>
+                                }
+                            </span>
+                            <small class="muted">{{ item.time | date: "HH:mm" }}</small>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="none muted">Aucun échec aujourd'hui.</p>
+            }
+        </section>
+
+        <a routerLink="/audit-logs" class="footer-link" (click)="close()">
+            Voir le journal d'audit
+        </a>
+    </div>
+}

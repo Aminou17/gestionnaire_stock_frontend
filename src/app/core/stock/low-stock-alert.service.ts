@@ -19,4 +19,11 @@ export class LowStockAlertService {
     });
 
     count = computed(() => (this.alerts.hasValue() ? this.alerts.value().length : 0));
+
+    failed = computed(() => this.alerts.error() !== undefined);
+    loading = computed(() => this.alerts.isLoading() && !this.alerts.hasValue());
+
+    reload() {
+        this.alerts.reload();
+    }
 }

@@ -29,12 +29,7 @@
         <ng-content />
 
         @if (auth.isAdmin()) {
-            <a routerLink="/alerts" class="icon-btn" aria-label="Alertes de stock">
-                <app-icon name="bell" />
-                @if (alerts.count() > 0) {
-                    <span class="dot">{{ alerts.count() }}</span>
-                }
-            </a>
+            <app-notifications />
         }
 
         <div class="user">

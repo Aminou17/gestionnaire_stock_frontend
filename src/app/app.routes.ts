@@ -10,12 +10,7 @@ import { MainLayout } from "./layout/main-layout/main-layout";
 const comingSoon = () => import("./features/coming-soon/coming-soon").then((m) => m.ComingSoon);
 
 // pages pas encore développées : [chemin, titre, réservée à l'admin]
-const upcoming: [string, string, boolean][] = [
-    ["inventories", "Inventaires", true],
-    ["alerts", "Alertes de stock", true],
-    ["users", "Utilisateurs", true],
-    ["audit-logs", "Journal d'audit", true],
-];
+const upcoming: [string, string, boolean][] = [["inventories", "Inventaires", true]];
 
 export const routes: Routes = [
     { path: "", pathMatch: "full", redirectTo: "dashboard" },
@@ -107,6 +102,32 @@ export const routes: Routes = [
                     import("./features/suppliers/supplier-page/supplier-page").then(
                         (m) => m.SupplierPage,
                     ),
+            },
+            {
+                path: "users",
+                title: "Utilisateurs · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () => import("./features/users/users").then((m) => m.Users),
+            },
+            {
+                path: "users/:id",
+                title: "Utilisateur · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/users/user-page/user-page").then((m) => m.UserPage),
+            },
+            {
+                path: "audit-logs",
+                title: "Journal d'audit · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/audit-logs/audit-logs").then((m) => m.AuditLogs),
+            },
+            {
+                path: "alerts",
+                title: "Alertes de stock · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () => import("./features/alerts/alerts").then((m) => m.Alerts),
             },
             {
                 path: "sales",

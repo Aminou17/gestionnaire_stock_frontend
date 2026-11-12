@@ -1,0 +1,424 @@
+:host {
+    display: block;
+}
+
+.list-card {
+    min-width: 0;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 12px;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.tab:hover {
+    color: var(--text);
+}
+
+.tab.selected {
+    border-bottom-color: var(--primary);
+    color: var(--text);
+}
+
+.clear {
+    flex-shrink: 0;
+    min-height: 36px;
+    padding: 0 8px;
+    border: 0;
+    background: none;
+    color: var(--primary-text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+/* compteurs de l'onglet Sécurité, cliquables pour filtrer */
+.summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.stat {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-height: 56px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.stat strong {
+    color: var(--text);
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* rouge seulement quand il y a vraiment quelque chose à regarder */
+.stat strong.alert {
+    color: var(--danger);
+}
+
+.stat-skeleton {
+    width: 24px;
+    height: 28px;
+}
+
+.stat-retry {
+    grid-column: 1 / -1;
+    justify-self: start;
+}
+
+.stat:hover {
+    background: var(--surface-hover);
+}
+
+.stat.active {
+    border-color: var(--danger);
+    background: var(--danger-soft);
+}
+
+/* le jour reste visible pendant qu'on fait défiler ses entrées */
+.day {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0;
+    padding: 8px 16px 8px 60px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+}
+
+.entries {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.entry {
+    border-bottom: 1px solid var(--border);
+}
+
+.entries .entry:last-child {
+    border-bottom: 0;
+}
+
+summary,
+.row {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 12px;
+    padding: 12px 16px;
+}
+
+summary {
+    list-style: none;
+    cursor: pointer;
+}
+
+summary::-webkit-details-marker {
+    display: none;
+}
+
+summary:hover,
+details[open] summary {
+    background: var(--surface-hover);
+}
+
+.chevron {
+    margin-top: 2px;
+    color: var(--text-muted);
+    transition: transform 0.15s;
+}
+
+details[open] .chevron {
+    transform: rotate(180deg);
+}
+
+.tab:focus-visible,
+.stat:focus-visible,
+summary:focus-visible,
+.open-link:focus-visible,
+.clear:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+.avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.failed .avatar {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.what {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.sentence {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--text);
+    overflow-wrap: anywhere;
+}
+
+.sentence strong {
+    font-weight: 600;
+}
+
+.meta {
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+/* séparateur entre l'heure, la précision et l'adresse IP */
+.meta > * + *::before {
+    content: "·";
+    margin: 0 8px;
+}
+
+.failed .note {
+    color: var(--danger);
+}
+
+.details {
+    display: grid;
+    gap: 8px;
+    padding: 0 16px 16px 60px;
+    background: var(--surface-hover);
+    font-size: 13px;
+}
+
+.detail-title {
+    margin: 4px 0 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.times span {
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    font-variant-numeric: tabular-nums;
+}
+
+.changes {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+}
+
+.changes div {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 8px;
+}
+
+.changes dt {
+    color: var(--text-muted);
+}
+
+.changes dd {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.changes app-icon {
+    color: var(--text-muted);
+}
+
+.old {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.open-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    justify-self: start;
+    min-height: 32px;
+    color: var(--primary-text);
+    font-weight: 500;
+}
+
+.reloading {
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.more {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.count {
+    margin: 0;
+    font-size: 13px;
+}
+
+.loading {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+/* même forme qu'une ligne : rond, phrase, heure */
+.row-skeleton {
+    display: grid;
+    grid-template-columns: 32px minmax(0, 1fr);
+    gap: 8px 12px;
+}
+
+.row-skeleton .circle {
+    grid-row: span 2;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.row-skeleton .line {
+    height: 14px;
+}
+
+.row-skeleton .short {
+    width: 40%;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 48px 16px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.list-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 12px 16px;
+}
+
+@media (max-width: 767px) {
+    .tabs {
+        padding: 0;
+    }
+
+    .tab {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .clear,
+    .open-link {
+        min-height: 44px;
+    }
+
+    .summary {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .stat {
+        flex-direction: column;
+        gap: 0;
+        padding: 8px 12px;
+    }
+
+    .day {
+        padding-left: 56px;
+    }
+
+    summary,
+    .row {
+        padding: 12px;
+    }
+
+    .details {
+        padding: 0 12px 16px 56px;
+    }
+
+    .changes div {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 2px;
+    }
+
+    .more .btn,
+    .empty .btn-sm,
+    .list-error .btn-sm {
+        min-height: 44px;
+    }
+
+    .more .btn {
+        width: 100%;
+    }
+}

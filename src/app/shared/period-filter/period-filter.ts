@@ -1,5 +1,5 @@
 import { formatDate } from "@angular/common";
-import { Component, LOCALE_ID, inject, output, signal } from "@angular/core";
+import { Component, LOCALE_ID, inject, input, output, signal } from "@angular/core";
 
 export type Period = "today" | "week" | "month" | "all" | "custom";
 
@@ -31,11 +31,14 @@ export const validateRange = (from: string, to: string, today: string) => {
     selector: "app-period-filter",
     templateUrl: "./period-filter.html",
     styleUrl: "./period-filter.css",
+    host: { "[class.chips]": "chips()" },
 })
 export class PeriodFilter {
     private locale = inject(LOCALE_ID);
 
     changed = output<PeriodRange>();
+    // affichage en pastilles, sans libellé visible (Journal d'audit)
+    chips = input(false);
 
     period = signal<Period>("all");
     customFrom = signal("");

@@ -1,0 +1,66 @@
+import { AuditLog } from "./audit-log.model";
+import { describeRequest, getAuditChanges, getAuditSentence } from "./audit-sentence";
+
+const log = (patch: Partial<AuditLog>): AuditLog => ({
+    id: 1,
+    user_id: 1,
+    user_name: "Awa",
+    action: "PRODUCT_CREATED",
+    entity_type: null,
+    entity_id: null,
+    details: null,
+    result: "SUCCESS",
+    ip_address: null,
+    created_at: "2026-01-10T10:00:00Z",
+    ...patch,
+});
+
+describe("audit sentence", () => {
+    it("should turn a denied request into words", () => {
+        expect(describeRequest("PATCH", "/categories/4/restore")).toBe("restaurer une catégorie");
+        expect(describeRequest("GET", "/users")).toBe("consulter les utilisateurs");
+        expect(describeRequest("DELETE", "/products/3")).toBe("supprimer un produit");
+        expect(describeRequest("GET", "/inconnu")).toBe("ouvrir une page réservée");
+    });
+
+    it("should name the object, from the details or from the API", () => {
+        expect(
+            getAuditSentence(log({ action: "CATEGORY_CREATED", details: { name: "Tissus" } })),
+        ).toEqual({ verb: "a créé la catégorie", object: "Tissus" });
+
+        expect(
+            getAuditSentence(
+                log({ action: "USER_DEACTIVATED", entity_type: "user", entity_name: "Moussa" }),
+            ).object,
+        ).toBe("Moussa");
+    });
+
+    it("should give the amount and the payment of a sale", () => {
+        const sentence = getAuditSentence(
+            log({ action: "SALE_CREATED", details: { total: 25000, paymentMethod: "CASH" } }),
+        );
+
+        expect(sentence.object!.replace(/\s/g, " ")).toBe("25 000 F");
+        expect(sentence.note).toBe("en espèces");
+    });
+
+    it("should keep an unknown action without inventing a sentence", () => {
+        expect(getAuditSentence(log({ action: "NEW_THING" }))).toEqual({
+            verb: "a fait une action",
+            note: "NEW_THING",
+        });
+    });
+
+    it("should list only the known fields that changed", () => {
+        const changes = getAuditChanges(
+            log({
+                details: {
+                    before: { name: "Tissus", role: "manager", updated_at: "a" },
+                    after: { name: "Tissus", role: "admin", updated_at: "b" },
+                },
+            }),
+        );
+
+        expect(changes).toEqual([{ label: "Rôle", before: "Gérant", after: "Propriétaire" }]);
+    });
+});

@@ -1,0 +1,115 @@
+<app-page-header
+    title="Alertes de stock"
+    subtitle="Les produits à réapprovisionner"
+    section="Stock"
+/>
+
+<section class="card list-card">
+    @if (!alerts.error()) {
+        <div class="tabs" role="group" aria-label="Afficher">
+            <button
+                type="button"
+                class="tab"
+                [class.selected]="view() === 'all'"
+                [attr.aria-pressed]="view() === 'all'"
+                (click)="view.set('all')"
+            >
+                Tous <span>{{ all().length }}</span>
+            </button>
+            <button
+                type="button"
+                class="tab"
+                [class.selected]="view() === 'out'"
+                [attr.aria-pressed]="view() === 'out'"
+                (click)="view.set('out')"
+            >
+                En rupture <span>{{ outCount() }}</span>
+            </button>
+            <button
+                type="button"
+                class="tab"
+                [class.selected]="view() === 'low'"
+                [attr.aria-pressed]="view() === 'low'"
+                (click)="view.set('low')"
+            >
+                Stock faible <span>{{ lowCount() }}</span>
+            </button>
+        </div>
+    }
+
+    @if (alerts.isLoading() && !alerts.hasValue()) {
+        <div class="loading">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (alerts.error()) {
+        <div class="empty" role="alert">
+            {{ errorMessage() }}
+            @if (needsSettings()) {
+                <a routerLink="/settings/stock" class="btn btn-outline btn-sm">
+                    Régler le seuil de stock
+                </a>
+            } @else {
+                <button type="button" class="btn btn-outline btn-sm" (click)="alerts.reload()">
+                    Réessayer
+                </button>
+            }
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty" role="status">
+            @if (all().length === 0) {
+                <app-icon name="check" [size]="24" aria-hidden="true" />
+                Tout est en ordre : aucun produit n'a atteint son seuil.
+            } @else {
+                Aucun produit dans cette catégorie.
+            }
+        </div>
+    } @else {
+        <div class="columns" aria-hidden="true">
+            <span>Produit</span>
+            <span>En stock</span>
+            <span>Seuil</span>
+            <span></span>
+        </div>
+
+        <ul class="rows">
+            @for (alert of list(); track alert.id) {
+                <li class="row" [class.out]="isOut(alert.theoretical_stock)">
+                    <div class="text">
+                        <a class="name" [routerLink]="['/products', alert.id]">{{ alert.name }}</a>
+                        <span
+                            class="badge"
+                            [class.badge-danger]="isOut(alert.theoretical_stock)"
+                            [class.badge-warning]="!isOut(alert.theoretical_stock)"
+                        >
+                            {{ isOut(alert.theoretical_stock) ? "En rupture" : "Stock faible" }}
+                        </span>
+                    </div>
+
+                    <span class="stock">
+                        <span class="mobile-label">En stock : </span>
+                        {{ alert.theoretical_stock }}
+                    </span>
+
+                    <span class="threshold">
+                        <span class="mobile-label">· Seuil : </span>
+                        {{ alert.min_stock }}
+                    </span>
+
+                    <div class="end">
+                        <a
+                            class="btn btn-outline btn-sm restock"
+                            routerLink="/stock-entries"
+                            [attr.aria-label]="'Réapprovisionner ' + alert.name"
+                            [queryParams]="{ productId: alert.id }"
+                        >
+                            <app-icon name="stock-entry" [size]="16" />
+                            Réapprovisionner
+                        </a>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
