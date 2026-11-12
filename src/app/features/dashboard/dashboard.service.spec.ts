@@ -29,11 +29,22 @@ describe("DashboardService", () => {
         expect(result).toEqual([{ date: "2026-11-11", netTotal: 1000 }]);
     });
 
+    it("should request the sales comparison", () => {
+        let result: unknown;
+        service.getSalesComparison().subscribe((data) => (result = data));
+
+        const req = httpMock.expectOne("/api/dashboard/sales-comparison");
+        req.flush({ todayTotal: 9000, yesterdayUntilNowTotal: 12500 });
+
+        expect(result).toEqual({ todayTotal: 9000, yesterdayUntilNowTotal: 12500 });
+    });
+
     it("should request the recent activity with a limit", () => {
         service.getRecentActivity(5).subscribe();
 
         const req = httpMock.expectOne((r) => r.url === "/api/dashboard/recent-activity");
         expect(req.request.params.get("limit")).toBe("5");
+        expect(req.request.params.get("excludeSales")).toBe("true");
         req.flush({ data: [] });
     });
 });

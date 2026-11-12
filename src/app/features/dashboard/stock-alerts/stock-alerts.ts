@@ -19,4 +19,9 @@ export class StockAlerts {
 
     // les plus urgents d'abord (déjà triés par le backend)
     visible = computed(() => this.alerts().slice(0, 5));
+
+    // un stock théorique négatif s'affiche comme 0
+    stock(alert: LowStockAlert) {
+        return Math.max(alert.theoretical_stock, 0);
+    }
 }

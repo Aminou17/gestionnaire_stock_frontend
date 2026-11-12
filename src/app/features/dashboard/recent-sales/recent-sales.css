@@ -3,43 +3,62 @@
     height: 100%;
 }
 
-.table-wrap {
-    overflow-x: auto;
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-th {
-    padding: 0 8px 10px;
-    text-align: left;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-muted);
-    white-space: nowrap;
-}
-
-td {
-    padding: 12px 8px;
+li {
     border-top: 1px solid var(--border);
-    white-space: nowrap;
 }
 
-.id {
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 6px;
+    margin: 0 -6px;
+    border-radius: 8px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.row:hover {
+    background: var(--surface-hover, rgba(127, 127, 127, 0.08));
+}
+
+.main {
+    display: grid;
+    min-width: 0;
+}
+
+.main strong {
+    font-size: 14px;
     font-weight: 600;
 }
 
-.num {
-    text-align: right;
+.main small {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.side {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.amount {
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
 
-.seller .muted {
-    font-size: 13px;
+.amount.cancelled {
+    text-decoration: line-through;
+    color: var(--text-muted);
 }
 
 .row-skeleton {
@@ -53,15 +72,9 @@ td {
     gap: 12px;
 }
 
+/* sur téléphone le rôle ferait passer la ligne sur deux lignes, le nom suffit */
 @media (max-width: 767px) {
-    .items,
-    .seller {
+    .role {
         display: none;
-    }
-
-    td,
-    th {
-        padding-left: 6px;
-        padding-right: 6px;
     }
 }

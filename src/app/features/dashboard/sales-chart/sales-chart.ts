@@ -46,9 +46,14 @@ export class SalesChart {
     });
 }
 
-// 198500 -> "199k"
+// 198500 -> "198,5k", 246000 -> "246k" : on garde une décimale pour ne pas arrondir de façon trompeuse
 function shortAmount(value: number) {
-    if (Math.abs(value) >= 1_000_000) return `${(value / 1_000_000).toFixed(1).replace(".", ",")}M`;
-    if (Math.abs(value) >= 1000) return `${Math.round(value / 1000)}k`;
+    const abs = Math.abs(value);
+    if (abs >= 1_000_000) return `${compact(value / 1_000_000)}M`;
+    if (abs >= 1000) return `${compact(value / 1000)}k`;
     return String(value);
+}
+
+function compact(value: number) {
+    return value.toFixed(1).replace(/\.0$/, "").replace(".", ",");
 }

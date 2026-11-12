@@ -32,8 +32,8 @@ describe("RecentSales", () => {
     });
 
     const sellers = () =>
-        [...el.querySelectorAll("td.seller")].map((td) =>
-            td.textContent?.replace(/\s+/g, " ").trim(),
+        [...el.querySelectorAll(".seller")].map((span) =>
+            span.textContent?.replace(/\s+/g, " ").trim().replace(/^· /, ""),
         );
 
     it("should show Propriétaire for an admin and Gérant for a manager", async () => {
@@ -54,10 +54,33 @@ describe("RecentSales", () => {
         expect(sellers()).toEqual(["Yabre M."]);
     });
 
+    it("should link each sale to its detail page and pluralise the articles", async () => {
+        fixture.componentRef.setInput("sales", [
+            sale({ id: 7, items_count: 1 }),
+            sale({ id: 8, items_count: 3 }),
+        ]);
+        await fixture.whenStable();
+
+        const rows = [...el.querySelectorAll<HTMLAnchorElement>("a.row")];
+        expect(rows.map((r) => r.getAttribute("href"))).toEqual(["/sales/7", "/sales/8"]);
+        expect(rows[0].textContent).toContain("1 article");
+        expect(rows[0].textContent).not.toContain("1 articles");
+        expect(rows[1].textContent).toContain("3 articles");
+    });
+
+    it("should hide the seller when showSeller is false", async () => {
+        fixture.componentRef.setInput("showSeller", false);
+        fixture.componentRef.setInput("sales", [sale({})]);
+        await fixture.whenStable();
+
+        expect(el.querySelector(".seller")).toBeNull();
+    });
+
     it("should label cancelled sales as refunded", async () => {
         fixture.componentRef.setInput("sales", [sale({ status: "CANCELLED" })]);
         await fixture.whenStable();
 
         expect(el.querySelector(".badge")?.textContent?.trim()).toBe("Remboursée");
+        expect(el.querySelector(".amount.cancelled")).not.toBeNull();
     });
 });
