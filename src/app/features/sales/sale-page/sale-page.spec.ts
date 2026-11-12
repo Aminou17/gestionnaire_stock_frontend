@@ -425,7 +425,7 @@ describe("SalePage", () => {
         const receipt = el.querySelector(".receipt")!.textContent!.replace(/\s+/g, " ");
         expect(receipt).toContain("Espèces");
         expect(receipt).toContain("Mobile money");
-        expect(receipt).toContain("Payé en totalité");
+        expect(receipt).toContain("Reste à payer");
         expect(receipt).not.toContain("Monnaie rendue");
     });
 

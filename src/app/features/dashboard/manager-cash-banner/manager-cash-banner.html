@@ -31,20 +31,25 @@
         } @else {
             <span class="icon"><app-icon name="wallet" [size]="20" /></span>
             <div class="text">
-                <strong>Caisse fermée</strong>
-                <small>Demandez au propriétaire de l'ouvrir</small>
+                @if (closedToday()) {
+                    <strong>Caisse clôturée</strong>
+                    <small>Les ventes reprennent demain</small>
+                } @else {
+                    <strong>Caisse fermée</strong>
+                    <small>Ouvrez-la pour commencer à vendre</small>
+                }
             </div>
         }
     </div>
 
-    <a
-        routerLink="/sales/new"
-        class="btn btn-primary new-sale"
-        [class.disabled]="!canSell()"
-        [attr.aria-disabled]="!canSell()"
-        [attr.tabindex]="canSell() ? null : -1"
-    >
-        <app-icon name="plus" [size]="18" />
-        Nouvelle vente
-    </a>
+    @if (canSell()) {
+        <a routerLink="/sales/new" class="btn btn-primary new-sale">
+            <app-icon name="plus" [size]="18" />
+            Nouvelle vente
+        </a>
+    } @else if (closedToday()) {
+        <a routerLink="/cash" class="btn btn-outline new-sale">Voir la caisse</a>
+    } @else {
+        <a routerLink="/cash" class="btn btn-primary new-sale">Ouvrir la caisse</a>
+    }
 </section>

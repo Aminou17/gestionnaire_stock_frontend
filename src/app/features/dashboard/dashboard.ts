@@ -99,7 +99,7 @@ export class Dashboard {
         const today = comparison.todayTotal;
         const yesterday = comparison.yesterdayUntilNowTotal;
         if (yesterday <= 0)
-            return { text: "Aucune vente hier à cette heure", tone: "muted" as const };
+            return { text: "Pas de vente à la même heure hier", tone: "muted" as const };
 
         const change = Math.round(((today - yesterday) / yesterday) * 100);
         const sign = change > 0 ? "+" : change < 0 ? "−" : "";

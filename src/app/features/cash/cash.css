@@ -59,8 +59,12 @@ app-page-header {
         order: 2;
     }
 
-    .movements {
+    .team {
         order: 3;
+    }
+
+    .movements {
+        order: 4;
     }
 }
 
@@ -232,6 +236,12 @@ app-page-header {
         flex-wrap: wrap;
     }
 
+    /* le texte reste à côté de l'icône, le lien passe seul à la ligne */
+    .banner > span {
+        flex: 1 1 calc(100% - 30px);
+        min-width: 0;
+    }
+
     /* aligné sous le texte, après l'icône de 18px */
     .link-btn {
         margin-left: 30px;
@@ -269,4 +279,48 @@ app-page-header {
 
 .badge.closing-note {
     margin-top: 12px;
+}
+
+.team-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.team-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+}
+
+.team-list li:first-child .team-row {
+    border-top: 0;
+}
+
+.team-name {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.team-state {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.gap.in {
+    color: var(--success);
+}
+
+.gap.out {
+    color: var(--danger);
 }

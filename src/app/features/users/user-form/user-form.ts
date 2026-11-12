@@ -79,8 +79,10 @@ export class UserForm {
             name: user?.name ?? "",
             email: user?.email ?? "",
             role: user?.role ?? "manager",
-            password: "",
+            password: user ? "" : generatePassword(),
         });
+        // un mot de passe est proposé d'emblée : il reste visible pour le transmettre
+        if (!user) this.showPassword.set(true);
 
         // le mot de passe ne se change pas ici, mais depuis Nouveau mot de passe
         if (user) this.form.controls.password.disable();

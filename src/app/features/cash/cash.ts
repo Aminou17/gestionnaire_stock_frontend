@@ -53,6 +53,8 @@ export class Cash {
     canExplain = computed(
         () => this.auth.isAdmin() || this.pending()?.closedBy === this.auth.user()?.id,
     );
+    team = computed(() => (this.today.hasValue() ? (this.today.value().teamSessions ?? []) : []));
+    isOwn = (userId: number) => userId === this.auth.user()?.id;
     isOpen = computed(() => this.cash()?.status === "OPEN");
 
     movements = computed(() => (this.session.hasValue() ? this.session.value().movements : []));

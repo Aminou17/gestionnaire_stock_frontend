@@ -76,7 +76,12 @@ a.label:hover {
 }
 
 .reason {
+    display: block;
     color: var(--text);
     font-size: 13px;
     overflow-wrap: anywhere;
+}
+
+.reason::first-letter {
+    text-transform: uppercase;
 }

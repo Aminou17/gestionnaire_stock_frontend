@@ -36,6 +36,8 @@ export class CloseCashDialog {
     expected = signal<number | null>(null);
     // session et écart à expliquer à l'étape explain
     sessionId = signal<number | null>(null);
+    // caisse d'un autre à fermer (admin seulement)
+    closingId = signal<number | null>(null);
     revealed = signal(0);
     // l'écart ne s'affiche qu'une fois le montant saisi, pas sur le 0 de départ
     edited = signal(false);
@@ -64,8 +66,10 @@ export class CloseCashDialog {
     // même 1 F d'écart doit être expliqué
     noteRequired = computed(() => this.difference() !== null && this.difference() !== 0);
 
-    open(sessionDate: string, expected: number | null) {
+    // sessionId : caisse d'un autre, fermée par l'admin
+    open(sessionDate: string, expected: number | null, sessionId?: number) {
         this.reset("count");
+        this.closingId.set(sessionId ?? null);
         this.sessionDate.set(sessionDate);
         this.expected.set(expected);
         this.dialog().nativeElement.showModal();
@@ -140,7 +144,9 @@ export class CloseCashDialog {
         // une explication écrite avant de corriger le montant ne doit pas partir
         const note = this.noteRequired() ? closingNote.trim() : "";
 
-        this.cash.close(this.sessionDate(), actualAmount, note).subscribe({
+        this.cash
+            .close(this.sessionDate(), actualAmount, note, this.closingId() ?? undefined)
+            .subscribe({
             next: (res) => {
                 this.saving.set(false);
                 this.closed.emit();

@@ -283,6 +283,10 @@ tbody tr:hover {
         height: 44px;
     }
 
+    .filter > span {
+        min-width: 72px;
+    }
+
     .filter .input {
         flex: 1;
         width: auto;

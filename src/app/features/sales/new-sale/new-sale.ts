@@ -55,6 +55,8 @@ export class NewSale {
     // on ne bloque la vente que si on SAIT que la caisse est fermée
     cashClosed = computed(() => this.cash.hasValue() && this.cash.value()?.status !== "OPEN");
 
+    cashClosedToday = computed(() => this.cash.hasValue() && this.cash.value()?.status === "CLOSED");
+
     products = rxResource({
         params: () => this.search(),
         stream: ({ params }) =>

@@ -42,13 +42,13 @@ describe("ManagerCashBanner", () => {
         expect(newSale().getAttribute("href")).toBe("/sales/new");
     });
 
-    it("should ask to call the admin and block sales when the cash register is closed", async () => {
+    it("should offer to open the cash register instead of selling when the cash register is closed", async () => {
         await fixture.whenStable();
 
         expect(text()).toContain("Caisse fermée");
-        expect(text()).toContain("Demandez au propriétaire de l'ouvrir");
-        expect(newSale().classList).toContain("disabled");
-        expect(newSale().getAttribute("aria-disabled")).toBe("true");
+        expect(text()).toContain("Ouvrez-la pour commencer à vendre");
+        expect(newSale().textContent).toContain("Ouvrir la caisse");
+        expect(newSale().getAttribute("href")).toBe("/cash");
         expect(el.querySelector("button")).toBeNull();
     });
 
@@ -58,7 +58,7 @@ describe("ManagerCashBanner", () => {
 
         expect(el.querySelector(".skeleton")).not.toBeNull();
         expect(text()).not.toContain("Caisse fermée");
-        expect(newSale().classList).toContain("disabled");
+        expect(newSale().textContent).toContain("Ouvrir la caisse");
     });
 
     it("should offer to retry when the cash state cannot be loaded", async () => {
