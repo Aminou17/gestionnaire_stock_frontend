@@ -58,6 +58,13 @@
                                         : "Remboursement de la vente #" + id
                                 }}</a
                             >
+                        } @else if (isInventory(movement)) {
+                            <a
+                                [routerLink]="['/inventories', movement.reference_id]"
+                                [state]="backState()"
+                                class="sale-link"
+                                >Inventaire #{{ movement.reference_id }}</a
+                            >
                         } @else if (movement.type === "ENTRY") {
                             Entrée de stock
                         } @else {

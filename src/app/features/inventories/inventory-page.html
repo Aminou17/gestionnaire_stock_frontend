@@ -1,0 +1,197 @@
+<app-page-header
+    title="Inventaire"
+    section="Stock"
+    back="/inventories"
+    backLabel="Retour aux inventaires"
+/>
+
+@if (inventory.isLoading() && !data()) {
+    <div class="layout" aria-busy="true">
+        <section class="card summary">
+            <div class="skeleton sk-total"></div>
+        </section>
+        <section class="card panel">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </section>
+    </div>
+} @else if (!data()) {
+    <section class="card empty">
+        <p>{{ errorMessage() }}</p>
+        @if (notFound()) {
+            <a routerLink="/inventories" class="btn btn-outline btn-sm">Retour aux inventaires</a>
+        } @else {
+            <button type="button" class="btn btn-outline btn-sm" (click)="inventory.reload()">
+                Réessayer
+            </button>
+        }
+    </section>
+} @else if (data(); as inv) {
+    <div class="layout">
+        @if (applyError()) {
+            <p class="alert" role="alert">{{ applyError() }}</p>
+        }
+
+        <section class="card status">
+            <strong class="number">N° {{ inv.id }}</strong>
+            @if (inv.applied_at) {
+                <span class="badge badge-success">Appliqué au stock</span>
+                <span class="muted"
+                    >le {{ inv.applied_at | date: "d MMMM y à HH:mm" }} par
+                    {{ inv.applied_by_name ?? "—" }}</span
+                >
+            } @else {
+                <span class="badge badge-neutral">Relevé seulement</span>
+                <span class="muted">Le stock des produits n'a pas été modifié.</span>
+                @if (canApply()) {
+                    <button type="button" class="btn btn-primary apply" (click)="askApply()">
+                        Appliquer les écarts au stock
+                    </button>
+                }
+            }
+        </section>
+
+        <section class="card summary">
+            <div class="stat">
+                <span class="label muted">Fait le</span>
+                <strong>{{ inv.created_at | date: "d MMMM y à HH:mm" }}</strong>
+                <span class="muted">par {{ inv.user_name ?? "—" }}</span>
+            </div>
+            <div class="stat">
+                <span class="label muted">Produits comptés</span>
+                <strong>{{ inv.items_count }}</strong>
+            </div>
+            <div class="stat">
+                <span class="label muted">Manquants</span>
+                <strong [class.out]="missing() > 0">{{ missing() }}</strong>
+            </div>
+            <div class="stat">
+                <span class="label muted">En trop</span>
+                <strong [class.in]="surplus() > 0">{{ surplus() }}</strong>
+            </div>
+            <div class="stat">
+                <span class="label muted">Valeur de l'écart</span>
+                <strong
+                    [class.in]="inv.difference_value > 0"
+                    [class.out]="inv.difference_value < 0"
+                    >{{ inv.difference_value | fcfa: true }}</strong
+                >
+            </div>
+        </section>
+
+        <section class="card panel">
+            <div class="card-header">
+                <h2>Produits comptés ({{ inv.items.length }})</h2>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th class="num">Stock théorique</th>
+                            <th class="num">Stock compté</th>
+                            <th class="num">Écart</th>
+                            <th class="num">Valeur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of inv.items; track item.id) {
+                            <tr>
+                                <td>
+                                    <a
+                                        [routerLink]="['/products', item.product_id]"
+                                        [state]="backState()"
+                                        class="product-link"
+                                        >{{ item.product_name }}</a
+                                    >
+                                </td>
+                                <td class="num">{{ item.theoretical_stock }}</td>
+                                <td class="num">{{ item.actual_stock }}</td>
+                                <td class="num">
+                                    @if (item.difference === 0) {
+                                        <span class="badge badge-neutral">Conforme</span>
+                                    } @else if (item.difference < 0) {
+                                        <span class="badge badge-danger">{{
+                                            item.difference
+                                        }}</span>
+                                    } @else {
+                                        <span class="badge badge-success"
+                                            >+{{ item.difference }}</span
+                                        >
+                                    }
+                                </td>
+                                <td
+                                    class="num"
+                                    [class.in]="item.difference > 0"
+                                    [class.out]="item.difference < 0"
+                                >
+                                    {{ item.difference * item.purchase_price | fcfa: true }}
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- version téléphone : une carte par produit -->
+            <ul class="cards">
+                @for (item of inv.items; track item.id) {
+                    <li class="item-card">
+                        <div class="line">
+                            <a
+                                [routerLink]="['/products', item.product_id]"
+                                [state]="backState()"
+                                class="product-link"
+                                >{{ item.product_name }}</a
+                            >
+                            @if (item.difference === 0) {
+                                <span class="badge badge-neutral">Conforme</span>
+                            } @else if (item.difference < 0) {
+                                <span class="badge badge-danger">{{ item.difference }}</span>
+                            } @else {
+                                <span class="badge badge-success">+{{ item.difference }}</span>
+                            }
+                        </div>
+                        <div class="line">
+                            <span class="meta muted"
+                                >Théorique {{ item.theoretical_stock }} · Compté
+                                {{ item.actual_stock }}</span
+                            >
+                            <span
+                                class="meta"
+                                [class.in]="item.difference > 0"
+                                [class.out]="item.difference < 0"
+                                >{{ item.difference * item.purchase_price | fcfa: true }}</span
+                            >
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+    </div>
+}
+
+<dialog #confirm class="confirm" aria-labelledby="apply-title">
+    <div class="confirm-body">
+        <h2 id="apply-title">Appliquer les écarts au stock ?</h2>
+        <p class="muted">
+            Le stock de chaque produit en écart sera corrigé et un mouvement « Inventaire » sera
+            enregistré. Cette action ne peut pas être annulée.
+        </p>
+        @if (ageInDays() > 1) {
+            <p class="note" role="note">
+                Cet inventaire a {{ ageInDays() }} jours : les écarts seront ajoutés au stock
+                actuel, ce qui peut être faux si le stock a beaucoup bougé depuis.
+            </p>
+        }
+
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-outline" (click)="closeConfirm()">Annuler</button>
+            <button type="button" class="btn btn-primary" [disabled]="applying()" (click)="apply()">
+                {{ applying() ? "Application…" : "Appliquer" }}
+            </button>
+        </div>
+    </div>
+</dialog>

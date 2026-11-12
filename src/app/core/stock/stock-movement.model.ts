@@ -1,11 +1,25 @@
 // ENTRY : entrée de stock, SALE : vente, ADJUSTMENT : remise en stock après un remboursement
-export type StockMovementType = "ENTRY" | "SALE" | "ADJUSTMENT";
+// INVENTORY_GAIN et INVENTORY_LOSS : écart d'un inventaire appliqué au stock
+export type StockMovementType =
+    "ENTRY" | "SALE" | "ADJUSTMENT" | "INVENTORY_GAIN" | "INVENTORY_LOSS";
+
+// valeurs acceptées pour filtrer ; INVENTORY regroupe les gains et les pertes
+export type StockMovementFilter = StockMovementType | "INVENTORY";
+
+export const isInventoryMovement = (movement: { type: StockMovementType }) =>
+    movement.type === "INVENTORY_GAIN" || movement.type === "INVENTORY_LOSS";
+
+// le stock baisse pour une vente et pour une perte constatée à l'inventaire
+export const isOutgoingMovement = (movement: { type: StockMovementType }) =>
+    movement.type === "SALE" || movement.type === "INVENTORY_LOSS";
 
 // affichage commun à la page Mouvements et à la fiche produit
 export const MOVEMENT_TYPES = {
     ENTRY: { label: "Entrée", sign: "+", tone: "primary" },
     SALE: { label: "Vente", sign: "−", tone: "success" },
     ADJUSTMENT: { label: "Remboursement", sign: "+", tone: "danger" },
+    INVENTORY_GAIN: { label: "Inventaire", sign: "+", tone: "warning" },
+    INVENTORY_LOSS: { label: "Inventaire", sign: "−", tone: "warning" },
 } as const;
 
 export interface StockMovement {
@@ -35,6 +49,8 @@ export interface StockMovementCounters {
     sale_units: number;
     adjustments: number;
     adjustment_units: number;
+    inventory_adjustments: number;
+    inventory_units: number;
 }
 
 export interface StockMovementPage {
@@ -47,7 +63,7 @@ export interface StockMovementFilters {
     // YYYY-MM-DD, bornes incluses
     from: string | null;
     to: string | null;
-    type: StockMovementType | null;
+    type: StockMovementFilter | null;
     productId: number | null;
     page: number;
     limit: number;

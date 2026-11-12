@@ -35,6 +35,8 @@ const counters = {
     sale_units: 4,
     adjustments: 1,
     adjustment_units: 4,
+    inventory_adjustments: 0,
+    inventory_units: 0,
 };
 
 describe("StockMovements", () => {
@@ -110,7 +112,7 @@ describe("StockMovements", () => {
             expect.objectContaining({ page: 1, limit: 20, type: null, productId: null }),
         );
         const stats = el.querySelectorAll(".stat");
-        expect(stats.length).toBe(4);
+        expect(stats.length).toBe(5);
         expect(stats[1].textContent).toContain("Entrées");
         expect(stats[1].textContent).toContain("20 unités");
         expect(stats[2].textContent).toContain("4 unités");

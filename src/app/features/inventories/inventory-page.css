@@ -1,0 +1,269 @@
+:host {
+    display: grid;
+    gap: 16px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+.layout {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.summary {
+    display: grid;
+    grid-template-columns: 2fr repeat(4, 1fr);
+    gap: 16px;
+    padding: 20px;
+}
+
+.stat {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    min-width: 0;
+}
+
+.stat strong {
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+}
+
+.label {
+    font-size: 13px;
+}
+
+.panel {
+    min-width: 0;
+}
+
+.card-header {
+    padding: 16px 16px 4px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.cards {
+    display: none;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.product-link {
+    color: var(--text);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.product-link:hover {
+    color: var(--primary);
+}
+
+.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.in {
+    color: var(--success);
+}
+
+.out {
+    color: var(--danger);
+}
+
+.sk-total {
+    height: 48px;
+}
+
+.row-skeleton {
+    height: 44px;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 40px 16px;
+}
+
+@media (max-width: 1023px) {
+    .summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat:first-child {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 767px) {
+    :host,
+    .layout {
+        gap: 12px;
+    }
+
+    .btn-sm {
+        height: 44px;
+    }
+
+    .table-wrap {
+        display: none;
+    }
+
+    .cards {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 12px;
+        list-style: none;
+    }
+
+    .item-card {
+        display: grid;
+        gap: 0;
+        min-height: 56px;
+        padding: 4px 16px 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+
+    .line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .item-card .product-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .meta {
+        font-size: 13px;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+.status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 16px 20px;
+    font-size: 14px;
+}
+
+.number {
+    font-size: 15px;
+}
+
+.apply {
+    margin-left: auto;
+}
+
+.alert {
+    margin: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-size: 14px;
+}
+
+.confirm {
+    width: min(440px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.confirm::backdrop {
+    background: var(--overlay);
+}
+
+.confirm-body {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.confirm h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.confirm p {
+    margin: -8px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+@media (max-width: 767px) {
+    .apply {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}
+
+.confirm .note {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--warning-soft);
+    color: var(--warning);
+}

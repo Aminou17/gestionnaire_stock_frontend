@@ -28,7 +28,15 @@
                     }}</span>
                     <span class="when muted">
                         {{ movement.created_at | date: "d MMM y, HH:mm" }}
-                        @if (movement.type !== "ENTRY" && movement.reference_id) {
+                        @if (isInventory(movement)) {
+                            ·
+                            <a
+                                (click)="$event.stopPropagation()"
+                                [routerLink]="['/inventories', movement.reference_id]"
+                                [state]="backState()"
+                                >Inventaire #{{ movement.reference_id }}</a
+                            >
+                        } @else if (movement.type !== "ENTRY" && movement.reference_id) {
                             ·
                             <a
                                 (click)="$event.stopPropagation()"

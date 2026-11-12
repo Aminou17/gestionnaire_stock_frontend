@@ -20,7 +20,8 @@ import {
     MOVEMENT_TYPES,
     StockMovement,
     StockMovementPage,
-    StockMovementType,
+    StockMovementFilter,
+    isInventoryMovement,
 } from "../../core/stock/stock-movement.model";
 import { StockMovementService } from "../../core/stock/stock-movement.service";
 import { MovementDetail } from "./movement-detail/movement-detail";
@@ -52,9 +53,10 @@ export class StockMovements {
     private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
 
     protected types = MOVEMENT_TYPES;
+    protected isInventory = isInventoryMovement;
 
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
-    type = signal<StockMovementType | null>(null);
+    type = signal<StockMovementFilter | null>(null);
     // arrivée depuis la fiche d'un produit : /stock-movements?productId=3
     productId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("productId")));
     page = signal(1);
@@ -116,7 +118,7 @@ export class StockMovements {
         const counters = this.counters();
         return [
             {
-                label: "Tous les mouvements",
+                label: "Tous",
                 short: "Tous",
                 value: null,
                 count: counters?.movements,
@@ -146,6 +148,14 @@ export class StockMovements {
                 count: counters?.adjustments,
                 units: counters?.adjustment_units,
                 tone: "danger",
+            },
+            {
+                label: "Inventaire",
+                short: "Inventaire",
+                value: "INVENTORY",
+                count: counters?.inventory_adjustments,
+                units: counters?.inventory_units,
+                tone: "warning",
             },
         ] as const;
     });
@@ -186,7 +196,7 @@ export class StockMovements {
         this.page.set(1);
     }
 
-    selectType(value: StockMovementType | null) {
+    selectType(value: StockMovementFilter | null) {
         this.type.set(value);
         this.page.set(1);
     }
@@ -218,7 +228,9 @@ export class StockMovements {
 
     // une entrée ne mène nulle part : la page des entrées n'a pas de fiche
     saleId(movement: StockMovement) {
-        return movement.type === "ENTRY" ? null : movement.reference_id;
+        return movement.type === "ENTRY" || isInventoryMovement(movement)
+            ? null
+            : movement.reference_id;
     }
 
     exporting = signal(false);

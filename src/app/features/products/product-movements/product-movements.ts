@@ -6,7 +6,11 @@ import { Router, RouterLink } from "@angular/router";
 
 import { BackState } from "../../../core/back-link";
 import { MovementDetail } from "../../stock-movements/movement-detail/movement-detail";
-import { MOVEMENT_TYPES, StockMovement } from "../../../core/stock/stock-movement.model";
+import {
+    MOVEMENT_TYPES,
+    StockMovement,
+    isInventoryMovement,
+} from "../../../core/stock/stock-movement.model";
 import { StockMovementService } from "../../../core/stock/stock-movement.service";
 
 // Derniers mouvements d'un produit, en bas de sa fiche
@@ -28,6 +32,7 @@ export class ProductMovements {
     }
 
     protected types = MOVEMENT_TYPES;
+    protected isInventory = isInventoryMovement;
 
     private detailDialog = viewChild.required<MovementDetail>("detail");
     selected = signal<StockMovement | null>(null);

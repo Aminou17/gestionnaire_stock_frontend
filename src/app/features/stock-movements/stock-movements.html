@@ -200,6 +200,14 @@
                                             movement.type === "SALE" ? "#" + id : "Vente #" + id
                                         }}</a
                                     >
+                                } @else if (isInventory(movement)) {
+                                    <a
+                                        [routerLink]="['/inventories', movement.reference_id]"
+                                        [state]="backState()"
+                                        class="sale-link"
+                                        (click)="$event.stopPropagation()"
+                                        >Inventaire #{{ movement.reference_id }}</a
+                                    >
                                 } @else if (movement.type === "ENTRY") {
                                     <span class="muted">Entrée de stock</span>
                                 } @else {
@@ -253,6 +261,15 @@
                                 class="sale-link"
                                 (click)="$event.stopPropagation()"
                                 >{{ movement.type === "SALE" ? "#" + id : "Vente #" + id }}</a
+                            >
+                        } @else if (isInventory(movement)) {
+                            ·
+                            <a
+                                [routerLink]="['/inventories', movement.reference_id]"
+                                [state]="backState()"
+                                class="sale-link"
+                                (click)="$event.stopPropagation()"
+                                >Inventaire #{{ movement.reference_id }}</a
                             >
                         }
                     </p>

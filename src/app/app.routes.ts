@@ -10,7 +10,7 @@ import { MainLayout } from "./layout/main-layout/main-layout";
 const comingSoon = () => import("./features/coming-soon/coming-soon").then((m) => m.ComingSoon);
 
 // pages pas encore développées : [chemin, titre, réservée à l'admin]
-const upcoming: [string, string, boolean][] = [["inventories", "Inventaires", true]];
+const upcoming: [string, string, boolean][] = [];
 
 export const routes: Routes = [
     { path: "", pathMatch: "full", redirectTo: "dashboard" },
@@ -122,6 +122,27 @@ export const routes: Routes = [
                 canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/audit-logs/audit-logs").then((m) => m.AuditLogs),
+            },
+            {
+                path: "inventories",
+                title: "Inventaires · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/inventories/inventories").then((m) => m.Inventories),
+            },
+            {
+                path: "inventories/new",
+                title: "Nouvel inventaire · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/inventories/new-inventory").then((m) => m.NewInventory),
+            },
+            {
+                path: "inventories/:id",
+                title: "Inventaire · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/inventories/inventory-page").then((m) => m.InventoryPage),
             },
             {
                 path: "alerts",
