@@ -16,6 +16,7 @@ import { map } from "rxjs";
 import { AuthService } from "../../../core/auth/auth.service";
 import { BackState, getBackLink } from "../../../core/back-link";
 import { getRoleLabel } from "../../../core/auth/role-label";
+import { PaymentMethod, SaleItem } from "../../../core/sales/sale.model";
 import { SaleService } from "../../../core/sales/sale.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
@@ -189,6 +190,177 @@ export class SalePage {
         if (this.justCreated()) {
             history.replaceState({ ...history.state, created: false }, "");
         }
+    }
+
+    // reste à payer d'une vente validée (acompte)
+    due = computed(() => {
+        const sale = this.data();
+        return sale && sale.status === "ACTIVE" ? sale.total - sale.paid_amount : 0;
+    });
+    // ce qui sera rendu au client : la part payée en espèces sort du tiroir, le reste se rend hors caisse
+    cashPaid = computed(() =>
+        (this.data()?.payments ?? [])
+            .filter((payment) => payment.payment_method === "CASH")
+            .reduce((sum, payment) => sum + payment.amount, 0),
+    );
+    otherPaid = computed(() => (this.data()?.paid_amount ?? 0) - this.cashPaid());
+    // plusieurs paiements ou un reste : on détaille, sinon le résumé habituel suffit
+    showPayments = computed(() => (this.data()?.payments.length ?? 0) > 1 || this.due() > 0);
+    canPay = computed(() => this.due() > 0);
+
+    payDialog = viewChild.required<ElementRef<HTMLDialogElement>>("payBox");
+    payMethod = signal<PaymentMethod>("CASH");
+    payAmount = signal<number | null>(null);
+    payReceived = signal<number | null>(null);
+    paying = signal(false);
+    payError = signal<string | null>(null);
+
+    askPay() {
+        this.payMethod.set("CASH");
+        this.payAmount.set(this.due());
+        this.payReceived.set(null);
+        this.payError.set(null);
+        this.payDialog().nativeElement.showModal();
+    }
+
+    closePay() {
+        if (this.paying()) return;
+        this.payDialog().nativeElement.close();
+    }
+
+    onPayBackdrop(event: MouseEvent) {
+        if (event.target === this.payDialog().nativeElement) this.closePay();
+    }
+
+    onPayCancel(event: Event) {
+        if (this.paying()) event.preventDefault();
+    }
+
+    readNumber(input: HTMLInputElement) {
+        const value = Math.round(input.valueAsNumber);
+        return Number.isFinite(value) && value > 0 ? value : null;
+    }
+
+    payChange = computed(() => {
+        const received = this.payReceived();
+        const amount = this.payAmount();
+        if (this.payMethod() !== "CASH" || received === null || amount === null) return null;
+        return received - amount;
+    });
+
+    pay() {
+        const amount = this.payAmount();
+        if (amount === null || amount > this.due()) {
+            this.payError.set(`Le montant doit être compris entre 1 et ${this.due()} F.`);
+            return;
+        }
+
+        const method = this.payMethod();
+        const received = this.payReceived();
+
+        if (method === "CASH" && received !== null && received < amount) {
+            this.payError.set(`Le montant reçu est inférieur à ${amount} F.`);
+            return;
+        }
+
+        this.paying.set(true);
+        this.payError.set(null);
+
+        this.saleService
+            .addPayment(this.id()!, {
+                paymentMethod: method,
+                amountPaid: amount,
+                ...(method === "CASH" ? { amountReceived: received ?? amount } : {}),
+            })
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: () => {
+                    this.paying.set(false);
+                    this.justCreated.set(false);
+                    this.closePay();
+                    this.sale.reload();
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.paying.set(false);
+                    this.payError.set(err.error?.message ?? "Impossible d'enregistrer le paiement.");
+                },
+            });
+    }
+
+    // retour partiel d'un article d'une vente soldée
+    canReturn = computed(
+        () => this.auth.isAdmin() && this.data()?.status === "ACTIVE" && this.due() === 0,
+    );
+    returnDialog = viewChild.required<ElementRef<HTMLDialogElement>>("returnBox");
+    returnItem = signal<SaleItem | null>(null);
+    returnQuantity = signal<number | null>(1);
+    returnReason = signal("");
+    returning = signal(false);
+    returnError = signal<string | null>(null);
+
+    returnable(item: SaleItem) {
+        const returned = (this.data()?.returns ?? [])
+            .filter((row) => row.product_id === item.product_id)
+            .reduce((sum, row) => sum + row.quantity, 0);
+        return item.quantity - returned;
+    }
+
+    returnAmount = computed(() => (this.returnItem()?.unit_price ?? 0) * (this.returnQuantity() ?? 0));
+
+    askReturn(item: SaleItem) {
+        this.returnItem.set(item);
+        this.returnQuantity.set(1);
+        this.returnReason.set("");
+        this.returnError.set(null);
+        this.returnDialog().nativeElement.showModal();
+    }
+
+    closeReturn() {
+        if (this.returning()) return;
+        this.returnDialog().nativeElement.close();
+    }
+
+    onReturnBackdrop(event: MouseEvent) {
+        if (event.target === this.returnDialog().nativeElement) this.closeReturn();
+    }
+
+    onReturnCancel(event: Event) {
+        if (this.returning()) event.preventDefault();
+    }
+
+    confirmReturn() {
+        const item = this.returnItem();
+        const quantity = this.returnQuantity();
+        const reason = this.returnReason().trim();
+        if (!item) return;
+
+        if (quantity === null || quantity > this.returnable(item)) {
+            this.returnError.set(`La quantité doit être comprise entre 1 et ${this.returnable(item)}.`);
+            return;
+        }
+        if (!reason) {
+            this.returnError.set("Le motif du retour est obligatoire.");
+            return;
+        }
+
+        this.returning.set(true);
+        this.returnError.set(null);
+
+        this.saleService
+            .returnItem(this.id()!, { productId: item.product_id, quantity, reason })
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: () => {
+                    this.returning.set(false);
+                    this.justCreated.set(false);
+                    this.closeReturn();
+                    this.sale.reload();
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.returning.set(false);
+                    this.returnError.set(err.error?.message ?? "Impossible d'enregistrer le retour.");
+                },
+            });
     }
 
     reason = signal("");

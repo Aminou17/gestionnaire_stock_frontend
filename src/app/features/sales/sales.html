@@ -11,8 +11,8 @@
         <button
             type="button"
             class="card stat"
-            [class.selected]="status() === tab.value"
-            [attr.aria-pressed]="status() === tab.value"
+            [class.selected]="isSelected(tab.value)"
+            [attr.aria-pressed]="isSelected(tab.value)"
             (click)="selectStatus(tab.value)"
         >
             <span class="stat-label">{{ tab.label }}</span>
@@ -36,15 +36,65 @@
 </div>
 
 <section class="card list-card">
-    <app-period-filter (changed)="selectRange($event)" />
+    <app-period-filter (changed)="selectRange($event)">
+        <label class="filter">
+            <span class="muted">Paiement</span>
+            <select class="input" (change)="selectPayment($any($event.target).value)">
+                <option value="">Tous</option>
+                <option value="CASH">Espèces</option>
+                <option value="MOBILE_MONEY">Mobile money</option>
+            </select>
+        </label>
+        @if (auth.isAdmin()) {
+            <label class="filter">
+                <span class="muted">Vendeur</span>
+                <select class="input" (change)="selectSeller($any($event.target).value)">
+                    <option value="">Tous</option>
+                    @for (user of sellers(); track user.id) {
+                        <option [value]="user.id">{{ user.name }}</option>
+                    }
+                </select>
+            </label>
+        }
+        @if (auth.isAdmin()) {
+            <button
+                type="button"
+                class="btn btn-outline export"
+                [disabled]="exporting() || list().length === 0"
+                (click)="exportCsv()"
+            >
+                @if (exporting()) {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="16" />
+                }
+                Exporter
+            </button>
+        }
+    </app-period-filter>
+
+    @if (exportError()) {
+        <div class="alert alert-error list-error" role="alert">{{ exportError() }}</div>
+    }
+
+    <div class="search">
+        <app-icon name="search" [size]="18" />
+        <input
+            type="search"
+            class="input"
+            [placeholder]="auth.isAdmin() ? 'Numéro de vente, vendeur ou client' : 'Numéro de vente ou client'"
+            aria-label="Rechercher une vente"
+            (input)="onSearch($any($event.target).value)"
+        />
+    </div>
 
     <div class="chips">
         @for (tab of tabs(); track tab.label) {
             <button
                 type="button"
                 class="chip"
-                [class.selected]="status() === tab.value"
-                [attr.aria-pressed]="status() === tab.value"
+                [class.selected]="isSelected(tab.value)"
+                [attr.aria-pressed]="isSelected(tab.value)"
                 (click)="selectStatus(tab.value)"
             >
                 {{ tab.short }}
@@ -107,6 +157,8 @@
                         @if (auth.isAdmin()) {
                             <th>Vendeur</th>
                         }
+                        <th>Client</th>
+                        <th>Paiement</th>
                         <th class="num">Articles</th>
                         <th class="num">Montant</th>
                         <th>Statut</th>
@@ -141,11 +193,15 @@
                                     }
                                 </td>
                             }
+                            <td>{{ sale.customer_name }}</td>
+                            <td>{{ paymentLabel(sale.payment_method) }}</td>
                             <td class="num">{{ sale.items_count }}</td>
                             <td class="num strong">{{ sale.total | fcfa }}</td>
                             <td>
                                 @if (sale.status === "CANCELLED") {
                                     <span class="badge badge-danger">Remboursée</span>
+                                } @else if (due(sale) > 0) {
+                                    <span class="badge badge-warning">Reste {{ due(sale) | fcfa }}</span>
                                 }
                             </td>
                         </tr>
@@ -171,6 +227,8 @@
                         >
                         @if (sale.status === "CANCELLED") {
                             <span class="badge badge-danger">Remboursée</span>
+                        } @else if (due(sale) > 0) {
+                            <span class="badge badge-warning">Reste {{ due(sale) | fcfa }}</span>
                         }
                     </div>
                     <span class="meta muted">
@@ -182,10 +240,16 @@
                         @if (auth.isAdmin() && sale.user_name) {
                             · {{ sale.user_name }}
                         }
+                        @if (sale.customer_name) {
+                            · Client : {{ sale.customer_name }}
+                        }
                     </span>
                     <div class="line">
                         <span class="meta muted">
                             {{ sale.items_count }} article{{ sale.items_count > 1 ? "s" : "" }}
+                            @if (paymentLabel(sale.payment_method); as method) {
+                                · {{ method }}
+                            }
                         </span>
                         <strong class="amount">{{ sale.total | fcfa }}</strong>
                     </div>

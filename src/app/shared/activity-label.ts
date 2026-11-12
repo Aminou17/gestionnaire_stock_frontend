@@ -9,6 +9,8 @@ export const LABELS: Record<string, string> = {
     PASSWORD_CHANGE_FAILED: "Mot de passe actuel incorrect",
     PROFILE_UPDATED: "A modifié son profil",
     SALE_CREATED: "Vente enregistrée",
+    SALE_PAYMENT_ADDED: "Paiement encaissé",
+    SALE_ITEM_RETURNED: "Article rendu",
     SALE_CANCELLED: "Vente remboursée",
     SALES_EXPORTED: "Ventes exportées",
     CASH_SESSION_OPENED: "Caisse ouverte",

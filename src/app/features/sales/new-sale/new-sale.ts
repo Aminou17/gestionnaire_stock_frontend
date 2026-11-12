@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
+import { Component, DestroyRef, afterNextRender, computed, inject, signal } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 
@@ -80,29 +80,83 @@ export class NewSale {
     // paiement : espèces par défaut, comme au comptoir
     paymentMethod = signal<PaymentMethod>("CASH");
     amountReceived = signal<number | null>(null);
-    paymentReference = signal("");
+
+    // client facultatif, obligatoire (nom ou téléphone) pour un acompte
+    showCustomer = signal(false);
+    customerName = signal("");
+    customerPhone = signal("");
+    // acompte : montant payé maintenant, vide = la vente est payée en totalité
+    deposit = signal<number | null>(null);
+    toPay = computed(() => this.deposit() ?? this.total());
+    remaining = computed(() => Math.max(0, this.total() - this.toPay()));
+    // deux modes : le premier paie le montant saisi, le second paie le reste du total
+    split = signal(false);
+    secondMethod = computed<PaymentMethod>(() =>
+        this.paymentMethod() === "CASH" ? "MOBILE_MONEY" : "CASH",
+    );
+    secondAmount = computed(() => Math.max(0, this.total() - (this.deposit() ?? 0)));
+    depositError = computed(() => {
+        const deposit = this.deposit();
+        if (deposit === null) return null;
+        if (this.split()) {
+            return deposit >= this.total() ? "La part en espèces doit être inférieure au total." : null;
+        }
+        if (deposit > this.total()) return "L'acompte dépasse le total de la vente.";
+        if (deposit < this.total() && !this.customerName().trim() && !this.customerPhone().trim())
+            return "Indiquez le nom ou le téléphone du client pour un acompte.";
+        return null;
+    });
 
     // somme reçue trop faible : on ne valide pas
     missingAmount = computed(() => {
         const received = this.amountReceived();
         if (this.paymentMethod() !== "CASH" || received === null) return 0;
-        return Math.max(0, this.total() - received);
+        return Math.max(0, this.toPay() - received);
     });
     change = computed(() => {
         const received = this.amountReceived();
         if (this.paymentMethod() !== "CASH" || received === null) return null;
-        return received - this.total();
+        return received - this.toPay();
     });
 
-    // billets ronds au-dessus du total, comme sur les caisses : 7 300 donne 7 500, 8 000, 10 000
+    // billets ronds au-dessus du montant à payer, comme sur les caisses : 7 300 donne 7 500, 10 000
     cashSuggestions = computed(() => {
-        const total = this.total();
+        const total = this.toPay();
         if (total <= 0) return [];
-        const rounded = [500, 1000, 2000, 5000, 10000].map(
+        const rounded = [500, 5000, 10000].map(
             (step) => Math.ceil(total / step) * step,
         );
         return [...new Set([total, ...rounded])].sort((a, b) => a - b).slice(0, 4);
     });
+
+    // acompte et paiement en deux modes s'excluent : l'un ou l'autre fixe la part payée maintenant
+    showDeposit = signal(false);
+
+    toggleCustomer() {
+        if (this.showCustomer()) {
+            this.customerName.set("");
+            this.customerPhone.set("");
+        }
+        this.showCustomer.update((value) => !value);
+    }
+
+    toggleDeposit() {
+        this.showDeposit.update((value) => !value);
+        this.split.set(false);
+        this.deposit.set(null);
+        this.amountReceived.set(null);
+        // sans client, personne ne pourrait réclamer le solde
+        if (this.showDeposit()) this.showCustomer.set(true);
+    }
+
+    toggleSplit() {
+        this.split.update((value) => !value);
+        this.showDeposit.set(false);
+        this.deposit.set(null);
+        this.amountReceived.set(null);
+        // le mixte est toujours espèces puis mobile money
+        if (this.split()) this.paymentMethod.set("CASH");
+    }
 
     selectPayment(method: PaymentMethod) {
         this.paymentMethod.set(method);
@@ -114,6 +168,12 @@ export class NewSale {
         this.amountReceived.set(Number.isFinite(value) && value > 0 ? value : null);
     }
 
+    onDepositChange(input: HTMLInputElement) {
+        const value = Math.round(input.valueAsNumber);
+        this.deposit.set(Number.isFinite(value) && value > 0 ? value : null);
+        this.amountReceived.set(null);
+    }
+
     hasInvalidLine = computed(() => this.cart().some((line) => this.lineError(line)));
     canSubmit = computed(
         () =>
@@ -122,12 +182,25 @@ export class NewSale {
             this.cash.hasValue() &&
             !this.cashClosed() &&
             this.missingAmount() === 0 &&
-            // sans référence, le paiement mobile money ne se rapproche pas du relevé
-            (this.paymentMethod() === "CASH" || this.paymentReference().trim() !== "") &&
+            this.depositError() === null &&
+            // le mixte demande la part en espèces
+            !(this.split() && this.deposit() === null) &&
             !this.saving(),
     );
 
+    // la barre du bas sert à rejoindre le panier : inutile quand il est déjà à l'écran
+    cartInView = signal(false);
+
     constructor() {
+        afterNextRender(() => {
+            const cart = document.getElementById("cart");
+            if (!cart || typeof IntersectionObserver === "undefined") return;
+            const observer = new IntersectionObserver(([entry]) =>
+                this.cartInView.set(entry.isIntersecting),
+            );
+            observer.observe(cart);
+            this.destroyRef.onDestroy(() => observer.disconnect());
+        });
         this.destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
 
         // arrivée depuis le bouton "Vendre" d'un produit
@@ -230,12 +303,24 @@ export class NewSale {
 
         const method = this.paymentMethod();
         const received = this.amountReceived();
-        const reference = this.paymentReference().trim();
+        const deposit = this.deposit();
+        const customerName = this.customerName().trim();
+        const customerPhone = this.customerPhone().trim();
         const payment = {
             paymentMethod: method,
             // montant non saisi : le client a donné le compte juste
-            ...(method === "CASH" ? { amountReceived: received ?? this.total() } : {}),
-            ...(method === "MOBILE_MONEY" && reference ? { paymentReference: reference } : {}),
+            ...(method === "CASH" ? { amountReceived: received ?? this.toPay() } : {}),
+            ...(deposit !== null && deposit < this.total() ? { amountPaid: deposit } : {}),
+            ...(this.split()
+                ? {
+                      secondPayment: {
+                          paymentMethod: this.secondMethod(),
+                          amountPaid: this.secondAmount(),
+                      },
+                  }
+                : {}),
+            ...(customerName ? { customerName } : {}),
+            ...(customerPhone ? { customerPhone } : {}),
         };
 
         this.saleService

@@ -18,6 +18,10 @@ const detail = (overrides: Partial<SaleDetail> = {}): SaleDetail => ({
     user_name: "Awa K.",
     user_role: "manager",
     total: 11000,
+    paid_amount: 11000,
+    payments: [],
+    returns: [],
+    returned_amount: 0,
     status: "ACTIVE",
     created_at: "2026-11-02T10:15:00",
     cancelled_at: null,
@@ -25,7 +29,6 @@ const detail = (overrides: Partial<SaleDetail> = {}): SaleDetail => ({
     cancelled_by_name: null,
     payment_method: "CASH",
     amount_received: 15000,
-    payment_reference: null,
     previous_id: 5,
     next_id: null,
     movements: [
@@ -68,6 +71,7 @@ describe("SalePage", () => {
     let fixture: ComponentFixture<SalePage>;
     let el: HTMLElement;
     let cancelSale: ReturnType<typeof vi.fn>;
+    let returnItem: ReturnType<typeof vi.fn>;
 
     async function render({
         isAdmin = true,
@@ -78,6 +82,7 @@ describe("SalePage", () => {
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
         cancelSale = vi.fn(() => of({ message: "ok" }));
+        returnItem = vi.fn(() => of({ amount: 1500, cashRefunded: 1500, otherRefunded: 0 }));
 
         await TestBed.configureTestingModule({
             imports: [SalePage],
@@ -95,6 +100,7 @@ describe("SalePage", () => {
                                 ? throwError(() => new HttpErrorResponse({ status, error: {} }))
                                 : of(sale),
                         cancelSale,
+                        returnItem,
                     },
                 },
                 {
@@ -183,6 +189,70 @@ describe("SalePage", () => {
         el.querySelector<HTMLButtonElement>("dialog button[type='submit']")!.click();
 
         expect(cancelSale).toHaveBeenCalledWith(6, "Article défectueux");
+    });
+
+    const returnButtons = () =>
+        Array.from(el.querySelectorAll<HTMLButtonElement>(".items .link-btn"));
+
+    it("should let only the owner return an item of a settled sale", async () => {
+        await render();
+        expect(returnButtons().length).toBe(2);
+
+        TestBed.resetTestingModule();
+        await render({ isAdmin: false });
+        expect(returnButtons().length).toBe(0);
+
+        TestBed.resetTestingModule();
+        await render({ sale: detail({ paid_amount: 5000 }) });
+        expect(returnButtons().length).toBe(0);
+    });
+
+    it("should return an item with a reason", async () => {
+        await render();
+        returnButtons()[0].click();
+        await fixture.whenStable();
+
+        const form = el.querySelector<HTMLFormElement>("#return-title")!.closest("form")!;
+        form.querySelector<HTMLButtonElement>("button[type='submit']")!.click();
+        await fixture.whenStable();
+        expect(returnItem).not.toHaveBeenCalled();
+        expect(text()).toContain("Le motif du retour est obligatoire.");
+
+        const reason = form.querySelector<HTMLInputElement>("input[type='text']")!;
+        reason.value = "Couleur non conforme";
+        reason.dispatchEvent(new Event("input"));
+        form.querySelector<HTMLButtonElement>("button[type='submit']")!.click();
+
+        expect(returnItem).toHaveBeenCalledWith(6, {
+            productId: 3,
+            quantity: 1,
+            reason: "Couleur non conforme",
+        });
+    });
+
+    it("should list the returned items and stop offering what was already returned", async () => {
+        await render({
+            sale: detail({
+                returned_amount: 1500,
+                returns: [
+                    {
+                        id: 1,
+                        product_id: 3,
+                        product_name: "Riz",
+                        quantity: 1,
+                        amount: 1500,
+                        cash_refunded: 1500,
+                        other_refunded: 0,
+                        reason: "Couleur non conforme",
+                        user_name: "Yabre M.",
+                        created_at: "2026-11-02T11:00:00",
+                    },
+                ],
+            }),
+        });
+
+        expect(text()).toContain("Rendu : 1 × Riz");
+        expect(returnButtons().length).toBe(1);
     });
 
     it("should explain a refunded sale", async () => {
@@ -325,14 +395,38 @@ describe("SalePage", () => {
             sale: detail({
                 payment_method: "MOBILE_MONEY",
                 amount_received: null,
-                payment_reference: "PP123",
             }),
         });
 
         expect(el.querySelector(".payment")!.textContent).toContain("Mobile money");
-        expect(el.querySelector(".payment")!.textContent).toContain("PP123");
         expect(el.querySelector(".receipt")!.textContent).toContain("Payé par mobile money");
         expect(el.querySelector(".confirm")!.textContent).toContain("hors");
+    });
+
+    it("should list every payment on the ticket and no negative change", async () => {
+        const pay = (id: number, amount: number, received: number | null, method = "CASH") => ({
+            id,
+            amount,
+            payment_method: method,
+            amount_received: received,
+            user_name: null,
+            created_at: "2026-11-12T12:23:00",
+        });
+        await render({
+            sale: detail({
+                total: 1500,
+                paid_amount: 1500,
+                payment_method: "CASH",
+                amount_received: 1000,
+                payments: [pay(1, 1000, 1000), pay(2, 500, 1000, "MOBILE_MONEY")] as never,
+            }),
+        });
+
+        const receipt = el.querySelector(".receipt")!.textContent!.replace(/\s+/g, " ");
+        expect(receipt).toContain("Espèces");
+        expect(receipt).toContain("Mobile money");
+        expect(receipt).toContain("Payé en totalité");
+        expect(receipt).not.toContain("Monnaie rendue");
     });
 
     it("should count an old cash sale without amount as exact change", async () => {

@@ -109,6 +109,18 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                 object: money(d["total"]) ?? undefined,
                 note: PAYMENT[String(d["paymentMethod"])],
             };
+        case "SALE_PAYMENT_ADDED":
+            return {
+                verb: "a encaissé un paiement de",
+                object: money(d["amount"]) ?? undefined,
+                note: PAYMENT[String(d["paymentMethod"])],
+            };
+        case "SALE_ITEM_RETURNED":
+            return {
+                verb: "a repris un article d'une vente pour",
+                object: money(d["amount"]) ?? undefined,
+                note: typeof d["reason"] === "string" ? d["reason"] : undefined,
+            };
         case "SALE_CANCELLED":
             return {
                 verb: "a remboursé la vente",

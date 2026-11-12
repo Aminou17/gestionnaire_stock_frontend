@@ -101,13 +101,30 @@
                                 ? 'badge badge-danger'
                                 : 'badge badge-success'
                         "
-                        >{{ sale.status === "CANCELLED" ? "Remboursée" : "Payée" }}</span
+                        >{{
+                            sale.status === "CANCELLED"
+                                ? "Remboursée"
+                                : due() > 0
+                                  ? "Reste " + (due() | number) + " F"
+                                  : "Payée"
+                        }}</span
                     >
                     <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
                         sale.total | fcfa
                     }}</strong>
                     <span class="summary-meta muted">
                         <span>{{ sale.created_at | date: "EEEE d MMMM y 'à' HH:mm" }}</span>
+                        @if (sale.customer_name || sale.customer_phone) {
+                            <span class="customer">
+                                <app-icon name="user" [size]="14" />
+                                {{ sale.customer_name }}
+                                @if (sale.customer_phone) {
+                                    <a [href]="'tel:' + sale.customer_phone">{{
+                                        sale.customer_phone
+                                    }}</a>
+                                }
+                            </span>
+                        }
                         @if (auth.isAdmin() && sale.user_name) {
                             <span class="seller" [title]="roleLabel(sale.user_role) ?? ''">
                                 <span class="seller-avatar" aria-hidden="true">{{
@@ -152,6 +169,17 @@
                         <app-icon name="printer" [size]="18" />
                         Imprimer
                     </button>
+                    @if (canPay()) {
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            [disabled]="reloading()"
+                            (click)="askPay()"
+                        >
+                            <app-icon name="banknote" [size]="18" />
+                            Encaisser
+                        </button>
+                    }
                     @if (canRefund()) {
                         <button
                             type="button"
@@ -211,6 +239,11 @@
                             <strong class="item-total">{{
                                 item.quantity * item.unit_price | fcfa
                             }}</strong>
+                            @if (canReturn() && returnable(item) > 0) {
+                                <button type="button" class="link-btn" (click)="askReturn(item)">
+                                    Rendre
+                                </button>
+                            }
                         </li>
                     }
                 </ul>
@@ -228,13 +261,48 @@
                     </dl>
                 }
 
+                @if (sale.returns.length > 0) {
+                    <ul class="returns" aria-label="Articles rendus">
+                        @for (row of sale.returns; track row.id) {
+                            <li>
+                                <span>
+                                    Rendu : {{ row.quantity }} × {{ row.product_name }}
+                                    <small class="muted">· {{ row.reason }}</small>
+                                </span>
+                                <strong class="discount">−{{ row.amount | fcfa }}</strong>
+                            </li>
+                        }
+                    </ul>
+                }
+
                 <div class="total" [class.cancelled]="sale.status === 'CANCELLED'">
                     <span>Total</span>
                     <strong>{{ sale.total | fcfa }}</strong>
                 </div>
 
                 <dl class="payment">
-                    @if (sale.payment_method === "MOBILE_MONEY") {
+                    @if (showPayments()) {
+                        @for (payment of sale.payments; track payment.id) {
+                            <div>
+                                <dt>
+                                    <app-icon
+                                        [name]="payment.payment_method === 'MOBILE_MONEY' ? 'phone' : 'banknote'"
+                                        [size]="16"
+                                    />
+                                    {{ payment.created_at | date: "d MMM, HH:mm" }}
+                                    ·
+                                    {{ payment.payment_method === "MOBILE_MONEY" ? "Mobile money" : "Espèces" }}
+                                </dt>
+                                <dd>{{ payment.amount | fcfa }}</dd>
+                            </div>
+                        }
+                        @if (due() > 0) {
+                            <div class="due">
+                                <dt>Reste à payer</dt>
+                                <dd>{{ due() | fcfa }}</dd>
+                            </div>
+                        }
+                    } @else if (sale.payment_method === "MOBILE_MONEY") {
                         <div>
                             <dt>
                                 <app-icon name="phone" [size]="16" />
@@ -242,12 +310,6 @@
                             </dt>
                             <dd>{{ sale.total | fcfa }}</dd>
                         </div>
-                        @if (sale.payment_reference) {
-                            <div>
-                                <dt>Référence</dt>
-                                <dd>{{ sale.payment_reference }}</dd>
-                            </div>
-                        }
                     } @else {
                         <div>
                             <dt>
@@ -365,13 +427,14 @@
     <form class="confirm-body" novalidate (submit)="$event.preventDefault(); refund()">
         <h2 id="refund-title">Rembourser la vente #{{ data()?.id }} ?</h2>
         <p class="muted">
-            @if (data()?.payment_method === "MOBILE_MONEY") {
-                Payée par mobile money : {{ data()?.total | fcfa }} sont à rendre au client hors
-                caisse, et les produits sont remis en stock.
-            } @else {
-                {{ data()?.total | fcfa }} seront retirés de la caisse et les produits remis en
-                stock.
+            @if (cashPaid() > 0) {
+                {{ cashPaid() | fcfa }} seront retirés de la caisse.
             }
+            @if (otherPaid() > 0) {
+                {{ otherPaid() | fcfa }} payés par mobile money sont à rendre au client hors
+                caisse.
+            }
+            Les produits sont remis en stock.
             Cette action est définitive.
         </p>
 
@@ -407,6 +470,169 @@
                     <span class="spinner"></span>
                 }
                 Rembourser
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog
+    #payBox
+    class="confirm"
+    aria-labelledby="pay-title"
+    (click)="onPayBackdrop($event)"
+    (cancel)="onPayCancel($event)"
+>
+    <form class="confirm-body" novalidate (submit)="$event.preventDefault(); pay()">
+        <h2 id="pay-title">Encaisser sur la vente #{{ data()?.id }}</h2>
+        <p class="muted">Reste à payer : {{ due() | fcfa }}.</p>
+
+        <div class="pay-methods">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [class.active]="payMethod() === 'CASH'"
+                [attr.aria-pressed]="payMethod() === 'CASH'"
+                (click)="payMethod.set('CASH')"
+            >
+                <app-icon name="banknote" [size]="18" />
+                Espèces
+            </button>
+            <button
+                type="button"
+                class="btn btn-outline"
+                [class.active]="payMethod() === 'MOBILE_MONEY'"
+                [attr.aria-pressed]="payMethod() === 'MOBILE_MONEY'"
+                (click)="payMethod.set('MOBILE_MONEY')"
+            >
+                <app-icon name="phone" [size]="18" />
+                Mobile money
+            </button>
+        </div>
+
+        <label class="field">
+            <span>Montant payé</span>
+            <input
+                #payAmountInput
+                class="input"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                [value]="payAmount() ?? ''"
+                (input)="payAmount.set(readNumber(payAmountInput))"
+            />
+        </label>
+
+        @if (payMethod() === "CASH") {
+            <label class="field">
+                <span>Montant reçu <small class="muted">(facultatif)</small></span>
+                <input
+                    #payReceivedInput
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    step="1"
+                    [value]="payReceived() ?? ''"
+                    (input)="payReceived.set(readNumber(payReceivedInput))"
+                />
+            </label>
+            @if (payChange(); as change) {
+                @if (change > 0) {
+                    <p class="muted">Monnaie à rendre : {{ change | fcfa }}</p>
+                }
+            }
+        } @else {
+        }
+
+        @if (payError()) {
+            <div class="alert alert-error" role="alert">{{ payError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="paying()"
+                (click)="closePay()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="paying()">
+                @if (paying()) {
+                    <span class="spinner"></span>
+                }
+                Encaisser
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog
+    #returnBox
+    class="confirm"
+    aria-labelledby="return-title"
+    (click)="onReturnBackdrop($event)"
+    (cancel)="onReturnCancel($event)"
+>
+    <form class="confirm-body" novalidate (submit)="$event.preventDefault(); confirmReturn()">
+        <h2 id="return-title">Rendre un article</h2>
+        @if (returnItem(); as item) {
+            <p class="muted">
+                {{ item.product_name }} : {{ returnable(item) }} à rendre au maximum.
+            </p>
+
+            <label class="field">
+                <span>Quantité rendue</span>
+                <input
+                    #returnQuantityInput
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    [max]="returnable(item)"
+                    step="1"
+                    [value]="returnQuantity() ?? ''"
+                    (input)="returnQuantity.set(readNumber(returnQuantityInput))"
+                />
+            </label>
+        }
+
+        <label class="field">
+            <span>Motif</span>
+            <input
+                class="input"
+                type="text"
+                maxlength="255"
+                autocomplete="off"
+                placeholder="Ex. couleur non conforme"
+                [value]="returnReason()"
+                (input)="returnReason.set($any($event.target).value)"
+            />
+        </label>
+
+        <p class="muted">
+            Le client est remboursé de {{ returnAmount() | fcfa }}. Le stock est remis.
+        </p>
+
+        @if (returnError()) {
+            <div class="alert alert-error" role="alert">{{ returnError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="returning()"
+                (click)="closeReturn()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="returning()">
+                @if (returning()) {
+                    <span class="spinner"></span>
+                }
+                Rendre
             </button>
         </div>
     </form>

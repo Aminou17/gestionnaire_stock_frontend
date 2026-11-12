@@ -27,6 +27,12 @@
         @if (s.user_name) {
             <span>Servi par {{ s.user_name }}</span>
         }
+        @if (s.customer_name) {
+            <span>Client : {{ s.customer_name }}</span>
+        }
+        @if (s.customer_phone) {
+            <span>Tél. client : {{ s.customer_phone }}</span>
+        }
         @if (s.status === "CANCELLED") {
             <strong class="receipt-cancelled">VENTE REMBOURSÉE</strong>
         }
@@ -64,15 +70,33 @@
         <p class="receipt-line receipt-total">
             <span>TOTAL</span><span>{{ s.total | fcfa }}</span>
         </p>
-        @if (s.payment_method === "MOBILE_MONEY") {
+        @if (s.payments.length > 0) {
+            @for (payment of s.payments; track payment.id) {
+                <p class="receipt-line">
+                    <span
+                        >{{ payment.created_at | date: "dd/MM" }}
+                        {{ payment.payment_method === "MOBILE_MONEY" ? "Mobile money" : "Espèces" }}</span
+                    ><span>{{ payment.amount | fcfa }}</span>
+                </p>
+                @if (changeOf(payment); as change) {
+                    <span class="receipt-note"
+                        >Reçu {{ payment.amount_received! | fcfa }}, rendu {{ change | fcfa }}</span
+                    >
+                }
+            }
+            @if (due() > 0) {
+                <p class="receipt-line receipt-total">
+                    <span>RESTE À PAYER</span><span>{{ due() | fcfa }}</span>
+                </p>
+            } @else if (s.status === "ACTIVE") {
+                <p class="receipt-line">
+                    <span>Payé en totalité</span><span></span>
+                </p>
+            }
+        } @else if (s.payment_method === "MOBILE_MONEY") {
             <p class="receipt-line">
                 <span>Payé par mobile money</span><span>{{ s.total | fcfa }}</span>
             </p>
-            @if (s.payment_reference) {
-                <p class="receipt-line">
-                    <span>Réf.</span><span>{{ s.payment_reference }}</span>
-                </p>
-            }
         } @else {
             <!-- anciennes ventes sans montant saisi : le client a donné le compte juste -->
             <p class="receipt-line">

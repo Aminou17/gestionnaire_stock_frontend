@@ -10,6 +10,7 @@ const sale = (overrides: Partial<Sale>): Sale => ({
     user_name: "Yabre M.",
     user_role: "admin",
     total: 18500,
+    paid_amount: 18500,
     status: "ACTIVE",
     items_count: 3,
     created_at: new Date().toISOString(),
