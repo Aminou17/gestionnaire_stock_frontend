@@ -1,0 +1,563 @@
+:host {
+    display: grid;
+    gap: 12px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    width: fit-content;
+    min-height: 44px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* cible tactile de 44 px, le lien ne se tasse pas à côté d'un texte long */
+.banner a,
+.link-btn {
+    margin-left: auto;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* produits à gauche, panier à droite qui reste visible au défilement */
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.catalog,
+.cart {
+    padding: 20px;
+}
+
+/* le panier ne dépasse jamais l'écran : ses lignes défilent, "Valider" reste visible */
+.cart {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    gap: 16px;
+}
+
+.cart .card-header {
+    margin-bottom: 0;
+}
+
+.count {
+    font-size: 13px;
+}
+
+.search {
+    position: relative;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.search app-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search .input {
+    padding-left: 40px;
+}
+
+.results {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.results li + li {
+    border-top: 1px solid var(--border);
+}
+
+.result {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 10px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.result:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.result:disabled {
+    cursor: default;
+}
+
+.result:disabled .result-text strong,
+.result:disabled .result-price strong {
+    color: var(--text-muted);
+}
+
+.result-text {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.result-text strong {
+    font-size: 15px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-text small {
+    font-size: 13px;
+}
+
+.result-price {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.add {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.stock-LOW {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.stock-OUT_OF_STOCK {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.reloading {
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.row-skeleton {
+    height: 56px;
+    margin-top: 8px;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 32px 16px;
+}
+
+.lines {
+    display: grid;
+    align-content: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    overflow-y: auto;
+}
+
+.line {
+    display: grid;
+    gap: 10px;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+}
+
+.line:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.line-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.line-head strong {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.icon-btn {
+    width: 36px;
+    height: 36px;
+    margin: -6px -6px -6px 0;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.line-body {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.stepper button {
+    width: 40px;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.stepper button:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.stepper button:focus-visible,
+.stepper input:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+.stepper button:disabled {
+    color: var(--text-muted);
+    opacity: 0.5;
+    cursor: default;
+}
+
+.stepper input {
+    width: 48px;
+    height: 100%;
+    border: 0;
+    border-inline: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: 600;
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.stepper input::-webkit-inner-spin-button,
+.stepper input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.price-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.price-field .input {
+    width: 110px;
+    height: 40px;
+}
+
+.unit {
+    font-size: 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+.line-total {
+    margin-left: auto;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.hint {
+    font-size: 12px;
+}
+
+.cart-footer {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: 15px;
+}
+
+.total strong {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.payment {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-hover);
+}
+
+.payment-title {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.method {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.method:hover {
+    border-color: var(--primary);
+}
+
+.method.active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
+    font-weight: 600;
+}
+
+.method:focus-visible,
+.chip:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.chip {
+    min-height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    cursor: pointer;
+}
+
+.chip:hover,
+.chip.active {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.change {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: 14px;
+}
+
+.change strong {
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+}
+
+.more-hint {
+    margin: 12px 0 0;
+    font-size: 13px;
+    text-align: center;
+}
+
+/* désactivé : bien distinct d'un bouton actif (même règle que la fiche produit) */
+.submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submit.busy:disabled {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.cart-bar {
+    display: none;
+}
+
+@media (max-width: 1023px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .cart {
+        position: static;
+        max-height: none;
+    }
+
+    .lines {
+        overflow: visible;
+    }
+
+    :host(.has-cart) {
+        padding-bottom: 72px;
+    }
+
+    /* le panier passe sous les produits : on rappelle le total en bas d'écran */
+    .cart-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 25;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 16px;
+        background: var(--surface);
+        border-top: 1px solid var(--border);
+    }
+
+    .cart-bar span {
+        display: grid;
+    }
+
+    .cart-bar strong {
+        font-size: 18px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cart-bar small {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* cibles tactiles de 44 px minimum (tablette comprise) */
+    .icon-btn,
+    .stepper button {
+        width: 44px;
+        height: 44px;
+    }
+
+    .stepper,
+    .price-field .input {
+        height: 44px;
+    }
+}
+
+@media (max-width: 767px) {
+    .catalog,
+    .cart {
+        padding: 16px;
+    }
+
+    /* sur téléphone la barre se pose au-dessus de la navigation du bas */
+    .cart-bar {
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+    }
+
+    /* nom sur deux lignes plutôt que coupé à côté du prix et des badges */
+    .result-text strong {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+}
+
+@media (max-width: 767px) {
+    .chip {
+        min-height: 44px;
+    }
+}

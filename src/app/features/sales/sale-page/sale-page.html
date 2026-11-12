@@ -1,0 +1,413 @@
+<div class="topbar">
+    <a [routerLink]="back.link" class="back">
+        <app-icon name="chevron-left" [size]="18" />
+        {{ back.label }}
+    </a>
+
+    @if (data(); as sale) {
+        <nav class="pager" aria-label="Autres ventes">
+            @if (sale.previous_id; as id) {
+                <a
+                    class="pager-btn"
+                    [routerLink]="['/sales', id]"
+                    [state]="navState()"
+                    (click)="justCreated.set(false)"
+                    [attr.aria-label]="'Vente précédente, n° ' + id"
+                    title="Vente précédente"
+                >
+                    <app-icon name="chevron-left" [size]="18" />
+                </a>
+            } @else {
+                <span class="pager-btn disabled" aria-hidden="true">
+                    <app-icon name="chevron-left" [size]="18" />
+                </span>
+            }
+            @if (sale.next_id; as id) {
+                <a
+                    class="pager-btn"
+                    [routerLink]="['/sales', id]"
+                    [state]="navState()"
+                    (click)="justCreated.set(false)"
+                    [attr.aria-label]="'Vente suivante, n° ' + id"
+                    title="Vente suivante"
+                >
+                    <app-icon name="chevron-right" [size]="18" />
+                </a>
+            } @else {
+                <span class="pager-btn disabled" aria-hidden="true">
+                    <app-icon name="chevron-right" [size]="18" />
+                </span>
+            }
+        </nav>
+    }
+</div>
+
+<app-page-header [title]="data() ? 'Vente #' + data()!.id : 'Vente'" section="Ventes" />
+
+@if (justCreated()) {
+    <div class="alert alert-success banner" role="status">
+        <span>Vente enregistrée.</span>
+        <a routerLink="/sales/new">Nouvelle vente</a>
+    </div>
+}
+
+@if (sale.isLoading() && !data()) {
+    <!-- même forme que la page chargée, pour qu'elle ne saute pas -->
+    <div class="layout" aria-busy="true">
+        <div class="main">
+            <section class="card summary">
+                <div class="summary-text">
+                    <div class="skeleton sk-badge"></div>
+                    <div class="skeleton sk-total"></div>
+                    <div class="skeleton sk-line"></div>
+                </div>
+            </section>
+            <section class="card sheet">
+                @for (i of [1, 2, 3]; track i) {
+                    <div class="skeleton row-skeleton"></div>
+                }
+            </section>
+        </div>
+        <aside class="side">
+            <section class="card panel">
+                @for (i of [1, 2]; track i) {
+                    <div class="skeleton row-skeleton"></div>
+                }
+            </section>
+        </aside>
+    </div>
+} @else if (!data() && (sale.error() || notFound())) {
+    <section class="card sheet">
+        <div class="empty">
+            {{ errorMessage() }}
+            @if (notFound()) {
+                <a routerLink="/sales" class="btn btn-outline btn-sm">Retour aux ventes</a>
+            } @else {
+                <button type="button" class="btn btn-outline btn-sm" (click)="sale.reload()">
+                    Réessayer
+                </button>
+            }
+        </div>
+    </section>
+} @else if (data(); as sale) {
+    <div class="layout">
+        <div class="main">
+            <section class="card summary">
+                <div class="summary-text">
+                    <span
+                        class="badge"
+                        [class]="
+                            sale.status === 'CANCELLED'
+                                ? 'badge badge-danger'
+                                : 'badge badge-success'
+                        "
+                        >{{ sale.status === "CANCELLED" ? "Remboursée" : "Payée" }}</span
+                    >
+                    <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
+                        sale.total | fcfa
+                    }}</strong>
+                    <span class="summary-meta muted">
+                        <span>{{ sale.created_at | date: "EEEE d MMMM y 'à' HH:mm" }}</span>
+                        @if (auth.isAdmin() && sale.user_name) {
+                            <span class="seller" [title]="roleLabel(sale.user_role) ?? ''">
+                                <span class="seller-avatar" aria-hidden="true">{{
+                                    sellerInitials()
+                                }}</span>
+                                {{ sale.user_name }}
+                                @if (roleLabel(sale.user_role); as role) {
+                                    <span class="seller-role">· {{ role }}</span>
+                                }
+                            </span>
+                        }
+                    </span>
+                </div>
+                @if (settingsFailed()) {
+                    <div class="alert alert-warning settings-alert" role="alert">
+                        Impossible de charger l'en-tête du ticket : l'impression est bloquée.
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            (click)="retrySettings()"
+                        >
+                            Réessayer
+                        </button>
+                    </div>
+                }
+                <div class="summary-actions">
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        [disabled]="!settingsReady()"
+                        (click)="openTicket()"
+                    >
+                        <app-icon name="receipt" [size]="18" />
+                        Ticket
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        [disabled]="!settingsReady()"
+                        (click)="print()"
+                    >
+                        <app-icon name="printer" [size]="18" />
+                        Imprimer
+                    </button>
+                    @if (canRefund()) {
+                        <button
+                            type="button"
+                            class="btn btn-outline refund-btn"
+                            [disabled]="reloading()"
+                            (click)="askRefund()"
+                        >
+                            <app-icon name="undo" [size]="18" />
+                            Rembourser
+                        </button>
+                    }
+                </div>
+            </section>
+
+            @if (sale.status === "CANCELLED") {
+                <div class="refund-info" role="status">
+                    <app-icon name="undo" [size]="18" />
+                    <div>
+                        <strong>Vente remboursée</strong>
+                        @if (sale.cancellation_reason) {
+                            <span>Motif : {{ sale.cancellation_reason }}</span>
+                        }
+                    </div>
+                </div>
+            }
+
+            <section class="card sheet">
+                <h2 class="section-title">
+                    Produits vendus
+                    <span class="muted">({{ itemsCount() }})</span>
+                </h2>
+                <ul class="items">
+                    @for (item of sale.items; track item.id) {
+                        <li>
+                            <div class="item-text">
+                                <a
+                                    [routerLink]="['/products', item.product_id]"
+                                    [state]="backState()"
+                                    class="item-name"
+                                    >{{ item.product_name }}</a
+                                >
+                                @if (item.quantity > 1 || item.discount_amount > 0) {
+                                    <small class="muted">
+                                        @if (item.quantity > 1) {
+                                            {{ item.quantity }} × {{ item.unit_price | fcfa }}
+                                        }
+                                        @if (item.discount_amount > 0) {
+                                            <span class="discount"
+                                                >{{ item.quantity > 1 ? "· " : "" }}remise de
+                                                {{ item.discount_amount | fcfa }} sur
+                                                {{ item.reference_price | fcfa }}</span
+                                            >
+                                        }
+                                    </small>
+                                }
+                            </div>
+                            <strong class="item-total">{{
+                                item.quantity * item.unit_price | fcfa
+                            }}</strong>
+                        </li>
+                    }
+                </ul>
+
+                @if (discounts() > 0) {
+                    <dl class="subtotals">
+                        <div>
+                            <dt>Sous-total</dt>
+                            <dd>{{ subtotal() | fcfa }}</dd>
+                        </div>
+                        <div>
+                            <dt>Remises</dt>
+                            <dd class="discount">−{{ discounts() | fcfa }}</dd>
+                        </div>
+                    </dl>
+                }
+
+                <div class="total" [class.cancelled]="sale.status === 'CANCELLED'">
+                    <span>Total</span>
+                    <strong>{{ sale.total | fcfa }}</strong>
+                </div>
+
+                <dl class="payment">
+                    @if (sale.payment_method === "MOBILE_MONEY") {
+                        <div>
+                            <dt>
+                                <app-icon name="phone" [size]="16" />
+                                Mobile money
+                            </dt>
+                            <dd>{{ sale.total | fcfa }}</dd>
+                        </div>
+                        @if (sale.payment_reference) {
+                            <div>
+                                <dt>Référence</dt>
+                                <dd>{{ sale.payment_reference }}</dd>
+                            </div>
+                        }
+                    } @else {
+                        <div>
+                            <dt>
+                                <app-icon name="banknote" [size]="16" />
+                                Espèces reçues
+                            </dt>
+                            <dd>{{ sale.amount_received ?? sale.total | fcfa }}</dd>
+                        </div>
+                        <div>
+                            <dt>Monnaie rendue</dt>
+                            <dd>{{ (sale.amount_received ?? sale.total) - sale.total | fcfa }}</dd>
+                        </div>
+                    }
+                </dl>
+            </section>
+        </div>
+
+        <aside class="side">
+            <section class="card panel">
+                <h2 class="section-title">Activité</h2>
+                <ol class="timeline">
+                    <li>
+                        <div class="event">
+                            <strong>Vente enregistrée</strong>
+                            <span class="muted">{{
+                                sale.created_at | date: "d MMM y, HH:mm"
+                            }}</span>
+                        </div>
+                        @for (move of saleMoves(); track move.id) {
+                            <button type="button" class="move" (click)="openMove(move)">
+                                <span class="move-name">{{ move.product_name }}</span>
+                                <span class="move-stock">
+                                    <strong class="out">−{{ move.quantity }}</strong>
+                                    · stock {{ move.stock_after + move.quantity | number }} →
+                                    {{ move.stock_after | number }}
+                                </span>
+                                <app-icon name="chevron-right" [size]="16" />
+                            </button>
+                        }
+                    </li>
+                    @if (sale.status === "CANCELLED") {
+                        <li class="danger">
+                            <div class="event">
+                                <strong>Vente remboursée</strong>
+                                <span class="muted">
+                                    {{ sale.cancelled_at | date: "d MMM y, HH:mm" }}
+                                    @if (auth.isAdmin() && sale.cancelled_by_name) {
+                                        · par {{ sale.cancelled_by_name }}
+                                    }
+                                </span>
+                            </div>
+                            @for (move of refundMoves(); track move.id) {
+                                <button type="button" class="move" (click)="openMove(move)">
+                                    <span class="move-name">{{ move.product_name }}</span>
+                                    <span class="move-stock">
+                                        <strong class="in">+{{ move.quantity }}</strong>
+                                        · stock {{ move.stock_after - move.quantity | number }} →
+                                        {{ move.stock_after | number }}
+                                    </span>
+                                    <app-icon name="chevron-right" [size]="16" />
+                                </button>
+                            }
+                        </li>
+                    }
+                </ol>
+            </section>
+        </aside>
+    </div>
+
+    <app-movement-detail #moveDetail [movement]="selectedMove()" [backState]="backState()" />
+}
+
+<dialog
+    #ticketBox
+    class="ticket-dialog"
+    aria-label="Aperçu du ticket"
+    (click)="onTicketBackdrop($event)"
+>
+    @if (data(); as sale) {
+        <div class="ticket-paper">
+            <app-sale-receipt [sale]="sale" [shop]="shopInfo()" [ticketPrefix]="ticketPrefix()" />
+        </div>
+        <div class="ticket-actions">
+            <button type="button" class="btn btn-outline" (click)="closeTicket()">Fermer</button>
+            <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="!settingsReady()"
+                (click)="closeTicket(); print()"
+            >
+                <app-icon name="printer" [size]="18" />
+                Imprimer
+            </button>
+        </div>
+    }
+</dialog>
+
+<!-- copie imprimée, cachée à l'écran -->
+@if (data(); as sale) {
+    <app-sale-receipt
+        class="print-only"
+        [sale]="sale"
+        [shop]="shopInfo()"
+        [ticketPrefix]="ticketPrefix()"
+    />
+}
+
+<dialog
+    #refundBox
+    class="confirm"
+    aria-labelledby="refund-title"
+    (click)="onRefundBackdrop($event)"
+    (cancel)="onRefundCancel($event)"
+>
+    <form class="confirm-body" novalidate (submit)="$event.preventDefault(); refund()">
+        <h2 id="refund-title">Rembourser la vente #{{ data()?.id }} ?</h2>
+        <p class="muted">
+            @if (data()?.payment_method === "MOBILE_MONEY") {
+                Payée par mobile money : {{ data()?.total | fcfa }} sont à rendre au client hors
+                caisse, et les produits sont remis en stock.
+            } @else {
+                {{ data()?.total | fcfa }} seront retirés de la caisse et les produits remis en
+                stock.
+            }
+            Cette action est définitive.
+        </p>
+
+        <label class="field">
+            <span>Motif du remboursement</span>
+            <textarea
+                class="input"
+                rows="3"
+                required
+                [class.invalid]="!!refundError()"
+                [attr.aria-invalid]="!!refundError()"
+                placeholder="Ex. : article défectueux, erreur de saisie…"
+                [value]="reason()"
+                (input)="reason.set($any($event.target).value)"
+            ></textarea>
+        </label>
+
+        @if (refundError()) {
+            <div class="alert alert-error" role="alert">{{ refundError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="refunding()"
+                (click)="closeRefund()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-danger" [disabled]="refunding()">
+                @if (refunding()) {
+                    <span class="spinner"></span>
+                }
+                Rembourser
+            </button>
+        </div>
+    </form>
+</dialog>

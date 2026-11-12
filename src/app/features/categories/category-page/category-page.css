@@ -1,0 +1,279 @@
+:host {
+    display: grid;
+    gap: 12px;
+}
+
+/* l'en-tête garde toute la largeur, seule la fiche est limitée (comme une vente) */
+.sheet {
+    width: 100%;
+    max-width: 720px;
+    padding: 4px 20px 20px;
+}
+
+dl {
+    display: grid;
+    margin: 0;
+}
+
+dl > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* description : le texte passe sous l'intitulé, il peut être long */
+dl > div.block {
+    display: grid;
+    gap: 6px;
+    padding: 14px 0;
+}
+
+.block dd {
+    text-align: left;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+dt {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+dd {
+    margin: 0;
+    font-size: 14px;
+    text-align: right;
+}
+
+.strong {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* lien "Ajouter une description" : discret, mais zone de clic confortable */
+.link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 36px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* nombre de produits cliquable */
+.count-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 40px;
+    padding: 0 0 0 12px;
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* modifier / supprimer : actions secondaires, sous les actions principales */
+.manage {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.manage .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+}
+
+.manage .btn:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.manage .danger:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+/* badges d'état du stock : cliquables vers les produits concernés */
+.stock-state {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 8px 0;
+}
+
+.stock-state a.badge {
+    text-decoration: none;
+}
+
+.section-title {
+    margin: 20px 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* aperçu des produits : nom, prix de vente, stock */
+.preview {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.preview a {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+}
+
+.preview a:hover .preview-name {
+    color: var(--primary);
+}
+
+.preview-name {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.preview strong {
+    min-width: 28px;
+    font-size: 14px;
+    text-align: right;
+}
+
+.preview .chevron {
+    color: var(--text-muted);
+}
+
+.preview-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stock-LOW {
+    color: var(--warning);
+}
+
+.stock-OUT_OF_STOCK {
+    color: var(--danger);
+}
+
+.row-skeleton {
+    height: 36px;
+    margin: 10px 0;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 32px 0;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.confirm {
+    width: min(420px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.confirm::backdrop {
+    background: var(--overlay);
+}
+
+.confirm-body {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.confirm h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.confirm p {
+    margin: -8px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 767px) {
+    .sheet {
+        padding: 4px 16px 16px;
+    }
+
+    /* action principale en haut, pleine largeur, facile à toucher */
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions .btn {
+        width: 100%;
+    }
+
+    .manage {
+        justify-content: stretch;
+    }
+
+    .manage .btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}
+
+.restore-error {
+    margin-top: 16px;
+}

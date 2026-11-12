@@ -1,0 +1,40 @@
+<dialog #dialog (click)="onBackdropClick($event)">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2>Ouvrir la caisse</h2>
+        <p class="muted">
+            Indiquez le fond de caisse présent dans le tiroir au début de la journée.
+        </p>
+
+        @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+        }
+
+        <label class="field">
+            <span>Fond de caisse (F)</span>
+            <input
+                class="input"
+                type="number"
+                min="0"
+                step="500"
+                inputmode="numeric"
+                formControlName="openingAmount"
+                [class.invalid]="
+                    form.controls.openingAmount.touched && form.controls.openingAmount.invalid
+                "
+            />
+            @if (form.controls.openingAmount.touched && form.controls.openingAmount.invalid) {
+                <small class="field-error">Le montant doit être positif ou nul.</small>
+            }
+        </label>
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" (click)="close()">Annuler</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Ouvrir la caisse
+            </button>
+        </div>
+    </form>
+</dialog>

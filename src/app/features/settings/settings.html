@@ -1,0 +1,39 @@
+<app-page-header title="Paramètres" subtitle="Réglages de la boutique et de votre compte" />
+
+<div class="content">
+    <section class="card profile">
+        <span class="avatar">{{ initials() }}</span>
+
+        <div class="profile-info">
+            <strong>{{ auth.user()?.name }}</strong>
+            <span class="muted">{{ auth.user()?.email }}</span>
+        </div>
+
+        <span class="badge badge-primary">{{ auth.roleLabel() }}</span>
+    </section>
+
+    @for (group of groups(); track group.title) {
+        <section class="group">
+            <h2>{{ group.title }}</h2>
+
+            <nav class="card list" [attr.aria-label]="group.title">
+                @for (link of group.links; track link.path) {
+                    <a [routerLink]="link.path" class="item">
+                        <span class="item-icon"><app-icon [name]="link.icon" [size]="20" /></span>
+
+                        <span class="item-text">
+                            <strong>{{ link.label }}</strong>
+                            <small class="muted">{{ link.description }}</small>
+                        </span>
+
+                        @if (link.path === "appearance") {
+                            <span class="item-value muted">{{ themeLabel() }}</span>
+                        }
+
+                        <app-icon name="chevron-right" [size]="18" class="chevron" />
+                    </a>
+                }
+            </nav>
+        </section>
+    }
+</div>

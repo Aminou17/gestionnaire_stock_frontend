@@ -1,0 +1,70 @@
+<section class="card chart-card">
+    <div class="card-header">
+        <h2>{{ title() }}</h2>
+        @if (!loading() && !error()) {
+            <span class="total">Total : {{ total() | fcfa }}</span>
+        }
+    </div>
+
+    @if (loading()) {
+        <div class="skeleton chart-skeleton"></div>
+    } @else if (error()) {
+        <div class="empty">
+            Impossible de charger les ventes.
+            <button type="button" class="btn btn-outline btn-sm" (click)="retry.emit()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <div class="chart-area">
+            @if (isEmpty()) {
+                <p class="no-data">Aucune vente sur les 7 derniers jours.</p>
+            }
+            <div
+                class="chart"
+                role="img"
+                [attr.aria-label]="'Ventes nettes des 7 derniers jours, total ' + (total() | fcfa)"
+            >
+                @for (bar of bars(); track bar.date; let i = $index) {
+                    <div
+                        class="col"
+                        tabindex="0"
+                        (mouseenter)="hovered.set(i)"
+                        (mouseleave)="hovered.set(null)"
+                        (focus)="hovered.set(i)"
+                        (blur)="hovered.set(null)"
+                    >
+                        <div class="plot">
+                            <span class="bar-value">{{ bar.short }}</span>
+                            <div
+                                class="bar"
+                                [class.today]="bar.isToday"
+                                [style.height.%]="bar.height"
+                            ></div>
+
+                            @if (hovered() === i) {
+                                <div class="tooltip" [class.left]="i >= bars().length - 2">
+                                    <strong>{{ bar.fullDate | date: "EEEE d MMMM" }}</strong>
+                                    <span>Net : {{ bar.netTotal | fcfa }}</span>
+                                    <span
+                                        >{{ bar.salesCount }} vente{{
+                                            bar.salesCount > 1 ? "s" : ""
+                                        }}</span
+                                    >
+                                    @if (bar.cancellationsCount > 0) {
+                                        <span class="refund"
+                                            >Remboursements :
+                                            {{ -bar.cancellationsTotal | fcfa }}</span
+                                        >
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <span class="day" [class.today]="bar.isToday">{{ bar.label }}</span>
+                    </div>
+                }
+            </div>
+        </div>
+        <p class="note">Montants nets : ventes du jour moins les remboursements.</p>
+    }
+</section>

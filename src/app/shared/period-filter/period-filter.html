@@ -1,0 +1,55 @@
+<div class="toolbar">
+    <label class="period">
+        <span class="muted">Période</span>
+        <select class="input" [value]="period()" (change)="selectPeriod($any($event.target).value)">
+            <option value="today">Aujourd'hui</option>
+            <option value="week">7 derniers jours</option>
+            <option value="month">30 derniers jours</option>
+            <option value="all">Toutes les dates</option>
+            <option value="custom">Personnalisée…</option>
+        </select>
+    </label>
+
+    <!-- autres filtres de la page (fournisseur) -->
+    <ng-content />
+</div>
+
+<!-- deuxième ligne : seulement pour une période personnalisée -->
+@if (period() === "custom") {
+    <div class="custom-range" role="group" aria-label="Période personnalisée">
+        <label class="date-field">
+            <span>Du</span>
+            <input
+                #fromInput
+                class="input"
+                type="date"
+                [max]="customTo() || today()"
+                [value]="customFrom()"
+                [class.invalid]="!!customError()"
+                [attr.aria-invalid]="!!customError()"
+                [attr.aria-describedby]="customError() ? 'range-error' : null"
+                (change)="applyCustomRange(fromInput.value, toInput.value)"
+            />
+        </label>
+        <label class="date-field">
+            <span>Au</span>
+            <input
+                #toInput
+                class="input"
+                type="date"
+                [min]="customFrom()"
+                [max]="today()"
+                [value]="customTo()"
+                [class.invalid]="!!customError()"
+                [attr.aria-invalid]="!!customError()"
+                [attr.aria-describedby]="customError() ? 'range-error' : null"
+                (change)="applyCustomRange(fromInput.value, toInput.value)"
+            />
+        </label>
+        @if (customError()) {
+            <p id="range-error" class="field-error range-error" role="alert">
+                {{ customError() }}
+            </p>
+        }
+    </div>
+}

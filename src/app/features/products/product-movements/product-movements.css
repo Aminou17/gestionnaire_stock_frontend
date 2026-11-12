@@ -1,0 +1,97 @@
+.movements-card {
+    padding: 20px;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    border-top: 1px solid var(--border);
+}
+
+.when {
+    flex: 1;
+    min-width: 0;
+    font-size: 13px;
+}
+
+.when a {
+    text-decoration: none;
+}
+
+.quantity {
+    font-variant-numeric: tabular-nums;
+}
+
+.row-skeleton {
+    height: 44px;
+    margin-top: 8px;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    text-align: center;
+}
+
+li.empty {
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 767px) {
+    .movements-card {
+        padding: 16px;
+    }
+
+    li {
+        flex-wrap: wrap;
+        gap: 4px 12px;
+        padding: 12px 0;
+    }
+
+    /* zone tactile de 44 px pour Tout voir */
+    .card-header a {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+    }
+
+    .when {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .quantity {
+        margin-left: auto;
+    }
+}
+
+.after {
+    min-width: 72px;
+    font-size: 13px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+li[tabindex] {
+    cursor: pointer;
+}
+
+li[tabindex]:hover {
+    background: var(--surface-muted, transparent);
+}
+
+li[tabindex]:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}

@@ -1,0 +1,69 @@
+<header [class.stacked]="subtitle()">
+    <button
+        type="button"
+        class="menu-btn"
+        (click)="layout.sidebarOpen.set(true)"
+        aria-label="Ouvrir le menu"
+    >
+        <app-icon name="menu" [size]="20" />
+    </button>
+
+    <div class="titles">
+        @if (section()) {
+            <p class="breadcrumb">{{ section() }} › {{ title() }}</p>
+        }
+        <div class="title-row">
+            @if (back()) {
+                <a [routerLink]="back()" class="back-btn" [attr.aria-label]="backLabel()">
+                    <app-icon name="chevron-left" [size]="22" />
+                </a>
+            }
+            <h1>{{ title() }}</h1>
+        </div>
+        @if (subtitle()) {
+            <p>{{ subtitle() }}</p>
+        }
+    </div>
+
+    <div class="actions">
+        <ng-content />
+
+        @if (auth.isAdmin()) {
+            <a routerLink="/alerts" class="icon-btn" aria-label="Alertes de stock">
+                <app-icon name="bell" />
+                @if (alerts.count() > 0) {
+                    <span class="dot">{{ alerts.count() }}</span>
+                }
+            </a>
+        }
+
+        <div class="user">
+            <button
+                type="button"
+                class="user-btn"
+                (click)="menuOpen.set(!menuOpen())"
+                [attr.aria-expanded]="menuOpen()"
+            >
+                <span class="avatar">{{ initials() }}</span>
+                <span class="user-info">
+                    <strong>{{ auth.user()?.name }}</strong>
+                    <small>{{ auth.roleLabel() }}</small>
+                </span>
+                <app-icon name="chevron-down" [size]="16" />
+            </button>
+
+            @if (menuOpen()) {
+                <div class="dropdown">
+                    <div class="dropdown-head">
+                        <strong>{{ auth.user()?.name }}</strong>
+                        <small>{{ auth.user()?.email }}</small>
+                    </div>
+                    <button type="button" (click)="auth.logout()">
+                        <app-icon name="logout" [size]="16" />
+                        Se déconnecter
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</header>

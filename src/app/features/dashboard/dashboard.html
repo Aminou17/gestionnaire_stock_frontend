@@ -1,0 +1,223 @@
+<app-page-header title="Tableau de bord" [subtitle]="today">
+    <!-- le gérant a son bouton "Nouvelle vente" sous le bandeau de caisse -->
+    @if (auth.isAdmin()) {
+        <a
+            routerLink="/sales/new"
+            class="btn btn-primary new-sale"
+            [class.disabled]="!cashOpen()"
+            [attr.aria-disabled]="!cashOpen()"
+            [attr.tabindex]="cashOpen() ? null : -1"
+            [title]="cashOpen() ? '' : 'Ouvrez la caisse pour enregistrer une vente'"
+        >
+            <app-icon name="plus" [size]="18" />
+            <span>Nouvelle vente</span>
+        </a>
+    }
+</app-page-header>
+
+@if (auth.isAdmin()) {
+    @if (summary.error() || dailySales.error()) {
+        <div class="alert alert-error banner" role="alert">
+            <app-icon name="alert" />
+            <span>Certaines données du tableau de bord n'ont pas pu être chargées.</span>
+            <button type="button" class="link-btn" (click)="reloadSummary()">Réessayer</button>
+        </div>
+    }
+
+    @if (summaryData()?.previousOpenSession; as previous) {
+        <div class="alert alert-warning banner" role="alert">
+            <app-icon name="alert" />
+            <span>
+                La caisse du <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas
+                été clôturée.
+            </span>
+            <a routerLink="/cash">Clôturer</a>
+        </div>
+    }
+
+    @if (summaryData()?.pendingExplanation; as pending) {
+        <div class="alert alert-warning banner" role="alert">
+            <app-icon name="alert" />
+            <span>
+                L'écart de la caisse du
+                <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong> n'est pas expliqué : la
+                caisse ne pourra pas être ouverte avant.
+            </span>
+            <a routerLink="/cash">Expliquer</a>
+        </div>
+    }
+
+    <section class="stats">
+        <app-stat-card
+            label="Ventes du jour"
+            icon="trending-up"
+            [loading]="dailySales.isLoading()"
+            [error]="!!dailySales.error()"
+            [value]="todaySales()?.netTotal ?? 0 | fcfa"
+            [hint]="salesHint().text"
+            [hintTone]="salesHint().tone"
+        />
+
+        <app-stat-card
+            label="Caisse"
+            icon="banknote"
+            [loading]="summary.isLoading()"
+            [error]="!!summary.error()"
+            [value]="cash() ? (cash()!.balance | fcfa) : 'Caisse fermée'"
+            [valueTone]="cash() ? undefined : 'muted'"
+            [hint]="cashHint()"
+        >
+            @if (canOpenCash()) {
+                <button
+                    type="button"
+                    class="btn btn-primary btn-sm open-cash"
+                    (click)="openCash.open()"
+                >
+                    Ouvrir la caisse
+                </button>
+            }
+        </app-stat-card>
+
+        <app-stat-card
+            label="Produits en alerte"
+            icon="alert"
+            iconTone="warning"
+            [loading]="summary.isLoading()"
+            [error]="!!summary.error()"
+            [value]="'' + alertCounts().total"
+            [valueTone]="alertCounts().total > 0 ? 'warning' : undefined"
+            [hint]="alertHint()"
+        />
+
+        <!-- la valeur du stock repose sur le prix d'achat : réservée à l'admin -->
+        <app-stat-card
+            label="Valeur du stock"
+            icon="package"
+            [loading]="summary.isLoading()"
+            [error]="!!summary.error()"
+            [value]="summaryData()?.stockValue | fcfa"
+            [hint]="(summaryData()?.activeProducts ?? 0) + ' produits actifs'"
+        />
+    </section>
+
+    <section class="grid">
+        <app-sales-chart
+            [days]="lastWeek()"
+            [loading]="dailySales.isLoading()"
+            [error]="!!dailySales.error()"
+            (retry)="dailySales.reload()"
+        />
+
+        <app-stock-alerts
+            [alerts]="alertList()"
+            [loading]="stockAlerts.alerts.isLoading()"
+            [error]="!!stockAlerts.alerts.error()"
+            link="/alerts"
+            (retry)="stockAlerts.alerts.reload()"
+        />
+    </section>
+
+    <section class="grid grid-bottom">
+        <app-recent-sales
+            [sales]="salesList()"
+            [loading]="sales.isLoading()"
+            [error]="!!sales.error()"
+            (retry)="sales.reload()"
+        />
+
+        <app-recent-activity
+            [items]="activityList()"
+            [loading]="activity.isLoading()"
+            [error]="!!activity.error()"
+            (retry)="activity.reload()"
+        />
+    </section>
+
+    <app-open-cash-dialog #openCash (opened)="onCashOpened()" />
+} @else {
+    <!-- même ordre sur téléphone et sur ordinateur : la grille ne fait que placer les blocs -->
+    <div class="manager">
+        <app-manager-cash-banner
+            class="m-cash"
+            [cash]="cash()"
+            [loading]="summary.isLoading()"
+            [error]="!!summary.error()"
+            (retry)="summary.reload()"
+        />
+
+        @if (summaryData()?.previousOpenSession; as previous) {
+            <div class="alert alert-warning banner m-previous" role="alert">
+                <app-icon name="alert" />
+                <span>
+                    La caisse du <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a
+                    pas été clôturée.
+                </span>
+                <a routerLink="/cash">Clôturer</a>
+            </div>
+        }
+
+        <!-- seule la personne qui a compté peut expliquer l'écart -->
+        @if (summaryData()?.pendingExplanation; as pending) {
+            @if (pending.closedBy === auth.user()?.id) {
+                <div class="alert alert-warning banner m-previous" role="alert">
+                    <app-icon name="alert" />
+                    <span>
+                        Expliquez l'écart de la caisse du
+                        <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong
+                        >.
+                    </span>
+                    <a routerLink="/cash">Expliquer</a>
+                </div>
+            }
+        }
+
+        <app-stat-card
+            class="m-today"
+            label="Mes ventes du jour"
+            icon="trending-up"
+            [loading]="dailySales.isLoading()"
+            [error]="!!dailySales.error()"
+            [value]="todaySales()?.netTotal ?? 0 | fcfa"
+            [hint]="salesHint().text"
+            [hintTone]="salesHint().tone"
+        />
+
+        <app-sales-chart
+            class="m-chart"
+            title="Mes ventes sur 7 jours"
+            [days]="lastWeek()"
+            [loading]="dailySales.isLoading()"
+            [error]="!!dailySales.error()"
+            (retry)="dailySales.reload()"
+        />
+
+        <app-recent-sales
+            class="m-sales"
+            title="Mes dernières ventes"
+            linkLabel="Voir tout"
+            [sales]="salesList()"
+            [loading]="sales.isLoading()"
+            [error]="!!sales.error()"
+            [showSeller]="false"
+            (retry)="sales.reload()"
+        />
+
+        <app-recent-activity
+            class="m-activity"
+            title="Mon activité récente"
+            [items]="activityList()"
+            [loading]="activity.isLoading()"
+            [error]="!!activity.error()"
+            (retry)="activity.reload()"
+        />
+
+        @if (cashOpen()) {
+            <div class="m-close">
+                <a routerLink="/cash" class="btn btn-outline close-cash">
+                    <app-icon name="wallet" [size]="18" />
+                    Clôturer la caisse
+                </a>
+            </div>
+        }
+    </div>
+}

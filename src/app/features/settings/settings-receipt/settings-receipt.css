@@ -1,0 +1,182 @@
+.layout {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 1040px;
+}
+
+.forms {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.forms .section {
+    max-width: none;
+}
+
+@media (min-width: 1024px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        align-items: start;
+    }
+
+    /* l'aperçu reste visible pendant la saisie */
+    .preview-col {
+        position: sticky;
+        top: 24px;
+    }
+}
+
+textarea.input {
+    height: auto;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.counter {
+    justify-self: end;
+    font-size: 12px;
+}
+
+.hint {
+    margin: 0;
+    font-size: 14px;
+}
+
+.hint a {
+    display: inline-block;
+    padding: 12px 0;
+    color: var(--primary-text);
+}
+
+.preview-title {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+/* un ticket de caisse sur papier blanc, même en thème sombre */
+.ticket {
+    display: grid;
+    gap: 10px;
+    padding: 20px 18px 24px;
+    border-radius: 4px;
+    background: #fff;
+    color: #111;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    overflow-wrap: anywhere;
+}
+
+.ticket-head,
+.ticket-foot {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.ticket-head {
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #111;
+}
+
+.ticket-shop {
+    margin-bottom: 4px;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ticket-gap {
+    margin-top: 6px;
+}
+
+.ticket-body p,
+.ticket-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+}
+
+.ticket-body p {
+    padding-left: 12px;
+}
+
+.ticket-total {
+    padding-top: 8px;
+    border-top: 1px solid #111;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ticket-foot {
+    padding-top: 10px;
+    border-top: 1px dashed #111;
+}
+
+@media (max-width: 767px) {
+    .preview-col {
+        justify-self: center;
+        width: 100%;
+        max-width: 340px;
+    }
+}
+
+.logo-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo-box {
+    display: grid;
+    place-items: center;
+    width: 200px;
+    height: 104px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: var(--surface-hover);
+}
+
+.logo-image {
+    width: auto;
+    max-width: 160px;
+    height: auto;
+    max-height: 80px;
+    object-fit: contain;
+}
+
+.logo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.remove {
+    color: var(--danger);
+}
+
+.ticket-logo {
+    width: auto;
+    max-width: 160px;
+    height: auto;
+    max-height: 80px;
+    margin-bottom: 4px;
+    object-fit: contain;
+}
+
+@media (max-width: 767px) {
+    .logo-box,
+    .logo-actions,
+    .logo-actions .btn {
+        width: 100%;
+    }
+}

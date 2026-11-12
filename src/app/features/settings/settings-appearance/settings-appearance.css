@@ -1,0 +1,105 @@
+.themes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.theme-option {
+    position: relative;
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
+
+.theme-option:hover {
+    background: var(--surface-hover);
+}
+
+.theme-option.selected {
+    border-color: var(--primary);
+}
+
+.theme-option:has(input:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* le bouton radio reste accessible au clavier, la carte entière sert de zone de clic */
+.theme-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.theme-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* miniature de l'interface : couleurs fixes reprises de styles.css, car les variables du thème
+   ne valent que pour la page entière et chaque miniature doit garder son thème */
+.sample {
+    display: flex;
+    height: 96px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #f4f6fa;
+    border: 1px solid #e3e8f0;
+}
+
+.sample.dark {
+    background: #0b1220;
+    border-color: #223049;
+}
+
+.sample-menu {
+    width: 26%;
+    background: #0f1e3d;
+}
+
+.sample.dark .sample-menu {
+    background: #08101f;
+}
+
+.sample-page {
+    display: grid;
+    align-content: start;
+    gap: 6px;
+    flex: 1;
+    padding: 10px;
+}
+
+.sample-line {
+    height: 6px;
+    width: 70%;
+    border-radius: 3px;
+    background: #cbd5e1;
+}
+
+.sample-line.short {
+    width: 40%;
+}
+
+.sample-card {
+    height: 32px;
+    margin-top: 4px;
+    border-radius: 6px;
+    background: #ffffff;
+    border: 1px solid #e3e8f0;
+}
+
+.sample.dark .sample-line {
+    background: #334155;
+}
+
+.sample.dark .sample-card {
+    background: #111a2c;
+    border-color: #223049;
+}

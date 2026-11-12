@@ -1,0 +1,310 @@
+<app-page-header
+    [title]="data()?.name ?? 'Fournisseur'"
+    section="Stock"
+    back="/suppliers"
+    backLabel="Retour aux fournisseurs"
+/>
+
+<section class="card sheet">
+    @if (supplier.isLoading() && !data()) {
+        @for (i of [1, 2, 3, 4]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (!data() && (supplier.error() || notFound())) {
+        <div class="empty">
+            @if (notFound()) {
+                Ce fournisseur est introuvable.
+                <a routerLink="/suppliers" class="btn btn-outline btn-sm">
+                    Retour aux fournisseurs
+                </a>
+            } @else {
+                Impossible de charger le fournisseur.
+                <button type="button" class="btn btn-outline btn-sm" (click)="supplier.reload()">
+                    Réessayer
+                </button>
+            }
+        </div>
+    } @else if (data(); as supplier) {
+        <dl>
+            @if (!supplier.is_active) {
+                <div>
+                    <dt>Statut</dt>
+                    <dd><span class="badge badge-neutral">Supprimé</span></dd>
+                </div>
+            }
+            <div>
+                <dt>Personne à contacter</dt>
+                <dd>
+                    @if (supplier.contact) {
+                        {{ supplier.contact }}
+                    } @else if (canManage()) {
+                        <button type="button" class="link-btn" (click)="editSupplier('contact')">
+                            <app-icon name="plus" [size]="16" />
+                            Ajouter
+                        </button>
+                    } @else {
+                        <span class="muted">Non renseignée</span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Téléphone</dt>
+                <dd>
+                    @if (supplier.telephone) {
+                        <span class="phone">
+                            <a class="contact-link" [href]="telLink(supplier.telephone)">
+                                <app-icon name="phone" [size]="16" />
+                                {{ formatPhone(supplier.telephone) }}
+                            </a>
+                            <a
+                                class="whatsapp"
+                                [href]="whatsAppLink(supplier.telephone)"
+                                target="_blank"
+                                rel="noopener"
+                                [attr.aria-label]="'Écrire sur WhatsApp à ' + supplier.name"
+                            >
+                                <app-icon name="message" [size]="16" />
+                                WhatsApp
+                            </a>
+                        </span>
+                    } @else if (canManage()) {
+                        <button type="button" class="link-btn" (click)="editSupplier('telephone')">
+                            <app-icon name="plus" [size]="16" />
+                            Ajouter
+                        </button>
+                    } @else {
+                        <span class="muted">Non renseigné</span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Email</dt>
+                <dd>
+                    @if (supplier.email) {
+                        <a class="contact-link" [href]="'mailto:' + supplier.email">
+                            <app-icon name="mail" [size]="16" />
+                            {{ supplier.email }}
+                        </a>
+                    } @else if (canManage()) {
+                        <button type="button" class="link-btn" (click)="editSupplier('email')">
+                            <app-icon name="plus" [size]="16" />
+                            Ajouter
+                        </button>
+                    } @else {
+                        <span class="muted">Non renseigné</span>
+                    }
+                </dd>
+            </div>
+            <!-- une adresse longue passe sous l'intitulé, une courte reste à droite -->
+            <div [class.block]="(supplier.address?.length ?? 0) > 40">
+                <dt>Adresse</dt>
+                <dd>
+                    @if (supplier.address) {
+                        {{ supplier.address }}
+                    } @else if (canManage()) {
+                        <button type="button" class="link-btn" (click)="editSupplier('address')">
+                            <app-icon name="plus" [size]="16" />
+                            Ajouter
+                        </button>
+                    } @else {
+                        <span class="muted">Non renseignée</span>
+                    }
+                </dd>
+            </div>
+            <!-- fournisseur créé avant que la date soit enregistrée : la ligne n'apprendrait rien -->
+            @if (supplier.created_at) {
+                <div>
+                    <dt>Ajouté le</dt>
+                    <dd>{{ supplier.created_at | date: "d MMMM y" }}</dd>
+                </div>
+            }
+        </dl>
+
+        @let count = productCount();
+        @if (count !== undefined) {
+            <h2 class="section-title">Produits fournis</h2>
+            <div class="products-line">
+                @if (count === 0) {
+                    <p class="muted">Aucun produit en vente ne vient de ce fournisseur.</p>
+                } @else {
+                    <p>
+                        <strong>{{ count }}</strong> produit{{ count > 1 ? "s" : "" }}
+                        en vente
+                    </p>
+                    <a
+                        routerLink="/products"
+                        [queryParams]="{ supplierId: supplier.id }"
+                        class="link-btn"
+                    >
+                        Voir les produits
+                        <app-icon name="chevron-right" [size]="16" />
+                    </a>
+                }
+            </div>
+        }
+
+        <h2 class="section-title">Livraisons reçues</h2>
+        @if (entries.isLoading() && !deliveries()) {
+            @for (i of [1, 2]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        } @else if (entries.error()) {
+            <p class="muted preview-error">
+                Impossible de charger les livraisons.
+                <button type="button" class="btn btn-outline btn-sm" (click)="entries.reload()">
+                    Réessayer
+                </button>
+            </p>
+        } @else if (deliveries(); as page) {
+            @if (page.total === 0) {
+                <p class="muted no-delivery">Aucune livraison enregistrée pour ce fournisseur.</p>
+                @if (supplier.is_active) {
+                    <div class="actions">
+                        <a
+                            routerLink="/stock-entries"
+                            [queryParams]="{ supplierId: supplier.id, new: 1 }"
+                            class="btn btn-outline"
+                        >
+                            <app-icon name="plus" [size]="18" />
+                            Enregistrer une livraison
+                        </a>
+                    </div>
+                }
+            } @else {
+                <div class="stats">
+                    @for (stat of stats(); track stat.label) {
+                        <div>
+                            <strong>{{ stat.value }}</strong
+                            >&ngsp;<span>{{ stat.label }}</span>
+                        </div>
+                    }
+                </div>
+
+                <ul class="preview">
+                    @for (entry of page.data; track entry.id) {
+                        <li>
+                            <a [routerLink]="['/products', entry.product_id]">
+                                <span class="preview-name">{{ entry.product_name }}</span>
+                                <small class="muted">
+                                    {{
+                                        isToday(entry.date_creation)
+                                            ? "Aujourd'hui, " +
+                                              (entry.date_creation | date: "HH:mm")
+                                            : (entry.date_creation | date: "d MMM y")
+                                    }}
+                                </small>
+                                <strong class="quantity">+{{ entry.quantity }}</strong>
+                                <app-icon name="chevron-right" [size]="16" class="chevron" />
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        }
+
+        <!-- le filtre des entrées ne propose que les fournisseurs actifs -->
+        @if (supplier.is_active && (deliveries()?.total ?? 0) > 0) {
+            <div class="actions">
+                <a
+                    routerLink="/stock-entries"
+                    [queryParams]="{ supplierId: supplier.id }"
+                    class="btn btn-outline"
+                >
+                    <app-icon name="stock-entry" [size]="18" />
+                    @if ((deliveries()?.total ?? 0) > previewSize) {
+                        Voir les {{ deliveries()?.total }} livraisons
+                    } @else {
+                        Voir dans les entrées de stock
+                    }
+                </a>
+            </div>
+        }
+
+        @if (canManage()) {
+            <div class="manage">
+                <button type="button" class="btn btn-sm edit" (click)="editSupplier()">
+                    <app-icon name="edit" [size]="16" />
+                    Modifier
+                </button>
+                <button type="button" class="btn btn-sm danger" (click)="askDelete()">
+                    <app-icon name="trash" [size]="16" />
+                    Supprimer
+                </button>
+            </div>
+        } @else {
+            @if (restoreError()) {
+                <div class="alert alert-error restore-error" role="alert">
+                    {{ restoreError() }}
+                </div>
+            }
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="restoring()"
+                    (click)="restoreSupplier()"
+                >
+                    @if (restoring()) {
+                        <span class="spinner"></span>
+                    } @else {
+                        <app-icon name="undo" [size]="18" />
+                    }
+                    Restaurer le fournisseur
+                </button>
+            </div>
+        }
+    }
+</section>
+
+@if (canManage()) {
+    <app-supplier-form (saved)="supplier.reload()" />
+
+    <dialog
+        #confirmBox
+        class="confirm"
+        aria-labelledby="supplier-delete-title"
+        (click)="onConfirmBackdrop($event)"
+        (cancel)="onConfirmCancel($event)"
+    >
+        <div class="confirm-body">
+            <h2 id="supplier-delete-title">Supprimer ce fournisseur ?</h2>
+            <p class="muted">
+                « {{ data()?.name }} » ne sera plus proposé pour les nouveaux produits et les
+                nouvelles entrées de stock. Ses livraisons passées sont conservées.
+            </p>
+            @if (productCount(); as count) {
+                <p class="linked-products">
+                    {{ count }} produit{{ count > 1 ? "s" : "" }} en vente
+                    {{ count > 1 ? "gardent" : "garde" }} ce fournisseur dans
+                    {{ count > 1 ? "leur" : "sa" }} fiche.
+                </p>
+            }
+
+            @if (deleteError()) {
+                <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+            }
+
+            <div class="confirm-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="deleting()"
+                    (click)="closeConfirm()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    [disabled]="deleting()"
+                    (click)="deleteSupplier()"
+                >
+                    @if (deleting()) {
+                        <span class="spinner"></span>
+                    }
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </dialog>
+}

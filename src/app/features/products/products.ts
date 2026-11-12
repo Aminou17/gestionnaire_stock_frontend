@@ -1,0 +1,333 @@
+import { NgTemplateOutlet } from "@angular/common";
+import { HttpErrorResponse } from "@angular/common/http";
+import {
+    Component,
+    DestroyRef,
+    ElementRef,
+    computed,
+    effect,
+    inject,
+    linkedSignal,
+    signal,
+    viewChild,
+} from "@angular/core";
+import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { map } from "rxjs";
+
+import { AuthService } from "../../core/auth/auth.service";
+import { CategoryService } from "../../core/stock/category.service";
+import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
+import { Product, ProductPage, ProductStatus, StockStatus } from "../../core/stock/product.model";
+import { ProductService } from "../../core/stock/product.service";
+import { SupplierService } from "../../core/stock/supplier.service";
+import { PageHeader } from "../../layout/page-header/page-header";
+import { Icon } from "../../shared/icon/icon";
+import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
+import { ProductForm } from "./product-form/product-form";
+
+const PAGE_SIZE = 20;
+
+const toId = (value: string | null) => {
+    const id = Number(value);
+    return Number.isInteger(id) && id > 0 ? id : null;
+};
+
+const toStockStatus = (value: string | null): StockStatus | null =>
+    value === "OK" || value === "LOW" || value === "OUT_OF_STOCK" ? value : null;
+
+type LoadedPage = ProductPage & { page: number };
+
+@Component({
+    selector: "app-products",
+    imports: [NgTemplateOutlet, RouterLink, PageHeader, Icon, FcfaPipe, ProductForm],
+    templateUrl: "./products.html",
+    styleUrl: "./products.css",
+    host: {
+        "(document:click)": "onDocumentClick($event)",
+        "(document:keydown.escape)": "menuFor.set(null)",
+    },
+})
+export class Products {
+    private productService = inject(ProductService);
+    private categoryService = inject(CategoryService);
+    private supplierService = inject(SupplierService);
+    private stockAlerts = inject(LowStockAlertService);
+    private router = inject(Router);
+    protected auth = inject(AuthService);
+
+    // le formulaire n'existe que pour l'admin
+    private form = viewChild(ProductForm);
+    private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
+    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
+
+    search = signal("");
+    private route = inject(ActivatedRoute);
+
+    // la catégorie filtrée vit dans l'URL (/products?categoryId=3) : lien partageable,
+    // et le retour arrière ou le menu "Produits" remettent le bon filtre
+    categoryId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("categoryId")));
+    // l'état du stock vit aussi dans l'URL : la fiche catégorie y mène directement
+    stockStatus = signal<StockStatus | null>(
+        toStockStatus(this.route.snapshot.queryParamMap.get("stockStatus")),
+    );
+    // arrivée depuis la fiche d'un fournisseur : /products?supplierId=4
+    supplierId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("supplierId")));
+    status = signal<ProductStatus>("active");
+    page = signal(1);
+
+    filtersOpen = signal(false);
+    menuFor = signal<number | null>(null);
+    toDelete = signal<Product | null>(null);
+    deleting = signal(false);
+    deleteError = signal<string | null>(null);
+
+    private searchTimer?: ReturnType<typeof setTimeout>;
+
+    products = rxResource({
+        params: () => ({
+            search: this.search(),
+            categoryId: this.categoryId(),
+            supplierId: this.supplierId(),
+            stockStatus: this.stockStatus(),
+            status: this.status(),
+            page: this.page(),
+            limit: PAGE_SIZE,
+        }),
+        // on garde le numéro de page pour savoir s'il faut remplacer ou ajouter
+        stream: ({ params }) =>
+            this.productService
+                .getProducts(params)
+                .pipe(map((res) => ({ ...res, page: params.page }))),
+    });
+    categories = rxResource({ stream: () => this.categoryService.getCategories() });
+
+    // seul le propriétaire voit les fournisseurs
+    supplier = rxResource({
+        params: () => (this.auth.isAdmin() ? (this.supplierId() ?? undefined) : undefined),
+        stream: ({ params }) => this.supplierService.getSupplier(params),
+    });
+    supplierName = computed(() => (this.supplier.hasValue() ? this.supplier.value()?.name : null));
+
+    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+        source: () => (this.products.hasValue() ? this.products.value() : undefined),
+        computation: (next, previous) => next ?? previous?.value,
+    });
+
+    // produits déjà chargés : la page 1 remplace la liste, les suivantes s'ajoutent au bout
+    list = linkedSignal<LoadedPage | undefined, Product[]>({
+        source: this.last,
+        computation: (res, previous) => {
+            if (!res) return previous?.value ?? [];
+            if (res.page === 1 || !previous) return res.data;
+            return [...previous.value, ...res.data];
+        },
+    });
+
+    total = computed(() => this.last()?.total ?? 0);
+    // les compteurs viennent du résumé du backend, pas de la page chargée
+    counters = computed(() => this.last()?.counters);
+    // catégories supprimées hors du filtre, sauf celle qui est déjà choisie
+    categoryList = computed(() =>
+        (this.categories.hasValue() ? this.categories.value() : []).filter(
+            (c) => c.is_active || c.id === this.categoryId(),
+        ),
+    );
+    firstLoad = computed(() => this.products.isLoading() && !this.last());
+    hasMore = computed(() => this.list().length < this.total());
+    loadingMore = computed(() => this.products.isLoading() && this.page() > 1);
+
+    tabs = computed(() => {
+        const counters = this.counters();
+        return [
+            {
+                label: "Tous les produits",
+                short: "Tous",
+                value: null,
+                count: counters?.total_products,
+                tone: "primary",
+            },
+            {
+                label: "En stock",
+                short: "En stock",
+                value: "OK",
+                count: counters?.in_stock,
+                tone: "success",
+            },
+            {
+                label: "Stock faible",
+                short: "Stock faible",
+                value: "LOW",
+                count: counters?.low_stock,
+                tone: "warning",
+            },
+            {
+                label: "Rupture",
+                short: "Rupture",
+                value: "OUT_OF_STOCK",
+                count: counters?.out_of_stock,
+                tone: "danger",
+            },
+        ] as const;
+    });
+
+    constructor() {
+        const destroyRef = inject(DestroyRef);
+        destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
+
+        // Suivre la catégorie et l'état du stock de l'URL
+        this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+            const categoryId = toId(params.get("categoryId"));
+            const supplierId = toId(params.get("supplierId"));
+            const stockStatus = toStockStatus(params.get("stockStatus"));
+            if (
+                categoryId === this.categoryId() &&
+                supplierId === this.supplierId() &&
+                stockStatus === this.stockStatus()
+            ) {
+                return;
+            }
+            this.categoryId.set(categoryId);
+            this.supplierId.set(supplierId);
+            this.stockStatus.set(stockStatus);
+            this.page.set(1);
+        });
+
+        // Charger la page suivante quand le bas de la liste devient visible
+        // (recréé à chaque ajout : si le bas est encore visible, on enchaîne la page suivante)
+        effect((onCleanup) => {
+            this.list();
+            const sentinel = this.sentinel()?.nativeElement;
+            if (!sentinel) return;
+
+            const observer = new IntersectionObserver(
+                ([entry]) => {
+                    if (entry.isIntersecting && this.hasMore() && !this.products.isLoading()) {
+                        this.page.update((page) => page + 1);
+                    }
+                },
+                { rootMargin: "200px" },
+            );
+            observer.observe(sentinel);
+            onCleanup(() => observer.disconnect());
+        });
+    }
+
+    onSearch(value: string) {
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => {
+            this.search.set(value);
+            this.page.set(1);
+        }, 300);
+    }
+
+    selectStock(value: StockStatus | null) {
+        this.stockStatus.set(value);
+        this.page.set(1);
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { stockStatus: value },
+            queryParamsHandling: "merge",
+            replaceUrl: true,
+        });
+    }
+
+    selectCategory(value: string) {
+        this.categoryId.set(toId(value));
+        this.page.set(1);
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { categoryId: this.categoryId() },
+            queryParamsHandling: "merge",
+            replaceUrl: true,
+        });
+    }
+
+    clearSupplier() {
+        this.supplierId.set(null);
+        this.page.set(1);
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { supplierId: null },
+            queryParamsHandling: "merge",
+            replaceUrl: true,
+        });
+    }
+
+    selectStatus(value: string) {
+        this.status.set(value as ProductStatus);
+        this.page.set(1);
+    }
+
+    openProduct(product: Product) {
+        this.menuFor.set(null);
+        this.router.navigate(["/products", product.id]);
+    }
+
+    toggleMenu(id: number) {
+        this.menuFor.set(this.menuFor() === id ? null : id);
+    }
+
+    onDocumentClick(event: Event) {
+        const target = event.target as HTMLElement;
+        if (!target.closest(".row-menu")) {
+            this.menuFor.set(null);
+        }
+    }
+
+    newProduct() {
+        this.form()?.openNew();
+    }
+
+    editProduct(product: Product) {
+        this.menuFor.set(null);
+        this.form()?.openEdit(product.id);
+    }
+
+    askDelete(product: Product) {
+        this.menuFor.set(null);
+        this.toDelete.set(product);
+        this.deleteError.set(null);
+        this.confirmDialog().nativeElement.showModal();
+    }
+
+    closeConfirm() {
+        this.confirmDialog().nativeElement.close();
+    }
+
+    onConfirmBackdrop(event: MouseEvent) {
+        if (event.target === this.confirmDialog().nativeElement) {
+            this.closeConfirm();
+        }
+    }
+
+    deleteProduct() {
+        const product = this.toDelete();
+        if (!product) return;
+
+        this.deleting.set(true);
+        this.deleteError.set(null);
+
+        this.productService.deleteProduct(product.id).subscribe({
+            next: () => {
+                this.deleting.set(false);
+                this.closeConfirm();
+                this.refresh();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.deleting.set(false);
+                this.deleteError.set(err.error?.message ?? "Impossible de supprimer le produit.");
+            },
+        });
+    }
+
+    refresh() {
+        if (this.page() === 1) {
+            this.products.reload();
+        } else {
+            this.page.set(1);
+        }
+        this.stockAlerts.alerts.reload();
+    }
+}

@@ -1,0 +1,232 @@
+<app-page-header title="Fournisseurs" section="Stock">
+    <button type="button" class="btn btn-primary new-supplier" (click)="newSupplier()">
+        <app-icon name="plus" [size]="18" />
+        <span>Nouveau fournisseur</span>
+    </button>
+</app-page-header>
+
+<section class="card list-card">
+    <div class="toolbar">
+        <label class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Rechercher un fournisseur…"
+                aria-label="Rechercher un fournisseur"
+                [value]="search()"
+                (input)="search.set($any($event.target).value)"
+            />
+        </label>
+
+        <div class="chips" role="group" aria-label="Afficher">
+            <button
+                type="button"
+                class="chip"
+                [class.selected]="view() === 'active'"
+                [attr.aria-pressed]="view() === 'active'"
+                (click)="selectView('active')"
+            >
+                Actifs <span>{{ activeCount() }}</span>
+            </button>
+            <button
+                type="button"
+                class="chip"
+                [class.selected]="view() === 'deleted'"
+                [attr.aria-pressed]="view() === 'deleted'"
+                (click)="selectView('deleted')"
+            >
+                Supprimés <span>{{ deletedCount() }}</span>
+            </button>
+        </div>
+    </div>
+
+    @if (suppliers.isLoading() && all().length === 0) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (suppliers.error() && all().length === 0) {
+        <div class="empty">
+            Impossible de charger les fournisseurs.
+            <button type="button" class="btn btn-outline btn-sm" (click)="suppliers.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty">
+            @if (search()) {
+                Aucun fournisseur ne correspond à « {{ search() }} ».
+                <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
+                    Effacer la recherche
+                </button>
+            } @else if (view() === "deleted") {
+                Aucun fournisseur supprimé.
+            } @else {
+                Aucun fournisseur pour le moment.
+                <button type="button" class="btn btn-outline btn-sm" (click)="newSupplier()">
+                    Ajouter un fournisseur
+                </button>
+            }
+        </div>
+    } @else {
+        <!-- erreur au rechargement : la liste déjà affichée reste visible -->
+        @if (suppliers.error()) {
+            <div class="alert alert-error list-error" role="alert">
+                Impossible de recharger les fournisseurs.
+                <button type="button" class="btn btn-outline btn-sm" (click)="suppliers.reload()">
+                    Réessayer
+                </button>
+            </div>
+        }
+        @if (restoreError()) {
+            <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>
+        }
+        <ul class="rows" [class.reloading]="suppliers.isLoading()">
+            @for (supplier of list(); track supplier.id) {
+                <li
+                    class="row"
+                    [class.inactive]="!supplier.is_active"
+                    (click)="openSupplier(supplier)"
+                >
+                    <span class="icon"><app-icon name="truck" [size]="18" /></span>
+
+                    <div class="text">
+                        <button
+                            type="button"
+                            class="name"
+                            [attr.aria-label]="'Voir la fiche de ' + supplier.name"
+                        >
+                            {{ supplier.name }}
+                        </button>
+                        <small class="muted">
+                            @if (supplier.contact || supplier.telephone) {
+                                {{ supplier.contact }}
+                                @if (supplier.contact && supplier.telephone) {
+                                    ·
+                                }
+                                @if (supplier.telephone) {
+                                    <span class="phone-number">{{
+                                        formatPhone(supplier.telephone)
+                                    }}</span>
+                                }
+                            } @else if (supplier.email) {
+                                {{ supplier.email }}
+                            } @else {
+                                Aucun contact
+                            }
+                        </small>
+                    </div>
+
+                    @if (!supplier.is_active) {
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm restore-btn"
+                            [disabled]="restoringId() !== null"
+                            [attr.aria-label]="'Restaurer ' + supplier.name"
+                            (click)="$event.stopPropagation(); restoreSupplier(supplier)"
+                        >
+                            @if (restoringId() === supplier.id) {
+                                <span class="spinner"></span>
+                            } @else {
+                                <app-icon name="undo" [size]="16" />
+                            }
+                            Restaurer
+                        </button>
+                    } @else {
+                        <div class="row-menu" (click)="$event.stopPropagation()">
+                            <button
+                                type="button"
+                                class="more-btn"
+                                aria-haspopup="menu"
+                                [attr.aria-expanded]="menuFor() === supplier.id"
+                                [attr.aria-label]="'Actions pour ' + supplier.name"
+                                (click)="toggleMenu(supplier.id)"
+                            >
+                                <app-icon name="more" />
+                            </button>
+                            @if (menuFor() === supplier.id) {
+                                <div class="menu" role="menu">
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        (click)="editSupplier(supplier)"
+                                    >
+                                        <app-icon name="edit" [size]="16" />
+                                        Modifier
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        class="danger"
+                                        (click)="askDelete(supplier)"
+                                    >
+                                        <app-icon name="trash" [size]="16" />
+                                        Supprimer
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+<button type="button" class="fab" (click)="newSupplier()" aria-label="Nouveau fournisseur">
+    <app-icon name="plus" [size]="24" />
+</button>
+
+<app-supplier-form (saved)="onSaved()" />
+
+<dialog
+    #confirmBox
+    class="confirm"
+    aria-labelledby="supplier-delete-title"
+    (click)="onConfirmBackdrop($event)"
+    (cancel)="onConfirmCancel($event)"
+>
+    <div class="confirm-body">
+        <h2 id="supplier-delete-title">Supprimer ce fournisseur ?</h2>
+        <p class="muted">
+            « {{ toDelete()?.name }} » ne sera plus proposé pour les nouveaux produits et les
+            nouvelles entrées de stock. Ses livraisons passées sont conservées.
+        </p>
+        @if (toDelete()?.product_count; as count) {
+            <p class="linked-products">
+                {{ count }} produit{{ count > 1 ? "s" : "" }} en vente
+                {{ count > 1 ? "gardent" : "garde" }} ce fournisseur dans
+                {{ count > 1 ? "leur" : "sa" }}
+                fiche.
+            </p>
+        }
+
+        @if (deleteError()) {
+            <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="deleting()"
+                (click)="closeConfirm()"
+            >
+                Annuler
+            </button>
+            <button
+                type="button"
+                class="btn btn-danger"
+                [disabled]="deleting()"
+                (click)="deleteSupplier()"
+            >
+                @if (deleting()) {
+                    <span class="spinner"></span>
+                }
+                Supprimer
+            </button>
+        </div>
+    </div>
+</dialog>

@@ -1,0 +1,74 @@
+<app-page-header
+    title="Caisse"
+    subtitle="Règles de clôture de la caisse"
+    section="Paramètres"
+    back="/settings"
+    backLabel="Retour aux paramètres"
+/>
+
+<form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="section-head">
+        <span class="section-icon"><app-icon name="banknote" [size]="20" /></span>
+        <div>
+            <h2>Clôture de la caisse</h2>
+            <p class="muted">
+                Règles appliquées quand le gérant ferme la caisse en fin de journée.
+            </p>
+        </div>
+    </div>
+
+    @if (settings.isLoading() && !settings.hasValue()) {
+        <div class="skeleton field-skeleton"></div>
+    } @else if (settings.error() && !settings.hasValue()) {
+        <div class="alert alert-error load-error" role="alert">
+            Impossible de charger les réglages de la caisse.
+            <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <label class="toggle">
+            <input type="checkbox" formControlName="blindClose" />
+            <span class="toggle-text">
+                <strong>Clôture à l'aveugle</strong>
+                <small class="muted">
+                    Le gérant compte le tiroir sans voir le fond de caisse ni le solde attendu.
+                    L'écart lui est montré après la clôture, et il doit l'expliquer. Vous voyez
+                    toujours tous les montants.
+                </small>
+            </span>
+        </label>
+
+        @if (message(); as message) {
+            <div
+                class="alert"
+                [class.alert-success]="message.ok"
+                [class.alert-error]="!message.ok"
+                [attr.role]="message.ok ? 'status' : 'alert'"
+            >
+                {{ message.text }}
+            </div>
+        }
+
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="saving() || form.pristine"
+                (click)="cancel()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving() || form.pristine">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer
+            </button>
+        </div>
+
+        <app-settings-history [actions]="['CASH_SETTINGS_UPDATED']" [version]="saveCount()" />
+    }
+</form>
+
+<app-unsaved-dialog />

@@ -1,0 +1,337 @@
+:host {
+    display: grid;
+    gap: 12px;
+}
+
+/* l'en-tête garde toute la largeur, seule la fiche est limitée (comme une vente) */
+.sheet {
+    width: 100%;
+    max-width: 720px;
+    padding: 4px 20px 20px;
+}
+
+dl {
+    display: grid;
+    margin: 0;
+}
+
+dl > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 52px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* description : le texte passe sous l'intitulé, il peut être long */
+dl > div.block {
+    display: grid;
+    gap: 6px;
+    padding: 14px 0;
+}
+
+.block dd {
+    text-align: left;
+    line-height: 1.5;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+dt {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+dd {
+    margin: 0;
+    font-size: 14px;
+    text-align: right;
+}
+
+.strong {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* modifier / supprimer : actions secondaires, sous les actions principales */
+.manage {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.manage .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 40px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+}
+
+.manage .btn:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.manage .edit {
+    color: var(--primary-text);
+}
+
+.manage .danger {
+    color: var(--danger);
+}
+
+.manage .danger:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+/* téléphone et email : un toucher suffit pour appeler ou écrire */
+.contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    color: var(--primary-text);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.phone {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    column-gap: 12px;
+}
+
+.whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    color: var(--primary-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary-text);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.products-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.products-line p {
+    margin: 0;
+}
+
+.restore-error {
+    margin-top: 16px;
+}
+
+.confirm p.linked-products {
+    color: var(--text);
+    font-weight: 500;
+}
+
+/* totaux des livraisons */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 8px 0 4px;
+}
+
+.stats div {
+    display: grid;
+    gap: 2px;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--surface-hover);
+}
+
+.stats strong {
+    font-size: 18px;
+}
+
+.stats span {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.no-delivery {
+    margin: 8px 0 0;
+    font-size: 14px;
+}
+
+.section-title {
+    margin: 20px 0 4px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+/* dernières livraisons : produit, date, quantité reçue */
+.preview {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.preview a {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+}
+
+.preview a:hover .preview-name {
+    color: var(--primary);
+}
+
+.preview-name {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.preview .quantity {
+    color: var(--success);
+}
+
+.preview strong {
+    min-width: 28px;
+    font-size: 14px;
+    text-align: right;
+}
+
+.preview .chevron {
+    color: var(--text-muted);
+}
+
+.preview-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.row-skeleton {
+    height: 36px;
+    margin: 10px 0;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 32px 0;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.confirm {
+    width: min(420px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.confirm::backdrop {
+    background: var(--overlay);
+}
+
+.confirm-body {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.confirm h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.confirm p {
+    margin: -8px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 767px) {
+    .sheet {
+        padding: 4px 16px 16px;
+    }
+
+    /* action principale en haut, pleine largeur, facile à toucher */
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions .btn {
+        width: 100%;
+    }
+
+    .manage {
+        justify-content: stretch;
+    }
+
+    .manage .btn {
+        flex: 1;
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}

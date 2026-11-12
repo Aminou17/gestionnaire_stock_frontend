@@ -1,0 +1,362 @@
+<app-page-header
+    [title]="data()?.name ?? 'Catégorie'"
+    section="Stock"
+    back="/categories"
+    backLabel="Retour aux catégories"
+/>
+
+<section class="card sheet">
+    @if (category.isLoading() && !data()) {
+        @for (i of [1, 2, 3, 4]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (!data() && (category.error() || notFound())) {
+        <div class="empty">
+            @if (notFound()) {
+                Cette catégorie est introuvable.
+                <a routerLink="/categories" class="btn btn-outline btn-sm">Retour aux catégories</a>
+            } @else {
+                Impossible de charger la catégorie.
+                <button type="button" class="btn btn-outline btn-sm" (click)="category.reload()">
+                    Réessayer
+                </button>
+            }
+        </div>
+    } @else if (data(); as category) {
+        <dl>
+            @if (!category.is_active) {
+                <div>
+                    <dt>Statut</dt>
+                    <dd><span class="badge badge-neutral">Supprimée</span></dd>
+                </div>
+            }
+            <div class="block">
+                <dt>Description</dt>
+                <dd>
+                    @if (category.description) {
+                        {{ category.description }}
+                    } @else if (canManage()) {
+                        <button type="button" class="link-btn" (click)="editCategory(true)">
+                            <app-icon name="plus" [size]="16" />
+                            Ajouter une description
+                        </button>
+                    } @else {
+                        <span class="muted">Aucune description</span>
+                    }
+                </dd>
+            </div>
+            <!-- catégorie créée avant que la date soit enregistrée : la ligne n'apprendrait rien -->
+            @if (category.created_at) {
+                <div>
+                    <dt>Créée le</dt>
+                    <dd>{{ category.created_at | date: "d MMMM y 'à' HH:mm" }}</dd>
+                </div>
+            }
+            <div>
+                <dt>Produits</dt>
+                <dd class="strong">
+                    @if (category.product_count > 0 && category.is_active) {
+                        <a
+                            routerLink="/products"
+                            [queryParams]="{ categoryId: category.id }"
+                            class="count-link"
+                            [attr.aria-label]="'Voir les ' + category.product_count + ' produits'"
+                        >
+                            {{ category.product_count }}
+                            <app-icon name="chevron-right" [size]="16" />
+                        </a>
+                    } @else {
+                        {{ category.product_count }}
+                    }
+                </dd>
+            </div>
+            @if (category.product_count > 0) {
+                <div>
+                    <dt>Articles en stock</dt>
+                    <dd class="strong">{{ category.total_stock }}</dd>
+                </div>
+                <div>
+                    <dt>État du stock</dt>
+                    <dd class="stock-state">
+                        @if (stockAlerts() === 0) {
+                            <span class="badge badge-success">Tout est en stock</span>
+                        }
+                        @if (category.out_of_stock_count > 0) {
+                            <a
+                                class="badge badge-danger"
+                                routerLink="/products"
+                                [queryParams]="{
+                                    categoryId: category.id,
+                                    stockStatus: 'OUT_OF_STOCK',
+                                }"
+                            >
+                                {{ category.out_of_stock_count }} en rupture
+                            </a>
+                        }
+                        @if (category.low_stock_count > 0) {
+                            <a
+                                class="badge badge-warning"
+                                routerLink="/products"
+                                [queryParams]="{ categoryId: category.id, stockStatus: 'LOW' }"
+                            >
+                                {{ category.low_stock_count }} stock faible
+                            </a>
+                        }
+                    </dd>
+                </div>
+            }
+            <!-- prix d'achat et journal d'audit : réservés à l'admin (le backend ne les envoie qu'à lui) -->
+            @if (category.stock_value !== undefined && category.product_count > 0) {
+                <div>
+                    <dt>Valeur du stock <small class="muted">(prix d'achat)</small></dt>
+                    <dd class="strong">{{ category.stock_value | fcfa }}</dd>
+                </div>
+            }
+            @if (category.last_change; as change) {
+                <div>
+                    <dt>{{ changeLabel() }} le</dt>
+                    <dd>
+                        {{ change.at | date: "d MMM y 'à' HH:mm" }}
+                        @if (change.user_name) {
+                            <small class="muted">par {{ change.user_name }}</small>
+                        }
+                    </dd>
+                </div>
+            }
+        </dl>
+
+        <!-- aperçu des premiers produits : la fiche montre ce que contient la catégorie -->
+        @if (category.is_active && category.product_count > 0) {
+            <h2 class="section-title">Produits</h2>
+            @if (products.isLoading() && preview().length === 0) {
+                @for (i of [1, 2]; track i) {
+                    <div class="skeleton row-skeleton"></div>
+                }
+            } @else if (products.error()) {
+                <p class="muted preview-error">
+                    Impossible de charger les produits.
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="products.reload()"
+                    >
+                        Réessayer
+                    </button>
+                </p>
+            } @else {
+                <ul class="preview">
+                    @for (product of preview(); track product.id) {
+                        <li>
+                            <a [routerLink]="['/products', product.id]">
+                                <span class="preview-name">{{ product.name }}</span>
+                                <small class="muted">{{ product.sale_price | fcfa }}</small>
+                                <strong class="stock-{{ product.stock_status }}">
+                                    {{ product.theoretical_stock }}
+                                </strong>
+                                <app-icon name="chevron-right" [size]="16" class="chevron" />
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        }
+
+        @if (category.is_active) {
+            <div class="actions">
+                @if (category.product_count > 0) {
+                    <a
+                        routerLink="/products"
+                        [queryParams]="{ categoryId: category.id }"
+                        class="btn"
+                        [class.btn-primary]="!canManage()"
+                        [class.btn-outline]="canManage()"
+                    >
+                        <app-icon name="package" [size]="18" />
+                        @if (category.product_count > preview().length && preview().length > 0) {
+                            Voir les {{ category.product_count }} produits
+                        } @else {
+                            Voir les produits
+                        }
+                    </a>
+                }
+                @if (canManage()) {
+                    <button type="button" class="btn btn-primary" (click)="addProduct()">
+                        <app-icon name="plus" [size]="18" />
+                        Ajouter un produit
+                    </button>
+                }
+            </div>
+        }
+
+        @if (canManage()) {
+            <div class="manage">
+                <button type="button" class="btn btn-sm" (click)="editCategory()">
+                    <app-icon name="edit" [size]="16" />
+                    Modifier
+                </button>
+                <button type="button" class="btn btn-sm danger" (click)="askDelete()">
+                    <app-icon name="trash" [size]="16" />
+                    Supprimer
+                </button>
+            </div>
+        }
+
+        @if (canRestore()) {
+            @if (restoreError()) {
+                <div class="alert alert-error restore-error" role="alert">
+                    {{ restoreError() }}
+                </div>
+            }
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="restoring()"
+                    (click)="restoreCategory()"
+                >
+                    @if (restoring()) {
+                        <span class="spinner"></span>
+                    } @else {
+                        <app-icon name="undo" [size]="18" />
+                    }
+                    Restaurer la catégorie
+                </button>
+            </div>
+        }
+    }
+</section>
+
+@if (canManage()) {
+    <!-- le produit créé ici change le nombre de produits de la catégorie -->
+    <app-product-form (saved)="category.reload()" />
+
+    <dialog
+        #formBox
+        class="confirm"
+        aria-labelledby="category-form-title"
+        (click)="onFormBackdrop($event)"
+        (cancel)="onDialogCancel($event)"
+    >
+        <form class="confirm-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <h2 id="category-form-title">Modifier la catégorie</h2>
+
+            <label class="field">
+                <span>Nom de la catégorie</span>
+                <input
+                    #nameInput
+                    class="input"
+                    type="text"
+                    formControlName="name"
+                    maxlength="100"
+                    autocomplete="off"
+                    [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
+                    [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+                />
+                @if (form.controls.name.touched && form.controls.name.invalid) {
+                    <small class="field-error" role="alert">Le nom est obligatoire.</small>
+                }
+            </label>
+
+            <label class="field">
+                <span>Description <small class="muted">(facultative)</small></span>
+                <textarea
+                    #descriptionInput
+                    class="input"
+                    rows="3"
+                    formControlName="description"
+                    maxlength="500"
+                    placeholder="Ex. Bazins riches teints à la main, toutes couleurs"
+                ></textarea>
+            </label>
+
+            @if (formError()) {
+                <div class="alert alert-error" role="alert">{{ formError() }}</div>
+            }
+
+            <div class="confirm-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="saving()"
+                    (click)="closeForm()"
+                >
+                    Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                    @if (saving()) {
+                        <span class="spinner"></span>
+                    }
+                    Enregistrer
+                </button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog
+        #confirmBox
+        class="confirm"
+        aria-labelledby="category-delete-title"
+        (click)="onConfirmBackdrop($event)"
+        (cancel)="onDialogCancel($event)"
+    >
+        <div class="confirm-body">
+            <h2 id="category-delete-title">
+                @if (deleteBlocked()) {
+                    Impossible de supprimer « {{ data()?.name }} »
+                } @else {
+                    Supprimer cette catégorie ?
+                }
+            </h2>
+
+            @if (deleteBlocked()) {
+                <!-- le backend refuserait : on l'explique tout de suite -->
+                <p class="muted">
+                    « {{ data()?.name }} » contient {{ data()?.product_count }} produit{{
+                        (data()?.product_count ?? 0) > 1 ? "s" : ""
+                    }}. Changez-{{ (data()?.product_count ?? 0) > 1 ? "les" : "le" }} de catégorie
+                    avant de la supprimer.
+                </p>
+            } @else {
+                <p class="muted">
+                    « {{ data()?.name }} » ne sera plus proposée pour les nouveaux produits. Son
+                    historique est conservé.
+                </p>
+            }
+
+            @if (deleteError()) {
+                <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+            }
+
+            <div class="confirm-actions">
+                @if (deleteBlocked()) {
+                    <button type="button" class="btn btn-outline" (click)="closeConfirm()">
+                        Fermer
+                    </button>
+                    <button type="button" class="btn btn-primary" (click)="showProducts()">
+                        Voir les produits
+                    </button>
+                } @else {
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        [disabled]="deleting()"
+                        (click)="closeConfirm()"
+                    >
+                        Annuler
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        [disabled]="deleting()"
+                        (click)="deleteCategory()"
+                    >
+                        @if (deleting()) {
+                            <span class="spinner"></span>
+                        }
+                        Supprimer
+                    </button>
+                }
+            </div>
+        </div>
+    </dialog>
+}
