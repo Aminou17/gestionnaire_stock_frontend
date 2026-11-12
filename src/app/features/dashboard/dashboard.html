@@ -4,6 +4,7 @@
         <a
             routerLink="/sales/new"
             class="btn btn-primary new-sale"
+            aria-label="Nouvelle vente"
             [class.disabled]="!cashOpen()"
             [attr.aria-disabled]="!cashOpen()"
             [attr.tabindex]="cashOpen() ? null : -1"
