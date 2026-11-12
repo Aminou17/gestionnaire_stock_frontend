@@ -1,7 +1,8 @@
 import { CashMovement } from "./cash.model";
 import { getReasonLabel } from "./cash-reasons";
 
-export const isRefund = (movement: CashMovement) => movement.reference_type === "SALE_CANCELLATION";
+export const isRefund = (movement: CashMovement) =>
+    ["SALE_CANCELLATION", "SALE_RETURN"].includes(movement.reference_type ?? "");
 
 // les ventes et les dépôts entrent dans le tiroir, le reste en sort
 export const isIncome = (movement: CashMovement) =>

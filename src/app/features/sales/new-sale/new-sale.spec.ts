@@ -245,7 +245,7 @@ describe("NewSale", () => {
         await render();
         await add(0);
 
-        const received = el.querySelector<HTMLInputElement>(".payment input")!;
+        const received = el.querySelector<HTMLInputElement>("input[placeholder='Ex. 10 000']")!;
         received.value = "5000";
         received.dispatchEvent(new Event("input"));
         await fixture.whenStable();
@@ -262,7 +262,7 @@ describe("NewSale", () => {
         await render();
         await add(0);
 
-        const received = el.querySelector<HTMLInputElement>(".payment input")!;
+        const received = el.querySelector<HTMLInputElement>("input[placeholder='Ex. 10 000']")!;
         received.value = "1000";
         received.dispatchEvent(new Event("input"));
         await fixture.whenStable();
@@ -276,31 +276,97 @@ describe("NewSale", () => {
         await add(0);
 
         const chips = [...el.querySelectorAll<HTMLButtonElement>(".chip")];
-        expect(chips[0].textContent).toContain("Compte juste");
+        expect(chips[0].textContent).toContain("Montant exact");
         chips[1].click();
         await fixture.whenStable();
 
         expect(el.querySelector(".change")).not.toBeNull();
     });
 
-    it("should send a mobile money payment with its reference", async () => {
+    it("should send a mobile money payment without any reference", async () => {
         await render();
         await add(0);
 
         [...el.querySelectorAll<HTMLButtonElement>(".method")][1].click();
         await fixture.whenStable();
-        // la référence est obligatoire
-        expect(submitBtn().disabled).toBe(true);
-        const reference = el.querySelector<HTMLInputElement>(".payment input")!;
-        reference.value = " PP123 ";
-        reference.dispatchEvent(new Event("input"));
-        await fixture.whenStable();
+        expect(el.querySelector("input[placeholder^='Ex. PP']")).toBeNull();
+        expect(submitBtn().disabled).toBe(false);
 
-        expect(text()).toContain("n'entre pas dans le tiroir-caisse");
+        expect(text()).not.toContain("tiroir-caisse");
         submitBtn().click();
         expect(createSale).toHaveBeenCalledWith([{ productId: 3, quantity: 1 }], {
             paymentMethod: "MOBILE_MONEY",
-            paymentReference: "PP123",
+        });
+    });
+
+    const type = async (selector: string, value: string) => {
+        const input = el.querySelector<HTMLInputElement>(selector)!;
+        input.value = value;
+        input.dispatchEvent(new Event("input"));
+        await fixture.whenStable();
+    };
+
+    it("should require a customer for a deposit", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder^='Tout payer']", "500");
+
+        expect(text()).toContain("Indiquez le nom ou le téléphone du client");
+        expect(submitBtn().disabled).toBe(true);
+    });
+
+    it("should send a deposit with the customer and show the remaining amount", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder='Nom du client']", " Fatou Ndiaye ");
+        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder^='Tout payer']", "500");
+
+        expect(text()).toContain("Reste à payer plus tard");
+        submitBtn().click();
+        expect(createSale).toHaveBeenCalledWith(
+            [{ productId: 3, quantity: 1 }],
+            expect.objectContaining({
+                paymentMethod: "CASH",
+                amountPaid: 500,
+                amountReceived: 500,
+                customerName: "Fatou Ndiaye",
+            }),
+        );
+    });
+
+    it("should refuse a deposit above the total", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder^='Tout payer']", "999999");
+
+        expect(text()).toContain("L'acompte dépasse le total");
+        expect(submitBtn().disabled).toBe(true);
+    });
+
+    it("should send a second payment for a mixed payment", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
+        await fixture.whenStable();
+        el.querySelector<HTMLButtonElement>(".option-split")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder='Ex. 5000']", "1000");
+
+        expect(text()).toContain("Reste en mobile money");
+        submitBtn().click();
+        const payment = createSale.mock.calls[0][1];
+        expect(payment.amountPaid).toBe(1000);
+        expect(payment.secondPayment).toEqual({
+            paymentMethod: "MOBILE_MONEY",
+            amountPaid: payment.secondPayment.amountPaid,
         });
     });
 });

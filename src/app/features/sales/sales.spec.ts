@@ -15,6 +15,7 @@ const sale = (id: number, status: Sale["status"] = "ACTIVE"): Sale => ({
     user_name: "Awa K.",
     user_role: "manager",
     total: 3000,
+    paid_amount: 3000,
     status,
     items_count: 2,
     created_at: "2026-11-02T10:15:00",
@@ -90,12 +91,27 @@ describe("Sales", () => {
 
     it("should filter by status from page 1", async () => {
         await render();
-        el.querySelectorAll<HTMLButtonElement>(".stat")[1].click();
+        el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
         await fixture.whenStable();
 
         expect(getSalesPage).toHaveBeenLastCalledWith(
             expect.objectContaining({ status: "CANCELLED", page: 1 }),
         );
+    });
+
+    it("should ask only for unpaid sales from the 'À solder' card", async () => {
+        await render();
+        el.querySelectorAll<HTMLButtonElement>(".stat")[1].click();
+        await fixture.whenStable();
+
+        expect(getSalesPage).toHaveBeenLastCalledWith(
+            expect.objectContaining({ unpaid: true, status: null, page: 1 }),
+        );
+    });
+
+    it("should show the remaining amount of a sale with a deposit", async () => {
+        await render(true, [{ ...sale(7), paid_amount: 1000 }]);
+        expect(text()).toContain("Reste");
     });
 
     it("should send today's dates when the period is today", async () => {
@@ -108,6 +124,43 @@ describe("Sales", () => {
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(filters.from).toBe(filters.to);
+    });
+
+    it("should send the payment method chosen in the filter", async () => {
+        await render();
+        const select = el.querySelector<HTMLSelectElement>(".filter select")!;
+        select.value = "MOBILE_MONEY";
+        select.dispatchEvent(new Event("change"));
+        await fixture.whenStable();
+
+        const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
+        expect(filters.paymentMethod).toBe("MOBILE_MONEY");
+        expect(filters.page).toBe(1);
+    });
+
+    it("should send the search text after a short delay", async () => {
+        await render();
+        const input = el.querySelector<HTMLInputElement>(".search input")!;
+        input.value = "#12";
+        input.dispatchEvent(new Event("input"));
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        await fixture.whenStable();
+
+        const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
+        expect(filters.search).toBe("#12");
+    });
+
+    it("should offer the export to an admin only", async () => {
+        await render();
+        expect(el.querySelector(".export")).not.toBeNull();
+        TestBed.resetTestingModule();
+        await render(false);
+        expect(el.querySelector(".export")).toBeNull();
+    });
+
+    it("should not offer the seller filter to a manager", async () => {
+        await render(false);
+        expect(el.querySelectorAll(".filter").length).toBe(1);
     });
 
     it("should invite to make a sale when there is none", async () => {

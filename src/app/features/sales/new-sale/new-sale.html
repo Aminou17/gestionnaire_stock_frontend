@@ -216,30 +216,121 @@
             </div>
 
             @if (cart().length > 0) {
+                <div class="options" role="group" aria-label="Options de la vente">
+                    <button
+                        type="button"
+                        class="option add-customer"
+                        [class.on]="showCustomer()"
+                        [attr.aria-pressed]="showCustomer()"
+                        (click)="toggleCustomer()"
+                    >
+                        Client
+                    </button>
+                    <button
+                        type="button"
+                        class="option option-deposit"
+                        [class.on]="showDeposit()"
+                        [attr.aria-pressed]="showDeposit()"
+                        (click)="toggleDeposit()"
+                    >
+                        Acompte
+                    </button>
+                    <button
+                        type="button"
+                        class="option option-split"
+                        [class.on]="split()"
+                        [attr.aria-pressed]="split()"
+                        (click)="toggleSplit()"
+                    >
+                        Paiement mixte
+                    </button>
+                </div>
+
+                @if (showCustomer()) {
+                    <div class="payment" role="group" aria-labelledby="customer-title">
+                        <span id="customer-title" class="payment-title"
+                            >Client <small class="muted">(facultatif)</small></span
+                        >
+                        <div class="customer">
+                            <input
+                                class="input"
+                                type="text"
+                                maxlength="100"
+                                autocomplete="off"
+                                placeholder="Nom du client"
+                                aria-label="Nom du client"
+                                [value]="customerName()"
+                                (input)="customerName.set($any($event.target).value)"
+                            />
+                            <input
+                                class="input"
+                                type="tel"
+                                maxlength="30"
+                                autocomplete="off"
+                                placeholder="Téléphone"
+                                aria-label="Téléphone du client"
+                                [value]="customerPhone()"
+                                (input)="customerPhone.set($any($event.target).value)"
+                            />
+                        </div>
+                    </div>
+                }
+
                 <div class="payment" role="group" aria-labelledby="payment-title">
                     <span id="payment-title" class="payment-title">Paiement</span>
-                    <div class="methods">
-                        <button
-                            type="button"
-                            class="method"
-                            [class.active]="paymentMethod() === 'CASH'"
-                            [attr.aria-pressed]="paymentMethod() === 'CASH'"
-                            (click)="selectPayment('CASH')"
-                        >
-                            <app-icon name="banknote" [size]="18" />
-                            Espèces
-                        </button>
-                        <button
-                            type="button"
-                            class="method"
-                            [class.active]="paymentMethod() === 'MOBILE_MONEY'"
-                            [attr.aria-pressed]="paymentMethod() === 'MOBILE_MONEY'"
-                            (click)="selectPayment('MOBILE_MONEY')"
-                        >
-                            <app-icon name="phone" [size]="18" />
-                            Mobile money
-                        </button>
-                    </div>
+
+                    @if (!split()) {
+                        <div class="methods">
+                            <button
+                                type="button"
+                                class="method"
+                                [class.active]="paymentMethod() === 'CASH'"
+                                [attr.aria-pressed]="paymentMethod() === 'CASH'"
+                                (click)="selectPayment('CASH')"
+                            >
+                                <app-icon name="banknote" [size]="18" />
+                                Espèces
+                            </button>
+                            <button
+                                type="button"
+                                class="method"
+                                [class.active]="paymentMethod() === 'MOBILE_MONEY'"
+                                [attr.aria-pressed]="paymentMethod() === 'MOBILE_MONEY'"
+                                (click)="selectPayment('MOBILE_MONEY')"
+                            >
+                                <app-icon name="phone" [size]="18" />
+                                Mobile money
+                            </button>
+                        </div>
+                    }
+
+                    @if (showDeposit() || split()) {
+                        <label class="field">
+                            <span>
+                                {{ split() ? "Part payée en espèces" : "Montant payé maintenant" }}
+                            </span>
+                            <input
+                                #depositInput
+                                class="input"
+                                type="number"
+                                inputmode="numeric"
+                                min="1"
+                                step="1"
+                                [placeholder]="split() ? 'Ex. 5000' : 'Tout payer : ' + total()"
+                                [value]="deposit() ?? ''"
+                                [class.invalid]="depositError() !== null"
+                                (input)="onDepositChange(depositInput)"
+                            />
+                        </label>
+                        @if (depositError(); as message) {
+                            <small class="field-error" role="alert">{{ message }}</small>
+                        } @else if (remaining() > 0 && !split()) {
+                            <div class="remaining">
+                                <span>Reste à payer plus tard</span>
+                                <strong>{{ remaining() | fcfa }}</strong>
+                            </div>
+                        }
+                    }
 
                     @if (paymentMethod() === "CASH") {
                         <label class="field">
@@ -266,8 +357,8 @@
                                     (click)="amountReceived.set(amount)"
                                 >
                                     {{
-                                        $first && amount === total()
-                                            ? "Compte juste"
+                                        $first && amount === toPay()
+                                            ? "Montant exact"
                                             : (amount | fcfa)
                                     }}
                                 </button>
@@ -283,23 +374,20 @@
                                 <strong>{{ amount | fcfa }}</strong>
                             </div>
                         }
-                    } @else {
-                        <label class="field">
-                            <span>Référence de la transaction</span>
-                            <input
-                                class="input"
-                                type="text"
-                                maxlength="50"
-                                autocomplete="off"
-                                placeholder="Ex. PP241111.1540.A12345"
-                                [value]="paymentReference()"
-                                (input)="paymentReference.set($any($event.target).value)"
-                            />
-                        </label>
-                        <small class="muted hint"
-                            >Notez la référence reçue par SMS. Ce montant n'entre pas dans le
-                            tiroir-caisse.</small
-                        >
+                    }
+
+                    @if (split()) {
+                        @if (deposit() !== null && deposit()! < total()) {
+                            <div class="remaining second">
+                                <span>Reste en mobile money</span>
+                                <strong>{{ secondAmount() | fcfa }}</strong>
+                            </div>
+                        } @else {
+                            <small class="muted hint"
+                                >Indiquez la part en espèces : le reste du total sera payé en
+                                mobile money.</small
+                            >
+                        }
                     }
                 </div>
             }
@@ -320,7 +408,7 @@
 </div>
 
 <!-- téléphone : rappel du panier au-dessus de la barre du bas -->
-@if (cart().length > 0) {
+@if (cart().length > 0 && !cartInView()) {
     <div class="cart-bar">
         <span>
             <strong>{{ total() | fcfa }}</strong>

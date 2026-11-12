@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
 import { Component, computed, input } from "@angular/core";
 
-import { SaleDetail } from "../../../core/sales/sale.model";
+import { SaleDetail, SalePayment } from "../../../core/sales/sale.model";
 import { formatTicketNumber } from "../../../core/sales/ticket-number";
 import { ShopSettings } from "../../../core/shop/shop-settings.model";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
@@ -22,6 +22,17 @@ export class SaleReceipt {
     ticketPrefix = input("");
 
     ticketNumber = computed(() => formatTicketNumber(this.sale().id, this.ticketPrefix()));
+
+    // reste à payer sur une vente validée avec acompte
+    due = computed(() =>
+        this.sale().status === "ACTIVE" ? this.sale().total - this.sale().paid_amount : 0,
+    );
+
+    // monnaie rendue sur un paiement en espèces, 0 si le compte était juste
+    changeOf(payment: SalePayment) {
+        if (payment.payment_method !== "CASH" || payment.amount_received === null) return 0;
+        return Math.max(0, payment.amount_received - payment.amount);
+    }
 
     itemsCount = computed(() => this.sale().items.reduce((sum, item) => sum + item.quantity, 0));
     subtotal = computed(() =>

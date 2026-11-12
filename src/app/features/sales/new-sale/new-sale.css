@@ -170,6 +170,12 @@ app-page-header {
     color: var(--primary-text);
 }
 
+.link-btn:focus-visible,
+.icon-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 .stock-LOW {
     color: var(--warning);
     font-weight: 600;
@@ -435,7 +441,7 @@ app-page-header {
 .chip:hover,
 .chip.active {
     border-color: var(--primary);
-    color: var(--primary);
+    color: var(--primary-text, var(--primary));
 }
 
 .change {
@@ -450,6 +456,28 @@ app-page-header {
 }
 
 .change strong {
+    font-size: 18px;
+    font-variant-numeric: tabular-nums;
+}
+
+.customer {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.remaining {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--warning-soft, var(--surface));
+    color: var(--warning, var(--text));
+    font-size: 14px;
+}
+
+.remaining strong {
     font-size: 18px;
     font-variant-numeric: tabular-nums;
 }
@@ -556,8 +584,58 @@ app-page-header {
     }
 }
 
-@media (max-width: 767px) {
-    .chip {
+@media (max-width: 1023px) {
+    .chip,
+    .option {
         min-height: 44px;
     }
+}
+
+.options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.option {
+    min-height: 40px;
+    padding: 0 14px;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted, var(--text));
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.option::before {
+    content: "+ ";
+}
+
+.option.on {
+    border-style: solid;
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
+    font-weight: 600;
+}
+
+.option.on::before {
+    content: "✓ ";
+}
+
+.option:hover {
+    border-color: var(--primary);
+}
+
+.option:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.remaining.second {
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
 }
