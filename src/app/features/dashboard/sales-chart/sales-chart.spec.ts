@@ -50,6 +50,25 @@ describe("SalesChart", () => {
         expect(el.querySelector(".total")?.textContent?.replace(/\s/g, " ")).toContain("444 000 F");
     });
 
+    it("should keep one decimal instead of rounding a misleading amount", async () => {
+        fixture.componentRef.setInput("days", [
+            day("2026-11-09", 800),
+            day("2026-11-10", 12500),
+            day("2026-11-11", 1250000),
+        ]);
+        await fixture.whenStable();
+
+        const values = [...el.querySelectorAll(".bar-value")].map((v) => v.textContent);
+        expect(values).toEqual(["800", "12,5k", "1,3M"]);
+    });
+
+    it("should not label days without sales", async () => {
+        fixture.componentRef.setInput("days", [day("2026-11-10", 0, 0), day("2026-11-11", 5000)]);
+        await fixture.whenStable();
+
+        expect(el.querySelectorAll(".bar-value").length).toBe(1);
+    });
+
     it("should show an empty message when there was no sale", async () => {
         fixture.componentRef.setInput("days", [day("2026-11-10", 0, 0), day("2026-11-11", 0, 0)]);
         await fixture.whenStable();

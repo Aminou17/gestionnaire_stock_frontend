@@ -11,6 +11,7 @@ import { DailySales, DashboardSummary } from "./dashboard.model";
 import { AuthService } from "../../core/auth/auth.service";
 import { SaleService } from "../../core/sales/sale.service";
 import { LowStockAlert } from "../../core/stock/low-stock-alert.model";
+import { SecurityAlertService } from "../../core/audit/security-alert.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 
 const day = (date: string, netTotal: number, salesCount = 1): DailySales => ({
@@ -41,6 +42,7 @@ describe("Dashboard", () => {
         cash = openCash,
         days = [day("2026-11-10", 200000), day("2026-11-11", 214000)],
         summaryFails = false,
+        yesterdayUntilNow = 200000,
         alerts = [],
         previousOpenSession = null,
         pendingExplanation = null,
@@ -49,6 +51,7 @@ describe("Dashboard", () => {
         cash?: DashboardSummary["cash"];
         days?: DailySales[];
         summaryFails?: boolean;
+        yesterdayUntilNow?: number;
         alerts?: LowStockAlert[];
         previousOpenSession?: DashboardSummary["previousOpenSession"];
         pendingExplanation?: DashboardSummary["pendingExplanation"];
@@ -75,6 +78,11 @@ describe("Dashboard", () => {
                         getSummary: () =>
                             summaryFails ? throwError(() => new Error("500")) : of(summary),
                         getDailySales: () => of(days),
+                        getSalesComparison: () =>
+                            of({
+                                todayTotal: days.at(-1)?.netTotal ?? 0,
+                                yesterdayUntilNowTotal: yesterdayUntilNow,
+                            }),
                         getRecentActivity: () => of([]),
                     },
                 },
@@ -91,6 +99,10 @@ describe("Dashboard", () => {
                         }),
                         roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
                     },
+                },
+                {
+                    provide: SecurityAlertService,
+                    useValue: { count: signal(0), latest: signal([]), reload: vi.fn() },
                 },
                 {
                     provide: LowStockAlertService,
@@ -138,19 +150,22 @@ describe("Dashboard", () => {
 
     it("should compare today with yesterday", async () => {
         await render();
-        expect(text()).toContain("+7 % par rapport à hier");
+        expect(text()).toContain("+7 % vs hier à cette heure");
     });
 
     it("should not compute a percentage when there was no sale yesterday", async () => {
-        await render({ days: [day("2026-11-10", 0, 0), day("2026-11-11", 5000)] });
-        expect(text()).toContain("Aucune vente hier pour comparer");
+        await render({
+            days: [day("2026-11-10", 0, 0), day("2026-11-11", 5000)],
+            yesterdayUntilNow: 0,
+        });
+        expect(text()).toContain("Aucune vente hier à cette heure");
     });
 
     it("should show the cash balance when the session is open", async () => {
         await render();
 
         expect(text()).toContain("312 000 F");
-        expect(text()).toContain("Session ouverte depuis 08:05");
+        expect(text()).toContain("Session ouverte à 08:05");
         expect(el.querySelector(".new-sale")?.classList).not.toContain("disabled");
     });
 
@@ -207,7 +222,7 @@ describe("Dashboard", () => {
             "m-close",
         ]);
         expect(text()).toContain("Mes ventes du jour");
-        expect(text()).toContain("+7 % par rapport à hier");
+        expect(text()).toContain("+7 % vs hier à cette heure");
         expect(text()).toContain("Mes ventes sur 7 jours");
         expect(text()).toContain("Mes dernières ventes");
         expect(text()).toContain("Mon activité récente");

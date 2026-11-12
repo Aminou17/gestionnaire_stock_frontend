@@ -18,50 +18,42 @@
     } @else if (sales().length === 0) {
         <p class="empty">Aucune vente pour le moment.</p>
     } @else {
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>N°</th>
-                        <th>Date</th>
-                        @if (showSeller()) {
-                            <th class="seller">Vendeur</th>
-                        }
-                        <th class="items">Articles</th>
-                        <th class="num">Montant</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (sale of sales(); track sale.id) {
-                        <tr>
-                            <td class="id">#{{ sale.id }}</td>
-                            <td>
+        <ul>
+            @for (sale of sales(); track sale.id) {
+                <li>
+                    <a [routerLink]="['/sales', sale.id]" class="row">
+                        <div class="main">
+                            <strong>Vente #{{ sale.id }}</strong>
+                            <small>
                                 {{
                                     isToday(sale.created_at)
                                         ? (sale.created_at | date: "HH:mm")
                                         : (sale.created_at | date: "d MMM, HH:mm")
                                 }}
-                            </td>
-                            @if (showSeller()) {
-                                <td class="seller">
-                                    {{ sale.user_name }}
-                                    @if (roleLabel(sale.user_role); as role) {
-                                        <span class="muted">({{ role }})</span>
-                                    }
-                                </td>
-                            }
-                            <td class="items">{{ sale.items_count }}</td>
-                            <td class="num">{{ sale.total | fcfa }}</td>
-                            <td>
-                                @if (sale.status === "CANCELLED") {
-                                    <span class="badge badge-danger">Remboursée</span>
+                                · {{ sale.items_count }} article{{
+                                    sale.items_count > 1 ? "s" : ""
+                                }}
+                                @if (showSeller() && sale.user_name) {
+                                    <span class="seller">
+                                        · {{ sale.user_name }}
+                                        @if (roleLabel(sale.user_role); as role) {
+                                            <span class="role">({{ role }})</span>
+                                        }
+                                    </span>
                                 }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                            </small>
+                        </div>
+                        <div class="side">
+                            <span class="amount" [class.cancelled]="sale.status === 'CANCELLED'">{{
+                                sale.total | fcfa
+                            }}</span>
+                            @if (sale.status === "CANCELLED") {
+                                <span class="badge badge-danger">Remboursée</span>
+                            }
+                        </div>
+                    </a>
+                </li>
+            }
+        </ul>
     }
 </section>

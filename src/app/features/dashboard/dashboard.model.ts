@@ -40,6 +40,12 @@ export interface DailySales {
     netTotal: number;
 }
 
+export interface SalesComparison {
+    todayTotal: number;
+    // hier, jusqu'à la même heure qu'à l'instant
+    yesterdayUntilNowTotal: number;
+}
+
 export type ActivityType =
     "SALE" | "REFUND" | "STOCK_ENTRY" | "INVENTORY_ADJUSTMENT" | "CASH_OPENING";
 

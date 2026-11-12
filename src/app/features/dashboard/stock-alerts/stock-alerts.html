@@ -21,16 +21,12 @@
                 <li>
                     <div class="product">
                         <strong>{{ alert.name }}</strong>
-                        <small>Seuil minimum : {{ alert.min_stock }}</small>
+                        <small>{{ stock(alert) }} en stock · seuil {{ alert.min_stock }}</small>
                     </div>
                     @if (alert.theoretical_stock <= 0) {
                         <span class="badge badge-danger">Rupture</span>
                     } @else {
-                        <span class="badge badge-warning">
-                            {{ alert.theoretical_stock }} restant{{
-                                alert.theoretical_stock > 1 ? "s" : ""
-                            }}
-                        </span>
+                        <span class="badge badge-warning">Stock faible</span>
                     }
                 </li>
             } @empty {

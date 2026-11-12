@@ -35,7 +35,9 @@
                         (blur)="hovered.set(null)"
                     >
                         <div class="plot">
-                            <span class="bar-value">{{ bar.short }}</span>
+                            @if (bar.netTotal !== 0) {
+                                <span class="bar-value">{{ bar.short }}</span>
+                            }
                             <div
                                 class="bar"
                                 [class.today]="bar.isToday"

@@ -3,7 +3,7 @@ import { Injectable, inject } from "@angular/core";
 import { map } from "rxjs";
 
 import { API_URL } from "../../core/api.config";
-import { Activity, DailySales, DashboardSummary } from "./dashboard.model";
+import { Activity, DailySales, DashboardSummary, SalesComparison } from "./dashboard.model";
 
 @Injectable({ providedIn: "root" })
 export class DashboardService {
@@ -21,10 +21,15 @@ export class DashboardService {
             .pipe(map((res) => res.data));
     }
 
+    getSalesComparison() {
+        return this.http.get<SalesComparison>(`${API_URL}/dashboard/sales-comparison`);
+    }
+
+    // les ventes ont déjà leur propre liste sur le tableau de bord : on ne les répète pas dans l'activité
     getRecentActivity(limit = 5) {
         return this.http
             .get<{ data: Activity[] }>(`${API_URL}/dashboard/recent-activity`, {
-                params: { limit },
+                params: { limit, excludeSales: true },
             })
             .pipe(map((res) => res.data));
     }
