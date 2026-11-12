@@ -1,0 +1,135 @@
+<app-page-header
+    title="Historique des caisses"
+    section="Caisse"
+    back="/cash"
+    backLabel="Retour à la caisse"
+/>
+
+<section class="card list-card">
+    @if (firstLoad()) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (sessions.error() && list().length === 0) {
+        <div class="empty">
+            Impossible de charger l'historique.
+            <button type="button" class="btn btn-outline btn-sm" (click)="sessions.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty">Aucune caisse n'a encore été ouverte.</div>
+    } @else {
+        <p class="count muted">{{ total() }} caisse{{ total() > 1 ? "s" : "" }}</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Ouverte par</th>
+                        <th class="num">Fond de caisse</th>
+                        <th class="num">Attendu</th>
+                        <th class="num">Compté</th>
+                        <th class="num">Écart</th>
+                        <th>Statut</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (session of list(); track session.id) {
+                        <tr (click)="openSession(session)">
+                            <td>
+                                <a
+                                    [routerLink]="['/cash/sessions', session.id]"
+                                    class="session-link"
+                                    (click)="$event.stopPropagation()"
+                                    >{{ session.session_date | date: "EEEE d MMMM y" }}</a
+                                >
+                            </td>
+                            <td>{{ session.opened_by_name ?? "—" }}</td>
+                            <td class="num">{{ session.opening_amount | fcfa }}</td>
+                            <td class="num">{{ session.theoretical_amount | fcfa }}</td>
+                            <td class="num">{{ session.actual_amount | fcfa }}</td>
+                            <td
+                                class="num strong"
+                                [class.in]="session.difference! > 0"
+                                [class.out]="session.difference! < 0"
+                            >
+                                {{
+                                    session.difference === null
+                                        ? "—"
+                                        : (session.difference | fcfa: true)
+                                }}
+                            </td>
+                            <td>
+                                @if (session.status === "OPEN") {
+                                    <span class="badge badge-success">Ouverte</span>
+                                } @else {
+                                    <span class="badge badge-neutral">Clôturée</span>
+                                }
+                                @if (session.explanation_pending) {
+                                    <span class="badge badge-warning">Écart à expliquer</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- version téléphone : une carte par caisse -->
+        <ul class="cards">
+            @for (session of list(); track session.id) {
+                <li class="session-card" (click)="openSession(session)">
+                    <div class="line">
+                        <a
+                            [routerLink]="['/cash/sessions', session.id]"
+                            class="session-link"
+                            (click)="$event.stopPropagation()"
+                            >{{ session.session_date | date: "EEE d MMM y" }}</a
+                        >
+                        @if (session.status === "OPEN") {
+                            <span class="badge badge-success">Ouverte</span>
+                        } @else {
+                            <span class="badge badge-neutral">Clôturée</span>
+                        }
+                        @if (session.explanation_pending) {
+                            <span class="badge badge-warning">Écart à expliquer</span>
+                        }
+                    </div>
+                    <div class="line">
+                        <span class="meta muted">Fond {{ session.opening_amount | fcfa }}</span>
+                        @if (session.difference !== null) {
+                            <strong
+                                class="gap"
+                                [class.in]="session.difference > 0"
+                                [class.out]="session.difference < 0"
+                            >
+                                Écart {{ session.difference | fcfa: true }}
+                            </strong>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+
+        @if (hasMore()) {
+            <div #sentinel class="more">
+                @if (loadingMore()) {
+                    <span class="spinner"></span>
+                    Chargement…
+                } @else if (sessions.error()) {
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="sessions.reload()"
+                    >
+                        Réessayer
+                    </button>
+                }
+            </div>
+        }
+    }
+</section>

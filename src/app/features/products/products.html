@@ -1,0 +1,356 @@
+<app-page-header title="Produits" section="Stock">
+    @if (auth.isAdmin()) {
+        <button type="button" class="btn btn-primary new-product" (click)="newProduct()">
+            <app-icon name="plus" [size]="18" />
+            <span>Nouveau produit</span>
+        </button>
+    }
+</app-page-header>
+
+<!-- Compteurs : cartes sur ordinateur, pastilles défilantes sur téléphone -->
+<div class="stats">
+    @for (tab of tabs(); track tab.label) {
+        <button
+            type="button"
+            class="card stat"
+            [class.selected]="stockStatus() === tab.value"
+            [attr.aria-pressed]="stockStatus() === tab.value"
+            (click)="selectStock(tab.value)"
+        >
+            <span class="stat-label">{{ tab.label }}</span>
+            @if (firstLoad()) {
+                <span class="skeleton stat-skeleton"></span>
+            } @else {
+                <strong class="stat-value tone-{{ tab.tone }}">{{ tab.count ?? "—" }}</strong>
+            }
+            <span class="dot dot-{{ tab.tone }}"></span>
+        </button>
+    }
+</div>
+
+<section class="card list-card">
+    <div class="toolbar">
+        <label class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Rechercher un produit…"
+                aria-label="Rechercher un produit"
+                (input)="onSearch($any($event.target).value)"
+            />
+        </label>
+
+        <button
+            type="button"
+            class="filter-btn"
+            [class.active]="filtersOpen() || categoryId() || status() !== 'active'"
+            [attr.aria-expanded]="filtersOpen()"
+            (click)="filtersOpen.set(!filtersOpen())"
+            aria-label="Filtres"
+        >
+            <app-icon name="filter" />
+        </button>
+
+        <div class="filters" [class.open]="filtersOpen()">
+            <select
+                class="input"
+                aria-label="Catégorie"
+                (change)="selectCategory($any($event.target).value)"
+            >
+                <option value="">Toutes les catégories</option>
+                @for (category of categoryList(); track category.id) {
+                    <option [value]="category.id" [selected]="category.id === categoryId()">
+                        {{ category.name }}
+                    </option>
+                }
+            </select>
+
+            @if (auth.isAdmin()) {
+                <select
+                    class="input"
+                    aria-label="Statut"
+                    (change)="selectStatus($any($event.target).value)"
+                >
+                    <option value="active">Actifs</option>
+                    <option value="deleted">Supprimés</option>
+                    <option value="all">Tous</option>
+                </select>
+            }
+        </div>
+    </div>
+
+    @if (supplierId()) {
+        <div class="supplier-filter">
+            <span>
+                Fournisseur :
+                @if (supplierName(); as name) {
+                    <a [routerLink]="['/suppliers', supplierId()]">{{ name }}</a>
+                } @else if (supplier.error()) {
+                    introuvable
+                } @else {
+                    n° {{ supplierId() }}
+                }
+            </span>
+            <button
+                type="button"
+                class="clear-filter"
+                aria-label="Retirer le filtre du fournisseur"
+                (click)="clearSupplier()"
+            >
+                <app-icon name="close" [size]="16" />
+            </button>
+        </div>
+    }
+
+    <div class="chips">
+        @for (tab of tabs(); track tab.label) {
+            <button
+                type="button"
+                class="chip"
+                [class.selected]="stockStatus() === tab.value"
+                [attr.aria-pressed]="stockStatus() === tab.value"
+                (click)="selectStock(tab.value)"
+            >
+                {{ tab.short }}
+                <span>{{ tab.count ?? "—" }}</span>
+            </button>
+        }
+    </div>
+
+    @if (firstLoad()) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (products.error() && list().length === 0) {
+        <div class="empty">
+            Impossible de charger les produits.
+            <button type="button" class="btn btn-outline btn-sm" (click)="products.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <p class="empty">Aucun produit à afficher.</p>
+    } @else {
+        <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
+        @if (products.error() && page() === 1) {
+            <div class="alert alert-error list-error" role="alert">
+                Impossible de charger les produits.
+                <button type="button" class="btn btn-outline btn-sm" (click)="products.reload()">
+                    Réessayer
+                </button>
+            </div>
+        }
+
+        <p class="mobile-count muted">{{ total() }} produit{{ total() > 1 ? "s" : "" }}</p>
+
+        <div class="table-wrap">
+            <table [class.reloading]="products.isLoading() && page() === 1">
+                <thead>
+                    <tr>
+                        <th>Produit</th>
+                        @if (auth.isAdmin()) {
+                            <th class="num">Prix d'achat</th>
+                        }
+                        <th class="num">Prix de vente</th>
+                        <th>Prix minimum</th>
+                        <th class="num">Stock</th>
+                        <th>État</th>
+                        @if (auth.isAdmin()) {
+                            <th class="actions-col"><span class="sr-only">Actions</span></th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (product of list(); track product.id) {
+                        <tr [class.inactive]="!product.is_active" (click)="openProduct(product)">
+                            <td>
+                                <button type="button" class="name-link name">
+                                    {{ product.name }}
+                                </button>
+                            </td>
+                            @if (auth.isAdmin()) {
+                                <td class="num muted">{{ product.purchase_price | fcfa }}</td>
+                            }
+                            <td class="num strong">{{ product.sale_price | fcfa }}</td>
+                            <td>
+                                @if (product.pricing_mode === "NEGOTIABLE") {
+                                    <span class="badge badge-violet" title="Prix minimum accepté"
+                                        >Min.
+                                        {{ product.sale_price - product.max_discount | fcfa }}</span
+                                    >
+                                }
+                            </td>
+                            <td class="num">
+                                <strong class="stock-{{ product.stock_status }}">{{
+                                    product.theoretical_stock
+                                }}</strong>
+                                @if (product.effective_min_stock !== null) {
+                                    <span class="muted">
+                                        / seuil {{ product.effective_min_stock }}</span
+                                    >
+                                }
+                            </td>
+                            <td>
+                                @if (!product.is_active) {
+                                    <span class="badge badge-neutral">Supprimé</span>
+                                } @else if (product.stock_status === "OUT_OF_STOCK") {
+                                    <span class="badge badge-danger">Rupture</span>
+                                } @else if (product.stock_status === "LOW") {
+                                    <span class="badge badge-warning">Stock faible</span>
+                                } @else {
+                                    <span class="badge badge-success">En stock</span>
+                                }
+                            </td>
+                            @if (auth.isAdmin()) {
+                                <td class="actions-col">
+                                    @if (product.is_active) {
+                                        <ng-container
+                                            *ngTemplateOutlet="
+                                                rowMenu;
+                                                context: { $implicit: product }
+                                            "
+                                        />
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Version téléphone : une carte compacte par produit -->
+        <ul class="cards">
+            @for (product of list(); track product.id) {
+                <li
+                    class="product-card"
+                    [class.inactive]="!product.is_active"
+                    (click)="openProduct(product)"
+                >
+                    <div class="line">
+                        <button type="button" class="name-link name">{{ product.name }}</button>
+                        @if (auth.isAdmin() && product.is_active) {
+                            <ng-container
+                                *ngTemplateOutlet="rowMenu; context: { $implicit: product }"
+                            />
+                        }
+                    </div>
+                    <span class="category muted">{{ product.category_name }}</span>
+                    <div class="line">
+                        <strong class="price">{{ product.sale_price | fcfa }}</strong>
+                        @if (product.pricing_mode === "NEGOTIABLE") {
+                            <span class="badge badge-violet" title="Prix minimum accepté"
+                                >Min. {{ product.sale_price - product.max_discount | fcfa }}</span
+                            >
+                        }
+                    </div>
+                    <div class="line">
+                        <span class="stock muted">
+                            Stock
+                            <strong class="stock-{{ product.stock_status }}">{{
+                                product.theoretical_stock
+                            }}</strong>
+                            @if (product.effective_min_stock !== null) {
+                                / seuil {{ product.effective_min_stock }}
+                            }
+                        </span>
+                        @if (!product.is_active) {
+                            <span class="badge badge-neutral">Supprimé</span>
+                        } @else if (product.stock_status === "OUT_OF_STOCK") {
+                            <span class="badge badge-danger">Rupture</span>
+                        } @else if (product.stock_status === "LOW") {
+                            <span class="badge badge-warning">Stock faible</span>
+                        } @else {
+                            <span class="badge badge-success">En stock</span>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+
+        <!-- en vue, ce repère déclenche le chargement des 20 produits suivants -->
+        @if (hasMore()) {
+            <div #sentinel class="more">
+                @if (loadingMore()) {
+                    <span class="spinner"></span>
+                    Chargement…
+                } @else if (products.error()) {
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="products.reload()"
+                    >
+                        Réessayer
+                    </button>
+                }
+            </div>
+        }
+    }
+</section>
+
+<ng-template #rowMenu let-product>
+    <div class="row-menu" (click)="$event.stopPropagation()">
+        <button
+            type="button"
+            class="more-btn"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuFor() === product.id"
+            [attr.aria-label]="'Actions pour ' + product.name"
+            (click)="toggleMenu(product.id)"
+        >
+            <app-icon name="more" />
+        </button>
+        @if (menuFor() === product.id) {
+            <div class="menu" role="menu">
+                <button type="button" role="menuitem" (click)="editProduct(product)">
+                    <app-icon name="edit" [size]="16" />
+                    Modifier
+                </button>
+                <button type="button" role="menuitem" class="danger" (click)="askDelete(product)">
+                    <app-icon name="ban" [size]="16" />
+                    Supprimer
+                </button>
+            </div>
+        }
+    </div>
+</ng-template>
+
+@if (auth.isAdmin()) {
+    <button type="button" class="fab" (click)="newProduct()" aria-label="Nouveau produit">
+        <app-icon name="plus" [size]="24" />
+    </button>
+
+    <app-product-form (saved)="refresh()" />
+}
+
+<dialog #confirm class="confirm" (click)="onConfirmBackdrop($event)">
+    <div class="confirm-body">
+        <h2>Supprimer ce produit ?</h2>
+        <p class="muted">
+            « {{ toDelete()?.name }} » n'apparaîtra plus dans la liste ni dans les ventes. Son
+            historique est conservé.
+        </p>
+
+        @if (deleteError()) {
+            <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-outline" (click)="closeConfirm()">Annuler</button>
+            <button
+                type="button"
+                class="btn btn-danger"
+                [disabled]="deleting()"
+                (click)="deleteProduct()"
+            >
+                @if (deleting()) {
+                    <span class="spinner"></span>
+                }
+                Supprimer
+            </button>
+        </div>
+    </div>
+</dialog>

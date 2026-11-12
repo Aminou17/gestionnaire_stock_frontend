@@ -1,0 +1,272 @@
+:host {
+    display: grid;
+    gap: 16px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+.banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 960px;
+}
+
+.link-btn {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-height: 44px;
+    margin-left: auto;
+    padding: 0 8px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.layout {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 960px;
+}
+
+.main,
+.side {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    min-width: 0;
+}
+
+/* sur petit écran, le résumé passe avant la longue liste des mouvements */
+@media (max-width: 1023px) {
+    .main {
+        display: contents;
+    }
+
+    .status,
+    .quick {
+        order: 1;
+    }
+
+    .side {
+        order: 2;
+    }
+
+    .movements {
+        order: 3;
+    }
+}
+
+@media (min-width: 1024px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr) 300px;
+    }
+}
+
+.status {
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+}
+
+.status.open {
+    border-color: var(--primary);
+}
+
+.status-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+}
+
+.balance {
+    display: grid;
+    gap: 2px;
+}
+
+.balance small {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.balance strong {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.note {
+    margin: 0;
+    font-size: 14px;
+}
+
+.quick {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.panel {
+    padding: 16px 20px;
+}
+
+.lines {
+    display: grid;
+    margin: 0;
+}
+
+.lines > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+}
+
+.lines dt {
+    color: var(--text-muted);
+}
+
+.lines dd {
+    margin: 0;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.lines .in {
+    color: var(--success);
+}
+
+.lines .out {
+    color: var(--danger);
+}
+
+.lines .total {
+    border-bottom: 0;
+    font-size: 16px;
+}
+
+.lines .total dt {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.closing {
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+}
+
+.closing > div:last-child {
+    border-bottom: 0;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 32px 20px;
+    text-align: center;
+}
+
+.empty p {
+    margin: 0;
+}
+
+.inline-error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    font-size: 14px;
+}
+
+.sk-title {
+    width: 120px;
+    height: 24px;
+}
+
+.sk-balance {
+    width: 220px;
+    height: 44px;
+}
+
+.sk-line {
+    width: 160px;
+    height: 16px;
+}
+
+.row-skeleton {
+    height: 48px;
+    margin-top: 8px;
+}
+
+@media (max-width: 767px) {
+    /* Mouvements et Historique côte à côte : icône seule, carré de 44px */
+    app-page-header .header-link {
+        width: 44px;
+        padding: 0;
+    }
+
+    app-page-header .header-link span {
+        display: none;
+    }
+
+    .banner {
+        flex-wrap: wrap;
+    }
+
+    /* aligné sous le texte, après l'icône de 18px */
+    .link-btn {
+        margin-left: 30px;
+        padding-left: 0;
+    }
+
+    .btn-sm {
+        height: 44px;
+    }
+
+    .balance strong {
+        font-size: 30px;
+    }
+
+    .actions .btn {
+        flex: 1;
+    }
+
+    .quick .btn {
+        padding: 0 8px;
+    }
+}
+
+.quick.single {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.closing-note {
+    margin-top: 8px;
+}
+
+.closing-note {
+    overflow-wrap: anywhere;
+}
+
+.badge.closing-note {
+    margin-top: 12px;
+}

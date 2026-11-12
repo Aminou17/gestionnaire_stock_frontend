@@ -1,0 +1,399 @@
+import { HttpErrorResponse } from "@angular/common/http";
+import { Component, ElementRef, computed, inject, output, signal, viewChild } from "@angular/core";
+import { rxResource, takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
+import { Subscription } from "rxjs";
+import {
+    AbstractControl,
+    NonNullableFormBuilder,
+    ReactiveFormsModule,
+    ValidationErrors,
+    Validators,
+} from "@angular/forms";
+
+import { CategoryService } from "../../../core/stock/category.service";
+import { PricingMode } from "../../../core/stock/product.model";
+import { ProductService } from "../../../core/stock/product.service";
+import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
+import { StockSettingsService } from "../../../core/stock/stock-settings.service";
+import { SupplierService } from "../../../core/stock/supplier.service";
+import { Icon } from "../../../shared/icon/icon";
+import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
+
+const discountValidator = (group: AbstractControl): ValidationErrors | null => {
+    const { pricingMode, salePrice, maxDiscount } = group.getRawValue();
+    if (pricingMode !== "NEGOTIABLE") return null;
+    if (maxDiscount === null) return { discountRequired: true };
+    if (salePrice !== null && maxDiscount > salePrice) return { discountTooHigh: true };
+    return null;
+};
+
+// valeur de l'option "+ Créer" dans les listes de catégories et de fournisseurs
+const NEW_ID = -1;
+
+@Component({
+    selector: "app-product-form",
+    imports: [ReactiveFormsModule, Icon, FcfaPipe],
+    templateUrl: "./product-form.html",
+    styleUrl: "./product-form.css",
+})
+export class ProductForm {
+    private productService = inject(ProductService);
+    private categoryService = inject(CategoryService);
+    private supplierService = inject(SupplierService);
+    private stockSettings = inject(StockSettingsService);
+    private salesSettingsService = inject(SalesSettingsService);
+    private fb = inject(NonNullableFormBuilder);
+
+    private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
+
+    saved = output();
+
+    form = this.fb.group(
+        {
+            name: ["", Validators.required],
+            categoryId: [0, Validators.min(1)],
+            supplierId: [0, Validators.min(1)],
+            // le backend refuse un prix d'achat à 0 à la création
+            purchasePrice: [null as number | null, [Validators.required, Validators.min(1)]],
+            salePrice: [null as number | null, [Validators.required, Validators.min(1)]],
+            pricingMode: ["FIXED" as PricingMode],
+            maxDiscount: [null as number | null, Validators.min(0)],
+            // vide = le produit suit le seuil par défaut
+            minStock: [null as number | null, [Validators.min(0), Validators.pattern(/^\d+$/)]],
+        },
+        { validators: discountValidator },
+    );
+
+    protected newId = NEW_ID;
+
+    // petit formulaire "Créer une catégorie", ouvert depuis la liste des catégories
+    categoryForm = this.fb.group({
+        name: ["", [Validators.required, Validators.maxLength(100)]],
+        description: ["", Validators.maxLength(500)],
+    });
+    addingCategory = signal(false);
+    savingCategory = signal(false);
+    categoryError = signal<string | null>(null);
+
+    // petit formulaire "Créer un fournisseur", ouvert depuis la liste des fournisseurs
+    supplierForm = this.fb.group({
+        name: ["", [Validators.required, Validators.maxLength(100)]],
+        telephone: ["", Validators.maxLength(50)],
+    });
+    addingSupplier = signal(false);
+    savingSupplier = signal(false);
+    supplierError = signal<string | null>(null);
+
+    productId = signal<number | null>(null);
+    // catégorie du produit modifié, gardée dans la liste même si elle est désactivée
+    currentCategoryId = signal<number | null>(null);
+    loading = signal(false);
+    loadFailed = signal(false);
+    saving = signal(false);
+    error = signal<string | null>(null);
+
+    // chargement en cours du produit à modifier, annulé si on ferme ou ouvre un autre produit
+    private loadSub?: Subscription;
+
+    // les listes ne sont chargées qu'à la première ouverture
+    private wanted = signal(false);
+    categories = rxResource({
+        params: () => this.wanted() || undefined,
+        stream: () => this.categoryService.getCategories(),
+    });
+    suppliers = rxResource({
+        params: () => this.wanted() || undefined,
+        stream: () => this.supplierService.getSuppliers(),
+    });
+    settings = rxResource({
+        params: () => this.wanted() || undefined,
+        stream: () => this.stockSettings.getSettings(),
+    });
+
+    salesSettings = rxResource({
+        params: () => this.wanted() || undefined,
+        stream: () => this.salesSettingsService.getSettings(),
+    });
+
+    activeCategories = computed(() =>
+        this.categories.hasValue()
+            ? this.categories
+                  .value()
+                  .filter((c) => c.is_active || c.id === this.currentCategoryId())
+            : [],
+    );
+    supplierList = computed(() => (this.suppliers.hasValue() ? this.suppliers.value() : []));
+    defaultThreshold = computed(() =>
+        this.settings.hasValue() ? (this.settings.value()?.min_stock ?? null) : null,
+    );
+
+    private values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
+
+    // dernier choix valable, rétabli quand on choisit "+ Créer"
+    private lastCategoryId = 0;
+    private lastSupplierId = 0;
+
+    constructor() {
+        // Ouvrir le petit formulaire quand on choisit "+ Créer une catégorie"
+        this.form.controls.categoryId.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => {
+            if (id !== NEW_ID) {
+                this.lastCategoryId = id;
+                return;
+            }
+            this.form.controls.categoryId.setValue(this.lastCategoryId, { emitEvent: false });
+            this.categoryForm.reset();
+            this.categoryError.set(null);
+            this.addingCategory.set(true);
+        });
+
+        // Ouvrir le petit formulaire quand on choisit "+ Créer un fournisseur"
+        this.form.controls.supplierId.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => {
+            if (id !== NEW_ID) {
+                this.lastSupplierId = id;
+                return;
+            }
+            this.form.controls.supplierId.setValue(this.lastSupplierId, { emitEvent: false });
+            this.supplierForm.reset();
+            this.supplierError.set(null);
+            this.addingSupplier.set(true);
+        });
+    }
+    pricingMode = computed(() => this.values().pricingMode);
+
+    // Marge affichée sous les prix
+    margin = computed(() => {
+        const { purchasePrice, salePrice } = this.values();
+        if (!purchasePrice || !salePrice) return null;
+        const amount = salePrice - purchasePrice;
+        return { amount, percent: Math.round((amount / salePrice) * 100) };
+    });
+
+    // Fourchette dans laquelle le gérant pourra vendre
+    priceRange = computed(() => {
+        const { salePrice, maxDiscount } = this.values();
+        if (!salePrice || maxDiscount === null || maxDiscount === undefined) return null;
+        if (maxDiscount > salePrice) return null;
+        return { min: salePrice - maxDiscount, max: salePrice };
+    });
+
+    // Ouvrir le formulaire vide pour un nouveau produit
+    // categoryId : catégorie déjà choisie (ex. depuis la fiche d'une catégorie)
+    openNew(categoryId: number | null = null) {
+        this.prepare(null);
+        if (categoryId) this.form.controls.categoryId.setValue(categoryId);
+        this.dialog().nativeElement.showModal();
+    }
+
+    openEdit(id: number) {
+        this.prepare(id);
+        this.loading.set(true);
+        this.dialog().nativeElement.showModal();
+
+        this.loadSub = this.productService.getProduct(id).subscribe({
+            next: (product) => {
+                this.loading.set(false);
+                this.currentCategoryId.set(product.category_id);
+                this.form.setValue({
+                    name: product.name,
+                    categoryId: product.category_id,
+                    supplierId: product.supplier_id,
+                    purchasePrice: product.purchase_price ?? null,
+                    salePrice: product.sale_price,
+                    pricingMode: product.pricing_mode,
+                    maxDiscount:
+                        product.pricing_mode === "NEGOTIABLE" ? product.max_discount : null,
+                    minStock: product.min_stock,
+                });
+            },
+            error: (err: HttpErrorResponse) => {
+                this.loading.set(false);
+                this.loadFailed.set(true);
+                this.error.set(err.error?.message ?? "Impossible de charger le produit.");
+            },
+        });
+    }
+
+    close() {
+        this.dialog().nativeElement.close();
+    }
+
+    onClosed() {
+        this.loadSub?.unsubscribe();
+    }
+
+    onBackdropClick(event: MouseEvent) {
+        if (event.target === this.dialog().nativeElement) {
+            this.close();
+        }
+    }
+
+    cancelCategory() {
+        if (this.savingCategory()) return;
+        this.addingCategory.set(false);
+    }
+
+    addCategory() {
+        // Entrée pendant l'envoi ne doit pas créer un doublon
+        if (this.savingCategory()) return;
+        if (this.categoryForm.invalid) {
+            this.categoryForm.markAllAsTouched();
+            return;
+        }
+
+        const name = this.categoryForm.getRawValue().name.trim();
+        const description = this.categoryForm.getRawValue().description.trim() || null;
+        if (!name) {
+            this.categoryForm.controls.name.setErrors({ required: true });
+            this.categoryForm.markAllAsTouched();
+            return;
+        }
+
+        this.savingCategory.set(true);
+        this.categoryError.set(null);
+
+        this.categoryService.createCategory(name, description).subscribe({
+            next: (category) => {
+                this.savingCategory.set(false);
+                this.addingCategory.set(false);
+                // value() lève une exception si la liste est en erreur : on la recharge alors
+                if (this.categories.hasValue()) {
+                    this.categories.update((list) =>
+                        [...(list ?? []), category].sort((a, b) => a.name.localeCompare(b.name)),
+                    );
+                } else {
+                    this.categories.reload();
+                }
+                this.form.controls.categoryId.setValue(category.id);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.savingCategory.set(false);
+                this.categoryError.set(err.error?.message ?? "Impossible de créer la catégorie.");
+            },
+        });
+    }
+
+    cancelSupplier() {
+        if (this.savingSupplier()) return;
+        this.addingSupplier.set(false);
+    }
+
+    addSupplier() {
+        // Entrée pendant l'envoi ne doit pas créer un doublon
+        if (this.savingSupplier()) return;
+        if (this.supplierForm.invalid) {
+            this.supplierForm.markAllAsTouched();
+            return;
+        }
+
+        const { name, telephone } = this.supplierForm.getRawValue();
+        if (!name.trim()) {
+            this.supplierForm.controls.name.setErrors({ required: true });
+            this.supplierForm.markAllAsTouched();
+            return;
+        }
+
+        // le fournisseur existe déjà dans la liste : on le choisit au lieu de créer un doublon
+        const existing = this.supplierList().find(
+            (s) => s.name.toLowerCase() === name.trim().toLowerCase(),
+        );
+        if (existing) {
+            this.addingSupplier.set(false);
+            this.form.controls.supplierId.setValue(existing.id);
+            return;
+        }
+
+        this.savingSupplier.set(true);
+        this.supplierError.set(null);
+
+        this.supplierService
+            .createSupplier({ name: name.trim(), telephone: telephone.trim() || null })
+            .subscribe({
+                next: (supplier) => {
+                    this.savingSupplier.set(false);
+                    this.addingSupplier.set(false);
+                    // value() lève une exception si la liste est en erreur : on la recharge alors
+                    if (this.suppliers.hasValue()) {
+                        this.suppliers.update((list) => [...(list ?? []), supplier]);
+                    } else {
+                        this.suppliers.reload();
+                    }
+                    this.form.controls.supplierId.setValue(supplier.id);
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.savingSupplier.set(false);
+                    this.supplierError.set(
+                        err.error?.message ?? "Impossible d'ajouter le fournisseur.",
+                    );
+                },
+            });
+    }
+
+    setMode(mode: PricingMode) {
+        this.form.controls.pricingMode.setValue(mode);
+
+        // la remise par défaut des réglages de vente préremplit un champ encore vide
+        const defaultDiscount = this.salesSettings.hasValue()
+            ? this.salesSettings.value().default_max_discount
+            : null;
+        if (
+            mode === "NEGOTIABLE" &&
+            defaultDiscount !== null &&
+            this.form.controls.maxDiscount.value === null
+        ) {
+            this.form.controls.maxDiscount.setValue(defaultDiscount);
+        }
+    }
+
+    submit() {
+        if (this.form.invalid) {
+            this.form.markAllAsTouched();
+            return;
+        }
+
+        const value = this.form.getRawValue();
+        const input = {
+            name: value.name.trim(),
+            categoryId: value.categoryId,
+            supplierId: value.supplierId,
+            purchasePrice: value.purchasePrice!,
+            salePrice: value.salePrice!,
+            pricingMode: value.pricingMode,
+            maxDiscount: value.pricingMode === "NEGOTIABLE" ? value.maxDiscount! : 0,
+            minStock: value.minStock,
+        };
+
+        this.saving.set(true);
+        this.error.set(null);
+
+        const id = this.productId();
+        const request = id
+            ? this.productService.updateProduct(id, input)
+            : this.productService.createProduct(input);
+
+        request.subscribe({
+            next: () => {
+                this.saving.set(false);
+                this.close();
+                this.saved.emit();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.saving.set(false);
+                this.error.set(err.error?.message ?? "Impossible d'enregistrer le produit.");
+            },
+        });
+    }
+
+    private prepare(id: number | null) {
+        this.loadSub?.unsubscribe();
+        this.productId.set(id);
+        this.currentCategoryId.set(null);
+        this.loadFailed.set(false);
+        this.error.set(null);
+        this.form.reset();
+        this.addingSupplier.set(false);
+        this.supplierError.set(null);
+        this.addingCategory.set(false);
+        this.categoryError.set(null);
+        this.wanted.set(true);
+    }
+}

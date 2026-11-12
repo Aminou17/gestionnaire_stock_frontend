@@ -1,0 +1,38 @@
+.export-list {
+    display: grid;
+}
+
+.export-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 0;
+}
+
+.export-item + .export-item {
+    border-top: 1px solid var(--border);
+}
+
+.export-text {
+    display: grid;
+    gap: 4px;
+    flex: 1;
+    min-width: 240px;
+}
+
+.export-text small {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.export-alert {
+    flex-basis: 100%;
+}
+
+@media (max-width: 767px) {
+    .export-item > .btn {
+        width: 100%;
+    }
+}

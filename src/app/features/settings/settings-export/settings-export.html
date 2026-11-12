@@ -1,0 +1,103 @@
+<app-page-header
+    title="Sauvegarde et export"
+    subtitle="Téléchargez vos données en fichier CSV, ouvrable dans Excel"
+    section="Paramètres"
+    back="/settings"
+    backLabel="Retour aux paramètres"
+/>
+
+<section class="card section">
+    <div class="section-head">
+        <span class="section-icon"><app-icon name="download" [size]="20" /></span>
+        <div>
+            <h2>Vos données</h2>
+            <p class="muted">
+                Les fichiers s'ouvrent dans Excel. Gardez-les en lieu sûr : ils contiennent vos prix
+                d'achat et vos ventes.
+            </p>
+        </div>
+    </div>
+
+    <div class="export-list">
+        <div class="export-item">
+            <div class="export-text">
+                <strong>Produits</strong>
+                <small class="muted">
+                    Catalogue complet avec prix, stock et seuils, produits supprimés compris.
+                </small>
+            </div>
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="busy() !== null"
+                (click)="exportProducts()"
+            >
+                @if (busy() === "products") {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="16" />
+                }
+                Télécharger
+            </button>
+            @if (error(); as e) {
+                @if (e.kind === "products") {
+                    <div class="alert alert-error export-alert" role="alert">{{ e.text }}</div>
+                }
+            }
+        </div>
+
+        <div class="export-item">
+            <div class="export-text">
+                <strong>Ventes</strong>
+                <small class="muted">Tous les tickets de la période, remboursements compris.</small>
+                <app-period-filter (changed)="range.set($event)" />
+            </div>
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="busy() !== null"
+                (click)="exportSales()"
+            >
+                @if (busy() === "sales") {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="16" />
+                }
+                Télécharger
+            </button>
+            @if (error(); as e) {
+                @if (e.kind === "sales") {
+                    <div class="alert alert-error export-alert" role="alert">{{ e.text }}</div>
+                }
+            }
+        </div>
+
+        <div class="export-item">
+            <div class="export-text">
+                <strong>Mouvements de stock</strong>
+                <small class="muted">
+                    Entrées, ventes et remboursements. Pour une période précise, utilisez la page
+                    <a routerLink="/stock-movements">Mouvements</a>.
+                </small>
+            </div>
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="busy() !== null"
+                (click)="exportMovements()"
+            >
+                @if (busy() === "movements") {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="16" />
+                }
+                Télécharger
+            </button>
+            @if (error(); as e) {
+                @if (e.kind === "movements") {
+                    <div class="alert alert-error export-alert" role="alert">{{ e.text }}</div>
+                }
+            }
+        </div>
+    </div>
+</section>

@@ -1,0 +1,94 @@
+@let s = sale();
+
+<section class="receipt">
+    <header>
+        @if (shop()?.logo; as logo) {
+            <img class="receipt-logo" [src]="logo" alt="" width="160" height="80" />
+        }
+        <strong class="receipt-shop">{{ shop()?.name || "Awa Bazin" }}</strong>
+        @if (shop(); as info) {
+            @if (info.address) {
+                <span>{{ info.address }}</span>
+            }
+            @if (info.phone) {
+                <span>Tél. {{ info.phone }}</span>
+            }
+            @if (info.tax_id) {
+                <span>IFU {{ info.tax_id }}</span>
+            }
+            @if (info.rccm) {
+                <span>RCCM {{ info.rccm }}</span>
+            }
+        }
+        <span class="receipt-gap"></span>
+        <span>Ticket n° {{ ticketNumber() }}</span>
+        <span>{{ s.created_at | date: "dd/MM/y 'à' HH:mm" }}</span>
+        <!-- le manager ne voit que ses ventes : son propre nom peut figurer sur son ticket -->
+        @if (s.user_name) {
+            <span>Servi par {{ s.user_name }}</span>
+        }
+        @if (s.status === "CANCELLED") {
+            <strong class="receipt-cancelled">VENTE REMBOURSÉE</strong>
+        }
+    </header>
+
+    <div class="receipt-items">
+        @for (item of s.items; track item.id) {
+            <div class="receipt-item">
+                <span class="receipt-name">{{ item.product_name }}</span>
+                <p class="receipt-line">
+                    <span>{{ item.quantity }} × {{ item.unit_price | fcfa }}</span>
+                    <span>{{ item.quantity * item.unit_price | fcfa }}</span>
+                </p>
+                @if (item.discount_amount > 0) {
+                    <span class="receipt-note"
+                        >Remise {{ item.quantity * item.discount_amount | fcfa }}</span
+                    >
+                }
+            </div>
+        }
+    </div>
+
+    <div class="receipt-sums">
+        <p class="receipt-line">
+            <span>Articles</span><span>{{ itemsCount() }}</span>
+        </p>
+        @if (discounts() > 0) {
+            <p class="receipt-line">
+                <span>Sous-total</span><span>{{ subtotal() | fcfa }}</span>
+            </p>
+            <p class="receipt-line">
+                <span>Remises</span><span>−{{ discounts() | fcfa }}</span>
+            </p>
+        }
+        <p class="receipt-line receipt-total">
+            <span>TOTAL</span><span>{{ s.total | fcfa }}</span>
+        </p>
+        @if (s.payment_method === "MOBILE_MONEY") {
+            <p class="receipt-line">
+                <span>Payé par mobile money</span><span>{{ s.total | fcfa }}</span>
+            </p>
+            @if (s.payment_reference) {
+                <p class="receipt-line">
+                    <span>Réf.</span><span>{{ s.payment_reference }}</span>
+                </p>
+            }
+        } @else {
+            <!-- anciennes ventes sans montant saisi : le client a donné le compte juste -->
+            <p class="receipt-line">
+                <span>Espèces reçues</span><span>{{ s.amount_received ?? s.total | fcfa }}</span>
+            </p>
+            <p class="receipt-line">
+                <span>Monnaie rendue</span
+                ><span>{{ (s.amount_received ?? s.total) - s.total | fcfa }}</span>
+            </p>
+        }
+    </div>
+
+    <footer class="receipt-thanks">
+        <span>Merci de votre visite !</span>
+        @if (shop()?.receipt_footer; as footer) {
+            <span class="receipt-policy">{{ footer }}</span>
+        }
+    </footer>
+</section>

@@ -1,1 +1,435 @@
-/* You can add global styles to this file, and also import other style files */
+/* Thème clair : thème par défaut */
+:root {
+    color-scheme: light;
+
+    /* Fond, cartes, texte */
+    --bg: #f4f6fa;
+    --surface: #ffffff;
+    --surface-hover: #f8fafc;
+    --border: #e3e8f0;
+    --text: #0f172a;
+    --text-muted: #5a6478;
+
+    /* Accent : une seule couleur, le bleu */
+    --primary: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-soft: #e8effd;
+    --primary-ring: rgba(37, 99, 235, 0.25);
+    --primary-text: #1d4ed8;
+    --on-primary: #ffffff;
+    --on-primary-faint: rgba(255, 255, 255, 0.4);
+
+    /* Icônes des cartes */
+    --icon-bg: #e8effd;
+    --icon-color: #1d4ed8;
+
+    /* Menu latéral (bleu nuit dans les deux modes) */
+    --sidebar-bg: #0f1e3d;
+    --sidebar-active: #1e3a70;
+    --sidebar-text: #c7d2e5;
+    --sidebar-text-strong: #ffffff;
+    --sidebar-text-soft: #dbe4f3;
+    --sidebar-sub: #9fb0cf;
+    --sidebar-pitch: #b7c4dd;
+    --sidebar-muted: #7d8fb0;
+    --sidebar-hover: rgba(255, 255, 255, 0.06);
+    --sidebar-surface: rgba(255, 255, 255, 0.05);
+    --sidebar-surface-hover: rgba(255, 255, 255, 0.09);
+    --switch-off: #3a4a6b;
+    --switch-knob: #ffffff;
+
+    /* Avatar */
+    --avatar-bg: linear-gradient(135deg, #3b82f6, #6366f1);
+    --avatar-text: #ffffff;
+
+    /* États : vert = Validée, rouge = Remboursée / Rupture, orange = alertes */
+    --success: #15803d;
+    --success-soft: #e7f6ec;
+    --danger: #b91c1c;
+    --danger-soft: #fdecec;
+    --warning: #c2410c;
+    --warning-soft: #fff1e6;
+    --neutral-soft: #eef1f6;
+    /* violet : réservé au badge "Négociable" */
+    --violet: #6d28d9;
+    --violet-soft: #f1ebfe;
+    --danger-strong: #dc2626;
+
+    /* Compteurs : pastille de la cloche, badge "Alertes" du menu */
+    --notification: #dc2626;
+    --notification-text: #ffffff;
+    --count-bg: #f59e0b;
+    --count-text: #1f1300;
+
+    /* Graphique */
+    --chart-bar: #2563eb;
+    --chart-bar-muted: #bfd3fb;
+
+    /* Ombres et fond grisé */
+    --overlay: rgba(15, 23, 42, 0.5);
+    --shadow-card: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --shadow-menu: 0 12px 32px rgba(15, 23, 42, 0.14);
+    --shadow-tooltip: 0 8px 24px rgba(15, 23, 42, 0.2);
+    --shadow-dialog: 0 24px 64px rgba(15, 23, 42, 0.25);
+    --shadow-drawer: 0 0 40px rgba(0, 0, 0, 0.3);
+
+    --radius: 12px;
+    --bottom-nav-height: 64px;
+}
+
+/* Thème sombre : seulement si l'utilisateur l'active */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg: #0b1220;
+    --surface: #111a2c;
+    --surface-hover: #17223a;
+    --border: #223049;
+    --text: #e6ebf5;
+    --text-muted: #9aa6bc;
+
+    --primary-soft: rgba(37, 99, 235, 0.18);
+    --primary-text: #9dbdff;
+
+    --icon-bg: #1c2e55;
+    --icon-color: #9dbdff;
+
+    --sidebar-bg: #08101f;
+
+    --success: #4ade80;
+    --success-soft: rgba(74, 222, 128, 0.14);
+    --danger: #f87171;
+    --danger-soft: rgba(248, 113, 113, 0.14);
+    --warning: #fb923c;
+    --warning-soft: rgba(251, 146, 60, 0.15);
+    --neutral-soft: #1a2540;
+    --violet: #c4b5fd;
+    --violet-soft: rgba(139, 92, 246, 0.18);
+
+    --chart-bar-muted: #2c3f66;
+
+    --overlay: rgba(0, 0, 0, 0.6);
+    --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-menu: 0 12px 32px rgba(0, 0, 0, 0.45);
+    --shadow-tooltip: 0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-dialog: 0 24px 64px rgba(0, 0, 0, 0.55);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+}
+
+body {
+    font-family:
+        "Inter",
+        system-ui,
+        -apple-system,
+        sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+a {
+    color: var(--primary);
+}
+
+.field {
+    display: grid;
+    gap: 6px;
+}
+
+.field > span,
+.field > label {
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.input {
+    width: 100%;
+    height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+.input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.input.invalid {
+    border-color: var(--danger);
+}
+
+.field-error {
+    color: var(--danger);
+    font-size: 12px;
+}
+
+.alert {
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.alert-error {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
+}
+
+.alert-success {
+    background: var(--success-soft);
+    color: var(--success);
+    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+}
+
+.alert-warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+    border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
+}
+
+.btn {
+    height: 44px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* le spinner indique un envoi en cours, pas un bouton interdit */
+.btn:disabled:has(.spinner) {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.btn-outline {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+}
+
+.btn-outline:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.btn-danger {
+    background: var(--danger-strong);
+    color: var(--on-primary);
+}
+
+.btn-danger:hover:not(:disabled) {
+    filter: brightness(0.92);
+}
+
+.btn-sm {
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--on-primary-faint);
+    border-top-color: var(--on-primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.card-header h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.card-header a {
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.card-header a:hover {
+    text-decoration: underline;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.badge-success {
+    background: var(--success-soft);
+    color: var(--success);
+}
+.badge-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+.badge-warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+.badge-primary {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+.badge-violet {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+.badge-neutral {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+
+.muted {
+    color: var(--text-muted);
+}
+
+.skeleton {
+    border-radius: 6px;
+    background: linear-gradient(
+        90deg,
+        var(--border) 25%,
+        var(--surface-hover) 50%,
+        var(--border) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+.empty {
+    padding: 24px 0;
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+@media print {
+    app-sidebar,
+    app-bottom-nav {
+        display: none !important;
+    }
+
+    /* pas de fond gris de l'application sur le papier */
+    html,
+    body {
+        background: #fff !important;
+    }
+
+    /* le papier reste clair même si l'écran est en thème sombre */
+    :root[data-theme="dark"] {
+        color-scheme: light;
+        --bg: #fff;
+        --surface: #fff;
+        --border: #e3e8f0;
+        --text: #0f172a;
+        --text-muted: #5a6478;
+        --success: #15803d;
+        --success-soft: #e7f6ec;
+        --danger: #b91c1c;
+        --danger-soft: #fdecec;
+        --warning: #c2410c;
+        --warning-soft: #fff1e6;
+        --neutral-soft: #eef1f6;
+    }
+
+    .card {
+        box-shadow: none;
+        break-inside: avoid;
+    }
+}
+
+@page {
+    margin: 8mm;
+}

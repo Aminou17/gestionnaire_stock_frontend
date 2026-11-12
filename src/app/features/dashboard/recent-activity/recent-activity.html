@@ -1,0 +1,81 @@
+<section class="card activity-card">
+    <div class="card-header">
+        <h2>{{ title() }}</h2>
+        <a routerLink="/stock-movements">Historique</a>
+    </div>
+
+    @if (loading()) {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (error()) {
+        <div class="empty">
+            Impossible de charger l'activité.
+            <button type="button" class="btn btn-outline btn-sm" (click)="retry.emit()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <ul>
+            @for (item of items(); track item.type + item.referenceId + item.occurredAt) {
+                <li>
+                    <span class="icon tone-{{ display(item).tone }}">
+                        <app-icon [name]="display(item).icon" [size]="16" />
+                    </span>
+
+                    <div class="text">
+                        @switch (item.type) {
+                            @case ("SALE") {
+                                <strong>Vente #{{ item.referenceId }}</strong>
+                                <small
+                                    >{{ item.userName }} · {{ item.itemsCount }} article{{
+                                        (item.itemsCount ?? 0) > 1 ? "s" : ""
+                                    }}
+                                    · {{ when(item) }}</small
+                                >
+                            }
+                            @case ("REFUND") {
+                                <strong>Remboursement</strong>
+                                <small
+                                    >Vente #{{ item.referenceId }} annulée · {{ when(item) }}</small
+                                >
+                            }
+                            @case ("STOCK_ENTRY") {
+                                <strong>Entrée de stock</strong>
+                                <small
+                                    >{{ item.productName }} · {{ item.quantity }} unité{{
+                                        (item.quantity ?? 0) > 1 ? "s" : ""
+                                    }}
+                                    · {{ when(item) }}</small
+                                >
+                            }
+                            @case ("INVENTORY_ADJUSTMENT") {
+                                <strong>Ajustement d'inventaire</strong>
+                                <small>{{ item.productName }} · {{ when(item) }}</small>
+                            }
+                            @case ("CASH_OPENING") {
+                                <strong>Ouverture de caisse</strong>
+                                <small>Fond de caisse · {{ when(item) }}</small>
+                            }
+                        }
+                    </div>
+
+                    <span
+                        class="value"
+                        [class.positive]="item.type === 'SALE'"
+                        [class.negative]="item.type === 'REFUND'"
+                    >
+                        @if (item.amount !== null) {
+                            {{ item.amount | fcfa: item.type === "SALE" }}
+                        } @else if (item.quantity !== null) {
+                            {{ item.quantity > 0 ? "+" : item.quantity < 0 ? "−" : ""
+                            }}{{ item.quantity < 0 ? -item.quantity : item.quantity }}
+                        }
+                    </span>
+                </li>
+            } @empty {
+                <li class="empty">Aucune activité récente.</li>
+            }
+        </ul>
+    }
+</section>

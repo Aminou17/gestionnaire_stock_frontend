@@ -1,0 +1,9 @@
+.narrow {
+    max-width: 320px;
+}
+
+@media (max-width: 767px) {
+    .narrow {
+        max-width: none;
+    }
+}

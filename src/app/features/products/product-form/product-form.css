@@ -1,0 +1,246 @@
+dialog {
+    width: min(560px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+dialog::backdrop {
+    background: var(--overlay);
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100dvh - 34px);
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+/* la flèche retour ne sert que sur téléphone, où le formulaire prend tout l'écran */
+.back {
+    display: none;
+    width: 40px;
+    height: 40px;
+    margin-left: -10px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    place-items: center;
+    cursor: pointer;
+}
+
+.content {
+    display: grid;
+    gap: 18px;
+    padding: 20px 24px;
+    overflow-y: auto;
+}
+
+.field > span:first-child {
+    font-weight: 600;
+}
+
+.required {
+    font-style: normal;
+    color: var(--danger);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.prices {
+    display: grid;
+    gap: 8px;
+}
+
+.money {
+    position: relative;
+    display: block;
+}
+
+.money .input {
+    padding-right: 32px;
+}
+
+.unit {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.margin {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--success);
+}
+
+.margin.negative {
+    color: var(--danger);
+}
+
+.segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+    background: var(--neutral-soft);
+}
+
+.segmented button {
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.segmented button.selected {
+    background: var(--surface);
+    color: var(--primary-text);
+    box-shadow: var(--shadow-card);
+}
+
+.discount {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--primary-soft);
+}
+
+.discount .input {
+    background: var(--surface);
+}
+
+.range {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.range strong {
+    color: var(--primary-text);
+}
+
+.hint {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.field > label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.new-supplier {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--primary-soft);
+}
+
+.new-supplier .input {
+    background: var(--surface);
+}
+
+.inline-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.field-skeleton {
+    height: 44px;
+}
+
+footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+}
+
+/* Téléphone : le formulaire prend tout l'écran, boutons fixés en bas */
+@media (max-width: 767px) {
+    dialog {
+        width: 100%;
+        max-width: none;
+        height: 100dvh;
+        max-height: none;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+    }
+
+    form {
+        height: 100%;
+        max-height: none;
+    }
+
+    header {
+        padding: 12px 16px;
+    }
+
+    .back {
+        display: grid;
+    }
+
+    .content {
+        flex: 1;
+        align-content: start;
+        padding: 16px;
+    }
+
+    footer {
+        padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    }
+
+    footer .btn:first-child {
+        flex: 0 0 auto;
+        min-width: 116px;
+    }
+
+    footer .btn:last-child {
+        flex: 1;
+    }
+}
+
+/* cibles tactiles de 44 px pour les petits formulaires (catégorie, fournisseur) */
+@media (max-width: 767px) {
+    .inline-actions .btn {
+        height: 44px;
+    }
+}

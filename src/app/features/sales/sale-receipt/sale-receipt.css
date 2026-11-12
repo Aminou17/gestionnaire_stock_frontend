@@ -1,0 +1,109 @@
+:host {
+    display: block;
+}
+
+/* largeur d'un rouleau de caisse, le reste de la feuille reste blanc */
+.receipt {
+    display: grid;
+    gap: 10px;
+    width: 72mm;
+    margin: 0 auto;
+    padding-top: 4mm;
+    color: #000;
+    font-family: "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.receipt header,
+.receipt-thanks {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.receipt header {
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #000;
+}
+
+.receipt-logo {
+    width: auto;
+    max-width: 160px;
+    height: auto;
+    max-height: 80px;
+    margin-bottom: 4px;
+    object-fit: contain;
+}
+
+.receipt-shop {
+    margin-bottom: 4px;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.receipt-gap {
+    height: 6px;
+}
+
+.receipt-policy {
+    margin-top: 4px;
+    font-size: 11px;
+}
+
+.receipt-cancelled {
+    margin-top: 6px;
+    padding: 2px 6px;
+    border: 1px solid #000;
+}
+
+.receipt-items {
+    display: grid;
+    gap: 8px;
+}
+
+.receipt-item {
+    display: grid;
+}
+
+.receipt-name {
+    font-weight: 700;
+}
+
+.receipt-note {
+    padding-left: 12px;
+    font-style: italic;
+}
+
+.receipt-line {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+}
+
+.receipt-item .receipt-line {
+    padding-left: 12px;
+}
+
+.receipt-sums {
+    display: grid;
+    gap: 2px;
+    padding-top: 10px;
+    border-top: 1px dashed #000;
+}
+
+.receipt-total {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid #000;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.receipt-thanks {
+    padding-top: 10px;
+    border-top: 1px dashed #000;
+}

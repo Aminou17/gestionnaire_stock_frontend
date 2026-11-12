@@ -1,0 +1,177 @@
+<a [routerLink]="back.link" class="back">
+    <app-icon name="chevron-left" [size]="18" />
+    {{ back.label }}
+</a>
+
+<app-page-header [title]="data()?.name ?? 'Produit'" section="Stock" />
+
+<section class="card sheet">
+    @if (product.isLoading() && !data()) {
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (product.error()) {
+        <div class="empty">
+            {{ errorMessage() }}
+            @if (notFound()) {
+                <a routerLink="/products" class="btn btn-outline btn-sm">Retour aux produits</a>
+            } @else {
+                <button type="button" class="btn btn-outline btn-sm" (click)="product.reload()">
+                    Réessayer
+                </button>
+            }
+        </div>
+    } @else if (data(); as product) {
+        <dl>
+            <div>
+                <dt>Catégorie</dt>
+                <dd>{{ product.category_name }}</dd>
+            </div>
+            <div>
+                <dt>Prix de vente</dt>
+                <dd class="strong">{{ product.sale_price | fcfa }}</dd>
+            </div>
+            @if (product.pricing_mode === "NEGOTIABLE") {
+                <div>
+                    <dt>Prix minimum</dt>
+                    <dd>{{ product.sale_price - product.max_discount | fcfa }}</dd>
+                </div>
+            }
+            @if (auth.isAdmin()) {
+                <div>
+                    <dt>Prix d'achat</dt>
+                    <dd>{{ product.purchase_price | fcfa }}</dd>
+                </div>
+            }
+            <div>
+                <dt>État</dt>
+                <dd>
+                    @if (product.stock_status === "OUT_OF_STOCK") {
+                        <span class="badge badge-danger">Rupture</span>
+                    } @else if (product.stock_status === "LOW") {
+                        <span class="badge badge-warning">Stock faible</span>
+                    } @else {
+                        <span class="badge badge-success">En stock</span>
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Stock</dt>
+                <dd class="strong stock-{{ product.stock_status }}">
+                    {{ product.theoretical_stock }}
+                </dd>
+            </div>
+            <div>
+                <dt>Seuil d'alerte</dt>
+                <dd>
+                    @if (product.effective_min_stock === null) {
+                        <span class="muted">Non défini</span>
+                    } @else {
+                        {{ product.effective_min_stock }}
+                        @if (product.min_stock === null) {
+                            <span class="muted">(par défaut)</span>
+                        }
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Créé le</dt>
+                <dd>
+                    @if (product.created_at) {
+                        {{ product.created_at | date: "d MMMM y 'à' HH:mm" }}
+                    } @else {
+                        <!-- produit créé avant que la date soit enregistrée -->
+                        <span class="muted">Date inconnue</span>
+                    }
+                </dd>
+            </div>
+        </dl>
+
+        <!-- en bas de la fiche : vendre, et pour l'admin le menu "..." -->
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-primary sell"
+                [disabled]="product.theoretical_stock <= 0"
+                [title]="product.theoretical_stock <= 0 ? 'Produit en rupture' : ''"
+                (click)="sell()"
+            >
+                <app-icon name="cart" [size]="18" />
+                Vendre
+            </button>
+
+            @if (auth.isAdmin()) {
+                <div class="row-menu">
+                    <button
+                        type="button"
+                        class="more-btn"
+                        aria-haspopup="menu"
+                        [attr.aria-expanded]="menuOpen()"
+                        aria-label="Autres actions"
+                        (click)="menuOpen.set(!menuOpen())"
+                    >
+                        <app-icon name="more" />
+                    </button>
+                    @if (menuOpen()) {
+                        <div class="menu" role="menu">
+                            <button type="button" role="menuitem" (click)="addStock()">
+                                <app-icon name="stock-entry" [size]="16" />
+                                Ajouter du stock
+                            </button>
+                            <button type="button" role="menuitem" (click)="edit()">
+                                <app-icon name="edit" [size]="16" />
+                                Modifier
+                            </button>
+                            <button
+                                type="button"
+                                role="menuitem"
+                                class="danger"
+                                (click)="askDelete()"
+                            >
+                                <app-icon name="ban" [size]="16" />
+                                Supprimer
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</section>
+
+@if (data(); as product) {
+    <app-product-movements [productId]="product.id" />
+}
+
+@if (auth.isAdmin()) {
+    <app-product-form (saved)="onSaved()" />
+}
+
+<dialog #confirm class="confirm" (click)="onConfirmBackdrop($event)">
+    <div class="confirm-body">
+        <h2>Supprimer ce produit ?</h2>
+        <p class="muted">
+            « {{ data()?.name }} » n'apparaîtra plus dans la liste ni dans les ventes. Son
+            historique est conservé.
+        </p>
+
+        @if (deleteError()) {
+            <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-outline" (click)="closeConfirm()">Annuler</button>
+            <button
+                type="button"
+                class="btn btn-danger"
+                [disabled]="deleting()"
+                (click)="deleteProduct()"
+            >
+                @if (deleting()) {
+                    <span class="spinner"></span>
+                }
+                Supprimer
+            </button>
+        </div>
+    </div>
+</dialog>

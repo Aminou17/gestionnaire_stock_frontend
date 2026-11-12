@@ -1,0 +1,120 @@
+.banner {
+    height: 100%;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.state {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.tone-primary {
+    background: var(--icon-bg);
+    color: var(--icon-color);
+    border-color: transparent;
+}
+
+.text {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.text strong {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.text small,
+.balance small {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.balance {
+    display: grid;
+    justify-items: end;
+    gap: 2px;
+}
+
+.balance strong {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.new-sale {
+    flex-shrink: 0;
+}
+
+.new-sale.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.link-btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.icon-skeleton {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+.title-skeleton {
+    height: 18px;
+    width: 140px;
+}
+.hint-skeleton {
+    height: 14px;
+    width: 90px;
+    margin-top: 4px;
+}
+
+/* sur téléphone, le bouton passe sous l'état de la caisse, sur toute la largeur */
+@media (max-width: 767px) {
+    .banner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+        padding: 16px;
+    }
+    .balance strong {
+        font-size: 20px;
+    }
+    .new-sale {
+        width: 100%;
+    }
+}

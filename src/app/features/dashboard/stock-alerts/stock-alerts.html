@@ -1,0 +1,41 @@
+<section class="card alerts-card">
+    <div class="card-header">
+        <h2>Alertes de stock</h2>
+        <a [routerLink]="link()">Tout voir</a>
+    </div>
+
+    @if (loading()) {
+        @for (i of [1, 2, 3, 4]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (error()) {
+        <div class="empty">
+            Impossible de charger les alertes.
+            <button type="button" class="btn btn-outline btn-sm" (click)="retry.emit()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <ul>
+            @for (alert of visible(); track alert.id) {
+                <li>
+                    <div class="product">
+                        <strong>{{ alert.name }}</strong>
+                        <small>Seuil minimum : {{ alert.min_stock }}</small>
+                    </div>
+                    @if (alert.theoretical_stock <= 0) {
+                        <span class="badge badge-danger">Rupture</span>
+                    } @else {
+                        <span class="badge badge-warning">
+                            {{ alert.theoretical_stock }} restant{{
+                                alert.theoretical_stock > 1 ? "s" : ""
+                            }}
+                        </span>
+                    }
+                </li>
+            } @empty {
+                <li class="empty">Aucun produit sous le seuil minimum.</li>
+            }
+        </ul>
+    }
+</section>

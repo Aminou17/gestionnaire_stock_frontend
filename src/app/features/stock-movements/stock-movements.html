@@ -1,0 +1,291 @@
+<app-page-header title="Mouvements de stock" section="Stock" />
+
+<!-- Compteurs de la période : cartes sur ordinateur, pastilles sur téléphone -->
+<div class="stats">
+    @for (tab of tabs(); track tab.label) {
+        <button
+            type="button"
+            class="card stat"
+            [class.selected]="type() === tab.value"
+            [attr.aria-pressed]="type() === tab.value"
+            (click)="selectType(tab.value)"
+        >
+            <span class="stat-label">{{ tab.label }}</span>
+            @if (firstLoad()) {
+                <span class="skeleton stat-skeleton"></span>
+            } @else {
+                <strong class="stat-value">{{
+                    tab.count === undefined ? "—" : (tab.count | number)
+                }}</strong>
+                @if (tab.units !== null) {
+                    <small class="muted">
+                        @if (tab.units === undefined) {
+                            —
+                        } @else {
+                            {{ tab.units | number }} unité{{ tab.units > 1 ? "s" : "" }}
+                        }
+                    </small>
+                }
+            }
+            <span class="dot dot-{{ tab.tone }}"></span>
+        </button>
+    }
+</div>
+
+<section class="card list-card">
+    <app-period-filter (changed)="selectRange($event)">
+        @if (productId() !== null) {
+            <button
+                type="button"
+                class="product-filter"
+                (click)="clearProduct()"
+                [attr.aria-label]="'Retirer le filtre ' + productName()"
+            >
+                <span>{{ productName() }}</span>
+                <app-icon name="close" [size]="16" />
+            </button>
+        }
+        <button
+            type="button"
+            class="btn btn-outline export"
+            [disabled]="exporting() || list().length === 0"
+            (click)="exportCsv()"
+        >
+            @if (exporting()) {
+                <span class="spinner"></span>
+            } @else {
+                <app-icon name="download" [size]="16" />
+            }
+            Exporter
+        </button>
+    </app-period-filter>
+
+    @if (exportError()) {
+        <div class="alert alert-error list-error" role="alert">{{ exportError() }}</div>
+    }
+
+    <div class="chips">
+        @for (tab of tabs(); track tab.label) {
+            <button
+                type="button"
+                class="chip"
+                [class.selected]="type() === tab.value"
+                [attr.aria-pressed]="type() === tab.value"
+                (click)="selectType(tab.value)"
+            >
+                {{ tab.short }}
+                <span>{{ tab.count === undefined ? "—" : (tab.count | number) }}</span>
+            </button>
+        }
+    </div>
+
+    @if (firstLoad()) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (movements.error() && list().length === 0) {
+        <div class="empty">
+            {{ errorMessage() }}
+            <div class="empty-actions">
+                <button type="button" class="btn btn-outline btn-sm" (click)="movements.reload()">
+                    Réessayer
+                </button>
+                @if (productId() !== null) {
+                    <button type="button" class="btn btn-outline btn-sm" (click)="clearProduct()">
+                        Voir tous les mouvements
+                    </button>
+                }
+            </div>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty">
+            @if (filtered() || type() !== null) {
+                Aucun mouvement pour ces filtres.
+                <div class="empty-actions">
+                    @if (productId() !== null) {
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            (click)="clearProduct()"
+                        >
+                            Voir tous les mouvements
+                        </button>
+                    }
+                    @if (type() !== null) {
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            (click)="selectType(null)"
+                        >
+                            Tous les types
+                        </button>
+                    }
+                </div>
+            } @else {
+                Aucun mouvement de stock pour le moment. Ils apparaissent avec les entrées de stock
+                et les ventes.
+            }
+        </div>
+    } @else {
+        <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
+        @if (movements.error() && page() === 1) {
+            <div class="alert alert-error list-error" role="alert">
+                {{ errorMessage() }}
+                <button type="button" class="btn btn-outline btn-sm" (click)="movements.reload()">
+                    Réessayer
+                </button>
+            </div>
+        }
+
+        <p class="mobile-count muted">
+            {{ total() | number }} mouvement{{ total() > 1 ? "s" : "" }}
+            @if (selectedUnits() !== null) {
+                · {{ selectedUnits() | number }} unité{{ selectedUnits()! > 1 ? "s" : "" }}
+            }
+        </p>
+
+        <div class="table-wrap">
+            <table [class.reloading]="movements.isLoading() && page() === 1">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Produit</th>
+                        <th>Type</th>
+                        <th class="num">Quantité</th>
+                        <th class="num">Stock après</th>
+                        <th>Origine</th>
+                        @if (auth.isAdmin()) {
+                            <th>Par</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (movement of list(); track movement.id) {
+                        <tr tabindex="0" (click)="open(movement)" (keydown.enter)="open(movement)">
+                            <td>
+                                {{
+                                    isToday(movement.created_at)
+                                        ? "Aujourd'hui, " + (movement.created_at | date: "HH:mm")
+                                        : (movement.created_at | date: "d MMM y, HH:mm")
+                                }}
+                            </td>
+                            <td>
+                                <a
+                                    [routerLink]="['/products', movement.product_id]"
+                                    [state]="backState()"
+                                    class="product-link"
+                                    (click)="$event.stopPropagation()"
+                                    >{{ movement.product_name }}</a
+                                >
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ types[movement.type].tone }}">{{
+                                    types[movement.type].label
+                                }}</span>
+                            </td>
+                            <td class="num quantity">
+                                {{ types[movement.type].sign }}{{ movement.quantity | number }}
+                            </td>
+                            <td class="num stock-after">{{ movement.stock_after | number }}</td>
+                            <td>
+                                @if (saleId(movement); as id) {
+                                    <a
+                                        [routerLink]="['/sales', id]"
+                                        [state]="backState()"
+                                        class="sale-link"
+                                        (click)="$event.stopPropagation()"
+                                        >{{
+                                            movement.type === "SALE" ? "#" + id : "Vente #" + id
+                                        }}</a
+                                    >
+                                } @else if (movement.type === "ENTRY") {
+                                    <span class="muted">Entrée de stock</span>
+                                } @else {
+                                    <span class="muted">Vente d'un autre vendeur</span>
+                                }
+                            </td>
+                            @if (auth.isAdmin()) {
+                                <td class="muted">{{ movement.user_name }}</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Version téléphone : une carte par mouvement -->
+        <ul class="cards">
+            @for (movement of list(); track movement.id) {
+                <li
+                    class="movement-card"
+                    tabindex="0"
+                    (click)="open(movement)"
+                    (keydown.enter)="open(movement)"
+                >
+                    <div class="line">
+                        <a
+                            [routerLink]="['/products', movement.product_id]"
+                            [state]="backState()"
+                            class="product-link"
+                            (click)="$event.stopPropagation()"
+                            >{{ movement.product_name }}</a
+                        >
+                        <strong class="quantity">
+                            {{ types[movement.type].sign }}{{ movement.quantity | number }}
+                        </strong>
+                    </div>
+                    <p class="meta muted">
+                        {{
+                            isToday(movement.created_at)
+                                ? "Aujourd'hui, " + (movement.created_at | date: "HH:mm")
+                                : (movement.created_at | date: "d MMM y, HH:mm")
+                        }}
+                        @if (auth.isAdmin() && movement.user_name) {
+                            · {{ movement.user_name }}
+                        }
+                        @if (saleId(movement); as id) {
+                            ·
+                            <a
+                                [routerLink]="['/sales', id]"
+                                [state]="backState()"
+                                class="sale-link"
+                                (click)="$event.stopPropagation()"
+                                >{{ movement.type === "SALE" ? "#" + id : "Vente #" + id }}</a
+                            >
+                        }
+                    </p>
+                    <div class="line">
+                        <span class="badge badge-{{ types[movement.type].tone }}">{{
+                            types[movement.type].label
+                        }}</span>
+                        <span class="muted after">
+                            Stock : <strong>{{ movement.stock_after | number }}</strong>
+                        </span>
+                    </div>
+                </li>
+            }
+        </ul>
+
+        <!-- en vue, ce repère déclenche le chargement des 20 mouvements suivants -->
+        @if (hasMore()) {
+            <div #sentinel class="more">
+                @if (loadingMore()) {
+                    <span class="spinner"></span>
+                    Chargement…
+                } @else if (movements.error()) {
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="movements.reload()"
+                    >
+                        Réessayer
+                    </button>
+                }
+            </div>
+        }
+    }
+</section>
+
+<app-movement-detail #detail [movement]="selected()" [backState]="backState()" />

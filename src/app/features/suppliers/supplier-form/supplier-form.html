@@ -1,0 +1,101 @@
+<dialog
+    #dialog
+    class="confirm"
+    aria-labelledby="supplier-form-title"
+    (click)="onBackdrop($event)"
+    (cancel)="onCancel($event)"
+>
+    <form class="confirm-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2 id="supplier-form-title">
+            {{ editing() ? "Modifier le fournisseur" : "Nouveau fournisseur" }}
+        </h2>
+
+        <label class="field">
+            <span>Nom du fournisseur</span>
+            <input
+                #nameInput
+                class="input"
+                type="text"
+                formControlName="name"
+                placeholder="Ex. Bazin Import Brazzaville"
+                maxlength="100"
+                autocomplete="off"
+                [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
+                [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+                <small class="field-error" role="alert">Le nom est obligatoire.</small>
+            }
+        </label>
+
+        <label class="field">
+            <span>Personne à contacter <small class="muted">(facultatif)</small></span>
+            <input
+                class="input"
+                type="text"
+                formControlName="contact"
+                placeholder="Ex. Moussa Traoré"
+                maxlength="100"
+                autocomplete="off"
+            />
+        </label>
+
+        <div class="pair">
+            <label class="field">
+                <span>Téléphone <small class="muted">(facultatif)</small></span>
+                <input
+                    class="input"
+                    type="tel"
+                    formControlName="telephone"
+                    placeholder="Ex. +242 06 123 45 67"
+                    maxlength="50"
+                    autocomplete="off"
+                />
+            </label>
+
+            <label class="field">
+                <span>Email <small class="muted">(facultatif)</small></span>
+                <input
+                    class="input"
+                    type="email"
+                    formControlName="email"
+                    placeholder="Ex. contact@tissus.com"
+                    maxlength="100"
+                    autocomplete="off"
+                    [class.invalid]="form.controls.email.touched && form.controls.email.invalid"
+                    [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+                />
+                @if (form.controls.email.touched && form.controls.email.invalid) {
+                    <small class="field-error" role="alert">Adresse email invalide.</small>
+                }
+            </label>
+        </div>
+
+        <label class="field">
+            <span>Adresse <small class="muted">(facultative)</small></span>
+            <textarea
+                class="input"
+                rows="2"
+                formControlName="address"
+                maxlength="500"
+                placeholder="Ex. Marché Total, Brazzaville"
+            ></textarea>
+        </label>
+
+        @if (formError()) {
+            <div class="alert alert-error" role="alert">{{ formError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="close()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                {{ editing() ? "Enregistrer" : "Créer" }}
+            </button>
+        </div>
+    </form>
+</dialog>

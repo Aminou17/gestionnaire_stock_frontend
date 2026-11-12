@@ -1,0 +1,318 @@
+<app-page-header title="Catégories" section="Stock">
+    @if (auth.isAdmin()) {
+        <button type="button" class="btn btn-primary new-category" (click)="newCategory()">
+            <app-icon name="plus" [size]="18" />
+            <span>Nouvelle catégorie</span>
+        </button>
+    }
+</app-page-header>
+
+<section class="card list-card">
+    <div class="toolbar">
+        <label class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Rechercher une catégorie…"
+                aria-label="Rechercher une catégorie"
+                [value]="search()"
+                (input)="search.set($any($event.target).value)"
+            />
+        </label>
+
+        <!-- seul l'admin voit les catégories supprimées -->
+        @if (auth.isAdmin()) {
+            <div class="chips" role="group" aria-label="Afficher">
+                <button
+                    type="button"
+                    class="chip"
+                    [class.selected]="view() === 'active'"
+                    [attr.aria-pressed]="view() === 'active'"
+                    (click)="selectView('active')"
+                >
+                    Actives <span>{{ activeCount() }}</span>
+                </button>
+                <button
+                    type="button"
+                    class="chip"
+                    [class.selected]="view() === 'deleted'"
+                    [attr.aria-pressed]="view() === 'deleted'"
+                    (click)="selectView('deleted')"
+                >
+                    Supprimées <span>{{ deletedCount() }}</span>
+                </button>
+            </div>
+        }
+    </div>
+
+    @if (categories.isLoading() && all().length === 0) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (categories.error() && all().length === 0) {
+        <div class="empty">
+            Impossible de charger les catégories.
+            <button type="button" class="btn btn-outline btn-sm" (click)="categories.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty">
+            @if (search()) {
+                Aucune catégorie ne correspond à « {{ search() }} ».
+                <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
+                    Effacer la recherche
+                </button>
+            } @else if (view() === "deleted") {
+                Aucune catégorie supprimée.
+            } @else {
+                Aucune catégorie pour le moment.
+                @if (auth.isAdmin()) {
+                    <button type="button" class="btn btn-outline btn-sm" (click)="newCategory()">
+                        Créer une catégorie
+                    </button>
+                }
+            }
+        </div>
+    } @else {
+        <!-- erreur au rechargement : la liste déjà affichée reste visible -->
+        @if (categories.error()) {
+            <div class="alert alert-error list-error" role="alert">
+                Impossible de recharger les catégories.
+                <button type="button" class="btn btn-outline btn-sm" (click)="categories.reload()">
+                    Réessayer
+                </button>
+            </div>
+        }
+        @if (restoreError()) {
+            <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>
+        }
+        <ul class="rows" [class.reloading]="categories.isLoading()">
+            @for (category of list(); track category.id) {
+                <li
+                    class="row"
+                    [class.inactive]="!category.is_active"
+                    (click)="openCategory(category)"
+                >
+                    <span class="icon"><app-icon name="tag" [size]="18" /></span>
+
+                    <div class="text">
+                        <button
+                            type="button"
+                            class="name"
+                            [attr.aria-label]="'Voir la fiche de ' + category.name"
+                        >
+                            {{ category.name }}
+                        </button>
+                        <small class="muted">
+                            @if (category.product_count === 0) {
+                                Aucun produit
+                            } @else {
+                                {{ category.product_count }} produit{{
+                                    category.product_count > 1 ? "s" : ""
+                                }}
+                            }
+                        </small>
+                    </div>
+
+                    @if (!category.is_active && auth.isAdmin()) {
+                        <!-- seul l'admin voit les supprimées : il peut les restaurer -->
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm restore-btn"
+                            [disabled]="restoringId() !== null"
+                            [attr.aria-label]="'Restaurer ' + category.name"
+                            (click)="$event.stopPropagation(); restoreCategory(category)"
+                        >
+                            @if (restoringId() === category.id) {
+                                <span class="spinner"></span>
+                            } @else {
+                                <app-icon name="undo" [size]="16" />
+                            }
+                            Restaurer
+                        </button>
+                    } @else if (!category.is_active) {
+                        <span class="badge badge-neutral">Supprimée</span>
+                    } @else if (auth.isAdmin()) {
+                        <div class="row-menu" (click)="$event.stopPropagation()">
+                            <button
+                                type="button"
+                                class="more-btn"
+                                aria-haspopup="menu"
+                                [attr.aria-expanded]="menuFor() === category.id"
+                                [attr.aria-label]="'Actions pour ' + category.name"
+                                (click)="toggleMenu(category.id)"
+                            >
+                                <app-icon name="more" />
+                            </button>
+                            @if (menuFor() === category.id) {
+                                <div class="menu" role="menu">
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        (click)="editCategory(category)"
+                                    >
+                                        <app-icon name="edit" [size]="16" />
+                                        Modifier
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        class="danger"
+                                        (click)="askDelete(category)"
+                                    >
+                                        <app-icon name="trash" [size]="16" />
+                                        Supprimer
+                                    </button>
+                                </div>
+                            }
+                        </div>
+                    } @else {
+                        <app-icon name="chevron-right" [size]="18" class="chevron" />
+                    }
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+@if (auth.isAdmin()) {
+    <button type="button" class="fab" (click)="newCategory()" aria-label="Nouvelle catégorie">
+        <app-icon name="plus" [size]="24" />
+    </button>
+}
+
+<dialog
+    #formBox
+    class="confirm"
+    aria-labelledby="category-form-title"
+    (click)="onFormBackdrop($event)"
+    (cancel)="onDialogCancel($event)"
+>
+    <form class="confirm-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2 id="category-form-title">
+            {{ editing() ? "Modifier la catégorie" : "Nouvelle catégorie" }}
+        </h2>
+
+        <label class="field">
+            <span>Nom de la catégorie</span>
+            <input
+                #nameInput
+                class="input"
+                type="text"
+                formControlName="name"
+                placeholder="Ex. Bazin riche"
+                maxlength="100"
+                autocomplete="off"
+                [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
+                [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+                <small class="field-error" role="alert">Le nom est obligatoire.</small>
+            }
+        </label>
+
+        <label class="field">
+            <span>Description <small class="muted">(facultative)</small></span>
+            <textarea
+                class="input"
+                rows="3"
+                formControlName="description"
+                maxlength="500"
+                placeholder="Ex. Bazins riches teints à la main, toutes couleurs"
+            ></textarea>
+        </label>
+
+        @if (formError()) {
+            <div class="alert alert-error" role="alert">{{ formError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="saving()"
+                (click)="closeForm()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                {{ editing() ? "Enregistrer" : "Créer" }}
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog
+    #confirmBox
+    class="confirm"
+    aria-labelledby="category-delete-title"
+    (click)="onConfirmBackdrop($event)"
+    (cancel)="onDialogCancel($event)"
+>
+    <div class="confirm-body">
+        <h2 id="category-delete-title">
+            @if (deleteBlocked()) {
+                Impossible de supprimer « {{ toDelete()?.name }} »
+            } @else {
+                Supprimer cette catégorie ?
+            }
+        </h2>
+
+        @if (deleteBlocked()) {
+            <!-- le backend refuserait : on l'explique tout de suite -->
+            <p class="muted">
+                « {{ toDelete()?.name }} » contient {{ toDelete()?.product_count }} produit{{
+                    (toDelete()?.product_count ?? 0) > 1 ? "s" : ""
+                }}. Changez-{{ (toDelete()?.product_count ?? 0) > 1 ? "les" : "le" }} de catégorie
+                avant de la supprimer.
+            </p>
+        } @else {
+            <p class="muted">
+                « {{ toDelete()?.name }} » ne sera plus proposée pour les nouveaux produits. Son
+                historique est conservé.
+            </p>
+        }
+
+        @if (deleteError()) {
+            <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            @if (deleteBlocked()) {
+                <button type="button" class="btn btn-outline" (click)="closeConfirm()">
+                    Fermer
+                </button>
+                <button type="button" class="btn btn-primary" (click)="showProducts()">
+                    Voir les produits
+                </button>
+            } @else {
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="deleting()"
+                    (click)="closeConfirm()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    [disabled]="deleting()"
+                    (click)="deleteCategory()"
+                >
+                    @if (deleting()) {
+                        <span class="spinner"></span>
+                    }
+                    Supprimer
+                </button>
+            }
+        </div>
+    </div>
+</dialog>

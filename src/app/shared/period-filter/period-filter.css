@@ -1,0 +1,87 @@
+:host {
+    display: block;
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.period {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.period .input {
+    width: 220px;
+    cursor: pointer;
+}
+
+.custom-range {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 12px 16px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-hover);
+}
+
+.date-field {
+    display: grid;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.date-field .input {
+    width: 180px;
+    cursor: pointer;
+}
+
+.range-error {
+    flex-basis: 100%;
+    margin: 0;
+}
+
+@media (max-width: 767px) {
+    .toolbar {
+        padding: 0;
+        border: 0;
+    }
+
+    .period {
+        flex: 1 1 100%;
+    }
+
+    .period .input {
+        flex: 1;
+        width: auto;
+    }
+
+    /* les deux dates côte à côte, sous le sélecteur */
+    .custom-range {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+    }
+
+    .date-field .input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .range-error {
+        grid-column: 1 / -1;
+    }
+}

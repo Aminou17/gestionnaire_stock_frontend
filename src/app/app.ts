@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Component, inject } from "@angular/core";
+import { RouterOutlet } from "@angular/router";
+
+import { ThemeService } from "./core/theme/theme.service";
 
 @Component({
-  imports: [RouterOutlet],
-  selector: 'app-root',
-  styleUrl: './app.css',
-  templateUrl: './app.html',
+    selector: "app-root",
+    imports: [RouterOutlet],
+    templateUrl: "./app.html",
+    styleUrl: "./app.css",
 })
 export class App {
-  protected readonly title = signal('gestionnaire_stock_frontend');
+    // applique le thème enregistré dès le démarrage
+    private theme = inject(ThemeService);
 }

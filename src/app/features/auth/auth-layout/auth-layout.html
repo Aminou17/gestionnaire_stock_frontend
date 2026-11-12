@@ -1,0 +1,47 @@
+<div class="page">
+    <aside class="brand-panel">
+        <div class="brand">
+            <span class="brand-icon">
+                <svg
+                    viewBox="0 0 24 24"
+                    width="22"
+                    height="22"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                >
+                    <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                    />
+                    <path d="M3.3 7 12 12l8.7-5" />
+                    <path d="M12 22V12" />
+                </svg>
+            </span>
+            <div>
+                <div class="brand-name">Gestionnaire</div>
+                <div class="brand-sub">de Stock</div>
+            </div>
+        </div>
+
+        <div class="pitch">
+            <h2>Votre boutique, sous contrôle.</h2>
+            <p>Ventes, caisse et stock au même endroit, avec des alertes avant la rupture.</p>
+            <ul>
+                <li>Suivi des ventes et de la caisse en temps réel</li>
+                <li>Alertes quand un produit passe sous son seuil</li>
+                <li>Inventaires et journal d'audit complets</li>
+            </ul>
+        </div>
+
+        <footer>© {{ year }} Awa Bazin · Vente de bazin</footer>
+    </aside>
+
+    <main class="content">
+        <div class="card">
+            <img src="logo.png" alt="Awa Bazin" width="470" height="480" class="logo" />
+            <router-outlet />
+        </div>
+    </main>
+</div>

@@ -1,0 +1,177 @@
+<app-page-header
+    [title]="title()"
+    section="Caisse"
+    back="/cash/sessions"
+    backLabel="Retour à l'historique"
+/>
+
+<h1 class="print-title">Caisse du {{ title() }}</h1>
+
+@if (session.isLoading() && !data()) {
+    <div class="layout" aria-busy="true">
+        <section class="card summary">
+            <div class="skeleton sk-badge"></div>
+            <div class="skeleton sk-total"></div>
+        </section>
+        <section class="card panel">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </section>
+    </div>
+} @else if (!data()) {
+    <section class="card empty">
+        <p>{{ errorMessage() }}</p>
+        @if (notFound()) {
+            <a routerLink="/cash/sessions" class="btn btn-outline btn-sm">Retour à l'historique</a>
+        } @else {
+            <button type="button" class="btn btn-outline btn-sm" (click)="session.reload()">
+                Réessayer
+            </button>
+        }
+    </section>
+} @else if (data(); as cash) {
+    <div class="layout">
+        <div class="main">
+            <section class="card summary">
+                <div class="summary-text">
+                    <span
+                        class="badge"
+                        [class]="cash.status === 'OPEN' ? 'badge-success' : 'badge-neutral'"
+                    >
+                        {{ cash.status === "OPEN" ? "Ouverte" : "Clôturée" }}
+                    </span>
+                    @if (cash.status === "CLOSED") {
+                        <small class="muted">Écart constaté à la clôture</small>
+                        <strong
+                            class="gap"
+                            [class.in]="cash.difference! > 0"
+                            [class.out]="cash.difference! < 0"
+                        >
+                            {{ cash.difference | fcfa: true }}
+                        </strong>
+                        @if (cash.closing_note) {
+                            <p class="note">Explication : {{ cash.closing_note }}</p>
+                        } @else if (cash.explanation_pending) {
+                            <span class="badge badge-warning">Écart à expliquer</span>
+                            @if (canExplain()) {
+                                <button
+                                    type="button"
+                                    class="btn btn-primary explain"
+                                    (click)="closeDialog.openExplain(cash.id, cash.difference!)"
+                                >
+                                    Expliquer l'écart
+                                </button>
+                            }
+                        }
+                    } @else {
+                        <small class="muted">
+                            Cette caisse est encore ouverte. L'écart sera calculé à la clôture.
+                        </small>
+                    }
+                </div>
+                <button type="button" class="btn btn-outline print" (click)="print()">
+                    <app-icon name="printer" [size]="18" />
+                    Imprimer
+                </button>
+            </section>
+
+            <section class="card panel">
+                <div class="card-header">
+                    <h2>Mouvements ({{ cash.movements.length }})</h2>
+                </div>
+                <app-cash-movement-list
+                    backLabel="Journée de caisse"
+                    [movements]="cash.movements"
+                    emptyText="Aucun mouvement sur cette caisse."
+                />
+            </section>
+        </div>
+
+        <aside class="side">
+            <section class="card panel">
+                <div class="card-header">
+                    <h2>Déroulement</h2>
+                </div>
+                <dl class="lines">
+                    <div>
+                        <dt>Ouverte à</dt>
+                        <dd>{{ cash.opened_at | date: "HH:mm" }}</dd>
+                    </div>
+                    <div>
+                        <dt>Ouverte par</dt>
+                        <dd>{{ cash.opened_by_name ?? "—" }}</dd>
+                    </div>
+                    @if (cash.closed_at) {
+                        <div>
+                            <dt>Clôturée à</dt>
+                            <dd>{{ cash.closed_at | date: "HH:mm" }}</dd>
+                        </div>
+                        <div>
+                            <dt>Clôturée par</dt>
+                            <dd>{{ cash.closed_by_name ?? "—" }}</dd>
+                        </div>
+                    }
+                </dl>
+            </section>
+
+            <section class="card panel">
+                <div class="card-header">
+                    <h2>Montants</h2>
+                </div>
+                @if (cash.blind) {
+                    <p class="muted blind-note">
+                        Clôture à l'aveugle : les montants seront visibles après la clôture.
+                    </p>
+                } @else {
+                    <dl class="lines">
+                        <div>
+                            <dt>Fond de caisse</dt>
+                            <dd>{{ cash.opening_amount | fcfa }}</dd>
+                        </div>
+                        <div>
+                            <dt>Ventes en espèces</dt>
+                            <dd class="in">{{ summary().sales | fcfa }}</dd>
+                        </div>
+                        @if (summary().deposits > 0) {
+                            <div>
+                                <dt>Argent ajouté</dt>
+                                <dd class="in">{{ summary().deposits | fcfa }}</dd>
+                            </div>
+                        }
+                        @if (summary().refunds > 0) {
+                            <div>
+                                <dt>Remboursements</dt>
+                                <dd class="out">−{{ summary().refunds | fcfa }}</dd>
+                            </div>
+                        }
+                        @if (summary().expenses > 0) {
+                            <div>
+                                <dt>Dépenses</dt>
+                                <dd class="out">−{{ summary().expenses | fcfa }}</dd>
+                            </div>
+                        }
+                        @if (summary().withdrawals > 0) {
+                            <div>
+                                <dt>Retraits</dt>
+                                <dd class="out">−{{ summary().withdrawals | fcfa }}</dd>
+                            </div>
+                        }
+                        @if (cash.status === "CLOSED") {
+                            <div class="total">
+                                <dt>Montant attendu</dt>
+                                <dd>{{ cash.theoretical_amount | fcfa }}</dd>
+                            </div>
+                            <div class="total">
+                                <dt>Montant compté</dt>
+                                <dd>{{ cash.actual_amount | fcfa }}</dd>
+                            </div>
+                        }
+                    </dl>
+                }
+            </section>
+        </aside>
+    </div>
+}
+
+<app-close-cash-dialog #closeDialog (closed)="session.reload()" />

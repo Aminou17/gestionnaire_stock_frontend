@@ -1,0 +1,62 @@
+<dialog #dialog (click)="onBackdropClick($event)">
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2>{{ texts().title }}</h2>
+        <p class="muted">{{ texts().hint }}</p>
+
+        @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+        }
+
+        <label class="field">
+            <span>Montant (F)</span>
+            <input
+                class="input"
+                type="number"
+                min="1"
+                step="500"
+                inputmode="numeric"
+                formControlName="amount"
+                [class.invalid]="form.controls.amount.touched && form.controls.amount.invalid"
+            />
+            @if (form.controls.amount.touched && form.controls.amount.invalid) {
+                <small class="field-error">Le montant doit être supérieur à 0.</small>
+            }
+        </label>
+
+        <label class="field">
+            <span>Motif (facultatif)</span>
+            <select class="input" formControlName="category">
+                <option value="">Aucun motif</option>
+                @for (reason of reasons(); track reason.value) {
+                    <option [value]="reason.value">{{ reason.label }}</option>
+                }
+            </select>
+        </label>
+
+        <label class="field">
+            <span>Précision{{ reasonRequired() ? "" : " (facultatif)" }}</span>
+            <input
+                class="input"
+                type="text"
+                maxlength="200"
+                autocomplete="off"
+                formControlName="reason"
+                placeholder="Ex. : taxi pour aller chercher le tissu"
+                [class.invalid]="reasonMissing()"
+            />
+            @if (reasonMissing()) {
+                <small class="field-error">Précisez la raison du mouvement.</small>
+            }
+        </label>
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" (click)="close()">Annuler</button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                {{ texts().button }}
+            </button>
+        </div>
+    </form>
+</dialog>

@@ -1,0 +1,85 @@
+<app-page-header
+    title="Stock"
+    subtitle="Seuil d'alerte des produits"
+    section="Paramètres"
+    back="/settings"
+    backLabel="Retour aux paramètres"
+/>
+
+<form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="section-head">
+        <span class="section-icon"><app-icon name="package" [size]="20" /></span>
+        <div>
+            <h2>Seuil d'alerte général</h2>
+            <p class="muted">
+                Un produit sans seuil propre passe en Stock faible à partir de cette quantité. Un
+                seuil défini sur la fiche du produit reste prioritaire.
+            </p>
+        </div>
+    </div>
+
+    @if (settings.isLoading() && !settings.hasValue()) {
+        <div class="skeleton field-skeleton"></div>
+    } @else if (settings.error() && !settings.hasValue()) {
+        <div class="alert alert-error load-error" role="alert">
+            Impossible de charger le seuil d'alerte.
+            <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <label class="field threshold">
+            <span>Quantité minimale</span>
+            <input
+                class="input"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                step="1"
+                formControlName="minStock"
+                placeholder="Ex. 5"
+                [class.invalid]="invalid()"
+                [attr.aria-invalid]="invalid()"
+            />
+            @if (invalid()) {
+                <small class="field-error" role="alert">
+                    Indiquez un nombre entier positif ou nul.
+                </small>
+            } @else if (settings.value() === null) {
+                <small class="muted">Aucun seuil général n'est encore défini.</small>
+            }
+        </label>
+
+        @if (message(); as message) {
+            <div
+                class="alert"
+                [class.alert-success]="message.ok"
+                [class.alert-error]="!message.ok"
+                [attr.role]="message.ok ? 'status' : 'alert'"
+            >
+                {{ message.text }}
+            </div>
+        }
+
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="saving() || form.pristine"
+                (click)="cancel()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving() || form.pristine">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer
+            </button>
+        </div>
+
+        <app-settings-history [actions]="['STOCK_SETTINGS_UPDATED']" [version]="saveCount()" />
+    }
+</form>
+
+<app-unsaved-dialog />

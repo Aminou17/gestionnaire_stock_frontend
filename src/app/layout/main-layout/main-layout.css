@@ -1,0 +1,29 @@
+main {
+    margin-left: 240px;
+    min-height: 100vh;
+    padding: 28px 28px 40px;
+    max-width: 1600px;
+}
+
+@media (max-width: 1023px) {
+    main {
+        margin-left: 0;
+        padding: 20px 20px 32px;
+    }
+}
+
+@media (max-width: 767px) {
+    /* place pour la barre de navigation du bas */
+    main {
+        padding: 16px 16px calc(var(--bottom-nav-height) + 28px + env(safe-area-inset-bottom));
+    }
+}
+
+/* à l'impression on ne garde que le contenu de la page */
+@media print {
+    main {
+        margin: 0;
+        padding: 0;
+        min-height: 0;
+    }
+}

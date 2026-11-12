@@ -1,0 +1,14 @@
+@if (change.error()) {
+    <p class="history muted">Historique indisponible.</p>
+} @else if (change.hasValue()) {
+    <p class="history muted">
+        @if (change.value(); as last) {
+            Dernière modification le {{ last.created_at | date: "d MMMM y 'à' HH:mm" }}
+            @if (last.user_name) {
+                par {{ last.user_name }}
+            }
+        } @else {
+            Jamais modifié depuis la mise en place du journal.
+        }
+    </p>
+}

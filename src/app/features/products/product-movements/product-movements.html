@@ -1,0 +1,57 @@
+<section class="card movements-card">
+    <div class="card-header">
+        <h2>Derniers mouvements</h2>
+        @if (total() > 0) {
+            <a routerLink="/stock-movements" [queryParams]="{ productId: productId() }"
+                >Tout voir ({{ total() | number }})</a
+            >
+        }
+    </div>
+
+    @if (movements.isLoading() && !movements.hasValue()) {
+        @for (i of [1, 2, 3]; track i) {
+            <div class="skeleton row-skeleton"></div>
+        }
+    } @else if (movements.error()) {
+        <div class="empty">
+            {{ errorMessage() }}
+            <button type="button" class="btn btn-outline btn-sm" (click)="movements.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <ul>
+            @for (movement of list(); track movement.id) {
+                <li tabindex="0" (click)="open(movement)" (keydown.enter)="open(movement)">
+                    <span class="badge badge-{{ types[movement.type].tone }}">{{
+                        types[movement.type].label
+                    }}</span>
+                    <span class="when muted">
+                        {{ movement.created_at | date: "d MMM y, HH:mm" }}
+                        @if (movement.type !== "ENTRY" && movement.reference_id) {
+                            ·
+                            <a
+                                (click)="$event.stopPropagation()"
+                                [routerLink]="['/sales', movement.reference_id]"
+                                [state]="backState()"
+                                >{{
+                                    movement.type === "SALE"
+                                        ? "#" + movement.reference_id
+                                        : "Vente #" + movement.reference_id
+                                }}</a
+                            >
+                        }
+                    </span>
+                    <strong class="quantity">
+                        {{ types[movement.type].sign }}{{ movement.quantity | number }}
+                    </strong>
+                    <span class="after muted">Stock {{ movement.stock_after | number }}</span>
+                </li>
+            } @empty {
+                <li class="empty muted">Aucun mouvement pour ce produit.</li>
+            }
+        </ul>
+    }
+</section>
+
+<app-movement-detail #detail [movement]="selected()" [backState]="backState()" />

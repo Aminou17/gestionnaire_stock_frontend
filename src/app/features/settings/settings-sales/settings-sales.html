@@ -1,0 +1,110 @@
+<app-page-header
+    title="Ventes"
+    subtitle="Numérotation des tickets et remise par défaut"
+    section="Paramètres"
+    [back]="backUrl"
+    [backLabel]="back.label"
+/>
+
+<form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <div class="section-head">
+        <span class="section-icon"><app-icon name="cart" [size]="20" /></span>
+        <div>
+            <h2>Réglages des ventes</h2>
+            <p class="muted">
+                Ces réglages s'appliquent aux tickets et à la création des produits.
+            </p>
+        </div>
+    </div>
+
+    @if (settings.isLoading() && !settings.hasValue()) {
+        @for (i of [1, 2]; track i) {
+            <div class="skeleton field-skeleton"></div>
+        }
+    } @else if (settings.error() && !settings.hasValue()) {
+        <div class="alert alert-error load-error" role="alert">
+            Impossible de charger les réglages des ventes.
+            <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else {
+        <label class="field narrow">
+            <span>Préfixe du ticket <small class="muted">(facultatif)</small></span>
+            <input
+                class="input"
+                type="text"
+                formControlName="ticketPrefix"
+                maxlength="10"
+                placeholder="Ex. AB"
+                autocomplete="off"
+                [class.invalid]="invalid('ticketPrefix')"
+                [attr.aria-invalid]="invalid('ticketPrefix')"
+            />
+            @if (invalid("ticketPrefix")) {
+                <small class="field-error" role="alert">
+                    10 lettres ou chiffres au maximum, sans espace.
+                </small>
+            } @else {
+                <small class="muted">Le ticket portera le numéro {{ example() }}.</small>
+            }
+        </label>
+
+        <label class="field narrow">
+            <span>Remise maximale par défaut <small class="muted">(facultative)</small></span>
+            <input
+                class="input"
+                type="number"
+                inputmode="numeric"
+                min="0"
+                step="1"
+                formControlName="defaultMaxDiscount"
+                placeholder="Ex. 500"
+                [class.invalid]="invalid('defaultMaxDiscount')"
+                [attr.aria-invalid]="invalid('defaultMaxDiscount')"
+            />
+            @if (invalid("defaultMaxDiscount")) {
+                <small class="field-error" role="alert">
+                    Indiquez un montant entier positif ou nul, en francs.
+                </small>
+            } @else {
+                <small class="muted">
+                    Proposée quand vous créez un produit négociable. Chaque produit garde sa propre
+                    remise.
+                </small>
+            }
+        </label>
+
+        @if (message(); as message) {
+            <div
+                class="alert"
+                [class.alert-success]="message.ok"
+                [class.alert-error]="!message.ok"
+                [attr.role]="message.ok ? 'status' : 'alert'"
+            >
+                {{ message.text }}
+            </div>
+        }
+
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="saving() || form.pristine"
+                (click)="cancel()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving() || form.pristine">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer
+            </button>
+        </div>
+
+        <app-settings-history [actions]="['SALES_SETTINGS_UPDATED']" [version]="saveCount()" />
+    }
+</form>
+
+<app-unsaved-dialog />

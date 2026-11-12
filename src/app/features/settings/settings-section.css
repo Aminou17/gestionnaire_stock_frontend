@@ -1,0 +1,81 @@
+/* mise en page commune aux sous-pages des paramètres */
+
+:host {
+    display: grid;
+    gap: 16px;
+}
+
+.section {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 720px;
+    padding: 24px;
+}
+
+.section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.section-icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.section-head h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.section-head p {
+    margin: 4px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.field-skeleton {
+    height: 64px;
+}
+
+.load-error {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+@media (max-width: 767px) {
+    .section {
+        padding: 16px;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions .btn {
+        width: 100%;
+    }
+
+    .load-error .btn-sm {
+        height: 44px;
+    }
+}

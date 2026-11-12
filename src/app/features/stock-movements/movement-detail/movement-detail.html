@@ -1,0 +1,75 @@
+<dialog #dialog class="detail" (click)="onBackdrop($event)">
+    @if (movement(); as movement) {
+        <div class="detail-body">
+            <div class="detail-head">
+                <h2>Mouvement n° {{ movement.id }}</h2>
+                <span class="badge badge-{{ types[movement.type].tone }}">{{
+                    types[movement.type].label
+                }}</span>
+            </div>
+
+            <dl>
+                <div>
+                    <dt>Produit</dt>
+                    <dd>
+                        <a
+                            [routerLink]="['/products', movement.product_id]"
+                            [state]="backState()"
+                            class="sale-link"
+                            >{{ movement.product_name }}</a
+                        >
+                    </dd>
+                </div>
+                <div>
+                    <dt>Date</dt>
+                    <dd>{{ movement.created_at | date: "d MMMM y 'à' HH:mm" }}</dd>
+                </div>
+                <div>
+                    <dt>Quantité</dt>
+                    <dd class="strong">
+                        {{ types[movement.type].sign }}{{ movement.quantity | number }}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Stock avant</dt>
+                    <dd>{{ stockBefore() | number }}</dd>
+                </div>
+                <div>
+                    <dt>Stock après</dt>
+                    <dd class="strong">{{ movement.stock_after | number }}</dd>
+                </div>
+                @if (auth.isAdmin() && movement.user_name) {
+                    <div>
+                        <dt>Par</dt>
+                        <dd>{{ movement.user_name }}</dd>
+                    </div>
+                }
+                <div>
+                    <dt>Origine</dt>
+                    <dd>
+                        @if (saleId(movement); as id) {
+                            <a
+                                [routerLink]="['/sales', id]"
+                                [state]="backState()"
+                                class="sale-link"
+                                >{{
+                                    movement.type === "SALE"
+                                        ? "Vente #" + id
+                                        : "Remboursement de la vente #" + id
+                                }}</a
+                            >
+                        } @else if (movement.type === "ENTRY") {
+                            Entrée de stock
+                        } @else {
+                            <span class="muted">Vente d'un autre vendeur</span>
+                        }
+                    </dd>
+                </div>
+            </dl>
+
+            <div class="detail-actions">
+                <button type="button" class="btn btn-outline" (click)="close()">Fermer</button>
+            </div>
+        </div>
+    }
+</dialog>

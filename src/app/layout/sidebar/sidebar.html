@@ -1,0 +1,39 @@
+<aside class="sidebar" [class.open]="layout.sidebarOpen()">
+    <div class="brand">
+        <span class="brand-icon"><app-icon name="box" [size]="20" /></span>
+        <div>
+            <div class="brand-name">Gestionnaire</div>
+            <div class="brand-sub">de Stock</div>
+        </div>
+        <button type="button" class="close" (click)="close()" aria-label="Fermer le menu">
+            <app-icon name="close" />
+        </button>
+    </div>
+
+    <nav>
+        @for (section of sections(); track $index) {
+            @if (section.title) {
+                <p class="section-title">{{ section.title }}</p>
+            }
+            @for (item of section.items; track item.path) {
+                <a [routerLink]="item.path" routerLinkActive="active" (click)="close()">
+                    <app-icon [name]="item.icon" />
+                    <span>{{ item.label }}</span>
+                    @if (item.path === "/alerts" && alerts.count() > 0) {
+                        <span class="count">{{ alerts.count() }}</span>
+                    }
+                </a>
+            }
+        }
+    </nav>
+
+    <button type="button" class="theme" (click)="theme.toggle()">
+        <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" />
+        <span>Mode sombre</span>
+        <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
+    </button>
+</aside>
+
+@if (layout.sidebarOpen()) {
+    <div class="overlay" (click)="close()"></div>
+}

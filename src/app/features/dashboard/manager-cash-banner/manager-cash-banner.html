@@ -1,0 +1,50 @@
+<section class="card banner" [class.open]="isOpen()" aria-live="polite">
+    <div class="state">
+        @if (loading()) {
+            <div class="skeleton icon-skeleton"></div>
+            <div class="text">
+                <div class="skeleton title-skeleton"></div>
+                <div class="skeleton hint-skeleton"></div>
+            </div>
+        } @else if (error()) {
+            <span class="icon"><app-icon name="alert" [size]="20" /></span>
+            <div class="text">
+                <strong>État de la caisse indisponible</strong>
+                <small>
+                    Impossible de le charger.
+                    <button type="button" class="link-btn" (click)="retry.emit()">Réessayer</button>
+                </small>
+            </div>
+        } @else if (isOpen()) {
+            <span class="icon tone-primary"><app-icon name="wallet" [size]="20" /></span>
+            <div class="text">
+                <strong>Caisse ouverte</strong>
+                <small>Depuis {{ openedAt() }}</small>
+            </div>
+            <!-- clôture à l'aveugle : le gérant ne voit pas le solde -->
+            @if (cash()!.balance !== null) {
+                <div class="balance">
+                    <small>Solde</small>
+                    <strong>{{ cash()!.balance | fcfa }}</strong>
+                </div>
+            }
+        } @else {
+            <span class="icon"><app-icon name="wallet" [size]="20" /></span>
+            <div class="text">
+                <strong>Caisse fermée</strong>
+                <small>Demandez au propriétaire de l'ouvrir</small>
+            </div>
+        }
+    </div>
+
+    <a
+        routerLink="/sales/new"
+        class="btn btn-primary new-sale"
+        [class.disabled]="!canSell()"
+        [attr.aria-disabled]="!canSell()"
+        [attr.tabindex]="canSell() ? null : -1"
+    >
+        <app-icon name="plus" [size]="18" />
+        Nouvelle vente
+    </a>
+</section>

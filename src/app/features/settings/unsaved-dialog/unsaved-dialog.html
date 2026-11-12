@@ -1,0 +1,19 @@
+<dialog
+    #box
+    class="confirm"
+    aria-labelledby="unsaved-title"
+    (click)="onBackdrop($event)"
+    (cancel)="onCancel($event)"
+>
+    <div class="confirm-body">
+        <h2 id="unsaved-title">Quitter sans enregistrer ?</h2>
+        <p class="muted">Les modifications que vous avez faites sur cette page seront perdues.</p>
+
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-outline" (click)="answer(false)">
+                Rester sur la page
+            </button>
+            <button type="button" class="btn btn-danger" (click)="answer(true)">Quitter</button>
+        </div>
+    </div>
+</dialog>
