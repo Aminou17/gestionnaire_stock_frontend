@@ -247,11 +247,20 @@ export const routes: Routes = [
                     },
                     {
                         path: "account",
-                        title: "Mon compte · Awa Bazin",
+                        title: "Mon profil · Awa Bazin",
                         canDeactivate: [unsavedChangesGuard],
                         loadComponent: () =>
                             import("./features/settings/settings-account/settings-account").then(
                                 (m) => m.SettingsAccount,
+                            ),
+                    },
+                    {
+                        path: "password",
+                        title: "Mot de passe · Awa Bazin",
+                        canDeactivate: [unsavedChangesGuard],
+                        loadComponent: () =>
+                            import("./features/settings/settings-password/settings-password").then(
+                                (m) => m.SettingsPassword,
                             ),
                     },
                     {

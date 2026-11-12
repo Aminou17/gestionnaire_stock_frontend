@@ -2,22 +2,14 @@
 
 <div class="content">
     <section class="card profile">
-        <a routerLink="account" class="profile-main" aria-label="Modifier mon profil">
-            <span class="avatar">{{ initials() }}</span>
+        <span class="avatar">{{ initials() }}</span>
 
-            <div class="profile-info">
-                <strong>{{ auth.user()?.name }}</strong>
-                <span class="muted">{{ auth.user()?.email }}</span>
-            </div>
+        <div class="profile-info">
+            <strong>{{ auth.user()?.name }}</strong>
+            <span class="muted">{{ auth.user()?.email }}</span>
+        </div>
 
-            <span class="badge badge-primary">{{ auth.roleLabel() }}</span>
-            <app-icon name="chevron-right" [size]="18" class="chevron" />
-        </a>
-
-        <a routerLink="account" fragment="password" class="btn btn-outline btn-sm pwd-link">
-            <app-icon name="key" [size]="16" />
-            Changer le mot de passe
-        </a>
+        <span class="badge badge-primary">{{ auth.roleLabel() }}</span>
     </section>
 
     @for (group of groups(); track group.title) {

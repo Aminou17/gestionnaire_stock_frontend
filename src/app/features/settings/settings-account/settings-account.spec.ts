@@ -1,8 +1,7 @@
-import { HttpErrorResponse } from "@angular/common/http";
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
-import { of, throwError } from "rxjs";
+import { of } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { SettingsAccount } from "./settings-account";
@@ -11,23 +10,14 @@ describe("SettingsAccount", () => {
     let fixture: ComponentFixture<SettingsAccount>;
     let el: HTMLElement;
     let updateProfile: ReturnType<typeof vi.fn>;
-    let changePassword: ReturnType<typeof vi.fn>;
     const user = signal({ id: 1, name: "Awa Traoré", email: "awa@test.com", role: "manager" });
 
-    async function render(passwordError?: string) {
+    async function render() {
         user.set({ id: 1, name: "Awa Traoré", email: "awa@test.com", role: "manager" });
         updateProfile = vi.fn((name: string, email: string) => {
             user.set({ ...user(), name, email });
             return of(user());
         });
-        changePassword = vi.fn(() =>
-            passwordError
-                ? throwError(
-                      () =>
-                          new HttpErrorResponse({ status: 400, error: { message: passwordError } }),
-                  )
-                : of({ message: "ok" }),
-        );
 
         await TestBed.configureTestingModule({
             imports: [SettingsAccount],
@@ -40,7 +30,6 @@ describe("SettingsAccount", () => {
                         isAdmin: signal(false),
                         roleLabel: signal("Gérant"),
                         updateProfile,
-                        changePassword,
                     },
                 },
             ],
@@ -102,54 +91,6 @@ describe("SettingsAccount", () => {
         await fixture.whenStable();
 
         expect(field("name").value).toBe("Awa Traoré");
-    });
-
-    it("should change the password and empty the fields", async () => {
-        await render();
-
-        await type("currentPassword", "ancien-mdp");
-        await type("newPassword", "nouveau-mdp");
-        await type("confirmPassword", "nouveau-mdp");
-        await submit(1);
-
-        expect(changePassword).toHaveBeenCalledWith("ancien-mdp", "nouveau-mdp");
-        expect(el.textContent).toContain("Mot de passe modifié.");
-        expect(field("newPassword").value).toBe("");
-    });
-
-    it("should refuse a short password", async () => {
-        await render();
-
-        await type("currentPassword", "ancien-mdp");
-        await type("newPassword", "court");
-        await type("confirmPassword", "court");
-        await submit(1);
-
-        expect(changePassword).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("au moins 8 caractères");
-    });
-
-    it("should refuse two different passwords", async () => {
-        await render();
-
-        await type("currentPassword", "ancien-mdp");
-        await type("newPassword", "nouveau-mdp");
-        await type("confirmPassword", "autre-chose");
-        await submit(1);
-
-        expect(changePassword).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("Les deux mots de passe sont différents.");
-    });
-
-    it("should show the backend message when the current password is wrong", async () => {
-        await render("Le mot de passe actuel est incorrect.");
-
-        await type("currentPassword", "mauvais-mdp");
-        await type("newPassword", "nouveau-mdp");
-        await type("confirmPassword", "nouveau-mdp");
-        await submit(1);
-
-        expect(el.textContent).toContain("Le mot de passe actuel est incorrect.");
     });
 
     it("should leave without question when nothing changed", async () => {

@@ -70,7 +70,7 @@
                                     <span class="badge badge-neutral">Clôturée</span>
                                 }
                                 @if (session.explanation_pending) {
-                                    <span class="badge badge-warning">Écart à expliquer</span>
+                                    <span class="badge badge-warning">À expliquer</span>
                                 }
                             </td>
                         </tr>
@@ -100,7 +100,10 @@
                         }
                     </div>
                     <div class="line">
-                        <span class="meta muted">Fond {{ session.opening_amount | fcfa }}</span>
+                        <span class="meta muted"
+                            >{{ session.opened_by_name ?? "—" }} · Fond
+                            {{ session.opening_amount | fcfa }}</span
+                        >
                         @if (session.difference !== null) {
                             <strong
                                 class="gap"
