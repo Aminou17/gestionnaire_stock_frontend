@@ -1,7 +1,11 @@
 @AGENTS.md
-## Workflow obligatoire
-Après toute création ou modification de page/composant, AVANT de dire « fini » :
-1. Lance l'agent design-reviewer.
-2. Lance l'agent angular-reviewer.
-3. Si des appels API ont changé, lance api-checker.
-Corrige les 🔴 et 🟠, puis donne-moi le résumé.
+
+## Avant de dire que c'est fini
+
+Après la création ou la modification d'une page ou d'un composant, une seule fois par fonctionnalité :
+1. lancer design-reviewer ;
+2. lancer angular-reviewer ;
+3. lancer api-checker si des appels à l'API ont changé ;
+4. corriger les problèmes critiques et importants signalés, puis faire le résumé.
+
+Pour une petite correction (texte, style, petit bug), pas d'agent : seulement npm test.
