@@ -1,0 +1,124 @@
+<app-page-header
+    title="Inventaire"
+    subtitle="Nouveau comptage"
+    section="Stock"
+    back="/inventories"
+    backLabel="Retour aux inventaires"
+/>
+
+<section class="card panel">
+    <p class="muted intro">
+        Comptez ce qu'il y a en rayon. Le stock du système est caché pour ne pas influencer le
+        comptage. Un produit laissé vide n'est pas compté.
+    </p>
+
+    <div class="filters">
+        <label class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Rechercher un produit"
+                aria-label="Rechercher un produit"
+                [value]="search()"
+                (input)="search.set($any($event.target).value)"
+            />
+        </label>
+        <select
+            class="input"
+            aria-label="Catégorie"
+            [value]="categoryId() ?? ''"
+            (change)="selectCategory($any($event.target).value)"
+        >
+            <option value="">Toutes les catégories</option>
+            @for (category of activeCategories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
+            }
+        </select>
+    </div>
+
+    @if (truncated()) {
+        <p class="note" role="note">
+            Seuls les 500 premiers produits sont affichés. Choisissez une catégorie pour compter les
+            autres.
+        </p>
+    }
+
+    @if (products.isLoading() && !products.hasValue()) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4, 5]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (!products.hasValue()) {
+        <div class="empty">
+            Impossible de charger les produits.
+            <button type="button" class="btn btn-outline btn-sm" (click)="products.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (visible().length === 0) {
+        <div class="empty">Aucun produit à compter.</div>
+    } @else {
+        <ul class="products">
+            @for (product of visible(); track product.id) {
+                <li class="product" [class.counted]="counts()[product.id] !== undefined">
+                    <div class="info">
+                        <span class="name">{{ product.name }}</span>
+                        <span class="muted category">{{ product.category_name }}</span>
+                    </div>
+                    <div
+                        class="stepper"
+                        role="group"
+                        [attr.aria-label]="'Comptage de ' + product.name"
+                    >
+                        <button
+                            type="button"
+                            aria-label="Diminuer"
+                            [disabled]="(counts()[product.id] ?? 0) <= 0"
+                            (click)="step(product.id, -1)"
+                        >
+                            <app-icon name="minus" [size]="16" />
+                        </button>
+                        <input
+                            class="count-input"
+                            type="number"
+                            inputmode="numeric"
+                            min="0"
+                            placeholder="—"
+                            [attr.aria-label]="'Stock compté de ' + product.name"
+                            [value]="counts()[product.id] ?? ''"
+                            (change)="setCount(product.id, $any($event.target).value)"
+                            (keydown.enter)="focusNext($event)"
+                        />
+                        <button type="button" aria-label="Augmenter" (click)="step(product.id, 1)">
+                            <app-icon name="plus" [size]="16" />
+                        </button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+<div class="bar">
+    <div class="bar-text">
+        <strong
+            >{{ countedTotal() }} produit{{ countedTotal() > 1 ? "s" : "" }} compté{{
+                countedTotal() > 1 ? "s" : ""
+            }}</strong
+        >
+        @if (error()) {
+            <small class="field-error" role="alert">{{ error() }}</small>
+        }
+    </div>
+    <a routerLink="/inventories" class="btn btn-outline cancel">Annuler</a>
+    <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="countedTotal() === 0 || saving()"
+        (click)="save()"
+    >
+        {{ saving() ? "Enregistrement…" : "Enregistrer l'inventaire" }}
+    </button>
+</div>

@@ -4,7 +4,12 @@ import { RouterLink } from "@angular/router";
 
 import { BackState } from "../../../core/back-link";
 import { AuthService } from "../../../core/auth/auth.service";
-import { MOVEMENT_TYPES, StockMovement } from "../../../core/stock/stock-movement.model";
+import {
+    MOVEMENT_TYPES,
+    StockMovement,
+    isInventoryMovement,
+    isOutgoingMovement,
+} from "../../../core/stock/stock-movement.model";
 
 // Fenêtre de détail d'un mouvement, utilisée par la liste et par la fiche produit
 @Component({
@@ -16,6 +21,7 @@ import { MOVEMENT_TYPES, StockMovement } from "../../../core/stock/stock-movemen
 export class MovementDetail {
     protected auth = inject(AuthService);
     protected types = MOVEMENT_TYPES;
+    protected isInventory = isInventoryMovement;
 
     movement = input<StockMovement | null>(null);
     backState = input.required<BackState>();
@@ -25,13 +31,15 @@ export class MovementDetail {
     stockBefore = computed(() => {
         const movement = this.movement();
         if (!movement) return null;
-        const change = movement.type === "SALE" ? -movement.quantity : movement.quantity;
+        const change = isOutgoingMovement(movement) ? -movement.quantity : movement.quantity;
         return movement.stock_after - change;
     });
 
     // une entrée ne mène nulle part : la page des entrées n'a pas de fiche
     saleId(movement: StockMovement) {
-        return movement.type === "ENTRY" ? null : movement.reference_id;
+        return movement.type === "ENTRY" || isInventoryMovement(movement)
+            ? null
+            : movement.reference_id;
     }
 
     show() {

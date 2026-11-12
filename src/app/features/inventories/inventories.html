@@ -1,0 +1,109 @@
+<app-page-header title="Inventaires" section="Stock">
+    <a routerLink="/inventories/new" class="btn btn-primary" aria-label="Nouvel inventaire">
+        <app-icon name="plus" [size]="18" />
+        <span class="wide">Nouvel inventaire</span>
+    </a>
+</app-page-header>
+
+<section class="card list-card">
+    @if (inventories.isLoading()) {
+        <div class="loading">
+            @for (i of [1, 2, 3, 4]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (!inventories.hasValue()) {
+        <div class="empty">
+            Impossible de charger les inventaires.
+            <button type="button" class="btn btn-outline btn-sm" (click)="inventories.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (inventories.value().length === 0) {
+        <div class="empty">Aucun inventaire n'a encore été fait.</div>
+    } @else {
+        @let list = inventories.value();
+        <p class="count muted">{{ list.length }} inventaire{{ list.length > 1 ? "s" : "" }}</p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Fait par</th>
+                        <th class="num">Produits comptés</th>
+                        <th class="num">Valeur de l'écart</th>
+                        <th>Stock</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (inventory of list; track inventory.id) {
+                        <tr (click)="openInventory(inventory)">
+                            <td>
+                                <a
+                                    [routerLink]="['/inventories', inventory.id]"
+                                    class="inventory-link"
+                                    (click)="$event.stopPropagation()"
+                                    >{{ inventory.created_at | date: "d MMMM y à HH:mm" }}</a
+                                >
+                            </td>
+                            <td>{{ inventory.user_name ?? "—" }}</td>
+                            <td class="num">{{ inventory.items_count }}</td>
+                            <td
+                                class="num strong"
+                                [class.in]="inventory.difference_value > 0"
+                                [class.out]="inventory.difference_value < 0"
+                            >
+                                {{ inventory.difference_value | fcfa: true }}
+                            </td>
+                            <td>
+                                @if (inventory.applied_at) {
+                                    <span class="badge badge-success">Corrigé</span>
+                                } @else {
+                                    <span class="badge badge-neutral">Relevé</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- version téléphone : une carte par inventaire -->
+        <ul class="cards">
+            @for (inventory of list; track inventory.id) {
+                <li class="inventory-card" (click)="openInventory(inventory)">
+                    <div class="line">
+                        <a
+                            [routerLink]="['/inventories', inventory.id]"
+                            class="inventory-link"
+                            (click)="$event.stopPropagation()"
+                            >{{ inventory.created_at | date: "d MMM y à HH:mm" }}</a
+                        >
+                        @if (inventory.applied_at) {
+                            <span class="badge badge-success">Corrigé</span>
+                        } @else {
+                            <span class="badge badge-neutral">Relevé</span>
+                        }
+                        <strong
+                            class="gap"
+                            [class.in]="inventory.difference_value > 0"
+                            [class.out]="inventory.difference_value < 0"
+                        >
+                            {{ inventory.difference_value | fcfa: true }}
+                        </strong>
+                    </div>
+                    <div class="line">
+                        <span class="meta muted"
+                            >{{ inventory.user_name ?? "—" }} ·
+                            {{ inventory.items_count }} produit{{
+                                inventory.items_count > 1 ? "s" : ""
+                            }}
+                            compté{{ inventory.items_count > 1 ? "s" : "" }}</span
+                        >
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
