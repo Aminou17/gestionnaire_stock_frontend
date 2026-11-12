@@ -257,7 +257,9 @@
                             {{
                                 cash()!.balance === null
                                     ? "Mes mouvements du jour"
-                                    : "Mouvements du jour"
+                                    : team().length > 0
+                                      ? "Mouvements du jour, toutes les caisses"
+                                      : "Mouvements du jour"
                             }}
                         </h2>
                     </div>
