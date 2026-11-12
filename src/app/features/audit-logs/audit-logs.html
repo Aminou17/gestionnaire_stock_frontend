@@ -1,0 +1,273 @@
+<app-page-header
+    title="Journal d'audit"
+    subtitle="Qui a fait quoi, et quand"
+    section="Administration"
+/>
+
+<section class="card list-card">
+    <div class="tabs" role="tablist" aria-label="Type d'événement">
+        <button
+            type="button"
+            role="tab"
+            class="tab"
+            [class.selected]="tab() === 'activity'"
+            [attr.aria-selected]="tab() === 'activity'"
+            (click)="selectTab('activity')"
+        >
+            <app-icon name="audit" [size]="16" />
+            Activité
+        </button>
+        <button
+            type="button"
+            role="tab"
+            class="tab"
+            [class.selected]="tab() === 'security'"
+            [attr.aria-selected]="tab() === 'security'"
+            (click)="selectTab('security')"
+        >
+            <app-icon name="key" [size]="16" />
+            Sécurité
+        </button>
+    </div>
+
+    <app-period-filter [chips]="true" (changed)="selectRange($event)">
+        <!-- en premier : sur téléphone la fin de la ligne est hors de l'écran -->
+        @if (clearable()) {
+            <button type="button" class="clear" (click)="resetFilters()">Effacer</button>
+        }
+
+        <select
+            class="chip"
+            aria-label="Personne"
+            [class.active]="userId() !== null"
+            [value]="userId() ?? ''"
+            (change)="selectUser($any($event.target).value)"
+        >
+            <option value="">Tout le monde</option>
+            @if (users.hasValue()) {
+                @for (user of users.value(); track user.id) {
+                    <option [value]="user.id">{{ user.name }}</option>
+                }
+            }
+        </select>
+
+        <select
+            class="chip"
+            aria-label="Action"
+            [class.active]="action() !== null"
+            [value]="action() ?? ''"
+            (change)="selectAction($any($event.target).value)"
+        >
+            <option value="">Toutes les actions</option>
+            @for (item of actions(); track item.code) {
+                <option [value]="item.code">{{ item.label }}</option>
+            }
+        </select>
+
+        <button
+            type="button"
+            class="chip"
+            [attr.aria-pressed]="onlyFailures()"
+            (click)="setFailures(!onlyFailures())"
+        >
+            Échecs
+        </button>
+    </app-period-filter>
+
+    @if (tab() === "security") {
+        <div class="summary">
+            @for (stat of stats; track stat.action) {
+                <button
+                    type="button"
+                    class="stat"
+                    [class.active]="action() === stat.action"
+                    [attr.aria-pressed]="action() === stat.action"
+                    (click)="toggleAction(stat.action)"
+                >
+                    @if (stat.count.hasValue()) {
+                        <strong [class.alert]="stat.count.value() > 0">{{
+                            stat.count.value()
+                        }}</strong>
+                        <span>{{ stat.count.value() === 1 ? stat.one : stat.many }}</span>
+                    } @else if (stat.count.error()) {
+                        <span>{{ stat.many }} : indisponible</span>
+                    } @else {
+                        <span class="skeleton stat-skeleton"></span>
+                        <span>{{ stat.many }}</span>
+                    }
+                </button>
+            }
+            @if (stats[0].count.error() || stats[1].count.error()) {
+                <button
+                    type="button"
+                    class="btn btn-outline btn-sm stat-retry"
+                    (click)="reloadStats()"
+                >
+                    Réessayer
+                </button>
+            }
+        </div>
+    }
+
+    @if (firstLoad()) {
+        <div class="loading" aria-busy="true">
+            @for (i of skeletonRows; track i) {
+                <div class="row-skeleton">
+                    <span class="skeleton circle"></span>
+                    <span class="skeleton line"></span>
+                    <span class="skeleton line short"></span>
+                </div>
+            }
+        </div>
+    } @else if (logs.error() && (page() === 1 || list().length === 0)) {
+        <div class="empty" role="alert">
+            {{ errorMessage() }}
+            <button type="button" class="btn btn-outline btn-sm" (click)="logs.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty" role="status">
+            @if (filtered()) {
+                Rien ne correspond à ces filtres.
+                @if (clearable()) {
+                    <button type="button" class="btn btn-outline btn-sm" (click)="resetFilters()">
+                        Effacer les filtres
+                    </button>
+                }
+            } @else if (tab() === "security") {
+                Aucune connexion ni tentative enregistrée pour le moment.
+            } @else {
+                Aucune action enregistrée pour le moment.
+            }
+        </div>
+    } @else {
+        @if (logs.error()) {
+            <div class="alert alert-error list-error" role="alert">
+                {{ errorMessage() }}
+                <button type="button" class="btn btn-outline btn-sm" (click)="logs.reload()">
+                    Réessayer
+                </button>
+            </div>
+        }
+
+        <div [class.reloading]="logs.isLoading() && page() === 1">
+            @for (day of days(); track day.key) {
+                <h2 class="day">{{ day.label }}</h2>
+                <ul class="entries">
+                    @for (row of day.rows; track row.log.id) {
+                        <li class="entry" [class.failed]="row.log.result === 'FAILURE'">
+                            @if (row.expandable) {
+                                <details>
+                                    <summary>
+                                        <ng-container
+                                            *ngTemplateOutlet="line; context: { $implicit: row }"
+                                        />
+                                        <app-icon class="chevron" name="chevron-down" [size]="16" />
+                                    </summary>
+
+                                    <div class="details">
+                                        @if (row.times.length > 1) {
+                                            <p class="detail-title">Heures de connexion</p>
+                                            <p class="times">
+                                                @for (time of row.times; track $index) {
+                                                    <span>{{ time | date: "HH:mm" }}</span>
+                                                }
+                                            </p>
+                                        }
+
+                                        @if (row.changes.length) {
+                                            <p class="detail-title">Modifications</p>
+                                            <dl class="changes">
+                                                @for (change of row.changes; track change.label) {
+                                                    <div>
+                                                        <dt>{{ change.label }}</dt>
+                                                        <dd>
+                                                            <span class="old">{{
+                                                                change.before
+                                                            }}</span>
+                                                            <app-icon
+                                                                name="chevron-right"
+                                                                [size]="14"
+                                                            />
+                                                            <span>{{ change.after }}</span>
+                                                        </dd>
+                                                    </div>
+                                                }
+                                            </dl>
+                                        }
+
+                                        @if (row.link; as link) {
+                                            <a class="open-link" [routerLink]="link">
+                                                Ouvrir la fiche
+                                                <app-icon name="arrow-up-right" [size]="14" />
+                                            </a>
+                                        }
+                                    </div>
+                                </details>
+                            } @else {
+                                <div class="row">
+                                    <ng-container
+                                        *ngTemplateOutlet="line; context: { $implicit: row }"
+                                    />
+                                </div>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <div class="more">
+            <p class="muted count">{{ list().length }} événements sur {{ total() }}</p>
+            @if (hasMore() && !logs.error()) {
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="loadingMore()"
+                    (click)="loadMore()"
+                >
+                    @if (loadingMore()) {
+                        <span class="spinner"></span>
+                    }
+                    Afficher plus
+                </button>
+            }
+        </div>
+    }
+</section>
+
+<!-- contenu d'une ligne, qu'elle s'ouvre ou non -->
+<ng-template #line let-row>
+    <span class="avatar" aria-hidden="true">
+        @if (row.log.result === "FAILURE") {
+            <app-icon name="alert" [size]="16" />
+        } @else {
+            {{ initials(row.log) }}
+        }
+    </span>
+
+    <span class="what">
+        <span class="sentence">
+            <strong>{{ getAuditAuthor(row.log) }}</strong>
+            {{ row.sentence.verb }}
+            @if (row.sentence.object) {
+                <strong>{{ row.sentence.object }}</strong>
+            }
+            @if (row.times.length > 1) {
+                {{ row.times.length }} fois
+            }
+        </span>
+        <span class="meta">
+            <time [attr.datetime]="row.log.created_at">{{
+                row.log.created_at | date: "HH:mm"
+            }}</time>
+            @if (row.note; as note) {
+                <span class="note">{{ note }}</span>
+            }
+            @if (row.log.ip_address) {
+                <span>IP {{ cleanIp(row.log.ip_address) }}</span>
+            }
+        </span>
+    </span>
+</ng-template>

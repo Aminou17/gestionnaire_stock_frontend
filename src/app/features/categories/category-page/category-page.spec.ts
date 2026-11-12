@@ -9,6 +9,7 @@ import { CategoryPage } from "./category-page";
 import { AuthService } from "../../../core/auth/auth.service";
 import { CategoryDetail } from "../../../core/stock/category.model";
 import { CategoryService } from "../../../core/stock/category.service";
+import { SecurityAlertService } from "../../../core/audit/security-alert.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { ProductService } from "../../../core/stock/product.service";
 
@@ -64,6 +65,10 @@ describe("CategoryPage", () => {
                 { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id })) } },
                 { provide: CategoryService, useValue: { getCategory, restoreCategory } },
                 { provide: ProductService, useValue: { getProducts } },
+                {
+                    provide: SecurityAlertService,
+                    useValue: { count: signal(0), latest: signal([]), reload: vi.fn() },
+                },
                 { provide: LowStockAlertService, useValue: { count: signal(0) } },
                 {
                     provide: AuthService,

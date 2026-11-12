@@ -1,0 +1,256 @@
+<app-page-header
+    title="Utilisateurs"
+    subtitle="Les personnes qui ont accès au logiciel"
+    section="Administration"
+>
+    <button type="button" class="btn btn-primary new-user" (click)="newUser()">
+        <app-icon name="plus" [size]="18" />
+        <span>Nouvel utilisateur</span>
+    </button>
+</app-page-header>
+
+<section class="card list-card">
+    <div class="tabs" role="group" aria-label="Afficher">
+        <button
+            type="button"
+            class="tab"
+            [class.selected]="view() === 'active'"
+            [attr.aria-pressed]="view() === 'active'"
+            (click)="selectView('active')"
+        >
+            Actifs <span>{{ activeCount() }}</span>
+        </button>
+        <button
+            type="button"
+            class="tab"
+            [class.selected]="view() === 'deleted'"
+            [attr.aria-pressed]="view() === 'deleted'"
+            (click)="selectView('deleted')"
+        >
+            Supprimés <span>{{ deletedCount() }}</span>
+        </button>
+    </div>
+
+    @if (view() === "deleted") {
+        <p class="deleted-note">
+            Ces personnes ne peuvent plus se connecter. Leurs ventes et leur historique sont
+            conservés. Restaurez un compte pour lui rendre l'accès.
+        </p>
+    }
+
+    <div class="toolbar">
+        <label class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Rechercher par nom ou email…"
+                aria-label="Rechercher un utilisateur"
+                [value]="search()"
+                (input)="search.set($any($event.target).value)"
+            />
+        </label>
+    </div>
+
+    @if (users.isLoading() && all().length === 0) {
+        <div class="loading">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (users.error() && all().length === 0) {
+        <div class="empty">
+            Impossible de charger les utilisateurs.
+            <button type="button" class="btn btn-outline btn-sm" (click)="users.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty">
+            @if (search()) {
+                Aucun utilisateur ne correspond à « {{ search() }} ».
+                <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
+                    Effacer la recherche
+                </button>
+            } @else if (view() === "deleted") {
+                Aucun utilisateur supprimé.
+            } @else {
+                Aucun utilisateur pour le moment.
+            }
+        </div>
+    } @else {
+        @if (restoreError()) {
+            <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>
+        }
+
+        <!-- en-têtes de colonnes, cachées sur téléphone où chaque ligne devient une carte -->
+        <div class="columns" aria-hidden="true">
+            <span>Utilisateur</span>
+            <span>Rôle</span>
+            <span>Dernière connexion</span>
+            <span></span>
+        </div>
+
+        <ul class="rows" [class.reloading]="users.isLoading()">
+            @for (user of list(); track user.id) {
+                <li class="row" [class.inactive]="!user.is_active" (click)="openUser(user)">
+                    <div class="who">
+                        <span class="avatar" aria-hidden="true">{{ getInitials(user.name) }}</span>
+                        <div class="text">
+                            <span class="name-line">
+                                <button
+                                    type="button"
+                                    class="name"
+                                    [attr.aria-label]="'Voir la fiche de ' + user.name"
+                                >
+                                    {{ user.name }}
+                                </button>
+                                @if (isMe(user)) {
+                                    <span class="me">Vous</span>
+                                }
+                            </span>
+                            <small class="muted email">{{ user.email }}</small>
+                        </div>
+                    </div>
+
+                    <div class="role">
+                        <span
+                            class="badge"
+                            [class.badge-primary]="user.role === 'admin'"
+                            [class.role-manager]="user.role !== 'admin'"
+                        >
+                            {{ getRoleLabel(user.role) }}
+                        </span>
+                    </div>
+
+                    @if (user.is_active) {
+                        <small class="last-login" [class.never]="!user.last_login_at">
+                            <span class="mobile-label">Dernière connexion : </span>
+                            {{ lastLogin(user) }}
+                        </small>
+                    } @else {
+                        <small class="last-login">{{ deletion(user) }}</small>
+                    }
+
+                    <div class="end">
+                        @if (!user.is_active) {
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm restore-btn"
+                                [disabled]="restoringId() !== null"
+                                [attr.aria-label]="'Restaurer ' + user.name"
+                                (click)="$event.stopPropagation(); restoreUser(user)"
+                            >
+                                @if (restoringId() === user.id) {
+                                    <span class="spinner"></span>
+                                } @else {
+                                    <app-icon name="undo" [size]="16" />
+                                }
+                                Restaurer
+                            </button>
+                        } @else {
+                            <div class="row-menu" (click)="$event.stopPropagation()">
+                                <button
+                                    type="button"
+                                    class="more-btn"
+                                    aria-haspopup="menu"
+                                    [attr.aria-expanded]="menuFor() === user.id"
+                                    [attr.aria-label]="'Actions pour ' + user.name"
+                                    (click)="toggleMenu(user.id)"
+                                >
+                                    <app-icon name="more" />
+                                </button>
+                                @if (menuFor() === user.id) {
+                                    <div class="menu" role="menu">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            (click)="editUser(user)"
+                                        >
+                                            <app-icon name="edit" [size]="16" />
+                                            Modifier
+                                        </button>
+                                        @if (isMe(user)) {
+                                            <a role="menuitem" routerLink="/settings/account">
+                                                <app-icon name="key" [size]="16" />
+                                                Mon mot de passe
+                                            </a>
+                                        } @else {
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                (click)="resetPassword(user)"
+                                            >
+                                                <app-icon name="key" [size]="16" />
+                                                Nouveau mot de passe
+                                            </button>
+                                            <button
+                                                type="button"
+                                                role="menuitem"
+                                                class="danger"
+                                                (click)="askDelete(user)"
+                                            >
+                                                <app-icon name="trash" [size]="16" />
+                                                Supprimer
+                                            </button>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+<button type="button" class="fab" (click)="newUser()" aria-label="Nouvel utilisateur">
+    <app-icon name="plus" [size]="24" />
+</button>
+
+<app-user-form (saved)="onSaved()" />
+<app-password-dialog />
+
+<dialog
+    #confirmBox
+    class="confirm"
+    aria-labelledby="user-delete-title"
+    (click)="onConfirmBackdrop($event)"
+    (cancel)="onConfirmCancel($event)"
+>
+    <div class="confirm-body">
+        <h2 id="user-delete-title">Supprimer cet utilisateur ?</h2>
+        <p class="muted">
+            {{ toDelete()?.name }} ne pourra plus se connecter et sera déconnecté tout de suite. Ses
+            ventes, ses caisses et tout son historique sont conservés. Vous pourrez le restaurer
+            plus tard.
+        </p>
+
+        @if (deleteError()) {
+            <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+        }
+
+        <div class="confirm-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="deleting()"
+                (click)="closeConfirm()"
+            >
+                Annuler
+            </button>
+            <button
+                type="button"
+                class="btn btn-danger"
+                [disabled]="deleting()"
+                (click)="deleteUser()"
+            >
+                @if (deleting()) {
+                    <span class="spinner"></span>
+                }
+                Supprimer
+            </button>
+        </div>
+    </div>
+</dialog>

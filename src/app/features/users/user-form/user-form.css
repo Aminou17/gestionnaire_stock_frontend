@@ -1,0 +1,178 @@
+/* même fenêtre que les fournisseurs */
+.confirm {
+    width: min(480px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.confirm::backdrop {
+    background: var(--overlay);
+}
+
+.confirm-body {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.confirm h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+/* rôle : deux cartes à cocher, avec ce que chaque rôle permet */
+.roles {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+}
+
+.roles legend {
+    margin-bottom: 6px;
+    padding: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.role {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.role:hover {
+    background: var(--surface-hover);
+}
+
+.role.selected {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.role input {
+    margin: 3px 0 0;
+    accent-color: var(--primary);
+}
+
+.role-text {
+    display: grid;
+    gap: 2px;
+}
+
+.role-text strong {
+    font-size: 14px;
+}
+
+.role-text small {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.roles.locked .role {
+    cursor: default;
+}
+
+.roles.locked .role:not(.selected) {
+    opacity: 0.55;
+}
+
+.roles.locked .role:hover {
+    background: none;
+}
+
+.roles.locked .role.selected:hover {
+    background: var(--primary-soft);
+}
+
+.role:has(input:focus-visible) {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* champ mot de passe avec le bouton afficher dans le champ */
+.password {
+    position: relative;
+}
+
+.password .input {
+    padding-right: 48px;
+}
+
+.eye {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.eye:hover {
+    color: var(--text);
+}
+
+.eye:focus-visible,
+.link-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    min-height: 36px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@media (max-width: 767px) {
+    .link-btn {
+        min-height: 44px;
+    }
+
+    .eye {
+        width: 44px;
+        height: 44px;
+        right: 2px;
+    }
+
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}

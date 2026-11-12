@@ -4,6 +4,7 @@ import { signal } from "@angular/core";
 
 import { PageHeader } from "./page-header";
 import { AuthService } from "../../core/auth/auth.service";
+import { SecurityAlertService } from "../../core/audit/security-alert.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 
 describe("PageHeader", () => {
@@ -32,6 +33,10 @@ describe("PageHeader", () => {
                     },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(3) } },
+                {
+                    provide: SecurityAlertService,
+                    useValue: { count: signal(0), latest: signal([]), reload: vi.fn() },
+                },
             ],
         }).compileComponents();
 
@@ -49,9 +54,14 @@ describe("PageHeader", () => {
         expect(el.querySelector(".user-info small")?.textContent).toBe("Propriétaire");
     });
 
+    it("should show the notification bell to the admin", async () => {
+        await render(true);
+        expect(el.querySelector("app-notifications")).not.toBeNull();
+    });
+
     it("should show the alert bell only to the admin", async () => {
         await render(false);
-        expect(el.querySelector('a[aria-label="Alertes de stock"]')).toBeNull();
+        expect(el.querySelector("app-notifications")).toBeNull();
     });
 
     it("should open the user menu, log out, and close the menu on an outside click", async () => {

@@ -2,13 +2,13 @@ import { Component, ElementRef, computed, inject, input, signal } from "@angular
 import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
-import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { Icon } from "../../shared/icon/icon";
 import { LayoutService } from "../layout.service";
+import { Notifications } from "../notifications/notifications";
 
 @Component({
     selector: "app-page-header",
-    imports: [RouterLink, Icon],
+    imports: [RouterLink, Icon, Notifications],
     templateUrl: "./page-header.html",
     styleUrl: "./page-header.css",
     host: { "(document:click)": "onDocumentClick($event)" },
@@ -16,7 +16,6 @@ import { LayoutService } from "../layout.service";
 export class PageHeader {
     private el = inject(ElementRef);
     protected auth = inject(AuthService);
-    protected alerts = inject(LowStockAlertService);
     protected layout = inject(LayoutService);
 
     title = input.required<string>();
