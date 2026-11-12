@@ -77,6 +77,10 @@ app-page-header {
     .stats {
         gap: 12px;
     }
+}
+
+/* le libellé tient jusqu'à 350 px ; en dessous, il ne reste que le "+" (avec aria-label) */
+@media (max-width: 349px) {
     .new-sale span {
         display: none;
     }
