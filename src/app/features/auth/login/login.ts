@@ -43,7 +43,13 @@ export class Login {
         const { email, password, remember } = this.form.getRawValue();
 
         this.auth.login(email.trim(), password, remember).subscribe({
-            next: () => this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]),
+            next: () => {
+                if (this.auth.user()?.mustChangePassword) {
+                    this.router.navigate(["/settings/password"]);
+                    return;
+                }
+                this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
+            },
             error: (err: HttpErrorResponse) => {
                 this.loading.set(false);
                 if (err.status === 0 || err.status >= 502) {

@@ -7,6 +7,7 @@ import {
     ValidationErrors,
     Validators,
 } from "@angular/forms";
+import { Router } from "@angular/router";
 import { filter } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
@@ -32,6 +33,7 @@ export class SettingsPassword implements HasUnsavedChanges {
     protected auth = inject(AuthService);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
+    private router = inject(Router);
 
     private leaveDialog = viewChild.required(UnsavedDialog);
 
@@ -76,6 +78,8 @@ export class SettingsPassword implements HasUnsavedChanges {
         if (this.passwordForm.invalid) return;
 
         const { currentPassword, newPassword } = this.passwordForm.getRawValue();
+        // avec un mot de passe provisoire, on repart vers l'application une fois le changement fait
+        const forced = this.auth.user()?.mustChangePassword === true;
 
         this.savingPassword.set(true);
         this.passwordMessage.set(null);
@@ -90,6 +94,7 @@ export class SettingsPassword implements HasUnsavedChanges {
                     this.passwordForm.enable({ emitEvent: false });
                     this.passwordForm.reset();
                     this.passwordMessage.set({ ok: true, text: "Mot de passe modifié." });
+                    if (forced) this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
                 },
                 error: (err) => {
                     this.savingPassword.set(false);

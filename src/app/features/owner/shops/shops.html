@@ -109,7 +109,9 @@
                     <span class="shop-icon" aria-hidden="true">{{ shop.name.charAt(0) }}</span>
 
                     <div class="shop-text">
-                        <strong>{{ shop.name }}</strong>
+                        <a class="shop-link" [routerLink]="['/owner/shops', shop.id]"
+                            ><strong>{{ shop.name }}</strong></a
+                        >
                         @if (shop.admin_email) {
                             <small class="muted">
                                 {{ shop.admin_name }} · <span>{{ shop.admin_email }}</span>
@@ -166,6 +168,14 @@
                                 </button>
                                 @if (menuFor() === shop.id) {
                                     <div class="menu" role="menu">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            (click)="openShop(shop)"
+                                        >
+                                            <app-icon name="eye" [size]="16" />
+                                            Voir la fiche
+                                        </button>
                                         <button type="button" role="menuitem" (click)="askTrial(shop)">
                                             <app-icon name="clock" [size]="16" />
                                             Modifier l'essai

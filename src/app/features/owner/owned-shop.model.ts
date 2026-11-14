@@ -31,3 +31,33 @@ export interface CreatedShop {
     trial_ends_at: string | null;
     admin: { id: number; name: string; email: string; role: "admin" };
 }
+
+export interface ShopAccount {
+    id: number;
+    name: string;
+    email: string;
+    role: "admin" | "manager";
+    is_active: boolean;
+    last_login_at: string | null;
+    created_at: string;
+}
+
+// la fiche d'une boutique : contact, comptes et activité, jamais les montants
+export interface OwnedShopDetail {
+    id: number;
+    name: string;
+    status: ShopStatus;
+    created_at: string;
+    trial_ends_at: string | null;
+    phone: string | null;
+    address: string | null;
+    products_count: number;
+    sales_last_30_days: number;
+    last_sale_at: string | null;
+    users: ShopAccount[];
+}
+
+export interface TemporaryPassword {
+    user: { id: number; name: string; email: string };
+    password: string;
+}

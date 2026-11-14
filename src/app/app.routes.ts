@@ -4,6 +4,7 @@ import { adminGuard } from "./core/auth/admin.guard";
 import { authGuard } from "./core/auth/auth.guard";
 import { guestGuard } from "./core/auth/guest.guard";
 import { ownerGuard } from "./core/auth/owner.guard";
+import { passwordChangeGuard } from "./core/auth/password-change.guard";
 import { shopGuard } from "./core/auth/shop.guard";
 import { AuthLayout } from "./features/auth/auth-layout/auth-layout";
 import { unsavedChangesGuard } from "./features/settings/unsaved-changes.guard";
@@ -33,6 +34,14 @@ export const routes: Routes = [
                     import("./features/auth/register/register").then((m) => m.Register),
             },
             {
+                path: "reset-password",
+                title: "Nouveau mot de passe",
+                loadComponent: () =>
+                    import("./features/auth/reset-password/reset-password").then(
+                        (m) => m.ResetPassword,
+                    ),
+            },
+            {
                 path: "forgot-password",
                 title: "Mot de passe oublié",
                 loadComponent: () =>
@@ -46,6 +55,7 @@ export const routes: Routes = [
         path: "",
         component: MainLayout,
         canActivate: [authGuard, shopGuard],
+        canActivateChild: [passwordChangeGuard],
         children: [
             {
                 path: "dashboard",
@@ -337,6 +347,12 @@ export const routes: Routes = [
                 path: "",
                 title: "Boutiques",
                 loadComponent: () => import("./features/owner/shops/shops").then((m) => m.Shops),
+            },
+            {
+                path: "shops/:id",
+                title: "Boutique",
+                loadComponent: () =>
+                    import("./features/owner/shop-page/shop-page").then((m) => m.ShopPage),
             },
             {
                 path: "password",

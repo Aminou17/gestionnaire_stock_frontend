@@ -10,11 +10,15 @@ describe("Login", () => {
     let fixture: ComponentFixture<Login>;
     let component: Login;
     let el: HTMLElement;
-    let auth: { login: ReturnType<typeof vi.fn>; isOwner: () => boolean };
+    let auth: {
+        login: ReturnType<typeof vi.fn>;
+        isOwner: () => boolean;
+        user: () => { mustChangePassword?: boolean } | null;
+    };
     let router: Router;
 
     beforeEach(async () => {
-        auth = { login: vi.fn(), isOwner: () => false };
+        auth = { login: vi.fn(), isOwner: () => false, user: () => null };
 
         await TestBed.configureTestingModule({
             imports: [Login],
