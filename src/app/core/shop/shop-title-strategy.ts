@@ -2,9 +2,8 @@ import { Injectable, Injector, computed, effect, inject, signal } from "@angular
 import { Title } from "@angular/platform-browser";
 import { RouterStateSnapshot, TitleStrategy } from "@angular/router";
 
+import { PRODUCT_NAME } from "../brand";
 import { ShopSettingsService } from "./shop-settings.service";
-
-export const PRODUCT_NAME = "Gestionnaire de stock";
 
 // Titre de l'onglet : la page puis le nom de la boutique (Produits · Chez Fatou). Le nom de la boutique arrive après la page,
 // le titre se met donc à jour dès qu'il est connu. Sans boutique, le nom du logiciel.

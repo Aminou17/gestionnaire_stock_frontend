@@ -20,8 +20,8 @@
                 </svg>
             </span>
             <div>
-                <div class="brand-name">Gestionnaire</div>
-                <div class="brand-sub">de Stock</div>
+                <div class="brand-name">{{ productName }}</div>
+                <div class="brand-sub">par {{ companyName }}</div>
             </div>
         </div>
 
@@ -35,7 +35,7 @@
             </ul>
         </div>
 
-        <footer>© {{ year }} Gestionnaire de stock</footer>
+        <footer>© {{ year }} {{ productName }} · {{ companyName }}</footer>
     </aside>
 
     <main class="content">

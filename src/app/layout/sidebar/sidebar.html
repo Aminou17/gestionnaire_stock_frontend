@@ -7,11 +7,11 @@
         }
         <div class="brand-text">
             <div class="brand-name" [attr.title]="shop.shopName() || null">
-                {{ shop.shopName() || "Gestionnaire" }}
+                {{ shop.shopName() || productName }}
             </div>
             <!-- avec le nom de la boutique, pas de sous-titre : il serait coupé sur téléphone -->
             @if (!shop.shopName()) {
-                <div class="brand-sub">de Stock</div>
+                <div class="brand-sub">par {{ companyName }}</div>
             }
         </div>
         <button type="button" class="close" (click)="close()" aria-label="Fermer le menu">

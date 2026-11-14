@@ -4,7 +4,8 @@ import { Title } from "@angular/platform-browser";
 import { RouterStateSnapshot } from "@angular/router";
 
 import { ShopSettingsService } from "./shop-settings.service";
-import { PRODUCT_NAME, ShopTitleStrategy } from "./shop-title-strategy";
+import { PRODUCT_NAME } from "../brand";
+import { ShopTitleStrategy } from "./shop-title-strategy";
 
 describe("ShopTitleStrategy", () => {
     const shopName = signal("");
