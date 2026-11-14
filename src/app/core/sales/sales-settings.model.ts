@@ -1,4 +1,4 @@
-// réglages des ventes choisis par le propriétaire
+// réglages des ventes choisis par l'administrateur
 export interface SalesSettings {
     // texte devant le numéro du ticket, vide si aucun
     ticket_prefix: string;

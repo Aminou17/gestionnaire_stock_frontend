@@ -1,16 +1,20 @@
 import { DatePipe, formatDate } from "@angular/common";
 import { Component, LOCALE_ID, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
-import { RouterLink } from "@angular/router";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { SaleService } from "../../core/sales/sale.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { RevealToggle } from "../../shared/secret/reveal-toggle";
+import { SecretValues } from "../../shared/secret/secret-values";
+import type { IconName } from "../../shared/icon/icons";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { DashboardService } from "./dashboard.service";
 import { OpenCashDialog } from "../cash/open-cash-dialog/open-cash-dialog";
+import { ReopenCashDialog } from "../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { RecentActivity } from "./recent-activity/recent-activity";
 import { RecentSales } from "./recent-sales/recent-sales";
 import { SalesChart } from "./sales-chart/sales-chart";
@@ -21,6 +25,7 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
 @Component({
     selector: "app-dashboard",
     imports: [
+        RevealToggle,
         RouterLink,
         DatePipe,
         FcfaPipe,
@@ -32,17 +37,23 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
         RecentSales,
         RecentActivity,
         OpenCashDialog,
+        ReopenCashDialog,
         ManagerCashBanner,
     ],
     templateUrl: "./dashboard.html",
     styleUrl: "./dashboard.css",
 })
 export class Dashboard {
+    protected secret = inject(SecretValues);
     private dashboard = inject(DashboardService);
     private saleService = inject(SaleService);
     private locale = inject(LOCALE_ID);
+    private route = inject(ActivatedRoute);
     protected auth = inject(AuthService);
     protected stockAlerts = inject(LowStockAlertService);
+
+    // le guard admin renvoie ici l'employé qui ouvre une page réservée
+    reserved = this.route.snapshot.queryParamMap.has("reserved");
 
     today = formatDate(new Date(), "EEEE d MMMM y", this.locale);
 
@@ -57,7 +68,7 @@ export class Dashboard {
     salesList = computed(() => (this.sales.hasValue() ? this.sales.value() : []));
     activityList = computed(() => (this.activity.hasValue() ? this.activity.value() : []));
 
-    // le tableau de bord du gérant n'a pas de bloc d'alertes : seule la vue admin les lit
+    // le tableau de bord de l'employé n'a pas de bloc d'alertes : seule la vue admin les lit
     alertList = computed(() =>
         this.stockAlerts.alerts.hasValue() ? this.stockAlerts.alerts.value() : [],
     );
@@ -65,20 +76,21 @@ export class Dashboard {
     // nombre de ruptures et de stocks faibles
     alertCounts = computed(() => {
         const alerts = this.alertList();
-        const out = alerts.filter((a) => a.theoretical_stock <= 0).length;
+        const out = alerts.filter((a) => a.status === "OUT_OF_STOCK").length;
         return { out, low: alerts.length - out, total: alerts.length };
     });
 
-    // même découpage que la page Produits : le chiffre compte les ruptures ET le stock faible
-    alertHint = computed(() => {
-        const counts = this.alertCounts();
-        if (counts.total === 0) return "Au seuil minimum ou en dessous";
-
-        const parts = [];
-        if (counts.out > 0) parts.push(`${counts.out} en rupture`);
-        if (counts.low > 0) parts.push(`${counts.low} en stock faible`);
-        return parts.join(" · ");
+    profitHint = computed(() => {
+        const margin = this.summaryData()?.todayMargin;
+        return margin == null ? "Pas encore de vente" : `Marge de ${margin} %`;
     });
+    profitTone = computed(() => {
+        const profit = this.summaryData()?.todayProfit ?? 0;
+        return profit > 0 ? ("success" as const) : profit < 0 ? ("danger" as const) : undefined;
+    });
+    profitMissing = computed(
+        () => this.summary.hasValue() && this.summaryData()?.todayProfit == null,
+    );
 
     // le backend renvoie 30 jours, le dernier étant aujourd'hui
     lastWeek = computed(() =>
@@ -115,6 +127,54 @@ export class Dashboard {
         if (cash.status === "OPEN")
             return `Session ouverte à ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
         return `Clôturée à ${formatDate(cash.closedAt!, "HH:mm", this.locale)}`;
+    });
+
+    // ce que l'administrateur doit faire maintenant : les alertes de stock ont déjà leur carte et leur liste
+    todo = computed(() => {
+        if (!this.summary.hasValue() || this.firstSteps()) return [];
+        const items: { icon: IconName; text: string; label: string; reopenId?: number }[] = [];
+        if (this.canOpenCash())
+            items.push({
+                icon: "banknote",
+                text: "La caisse n'est pas ouverte : impossible d'enregistrer une vente.",
+                label: "Ouvrir la caisse",
+            });
+        const cash = this.cash();
+        if (this.auth.isAdmin() && cash?.status === "CLOSED")
+            items.push({
+                icon: "banknote",
+                text: "La caisse est clôturée : impossible d'enregistrer une vente.",
+                label: "Rouvrir la caisse",
+                reopenId: cash.id,
+            });
+        return items;
+    });
+
+    // aucune vente enregistrée : on guide l'administrateur pas à pas, comme Shopify ou Square
+    firstSteps = computed(() => {
+        if (!this.summary.hasValue() || !this.sales.hasValue() || this.salesList().length > 0)
+            return null;
+        const steps = [
+            {
+                icon: "package" as IconName,
+                label: "Ajouter vos produits",
+                done: (this.summaryData()?.activeProducts ?? 0) > 0,
+                link: "/products",
+            },
+            {
+                icon: "banknote" as IconName,
+                label: "Ouvrir la caisse",
+                done: !!this.cash(),
+                link: undefined,
+            },
+            {
+                icon: "cart" as IconName,
+                label: "Enregistrer une première vente",
+                done: false,
+                link: "/sales/new",
+            },
+        ];
+        return { steps, doneCount: steps.filter((step) => step.done).length };
     });
 
     reloadSummary() {

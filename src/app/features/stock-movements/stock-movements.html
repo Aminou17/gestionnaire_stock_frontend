@@ -1,4 +1,61 @@
-<app-page-header title="Mouvements de stock" section="Stock" />
+<app-page-header title="Mouvements" section="Stock">
+    @if (auth.isAdmin()) {
+        <app-export-menu
+            class="desktop-only"
+            ariaLabel="Exporter les mouvements"
+            [busy]="exporting()"
+            [disabled]="list().length === 0"
+            (picked)="exportFile($event)"
+        />
+        <!-- téléphone : les exports se rangent dans un menu, comme sur la page Produits -->
+        <div class="head-menu">
+            <button
+                type="button"
+                class="more-btn"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="menuOpen()"
+                aria-label="Exporter les mouvements"
+                (click)="toggleMenu()"
+            >
+                <app-icon name="download" />
+            </button>
+            @if (menuOpen()) {
+                <div class="menu" role="menu">
+                    <button
+                        type="button"
+                        role="menuitem"
+                        [disabled]="exporting() || list().length === 0"
+                        (click)="menuOpen.set(false); exportFile('pdf')"
+                    >
+                        <app-icon name="download" [size]="16" />
+                        Exporter en PDF
+                    </button>
+                    <button
+                        type="button"
+                        role="menuitem"
+                        [disabled]="exporting() || list().length === 0"
+                        (click)="menuOpen.set(false); exportFile('csv')"
+                    >
+                        <app-icon name="download" [size]="16" />
+                        Exporter en CSV
+                    </button>
+                </div>
+            }
+        </div>
+        <button
+            type="button"
+            class="btn btn-primary adjust-btn desktop-only"
+            (click)="openAdjust()"
+        >
+            <app-icon name="plus" [size]="18" />
+            Ajuster le stock
+        </button>
+    }
+</app-page-header>
+
+@if (success()) {
+    <div class="alert alert-success" role="status">{{ success() }}</div>
+}
 
 <!-- Compteurs de la période : cartes sur ordinateur, pastilles sur téléphone -->
 <div class="stats">
@@ -19,12 +76,18 @@
                 }}</strong>
                 @if (tab.units !== null) {
                     <small class="muted">
-                        @if (tab.units === undefined) {
+                        @if (tab.units === undefined || tab.count === 0) {
                             —
                         } @else {
                             {{ tab.units | number }} unité{{ tab.units > 1 ? "s" : "" }}
                         }
                     </small>
+                    <span class="stat-track" aria-hidden="true">
+                        <span
+                            class="stat-bar dot-{{ tab.tone }}"
+                            [style.width.%]="share(tab.count)"
+                        ></span>
+                    </span>
                 }
             }
             <span class="dot dot-{{ tab.tone }}"></span>
@@ -33,51 +96,132 @@
 </div>
 
 <section class="card list-card">
-    <app-period-filter (changed)="selectRange($event)">
-        @if (productId() !== null) {
-            <button
-                type="button"
-                class="product-filter"
-                (click)="clearProduct()"
-                [attr.aria-label]="'Retirer le filtre ' + productName()"
-            >
-                <span>{{ productName() }}</span>
-                <app-icon name="close" [size]="16" />
-            </button>
-        }
+    <!-- téléphone : trois puces par sens, puis le bouton qui ouvre la fenêtre Filtres -->
+    <div class="phone-bar">
         <button
             type="button"
-            class="btn btn-outline export"
-            [disabled]="exporting() || list().length === 0"
-            (click)="exportCsv()"
+            class="chip all-chip"
+            [class.selected]="type() === null"
+            [attr.aria-pressed]="type() === null"
+            (click)="selectType(null)"
         >
-            @if (exporting()) {
-                <span class="spinner"></span>
-            } @else {
-                <app-icon name="download" [size]="16" />
-            }
-            Exporter
+            Tous
+            <span class="chip-count">{{
+                counters()?.movements === undefined ? "—" : (counters()!.movements | number)
+            }}</span>
         </button>
-    </app-period-filter>
+
+        <button
+            type="button"
+            class="filter-btn"
+            [class.active]="filtersOpen() || activeFilters().length > 0"
+            [attr.aria-expanded]="filtersOpen()"
+            aria-label="Filtre"
+            (click)="filtersOpen.set(!filtersOpen())"
+        >
+            <app-icon name="filter" [size]="18" />
+            <span class="filter-label">Filtre</span>
+            @if (activeFilters().length > 0) {
+                <span class="filter-count">{{ activeFilters().length }}</span>
+            }
+        </button>
+
+        @for (filter of activeFilters(); track filter.key) {
+            <button
+                type="button"
+                class="active-chip"
+                [attr.aria-label]="'Retirer le filtre ' + filter.label"
+                (click)="clearFilter(filter.key)"
+            >
+                <span>{{ filter.label }}</span>
+                <app-icon name="close" [size]="14" />
+            </button>
+        }
+    </div>
+
+    <!-- sur ordinateur ce bloc se fond dans la page ; sur téléphone c'est la fenêtre qui monte du bas -->
+    <div class="filters" [class.open]="filtersOpen()">
+        <div class="sheet-head">
+            <h2>Filtres</h2>
+            <button
+                type="button"
+                class="sheet-close"
+                aria-label="Fermer les filtres"
+                (click)="filtersOpen.set(false)"
+            >
+                <app-icon name="close" [size]="20" />
+            </button>
+        </div>
+
+        <span class="field-label sheet-only" aria-hidden="true">Période</span>
+        <app-period-filter #period [chips]="true" [flat]="true" (changed)="selectRange($event)">
+            @if (productId() !== null) {
+                <button
+                    type="button"
+                    class="product-filter"
+                    (click)="clearProduct()"
+                    [attr.aria-label]="'Retirer le filtre ' + productName()"
+                >
+                    <span>{{ productName() }}</span>
+                    <app-icon name="close" [size]="16" />
+                </button>
+            }
+        </app-period-filter>
+
+        <div class="sheet-only" role="group" aria-label="Sens">
+            <span class="field-label">Sens</span>
+            <div class="type-options">
+                @for (tab of phoneTabs(); track tab.label) {
+                    <button
+                        type="button"
+                        class="chip type-chip"
+                        [attr.aria-pressed]="type() === tab.value"
+                        (click)="selectType(tab.value)"
+                    >
+                        {{ tab.label }}
+                        <span class="chip-count">{{
+                            tab.count === undefined ? "—" : (tab.count | number)
+                        }}</span>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <div class="sheet-only" role="group" aria-label="Type précis">
+            <span class="field-label">Type</span>
+            <div class="type-options">
+                @for (tab of tabs(); track tab.label) {
+                    @if (tab.value !== null) {
+                        <button
+                            type="button"
+                            class="chip"
+                            [attr.aria-pressed]="type() === tab.value"
+                            (click)="selectType(tab.value)"
+                        >
+                            {{ tab.short }}
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="sheet-foot">
+            <button type="button" class="btn btn-outline" (click)="resetFilters()">
+                Réinitialiser
+            </button>
+            <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
+                Voir {{ total() | number }} mouvement{{ total() > 1 ? "s" : "" }}
+            </button>
+        </div>
+    </div>
+
+    @if (filtersOpen()) {
+        <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
+    }
 
     @if (exportError()) {
         <div class="alert alert-error list-error" role="alert">{{ exportError() }}</div>
     }
-
-    <div class="chips">
-        @for (tab of tabs(); track tab.label) {
-            <button
-                type="button"
-                class="chip"
-                [class.selected]="type() === tab.value"
-                [attr.aria-pressed]="type() === tab.value"
-                (click)="selectType(tab.value)"
-            >
-                {{ tab.short }}
-                <span>{{ tab.count === undefined ? "—" : (tab.count | number) }}</span>
-            </button>
-        }
-    </div>
 
     @if (firstLoad()) {
         <div class="loading">
@@ -101,31 +245,35 @@
         </div>
     } @else if (list().length === 0) {
         <div class="empty">
+            <app-icon name="search" [size]="32" />
             @if (filtered() || type() !== null) {
-                Aucun mouvement pour ces filtres.
+                <p>Aucun mouvement pour ces filtres.</p>
                 <div class="empty-actions">
+                    @if (range().period !== "all") {
+                        <button type="button" class="btn btn-outline" (click)="allDates()">
+                            Toutes les dates
+                        </button>
+                    }
                     @if (productId() !== null) {
-                        <button
-                            type="button"
-                            class="btn btn-outline btn-sm"
-                            (click)="clearProduct()"
-                        >
+                        <button type="button" class="btn btn-outline" (click)="clearProduct()">
                             Voir tous les mouvements
                         </button>
                     }
                     @if (type() !== null) {
-                        <button
-                            type="button"
-                            class="btn btn-outline btn-sm"
-                            (click)="selectType(null)"
-                        >
+                        <button type="button" class="btn btn-outline" (click)="selectType(null)">
                             Tous les types
                         </button>
                     }
                 </div>
             } @else {
-                Aucun mouvement de stock pour le moment. Ils apparaissent avec les entrées de stock
-                et les ventes.
+                <p>
+                    Aucun mouvement pour le moment. Ils apparaissent avec les entrées et les ventes.
+                </p>
+                @if (auth.isAdmin()) {
+                    <a class="btn btn-primary" routerLink="/stock-entries">
+                        Faire une entrée de stock
+                    </a>
+                }
             }
         </div>
     } @else {
@@ -139,12 +287,12 @@
             </div>
         }
 
-        <p class="mobile-count muted">
-            {{ total() | number }} mouvement{{ total() > 1 ? "s" : "" }}
-            @if (selectedUnits() !== null) {
-                · {{ selectedUnits() | number }} unité{{ selectedUnits()! > 1 ? "s" : "" }}
-            }
-        </p>
+        <div class="summary-bar">
+            <p class="summary">
+                <strong>{{ total() | number }}</strong>
+                mouvement{{ total() > 1 ? "s" : "" }}
+            </p>
+        </div>
 
         <div class="table-wrap">
             <table [class.reloading]="movements.isLoading() && page() === 1">
@@ -163,8 +311,13 @@
                 </thead>
                 <tbody>
                     @for (movement of list(); track movement.id) {
-                        <tr tabindex="0" (click)="open(movement)" (keydown.enter)="open(movement)">
-                            <td>
+                        <tr
+                            tabindex="0"
+                            (click)="open(movement)"
+                            (keydown.enter)="open(movement)"
+                            (keydown.space)="openWithSpace($event, movement)"
+                        >
+                            <td class="date">
                                 {{
                                     isToday(movement.created_at)
                                         ? "Aujourd'hui, " + (movement.created_at | date: "HH:mm")
@@ -172,20 +325,43 @@
                                 }}
                             </td>
                             <td>
-                                <a
-                                    [routerLink]="['/products', movement.product_id]"
-                                    [state]="backState()"
-                                    class="product-link"
-                                    (click)="$event.stopPropagation()"
-                                    >{{ movement.product_name }}</a
-                                >
+                                <div class="product-cell">
+                                    <span class="thumb av-{{ movement.product_id % 4 }}">
+                                        @if (movement.image) {
+                                            <button
+                                                type="button"
+                                                class="thumb-zoom"
+                                                [attr.aria-label]="
+                                                    'Agrandir la photo de ' + movement.product_name
+                                                "
+                                                (click)="zoomImage($event, movement)"
+                                            >
+                                                <img [src]="movement.image" alt="" />
+                                            </button>
+                                        } @else {
+                                            {{ initials(movement.product_name) }}
+                                        }
+                                    </span>
+                                    <a
+                                        [routerLink]="['/products', movement.product_id]"
+                                        [state]="backState()"
+                                        class="product-link"
+                                        (click)="$event.stopPropagation()"
+                                        >{{ movement.product_name }}</a
+                                    >
+                                </div>
                             </td>
                             <td>
-                                <span class="badge badge-{{ types[movement.type].tone }}">{{
-                                    types[movement.type].label
-                                }}</span>
+                                <span class="type-tag">
+                                    <i class="tag-dot dot-{{ types[movement.type].tone }}"></i>
+                                    {{ types[movement.type].label }}
+                                </span>
                             </td>
-                            <td class="num quantity">
+                            <td
+                                class="num quantity"
+                                [class.in]="types[movement.type].sign === '+'"
+                                [class.out]="types[movement.type].sign !== '+'"
+                            >
                                 {{ types[movement.type].sign }}{{ movement.quantity | number }}
                             </td>
                             <td class="num stock-after">{{ movement.stock_after | number }}</td>
@@ -197,7 +373,11 @@
                                         class="sale-link"
                                         (click)="$event.stopPropagation()"
                                         >{{
-                                            movement.type === "SALE" ? "#" + id : "Vente #" + id
+                                            movement.type === "SALE"
+                                                ? "#" + id
+                                                : (movement.type === "ADJUSTMENT"
+                                                      ? "Remboursement #"
+                                                      : "Vente #") + id
                                         }}</a
                                     >
                                 } @else if (isInventory(movement)) {
@@ -208,14 +388,16 @@
                                         (click)="$event.stopPropagation()"
                                         >Inventaire #{{ movement.reference_id }}</a
                                     >
+                                } @else if (isManual(movement)) {
+                                    <span class="origin">{{ reasonLabel(movement) }}</span>
                                 } @else if (movement.type === "ENTRY") {
-                                    <span class="muted">Entrée de stock</span>
+                                    <span class="origin">Entrée de stock</span>
                                 } @else {
-                                    <span class="muted">Vente d'un autre vendeur</span>
+                                    <span class="origin">Vente</span>
                                 }
                             </td>
                             @if (auth.isAdmin()) {
-                                <td class="muted">{{ movement.user_name }}</td>
+                                <td class="origin muted-cell">{{ movement.user_name }}</td>
                             }
                         </tr>
                     }
@@ -223,67 +405,112 @@
             </table>
         </div>
 
-        <!-- Version téléphone : une carte par mouvement -->
-        <ul class="cards">
-            @for (movement of list(); track movement.id) {
-                <li
-                    class="movement-card"
-                    tabindex="0"
-                    (click)="open(movement)"
-                    (keydown.enter)="open(movement)"
-                >
-                    <div class="line">
-                        <a
-                            [routerLink]="['/products', movement.product_id]"
-                            [state]="backState()"
-                            class="product-link"
-                            (click)="$event.stopPropagation()"
-                            >{{ movement.product_name }}</a
-                        >
-                        <strong class="quantity">
-                            {{ types[movement.type].sign }}{{ movement.quantity | number }}
-                        </strong>
-                    </div>
-                    <p class="meta muted">
-                        {{
-                            isToday(movement.created_at)
-                                ? "Aujourd'hui, " + (movement.created_at | date: "HH:mm")
-                                : (movement.created_at | date: "d MMM y, HH:mm")
-                        }}
-                        @if (auth.isAdmin() && movement.user_name) {
-                            · {{ movement.user_name }}
-                        }
-                        @if (saleId(movement); as id) {
-                            ·
-                            <a
-                                [routerLink]="['/sales', id]"
-                                [state]="backState()"
-                                class="sale-link"
-                                (click)="$event.stopPropagation()"
-                                >{{ movement.type === "SALE" ? "#" + id : "Vente #" + id }}</a
+        <!-- Version téléphone : les mouvements regroupés par jour -->
+        <div class="days">
+            @for (day of days(); track day.key) {
+                <section class="day">
+                    <h2 class="day-title">
+                        <span>{{ day.label }}</span>
+                    </h2>
+                    <ul class="day-card">
+                        @for (movement of day.items; track movement.id) {
+                            <li
+                                class="movement-row"
+                                tabindex="0"
+                                (click)="open(movement)"
+                                (keydown.enter)="open(movement)"
+                                (keydown.space)="openWithSpace($event, movement)"
                             >
-                        } @else if (isInventory(movement)) {
-                            ·
-                            <a
-                                [routerLink]="['/inventories', movement.reference_id]"
-                                [state]="backState()"
-                                class="sale-link"
-                                (click)="$event.stopPropagation()"
-                                >Inventaire #{{ movement.reference_id }}</a
-                            >
+                                <span class="thumb av-{{ movement.product_id % 4 }}">
+                                    @if (movement.image) {
+                                        <button
+                                            type="button"
+                                            class="thumb-zoom"
+                                            [attr.aria-label]="
+                                                'Agrandir la photo de ' + movement.product_name
+                                            "
+                                            (click)="zoomImage($event, movement)"
+                                        >
+                                            <img [src]="movement.image" alt="" />
+                                        </button>
+                                    } @else {
+                                        {{ initials(movement.product_name) }}
+                                    }
+                                    <span
+                                        class="type-pill pill-{{ types[movement.type].tone }}"
+                                        [attr.title]="types[movement.type].label"
+                                    >
+                                        <app-icon [name]="typeIcons[movement.type]" [size]="10" />
+                                    </span>
+                                </span>
+                                <div class="movement-main">
+                                    <a
+                                        [routerLink]="['/products', movement.product_id]"
+                                        [state]="backState()"
+                                        class="product-link"
+                                        (click)="$event.stopPropagation()"
+                                        >{{ movement.product_name }}</a
+                                    >
+                                    <p class="meta">
+                                        {{ movement.created_at | date: "HH:mm" }}
+                                        @if (saleId(movement); as id) {
+                                            ·
+                                            <a
+                                                [routerLink]="['/sales', id]"
+                                                [state]="backState()"
+                                                class="sale-link"
+                                                (click)="$event.stopPropagation()"
+                                                >{{
+                                                    (movement.type === "ADJUSTMENT"
+                                                        ? "Remboursement #"
+                                                        : "Vente #") + id
+                                                }}</a
+                                            >
+                                        } @else if (isInventory(movement)) {
+                                            ·
+                                            <a
+                                                [routerLink]="[
+                                                    '/inventories',
+                                                    movement.reference_id,
+                                                ]"
+                                                [state]="backState()"
+                                                class="sale-link"
+                                                (click)="$event.stopPropagation()"
+                                                >Inventaire #{{ movement.reference_id }}</a
+                                            >
+                                        } @else if (isManual(movement)) {
+                                            · {{ reasonLabel(movement) }}
+                                        } @else if (movement.type === "ENTRY") {
+                                            · Entrée de stock
+                                        } @else if (movement.type === "SALE") {
+                                            · Vente
+                                        }
+                                        @if (auth.isAdmin() && movement.user_name) {
+                                            <span class="meta-author"
+                                                >· {{ movement.user_name }}</span
+                                            >
+                                        }
+                                    </p>
+                                </div>
+                                <div class="movement-qty">
+                                    <strong
+                                        class="quantity"
+                                        [class.in]="types[movement.type].sign === '+'"
+                                        [class.out]="types[movement.type].sign !== '+'"
+                                    >
+                                        {{ types[movement.type].sign
+                                        }}{{ movement.quantity | number }}
+                                    </strong>
+                                    <small class="after"
+                                        >Stock : {{ movement.stock_after | number }}</small
+                                    >
+                                </div>
+                            </li>
                         }
-                    </p>
-                    <div class="line">
-                        <span class="badge badge-{{ types[movement.type].tone }}">{{
-                            types[movement.type].label
-                        }}</span>
-                        <span class="muted after">
-                            Stock : <strong>{{ movement.stock_after | number }}</strong>
-                        </span>
-                    </div>
-                </li>
+                    </ul>
+                </section>
             }
-        </ul>
+        </div>
 
         <!-- en vue, ce repère déclenche le chargement des 20 mouvements suivants -->
         @if (hasMore()) {
@@ -306,3 +533,23 @@
 </section>
 
 <app-movement-detail #detail [movement]="selected()" [backState]="backState()" />
+
+<app-adjust-dialog #adjust (saved)="onAdjusted($event)" />
+
+@if (zoom(); as photo) {
+    <div
+        class="zoom"
+        role="dialog"
+        aria-modal="true"
+        [attr.aria-label]="photo.name"
+        tabindex="-1"
+        (click)="zoom.set(null)"
+        (keydown.escape)="zoom.set(null)"
+    >
+        <img [src]="photo.src" [alt]="photo.name" />
+        <p>{{ photo.name }}</p>
+        <button type="button" class="zoom-close" aria-label="Fermer la photo">
+            <app-icon name="close" [size]="22" />
+        </button>
+    </div>
+}

@@ -1,20 +1,21 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, computed, inject, signal } from "@angular/core";
-import { rxResource } from "@angular/core/rxjs-interop";
-import { Router, RouterLink } from "@angular/router";
+import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
+import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Router } from "@angular/router";
 
 import { CategoryService } from "../../core/stock/category.service";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { ProductService } from "../../core/stock/product.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { categoryTone, productInitials } from "../products/product-look";
 
 // même limite que le backend
 const MAX_STOCK = 1000000;
 
 @Component({
     selector: "app-new-inventory",
-    imports: [RouterLink, PageHeader, Icon],
+    imports: [PageHeader, Icon],
     templateUrl: "./new-inventory.html",
     styleUrl: "./new-inventory.css",
 })
@@ -23,6 +24,7 @@ export class NewInventory {
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);
     private router = inject(Router);
+    private destroyRef = inject(DestroyRef);
 
     search = signal("");
     categoryId = signal<number | null>(null);
@@ -63,7 +65,25 @@ export class NewInventory {
             this.products.value().total > this.products.value().data.length,
     );
 
+    initials = productInitials;
+    tone = categoryTone;
+
     countedTotal = computed(() => Object.keys(this.counts()).length);
+
+    // la jauge compte seulement les produits chargés (la catégorie choisie)
+    totalProducts = computed(() =>
+        this.products.hasValue() ? this.products.value().data.length : 0,
+    );
+
+    countedInList = computed(() => {
+        if (!this.products.hasValue()) return 0;
+        const counts = this.counts();
+        return this.products.value().data.filter((p) => counts[p.id] !== undefined).length;
+    });
+
+    progressPercent = computed(() =>
+        this.totalProducts() === 0 ? 0 : (this.countedInList() / this.totalProducts()) * 100,
+    );
 
     selectCategory(value: string) {
         this.categoryId.set(value ? Number(value) : null);
@@ -103,12 +123,17 @@ export class NewInventory {
 
         this.saving.set(true);
         this.error.set("");
-        this.inventoryService.createInventory(items).subscribe({
-            next: (inventory) => this.router.navigate(["/inventories", inventory.id]),
-            error: (err: HttpErrorResponse) => {
-                this.saving.set(false);
-                this.error.set(err.error?.message ?? "L'inventaire n'a pas pu être enregistré.");
-            },
-        });
+        this.inventoryService
+            .createInventory(items)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (inventory) => this.router.navigate(["/inventories", inventory.id]),
+                error: (err: HttpErrorResponse) => {
+                    this.saving.set(false);
+                    this.error.set(
+                        err.error?.message ?? "L'inventaire n'a pas pu être enregistré.",
+                    );
+                },
+            });
     }
 }

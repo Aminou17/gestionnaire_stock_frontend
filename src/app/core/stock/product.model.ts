@@ -13,15 +13,20 @@ export interface Product {
     max_discount: number;
     theoretical_stock: number;
     is_active: boolean;
+    // petite image en data URL, null sans photo
+    image?: string | null;
     // seuil propre au produit, null = seuil général
     min_stock: number | null;
     effective_min_stock: number | null;
     stock_status: StockStatus;
+    // ventes nettes des 30 derniers jours
+    sold_last_30_days?: number;
 }
 
 export interface ProductDetail extends Product {
     category_id: number;
-    supplier_id: number;
+    // envoyé seulement à l'admin
+    supplier_id?: number;
     // null pour les produits créés avant l'ajout de la date
     created_at: string | null;
 }
@@ -31,6 +36,8 @@ export interface ProductCounters {
     in_stock: number;
     low_stock: number;
     out_of_stock: number;
+    // valeur au prix d'achat, envoyée seulement à l'admin
+    stock_value?: number;
 }
 
 export interface ProductPage {
@@ -39,8 +46,19 @@ export interface ProductPage {
     counters: ProductCounters;
 }
 
+export type ProductSort =
+    | "default"
+    | "recent"
+    | "name"
+    | "price_asc"
+    | "price_desc"
+    | "stock_asc"
+    | "sold_desc"
+    | "sold_asc";
+
 export interface ProductFilters {
     search: string;
+    sort?: ProductSort;
     categoryId: number | null;
     supplierId?: number | null;
     stockStatus: StockStatus | null;

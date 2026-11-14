@@ -48,6 +48,27 @@ describe("CashSessionService", () => {
         req.flush({});
     });
 
+    it("should send the period and the status filters of the history", () => {
+        service
+            .getSessions(1, 20, { from: "2026-11-01", to: "2026-11-12", status: "gap" })
+            .subscribe();
+
+        const req = httpMock.expectOne((r) => r.url === "/api/cash_sessions");
+        expect(req.request.params.get("startDate")).toBe("2026-11-01");
+        expect(req.request.params.get("endDate")).toBe("2026-11-12");
+        expect(req.request.params.get("status")).toBe("gap");
+        req.flush({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
+    });
+
+    it("should reopen a closed session with its reason", () => {
+        service.reopen(4, "erreur de comptage").subscribe();
+
+        const req = httpMock.expectOne("/api/cash_sessions/4/reopen");
+        expect(req.request.method).toBe("POST");
+        expect(req.request.body).toEqual({ reason: "erreur de comptage" });
+        req.flush({});
+    });
+
     it("should convert the amounts of a session list to numbers", () => {
         let result: unknown;
         service.getSessions(2, 20).subscribe((res) => (result = res));

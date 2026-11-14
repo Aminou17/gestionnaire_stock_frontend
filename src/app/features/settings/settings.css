@@ -19,10 +19,6 @@
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background: var(--avatar-bg);
-    color: var(--avatar-text);
-    font-size: 16px;
-    font-weight: 700;
 }
 
 .profile-info {
@@ -110,8 +106,43 @@
     line-height: 1.4;
 }
 
-.item-value {
-    font-size: 14px;
+.theme-toggle {
+    width: 100%;
+    border: 0;
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 40px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--switch-off);
+    transition: background 0.15s;
+}
+
+.switch::after {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--switch-knob);
+    transition: transform 0.15s;
+}
+
+.switch.on {
+    background: var(--primary);
+}
+
+.switch.on::after {
+    transform: translateX(16px);
 }
 
 .chevron {
@@ -123,4 +154,13 @@
     .profile {
         padding: 16px;
     }
+}
+
+.avatar-link {
+    border-radius: 50%;
+}
+
+.avatar-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }

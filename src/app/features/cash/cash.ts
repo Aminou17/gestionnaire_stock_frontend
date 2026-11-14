@@ -1,3 +1,4 @@
+import { CashTabs } from "./cash-tabs/cash-tabs";
 import { DatePipe } from "@angular/common";
 import { Component, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
@@ -17,6 +18,7 @@ import { OpenCashDialog } from "./open-cash-dialog/open-cash-dialog";
 @Component({
     selector: "app-cash",
     imports: [
+        CashTabs,
         RouterLink,
         DatePipe,
         PageHeader,
@@ -31,6 +33,9 @@ import { OpenCashDialog } from "./open-cash-dialog/open-cash-dialog";
     styleUrl: "./cash.css",
 })
 export class Cash {
+    // la fiche d'une caisse ramène ici avec le bouton Retour
+    protected backState = { backTo: "/cash", backLabel: "Retour à la caisse" };
+
     private cashService = inject(CashSessionService);
     protected auth = inject(AuthService);
 
@@ -49,7 +54,7 @@ export class Cash {
     pending = computed(() =>
         this.today.hasValue() ? this.today.value().pendingExplanation : null,
     );
-    // celui qui a compté explique l'écart ; le propriétaire peut aussi le faire
+    // celui qui a compté explique l'écart ; l'administrateur peut aussi le faire
     canExplain = computed(
         () => this.auth.isAdmin() || this.pending()?.closedBy === this.auth.user()?.id,
     );

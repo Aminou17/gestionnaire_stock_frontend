@@ -1,0 +1,49 @@
+<div class="counter" [class.open]="open()">
+    <button
+        type="button"
+        class="toggle"
+        [attr.aria-expanded]="open()"
+        aria-controls="counter-body"
+        (click)="open.set(!open())"
+    >
+        <span>Compter les billets et les pièces</span>
+        @if (!open() && total() > 0) {
+            <strong class="mini">{{ total() | fcfa }}</strong>
+        }
+        <app-icon class="chevron" name="chevron-down" [size]="18" />
+    </button>
+
+    @if (open()) {
+        <div id="counter-body">
+            <div class="grid">
+                @for (value of denominations; track value) {
+                    <label class="line">
+                        <span class="face">{{ value | fcfa }}</span>
+                        <input
+                            class="input"
+                            type="number"
+                            min="0"
+                            step="1"
+                            inputmode="numeric"
+                            placeholder="0"
+                            [attr.aria-label]="'Nombre de ' + value + ' F'"
+                            [value]="count(value) || ''"
+                            (focus)="$any($event.target).select()"
+                            (input)="set(value, $any($event.target).value)"
+                        />
+                        <span class="sub muted">{{ value * count(value) | fcfa }}</span>
+                    </label>
+                }
+            </div>
+
+            <div class="foot">
+                <span
+                    >Total compté : <strong>{{ total() | fcfa }}</strong></span
+                >
+                <button type="button" class="btn btn-outline btn-sm" (click)="open.set(false)">
+                    Terminé
+                </button>
+            </div>
+        </div>
+    }
+</div>

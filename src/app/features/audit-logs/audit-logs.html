@@ -239,13 +239,11 @@
 
 <!-- contenu d'une ligne, qu'elle s'ouvre ou non -->
 <ng-template #line let-row>
-    <span class="avatar" aria-hidden="true">
-        @if (row.log.result === "FAILURE") {
-            <app-icon name="alert" [size]="16" />
-        } @else {
-            {{ initials(row.log) }}
-        }
-    </span>
+    @if (row.log.result === "FAILURE") {
+        <span class="avatar" aria-hidden="true"><app-icon name="alert" [size]="16" /></span>
+    } @else {
+        <app-avatar class="avatar" aria-hidden="true" />
+    }
 
     <span class="what">
         <span class="sentence">

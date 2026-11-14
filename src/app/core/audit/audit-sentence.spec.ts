@@ -61,6 +61,6 @@ describe("audit sentence", () => {
             }),
         );
 
-        expect(changes).toEqual([{ label: "Rôle", before: "Gérant", after: "Propriétaire" }]);
+        expect(changes).toEqual([{ label: "Rôle", before: "Employé", after: "Administrateur" }]);
     });
 });

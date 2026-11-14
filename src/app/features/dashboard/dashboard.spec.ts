@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideHttpClient } from "@angular/common/http";
 import { provideHttpClientTesting } from "@angular/common/http/testing";
-import { provideRouter } from "@angular/router";
+import { ActivatedRoute, convertToParamMap, provideRouter } from "@angular/router";
 import { signal } from "@angular/core";
 import { of, throwError } from "rxjs";
 
@@ -9,6 +9,7 @@ import { Dashboard } from "./dashboard";
 import { DashboardService } from "./dashboard.service";
 import { DailySales, DashboardSummary } from "./dashboard.model";
 import { AuthService } from "../../core/auth/auth.service";
+import { SecretValues } from "../../shared/secret/secret-values";
 import { SaleService } from "../../core/sales/sale.service";
 import { LowStockAlert } from "../../core/stock/low-stock-alert.model";
 import { SecurityAlertService } from "../../core/audit/security-alert.service";
@@ -46,6 +47,8 @@ describe("Dashboard", () => {
         alerts = [],
         previousOpenSession = null,
         pendingExplanation = null,
+        reserved = false,
+        sales = [{ id: 1 }] as any[],
     }: {
         isAdmin?: boolean;
         cash?: DashboardSummary["cash"];
@@ -55,6 +58,8 @@ describe("Dashboard", () => {
         alerts?: LowStockAlert[];
         previousOpenSession?: DashboardSummary["previousOpenSession"];
         pendingExplanation?: DashboardSummary["pendingExplanation"];
+        reserved?: boolean;
+        sales?: any[];
     } = {}) {
         const summary: DashboardSummary = {
             cash,
@@ -64,12 +69,22 @@ describe("Dashboard", () => {
             stockValue: isAdmin ? 4860000 : null,
             activeProducts: isAdmin ? 142 : null,
             lowStockCount: isAdmin ? 5 : null,
+            todayProfit: isAdmin ? 86000 : null,
+            todayMargin: isAdmin ? 40 : null,
         };
 
         await TestBed.configureTestingModule({
             imports: [Dashboard],
             providers: [
                 provideRouter([]),
+                {
+                    provide: ActivatedRoute,
+                    useValue: {
+                        snapshot: {
+                            queryParamMap: convertToParamMap(reserved ? { reserved: "1" } : {}),
+                        },
+                    },
+                },
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 {
@@ -86,7 +101,7 @@ describe("Dashboard", () => {
                         getRecentActivity: () => of([]),
                     },
                 },
-                { provide: SaleService, useValue: { getSales: () => of([]) } },
+                { provide: SaleService, useValue: { getSales: () => of(sales) } },
                 {
                     provide: AuthService,
                     useValue: {
@@ -97,7 +112,7 @@ describe("Dashboard", () => {
                             email: "y@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
                 {
@@ -130,22 +145,106 @@ describe("Dashboard", () => {
     it("should show the stock cards to the admin", async () => {
         await render();
 
-        expect(text()).toContain("Produits en alerte");
+        expect(text()).toContain("Bénéfice du jour");
+        expect(text()).toContain("86 000 F");
+        expect(text()).toContain("Marge de 40 %");
+        // la valeur du stock reste masquée tant que le mot de passe n'est pas redonné
+        expect(text()).not.toContain("4 860 000 F");
+        TestBed.inject(SecretValues).unlock();
+        fixture.detectChanges();
         expect(text()).toContain("4 860 000 F");
         expect(text()).toContain("142 produits actifs");
         expect(text()).not.toContain("Panier moyen");
     });
 
+    it("should tell a manager that the page he tried to open is reserved", async () => {
+        await render({ isAdmin: false, reserved: true });
+
+        expect(text()).toContain("Cette page est réservée à l'administrateur");
+    });
+
+    it("should not show the reserved notice on a normal visit", async () => {
+        await render();
+
+        expect(text()).not.toContain("réservée à l'administrateur");
+    });
+
     it("should split the alerts between out of stock and low stock", async () => {
         await render({
             alerts: [
-                { id: 1, name: "Produit Test", theoretical_stock: 0, min_stock: 10 },
-                { id: 2, name: "Clavier USB", theoretical_stock: 0, min_stock: 10 },
-                { id: 3, name: "Savon", theoretical_stock: 5, min_stock: 5 },
+                {
+                    id: 1,
+                    name: "Produit Test",
+                    theoretical_stock: 0,
+                    min_stock: 10,
+                    sold_last_30_days: 0,
+                    days_left: null,
+                    category_id: null,
+                    category_name: null,
+                    supplier_id: null,
+                    supplier_name: null,
+                    supplier_contact: null,
+                    supplier_phone: null,
+                    last_entry_at: null,
+                    last_entry_quantity: null,
+                    status: "OUT_OF_STOCK",
+                    suggested_quantity: 20,
+                },
+                {
+                    id: 2,
+                    name: "Clavier USB",
+                    theoretical_stock: 0,
+                    min_stock: 10,
+                    sold_last_30_days: 0,
+                    days_left: null,
+                    category_id: null,
+                    category_name: null,
+                    supplier_id: null,
+                    supplier_name: null,
+                    supplier_contact: null,
+                    supplier_phone: null,
+                    last_entry_at: null,
+                    last_entry_quantity: null,
+                    status: "OUT_OF_STOCK",
+                    suggested_quantity: 20,
+                },
+                {
+                    id: 3,
+                    name: "Savon",
+                    theoretical_stock: 5,
+                    min_stock: 5,
+                    sold_last_30_days: 0,
+                    days_left: null,
+                    category_id: null,
+                    category_name: null,
+                    supplier_id: null,
+                    supplier_name: null,
+                    supplier_contact: null,
+                    supplier_phone: null,
+                    last_entry_at: null,
+                    last_entry_quantity: null,
+                    status: "LOW",
+                    suggested_quantity: 5,
+                },
             ],
         });
 
-        expect(text()).toContain("2 en rupture · 1 en stock faible");
+        expect(el.querySelector(".todo")).toBeNull();
+    });
+
+    it("should guide the owner step by step before the first sale", async () => {
+        await render({ sales: [], cash: null });
+
+        const start = el.querySelector(".start");
+        expect(start?.textContent).toContain("Pour bien démarrer");
+        expect(start?.textContent).toContain("1 sur 3");
+        expect(el.querySelector(".todo")).toBeNull();
+    });
+
+    it("should hide the first steps once a sale exists", async () => {
+        await render();
+
+        expect(el.querySelector(".start")).toBeNull();
     });
 
     it("should compare today with yesterday", async () => {
@@ -166,14 +265,30 @@ describe("Dashboard", () => {
 
         expect(text()).toContain("312 000 F");
         expect(text()).toContain("Session ouverte à 08:05");
-        expect(el.querySelector(".new-sale")?.classList).not.toContain("disabled");
     });
 
-    it("should disable new sales and offer to open the cash register when it is closed", async () => {
+    it("should offer to open the cash register when it is closed", async () => {
         await render({ cash: null });
 
-        expect(el.querySelector(".new-sale")?.classList).toContain("disabled");
-        expect(el.querySelector(".open-cash")?.textContent).toContain("Ouvrir la caisse");
+        expect(el.querySelector(".todo")?.textContent).toContain("Ouvrir la caisse");
+        expect(el.querySelector(".todo")?.textContent).toContain("La caisse n'est pas ouverte");
+    });
+
+    it("should let the owner reopen a closed cash register", async () => {
+        await render({
+            cash: { ...openCash!, status: "CLOSED", closedAt: "2026-11-11T18:00:00" },
+        });
+
+        const todo = el.querySelector(".todo");
+        expect(todo?.textContent).toContain("La caisse est clôturée");
+        expect(todo?.textContent).toContain("Rouvrir la caisse");
+        expect(el.querySelector("app-reopen-cash-dialog")).not.toBeNull();
+    });
+
+    it("should hide the to-do block when nothing is left to do", async () => {
+        await render();
+
+        expect(el.querySelector(".todo")).toBeNull();
     });
 
     it("should keep only the last 7 days for the chart", async () => {
@@ -194,31 +309,23 @@ describe("Dashboard", () => {
         );
         expect(text()).not.toContain("Caisse fermée");
         expect(text()).toContain("Données indisponibles");
-        expect(el.querySelector(".open-cash")).toBeNull();
     });
 
     it("should not show the manager any admin block", async () => {
         await render({ isAdmin: false });
 
         expect(text()).not.toContain("Valeur du stock");
-        expect(text()).not.toContain("Produits en alerte");
+        expect(text()).not.toContain("Bénéfice du jour");
         expect(text()).not.toContain("Alertes de stock");
         expect(text()).not.toContain("null");
         expect(el.querySelector("app-stock-alerts")).toBeNull();
-        expect(el.querySelector(".open-cash")).toBeNull();
     });
 
     it("should show the manager's blocks in the requested order", async () => {
         await render({ isAdmin: false });
 
         const blocks = [...el.querySelectorAll(".manager > *")].map((b) => b.className);
-        expect(blocks).toEqual([
-            "m-cash",
-            "m-today",
-            "m-chart",
-            "m-sales",
-            "m-close",
-        ]);
+        expect(blocks).toEqual(["m-cash", "m-today", "m-chart", "m-sales", "m-close"]);
         expect(text()).toContain("Mes ventes du jour");
         expect(text()).toContain("+7 % vs hier à cette heure");
         expect(text()).toContain("Mes ventes sur 7 jours");
@@ -231,7 +338,6 @@ describe("Dashboard", () => {
 
         expect(text()).toContain("Caisse ouverte");
         expect(text()).toContain("312 000 F");
-        expect(el.querySelector(".new-sale")?.classList).not.toContain("disabled");
         expect(el.querySelector(".close-cash")?.getAttribute("href")).toBe("/cash");
     });
 

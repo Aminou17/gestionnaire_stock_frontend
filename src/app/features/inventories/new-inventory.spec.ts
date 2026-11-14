@@ -88,6 +88,23 @@ describe("NewInventory", () => {
         expect(component.counts()).toEqual({ 3: 0, 13: 1000000 });
     });
 
+    it("should fill the gauge with the counted products", async () => {
+        await render();
+
+        component.setCount(3, "26");
+        fixture.detectChanges();
+
+        expect(component.countedInList()).toBe(1);
+        expect(component.progressPercent()).toBe(50);
+        expect(el.querySelector(".progress-text")?.textContent).toContain("1 / 2");
+    });
+
+    it("should show the product photo or its initials", async () => {
+        await render();
+
+        expect(el.querySelector(".avatar")?.textContent).toContain("RP");
+    });
+
     it("should filter the products by name", async () => {
         await render();
 

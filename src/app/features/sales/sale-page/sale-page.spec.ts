@@ -141,7 +141,7 @@ describe("SalePage", () => {
                             email: "y@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
             ],
@@ -251,8 +251,15 @@ describe("SalePage", () => {
             }),
         });
 
-        expect(text()).toContain("Rendu : 1 × Riz");
+        expect(text()).toContain("1 × Riz");
         expect(returnButtons().length).toBe(1);
+        // le net remplace le total en haut et dans la carte Paiement
+        expect(text()).toContain("Net");
+        expect(text()).toContain("rendus");
+        expect(el.querySelector(".total strong")!.textContent!.replace(/\s/g, " ")).not.toBe("");
+        // le retour apparaît aussi dans l'activité, avec son motif
+        expect(el.querySelector(".timeline")!.textContent).toContain("Rendu : 1 × Riz");
+        expect(el.querySelector(".timeline")!.textContent).toContain("Couleur non conforme");
     });
 
     it("should explain a refunded sale", async () => {
@@ -367,7 +374,7 @@ describe("SalePage", () => {
 
         const detail = el.querySelector("app-movement-detail")!.textContent!;
         expect(detail).toContain("Mouvement n° 30");
-        expect(detail).toContain("Stock avant");
+        expect(detail).toContain("en stock");
         expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
     });
 
@@ -423,10 +430,36 @@ describe("SalePage", () => {
         });
 
         const receipt = el.querySelector(".receipt")!.textContent!.replace(/\s+/g, " ");
-        expect(receipt).toContain("Espèces");
-        expect(receipt).toContain("Mobile money");
+        expect(receipt.match(/Payé/g)).toHaveLength(2);
         expect(receipt).toContain("Reste à payer");
         expect(receipt).not.toContain("Monnaie rendue");
+    });
+
+    it("should show the date of each payment on the page and on the ticket", async () => {
+        const pay = (id: number, created_at: string) => ({
+            id,
+            amount: 500,
+            payment_method: "CASH",
+            amount_received: 500,
+            user_name: null,
+            created_at,
+        });
+        await render({
+            sale: detail({
+                total: 1000,
+                paid_amount: 1000,
+                created_at: "2026-11-12T12:00:00",
+                payments: [pay(1, "2026-11-12T12:05:00"), pay(2, "2026-11-14T09:00:00")] as never,
+            }),
+        });
+
+        const receipt = el.querySelector(".receipt")!.textContent!.replace(/\s+/g, " ");
+        expect(receipt).toContain("12/11 Payé");
+        expect(receipt).toContain("14/11 Payé");
+
+        const page = el.querySelector(".payment")!.textContent!.replace(/\s+/g, " ");
+        expect(page).toContain("12 Nov, 12:05 · Espèces");
+        expect(page).toContain("14 Nov, 09:00 · Espèces");
     });
 
     it("should count an old cash sale without amount as exact change", async () => {

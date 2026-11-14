@@ -1,9 +1,8 @@
-<a [routerLink]="back.link" class="back">
-    <app-icon name="chevron-left" [size]="18" />
-    {{ back.label }}
-</a>
+<app-page-header title="Produit" section="Stock" [back]="back.link" [backLabel]="back.label" />
 
-<app-page-header [title]="data()?.name ?? 'Produit'" section="Stock" />
+@if (notice()) {
+    <div class="alert alert-success" role="status">{{ notice() }}</div>
+}
 
 <section class="card sheet">
     @if (product.isLoading() && !data()) {
@@ -22,72 +21,96 @@
             }
         </div>
     } @else if (data(); as product) {
-        <dl>
-            <div>
-                <dt>Catégorie</dt>
-                <dd>{{ product.category_name }}</dd>
+        <div class="identity">
+            <div class="photo-wrap">
+                @if (product.image) {
+                    <button
+                        type="button"
+                        class="photo"
+                        aria-label="Agrandir la photo"
+                        (click)="openPhoto()"
+                    >
+                        <ng-container
+                            *ngTemplateOutlet="photoView; context: { $implicit: product }"
+                        />
+                    </button>
+                } @else {
+                    <span class="photo">
+                        <ng-container
+                            *ngTemplateOutlet="photoView; context: { $implicit: product }"
+                        />
+                    </span>
+                }
+                @if (auth.isAdmin()) {
+                    <label class="photo-badge" [class.busy]="photoSaving()">
+                        <app-icon name="camera" [size]="14" />
+                        <input
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            class="sr-only"
+                            [attr.aria-label]="
+                                product.image ? 'Changer la photo' : 'Ajouter une photo'
+                            "
+                            [disabled]="photoSaving()"
+                            (change)="pickPhoto($event)"
+                        />
+                    </label>
+                }
             </div>
-            <div>
-                <dt>Prix de vente</dt>
-                <dd class="strong">{{ product.sale_price | fcfa }}</dd>
+            <div class="identity-text">
+                <h2>{{ product.name }}</h2>
+                <span class="muted">{{ product.category_name }}</span>
             </div>
-            @if (product.pricing_mode === "NEGOTIABLE") {
-                <div>
-                    <dt>Prix minimum</dt>
-                    <dd>{{ product.sale_price - product.max_discount | fcfa }}</dd>
-                </div>
-            }
-            @if (auth.isAdmin()) {
-                <div>
-                    <dt>Prix d'achat</dt>
-                    <dd>{{ product.purchase_price | fcfa }}</dd>
-                </div>
-            }
-            <div>
-                <dt>État</dt>
-                <dd>
-                    @if (product.stock_status === "OUT_OF_STOCK") {
-                        <span class="badge badge-danger">Rupture</span>
-                    } @else if (product.stock_status === "LOW") {
-                        <span class="badge badge-warning">Stock faible</span>
-                    } @else {
-                        <span class="badge badge-success">En stock</span>
-                    }
-                </dd>
-            </div>
-            <div>
-                <dt>Stock</dt>
-                <dd class="strong stock-{{ product.stock_status }}">
-                    {{ product.theoretical_stock }}
-                </dd>
-            </div>
-            <div>
-                <dt>Seuil d'alerte</dt>
-                <dd>
-                    @if (product.effective_min_stock === null) {
-                        <span class="muted">Non défini</span>
-                    } @else {
-                        {{ product.effective_min_stock }}
-                        @if (product.min_stock === null) {
-                            <span class="muted">(par défaut)</span>
-                        }
-                    }
-                </dd>
-            </div>
-            <div>
-                <dt>Créé le</dt>
-                <dd>
-                    @if (product.created_at) {
-                        {{ product.created_at | date: "d MMMM y 'à' HH:mm" }}
-                    } @else {
-                        <!-- produit créé avant que la date soit enregistrée -->
-                        <span class="muted">Date inconnue</span>
-                    }
-                </dd>
-            </div>
-        </dl>
+        </div>
 
-        <!-- en bas de la fiche : vendre, et pour l'admin le menu "..." -->
+        @if (photoError()) {
+            <div class="alert alert-error" role="alert">{{ photoError() }}</div>
+        }
+
+        <div class="hero">
+            <div class="kpi">
+                <span class="kpi-label">Prix de vente</span>
+                <strong class="kpi-value">{{ product.sale_price | fcfa }}</strong>
+                @if (product.pricing_mode === "NEGOTIABLE") {
+                    <span class="kpi-note"
+                        >Minimum {{ product.sale_price - product.max_discount | fcfa }}</span
+                    >
+                }
+            </div>
+            <div class="kpi">
+                <span class="kpi-label">En stock</span>
+                <strong class="kpi-value stock-{{ product.stock_status }}">{{
+                    product.theoretical_stock
+                }}</strong>
+                @if (product.effective_min_stock !== null) {
+                    <span class="kpi-note">Seuil d'alerte {{ product.effective_min_stock }}</span>
+                }
+                @if (product.stock_status === "OUT_OF_STOCK") {
+                    <span class="badge badge-danger">Rupture</span>
+                } @else if (product.stock_status === "LOW") {
+                    <span class="badge badge-warning">Stock faible</span>
+                }
+            </div>
+        </div>
+
+        @if (auth.isAdmin()) {
+            <div class="hero cost">
+                <div class="kpi">
+                    <span class="kpi-label">Prix d'achat</span>
+                    <strong class="kpi-small">{{ product.purchase_price | fcfa }}</strong>
+                </div>
+                @if (margin(); as margin) {
+                    <div class="kpi">
+                        <span class="kpi-label">Marge</span>
+                        <strong class="kpi-small"
+                            >{{ margin.amount | fcfa }} ({{ margin.percent }} %)</strong
+                        >
+                    </div>
+                }
+            </div>
+        }
+
+        <!-- vendre et ajouter du stock restent visibles, le reste est dans le menu "..." -->
         <div class="actions">
             <button
                 type="button"
@@ -101,6 +124,11 @@
             </button>
 
             @if (auth.isAdmin()) {
+                <button type="button" class="btn btn-outline add-stock" (click)="addStock()">
+                    <app-icon name="stock-entry" [size]="18" />
+                    Ajouter du stock
+                </button>
+
                 <div class="row-menu">
                     <button
                         type="button"
@@ -114,14 +142,20 @@
                     </button>
                     @if (menuOpen()) {
                         <div class="menu" role="menu">
-                            <button type="button" role="menuitem" (click)="addStock()">
+                            <button type="button" role="menuitem" (click)="adjust()">
                                 <app-icon name="stock-entry" [size]="16" />
-                                Ajouter du stock
+                                Ajuster le stock
                             </button>
                             <button type="button" role="menuitem" (click)="edit()">
                                 <app-icon name="edit" [size]="16" />
                                 Modifier
                             </button>
+                            @if (product.image) {
+                                <button type="button" role="menuitem" (click)="removePhoto()">
+                                    <app-icon name="image" [size]="16" />
+                                    Retirer la photo
+                                </button>
+                            }
                             <button
                                 type="button"
                                 role="menuitem"
@@ -145,6 +179,7 @@
 
 @if (auth.isAdmin()) {
     <app-product-form (saved)="onSaved()" />
+    <app-adjust-dialog (saved)="onAdjusted($event)" />
 }
 
 <dialog #confirm class="confirm" (click)="onConfirmBackdrop($event)">
@@ -174,4 +209,21 @@
             </button>
         </div>
     </div>
+</dialog>
+
+<ng-template #photoView let-product>
+    @if (product.image) {
+        <img [src]="product.image" alt="Photo de {{ product.name }}" />
+    } @else {
+        {{ initials(product.name) }}
+    }
+</ng-template>
+
+<dialog #viewer class="viewer" (click)="onViewerClick($event)">
+    @if (data()?.image) {
+        <img [src]="data()!.image" alt="Photo de {{ data()!.name }}" />
+    }
+    <button type="button" class="viewer-close" aria-label="Fermer" (click)="closePhoto()">
+        <app-icon name="close" [size]="20" />
+    </button>
 </dialog>

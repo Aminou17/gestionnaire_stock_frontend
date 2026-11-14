@@ -94,7 +94,7 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
             return {
                 verb: "a essayé de",
                 object: describeRequest(d["method"], d["path"]),
-                note: "réservé au propriétaire",
+                note: "réservé à l'administrateur",
             };
         case "PASSWORD_CHANGED":
             return { verb: "a changé son mot de passe" };
@@ -163,6 +163,13 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                 verb: d["quantity"]
                     ? `a ajouté ${d["quantity"]} au stock de`
                     : "a ajouté du stock à",
+                object: log.entity_name ?? "un produit",
+            };
+        case "STOCK_ADJUSTED":
+            return {
+                verb: d["quantity"]
+                    ? `a ${d["direction"] === "gain" ? "ajouté" : "retiré"} ${d["quantity"]} ${d["direction"] === "gain" ? "au" : "du"} stock de`
+                    : "a ajusté le stock de",
                 object: log.entity_name ?? "un produit",
             };
         case "INVENTORY_CREATED": {
@@ -256,8 +263,8 @@ const FIELDS: Record<string, string> = {
 const PRICES = new Set(["sale_price", "purchase_price", "max_discount", "defaultMaxDiscount"]);
 
 const VALUES: Record<string, string> = {
-    admin: "Propriétaire",
-    manager: "Gérant",
+    admin: "Administrateur",
+    manager: "Employé",
     FIXED: "Fixe",
     NEGOTIABLE: "Négociable",
 };

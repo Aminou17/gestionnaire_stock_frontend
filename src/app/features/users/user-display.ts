@@ -2,15 +2,6 @@ import { formatDate } from "@angular/common";
 
 import { UserAccount } from "./user.model";
 
-// "Awa Bazin" donne "AB", comme l'avatar de l'en-tête
-export const getInitials = (name: string) =>
-    name
-        .split(" ")
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((part) => part[0].toUpperCase())
-        .join("");
-
 // sans 0, O, 1, l ni I, qu'on confond quand on dicte ou recopie le mot de passe
 const PASSWORD_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 

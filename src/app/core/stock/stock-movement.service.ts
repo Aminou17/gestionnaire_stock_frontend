@@ -2,9 +2,14 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 
 import { API_URL } from "../api.config";
-import { StockMovementFilters, StockMovementPage } from "./stock-movement.model";
+import { ExportFormat } from "../export-format";
+import {
+    StockAdjustmentInput,
+    StockMovementFilters,
+    StockMovementPage,
+} from "./stock-movement.model";
 
-// Historique en lecture seule : les mouvements naissent des entrées, ventes et remboursements
+// Historique des mouvements : ils naissent des entrées, ventes, remboursements et ajustements
 @Injectable({ providedIn: "root" })
 export class StockMovementService {
     private http = inject(HttpClient);
@@ -20,10 +25,18 @@ export class StockMovementService {
         return this.http.get<StockMovementPage>(`${API_URL}/stock_movements`, { params });
     }
 
-    // fichier CSV des mouvements correspondant aux filtres, sans pagination
-    exportCsv(filters: Omit<StockMovementFilters, "page" | "limit">) {
+    // ajustement manuel du stock, réservé à l'admin
+    adjustStock(input: StockAdjustmentInput) {
+        return this.http.post<{ id: number; stock_after: number }>(
+            `${API_URL}/stock_movements/adjustments`,
+            input,
+        );
+    }
+
+    // fichier des mouvements correspondant aux filtres, sans pagination
+    exportFile(filters: Omit<StockMovementFilters, "page" | "limit">, format: ExportFormat) {
         return this.http.get(`${API_URL}/stock_movements/export`, {
-            params: this.filterParams(filters),
+            params: { ...this.filterParams(filters), format },
             responseType: "blob",
         });
     }

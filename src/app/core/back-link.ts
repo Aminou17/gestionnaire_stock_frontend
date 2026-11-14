@@ -7,7 +7,8 @@ export interface BackState {
     backLabel: string;
 }
 
-// Lien Retour d'une fiche : la page d'où l'on vient si elle l'a indiqué, sinon la liste habituelle.
+// Lien Retour d'une fiche : la page d'où l'on vient si elle l'a indiqué, sinon la page précédente
+// (bouton Vendre, recherche, tableau de bord), sinon la liste habituelle.
 // À appeler dans le constructeur ou un champ du composant.
 export const getBackLink = (fallbackUrl: string, fallbackLabel: string) => {
     const router = inject(Router);
@@ -15,8 +16,29 @@ export const getBackLink = (fallbackUrl: string, fallbackLabel: string) => {
     const state = router.currentNavigation()?.extras.state ?? history.state;
     const fromState = typeof state?.backTo === "string" && state.backTo.startsWith("/");
 
+    const previous = fromState ? null : previousPage(router);
+
     return {
-        link: router.parseUrl(fromState ? state.backTo : fallbackUrl),
-        label: fromState && typeof state.backLabel === "string" ? state.backLabel : fallbackLabel,
+        link: router.parseUrl(fromState ? state.backTo : (previous ?? fallbackUrl)),
+        label:
+            fromState && typeof state.backLabel === "string"
+                ? state.backLabel
+                : previous
+                  ? "Retour"
+                  : fallbackLabel,
     };
+};
+
+// la page visitée juste avant, sauf un formulaire de création, l'accueil ou la page elle-même
+const previousPage = (router: Router) => {
+    const navigation = router.currentNavigation();
+    const previous = navigation?.previousNavigation?.finalUrl;
+    if (!previous) return null;
+
+    const url = router.serializeUrl(previous);
+    const path = (value: string) => value.split("?")[0];
+    const current = navigation?.finalUrl ? path(router.serializeUrl(navigation.finalUrl)) : null;
+
+    if (url === "/" || path(url) === current || /\/new(\?|$)|^\/login/.test(url)) return null;
+    return url;
 };

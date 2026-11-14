@@ -4,6 +4,7 @@ import { Router } from "@angular/router";
 import { tap } from "rxjs";
 
 import { API_URL } from "../api.config";
+import { SecretValues } from "../../shared/secret/secret-values";
 import { getRoleLabel } from "./role-label";
 
 export type UserRole = "admin" | "manager";
@@ -13,6 +14,7 @@ export interface User {
     name: string;
     email: string;
     role: UserRole;
+    avatar?: string | null;
 }
 
 interface LoginResponse {
@@ -25,6 +27,7 @@ interface LoginResponse {
 export class AuthService {
     private http = inject(HttpClient);
     private router = inject(Router);
+    private secret = inject(SecretValues);
 
     // "Se souvenir de moi" coché -> localStorage, sinon la session s'arrête à la fermeture du navigateur
     private storage = localStorage.getItem("token") ? localStorage : sessionStorage;
@@ -79,10 +82,27 @@ export class AuthService {
     updateProfile(name: string, email: string) {
         return this.http.put<User>(`${API_URL}/auth/me`, { name, email }).pipe(
             tap((user) => {
-                this.storage.setItem("user", JSON.stringify(user));
-                this._user.set(user);
+                // la réponse ne renvoie pas la photo : on garde celle qu'on a
+                this.saveUser({ ...user, avatar: this._user()?.avatar });
             }),
         );
+    }
+
+    // image en data URL, ou null pour retirer la photo
+    updateAvatar(avatar: string | null) {
+        return this.http
+            .put<User>(`${API_URL}/auth/me/avatar`, { avatar })
+            .pipe(tap((user) => this.saveUser(user)));
+    }
+
+    private saveUser(user: User) {
+        this.storage.setItem("user", JSON.stringify(user));
+        this._user.set(user);
+    }
+
+    // sert à ré-afficher une valeur masquée : ne change ni le token ni la session
+    verifyPassword(password: string) {
+        return this.http.post<{ message: string }>(`${API_URL}/auth/verify-password`, { password });
     }
 
     changePassword(currentPassword: string, newPassword: string) {
@@ -112,6 +132,8 @@ export class AuthService {
         }
         this._token.set(null);
         this._user.set(null);
+        // la valeur du stock ne reste pas visible pour le prochain connecté
+        this.secret.revealed.set(false);
     }
 }
 

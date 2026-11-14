@@ -9,13 +9,15 @@ import { Settings } from "./settings";
 describe("Settings", () => {
     let fixture: ComponentFixture<Settings>;
     let el: HTMLElement;
+    const theme = signal("dark");
+    const toggle = vi.fn();
 
     async function render(isAdmin = true) {
         await TestBed.configureTestingModule({
             imports: [Settings],
             providers: [
                 provideRouter([]),
-                { provide: ThemeService, useValue: { theme: signal("dark") } },
+                { provide: ThemeService, useValue: { theme, toggle } },
                 {
                     provide: AuthService,
                     useValue: {
@@ -26,7 +28,7 @@ describe("Settings", () => {
                             email: "awa@test.com",
                             role: "admin",
                         }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -45,9 +47,8 @@ describe("Settings", () => {
 
         const profile = el.querySelector(".profile")!.textContent!;
 
-        expect(profile).toContain("AT");
         expect(profile).toContain("awa@test.com");
-        expect(profile).toContain("Propriétaire");
+        expect(profile).toContain("Administrateur");
     });
 
     it("should link to every settings page for the owner", async () => {
@@ -57,24 +58,30 @@ describe("Settings", () => {
             "/shop",
             "/receipt",
             "/stock",
+            "/alert-email",
             "/cash",
             "/sales",
             "/export",
             "/account",
             "/password",
-            "/appearance",
         ]);
     });
 
-    it("should only offer the account and the appearance to the manager", async () => {
+    it("should only offer the account to the manager", async () => {
         await render(false);
 
-        expect(hrefs()).toEqual(["/account", "/password", "/appearance"]);
+        expect(hrefs()).toEqual(["/account", "/password"]);
     });
 
-    it("should show the current theme", async () => {
+    it("should show the dark mode as a switch and toggle it from the page", async () => {
         await render();
+        const toggleButton = el.querySelector<HTMLButtonElement>(".theme-toggle")!;
 
-        expect(el.textContent).toContain("Sombre");
+        expect(toggleButton.textContent).toContain("Mode sombre");
+        expect(toggleButton.getAttribute("aria-checked")).toBe("true");
+
+        toggleButton.click();
+
+        expect(toggle).toHaveBeenCalled();
     });
 });

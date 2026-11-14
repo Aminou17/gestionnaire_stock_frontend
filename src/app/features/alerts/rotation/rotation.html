@@ -1,0 +1,125 @@
+<app-page-header
+    title="Rotation des produits"
+    subtitle="Du plus vendu au moins vendu sur 30 jours"
+    section="Stock"
+    back="/alerts"
+    backLabel="Retour aux alertes"
+/>
+
+<section class="card list-card">
+    @if (!rotation.error() && urgentCount() > 0) {
+        <p class="summary">
+            <strong>{{ urgentCount() }}</strong>
+            {{ urgentCount() === 1 ? "produit qui sort vite a" : "produits qui sortent vite ont" }}
+            moins de 14 jours de stock.
+        </p>
+    }
+
+    @if (!rotation.error()) {
+        <div class="tabs tiles" role="group" aria-label="Afficher">
+            @for (tab of tabs; track tab.value) {
+                <button
+                    type="button"
+                    class="tab"
+                    [class.fast]="tab.value === 'FAST'"
+                    [class.slow]="tab.value === 'SLOW'"
+                    [class.selected]="view() === tab.value"
+                    [attr.aria-pressed]="view() === tab.value"
+                    (click)="view.set(tab.value)"
+                >
+                    {{ tab.label }} <span>{{ count(tab.value) }}</span>
+                </button>
+            }
+        </div>
+    }
+
+    @if (rotation.isLoading() && !rotation.hasValue()) {
+        <div class="loading">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (rotation.error()) {
+        <div class="empty" role="alert">
+            Impossible de charger la rotation des produits.
+            <button type="button" class="btn btn-outline btn-sm" (click)="rotation.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty" role="status">{{ emptyMessage() }}</div>
+    } @else {
+        <div class="columns" aria-hidden="true">
+            <span>Produit</span>
+            <span>Vendu (30 j)</span>
+            <span>En stock</span>
+            <span>Jours restants</span>
+        </div>
+
+        <ul class="rows">
+            @for (product of list(); track product.id) {
+                <li class="row">
+                    <div class="identity">
+                        <a
+                            class="name"
+                            [routerLink]="['/products', product.id]"
+                            [state]="backState()"
+                            >{{ product.name }}</a
+                        >
+                        <div class="meta-line">
+                            <span
+                                class="speed"
+                                [class.fast]="product.speed === 'FAST'"
+                                [class.slow]="product.speed === 'SLOW'"
+                                >{{ label(product.speed) }}</span
+                            >
+                            @if (product.to_clear) {
+                                <span class="clear">À solder</span>
+                            }
+                            @if (product.category_name) {
+                                <span class="meta">{{ product.category_name }}</span>
+                            }
+                            @if (product.speed === "DORMANT" && product.idle_days !== null) {
+                                <span class="meta idle">{{ idleLabel(product) }}</span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="figures">
+                        <span class="counts">
+                            <span class="sold">
+                                <span class="mobile-label">Vendu </span>
+                                {{ product.sold_last_30_days }}
+                            </span>
+
+                            <span class="stock">
+                                <span class="mobile-label">En stock </span>
+                                {{ product.theoretical_stock }}
+                            </span>
+                        </span>
+
+                        <span
+                            class="days"
+                            [class.urgent]="isUrgent(product)"
+                            [class.none]="product.days_left === null"
+                        >
+                            @if (product.days_left === null) {
+                                <span class="muted">Pas de vente</span>
+                            } @else {
+                                <span class="days-value" [class.long]="product.days_left > 365">
+                                    {{ product.days_left | daysLeft }}
+                                </span>
+                                <span class="gauge" aria-hidden="true">
+                                    <i
+                                        class="tone-{{ gaugeTone(product) }}"
+                                        [style.width.%]="gaugeWidth(product)"
+                                    ></i>
+                                </span>
+                            }
+                        </span>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>

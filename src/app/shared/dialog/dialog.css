@@ -1,3 +1,4 @@
+/* socle commun des fenêtres de la caisse */
 dialog {
     width: min(420px, calc(100% - 32px));
     padding: 0;

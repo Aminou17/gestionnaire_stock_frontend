@@ -7,10 +7,10 @@ import { map } from "rxjs";
 
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { Avatar } from "../../shared/avatar/avatar";
 import { LABELS } from "../../shared/activity-label";
 import { groupByDay } from "../../shared/day-label";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
-import { getInitials } from "../users/user-display";
 import { UserService } from "../users/user.service";
 import { getAuditAuthor } from "../../core/audit/audit-author";
 import {
@@ -53,10 +53,10 @@ const ENTITY_LINKS: Record<string, string> = {
 
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
-// Page réservée au propriétaire (adminGuard sur la route, 403 côté backend)
+// Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-audit-logs",
-    imports: [RouterLink, DatePipe, NgTemplateOutlet, PageHeader, PeriodFilter, Icon],
+    imports: [RouterLink, DatePipe, NgTemplateOutlet, PageHeader, PeriodFilter, Icon, Avatar],
     templateUrl: "./audit-logs.html",
     styleUrl: "./audit-logs.css",
 })
@@ -223,9 +223,6 @@ export class AuditLogs {
     }
 
     // une tentative sans compte connu n'a pas d'initiales
-    initials(log: AuditLog) {
-        return log.user_name ? getInitials(log.user_name) : "?";
-    }
 
     // une adresse IPv4 arrive sous la forme ::ffff:127.0.0.1
     cleanIp(ip: string) {

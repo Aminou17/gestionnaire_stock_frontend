@@ -4,7 +4,7 @@ import { Injectable, inject } from "@angular/core";
 import { API_URL } from "../api.config";
 import { AuditLogFilters, AuditLogPage } from "./audit-log.model";
 
-// Journal en lecture seule, réservé au propriétaire
+// Journal en lecture seule, réservé à l'administrateur
 @Injectable({ providedIn: "root" })
 export class AuditLogService {
     private http = inject(HttpClient);

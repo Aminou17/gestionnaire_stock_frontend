@@ -1,0 +1,80 @@
+.counter {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--primary-text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+
+.toggle span {
+    flex: 1;
+}
+
+.mini {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.chevron {
+    transition: transform 0.15s;
+}
+
+.open .chevron {
+    transform: rotate(180deg);
+}
+
+.grid {
+    display: grid;
+    gap: 8px;
+    padding: 0 12px 12px;
+}
+
+.line {
+    display: grid;
+    grid-template-columns: 72px 1fr 96px;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+}
+
+.face {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.line .input {
+    min-width: 0;
+    height: 40px;
+    text-align: right;
+}
+
+.sub {
+    text-align: right;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+}
+
+.foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    font-size: 14px;
+}

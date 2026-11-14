@@ -1,4 +1,5 @@
 import { Component, input } from "@angular/core";
+import { RouterLink } from "@angular/router";
 
 import { Icon } from "../../../shared/icon/icon";
 import { IconName } from "../../../shared/icon/icons";
@@ -9,7 +10,7 @@ type IconTone = "primary" | "warning";
 
 @Component({
     selector: "app-stat-card",
-    imports: [Icon],
+    imports: [Icon, RouterLink],
     templateUrl: "./stat-card.html",
     styleUrl: "./stat-card.css",
 })
@@ -21,6 +22,7 @@ export class StatCard {
     iconTone = input<IconTone>("primary");
     valueTone = input<Tone>();
     hintTone = input<Tone>("muted");
+    link = input<string>();
     loading = input(false);
     error = input(false);
 }

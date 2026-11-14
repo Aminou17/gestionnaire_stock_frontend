@@ -70,7 +70,7 @@ describe("Categories", () => {
                             email: "y@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
             ],

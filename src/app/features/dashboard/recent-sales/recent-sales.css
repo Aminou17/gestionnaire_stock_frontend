@@ -71,10 +71,3 @@ li {
     justify-items: center;
     gap: 12px;
 }
-
-/* sur téléphone le rôle ferait passer la ligne sur deux lignes, le nom suffit */
-@media (max-width: 767px) {
-    .role {
-        display: none;
-    }
-}

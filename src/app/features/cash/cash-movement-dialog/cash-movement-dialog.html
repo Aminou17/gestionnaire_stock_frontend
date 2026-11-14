@@ -1,6 +1,11 @@
-<dialog #dialog (click)="onBackdropClick($event)">
+<dialog
+    #dialog
+    aria-labelledby="cash-movement-title"
+    (click)="onBackdropClick($event)"
+    (cancel)="onCancel($event)"
+>
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <h2>{{ texts().title }}</h2>
+        <h2 id="cash-movement-title">{{ texts().title }}</h2>
         <p class="muted">{{ texts().hint }}</p>
 
         @if (error()) {
@@ -13,13 +18,20 @@
                 class="input"
                 type="number"
                 min="1"
-                step="500"
+                step="1"
                 inputmode="numeric"
                 formControlName="amount"
+                (focus)="$any($event.target).select()"
+                [attr.aria-invalid]="form.controls.amount.touched && form.controls.amount.invalid"
                 [class.invalid]="form.controls.amount.touched && form.controls.amount.invalid"
             />
+            @if (form.controls.amount.valid && form.controls.amount.value) {
+                <small class="muted">{{ form.controls.amount.value | fcfa }}</small>
+            }
             @if (form.controls.amount.touched && form.controls.amount.invalid) {
-                <small class="field-error">Le montant doit être supérieur à 0.</small>
+                <small class="field-error"
+                    >Le montant doit être un nombre entier supérieur à 0.</small
+                >
             }
         </label>
 

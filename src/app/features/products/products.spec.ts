@@ -42,7 +42,14 @@ describe("Products", () => {
         const page: ProductPage = {
             data,
             total,
-            counters: { total_products: 4, in_stock: 2, low_stock: 1, out_of_stock: 1 },
+            counters: {
+                total_products: 4,
+                in_stock: 2,
+                low_stock: 1,
+                out_of_stock: 1,
+                // le backend n'envoie la valeur du stock qu'à l'admin
+                ...(isAdmin ? { stock_value: 120000 } : {}),
+            },
         };
         getProducts = vi.fn(() => of(page));
         // jsdom ne gère ni <dialog> ni IntersectionObserver
@@ -85,7 +92,7 @@ describe("Products", () => {
                     useValue: {
                         isAdmin: signal(isAdmin),
                         user: signal({ id: 1, name: "Admin Test", email: "a@test.com" }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
                 {
@@ -118,39 +125,86 @@ describe("Products", () => {
         expect(card).toContain("Riz parfumé 5 kg");
         expect(card).toContain("Céréales");
         expect(card).toContain("1 500 F");
-        expect(card).toContain("Stock 45 / seuil 10");
-        expect(card).toContain("En stock");
+        expect(card).toContain("45 en stock");
+        expect(card).not.toContain("seuil");
+        expect(card).not.toContain("En stock");
     });
 
-    it("should show the minimum price only for negotiable products, never Fixe", async () => {
+    it("should not show the minimum price nor Fixe in the list", async () => {
         await render(true, [
             product({ id: 1, pricing_mode: "NEGOTIABLE", sale_price: 1500, max_discount: 200 }),
             product({ id: 2 }),
         ]);
 
-        const cards = el.querySelectorAll(".product-card");
-        expect(text(cards[0])).toContain("Min. 1 300 F");
-        expect(text(cards[0])).not.toContain("Négociable");
-        expect(cards[0].querySelector(".badge-violet")).not.toBeNull();
-        expect(cards[1].querySelector(".badge-violet")).toBeNull();
+        expect(text(el.querySelector(".list-card"))).not.toContain("Min.");
         expect(text()).not.toContain("Fixe");
     });
 
-    it("should color the stock in orange when low and in red when out of stock", async () => {
+    it("should show the margin to the admin only", async () => {
+        await render(true, [product({ sale_price: 1500, purchase_price: 800 })]);
+        expect(text(el.querySelector("table"))).toContain("Marge");
+        expect(text(el.querySelector("tbody"))).toContain("47 %");
+    });
+
+    it("should ask the backend for the chosen sort", async () => {
+        await render(true, [product({})]);
+
+        const select = el.querySelector<HTMLSelectElement>('select[aria-label="Trier par"]')!;
+        select.value = "price_desc";
+        select.dispatchEvent(new Event("change"));
+        await fixture.whenStable();
+
+        expect(getProducts.mock.lastCall![0]).toEqual(
+            expect.objectContaining({ sort: "price_desc", page: 1 }),
+        );
+    });
+
+    it("should show the stock as a green, orange or red pill", async () => {
         await render(true, [
-            product({ id: 1, stock_status: "LOW", theoretical_stock: 5 }),
-            product({ id: 2, stock_status: "OUT_OF_STOCK", theoretical_stock: 0 }),
+            product({ id: 1, stock_status: "OK", theoretical_stock: 20 }),
+            product({ id: 2, stock_status: "LOW", theoretical_stock: 5 }),
+            product({ id: 3, stock_status: "OUT_OF_STOCK", theoretical_stock: 0 }),
         ]);
 
         const cards = el.querySelectorAll(".product-card");
-        expect(cards[0].querySelector(".stock-LOW")?.textContent?.trim()).toBe("5");
-        expect(cards[1].querySelector(".stock-OUT_OF_STOCK")?.textContent?.trim()).toBe("0");
+        expect(cards[0].querySelector(".badge-success")?.textContent?.trim()).toBe("20 en stock");
+        expect(cards[1].querySelector(".badge-warning")?.textContent?.trim()).toBe(
+            "5 en stock · faible",
+        );
+        expect(cards[2].querySelector(".badge-danger")?.textContent?.trim()).toBe("Rupture");
+    });
+
+    it("should switch to the grid view and remember the choice", async () => {
+        await render(true, [product({ id: 1 }), product({ id: 2, name: "Pagne" })]);
+
+        expect(el.querySelector("table")).not.toBeNull();
+        expect(el.querySelector(".grid")).toBeNull();
+
+        (el.querySelector("[aria-label='Vue en grille']") as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        expect(el.querySelector("table")).toBeNull();
+        expect(el.querySelectorAll(".gcard").length).toBe(2);
+        expect(localStorage.getItem("products-view")).toBe("grid");
+        localStorage.removeItem("products-view");
+    });
+
+    it("should give the admin a menu for import and export on phone", async () => {
+        await render(true, [product({})]);
+
+        (el.querySelector(".head-menu .more-btn") as HTMLButtonElement).click();
+        fixture.detectChanges();
+
+        const items = [...el.querySelectorAll(".head-menu [role=menuitem]")].map((i) =>
+            i.textContent?.trim(),
+        );
+        expect(items).toEqual(["Importer", "Exporter en PDF", "Exporter en CSV"]);
     });
 
     it("should give the admin the + button and the actions menu", async () => {
         await render(true, [product({ purchase_price: 1100 })]);
 
-        expect(el.querySelector(".fab")).not.toBeNull();
+        expect(el.querySelector(".new-product")).not.toBeNull();
         expect(el.querySelector(".product-card .more-btn")).not.toBeNull();
         expect(text()).toContain("Prix d'achat");
     });
@@ -158,11 +212,32 @@ describe("Products", () => {
     it("should show the list read-only to the manager", async () => {
         await render(false, [product({})]);
 
-        expect(el.querySelector(".fab")).toBeNull();
         expect(el.querySelector(".new-product")).toBeNull();
-        expect(el.querySelector(".more-btn")).toBeNull();
+        expect(el.querySelector(".new-product")).toBeNull();
         expect(text()).not.toContain("Prix d'achat");
-        expect(el.querySelectorAll(".filters select").length).toBe(1);
+        expect(text()).not.toContain("Marge");
+        expect(el.querySelectorAll(".filters select").length).toBe(2);
+    });
+
+    it("should give the manager only the Vendre action in the row menu", async () => {
+        await render(false, [product({ theoretical_stock: 5 })]);
+
+        el.querySelector<HTMLButtonElement>(".more-btn")!.click();
+        await fixture.whenStable();
+
+        // le tableau et les cartes ont chacun leur menu : on ne garde que les libellés
+        const items = [...el.querySelectorAll('[role="menuitem"]')].map((i) => text(i).trim());
+        expect([...new Set(items)]).toEqual(["Vendre"]);
+    });
+
+    it("should show the stock value to the admin only", async () => {
+        await render(true, [product({})]);
+        expect(text(el.querySelector(".value-card"))).toContain("Valeur du stock");
+    });
+
+    it("should not show the stock value to the manager", async () => {
+        await render(false, [product({})]);
+        expect(el.querySelector(".value-card")).toBeNull();
     });
 
     it("should never say désactivé", async () => {

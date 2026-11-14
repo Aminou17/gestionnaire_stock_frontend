@@ -1,7 +1,7 @@
 export interface CashSummary {
     id: number;
     status: "OPEN" | "CLOSED";
-    // null pour le gérant quand la clôture est à l'aveugle
+    // null pour l'employé quand la clôture est à l'aveugle
     openingAmount: number | null;
     balance: number | null;
     openedAt: string;
@@ -29,6 +29,9 @@ export interface DashboardSummary {
     stockValue: number | null;
     activeProducts: number | null;
     lowStockCount: number | null;
+    // bénéfice du jour et marge en %, admin seulement ; la marge est null sans vente
+    todayProfit?: number | null;
+    todayMargin?: number | null;
 }
 
 export interface DailySales {

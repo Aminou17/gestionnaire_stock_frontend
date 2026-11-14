@@ -24,7 +24,7 @@ export interface CashSession {
     // YYYY-MM-DD
     session_date: string;
     status: "OPEN" | "CLOSED";
-    // null pour le gérant quand la caisse est ouverte et la clôture à l'aveugle
+    // null pour l'employé quand la caisse est ouverte et la clôture à l'aveugle
     opening_amount: number | null;
     // les trois montants suivants restent vides tant que la session est ouverte
     theoretical_amount: number | null;
@@ -65,7 +65,7 @@ export interface TeamSession {
 }
 
 // partie caisse de /dashboard/summary
-// balance et openingAmount valent null pour le gérant quand la clôture est à l'aveugle
+// balance et openingAmount valent null pour l'employé quand la clôture est à l'aveugle
 export interface CashToday {
     cash: {
         id: number;

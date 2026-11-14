@@ -1,8 +1,8 @@
-import { DatePipe } from "@angular/common";
+import { NgTemplateOutlet } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, computed, inject, signal, viewChild } from "@angular/core";
 import { rxResource, toSignal } from "@angular/core/rxjs-interop";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { map } from "rxjs";
 
 import { getBackLink } from "../../../core/back-link";
@@ -10,14 +10,25 @@ import { AuthService } from "../../../core/auth/auth.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { ProductService } from "../../../core/stock/product.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ProductForm } from "../product-form/product-form";
+import { AdjustDialog } from "../../stock-movements/adjust-dialog/adjust-dialog";
 import { ProductMovements } from "../product-movements/product-movements";
+import { marginPercent, productInitials } from "../product-look";
 
 @Component({
     selector: "app-product-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, FcfaPipe, ProductForm, ProductMovements],
+    imports: [
+        NgTemplateOutlet,
+        PageHeader,
+        Icon,
+        FcfaPipe,
+        ProductForm,
+        ProductMovements,
+        AdjustDialog,
+    ],
     templateUrl: "./product-page.html",
     styleUrl: "./product-page.css",
     host: {
@@ -35,15 +46,19 @@ export class ProductPage {
 
     // le formulaire n'existe que pour l'admin
     private form = viewChild(ProductForm);
+    private adjustDialog = viewChild(AdjustDialog);
+    private history = viewChild(ProductMovements);
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
+    private viewer = viewChild.required<ElementRef<HTMLDialogElement>>("viewer");
 
     private id = toSignal(
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
     product = rxResource({
-        params: () => this.id(),
-        stream: ({ params }) => this.productService.getProduct(params),
+        // un identifiant illisible dans l'adresse ne lance aucune requête
+        params: () => (Number.isInteger(this.id()) ? this.id() : undefined),
+        stream: ({ params }) => this.productService.getProduct(params!),
     });
 
     data = computed(() => (this.product.hasValue() ? this.product.value() : undefined));
@@ -57,6 +72,72 @@ export class ProductPage {
         const err = this.product.error() as HttpErrorResponse | undefined;
         return err?.error?.message ?? "Impossible de charger le produit.";
     });
+
+    // marge en francs et en pourcentage, seulement si le prix d'achat est connu (admin)
+    margin = computed(() => {
+        const product = this.data();
+        const percent = product ? marginPercent(product.sale_price, product.purchase_price) : null;
+        if (!product || percent === null) return null;
+        return { amount: product.sale_price - (product.purchase_price ?? 0), percent };
+    });
+
+    initials = productInitials;
+
+    photoSaving = signal(false);
+    photoError = signal<string | null>(null);
+
+    async pickPhoto(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = "";
+        if (!file) return;
+
+        this.photoError.set(null);
+        try {
+            const [image, thumb] = await Promise.all([
+                resizeAvatar(file, 320, 85000),
+                resizeAvatar(file, 80, 15000),
+            ]);
+            this.sendPhoto(image, thumb);
+        } catch (err) {
+            this.photoError.set((err as Error).message);
+        }
+    }
+
+    removePhoto() {
+        this.menuOpen.set(false);
+        this.photoError.set(null);
+        this.sendPhoto(null);
+    }
+
+    private sendPhoto(image: string | null, thumb: string | null = null) {
+        this.photoSaving.set(true);
+
+        this.productService.setImage(this.id()!, image, thumb).subscribe({
+            next: () => {
+                this.photoSaving.set(false);
+                this.product.reload();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.photoSaving.set(false);
+                this.photoError.set(err.error?.message ?? "Impossible d'enregistrer la photo.");
+            },
+        });
+    }
+
+    openPhoto() {
+        this.viewer().nativeElement.showModal();
+    }
+
+    closePhoto() {
+        this.viewer().nativeElement.close();
+    }
+
+    onViewerClick(event: MouseEvent) {
+        if (event.target === this.viewer().nativeElement) {
+            this.closePhoto();
+        }
+    }
 
     menuOpen = signal(false);
     deleting = signal(false);
@@ -72,9 +153,28 @@ export class ProductPage {
         }
     }
 
+    // message de confirmation après un ajustement du stock
+    notice = signal<string | null>(null);
+
+    adjust() {
+        this.menuOpen.set(false);
+        const product = this.data();
+        if (product) this.adjustDialog()?.show(product);
+    }
+
+    onAdjusted(message: string) {
+        this.notice.set(message);
+        this.product.reload();
+        this.history()?.reload();
+        this.stockAlerts.alerts.reload();
+    }
+
     addStock() {
         this.menuOpen.set(false);
-        this.router.navigate(["/stock-entries"], { queryParams: { productId: this.id() } });
+        this.router.navigate(["/stock-entries"], {
+            queryParams: { productId: this.id() },
+            state: { backTo: this.router.url, backLabel: "Produit" },
+        });
     }
 
     edit() {

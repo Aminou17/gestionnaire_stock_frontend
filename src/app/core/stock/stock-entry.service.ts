@@ -4,7 +4,7 @@ import { Injectable, inject } from "@angular/core";
 import { API_URL } from "../api.config";
 import { StockEntryFilters, StockEntryInput, StockEntryPage } from "./stock-entry.model";
 
-// Entrées de stock : réservées au propriétaire, côté backend comme côté interface
+// Entrées de stock : réservées à l'administrateur, côté backend comme côté interface
 @Injectable({ providedIn: "root" })
 export class StockEntryService {
     private http = inject(HttpClient);

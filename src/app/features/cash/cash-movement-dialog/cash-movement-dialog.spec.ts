@@ -111,14 +111,14 @@ describe("CashMovementDialog", () => {
     it("should let the reason from the list be left out", async () => {
         fixture.componentInstance.open("DEPOSIT");
         await typeAmount("1000");
-        await typeDetail("Monnaie donnée par la gérante");
+        await typeDetail("Monnaie donnée par la employée");
         await clickSubmit();
 
         const req = httpMock.expectOne("/api/cash_movements");
         expect(req.request.body).toEqual({
             type: "DEPOSIT",
             amount: 1000,
-            reason: "Monnaie donnée par la gérante",
+            reason: "Monnaie donnée par la employée",
         });
         req.flush({ id: 1 });
     });
@@ -140,7 +140,7 @@ describe("CashMovementDialog", () => {
         await clickSubmit();
 
         httpMock.expectNone("/api/cash_movements");
-        expect(el.textContent).toContain("Le montant doit être supérieur à 0.");
+        expect(el.textContent).toContain("Le montant doit être un nombre entier supérieur à 0.");
     });
 
     it("should keep the dialog open and show the API error", async () => {

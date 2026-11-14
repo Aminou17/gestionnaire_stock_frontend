@@ -95,7 +95,7 @@
             @for (user of list(); track user.id) {
                 <li class="row" [class.inactive]="!user.is_active" (click)="openUser(user)">
                     <div class="who">
-                        <span class="avatar" aria-hidden="true">{{ getInitials(user.name) }}</span>
+                        <app-avatar class="avatar" [photo]="user.avatar" aria-hidden="true" />
                         <div class="text">
                             <span class="name-line">
                                 <button

@@ -18,9 +18,12 @@ import { AuthService } from "../../../core/auth/auth.service";
 import { CategoryService } from "../../../core/stock/category.service";
 import { ProductService } from "../../../core/stock/product.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { RevealToggle } from "../../../shared/secret/reveal-toggle";
+import { SecretValues } from "../../../shared/secret/secret-values";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ProductForm } from "../../products/product-form/product-form";
+import { BackState } from "../../../core/back-link";
 
 // nombre de produits montrés directement sur la fiche
 const PREVIEW_SIZE = 5;
@@ -35,14 +38,29 @@ const CHANGE_LABELS: Record<string, string> = {
 
 @Component({
     selector: "app-category-page",
-    imports: [RouterLink, DatePipe, ReactiveFormsModule, PageHeader, Icon, FcfaPipe, ProductForm],
+    imports: [
+        RouterLink,
+        DatePipe,
+        ReactiveFormsModule,
+        PageHeader,
+        Icon,
+        FcfaPipe,
+        ProductForm,
+        RevealToggle,
+    ],
     templateUrl: "./category-page.html",
     styleUrl: "./category-page.css",
 })
 export class CategoryPage {
+    protected secret = inject(SecretValues);
     private categoryService = inject(CategoryService);
     private productService = inject(ProductService);
     private router = inject(Router);
+
+    // la fiche produit ouverte sait ainsi revenir ici
+    backState(): BackState {
+        return { backTo: this.router.url, backLabel: "Catégorie" };
+    }
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
 
@@ -103,7 +121,7 @@ export class CategoryPage {
         return action ? (CHANGE_LABELS[action] ?? action) : "";
     });
 
-    // le backend répond 404 pour une catégorie inexistante (ou supprimée, pour le gérant)
+    // le backend répond 404 pour une catégorie inexistante (ou supprimée, pour l'employé)
     notFound = computed(
         () =>
             !this.validId() ||

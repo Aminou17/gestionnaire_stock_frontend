@@ -85,8 +85,8 @@ export class SettingsCash implements HasUnsavedChanges {
                     this.message.set({
                         ok: true,
                         text: settings.blind_close
-                            ? "Le gérant clôturera sans voir le solde attendu."
-                            : "Le gérant verra le solde attendu à la clôture.",
+                            ? "L'employé clôturera sans voir le solde attendu."
+                            : "L'employé verra le solde attendu à la clôture.",
                     });
                 },
                 error: (err) => {

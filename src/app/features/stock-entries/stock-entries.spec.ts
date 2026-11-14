@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { signal } from "@angular/core";
 import { HttpErrorResponse } from "@angular/common/http";
-import { ActivatedRoute, convertToParamMap, provideRouter } from "@angular/router";
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
 import { StockEntries } from "./stock-entries";
@@ -120,7 +120,7 @@ describe("StockEntries", () => {
                             email: "a@test.com",
                             role: "admin",
                         }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -188,7 +188,7 @@ describe("StockEntries", () => {
         expect(component().form.controls.supplierId.value).toBe(1);
         component().form.controls.quantity.setValue(12);
         await fixture.whenStable();
-        expect(text()).toContain("Stock après l'entrée : 57");
+        expect(text()).toMatch(/Nouveau stock\s*57/);
 
         component().submit();
         await fixture.whenStable();
@@ -229,5 +229,36 @@ describe("StockEntries", () => {
 
         expect(component().product()?.name).toBe("Riz");
         expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
+    });
+
+    it("should prefill the quantity suggested by the alerts page", async () => {
+        await render({ query: { productId: "3", quantity: "12" } });
+        await fixture.whenStable();
+
+        expect(component().form.controls.quantity.value).toBe(12);
+    });
+
+    it("should add quickly with the plus buttons and never go below 1", async () => {
+        await render({ query: { productId: "3" } });
+        await fixture.whenStable();
+
+        component().addQuantity(10);
+        component().addQuantity(5);
+        expect(component().form.controls.quantity.value).toBe(15);
+
+        component().addQuantity(-100);
+        expect(component().form.controls.quantity.value).toBe(1);
+    });
+
+    it("should go back to the page we came from when the window is cancelled", async () => {
+        history.replaceState({ backTo: "/products/3", backLabel: "Produit" }, "");
+        await render({ query: { productId: "3" } });
+        await fixture.whenStable();
+
+        const navigate = vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
+        component().onClosed();
+
+        expect(navigate).toHaveBeenCalledWith("/products/3", { replaceUrl: true });
+        history.replaceState(null, "");
     });
 });

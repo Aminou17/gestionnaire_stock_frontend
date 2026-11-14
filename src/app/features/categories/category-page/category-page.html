@@ -109,7 +109,14 @@
             @if (category.stock_value !== undefined && category.product_count > 0) {
                 <div>
                     <dt>Valeur du stock <small class="muted">(prix d'achat)</small></dt>
-                    <dd class="strong">{{ category.stock_value | fcfa }}</dd>
+                    <dd class="strong">
+                        @if (secret.revealed()) {
+                            {{ category.stock_value | fcfa }}
+                        } @else {
+                            <span role="img" aria-label="Valeur masquée">••••••••</span>
+                        }
+                        <app-reveal-toggle />
+                    </dd>
                 </div>
             }
             @if (category.last_change; as change) {
@@ -147,7 +154,7 @@
                 <ul class="preview">
                     @for (product of preview(); track product.id) {
                         <li>
-                            <a [routerLink]="['/products', product.id]">
+                            <a [routerLink]="['/products', product.id]" [state]="backState()">
                                 <span class="preview-name">{{ product.name }}</span>
                                 <small class="muted">{{ product.sale_price | fcfa }}</small>
                                 <strong class="stock-{{ product.stock_status }}">

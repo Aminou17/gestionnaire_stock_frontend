@@ -1,0 +1,348 @@
+:host {
+    display: block;
+}
+
+.list-card {
+    min-width: 0;
+}
+
+.summary {
+    margin: 0;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+.summary strong {
+    color: var(--text);
+}
+
+.name:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.columns,
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) 110px 90px 120px;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+}
+
+.columns {
+    min-height: 40px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    position: relative;
+    min-height: 60px;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+.row:last-child {
+    border-bottom: 0;
+}
+
+/* le lien du nom couvre toute la ligne ; les boutons restent au-dessus */
+.name::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.row:hover {
+    background: var(--surface-hover);
+}
+
+.identity {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.figures,
+.counts {
+    display: contents;
+}
+
+.meta-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-top: 4px;
+}
+
+.speed,
+.clear {
+    display: inline-flex;
+    align-items: center;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.speed.fast {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.speed.slow,
+.clear {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.name {
+    min-width: 0;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.name:hover {
+    text-decoration: underline;
+}
+
+.meta {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.sold {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.stock,
+.days {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.days.urgent {
+    color: var(--danger);
+    font-weight: 700;
+}
+
+.mobile-label {
+    display: none;
+}
+
+.loading {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+}
+
+.row-skeleton {
+    height: 48px;
+    border-radius: 8px;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 48px 16px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .list-card {
+        padding-bottom: 0;
+    }
+
+    /* filtres : une rangée fine de pastilles */
+    .tabs.tiles {
+        display: flex;
+        gap: 6px;
+        padding: 10px 12px;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .tabs.tiles::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tiles .tab {
+        display: inline-flex;
+        flex: none;
+        flex-direction: row;
+        align-items: center;
+        gap: 6px;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        font-size: 13px;
+    }
+
+    .tiles .tab span {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .tabs .fast span {
+        color: var(--success);
+    }
+
+    .tabs .slow span {
+        color: var(--warning);
+    }
+
+    .summary {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .columns {
+        display: none;
+    }
+
+    /* une ligne : le produit à gauche, les jours restants en gros à droite */
+    .row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "id days"
+            "counts days";
+        gap: 4px 12px;
+        padding: 12px 16px;
+    }
+
+    .identity {
+        grid-area: id;
+    }
+
+    .counts {
+        display: flex;
+        grid-area: counts;
+        gap: 12px;
+        color: var(--text-muted);
+        font-size: 13px;
+    }
+
+    .figures {
+        display: contents;
+    }
+
+    .sold,
+    .stock {
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--text-muted);
+    }
+
+    /* le statut devient un point coloré et un mot, plus léger qu'une pastille */
+    .speed {
+        height: auto;
+        padding: 0;
+        gap: 6px;
+        background: none;
+        font-size: 12.5px;
+    }
+
+    .speed::before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+    }
+
+    .speed.fast,
+    .speed.slow {
+        background: none;
+    }
+
+    .days-value.long {
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .gauge {
+        display: block;
+        width: 56px;
+        height: 4px;
+        margin: 6px 0 0 auto;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--neutral-soft);
+    }
+
+    .gauge i {
+        display: block;
+        height: 100%;
+        border-radius: inherit;
+    }
+
+    .gauge .tone-danger {
+        background: var(--danger);
+    }
+
+    .gauge .tone-warning {
+        background: var(--warning);
+    }
+
+    .gauge .tone-success {
+        background: var(--success);
+    }
+
+    .days {
+        grid-area: days;
+        align-self: center;
+        color: var(--text);
+        font-size: 17px;
+        font-weight: 600;
+        font-variant-numeric: tabular-nums;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .days.none {
+        color: var(--text-muted);
+        font-size: 14px;
+        font-weight: 400;
+    }
+
+    .days.urgent {
+        color: var(--danger);
+    }
+
+    .days .muted {
+        font-size: 12px;
+        font-weight: 400;
+    }
+
+    .mobile-label {
+        display: inline;
+        font-weight: 400;
+        color: var(--text-muted);
+    }
+
+    .empty .btn-sm {
+        min-height: 44px;
+    }
+}

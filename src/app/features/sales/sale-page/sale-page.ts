@@ -15,8 +15,7 @@ import { map } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { BackState, getBackLink } from "../../../core/back-link";
-import { getRoleLabel } from "../../../core/auth/role-label";
-import { PaymentMethod, SaleItem } from "../../../core/sales/sale.model";
+import { PaymentMethod, SaleItem, SalePayment, SaleReturn } from "../../../core/sales/sale.model";
 import { SaleService } from "../../../core/sales/sale.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
@@ -26,8 +25,19 @@ import { StockMovement } from "../../../core/stock/stock-movement.model";
 import { SaleReceipt } from "../sale-receipt/sale-receipt";
 import { MovementDetail } from "../../stock-movements/movement-detail/movement-detail";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { Avatar } from "../../../shared/avatar/avatar";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
+
+interface TimelineEvent {
+    key: string;
+    kind: "sale" | "payment" | "return" | "cancel";
+    at: string;
+    rank: number;
+    payment?: SalePayment;
+    ret?: SaleReturn;
+    moves: StockMovement[];
+}
 
 @Component({
     selector: "app-sale-page",
@@ -37,12 +47,13 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
         DecimalPipe,
         PageHeader,
         Icon,
+        Avatar,
         FcfaPipe,
         MovementDetail,
         SaleReceipt,
     ],
     templateUrl: "./sale-page.html",
-    styleUrl: "./sale-page.css",
+    styleUrls: ["./sale-page.css", "./sale-page-dialogs.css"],
 })
 export class SalePage {
     private saleService = inject(SaleService);
@@ -80,7 +91,7 @@ export class SalePage {
 
     data = computed(() => (this.sale.hasValue() ? this.sale.value() : undefined));
 
-    // le backend répond 404 pour une vente inexistante ou celle d'un autre gérant
+    // le backend répond 404 pour une vente inexistante ou celle d'un autre employé
     notFound = computed(
         () =>
             !this.validId() || (this.sale.error() as HttpErrorResponse | undefined)?.status === 404,
@@ -105,24 +116,76 @@ export class SalePage {
         ),
     );
 
-    sellerInitials = computed(() =>
-        (this.data()?.user_name ?? "")
-            .split(" ")
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((part) => part[0].toUpperCase())
-            .join(""),
-    );
-
     // passer d'une vente à l'autre garde le même lien Retour
     navState(): BackState {
         return { backTo: this.router.serializeUrl(this.back.link), backLabel: this.back.label };
     }
 
     saleMoves = computed(() => (this.data()?.movements ?? []).filter((m) => m.type === "SALE"));
-    refundMoves = computed(() =>
-        (this.data()?.movements ?? []).filter((m) => m.type === "ADJUSTMENT"),
-    );
+
+    // montant gardé par la boutique : le total moins ce qui a été rendu
+    returned = computed(() => this.data()?.returned_amount ?? 0);
+    net = computed(() => (this.data()?.total ?? 0) - this.returned());
+    hasReturns = computed(() => this.returned() > 0 && this.data()?.status !== "CANCELLED");
+
+    // journal : du plus récent au plus ancien, avec le stock rattaché à chaque événement
+    timeline = computed<TimelineEvent[]>(() => {
+        const sale = this.data();
+        if (!sale) return [];
+
+        const adjustments = sale.movements.filter((m) => m.type === "ADJUSTMENT");
+        const events: TimelineEvent[] = [
+            { key: "sale", kind: "sale", at: sale.created_at, rank: 0, moves: this.saleMoves() },
+        ];
+
+        for (const payment of sale.payments) {
+            events.push({
+                key: `payment-${payment.id}`,
+                kind: "payment",
+                at: payment.created_at,
+                rank: 1,
+                payment,
+                moves: [],
+            });
+        }
+
+        // chaque retour reprend son mouvement de stock (même produit et même quantité)
+        for (const row of sale.returns) {
+            const index = adjustments.findIndex(
+                (m) => m.product_id === row.product_id && m.quantity === row.quantity,
+            );
+            const moves = index >= 0 ? adjustments.splice(index, 1) : [];
+            events.push({
+                key: `return-${row.id}`,
+                kind: "return",
+                at: row.created_at,
+                rank: 2,
+                ret: row,
+                moves,
+            });
+        }
+
+        if (sale.status === "CANCELLED" && sale.cancelled_at) {
+            events.push({
+                key: "cancel",
+                kind: "cancel",
+                at: sale.cancelled_at,
+                rank: 3,
+                moves: adjustments,
+            });
+        }
+
+        return events.sort((a, b) => Date.parse(b.at) - Date.parse(a.at) || b.rank - a.rank);
+    });
+
+    // stock replié quand un événement touche plusieurs produits
+    openStock = signal<string[]>([]);
+
+    toggleStock(key: string) {
+        this.openStock.update((keys) =>
+            keys.includes(key) ? keys.filter((k) => k !== key) : [...keys, key],
+        );
+    }
 
     // détail d'un mouvement dans la même fenêtre que la page Mouvements
     private moveDetail = viewChild<MovementDetail>("moveDetail");
@@ -282,7 +345,9 @@ export class SalePage {
                 },
                 error: (err: HttpErrorResponse) => {
                     this.paying.set(false);
-                    this.payError.set(err.error?.message ?? "Impossible d'enregistrer le paiement.");
+                    this.payError.set(
+                        err.error?.message ?? "Impossible d'enregistrer le paiement.",
+                    );
                 },
             });
     }
@@ -305,7 +370,9 @@ export class SalePage {
         return item.quantity - returned;
     }
 
-    returnAmount = computed(() => (this.returnItem()?.unit_price ?? 0) * (this.returnQuantity() ?? 0));
+    returnAmount = computed(
+        () => (this.returnItem()?.unit_price ?? 0) * (this.returnQuantity() ?? 0),
+    );
 
     askReturn(item: SaleItem) {
         this.returnItem.set(item);
@@ -335,7 +402,9 @@ export class SalePage {
         if (!item) return;
 
         if (quantity === null || quantity > this.returnable(item)) {
-            this.returnError.set(`La quantité doit être comprise entre 1 et ${this.returnable(item)}.`);
+            this.returnError.set(
+                `La quantité doit être comprise entre 1 et ${this.returnable(item)}.`,
+            );
             return;
         }
         if (!reason) {
@@ -358,7 +427,9 @@ export class SalePage {
                 },
                 error: (err: HttpErrorResponse) => {
                     this.returning.set(false);
-                    this.returnError.set(err.error?.message ?? "Impossible d'enregistrer le retour.");
+                    this.returnError.set(
+                        err.error?.message ?? "Impossible d'enregistrer le retour.",
+                    );
                 },
             });
     }
@@ -366,11 +437,6 @@ export class SalePage {
     reason = signal("");
     refunding = signal(false);
     refundError = signal<string | null>(null);
-
-    // Libellé du rôle du vendeur (rien si le backend ne l'a pas envoyé)
-    roleLabel(role: "admin" | "manager" | null) {
-        return getRoleLabel(role);
-    }
 
     askRefund() {
         this.reason.set("");

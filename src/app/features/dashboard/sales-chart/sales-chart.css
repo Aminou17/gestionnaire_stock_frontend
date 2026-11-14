@@ -71,6 +71,13 @@
     transition: height 0.4s ease;
 }
 
+/* un petit trait pour les jours sans vente : les 7 jours restent visibles */
+.bar.none {
+    height: 3px;
+    border-radius: 2px;
+    background: var(--border);
+}
+
 .bar.today {
     background: var(--chart-bar);
 }
@@ -80,6 +87,11 @@
     font-size: 12px;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
+}
+
+.bar-value.best {
+    color: var(--text);
+    font-weight: 600;
 }
 
 .day {
@@ -126,12 +138,6 @@
     opacity: 0.8;
 }
 
-.note {
-    margin: 12px 0 0;
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
 .chart-skeleton {
     flex: 1;
     min-height: 260px;
@@ -152,5 +158,8 @@
     }
     .day {
         font-size: 12px;
+    }
+    .bar {
+        width: min(28px, 55%);
     }
 }

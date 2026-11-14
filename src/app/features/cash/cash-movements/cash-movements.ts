@@ -1,8 +1,10 @@
+import { CashTabs } from "../cash-tabs/cash-tabs";
 import {
     Component,
     ElementRef,
     computed,
     effect,
+    LOCALE_ID,
     inject,
     linkedSignal,
     signal,
@@ -14,6 +16,7 @@ import { CashMovementPage, CashMovementRow, CashMovementType } from "../../../co
 import { CashMovementService } from "../../../core/cash/cash-movement.service";
 import { CASH_REASONS } from "../../../core/cash/cash-reasons";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { groupByDay } from "../../../shared/day-label";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementList } from "../cash-movement-list/cash-movement-list";
@@ -28,15 +31,16 @@ const TYPES: { label: string; value: CashMovementType | null }[] = [
     { label: "Retraits", value: "WITHDRAWAL" },
 ];
 
-// Journal de tous les mouvements de caisse (propriétaire seulement, comme l'API)
+// Journal de tous les mouvements de caisse (administrateur seulement, comme l'API)
 @Component({
     selector: "app-cash-movements",
-    imports: [PageHeader, PeriodFilter, FcfaPipe, CashMovementList],
+    imports: [CashTabs, PageHeader, PeriodFilter, FcfaPipe, CashMovementList],
     templateUrl: "./cash-movements.html",
     styleUrl: "./cash-movements.css",
 })
 export class CashMovements {
     private movementService = inject(CashMovementService);
+    private locale = inject(LOCALE_ID);
 
     private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
 
@@ -81,6 +85,9 @@ export class CashMovements {
             return [...previous.value, ...res.data.filter((m) => !known.has(m.id))];
         },
     });
+
+    // les mouvements chargés, regroupés par jour
+    days = computed(() => groupByDay(this.list(), this.locale));
 
     total = computed(() => this.last()?.pagination.total ?? 0);
     summary = computed(() => this.last()?.summary);

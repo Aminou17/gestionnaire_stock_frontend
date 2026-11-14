@@ -23,7 +23,7 @@
                         <strong>{{ alert.name }}</strong>
                         <small>{{ stock(alert) }} en stock · seuil {{ alert.min_stock }}</small>
                     </div>
-                    @if (alert.theoretical_stock <= 0) {
+                    @if (alert.status === "OUT_OF_STOCK") {
                         <span class="badge badge-danger">Rupture</span>
                     } @else {
                         <span class="badge badge-warning">Stock faible</span>

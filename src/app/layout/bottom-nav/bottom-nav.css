@@ -29,6 +29,44 @@ button {
     cursor: pointer;
 }
 
+.icon {
+    position: relative;
+    display: grid;
+}
+
+.badge {
+    position: absolute;
+    top: -4px;
+    left: 14px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--danger-strong);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+}
+
+.sell {
+    color: var(--primary-text);
+    font-weight: 600;
+}
+
+.sell-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-top: -14px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.25);
+}
+
 a.active {
     color: var(--primary-text);
     font-weight: 600;

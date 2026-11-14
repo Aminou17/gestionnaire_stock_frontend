@@ -24,7 +24,7 @@
         </div>
     } @else if (data(); as user) {
         <div class="identity" [class.inactive]="!user.is_active">
-            <span class="avatar" aria-hidden="true">{{ getInitials(user.name) }}</span>
+            <app-avatar class="avatar" [photo]="user.avatar" aria-hidden="true" />
             <div>
                 <h2>{{ user.name }}</h2>
                 <div class="tags">

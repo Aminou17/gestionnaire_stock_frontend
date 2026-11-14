@@ -31,7 +31,7 @@ export const validateRange = (from: string, to: string, today: string) => {
     selector: "app-period-filter",
     templateUrl: "./period-filter.html",
     styleUrl: "./period-filter.css",
-    host: { "[class.chips]": "chips()" },
+    host: { "[class.chips]": "chips()", "[class.stacked]": "stacked()", "[class.flat]": "flat()" },
 })
 export class PeriodFilter {
     private locale = inject(LOCALE_ID);
@@ -39,6 +39,10 @@ export class PeriodFilter {
     changed = output<PeriodRange>();
     // affichage en pastilles, sans libellé visible (Journal d'audit)
     chips = input(false);
+    // sur téléphone, les filtres s'empilent en pleine largeur (panneau Filtres des Ventes)
+    stacked = input(false);
+    // sur téléphone, sans cadre ni défilement : pour le placer dans une fenêtre de filtres
+    flat = input(false);
 
     period = signal<Period>("all");
     customFrom = signal("");

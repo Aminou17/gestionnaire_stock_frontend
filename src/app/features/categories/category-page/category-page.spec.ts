@@ -7,6 +7,7 @@ import { of, throwError } from "rxjs";
 
 import { CategoryPage } from "./category-page";
 import { AuthService } from "../../../core/auth/auth.service";
+import { SecretValues } from "../../../shared/secret/secret-values";
 import { CategoryDetail } from "../../../core/stock/category.model";
 import { CategoryService } from "../../../core/stock/category.service";
 import { SecurityAlertService } from "../../../core/audit/security-alert.service";
@@ -80,7 +81,7 @@ describe("CategoryPage", () => {
                             email: "a@test.com",
                             role: "manager",
                         }),
-                        roleLabel: signal("Gérant"),
+                        roleLabel: signal("Employé"),
                     },
                 },
             ],
@@ -161,6 +162,9 @@ describe("CategoryPage", () => {
         await render({ admin: true, category: { ...wax, ...adminExtras } });
 
         expect(text()).toContain("Valeur du stock");
+        expect(text()).not.toContain("245 500 F");
+        TestBed.inject(SecretValues).unlock();
+        fixture.detectChanges();
         expect(text()).toContain("245 500 F");
         expect(text()).toContain("Modifiée le");
         expect(text()).toContain("par Admin Test");

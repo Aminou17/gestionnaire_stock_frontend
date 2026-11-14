@@ -37,22 +37,14 @@ describe("RecentSales", () => {
             span.textContent?.replace(/\s+/g, " ").trim().replace(/^· /, ""),
         );
 
-    it("should show Propriétaire for an admin and Gérant for a manager", async () => {
+    it("should show the seller name only", async () => {
         fixture.componentRef.setInput("sales", [
             sale({ id: 1, user_name: "Yabre M.", user_role: "admin" }),
             sale({ id: 2, user_name: "Awa", user_role: "manager" }),
         ]);
         await fixture.whenStable();
 
-        expect(sellers()).toEqual(["Yabre M. (Propriétaire)", "Awa (Gérant)"]);
-    });
-
-    // c'était le bug : sans rôle, l'admin s'affichait "Gérant(e)"
-    it("should show only the name when the role is missing", async () => {
-        fixture.componentRef.setInput("sales", [sale({ user_role: undefined as any })]);
-        await fixture.whenStable();
-
-        expect(sellers()).toEqual(["Yabre M."]);
+        expect(sellers()).toEqual(["Yabre M.", "Awa"]);
     });
 
     it("should link each sale to its detail page and pluralise the articles", async () => {

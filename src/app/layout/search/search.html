@@ -1,0 +1,37 @@
+@if (layout.searchOpen()) {
+    <div class="backdrop" (click)="close()"></div>
+    <div class="palette" role="dialog" aria-label="Recherche">
+        <div class="field">
+            <app-icon name="search" [size]="18" />
+            <input
+                #input
+                type="text"
+                placeholder="Rechercher une page ou un produit"
+                autocomplete="off"
+                [value]="query()"
+                (input)="onInput($any($event.target).value)"
+            />
+            <kbd>Échap</kbd>
+        </div>
+
+        @if (results().length === 0) {
+            <p class="empty">Aucun résultat pour « {{ query() }} »</p>
+        } @else {
+            <ul role="listbox">
+                @for (result of results(); track $index) {
+                    <li
+                        role="option"
+                        [class.active]="$index === active()"
+                        [attr.aria-selected]="$index === active()"
+                        (click)="open(result)"
+                        (mouseenter)="active.set($index)"
+                    >
+                        <app-icon [name]="result.icon" [size]="18" />
+                        <span class="label">{{ result.label }}</span>
+                        <small>{{ result.hint }}</small>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+}

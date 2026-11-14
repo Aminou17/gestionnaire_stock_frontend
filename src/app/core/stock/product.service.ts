@@ -26,10 +26,11 @@ export class ProductService {
             includeSummary: "true",
         };
 
+        if (filters.sort && filters.sort !== "default") params["sort"] = filters.sort;
         if (filters.categoryId) params["categoryId"] = filters.categoryId;
         if (filters.supplierId) params["supplierId"] = filters.supplierId;
         if (filters.stockStatus) params["stockStatus"] = filters.stockStatus;
-        // le backend refuse un autre statut que "active" au gérant : on ne l'envoie qu'au besoin
+        // le backend refuse un autre statut que "active" à l'employé : on ne l'envoie qu'au besoin
         if (filters.status !== "active") params["status"] = filters.status;
 
         return this.http
@@ -47,11 +48,24 @@ export class ProductService {
         return this.http.post<ProductDetail>(`${API_URL}/products`, input);
     }
 
-    updateProduct(id: number, input: ProductInput) {
+    updateProduct(id: number, input: Partial<ProductInput>) {
         return this.http.patch<ProductDetail>(`${API_URL}/products/${id}`, input);
     }
 
     deleteProduct(id: number) {
         return this.http.delete<{ message: string }>(`${API_URL}/products/${id}`);
+    }
+
+    // image : data URL PNG ou JPEG, ou null pour retirer la photo
+    // thumb : petite version pour la liste
+    setImage(id: number, image: string | null, thumb: string | null = null) {
+        return this.http.patch<{ id: number; image: string | null }>(
+            `${API_URL}/products/${id}/image`,
+            { image, thumb },
+        );
+    }
+
+    importCsv(csv: string) {
+        return this.http.post<{ imported: number }>(`${API_URL}/products/import`, { csv });
     }
 }

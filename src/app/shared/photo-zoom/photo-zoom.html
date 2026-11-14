@@ -1,0 +1,18 @@
+<dialog
+    class="zoom"
+    #zoom
+    [attr.aria-label]="name()"
+    (click)="zoom.close()"
+    (close)="closed.emit()"
+>
+    <img [src]="src()" [alt]="name()" />
+    <p>{{ name() }}</p>
+    <button
+        type="button"
+        class="zoom-close"
+        aria-label="Fermer la photo"
+        (click)="$event.stopPropagation(); zoom.close()"
+    >
+        <app-icon name="close" [size]="22" />
+    </button>
+</dialog>

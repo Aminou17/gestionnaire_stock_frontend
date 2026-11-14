@@ -11,7 +11,6 @@ app-page-header {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
-    max-width: 640px;
 }
 
 .stat {
@@ -48,13 +47,16 @@ app-page-header {
 .list-card {
     min-width: 0;
     padding-bottom: 8px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
 }
 
 .chips {
     display: flex;
-    gap: 8px;
+    gap: 6px;
     margin: 8px 0 0;
-    padding: 4px 16px;
+    padding: 4px 0;
     overflow-x: auto;
     scrollbar-width: none;
 }
@@ -66,7 +68,7 @@ app-page-header {
 .chip {
     flex-shrink: 0;
     height: 44px;
-    padding: 0 16px;
+    padding: 0 14px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--surface);
@@ -84,13 +86,32 @@ app-page-header {
 
 .count {
     margin: 0;
-    padding: 12px 16px 0;
+    padding: 12px 4px 0;
     font-size: 14px;
 }
 
 app-cash-movement-list {
     display: block;
+}
+
+.days {
+    display: grid;
+    gap: 20px;
+    padding: 8px 0 0;
+}
+
+.day-title {
+    margin: 0 4px 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.day-card {
     padding: 0 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
 }
 
 .list-error {
@@ -149,34 +170,5 @@ app-cash-movement-list {
 
     .btn-sm {
         height: 44px;
-    }
-}
-
-.reason-filter {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-width: 0;
-    font-size: 14px;
-}
-
-.reason-filter .input {
-    width: 220px;
-    cursor: pointer;
-}
-
-@media (max-width: 767px) {
-    /* la barre de période perd son padding sur mobile, la carte le garde */
-    app-period-filter {
-        padding: 16px 16px 0;
-    }
-
-    .reason-filter {
-        flex: 1 1 100%;
-    }
-
-    .reason-filter .input {
-        flex: 1;
-        width: auto;
     }
 }

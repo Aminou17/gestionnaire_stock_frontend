@@ -45,12 +45,12 @@ export class UserForm {
     roles: { value: UserRole; label: string; hint: string }[] = [
         {
             value: "manager",
-            label: "Gérant",
+            label: "Employé",
             hint: "Vend, encaisse et clôture la caisse. Ne voit ni les prix d'achat ni les réglages.",
         },
         {
             value: "admin",
-            label: "Propriétaire",
+            label: "Administrateur",
             hint: "Accès complet : stock, fournisseurs, caisse, utilisateurs et paramètres.",
         },
     ];

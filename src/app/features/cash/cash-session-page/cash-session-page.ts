@@ -2,27 +2,43 @@ import { DatePipe, formatDate } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, LOCALE_ID, computed, inject } from "@angular/core";
 import { rxResource, toSignal } from "@angular/core/rxjs-interop";
-import { ActivatedRoute, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { map } from "rxjs";
 
+import { getBackLink } from "../../../core/back-link";
 import { CashSessionService } from "../../../core/cash/cash-session.service";
 import { summarizeMovements } from "../../../core/cash/cash-movements";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementList } from "../cash-movement-list/cash-movement-list";
+import { ReopenCashDialog } from "../reopen-cash-dialog/reopen-cash-dialog";
 import { CloseCashDialog } from "../close-cash-dialog/close-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
 
 @Component({
     selector: "app-cash-session-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, FcfaPipe, CashMovementList, CloseCashDialog],
+    imports: [
+        RouterLink,
+        DatePipe,
+        PageHeader,
+        Icon,
+        FcfaPipe,
+        CashMovementList,
+        CloseCashDialog,
+        ReopenCashDialog,
+    ],
     templateUrl: "./cash-session-page.html",
     styleUrl: "./cash-session-page.css",
 })
 export class CashSessionPage {
     private cashService = inject(CashSessionService);
-    private auth = inject(AuthService);
+    protected auth = inject(AuthService);
+
+    // retour vers la page d'où l'on vient (Caisse ou Historique), sinon l'historique
+    private back = getBackLink("/cash/sessions", "Retour à l'historique");
+    protected backUrl = inject(Router).serializeUrl(this.back.link);
+    protected backLabel = this.back.label;
 
     private id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => Number(p.get("id")))), {
         requireSync: true,
@@ -36,7 +52,7 @@ export class CashSessionPage {
     private locale = inject(LOCALE_ID);
 
     data = computed(() => (this.session.hasValue() ? this.session.value() : undefined));
-    // celui qui a compté explique l'écart ; le propriétaire peut aussi le faire
+    // celui qui a compté explique l'écart ; l'administrateur peut aussi le faire
     canExplain = computed(
         () => this.auth.isAdmin() || this.data()?.closed_by === this.auth.user()?.id,
     );

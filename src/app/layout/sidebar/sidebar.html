@@ -1,7 +1,7 @@
-<aside class="sidebar" [class.open]="layout.sidebarOpen()">
+<aside class="sidebar" [class.open]="layout.sidebarOpen()" [class.collapsed]="layout.collapsed()">
     <div class="brand">
         <span class="brand-icon"><app-icon name="box" [size]="20" /></span>
-        <div>
+        <div class="brand-text">
             <div class="brand-name">Gestionnaire</div>
             <div class="brand-sub">de Stock</div>
         </div>
@@ -10,28 +10,149 @@
         </button>
     </div>
 
+    <a
+        class="new-sale"
+        routerLink="/sales/new"
+        [attr.title]="layout.collapsed() ? 'Nouvelle vente' : null"
+        (click)="close()"
+    >
+        <app-icon name="plus" [size]="18" />
+        <span class="label">Nouvelle vente</span>
+    </a>
+
+    <button
+        type="button"
+        class="search-btn"
+        (click)="openSearch()"
+        [attr.title]="layout.collapsed() ? 'Rechercher' : null"
+        aria-label="Rechercher"
+    >
+        <app-icon name="search" [size]="18" />
+        <span class="label">Rechercher</span>
+        <kbd class="label">Ctrl K</kbd>
+    </button>
+
     <nav>
         @for (section of sections(); track $index) {
             @if (section.title) {
                 <p class="section-title">{{ section.title }}</p>
             }
-            @for (item of section.items; track item.path) {
-                <a [routerLink]="item.path" routerLinkActive="active" (click)="close()">
-                    <app-icon [name]="item.icon" />
-                    <span>{{ item.label }}</span>
-                    @if (item.path === "/alerts" && alerts.count() > 0) {
-                        <span class="count">{{ alerts.count() }}</span>
-                    }
-                </a>
+            @for (item of section.items; track item.label) {
+                @if (item.children) {
+                    <button
+                        type="button"
+                        class="group"
+                        (click)="toggleGroup(item.label)"
+                        [attr.aria-expanded]="openGroups().includes(item.label)"
+                    >
+                        <app-icon [name]="item.icon" />
+                        <span class="label">{{ item.label }}</span>
+                        @if (
+                            hasAlerts(item) &&
+                            !openGroups().includes(item.label) &&
+                            alerts.count() > 0
+                        ) {
+                            <span class="count">{{ alerts.count() }}</span>
+                        }
+                        <app-icon
+                            class="arrow"
+                            [class.turned]="openGroups().includes(item.label)"
+                            name="chevron-down"
+                            [size]="16"
+                        />
+                    </button>
+                    <div class="children" [class.shown]="openGroups().includes(item.label)">
+                        @for (child of item.children; track child.label) {
+                            <a
+                                [routerLink]="child.path"
+                                [queryParams]="child.queryParams"
+                                routerLinkActive="active"
+                                [routerLinkActiveOptions]="{ exact: !!child.exact }"
+                                [attr.title]="layout.collapsed() ? child.label : null"
+                                (click)="close()"
+                            >
+                                <app-icon [name]="child.icon" />
+                                <span class="label">{{ child.label }}</span>
+                                @if (child.path === "/alerts" && alerts.count() > 0) {
+                                    <span class="count">{{ alerts.count() }}</span>
+                                }
+                            </a>
+                        }
+                    </div>
+                } @else {
+                    <a
+                        [routerLink]="item.path"
+                        routerLinkActive="active"
+                        [attr.title]="layout.collapsed() ? item.label : null"
+                        (click)="close()"
+                    >
+                        <app-icon [name]="item.icon" />
+                        <span class="label">{{ item.label }}</span>
+                        @if (item.path === "/alerts" && alerts.count() > 0) {
+                            <span class="count">{{ alerts.count() }}</span>
+                        }
+                    </a>
+                }
             }
         }
     </nav>
 
-    <button type="button" class="theme" (click)="theme.toggle()">
-        <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" />
-        <span>Mode sombre</span>
-        <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
-    </button>
+    <div class="footer">
+        <button
+            type="button"
+            class="collapse"
+            (click)="layout.toggleCollapsed()"
+            [attr.title]="layout.collapsed() ? 'Agrandir le menu' : null"
+            [attr.aria-label]="layout.collapsed() ? 'Agrandir le menu' : 'Réduire le menu'"
+        >
+            <app-icon [name]="layout.collapsed() ? 'chevron-right' : 'chevron-left'" />
+            <span class="label">Réduire le menu</span>
+        </button>
+
+        <div class="profile">
+            @if (profileOpen()) {
+                <div class="popup" role="menu">
+                    <a routerLink="/settings/account" role="menuitem" (click)="close()">
+                        <app-icon name="user" [size]="16" />
+                        Mon profil
+                    </a>
+                    <a routerLink="/settings/password" role="menuitem" (click)="close()">
+                        <app-icon name="key" [size]="16" />
+                        Mot de passe
+                    </a>
+                    <a routerLink="/settings" role="menuitem" (click)="close()">
+                        <app-icon name="settings" [size]="16" />
+                        Paramètres
+                    </a>
+                    <button type="button" role="menuitem" (click)="theme.toggle()">
+                        <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" [size]="16" />
+                        Mode sombre
+                        <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
+                    </button>
+                    <button type="button" class="logout" role="menuitem" (click)="auth.logout()">
+                        <app-icon name="logout" [size]="16" />
+                        Se déconnecter
+                    </button>
+                </div>
+            }
+
+            <button
+                type="button"
+                class="profile-btn"
+                (click)="profileOpen.set(!profileOpen())"
+                [attr.aria-expanded]="profileOpen()"
+                aria-haspopup="menu"
+                [attr.title]="layout.collapsed() ? auth.user()?.name : null"
+            >
+                <app-avatar class="avatar" [photo]="auth.user()?.avatar" />
+                <span class="who">
+                    <strong>{{ auth.user()?.name }}</strong>
+                    <small>{{ auth.roleLabel() }}</small>
+                </span>
+                <app-icon class="chevron" name="chevron-down" [size]="16" />
+            </button>
+        </div>
+    </div>
 </aside>
 
 @if (layout.sidebarOpen()) {

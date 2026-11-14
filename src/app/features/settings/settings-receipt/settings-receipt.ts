@@ -117,7 +117,7 @@ export class SettingsReceipt implements HasUnsavedChanges {
         this.form.disable({ emitEvent: false });
 
         // le backend remplace toute la fiche : on renvoie les coordonnées lues au chargement
-        // (un seul propriétaire modifie ces réglages, le risque de conflit est accepté)
+        // (un seul administrateur modifie ces réglages, le risque de conflit est accepté)
         const input = {
             name: shop.name,
             address: shop.address ?? "",

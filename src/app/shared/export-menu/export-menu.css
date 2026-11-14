@@ -1,0 +1,133 @@
+:host {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.trigger {
+    gap: 8px;
+}
+
+.trigger.chip {
+    gap: 6px;
+}
+
+.trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.panel {
+    inset: auto;
+    margin: 0;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-dialog);
+    color: var(--text);
+}
+
+.panel:popover-open {
+    display: grid;
+}
+
+@media (min-width: 768px) {
+    .panel {
+        top: var(--top);
+        right: var(--right);
+    }
+}
+
+.sheet-title {
+    display: none;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: var(--surface-hover);
+}
+
+.item:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+.item small {
+    margin-left: 4px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 767px) {
+    /* dans l'en-tête, le bouton se réduit à son icône */
+    :host(.icon-phone) .trigger {
+        width: 36px;
+        min-height: 36px;
+        height: 36px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    /* petite puce réduite à son icône, pour les lignes de résumé */
+    :host(.compact) .trigger {
+        width: 32px;
+        min-height: 32px;
+        height: 32px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    :host(.compact) .label {
+        display: none;
+    }
+
+    :host(.icon-phone) .label {
+        display: none;
+    }
+
+    .trigger.chip {
+        min-height: 44px;
+    }
+
+    .panel::backdrop {
+        background: rgb(15 23 42 / 0.45);
+    }
+
+    .panel {
+        inset: auto 0 0;
+        width: 100%;
+        gap: 2px;
+        padding: 8px 12px calc(16px + env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .sheet-title {
+        display: block;
+        padding: 8px 12px 12px;
+        font-size: 16px;
+    }
+
+    .item {
+        min-height: 48px;
+        font-size: 15px;
+    }
+}

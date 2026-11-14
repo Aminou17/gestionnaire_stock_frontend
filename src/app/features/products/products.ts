@@ -18,15 +18,38 @@ import { map } from "rxjs";
 import { AuthService } from "../../core/auth/auth.service";
 import { CategoryService } from "../../core/stock/category.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
-import { Product, ProductPage, ProductStatus, StockStatus } from "../../core/stock/product.model";
+import {
+    Product,
+    ProductPage,
+    ProductSort,
+    ProductStatus,
+    StockStatus,
+} from "../../core/stock/product.model";
 import { ProductService } from "../../core/stock/product.service";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { ExportFormat } from "../../core/export-format";
 import { Icon } from "../../shared/icon/icon";
+import { RevealToggle } from "../../shared/secret/reveal-toggle";
+import { SecretValues } from "../../shared/secret/secret-values";
+import { ExportMenu } from "../../shared/export-menu/export-menu";
+import { ExportService } from "../settings/settings-export/export.service";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
+import { AdjustDialog } from "../stock-movements/adjust-dialog/adjust-dialog";
 import { ProductForm } from "./product-form/product-form";
+import { ProductImport } from "./product-import/product-import";
+import { categoryTone, marginPercent, productInitials } from "./product-look";
 
 const PAGE_SIZE = 20;
+const VIEW_KEY = "products-view";
+
+const readView = (): "list" | "grid" => {
+    try {
+        return localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
+    } catch {
+        return "list";
+    }
+};
 
 const toId = (value: string | null) => {
     const id = Number(value);
@@ -40,12 +63,23 @@ type LoadedPage = ProductPage & { page: number };
 
 @Component({
     selector: "app-products",
-    imports: [NgTemplateOutlet, RouterLink, PageHeader, Icon, FcfaPipe, ProductForm],
+    imports: [
+        NgTemplateOutlet,
+        RouterLink,
+        RevealToggle,
+        PageHeader,
+        Icon,
+        FcfaPipe,
+        ProductForm,
+        ProductImport,
+        ExportMenu,
+        AdjustDialog,
+    ],
     templateUrl: "./products.html",
     styleUrl: "./products.css",
     host: {
         "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuFor.set(null)",
+        "(document:keydown.escape)": "menuFor.set(null); filtersOpen.set(false)",
     },
 })
 export class Products {
@@ -54,10 +88,13 @@ export class Products {
     private supplierService = inject(SupplierService);
     private stockAlerts = inject(LowStockAlertService);
     private router = inject(Router);
+    private exportService = inject(ExportService);
     protected auth = inject(AuthService);
 
     // le formulaire n'existe que pour l'admin
     private form = viewChild(ProductForm);
+    private importDialog = viewChild(ProductImport);
+    private adjustDialog = viewChild(AdjustDialog);
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
     private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
 
@@ -74,10 +111,30 @@ export class Products {
     // arrivée depuis la fiche d'un fournisseur : /products?supplierId=4
     supplierId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("supplierId")));
     status = signal<ProductStatus>("active");
+    sort = signal<ProductSort>("default");
     page = signal(1);
+
+    sorts: { value: ProductSort; label: string }[] = [
+        { value: "default", label: "Par défaut" },
+        { value: "recent", label: "Plus récents" },
+        { value: "name", label: "Nom (A à Z)" },
+        { value: "price_asc", label: "Prix croissant" },
+        { value: "price_desc", label: "Prix décroissant" },
+        { value: "stock_asc", label: "Stock le plus bas" },
+        { value: "sold_desc", label: "Les plus vendus (30 jours)" },
+        { value: "sold_asc", label: "Les moins vendus (30 jours)" },
+    ];
+    initials = productInitials;
+    tone = categoryTone;
+    margin = (product: Product) => marginPercent(product.sale_price, product.purchase_price);
 
     filtersOpen = signal(false);
     menuFor = signal<number | null>(null);
+
+    // vue tableau ou grille sur ordinateur, le choix est gardé d'une visite à l'autre
+    protected secret = inject(SecretValues);
+
+    view = signal<"list" | "grid">(readView());
     toDelete = signal<Product | null>(null);
     deleting = signal(false);
     deleteError = signal<string | null>(null);
@@ -91,6 +148,7 @@ export class Products {
             supplierId: this.supplierId(),
             stockStatus: this.stockStatus(),
             status: this.status(),
+            sort: this.sort(),
             page: this.page(),
             limit: PAGE_SIZE,
         }),
@@ -102,7 +160,7 @@ export class Products {
     });
     categories = rxResource({ stream: () => this.categoryService.getCategories() });
 
-    // seul le propriétaire voit les fournisseurs
+    // seul l'administrateur voit les fournisseurs
     supplier = rxResource({
         params: () => (this.auth.isAdmin() ? (this.supplierId() ?? undefined) : undefined),
         stream: ({ params }) => this.supplierService.getSupplier(params),
@@ -134,6 +192,10 @@ export class Products {
             (c) => c.is_active || c.id === this.categoryId(),
         ),
     );
+    // les ventes ne s'affichent sur la carte que lorsque le tri les concerne
+    soldView = computed(() => this.sort().startsWith("sold"));
+    // valeur au prix d'achat : le backend ne l'envoie qu'à l'admin
+    stockValue = computed(() => this.counters()?.stock_value);
     firstLoad = computed(() => this.products.isLoading() && !this.last());
     hasMore = computed(() => this.list().length < this.total());
     loadingMore = computed(() => this.products.isLoading() && this.page() > 1);
@@ -157,7 +219,7 @@ export class Products {
             },
             {
                 label: "Stock faible",
-                short: "Stock faible",
+                short: "Faible",
                 value: "LOW",
                 count: counters?.low_stock,
                 tone: "warning",
@@ -255,6 +317,24 @@ export class Products {
         });
     }
 
+    selectSort(value: string) {
+        this.sort.set(value as ProductSort);
+        this.page.set(1);
+    }
+
+    resetFilters() {
+        this.categoryId.set(null);
+        this.status.set("active");
+        this.sort.set("default");
+        this.page.set(1);
+        this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: { categoryId: null },
+            queryParamsHandling: "merge",
+            replaceUrl: true,
+        });
+    }
+
     selectStatus(value: string) {
         this.status.set(value as ProductStatus);
         this.page.set(1);
@@ -263,6 +343,15 @@ export class Products {
     openProduct(product: Product) {
         this.menuFor.set(null);
         this.router.navigate(["/products", product.id]);
+    }
+
+    setView(view: "list" | "grid") {
+        this.view.set(view);
+        try {
+            localStorage.setItem(VIEW_KEY, view);
+        } catch {
+            // navigation privée : le choix ne sera pas gardé
+        }
     }
 
     toggleMenu(id: number) {
@@ -274,6 +363,33 @@ export class Products {
         if (!target.closest(".row-menu")) {
             this.menuFor.set(null);
         }
+    }
+
+    sellProduct(product: Product) {
+        this.menuFor.set(null);
+        this.router.navigate(["/sales/new"], { queryParams: { productId: product.id } });
+    }
+
+    addStock(product: Product) {
+        this.menuFor.set(null);
+        this.router.navigate(["/stock-entries"], {
+            queryParams: { productId: product.id },
+            state: { backTo: "/products", backLabel: "Produits" },
+        });
+    }
+
+    // message de confirmation après un ajustement du stock
+    notice = signal<string | null>(null);
+
+    adjustProduct(product: Product) {
+        this.menuFor.set(null);
+        this.notice.set(null);
+        this.adjustDialog()?.show(product);
+    }
+
+    onAdjusted(message: string) {
+        this.notice.set(message);
+        this.refresh();
     }
 
     newProduct() {
@@ -329,5 +445,37 @@ export class Products {
             this.page.set(1);
         }
         this.stockAlerts.alerts.reload();
+    }
+
+    exporting = signal(false);
+    exportError = signal<string | null>(null);
+
+    exportFile(format: ExportFormat) {
+        this.exporting.set(true);
+        this.exportError.set(null);
+
+        this.exportService.productsFile(format).subscribe({
+            next: (file) => {
+                this.exporting.set(false);
+                const url = URL.createObjectURL(file);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `produits.${format}`;
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(url));
+            },
+            error: (err: HttpErrorResponse) => {
+                this.exporting.set(false);
+                this.exportError.set(
+                    err.status === 413
+                        ? "Il y a trop de produits pour un seul fichier."
+                        : "Impossible d'exporter les produits.",
+                );
+            },
+        });
+    }
+
+    openImport() {
+        this.importDialog()?.open();
     }
 }

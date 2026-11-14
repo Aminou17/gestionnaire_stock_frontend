@@ -4,7 +4,9 @@
             <button type="button" class="back" (click)="close()" aria-label="Retour">
                 <app-icon name="chevron-left" [size]="22" />
             </button>
-            <h2>{{ productId() ? "Modifier le produit" : "Nouveau produit" }}</h2>
+            <h2 tabindex="-1" autofocus>
+                {{ productId() ? "Modifier le produit" : "Nouveau produit" }}
+            </h2>
         </header>
 
         <div class="content">
@@ -19,351 +21,480 @@
                     <div class="skeleton field-skeleton"></div>
                 }
             } @else {
-                <label class="field">
-                    <span>Nom du produit <em class="required">*</em></span>
-                    <input
-                        class="input"
-                        type="text"
-                        formControlName="name"
-                        placeholder="Ex. Pagne wax 6 yards"
-                        [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
-                    />
-                    @if (form.controls.name.touched && form.controls.name.invalid) {
-                        <small class="field-error">Le nom est obligatoire.</small>
-                    }
-                </label>
-
-                <label class="field">
-                    <span>Catégorie <em class="required">*</em></span>
-                    <select
-                        class="input"
-                        formControlName="categoryId"
-                        [class.invalid]="
-                            form.controls.categoryId.touched && form.controls.categoryId.invalid
-                        "
+                <div class="progress" [class.done]="missing().length === 0" role="status">
+                    <span class="progress-icon">
+                        <app-icon [name]="missing().length === 0 ? 'check' : 'edit'" [size]="18" />
+                    </span>
+                    <div class="progress-text">
+                        <strong>{{
+                            missing().length === 0 ? "Tout est prêt" : "À remplir"
+                        }}</strong>
+                        <small>{{
+                            missing().length === 0
+                                ? "Vous pouvez enregistrer."
+                                : "Il manque " + missing().join(", ") + "."
+                        }}</small>
+                    </div>
+                    <span class="progress-count"
+                        >{{ requiredCount() - missing().length }}/{{ requiredCount() }}</span
                     >
-                        <option [ngValue]="0" disabled>Choisir…</option>
-                        @for (category of activeCategories(); track category.id) {
-                            <option [ngValue]="category.id">{{ category.name }}</option>
-                        }
-                        <option [ngValue]="newId">+ Créer une catégorie…</option>
-                    </select>
-                    @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
-                        <small class="field-error">Choisissez une catégorie.</small>
-                    }
-                </label>
+                </div>
 
-                @if (addingCategory()) {
-                    <!-- pas de <form> imbriqué : Entrée crée la catégorie, pas le produit -->
-                    <div
-                        class="new-supplier"
-                        [formGroup]="categoryForm"
-                        (keydown.enter)="$event.preventDefault(); addCategory()"
-                    >
-                        <strong>Nouvelle catégorie</strong>
-                        @if (categoryError()) {
-                            <div class="alert alert-error" role="alert">{{ categoryError() }}</div>
+                <section class="group">
+                    <h3><span class="step">1</span>Informations</h3>
+                    <label class="field">
+                        <span>Nom du produit</span>
+                        <input
+                            class="input"
+                            type="text"
+                            formControlName="name"
+                            [class.todo]="todo().name"
+                            [attr.aria-invalid]="
+                                form.controls.name.touched && form.controls.name.invalid
+                            "
+                            placeholder="Ex. Pagne wax 6 yards"
+                            [class.invalid]="
+                                form.controls.name.touched && form.controls.name.invalid
+                            "
+                        />
+                        @if (form.controls.name.touched && form.controls.name.invalid) {
+                            <small class="field-error" role="alert">Le nom est obligatoire.</small>
                         }
-                        <label class="field">
-                            <span>Nom <em class="required">*</em></span>
-                            <input
-                                class="input"
-                                type="text"
-                                formControlName="name"
-                                maxlength="100"
-                                placeholder="Ex. Bazin riche"
-                                [class.invalid]="
+                    </label>
+
+                    <label class="field">
+                        <span>Catégorie</span>
+                        <select
+                            class="input"
+                            formControlName="categoryId"
+                            [class.todo]="todo().category"
+                            [attr.aria-invalid]="
+                                form.controls.categoryId.touched && form.controls.categoryId.invalid
+                            "
+                            [class.invalid]="
+                                form.controls.categoryId.touched && form.controls.categoryId.invalid
+                            "
+                        >
+                            <option [ngValue]="0" disabled>Choisir…</option>
+                            @for (category of activeCategories(); track category.id) {
+                                <option [ngValue]="category.id">{{ category.name }}</option>
+                            }
+                            <option [ngValue]="newId">+ Créer une catégorie…</option>
+                        </select>
+                        @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
+                            <small class="field-error" role="alert"
+                                >Choisissez une catégorie.</small
+                            >
+                        }
+                    </label>
+
+                    @if (addingCategory()) {
+                        <!-- pas de <form> imbriqué : Entrée crée la catégorie, pas le produit -->
+                        <div
+                            class="new-supplier"
+                            [formGroup]="categoryForm"
+                            (keydown.enter)="$event.preventDefault(); addCategory()"
+                        >
+                            <strong>Nouvelle catégorie</strong>
+                            @if (categoryError()) {
+                                <div class="alert alert-error" role="alert">
+                                    {{ categoryError() }}
+                                </div>
+                            }
+                            <label class="field">
+                                <span>Nom</span>
+                                <input
+                                    class="input"
+                                    type="text"
+                                    formControlName="name"
+                                    maxlength="100"
+                                    placeholder="Ex. Bazin riche"
+                                    [class.invalid]="
+                                        categoryForm.controls.name.touched &&
+                                        categoryForm.controls.name.invalid
+                                    "
+                                />
+                                @if (
                                     categoryForm.controls.name.touched &&
                                     categoryForm.controls.name.invalid
-                                "
-                            />
-                            @if (
-                                categoryForm.controls.name.touched &&
-                                categoryForm.controls.name.invalid
-                            ) {
-                                <small class="field-error">Le nom est obligatoire.</small>
-                            }
-                        </label>
-                        <label class="field">
-                            <span>Description</span>
-                            <input
-                                class="input"
-                                type="text"
-                                formControlName="description"
-                                maxlength="500"
-                                placeholder="Facultatif"
-                            />
-                        </label>
-                        <div class="inline-actions">
-                            <button
-                                type="button"
-                                class="btn btn-outline btn-sm"
-                                [disabled]="savingCategory()"
-                                (click)="cancelCategory()"
-                            >
-                                Annuler
-                            </button>
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                [disabled]="savingCategory()"
-                                (click)="addCategory()"
-                            >
-                                @if (savingCategory()) {
-                                    <span class="spinner"></span>
+                                ) {
+                                    <small class="field-error" role="alert"
+                                        >Le nom est obligatoire.</small
+                                    >
                                 }
-                                Créer
-                            </button>
+                            </label>
+                            <label class="field">
+                                <span>Description</span>
+                                <input
+                                    class="input"
+                                    type="text"
+                                    formControlName="description"
+                                    maxlength="500"
+                                    placeholder="Facultatif"
+                                />
+                            </label>
+                            <div class="inline-actions">
+                                <button
+                                    type="button"
+                                    class="btn btn-outline btn-sm"
+                                    [disabled]="savingCategory()"
+                                    (click)="cancelCategory()"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm"
+                                    [disabled]="savingCategory()"
+                                    (click)="addCategory()"
+                                >
+                                    @if (savingCategory()) {
+                                        <span class="spinner"></span>
+                                    }
+                                    Créer
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                }
-
-                <div class="field">
-                    <label for="supplier">Fournisseur <em class="required">*</em></label>
-                    <select
-                        id="supplier"
-                        class="input"
-                        formControlName="supplierId"
-                        [class.invalid]="
-                            form.controls.supplierId.touched && form.controls.supplierId.invalid
-                        "
-                    >
-                        <option [ngValue]="0" disabled>Choisir…</option>
-                        @for (supplier of supplierList(); track supplier.id) {
-                            <option [ngValue]="supplier.id">{{ supplier.name }}</option>
-                        }
-                        <option [ngValue]="newId">+ Créer un fournisseur…</option>
-                    </select>
-                    @if (form.controls.supplierId.touched && form.controls.supplierId.invalid) {
-                        <small class="field-error">Choisissez un fournisseur.</small>
                     }
-                </div>
 
-                @if (addingSupplier()) {
-                    <!-- pas de <form> imbriqué : Entrée ajoute le fournisseur, pas le produit -->
-                    <div
-                        class="new-supplier"
-                        [formGroup]="supplierForm"
-                        (keydown.enter)="$event.preventDefault(); addSupplier()"
-                    >
-                        <strong>Nouveau fournisseur</strong>
-                        @if (supplierError()) {
-                            <div class="alert alert-error" role="alert">{{ supplierError() }}</div>
+                    <div class="field">
+                        <label for="supplier">Fournisseur</label>
+                        <select
+                            id="supplier"
+                            class="input"
+                            formControlName="supplierId"
+                            [class.todo]="todo().supplier"
+                            [attr.aria-invalid]="
+                                form.controls.supplierId.touched && form.controls.supplierId.invalid
+                            "
+                            [class.invalid]="
+                                form.controls.supplierId.touched && form.controls.supplierId.invalid
+                            "
+                        >
+                            <option [ngValue]="0" disabled>Choisir…</option>
+                            @for (supplier of supplierList(); track supplier.id) {
+                                <option [ngValue]="supplier.id">{{ supplier.name }}</option>
+                            }
+                            <option [ngValue]="newId">+ Créer un fournisseur…</option>
+                        </select>
+                        @if (form.controls.supplierId.touched && form.controls.supplierId.invalid) {
+                            <small class="field-error" role="alert"
+                                >Choisissez un fournisseur.</small
+                            >
                         }
-                        <label class="field">
-                            <span>Nom <em class="required">*</em></span>
-                            <input
-                                class="input"
-                                type="text"
-                                formControlName="name"
-                                maxlength="100"
-                                placeholder="Ex. Tissus du Faso"
-                                [class.invalid]="
+                    </div>
+
+                    @if (addingSupplier()) {
+                        <!-- pas de <form> imbriqué : Entrée ajoute le fournisseur, pas le produit -->
+                        <div
+                            class="new-supplier"
+                            [formGroup]="supplierForm"
+                            (keydown.enter)="$event.preventDefault(); addSupplier()"
+                        >
+                            <strong>Nouveau fournisseur</strong>
+                            @if (supplierError()) {
+                                <div class="alert alert-error" role="alert">
+                                    {{ supplierError() }}
+                                </div>
+                            }
+                            <label class="field">
+                                <span>Nom</span>
+                                <input
+                                    class="input"
+                                    type="text"
+                                    formControlName="name"
+                                    maxlength="100"
+                                    placeholder="Ex. Tissus du Faso"
+                                    [class.invalid]="
+                                        supplierForm.controls.name.touched &&
+                                        supplierForm.controls.name.invalid
+                                    "
+                                />
+                                @if (
                                     supplierForm.controls.name.touched &&
                                     supplierForm.controls.name.invalid
-                                "
-                            />
-                            @if (
-                                supplierForm.controls.name.touched &&
-                                supplierForm.controls.name.invalid
-                            ) {
-                                <small class="field-error">Le nom est obligatoire.</small>
-                            }
-                        </label>
-                        <label class="field">
-                            <span>Téléphone</span>
-                            <input
-                                class="input"
-                                type="tel"
-                                formControlName="telephone"
-                                maxlength="50"
-                                placeholder="Facultatif"
-                            />
-                        </label>
-                        <div class="inline-actions">
-                            <button
-                                type="button"
-                                class="btn btn-outline btn-sm"
-                                [disabled]="savingSupplier()"
-                                (click)="cancelSupplier()"
-                            >
-                                Annuler
-                            </button>
-                            <button
-                                type="button"
-                                class="btn btn-primary btn-sm"
-                                [disabled]="savingSupplier()"
-                                (click)="addSupplier()"
-                            >
-                                @if (savingSupplier()) {
-                                    <span class="spinner"></span>
+                                ) {
+                                    <small class="field-error" role="alert"
+                                        >Le nom est obligatoire.</small
+                                    >
                                 }
-                                Créer
-                            </button>
+                            </label>
+                            <label class="field">
+                                <span>Téléphone</span>
+                                <input
+                                    class="input"
+                                    type="tel"
+                                    formControlName="telephone"
+                                    maxlength="50"
+                                    placeholder="Facultatif"
+                                />
+                            </label>
+                            <div class="inline-actions">
+                                <button
+                                    type="button"
+                                    class="btn btn-outline btn-sm"
+                                    [disabled]="savingSupplier()"
+                                    (click)="cancelSupplier()"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary btn-sm"
+                                    [disabled]="savingSupplier()"
+                                    (click)="addSupplier()"
+                                >
+                                    @if (savingSupplier()) {
+                                        <span class="spinner"></span>
+                                    }
+                                    Créer
+                                </button>
+                            </div>
+                        </div>
+                    }
+
+                    @if (categories.error() || suppliers.error()) {
+                        <div class="alert alert-error" role="alert">
+                            Impossible de charger les catégories ou les fournisseurs.
+                        </div>
+                    }
+                    <hr class="divider" />
+                    <div class="photo-row">
+                        <span class="photo-thumb">
+                            @if (photoPreview(); as image) {
+                                <img [src]="image" alt="" />
+                            } @else {
+                                <app-icon name="image" [size]="24" />
+                            }
+                        </span>
+                        <div class="photo-text">
+                            <strong>Photo</strong>
+                            <small class="hint">Facultatif. PNG ou JPEG.</small>
+                            <div class="photo-actions">
+                                <label class="btn btn-outline btn-sm">
+                                    <app-icon name="camera" [size]="16" />
+                                    {{ photoPreview() ? "Changer" : "Ajouter" }}
+                                    <input
+                                        type="file"
+                                        accept="image/png,image/jpeg"
+                                        class="sr-only"
+                                        (change)="pickPhoto($event)"
+                                    />
+                                </label>
+                                @if (photoPreview()) {
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline btn-sm"
+                                        (click)="removePhoto()"
+                                    >
+                                        Retirer
+                                    </button>
+                                }
+                            </div>
                         </div>
                     </div>
-                }
-
-                @if (categories.error() || suppliers.error()) {
-                    <div class="alert alert-error" role="alert">
-                        Impossible de charger les catégories ou les fournisseurs.
-                    </div>
-                }
-
-                <div class="prices">
-                    <div class="row">
-                        <label class="field">
-                            <span>Prix d'achat <em class="required">*</em></span>
-                            <span class="money">
-                                <input
-                                    class="input"
-                                    type="number"
-                                    min="1"
-                                    inputmode="numeric"
-                                    formControlName="purchasePrice"
-                                    [class.invalid]="
-                                        form.controls.purchasePrice.touched &&
-                                        form.controls.purchasePrice.invalid
-                                    "
-                                />
-                                <span class="unit">F</span>
-                            </span>
-                            @if (
-                                form.controls.purchasePrice.touched &&
-                                form.controls.purchasePrice.invalid
-                            ) {
-                                <small class="field-error">Indiquez un prix supérieur à 0.</small>
-                            }
-                        </label>
-
-                        <label class="field">
-                            <span>Prix de vente <em class="required">*</em></span>
-                            <span class="money">
-                                <input
-                                    class="input"
-                                    type="number"
-                                    min="1"
-                                    inputmode="numeric"
-                                    formControlName="salePrice"
-                                    [class.invalid]="
-                                        form.controls.salePrice.touched &&
-                                        form.controls.salePrice.invalid
-                                    "
-                                />
-                                <span class="unit">F</span>
-                            </span>
-                            @if (
-                                form.controls.salePrice.touched && form.controls.salePrice.invalid
-                            ) {
-                                <small class="field-error">Indiquez un prix supérieur à 0.</small>
-                            }
-                        </label>
-                    </div>
-
-                    @if (margin(); as margin) {
-                        <p class="margin" [class.negative]="margin.amount < 0">
-                            Marge : {{ margin.amount | fcfa }} ({{ margin.percent }} %)
-                        </p>
+                    @if (photoError()) {
+                        <small class="field-error" role="alert">{{ photoError() }}</small>
                     }
-                </div>
+                </section>
 
-                <div class="field">
-                    <span id="mode-label">Mode de prix</span>
-                    <div class="segmented" role="group" aria-labelledby="mode-label">
-                        <button
-                            type="button"
-                            [attr.aria-pressed]="pricingMode() === 'FIXED'"
-                            [class.selected]="pricingMode() === 'FIXED'"
-                            (click)="setMode('FIXED')"
-                        >
-                            Prix fixe
-                        </button>
-                        <button
-                            type="button"
-                            [attr.aria-pressed]="pricingMode() === 'NEGOTIABLE'"
-                            [class.selected]="pricingMode() === 'NEGOTIABLE'"
-                            (click)="setMode('NEGOTIABLE')"
-                        >
-                            Négociable
-                        </button>
-                    </div>
-                </div>
+                <section class="group">
+                    <h3><span class="step">2</span>Prix</h3>
+                    <div class="prices">
+                        <div class="row">
+                            <label class="field">
+                                <span>Prix d'achat</span>
+                                <span class="money">
+                                    <input
+                                        class="input"
+                                        type="number"
+                                        min="1"
+                                        inputmode="numeric"
+                                        formControlName="purchasePrice"
+                                        [class.todo]="todo().purchase"
+                                        [attr.aria-invalid]="
+                                            form.controls.purchasePrice.touched &&
+                                            form.controls.purchasePrice.invalid
+                                        "
+                                        [class.invalid]="
+                                            form.controls.purchasePrice.touched &&
+                                            form.controls.purchasePrice.invalid
+                                        "
+                                    />
+                                    <span class="unit">F</span>
+                                </span>
+                                @if (
+                                    form.controls.purchasePrice.touched &&
+                                    form.controls.purchasePrice.invalid
+                                ) {
+                                    <small class="field-error"
+                                        >Indiquez un prix supérieur à 0.</small
+                                    >
+                                }
+                            </label>
 
-                @if (pricingMode() === "NEGOTIABLE") {
-                    <div class="discount">
-                        <label class="field">
-                            <span>Remise maximale</span>
-                            <span class="money">
-                                <input
-                                    class="input"
-                                    type="number"
-                                    min="0"
-                                    inputmode="numeric"
-                                    formControlName="maxDiscount"
-                                    [class.invalid]="
-                                        form.controls.maxDiscount.touched &&
-                                        (form.controls.maxDiscount.invalid ||
-                                            form.hasError('discountRequired') ||
-                                            form.hasError('discountTooHigh'))
-                                    "
-                                />
-                                <span class="unit">F</span>
-                            </span>
-                        </label>
-                        @if (
-                            form.controls.maxDiscount.touched &&
-                            (form.controls.maxDiscount.invalid || form.hasError("discountRequired"))
-                        ) {
-                            <small class="field-error">Indiquez la remise maximale.</small>
-                        } @else if (form.hasError("discountTooHigh")) {
-                            <small class="field-error">
-                                La remise ne peut pas dépasser le prix de vente.
-                            </small>
-                        } @else if (priceRange(); as range) {
-                            <p class="range" aria-live="polite">
-                                Le gérant pourra vendre entre
-                                <strong>{{ range.min | fcfa }} et {{ range.max | fcfa }}</strong
-                                >.
+                            <label class="field">
+                                <span>Prix de vente</span>
+                                <span class="money">
+                                    <input
+                                        class="input"
+                                        type="number"
+                                        min="1"
+                                        inputmode="numeric"
+                                        formControlName="salePrice"
+                                        [class.todo]="todo().sale"
+                                        [attr.aria-invalid]="
+                                            form.controls.salePrice.touched &&
+                                            form.controls.salePrice.invalid
+                                        "
+                                        [class.invalid]="
+                                            form.controls.salePrice.touched &&
+                                            form.controls.salePrice.invalid
+                                        "
+                                    />
+                                    <span class="unit">F</span>
+                                </span>
+                                @if (
+                                    form.controls.salePrice.touched &&
+                                    form.controls.salePrice.invalid
+                                ) {
+                                    <small class="field-error"
+                                        >Indiquez un prix supérieur à 0.</small
+                                    >
+                                }
+                            </label>
+                        </div>
+
+                        @if (margin(); as margin) {
+                            <p class="margin" [class.negative]="margin.amount < 0">
+                                <span>Marge</span>
+                                <strong>{{ margin.amount | fcfa }} ({{ margin.percent }} %)</strong>
                             </p>
                         }
                     </div>
-                }
 
-                <label class="field">
-                    <span>Seuil d'alerte</span>
-                    <input
-                        class="input"
-                        type="number"
-                        min="0"
-                        step="1"
-                        inputmode="numeric"
-                        formControlName="minStock"
-                        [placeholder]="
-                            defaultThreshold() !== null ? 'Par défaut : ' + defaultThreshold() : ''
-                        "
-                        [class.invalid]="
-                            form.controls.minStock.touched && form.controls.minStock.invalid
-                        "
-                    />
-                    @if (form.controls.minStock.touched && form.controls.minStock.invalid) {
-                        <small class="field-error">Indiquez un nombre entier positif.</small>
-                    } @else if (defaultThreshold() !== null) {
-                        <small class="hint">
-                            Laissez vide pour utiliser le seuil par défaut ({{
-                                defaultThreshold()
-                            }}).
-                        </small>
-                    } @else {
-                        <small class="hint">
-                            Laissez vide pour utiliser le seuil par défaut, une fois réglé dans les
-                            paramètres.
-                        </small>
+                    <div class="field">
+                        <span id="mode-label">Mode de prix</span>
+                        <div class="segmented" role="group" aria-labelledby="mode-label">
+                            <button
+                                type="button"
+                                [attr.aria-pressed]="pricingMode() === 'FIXED'"
+                                [class.selected]="pricingMode() === 'FIXED'"
+                                (click)="setMode('FIXED')"
+                            >
+                                Prix fixe
+                            </button>
+                            <button
+                                type="button"
+                                [attr.aria-pressed]="pricingMode() === 'NEGOTIABLE'"
+                                [class.selected]="pricingMode() === 'NEGOTIABLE'"
+                                (click)="setMode('NEGOTIABLE')"
+                            >
+                                Négociable
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="hint">
+                        {{
+                            pricingMode() === "FIXED"
+                                ? "L'employé vend toujours à ce prix."
+                                : "L'employé peut baisser le prix, jusqu'à une limite."
+                        }}
+                    </p>
+
+                    @if (pricingMode() === "NEGOTIABLE") {
+                        <div class="discount">
+                            <label class="field">
+                                <span>Remise maximale</span>
+                                <span class="money">
+                                    <input
+                                        class="input"
+                                        type="number"
+                                        min="0"
+                                        inputmode="numeric"
+                                        formControlName="maxDiscount"
+                                        [class.todo]="todo().discount"
+                                        [class.invalid]="
+                                            form.controls.maxDiscount.touched &&
+                                            (form.controls.maxDiscount.invalid ||
+                                                form.hasError('discountRequired') ||
+                                                form.hasError('discountTooHigh'))
+                                        "
+                                    />
+                                    <span class="unit">F</span>
+                                </span>
+                            </label>
+                            @if (
+                                form.controls.maxDiscount.touched &&
+                                (form.controls.maxDiscount.invalid ||
+                                    form.hasError("discountRequired"))
+                            ) {
+                                <small class="field-error" role="alert"
+                                    >Indiquez la remise maximale.</small
+                                >
+                            } @else if (form.hasError("discountTooHigh")) {
+                                <small class="field-error" role="alert">
+                                    La remise ne peut pas dépasser le prix de vente.
+                                </small>
+                            } @else if (priceRange(); as range) {
+                                <p class="range" aria-live="polite">
+                                    L'employé pourra vendre entre
+                                    <strong>{{ range.min | fcfa }} et {{ range.max | fcfa }}</strong
+                                    >.
+                                </p>
+                            }
+                        </div>
                     }
-                </label>
+                </section>
 
-                @if (!productId()) {
-                    <p class="hint">Le stock se remplit ensuite via les entrées de stock.</p>
-                }
+                <section class="group">
+                    <h3><span class="step">3</span>Alerte de stock</h3>
+                    <label class="field">
+                        <span>Seuil d'alerte <small class="hint">facultatif</small></span>
+                        <input
+                            class="input"
+                            type="number"
+                            min="0"
+                            step="1"
+                            inputmode="numeric"
+                            formControlName="minStock"
+                            [attr.aria-invalid]="
+                                form.controls.minStock.touched && form.controls.minStock.invalid
+                            "
+                            [placeholder]="
+                                defaultThreshold() !== null
+                                    ? 'Par défaut : ' + defaultThreshold()
+                                    : ''
+                            "
+                            [class.invalid]="
+                                form.controls.minStock.touched && form.controls.minStock.invalid
+                            "
+                        />
+                        @if (form.controls.minStock.touched && form.controls.minStock.invalid) {
+                            <small class="field-error" role="alert"
+                                >Indiquez un nombre entier positif.</small
+                            >
+                        } @else if (defaultThreshold() !== null) {
+                            <small class="hint">
+                                Laissez vide pour utiliser le seuil par défaut ({{
+                                    defaultThreshold()
+                                }}).
+                            </small>
+                        } @else {
+                            <small class="hint">
+                                Laissez vide pour utiliser le seuil par défaut, une fois réglé dans
+                                les paramètres.
+                            </small>
+                        }
+                    </label>
+
+                    @if (!productId()) {
+                        <p class="hint">
+                            Le stock de départ s'ajoute ensuite avec une entrée de stock.
+                        </p>
+                    }
+                </section>
             }
         </div>
 
@@ -377,7 +508,7 @@
                 @if (saving()) {
                     <span class="spinner"></span>
                 }
-                Enregistrer
+                {{ productId() ? "Enregistrer" : "Créer le produit" }}
             </button>
         </footer>
     </form>

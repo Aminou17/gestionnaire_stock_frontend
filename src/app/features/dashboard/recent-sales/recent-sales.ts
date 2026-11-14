@@ -2,7 +2,6 @@ import { DatePipe } from "@angular/common";
 import { Component, input, output } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
-import { getRoleLabel } from "../../../core/auth/role-label";
 import { Sale } from "../../../core/sales/sale.model";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
@@ -24,10 +23,5 @@ export class RecentSales {
 
     isToday(date: string) {
         return new Date(date).toDateString() === new Date().toDateString();
-    }
-
-    // Libellé du rôle du vendeur (rien si le backend ne l'a pas envoyé)
-    roleLabel(role: Sale["user_role"]) {
-        return getRoleLabel(role);
     }
 }

@@ -1,0 +1,48 @@
+<dialog
+    #dialog
+    aria-labelledby="reopen-cash-title"
+    (click)="onBackdropClick($event)"
+    (cancel)="onCancel($event)"
+>
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <h2 id="reopen-cash-title">Rouvrir la caisse</h2>
+        <p class="muted">
+            Le comptage de la clôture est effacé et la caisse redevient ouverte. Les mouvements sont
+            conservés. Le motif est gardé dans le journal d'audit.
+        </p>
+
+        @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+        }
+
+        <label class="field">
+            <span>Motif</span>
+            <textarea
+                class="input"
+                rows="3"
+                maxlength="200"
+                formControlName="reason"
+                placeholder="Ex. erreur de comptage des pièces"
+                [attr.aria-invalid]="form.controls.reason.touched && form.controls.reason.invalid"
+                [class.invalid]="form.controls.reason.touched && form.controls.reason.invalid"
+            ></textarea>
+            @if (form.controls.reason.touched && form.controls.reason.invalid) {
+                <small class="field-error"
+                    >Expliquez en quelques mots (5 caractères minimum).</small
+                >
+            }
+        </label>
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="close()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Rouvrir la caisse
+            </button>
+        </div>
+    </form>
+</dialog>

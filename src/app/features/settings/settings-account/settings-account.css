@@ -1,0 +1,62 @@
+.photo {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.photo-btn {
+    position: relative;
+    flex-shrink: 0;
+    width: 72px;
+    height: 72px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    cursor: pointer;
+}
+
+.photo-btn app-avatar {
+    width: 100%;
+    height: 100%;
+}
+
+.photo-btn:hover app-avatar {
+    opacity: 0.85;
+}
+
+.photo-badge {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.photo-text {
+    display: grid;
+    gap: 2px;
+    justify-items: start;
+}
+
+.photo-remove {
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--danger);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.photo-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}

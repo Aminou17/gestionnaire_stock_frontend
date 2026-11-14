@@ -4,7 +4,7 @@ import { Injectable, inject } from "@angular/core";
 import { API_URL } from "../api.config";
 import { Supplier, SupplierInput, SupplierStatus } from "./supplier.model";
 
-// Fournisseurs : réservés au propriétaire, côté backend comme côté interface
+// Fournisseurs : réservés à l'administrateur, côté backend comme côté interface
 @Injectable({ providedIn: "root" })
 export class SupplierService {
     private http = inject(HttpClient);

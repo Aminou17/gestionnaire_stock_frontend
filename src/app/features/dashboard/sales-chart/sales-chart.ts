@@ -13,7 +13,7 @@ const DAY_LABELS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
     styleUrl: "./sales-chart.css",
 })
 export class SalesChart {
-    // le gérant voit "Mes ventes sur 7 jours"
+    // l'employé voit "Mes ventes sur 7 jours"
     title = input("Ventes des 7 derniers jours");
     days = input<DailySales[]>([]);
     loading = input(false);
@@ -39,6 +39,7 @@ export class SalesChart {
                 label: isToday ? "Auj." : DAY_LABELS[new Date(y, m - 1, d).getDay()],
                 fullDate: new Date(y, m - 1, d),
                 isToday,
+                best: max > 1 && day.netTotal === max,
                 height: Math.max((Math.max(day.netTotal, 0) / max) * 100, day.netTotal > 0 ? 2 : 0),
                 short: shortAmount(day.netTotal),
             };

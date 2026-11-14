@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, computed, inject, output, signal, viewChild } from "@angular/core";
 import { rxResource, takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
-import { Subscription } from "rxjs";
+import { Subscription, catchError, of, switchMap } from "rxjs";
 import {
     AbstractControl,
     NonNullableFormBuilder,
@@ -16,6 +16,7 @@ import { ProductService } from "../../../core/stock/product.service";
 import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
 import { StockSettingsService } from "../../../core/stock/stock-settings.service";
 import { SupplierService } from "../../../core/stock/supplier.service";
+import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
@@ -85,6 +86,15 @@ export class ProductForm {
     supplierError = signal<string | null>(null);
 
     productId = signal<number | null>(null);
+
+    // photo : undefined = inchangée, null = retirée, sinon la nouvelle image et sa miniature
+    photo = signal<{ image: string; thumb: string } | null | undefined>(undefined);
+    currentImage = signal<string | null>(null);
+    photoError = signal<string | null>(null);
+    photoPreview = computed(() => {
+        const photo = this.photo();
+        return photo === undefined ? this.currentImage() : (photo?.image ?? null);
+    });
     // catégorie du produit modifié, gardée dans la liste même si elle est désactivée
     currentCategoryId = signal<number | null>(null);
     loading = signal(false);
@@ -160,6 +170,33 @@ export class ProductForm {
     }
     pricingMode = computed(() => this.values().pricingMode);
 
+    // champs obligatoires pas encore remplis : ils guident l'utilisateur
+    todo = computed(() => {
+        const v = this.values();
+        return {
+            name: !v.name?.trim(),
+            category: !v.categoryId,
+            supplier: !v.supplierId,
+            purchase: !v.purchasePrice,
+            sale: !v.salePrice,
+            discount:
+                v.pricingMode === "NEGOTIABLE" &&
+                (v.maxDiscount === null || v.maxDiscount === undefined),
+        };
+    });
+    missing = computed(() => {
+        const todo = this.todo();
+        return [
+            todo.name ? "le nom" : null,
+            todo.category ? "la catégorie" : null,
+            todo.supplier ? "le fournisseur" : null,
+            todo.purchase ? "le prix d'achat" : null,
+            todo.sale ? "le prix de vente" : null,
+            todo.discount ? "la remise maximale" : null,
+        ].filter((label): label is string => label !== null);
+    });
+    requiredCount = computed(() => (this.pricingMode() === "NEGOTIABLE" ? 6 : 5));
+
     // Marge affichée sous les prix
     margin = computed(() => {
         const { purchasePrice, salePrice } = this.values();
@@ -168,7 +205,7 @@ export class ProductForm {
         return { amount, percent: Math.round((amount / salePrice) * 100) };
     });
 
-    // Fourchette dans laquelle le gérant pourra vendre
+    // Fourchette dans laquelle l'employé pourra vendre
     priceRange = computed(() => {
         const { salePrice, maxDiscount } = this.values();
         if (!salePrice || maxDiscount === null || maxDiscount === undefined) return null;
@@ -193,10 +230,11 @@ export class ProductForm {
             next: (product) => {
                 this.loading.set(false);
                 this.currentCategoryId.set(product.category_id);
+                this.currentImage.set(product.image ?? null);
                 this.form.setValue({
                     name: product.name,
                     categoryId: product.category_id,
-                    supplierId: product.supplier_id,
+                    supplierId: product.supplier_id ?? 0,
                     purchasePrice: product.purchase_price ?? null,
                     salePrice: product.sale_price,
                     pricingMode: product.pricing_mode,
@@ -328,6 +366,29 @@ export class ProductForm {
             });
     }
 
+    async pickPhoto(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = "";
+        if (!file) return;
+
+        this.photoError.set(null);
+        try {
+            const [image, thumb] = await Promise.all([
+                resizeAvatar(file, 320, 85000),
+                resizeAvatar(file, 80, 15000),
+            ]);
+            this.photo.set({ image, thumb });
+        } catch (err) {
+            this.photoError.set((err as Error).message);
+        }
+    }
+
+    removePhoto() {
+        this.photoError.set(null);
+        this.photo.set(null);
+    }
+
     setMode(mode: PricingMode) {
         this.form.controls.pricingMode.setValue(mode);
 
@@ -369,24 +430,53 @@ export class ProductForm {
         const request = id
             ? this.productService.updateProduct(id, input)
             : this.productService.createProduct(input);
+        const photo = this.photo();
+        let photoFailed = false;
 
-        request.subscribe({
-            next: () => {
-                this.saving.set(false);
-                this.close();
-                this.saved.emit();
-            },
-            error: (err: HttpErrorResponse) => {
-                this.saving.set(false);
-                this.error.set(err.error?.message ?? "Impossible d'enregistrer le produit.");
-            },
-        });
+        request
+            .pipe(
+                // la photo part après le produit, qui doit déjà exister
+                switchMap((product) => {
+                    this.productId.set(product.id);
+                    if (photo === undefined) return of(product);
+
+                    return this.productService
+                        .setImage(product.id, photo?.image ?? null, photo?.thumb ?? null)
+                        .pipe(
+                            catchError(() => {
+                                photoFailed = true;
+                                return of(product);
+                            }),
+                        );
+                }),
+            )
+            .subscribe({
+                next: () => {
+                    this.saving.set(false);
+                    this.saved.emit();
+
+                    if (photoFailed) {
+                        this.error.set(
+                            "Le produit est enregistré, mais la photo n'a pas pu être envoyée. Réessayez avec une autre image.",
+                        );
+                        return;
+                    }
+                    this.close();
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.saving.set(false);
+                    this.error.set(err.error?.message ?? "Impossible d'enregistrer le produit.");
+                },
+            });
     }
 
     private prepare(id: number | null) {
         this.loadSub?.unsubscribe();
         this.productId.set(id);
         this.currentCategoryId.set(null);
+        this.photo.set(undefined);
+        this.currentImage.set(null);
+        this.photoError.set(null);
         this.loadFailed.set(false);
         this.error.set(null);
         this.form.reset();

@@ -1,5 +1,5 @@
 <app-page-header
-    title="Inventaire"
+    [title]="data() ? 'Inventaire #' + data()!.id : 'Inventaire'"
     section="Stock"
     back="/inventories"
     backLabel="Retour aux inventaires"
@@ -33,56 +33,123 @@
             <p class="alert" role="alert">{{ applyError() }}</p>
         }
 
-        <section class="card status">
-            <strong class="number">N° {{ inv.id }}</strong>
-            @if (inv.applied_at) {
-                <span class="badge badge-success">Appliqué au stock</span>
-                <span class="muted"
-                    >le {{ inv.applied_at | date: "d MMMM y à HH:mm" }} par
-                    {{ inv.applied_by_name ?? "—" }}</span
-                >
-            } @else {
-                <span class="badge badge-neutral">Relevé seulement</span>
-                <span class="muted">Le stock des produits n'a pas été modifié.</span>
+        <section class="card summary">
+            <div class="sum-head">
+                <h2>Résumé du comptage</h2>
+                @if (inv.applied_at) {
+                    <span class="badge badge-success">Appliqué</span>
+                } @else {
+                    <span class="badge badge-warning">À appliquer</span>
+                }
+                <app-export-menu
+                    class="icon-phone"
+                    ariaLabel="Exporter cet inventaire"
+                    [busy]="exporting()"
+                    (picked)="exportFile($event)"
+                />
+            </div>
+
+            <dl class="facts">
+                <div>
+                    <dt>Date</dt>
+                    <dd>{{ inv.created_at | date: "d MMM y à HH:mm" }}</dd>
+                </div>
+                <div>
+                    <dt>Auteur</dt>
+                    <dd class="person">
+                        <app-avatar [photo]="inv.user_avatar" />
+                        {{ inv.user_name ?? "—" }}
+                    </dd>
+                </div>
+                <div>
+                    <dt>Produits comptés</dt>
+                    <dd>{{ inv.items.length }}</dd>
+                </div>
+                <div>
+                    <dt>Appliqué au stock</dt>
+                    @if (inv.applied_at) {
+                        <dd class="person">
+                            <app-avatar [photo]="inv.applied_by_avatar" />
+                            <span
+                                >{{ inv.applied_by_name ?? "—" }}
+                                <small>{{ inv.applied_at | date: "d MMM y à HH:mm" }}</small></span
+                            >
+                        </dd>
+                    } @else {
+                        <dd class="muted">Pas encore</dd>
+                    }
+                </div>
+            </dl>
+
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label"><i class="dot dot-out"></i>Manquants</span>
+                    <strong class="stat-value" [class.out]="missing() > 0">{{ missing() }}</strong>
+                    <span class="stat-sub"
+                        >{{ shortCount() }} produit{{ shortCount() > 1 ? "s" : "" }}</span
+                    >
+                </div>
+                <div class="stat">
+                    <span class="stat-label"><i class="dot dot-ok"></i>Conformes</span>
+                    <strong class="stat-value">{{ conformCount() }}</strong>
+                    <span class="stat-sub">sur {{ inv.items.length }}</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label"><i class="dot dot-in"></i>En trop</span>
+                    <strong class="stat-value" [class.in]="surplus() > 0">{{ surplus() }}</strong>
+                    <span class="stat-sub"
+                        >{{ overCount() }} produit{{ overCount() > 1 ? "s" : "" }}</span
+                    >
+                </div>
+            </div>
+
+            <!-- répartition des produits comptés, dans l'ordre des tuiles -->
+            <div
+                class="split"
+                role="img"
+                [attr.aria-label]="
+                    shortCount() +
+                    ' manquant, ' +
+                    conformCount() +
+                    ' conformes, ' +
+                    overCount() +
+                    ' en trop'
+                "
+            >
+                <span class="seg seg-out" [style.flex-grow]="shortCount()"></span>
+                <span class="seg seg-ok" [style.flex-grow]="conformCount()"></span>
+                <span class="seg seg-in" [style.flex-grow]="overCount()"></span>
+            </div>
+
+            <div class="sum-foot">
+                <div class="total">
+                    <span class="total-label">Valeur de l'écart</span>
+                    <strong
+                        class="total-value"
+                        [class.in]="inv.difference_value > 0"
+                        [class.out]="inv.difference_value < 0"
+                        >{{ inv.difference_value | fcfa: true }}</strong
+                    >
+                </div>
+
                 @if (canApply()) {
                     <button type="button" class="btn btn-primary apply" (click)="askApply()">
-                        Appliquer les écarts au stock
+                        Appliquer au stock
                     </button>
+                } @else if (!inv.applied_at) {
+                    <span class="muted foot-note">Aucun écart : rien à appliquer.</span>
+                } @else {
+                    <span class="foot-note done">
+                        <app-icon name="check" [size]="16" />
+                        Stock corrigé
+                    </span>
                 }
-            }
-        </section>
-
-        <section class="card summary">
-            <div class="stat">
-                <span class="label muted">Fait le</span>
-                <strong>{{ inv.created_at | date: "d MMMM y à HH:mm" }}</strong>
-                <span class="muted">par {{ inv.user_name ?? "—" }}</span>
-            </div>
-            <div class="stat">
-                <span class="label muted">Produits comptés</span>
-                <strong>{{ inv.items_count }}</strong>
-            </div>
-            <div class="stat">
-                <span class="label muted">Manquants</span>
-                <strong [class.out]="missing() > 0">{{ missing() }}</strong>
-            </div>
-            <div class="stat">
-                <span class="label muted">En trop</span>
-                <strong [class.in]="surplus() > 0">{{ surplus() }}</strong>
-            </div>
-            <div class="stat">
-                <span class="label muted">Valeur de l'écart</span>
-                <strong
-                    [class.in]="inv.difference_value > 0"
-                    [class.out]="inv.difference_value < 0"
-                    >{{ inv.difference_value | fcfa: true }}</strong
-                >
             </div>
         </section>
 
         <section class="card panel">
             <div class="card-header">
-                <h2>Produits comptés ({{ inv.items.length }})</h2>
+                <h2>Détail par produit</h2>
             </div>
 
             <div class="table-wrap">
@@ -90,37 +157,34 @@
                     <thead>
                         <tr>
                             <th>Produit</th>
-                            <th class="num">Stock théorique</th>
-                            <th class="num">Stock compté</th>
+                            <th class="num">Théorique</th>
+                            <th class="num">Compté</th>
                             <th class="num">Écart</th>
                             <th class="num">Valeur</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @for (item of inv.items; track item.id) {
+                        @for (item of sortedItems(); track item.id) {
                             <tr>
                                 <td>
-                                    <a
-                                        [routerLink]="['/products', item.product_id]"
-                                        [state]="backState()"
-                                        class="product-link"
-                                        >{{ item.product_name }}</a
-                                    >
+                                    <div class="product-cell">
+                                        <ng-container
+                                            *ngTemplateOutlet="thumb; context: { $implicit: item }"
+                                        />
+                                        <a
+                                            [routerLink]="['/products', item.product_id]"
+                                            [state]="backState()"
+                                            class="product-link"
+                                            >{{ item.product_name }}</a
+                                        >
+                                    </div>
                                 </td>
                                 <td class="num">{{ item.theoretical_stock }}</td>
                                 <td class="num">{{ item.actual_stock }}</td>
                                 <td class="num">
-                                    @if (item.difference === 0) {
-                                        <span class="badge badge-neutral">Conforme</span>
-                                    } @else if (item.difference < 0) {
-                                        <span class="badge badge-danger">{{
-                                            item.difference
-                                        }}</span>
-                                    } @else {
-                                        <span class="badge badge-success"
-                                            >+{{ item.difference }}</span
-                                        >
-                                    }
+                                    <ng-container
+                                        *ngTemplateOutlet="gap; context: { $implicit: item }"
+                                    />
                                 </td>
                                 <td
                                     class="num"
@@ -135,36 +199,35 @@
                 </table>
             </div>
 
-            <!-- version téléphone : une carte par produit -->
+            <!-- version téléphone : une ligne par produit -->
             <ul class="cards">
-                @for (item of inv.items; track item.id) {
-                    <li class="item-card">
-                        <div class="line">
+                @for (item of sortedItems(); track item.id) {
+                    <li class="item-row">
+                        <ng-container *ngTemplateOutlet="thumb; context: { $implicit: item }" />
+
+                        <div class="item-info">
                             <a
                                 [routerLink]="['/products', item.product_id]"
                                 [state]="backState()"
                                 class="product-link"
                                 >{{ item.product_name }}</a
                             >
-                            @if (item.difference === 0) {
-                                <span class="badge badge-neutral">Conforme</span>
-                            } @else if (item.difference < 0) {
-                                <span class="badge badge-danger">{{ item.difference }}</span>
-                            } @else {
-                                <span class="badge badge-success">+{{ item.difference }}</span>
-                            }
+                            <span class="meta muted">
+                                <span>Théorique : {{ item.theoretical_stock }}</span>
+                                <span>Compté : {{ item.actual_stock }}</span>
+                            </span>
                         </div>
-                        <div class="line">
-                            <span class="meta muted"
-                                >Théorique {{ item.theoretical_stock }} · Compté
-                                {{ item.actual_stock }}</span
-                            >
-                            <span
-                                class="meta"
-                                [class.in]="item.difference > 0"
-                                [class.out]="item.difference < 0"
-                                >{{ item.difference * item.purchase_price | fcfa: true }}</span
-                            >
+
+                        <div class="item-gap">
+                            <ng-container *ngTemplateOutlet="gap; context: { $implicit: item }" />
+                            @if (item.difference !== 0) {
+                                <span
+                                    class="meta"
+                                    [class.in]="item.difference > 0"
+                                    [class.out]="item.difference < 0"
+                                    >{{ item.difference * item.purchase_price | fcfa: true }}</span
+                                >
+                            }
                         </div>
                     </li>
                 }
@@ -173,7 +236,44 @@
     </div>
 }
 
-<dialog #confirm class="confirm" aria-labelledby="apply-title">
+<ng-template #thumb let-item>
+    <span class="thumb av-{{ item.product_id % 4 }}">
+        @if (item.image) {
+            <button
+                type="button"
+                class="thumb-zoom"
+                [attr.aria-label]="'Agrandir la photo de ' + item.product_name"
+                (click)="zoom.set({ src: item.image, name: item.product_name })"
+            >
+                <img [src]="item.image" alt="" />
+            </button>
+        } @else {
+            {{ initials(item.product_name) }}
+        }
+    </span>
+</ng-template>
+
+<ng-template #gap let-item>
+    @if (item.difference === 0) {
+        <span class="badge badge-neutral">Conforme</span>
+    } @else if (item.difference < 0) {
+        <span class="badge badge-danger">{{ item.difference }}</span>
+    } @else {
+        <span class="badge badge-success">+{{ item.difference }}</span>
+    }
+</ng-template>
+
+@if (zoom(); as photo) {
+    <app-photo-zoom [src]="photo.src" [name]="photo.name" (closed)="zoom.set(null)" />
+}
+
+<dialog
+    #confirm
+    class="confirm"
+    aria-labelledby="apply-title"
+    (click)="onConfirmBackdrop($event)"
+    (cancel)="onConfirmCancel($event)"
+>
     <div class="confirm-body">
         <h2 id="apply-title">Appliquer les écarts au stock ?</h2>
         <p class="muted">
@@ -188,7 +288,15 @@
         }
 
         <div class="confirm-actions">
-            <button type="button" class="btn btn-outline" (click)="closeConfirm()">Annuler</button>
+            <button
+                type="button"
+                class="btn btn-outline"
+                autofocus
+                [disabled]="applying()"
+                (click)="closeConfirm()"
+            >
+                Annuler
+            </button>
             <button type="button" class="btn btn-primary" [disabled]="applying()" (click)="apply()">
                 {{ applying() ? "Application…" : "Appliquer" }}
             </button>

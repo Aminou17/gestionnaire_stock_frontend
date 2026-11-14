@@ -25,6 +25,20 @@ describe("getBackLink", () => {
         expect(run()).toEqual({ url: "/products", label: "Produits" });
     });
 
+    it("should go back to the previous page when the origin did not say anything", async () => {
+        const router = TestBed.inject(Router);
+        router.resetConfig([
+            { path: "dashboard", children: [] },
+            { path: "products/:id", children: [] },
+        ]);
+        await router.navigateByUrl("/dashboard");
+        const navigation = router.navigateByUrl("/products/5");
+        const result = run();
+        await navigation;
+
+        expect(result).toEqual({ url: "/dashboard", label: "Retour" });
+    });
+
     it("should ignore an address that is not inside the app", () => {
         history.replaceState({ backTo: "https://exemple.com", backLabel: "Ailleurs" }, "");
         expect(run()).toEqual({ url: "/products", label: "Produits" });

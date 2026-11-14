@@ -1,0 +1,32 @@
+<button
+    #trigger
+    type="button"
+    class="trigger"
+    [class.chip]="variant() === 'chip'"
+    [class.btn]="variant() === 'button'"
+    [class.btn-outline]="variant() === 'button'"
+    [attr.aria-label]="ariaLabel()"
+    aria-haspopup="true"
+    [attr.aria-expanded]="open()"
+    [disabled]="disabled() || busy()"
+    (click)="toggle()"
+>
+    @if (busy()) {
+        <span class="spinner"></span>
+    } @else {
+        <app-icon name="download" [size]="variant() === 'chip' ? 14 : 18" />
+    }
+    <span class="label">{{ label() }}</span>
+</button>
+
+<div #panel class="panel" popover="auto" aria-label="Format du fichier" (toggle)="onToggle($event)">
+    <strong class="sheet-title">Télécharger en</strong>
+    <button type="button" class="item" (click)="pick('pdf')">
+        <app-icon name="download" [size]="18" />
+        <span>PDF <small>pour imprimer</small></span>
+    </button>
+    <button type="button" class="item" (click)="pick('csv')">
+        <app-icon name="download" [size]="18" />
+        <span>CSV <small>pour Excel</small></span>
+    </button>
+</div>

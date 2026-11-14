@@ -162,6 +162,7 @@
                     <div class="actions">
                         <a
                             routerLink="/stock-entries"
+                            [state]="backState()"
                             [queryParams]="{ supplierId: supplier.id, new: 1 }"
                             class="btn btn-outline"
                         >
@@ -183,7 +184,7 @@
                 <ul class="preview">
                     @for (entry of page.data; track entry.id) {
                         <li>
-                            <a [routerLink]="['/products', entry.product_id]">
+                            <a [routerLink]="['/products', entry.product_id]" [state]="backState()">
                                 <span class="preview-name">{{ entry.product_name }}</span>
                                 <small class="muted">
                                     {{

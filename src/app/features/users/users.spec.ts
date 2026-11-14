@@ -29,7 +29,7 @@ const moussa: UserAccount = {
     last_login_at: null,
 };
 
-const ancien: UserAccount = { ...moussa, id: 3, name: "Ancien gérant", is_active: false };
+const ancien: UserAccount = { ...moussa, id: 3, name: "Ancien employé", is_active: false };
 
 describe("Users", () => {
     let fixture: ComponentFixture<Users>;
@@ -72,7 +72,7 @@ describe("Users", () => {
                     useValue: {
                         isAdmin: signal(true),
                         user: signal({ id: 1, name: me.name, email: me.email, role: "admin" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -99,12 +99,12 @@ describe("Users", () => {
 
         expect(rows().length).toBe(2);
         expect(text()).toContain("Moussa Traoré");
-        expect(text()).toContain("Gérant");
-        expect(text()).toContain("Propriétaire");
+        expect(text()).toContain("Employé");
+        expect(text()).toContain("Administrateur");
         expect(text()).toContain("Jamais connecté");
         expect(text()).toContain("Actifs 2");
         expect(text()).toContain("Supprimés 1");
-        expect(text()).not.toContain("Ancien gérant");
+        expect(text()).not.toContain("Ancien employé");
     });
 
     it("should mark the connected user and hide delete on its own row", async () => {
@@ -159,7 +159,7 @@ describe("Users", () => {
         await render();
         await click(el.querySelectorAll(".tab")[1]);
 
-        expect(text()).toContain("Ancien gérant");
+        expect(text()).toContain("Ancien employé");
         await click(el.querySelector(".restore-btn"));
 
         expect(restoreUser).toHaveBeenCalledWith(3);

@@ -1,15 +1,26 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, DestroyRef, afterNextRender, computed, inject, signal } from "@angular/core";
+import {
+    Component,
+    DestroyRef,
+    afterNextRender,
+    computed,
+    inject,
+    signal,
+    viewChild,
+} from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { getBackLink } from "../../../core/back-link";
 import { CashSessionService } from "../../../core/cash/cash-session.service";
 import { PaymentMethod } from "../../../core/sales/sale.model";
 import { SaleService } from "../../../core/sales/sale.service";
+import { CategoryService } from "../../../core/stock/category.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
+import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
@@ -29,22 +40,25 @@ export const getMinPrice = (product: Product) =>
 
 @Component({
     selector: "app-new-sale",
-    imports: [RouterLink, PageHeader, Icon, FcfaPipe],
+    imports: [PageHeader, Icon, FcfaPipe, ReopenCashDialog],
     templateUrl: "./new-sale.html",
-    styleUrl: "./new-sale.css",
+    styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
     // la barre du panier en bas d'écran demande de la place sous la page
     host: { "[class.has-cart]": "cart().length > 0" },
 })
 export class NewSale {
     private saleService = inject(SaleService);
     private productService = inject(ProductService);
+    private categoryService = inject(CategoryService);
     private cashService = inject(CashSessionService);
     private stockAlerts = inject(LowStockAlertService);
     private router = inject(Router);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
+    protected back = getBackLink("/sales", "Ventes");
 
     search = signal("");
+    categoryId = signal<number | null>(null);
     cart = signal<CartLine[]>([]);
     saving = signal(false);
     error = signal<string | null>(null);
@@ -55,22 +69,31 @@ export class NewSale {
     // on ne bloque la vente que si on SAIT que la caisse est fermée
     cashClosed = computed(() => this.cash.hasValue() && this.cash.value()?.status !== "OPEN");
 
-    cashClosedToday = computed(() => this.cash.hasValue() && this.cash.value()?.status === "CLOSED");
+    cashClosedToday = computed(
+        () => this.cash.hasValue() && this.cash.value()?.status === "CLOSED",
+    );
 
     products = rxResource({
-        params: () => this.search(),
+        params: () => ({ search: this.search(), categoryId: this.categoryId() }),
         stream: ({ params }) =>
             this.productService.getProducts({
-                search: params,
-                categoryId: null,
+                search: params.search,
+                categoryId: params.categoryId,
                 stockStatus: null,
                 status: "active",
                 page: 1,
-                limit: 20,
+                limit: 24,
             }),
     });
+    // les puces ne montrent que les catégories qui ont des produits
+    categories = rxResource({ stream: () => this.categoryService.getCategories() });
+    categoryChips = computed(() =>
+        this.categories.hasValue()
+            ? this.categories.value().filter((category) => category.product_count > 0)
+            : [],
+    );
     results = computed(() => (this.products.hasValue() ? this.products.value().data : []));
-    // on n'affiche que les 20 premiers : au-delà il faut préciser la recherche
+    // on n'affiche que les 24 premiers : au-delà il faut préciser la recherche
     moreResults = computed(() =>
         this.products.hasValue() ? this.products.value().total > this.results().length : false,
     );
@@ -101,7 +124,9 @@ export class NewSale {
         const deposit = this.deposit();
         if (deposit === null) return null;
         if (this.split()) {
-            return deposit >= this.total() ? "La part en espèces doit être inférieure au total." : null;
+            return deposit >= this.total()
+                ? "La part en espèces doit être inférieure au total."
+                : null;
         }
         if (deposit > this.total()) return "L'acompte dépasse le total de la vente.";
         if (deposit < this.total() && !this.customerName().trim() && !this.customerPhone().trim())
@@ -125,9 +150,7 @@ export class NewSale {
     cashSuggestions = computed(() => {
         const total = this.toPay();
         if (total <= 0) return [];
-        const rounded = [500, 5000, 10000].map(
-            (step) => Math.ceil(total / step) * step,
-        );
+        const rounded = [500, 5000, 10000].map((step) => Math.ceil(total / step) * step);
         return [...new Set([total, ...rounded])].sort((a, b) => a - b).slice(0, 4);
     });
 
@@ -247,6 +270,17 @@ export class NewSale {
         ]);
     }
 
+    selectCategory(value: string) {
+        this.categoryId.set(value ? Number(value) : null);
+    }
+
+    // un second clic sur une tuile déjà ajoutée la retire du panier
+    toggleProduct(product: Product) {
+        const line = this.cart().find((l) => l.product.id === product.id);
+        if (line) this.removeLine(line);
+        else this.addProduct(product);
+    }
+
     removeLine(line: CartLine) {
         this.cart.update((lines) => lines.filter((l) => l !== line));
     }
@@ -342,6 +376,13 @@ export class NewSale {
                     this.cash.reload();
                 },
             });
+    }
+
+    private reopenDialog = viewChild.required<ReopenCashDialog>("reopenCash");
+
+    reopen() {
+        const cash = this.cash.value();
+        if (cash) this.reopenDialog().open(cash.id);
     }
 
     scrollToCart() {

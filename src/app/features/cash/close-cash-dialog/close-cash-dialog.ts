@@ -1,3 +1,4 @@
+import { CashCounter } from "../cash-counter/cash-counter";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, computed, inject, output, signal, viewChild } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
@@ -11,9 +12,9 @@ type Step = "count" | "explain";
 
 @Component({
     selector: "app-close-cash-dialog",
-    imports: [ReactiveFormsModule, FcfaPipe],
+    imports: [CashCounter, ReactiveFormsModule, FcfaPipe],
     templateUrl: "./close-cash-dialog.html",
-    styleUrl: "./close-cash-dialog.css",
+    styleUrls: ["../../../shared/dialog/dialog.css", "./close-cash-dialog.css"],
 })
 export class CloseCashDialog {
     private cash = inject(CashSessionService);
@@ -25,7 +26,7 @@ export class CloseCashDialog {
     closed = output();
 
     form = this.fb.group({
-        actualAmount: [0, [Validators.required, Validators.min(0)]],
+        actualAmount: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
         closingNote: ["", [Validators.maxLength(300)]],
     });
 
@@ -83,7 +84,10 @@ export class CloseCashDialog {
         this.dialog().nativeElement.showModal();
     }
 
+    private counter = viewChild(CashCounter);
+
     private reset(step: Step) {
+        this.counter()?.reset();
         this.step.set(step);
         this.sessionDate.set("");
         this.expected.set(null);
@@ -147,26 +151,26 @@ export class CloseCashDialog {
         this.cash
             .close(this.sessionDate(), actualAmount, note, this.closingId() ?? undefined)
             .subscribe({
-            next: (res) => {
-                this.saving.set(false);
-                this.closed.emit();
+                next: (res) => {
+                    this.saving.set(false);
+                    this.closed.emit();
 
-                if (!res.explanation_pending) {
-                    this.close();
-                    return;
-                }
+                    if (!res.explanation_pending) {
+                        this.close();
+                        return;
+                    }
 
-                // la caisse est clôturée, le montant ne peut plus changer : on révèle l'écart
-                this.sessionId.set(res.id);
-                this.revealed.set(res.difference);
-                this.form.controls.closingNote.reset();
-                this.step.set("explain");
-            },
-            error: (err: HttpErrorResponse) => {
-                this.saving.set(false);
-                this.error.set(err.error?.message ?? "Impossible de clôturer la caisse.");
-            },
-        });
+                    // la caisse est clôturée, le montant ne peut plus changer : on révèle l'écart
+                    this.sessionId.set(res.id);
+                    this.revealed.set(res.difference);
+                    this.form.controls.closingNote.reset();
+                    this.step.set("explain");
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.saving.set(false);
+                    this.error.set(err.error?.message ?? "Impossible de clôturer la caisse.");
+                },
+            });
     }
 
     private explain() {

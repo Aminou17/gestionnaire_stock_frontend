@@ -1,13 +1,28 @@
 <nav aria-label="Navigation principale">
-    @for (link of links; track link.path) {
+    @for (link of left; track link.path) {
         <a [routerLink]="link.path" routerLinkActive="active">
             <app-icon [name]="link.icon" [size]="22" />
             <span>{{ link.label }}</span>
         </a>
     }
-    <!-- "Plus" ouvre le menu complet -->
+    <a routerLink="/sales/new" class="sell" aria-label="Nouvelle vente">
+        <span class="sell-icon"><app-icon name="plus" [size]="24" /></span>
+        <span>Vendre</span>
+    </a>
+    @for (link of right; track link.path) {
+        <a [routerLink]="link.path" routerLinkActive="active">
+            <app-icon [name]="link.icon" [size]="22" />
+            <span>{{ link.label }}</span>
+        </a>
+    }
+    <!-- "Plus" ouvre le menu complet, avec le nombre d'alertes en pastille -->
     <button type="button" (click)="layout.sidebarOpen.set(true)">
-        <app-icon name="more" [size]="22" />
+        <span class="icon">
+            <app-icon name="more" [size]="22" />
+            @if (alerts.count() > 0) {
+                <span class="badge">{{ alerts.count() }}</span>
+            }
+        </span>
         <span>Plus</span>
     </button>
 </nav>

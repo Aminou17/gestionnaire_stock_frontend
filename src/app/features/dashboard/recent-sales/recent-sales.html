@@ -34,12 +34,7 @@
                                     sale.items_count > 1 ? "s" : ""
                                 }}
                                 @if (showSeller() && sale.user_name) {
-                                    <span class="seller">
-                                        · {{ sale.user_name }}
-                                        @if (roleLabel(sale.user_role); as role) {
-                                            <span class="role">({{ role }})</span>
-                                        }
-                                    </span>
+                                    <span class="seller"> · {{ sale.user_name }} </span>
                                 }
                             </small>
                         </div>

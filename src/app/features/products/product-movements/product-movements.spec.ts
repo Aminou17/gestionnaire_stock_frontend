@@ -49,10 +49,10 @@ describe("ProductMovements", () => {
         await fixture.whenStable();
     }
 
-    it("should ask the last 5 movements of the product", async () => {
+    it("should ask the last 3 movements of the product", async () => {
         await render([]);
         expect(getMovements).toHaveBeenCalledWith(
-            expect.objectContaining({ productId: 3, page: 1, limit: 5, type: null }),
+            expect.objectContaining({ productId: 3, page: 1, limit: 3, type: null }),
         );
     });
 

@@ -1,0 +1,251 @@
+:host {
+    display: grid;
+    gap: 12px;
+}
+
+:host > * {
+    min-width: 0;
+}
+
+:host > :not(app-page-header) {
+    max-width: 640px;
+}
+
+app-page-header {
+    order: -1;
+}
+
+.card {
+    padding: 16px;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-weight: 700;
+}
+
+.head-text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
+
+.card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+h2 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.lines {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lines li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+}
+
+.lines li.off .line-text {
+    opacity: 0.5;
+}
+
+.check {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin: -8px 0 -8px -12px;
+    cursor: pointer;
+}
+
+.check input {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--primary);
+}
+
+.line-text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
+
+.line-text strong {
+    overflow-wrap: anywhere;
+}
+
+.line-sub {
+    font-size: 13px;
+}
+
+.state-OUT_OF_STOCK {
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.state-LOW {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.stepper {
+    display: grid;
+    grid-template-columns: 40px 56px 40px;
+    flex-shrink: 0;
+    align-items: center;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+.stepper.disabled {
+    opacity: 0.5;
+}
+
+.stepper button {
+    display: grid;
+    place-items: center;
+    height: 44px;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.stepper button:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.stepper input {
+    width: 100%;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.stepper input::-webkit-outer-spin-button,
+.stepper input::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+}
+
+.stepper :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+textarea.input {
+    height: auto;
+    padding: 12px;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.hint {
+    margin: 8px 0 0;
+    font-size: 13px;
+}
+
+.actions {
+    display: grid;
+    gap: 8px;
+}
+
+.actions .whatsapp {
+    width: 100%;
+    min-height: 48px;
+}
+
+.actions-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.actions-row .btn {
+    min-height: 44px;
+    gap: 4px;
+    padding-inline: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.empty p {
+    margin: 0;
+}
+
+.block-skeleton {
+    height: 96px;
+    border-radius: var(--radius);
+}
+
+@media (max-width: 767px) {
+    /* le bouton WhatsApp reste sous le pouce, au-dessus de la barre du bas */
+    .actions {
+        position: sticky;
+        bottom: calc(var(--bottom-nav-height) + 8px);
+        z-index: 5;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow-menu);
+    }
+}
+
+@media (min-width: 1024px) {
+    :host > :not(app-page-header) {
+        max-width: 720px;
+    }
+}
+
+@media (max-width: 359px) {
+    .actions-row app-icon {
+        display: none;
+    }
+}

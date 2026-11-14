@@ -18,6 +18,7 @@ export const LABELS: Record<string, string> = {
     CASH_SESSION_GAP_EXPLAINED: "Écart de caisse expliqué",
     CASH_MOVEMENT_CREATED: "Mouvement de caisse",
     STOCK_ENTRY_CREATED: "Entrée de stock",
+    STOCK_ADJUSTED: "Ajustement de stock",
     INVENTORY_CREATED: "Inventaire enregistré",
     PRODUCT_CREATED: "Produit créé",
     PRODUCT_UPDATED: "Produit modifié",

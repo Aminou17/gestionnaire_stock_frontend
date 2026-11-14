@@ -1,0 +1,211 @@
+.confirm {
+    width: min(440px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.confirm::backdrop {
+    background: var(--overlay);
+}
+
+.confirm-body {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.confirm h2 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.confirm p {
+    margin: -8px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+textarea.input {
+    height: auto;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@media (max-width: 767px) {
+    .sheet,
+    .panel {
+        padding: 4px 16px 16px;
+    }
+
+    .summary {
+        padding: 16px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .summary-actions {
+        flex-wrap: wrap;
+        justify-content: stretch;
+        padding-top: 16px;
+        border-top: 1px solid var(--border);
+    }
+
+    .summary-actions .btn {
+        flex: 1 1 0;
+        min-width: 0;
+        padding-inline: 8px;
+        white-space: nowrap;
+    }
+
+    /* sous 375px les trois libellés ne tiennent qu'en retirant les icônes */
+    @media (max-width: 374px) {
+        .summary-actions .btn app-icon {
+            display: none;
+        }
+    }
+
+    /* trois boutons ne tiennent pas sur une ligne à 390px : Rembourser passe dessous */
+    .summary-actions .refund-btn {
+        flex-basis: 100%;
+    }
+
+    .summary-total {
+        font-size: 28px;
+    }
+
+    .confirm-actions {
+        flex-direction: column-reverse;
+    }
+
+    .confirm-actions .btn {
+        width: 100%;
+    }
+}
+
+.sk-badge {
+    width: 64px;
+    height: 22px;
+}
+
+.sk-total {
+    width: 140px;
+    height: 32px;
+}
+
+.sk-line {
+    width: 220px;
+    max-width: 100%;
+    height: 16px;
+}
+
+.settings-alert {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.pay-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.pay-methods .btn {
+    min-height: 44px;
+}
+
+.pay-methods .active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.customer {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.payment .due {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.returns {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.returns li {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.return-text {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.return-text strong {
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.return-text small {
+    font-size: 13px;
+}
+
+.returns li > strong {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.returns-total {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.returns .discount,
+.returns-total .discount {
+    color: var(--danger);
+}
+
+.items .link-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+.items .link-btn {
+    position: relative;
+    z-index: 1;
+    min-height: 44px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}

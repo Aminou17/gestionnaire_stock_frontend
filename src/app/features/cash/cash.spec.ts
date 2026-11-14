@@ -93,7 +93,7 @@ describe("Cash", () => {
                             email: "y@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(0) } },
@@ -129,8 +129,8 @@ describe("Cash", () => {
         expect(text()).toContain("Macaisseouverte");
         expect(text()).toContain("9500F");
         expect(text()).toContain("Vente#12");
-        expect(text()).toContain("Fonddecaisse5000F");
-        expect(text()).toContain("Ventesenespèces4500F");
+        expect(text()).toContain("Fondsdedépart5000F");
+        expect(text()).not.toContain("Ventesenespèces4500F");
         expect(buttons()).toContain("Nouvelle vente");
         expect(buttons()).toContain("Clôturer la caisse");
     });
@@ -138,13 +138,15 @@ describe("Cash", () => {
     it("should let the owner add, spend and withdraw money", async () => {
         await render();
 
-        expect(buttons()).toEqual(expect.arrayContaining(["Ajouter", "Dépense", "Retrait"]));
+        expect(buttons()).toEqual(
+            expect.arrayContaining(["Ajouter", "Dépense", "Retrait"]),
+        );
     });
 
     it("should let the manager add money but not take it out", async () => {
         await render({ isAdmin: false });
 
-        expect(buttons()).toContain("Ajouter de l'argent");
+        expect(buttons()).toContain("Ajouter");
         expect(buttons()).not.toContain("Dépense");
         expect(buttons()).not.toContain("Retrait");
         expect(buttons()).toContain("Clôturer la caisse");
@@ -176,7 +178,7 @@ describe("Cash", () => {
 
         expect(text()).toContain("Soldemasqué");
         expect(text()).not.toContain("9500F");
-        expect(text()).not.toContain("Fonddecaisse5000F");
+        expect(text()).not.toContain("Fondsdedépart5000F");
 
         [...el.querySelectorAll("button")]
             .find((b) => b.textContent!.trim() === "Clôturer la caisse")!
@@ -191,7 +193,7 @@ describe("Cash", () => {
     it("should offer to open the cash register to the owner when it is closed", async () => {
         await render({ today: { cash: null } });
 
-        expect(text()).toContain("Macaisseestfermée");
+        expect(text()).toContain("Caissenonouverte");
         expect(buttons()).toContain("Ouvrir la caisse");
         expect(buttons()).not.toContain("Nouvelle vente");
     });
@@ -331,7 +333,7 @@ describe("Cash", () => {
         await render({ failToday: true });
 
         expect(text()).toContain("Impossibledechargerl'étatdelacaisse.");
-        expect(text()).not.toContain("Macaisseestfermée");
+        expect(text()).not.toContain("Caissenonouverte");
         expect(buttons()).toContain("Réessayer");
     });
 });

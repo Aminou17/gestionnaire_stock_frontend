@@ -56,7 +56,7 @@ describe("Sales", () => {
                             email: "y@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(0) } },
@@ -152,10 +152,10 @@ describe("Sales", () => {
 
     it("should offer the export to an admin only", async () => {
         await render();
-        expect(el.querySelector(".export")).not.toBeNull();
+        expect(el.querySelector("app-export-menu")).not.toBeNull();
         TestBed.resetTestingModule();
         await render(false);
-        expect(el.querySelector(".export")).toBeNull();
+        expect(el.querySelector("app-export-menu")).toBeNull();
     });
 
     it("should not offer the seller filter to a manager", async () => {
@@ -165,7 +165,7 @@ describe("Sales", () => {
 
     it("should invite to make a sale when there is none", async () => {
         await render(true, []);
-        expect(text()).toContain("Aucune vente enregistrée pour le moment.");
+        expect(text()).toContain("Aucune vente pour le moment");
     });
 
     it("should show a second row of dates for a custom period, prefilled with the last 7 days", async () => {
