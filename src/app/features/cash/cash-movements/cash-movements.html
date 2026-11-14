@@ -1,9 +1,5 @@
-<app-page-header
-    title="Mouvements de caisse"
-    section="Caisse"
-    back="/cash"
-    backLabel="Retour à la caisse"
-/>
+<app-page-header title="Mouvements" section="Caisse" />
+<app-cash-tabs />
 
 <div class="stats">
     <div class="card stat">
@@ -25,18 +21,20 @@
 </div>
 
 <section class="card list-card">
-    <app-period-filter (changed)="selectRange($event)">
+    <app-period-filter [chips]="true" (changed)="selectRange($event)">
         @if (reasons().length > 0) {
             <label class="reason-filter">
-                <span class="muted">Motif</span>
+                <span class="sr-only">Motif</span>
                 <select
-                    class="input"
-                    [value]="category() ?? ''"
+                    class="chip"
+                    [class.active]="category() !== null"
                     (change)="selectCategory($any($event.target).value)"
                 >
-                    <option value="">Tous les motifs</option>
+                    <option value="" [selected]="category() === null">Tous les motifs</option>
                     @for (reason of reasons(); track reason.value) {
-                        <option [value]="reason.value">{{ reason.label }}</option>
+                        <option [value]="reason.value" [selected]="category() === reason.value">
+                            {{ reason.label }}
+                        </option>
                     }
                 </select>
             </label>
@@ -73,12 +71,23 @@
     } @else {
         <p class="count muted">{{ total() }} mouvement{{ total() > 1 ? "s" : "" }}</p>
 
-        <app-cash-movement-list
-            backLabel="Mouvements"
-            [movements]="list()"
-            [showDate]="true"
-            emptyText="Aucun mouvement pour ces filtres."
-        />
+        @if (list().length === 0) {
+            <app-cash-movement-list
+                [movements]="[]"
+                emptyText="Aucun mouvement pour ces filtres."
+            />
+        }
+
+        <div class="days">
+            @for (day of days(); track day.key) {
+                <section class="day">
+                    <h2 class="day-title">{{ day.label }}</h2>
+                    <div class="day-card">
+                        <app-cash-movement-list backLabel="Mouvements" [movements]="day.items" />
+                    </div>
+                </section>
+            }
+        </div>
 
         @if (hasMore()) {
             <div #sentinel class="more">

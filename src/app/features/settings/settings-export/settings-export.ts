@@ -6,6 +6,8 @@ import { Observable } from "rxjs";
 
 import { StockMovementService } from "../../../core/stock/stock-movement.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { ExportFormat } from "../../../core/export-format";
+import { ExportMenu } from "../../../shared/export-menu/export-menu";
 import { Icon } from "../../../shared/icon/icon";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
 import { ExportService } from "./export.service";
@@ -14,7 +16,7 @@ type ExportKind = "products" | "sales" | "movements";
 
 @Component({
     selector: "app-settings-export",
-    imports: [RouterLink, PageHeader, Icon, PeriodFilter],
+    imports: [RouterLink, PageHeader, Icon, PeriodFilter, ExportMenu],
     templateUrl: "./settings-export.html",
     styleUrls: ["../settings-section.css", "./settings-export.css"],
 })
@@ -29,31 +31,34 @@ export class SettingsExport {
     busy = signal<ExportKind | null>(null);
     error = signal<{ kind: ExportKind; text: string } | null>(null);
 
-    exportProducts() {
+    exportProducts(format: ExportFormat) {
         this.run(
             "products",
-            this.exportService.productsCsv(),
-            "produits.csv",
+            this.exportService.productsFile(format),
+            `produits.${format}`,
             "Impossible d'exporter les produits.",
         );
     }
 
-    exportSales() {
+    exportSales(format: ExportFormat) {
         const { from, to } = this.range();
 
         this.run(
             "sales",
-            this.exportService.salesCsv(from, to),
-            "ventes.csv",
+            this.exportService.salesFile(from, to, format),
+            `ventes.${format}`,
             "Impossible d'exporter les ventes.",
         );
     }
 
-    exportMovements() {
+    exportMovements(format: ExportFormat) {
         this.run(
             "movements",
-            this.movementService.exportCsv({ from: null, to: null, type: null, productId: null }),
-            "mouvements-stock.csv",
+            this.movementService.exportFile(
+                { from: null, to: null, type: null, productId: null },
+                format,
+            ),
+            `mouvements-stock.${format}`,
             "Impossible d'exporter les mouvements.",
         );
     }

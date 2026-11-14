@@ -3,6 +3,7 @@ import { Injectable, inject } from "@angular/core";
 import { map } from "rxjs";
 
 import { API_URL } from "../api.config";
+import { ExportFormat } from "../export-format";
 import {
     CashMovement,
     CashSession,
@@ -11,6 +12,13 @@ import {
     CashToday,
     ClosedCash,
 } from "./cash.model";
+
+// open : caisses encore ouvertes, gap : caisses clôturées avec un écart
+export interface CashSessionFilters {
+    from?: string | null;
+    to?: string | null;
+    status?: "open" | "gap" | null;
+}
 
 export interface TodayCash {
     status: "OPEN" | "CLOSED";
@@ -71,10 +79,33 @@ export class CashSessionService {
         return this.http.get<CashToday>(`${API_URL}/dashboard/summary`);
     }
 
-    getSessions(page: number, limit: number) {
+    getSessions(page: number, limit: number, filters: CashSessionFilters = {}) {
         return this.http
-            .get<CashSessionPage>(`${API_URL}/cash_sessions`, { params: { page, limit } })
+            .get<CashSessionPage>(`${API_URL}/cash_sessions`, {
+                params: { page, limit, ...this.filterParams(filters) },
+            })
             .pipe(map((res) => ({ ...res, data: res.data.map(toSession) })));
+    }
+
+    // fichier de l'historique selon les mêmes filtres
+    exportSessions(filters: CashSessionFilters, format: ExportFormat) {
+        return this.http.get(`${API_URL}/cash_sessions/export`, {
+            params: { ...this.filterParams(filters), format },
+            responseType: "blob",
+        });
+    }
+
+    // admin seulement : rouvre une caisse clôturée, le motif reste dans le journal
+    reopen(id: number, reason: string) {
+        return this.http.post(`${API_URL}/cash_sessions/${id}/reopen`, { reason });
+    }
+
+    private filterParams(filters: CashSessionFilters) {
+        const params: Record<string, string> = {};
+        if (filters.from) params["startDate"] = filters.from;
+        if (filters.to) params["endDate"] = filters.to;
+        if (filters.status) params["status"] = filters.status;
+        return params;
     }
 
     getSession(id: number) {

@@ -26,6 +26,6 @@ describe("adminGuard", () => {
 
     it("should send a manager back to the dashboard", () => {
         const url = TestBed.inject(Router).serializeUrl(run() as UrlTree);
-        expect(url).toBe("/dashboard");
+        expect(url).toBe("/dashboard?reserved=1");
     });
 });

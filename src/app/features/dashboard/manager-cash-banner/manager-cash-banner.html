@@ -21,7 +21,7 @@
                 <strong>Caisse ouverte</strong>
                 <small>Depuis {{ openedAt() }}</small>
             </div>
-            <!-- clôture à l'aveugle : le gérant ne voit pas le solde -->
+            <!-- clôture à l'aveugle : l'employé ne voit pas le solde -->
             @if (cash()!.balance !== null) {
                 <div class="balance">
                     <small>Solde</small>

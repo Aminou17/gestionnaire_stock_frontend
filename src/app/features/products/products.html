@@ -1,11 +1,92 @@
 <app-page-header title="Produits" section="Stock">
     @if (auth.isAdmin()) {
-        <button type="button" class="btn btn-primary new-product" (click)="newProduct()">
+        <app-export-menu
+            class="icon-phone desktop-only"
+            ariaLabel="Exporter les produits"
+            [busy]="exporting()"
+            [disabled]="list().length === 0"
+            (picked)="exportFile($event)"
+        />
+        <button
+            type="button"
+            class="btn btn-outline import-products desktop-only"
+            (click)="openImport()"
+        >
+            <app-icon name="upload" [size]="18" />
+            <span>Importer</span>
+        </button>
+        <!-- sur téléphone, import et export se rangent dans un seul menu -->
+        <div class="row-menu head-menu" (click)="$event.stopPropagation()">
+            <button
+                type="button"
+                class="more-btn"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="menuFor() === 0"
+                aria-label="Importer ou exporter"
+                (click)="toggleMenu(0)"
+            >
+                <app-icon name="more" />
+            </button>
+            @if (menuFor() === 0) {
+                <div class="menu" role="menu">
+                    <button type="button" role="menuitem" (click)="menuFor.set(null); openImport()">
+                        <app-icon name="upload" [size]="16" />
+                        Importer
+                    </button>
+                    <button
+                        type="button"
+                        role="menuitem"
+                        [disabled]="exporting() || list().length === 0"
+                        (click)="menuFor.set(null); exportFile('pdf')"
+                    >
+                        <app-icon name="download" [size]="16" />
+                        Exporter en PDF
+                    </button>
+                    <button
+                        type="button"
+                        role="menuitem"
+                        [disabled]="exporting() || list().length === 0"
+                        (click)="menuFor.set(null); exportFile('csv')"
+                    >
+                        <app-icon name="download" [size]="16" />
+                        Exporter en CSV
+                    </button>
+                </div>
+            }
+        </div>
+        <button
+            type="button"
+            class="btn btn-primary new-product"
+            aria-label="Nouveau produit"
+            (click)="newProduct()"
+        >
             <app-icon name="plus" [size]="18" />
             <span>Nouveau produit</span>
         </button>
     }
 </app-page-header>
+
+@if (notice()) {
+    <div class="alert alert-success" role="status">{{ notice() }}</div>
+}
+
+@if (stockValue() !== undefined) {
+    <div class="card value-card">
+        <span class="value-icon"><app-icon name="wallet" [size]="20" /></span>
+        <div class="value-text">
+            <span class="value-label">Valeur du stock</span>
+            <strong class="value-amount">
+                @if (secret.revealed()) {
+                    {{ stockValue() | fcfa }}
+                } @else {
+                    <span role="img" aria-label="Valeur masquée">••••••••</span>
+                }
+            </strong>
+        </div>
+        <span class="value-note muted">au prix d'achat</span>
+        <app-reveal-toggle />
+    </div>
+}
 
 <!-- Compteurs : cartes sur ordinateur, pastilles défilantes sur téléphone -->
 <div class="stats">
@@ -28,6 +109,10 @@
     }
 </div>
 
+@if (exportError()) {
+    <div class="alert alert-error" role="alert">{{ exportError() }}</div>
+}
+
 <section class="card list-card">
     <div class="toolbar">
         <label class="search">
@@ -35,7 +120,7 @@
             <input
                 class="input"
                 type="search"
-                placeholder="Rechercher un produit…"
+                placeholder="Rechercher…"
                 aria-label="Rechercher un produit"
                 (input)="onSearch($any($event.target).value)"
             />
@@ -44,7 +129,9 @@
         <button
             type="button"
             class="filter-btn"
-            [class.active]="filtersOpen() || categoryId() || status() !== 'active'"
+            [class.active]="
+                filtersOpen() || categoryId() || status() !== 'active' || sort() !== 'default'
+            "
             [attr.aria-expanded]="filtersOpen()"
             (click)="filtersOpen.set(!filtersOpen())"
             aria-label="Filtres"
@@ -53,31 +140,100 @@
         </button>
 
         <div class="filters" [class.open]="filtersOpen()">
-            <select
-                class="input"
-                aria-label="Catégorie"
-                (change)="selectCategory($any($event.target).value)"
-            >
-                <option value="">Toutes les catégories</option>
-                @for (category of categoryList(); track category.id) {
-                    <option [value]="category.id" [selected]="category.id === categoryId()">
-                        {{ category.name }}
-                    </option>
-                }
-            </select>
+            <div class="sheet-head">
+                <h2>Filtres</h2>
+                <button
+                    type="button"
+                    class="sheet-close"
+                    aria-label="Fermer les filtres"
+                    (click)="filtersOpen.set(false)"
+                >
+                    <app-icon name="close" [size]="20" />
+                </button>
+            </div>
+
+            <label class="field">
+                <span class="field-label">Catégorie</span>
+                <select class="input" (change)="selectCategory($any($event.target).value)">
+                    <option value="">Toutes les catégories</option>
+                    @for (category of categoryList(); track category.id) {
+                        <option [value]="category.id" [selected]="category.id === categoryId()">
+                            {{ category.name }}
+                        </option>
+                    }
+                </select>
+            </label>
 
             @if (auth.isAdmin()) {
+                <label class="field">
+                    <span class="field-label">Statut</span>
+                    <select class="input" (change)="selectStatus($any($event.target).value)">
+                        <option value="active" [selected]="status() === 'active'">Actifs</option>
+                        <option value="deleted" [selected]="status() === 'deleted'">
+                            Supprimés
+                        </option>
+                        <option value="all" [selected]="status() === 'all'">Tous</option>
+                    </select>
+                </label>
+            }
+
+            <label class="field">
+                <span class="field-label">Trier par</span>
                 <select
                     class="input"
-                    aria-label="Statut"
-                    (change)="selectStatus($any($event.target).value)"
+                    aria-label="Trier par"
+                    (change)="selectSort($any($event.target).value)"
                 >
-                    <option value="active">Actifs</option>
-                    <option value="deleted">Supprimés</option>
-                    <option value="all">Tous</option>
+                    @for (option of sorts; track option.value) {
+                        <option [value]="option.value" [selected]="option.value === sort()">
+                            {{ option.label }}
+                        </option>
+                    }
                 </select>
-            }
+            </label>
+
+            <div class="sheet-foot">
+                <button type="button" class="btn btn-outline" (click)="resetFilters()">
+                    Réinitialiser
+                </button>
+                <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
+                    Voir {{ total() }} produit{{ total() > 1 ? "s" : "" }}
+                </button>
+            </div>
         </div>
+
+        <button
+            type="button"
+            class="view-single"
+            aria-label="Afficher en carreaux"
+            [attr.aria-pressed]="view() === 'grid'"
+            (click)="setView(view() === 'grid' ? 'list' : 'grid')"
+        >
+            <app-icon name="grid" [size]="18" />
+        </button>
+
+        <div class="view-toggle" role="group" aria-label="Affichage">
+            <button
+                type="button"
+                aria-label="Vue en liste"
+                [attr.aria-pressed]="view() === 'list'"
+                (click)="setView('list')"
+            >
+                <app-icon name="list" [size]="18" />
+            </button>
+            <button
+                type="button"
+                aria-label="Vue en grille"
+                [attr.aria-pressed]="view() === 'grid'"
+                (click)="setView('grid')"
+            >
+                <app-icon name="grid" [size]="18" />
+            </button>
+        </div>
+
+        @if (filtersOpen()) {
+            <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
+        }
     </div>
 
     @if (supplierId()) {
@@ -113,7 +269,7 @@
                 (click)="selectStock(tab.value)"
             >
                 {{ tab.short }}
-                <span>{{ tab.count ?? "—" }}</span>
+                <span class="chip-count tone-{{ tab.tone }}">{{ tab.count ?? "—" }}</span>
             </button>
         }
     </div>
@@ -146,65 +302,66 @@
 
         <p class="mobile-count muted">{{ total() }} produit{{ total() > 1 ? "s" : "" }}</p>
 
-        <div class="table-wrap">
-            <table [class.reloading]="products.isLoading() && page() === 1">
-                <thead>
-                    <tr>
-                        <th>Produit</th>
-                        @if (auth.isAdmin()) {
-                            <th class="num">Prix d'achat</th>
-                        }
-                        <th class="num">Prix de vente</th>
-                        <th>Prix minimum</th>
-                        <th class="num">Stock</th>
-                        <th>État</th>
-                        @if (auth.isAdmin()) {
-                            <th class="actions-col"><span class="sr-only">Actions</span></th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (product of list(); track product.id) {
-                        <tr [class.inactive]="!product.is_active" (click)="openProduct(product)">
-                            <td>
-                                <button type="button" class="name-link name">
-                                    {{ product.name }}
-                                </button>
-                            </td>
+        @if (view() === "list") {
+            <div class="table-wrap">
+                <table [class.reloading]="products.isLoading() && page() === 1">
+                    <thead>
+                        <tr>
+                            <th>Produit</th>
+                            <th>Catégorie</th>
+                            <th class="num">Prix de vente</th>
                             @if (auth.isAdmin()) {
-                                <td class="num muted">{{ product.purchase_price | fcfa }}</td>
+                                <th class="num">Marge</th>
                             }
-                            <td class="num strong">{{ product.sale_price | fcfa }}</td>
-                            <td>
-                                @if (product.pricing_mode === "NEGOTIABLE") {
-                                    <span class="badge badge-violet" title="Prix minimum accepté"
-                                        >Min.
-                                        {{ product.sale_price - product.max_discount | fcfa }}</span
-                                    >
+                            <th class="num">Stock</th>
+                            <th class="actions-col"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (product of list(); track product.id) {
+                            <tr
+                                [class.inactive]="!product.is_active"
+                                (click)="openProduct(product)"
+                            >
+                                <td>
+                                    <div class="product-cell">
+                                        <span class="avatar av-{{ tone(product.category_name) }}">
+                                            @if (product.image) {
+                                                <img [src]="product.image" alt="" />
+                                            } @else {
+                                                {{ initials(product.name) }}
+                                            }
+                                        </span>
+                                        <button type="button" class="name-link name">
+                                            {{ product.name }}
+                                        </button>
+                                    </div>
+                                </td>
+                                <td class="muted">{{ product.category_name }}</td>
+                                <td class="num strong">{{ product.sale_price | fcfa }}</td>
+                                @if (auth.isAdmin()) {
+                                    <td class="num muted">
+                                        @if (margin(product); as percent) {
+                                            {{ percent }} %
+                                        } @else {
+                                            <span aria-label="Inconnue">-</span>
+                                        }
+                                    </td>
                                 }
-                            </td>
-                            <td class="num">
-                                <strong class="stock-{{ product.stock_status }}">{{
-                                    product.theoretical_stock
-                                }}</strong>
-                                @if (product.effective_min_stock !== null) {
-                                    <span class="muted">
-                                        / seuil {{ product.effective_min_stock }}</span
-                                    >
-                                }
-                            </td>
-                            <td>
-                                @if (!product.is_active) {
-                                    <span class="badge badge-neutral">Supprimé</span>
-                                } @else if (product.stock_status === "OUT_OF_STOCK") {
-                                    <span class="badge badge-danger">Rupture</span>
-                                } @else if (product.stock_status === "LOW") {
-                                    <span class="badge badge-warning">Stock faible</span>
-                                } @else {
-                                    <span class="badge badge-success">En stock</span>
-                                }
-                            </td>
-                            @if (auth.isAdmin()) {
+                                <td class="num">
+                                    <span class="stock-cell">
+                                        <strong class="stock-{{ product.stock_status }}">{{
+                                            product.theoretical_stock
+                                        }}</strong>
+                                        @if (!product.is_active) {
+                                            <span class="badge badge-neutral">Supprimé</span>
+                                        } @else if (product.stock_status === "OUT_OF_STOCK") {
+                                            <span class="badge badge-danger">Rupture</span>
+                                        } @else if (product.stock_status === "LOW") {
+                                            <span class="badge badge-warning">Stock faible</span>
+                                        }
+                                    </span>
+                                </td>
                                 <td class="actions-col">
                                     @if (product.is_active) {
                                         <ng-container
@@ -215,61 +372,87 @@
                                         />
                                     }
                                 </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        } @else {
+            <!-- vue grille : un catalogue de grandes photos -->
+            <ul class="grid">
+                @for (product of list(); track product.id) {
+                    <li
+                        class="gcard"
+                        [class.inactive]="!product.is_active"
+                        (click)="openProduct(product)"
+                    >
+                        <span class="gphoto av-{{ tone(product.category_name) }}">
+                            @if (product.image) {
+                                <img [src]="product.image" alt="" />
+                            } @else {
+                                {{ initials(product.name) }}
                             }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                        </span>
+                        @if (product.is_active) {
+                            <span class="gmenu">
+                                <ng-container
+                                    *ngTemplateOutlet="rowMenu; context: { $implicit: product }"
+                                />
+                            </span>
+                        }
+                        <div class="gbody">
+                            <button type="button" class="name-link name">{{ product.name }}</button>
+                            <span class="muted gsub">{{ product.category_name }}</span>
+                            <div class="gfoot">
+                                <strong>{{ product.sale_price | fcfa }}</strong>
+                                <ng-container
+                                    *ngTemplateOutlet="stockPill; context: { $implicit: product }"
+                                />
+                            </div>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
 
         <!-- Version téléphone : une carte compacte par produit -->
-        <ul class="cards">
-            @for (product of list(); track product.id) {
-                <li
-                    class="product-card"
-                    [class.inactive]="!product.is_active"
-                    (click)="openProduct(product)"
-                >
-                    <div class="line">
-                        <button type="button" class="name-link name">{{ product.name }}</button>
-                        @if (auth.isAdmin() && product.is_active) {
+        @if (view() === "list") {
+            <ul class="cards">
+                @for (product of list(); track product.id) {
+                    <li
+                        class="product-card"
+                        [class.inactive]="!product.is_active"
+                        (click)="openProduct(product)"
+                    >
+                        <span class="avatar av-{{ tone(product.category_name) }}">
+                            @if (product.image) {
+                                <img [src]="product.image" alt="" />
+                            } @else {
+                                {{ initials(product.name) }}
+                            }
+                        </span>
+                        <div class="info">
+                            <button type="button" class="name-link name">{{ product.name }}</button>
+                            <span class="sub muted">
+                                {{ product.category_name }}
+                                @if (soldView()) {
+                                    · <strong>{{ product.sold_last_30_days }}</strong> vendus
+                                }
+                            </span>
+                            <ng-container
+                                *ngTemplateOutlet="stockPill; context: { $implicit: product }"
+                            />
+                        </div>
+                        <strong class="price">{{ product.sale_price | fcfa }}</strong>
+                        @if (product.is_active) {
                             <ng-container
                                 *ngTemplateOutlet="rowMenu; context: { $implicit: product }"
                             />
                         }
-                    </div>
-                    <span class="category muted">{{ product.category_name }}</span>
-                    <div class="line">
-                        <strong class="price">{{ product.sale_price | fcfa }}</strong>
-                        @if (product.pricing_mode === "NEGOTIABLE") {
-                            <span class="badge badge-violet" title="Prix minimum accepté"
-                                >Min. {{ product.sale_price - product.max_discount | fcfa }}</span
-                            >
-                        }
-                    </div>
-                    <div class="line">
-                        <span class="stock muted">
-                            Stock
-                            <strong class="stock-{{ product.stock_status }}">{{
-                                product.theoretical_stock
-                            }}</strong>
-                            @if (product.effective_min_stock !== null) {
-                                / seuil {{ product.effective_min_stock }}
-                            }
-                        </span>
-                        @if (!product.is_active) {
-                            <span class="badge badge-neutral">Supprimé</span>
-                        } @else if (product.stock_status === "OUT_OF_STOCK") {
-                            <span class="badge badge-danger">Rupture</span>
-                        } @else if (product.stock_status === "LOW") {
-                            <span class="badge badge-warning">Stock faible</span>
-                        } @else {
-                            <span class="badge badge-success">En stock</span>
-                        }
-                    </div>
-                </li>
-            }
-        </ul>
+                    </li>
+                }
+            </ul>
+        }
 
         <!-- en vue, ce repère déclenche le chargement des 20 produits suivants -->
         @if (hasMore()) {
@@ -291,39 +474,72 @@
     }
 </section>
 
+<ng-template #stockPill let-product>
+    @if (!product.is_active) {
+        <span class="badge badge-neutral">Supprimé</span>
+    } @else if (product.stock_status === "OUT_OF_STOCK") {
+        <span class="badge badge-danger">Rupture</span>
+    } @else if (product.stock_status === "LOW") {
+        <span class="badge badge-warning">{{ product.theoretical_stock }} en stock · faible</span>
+    } @else {
+        <span class="badge badge-success">{{ product.theoretical_stock }} en stock</span>
+    }
+</ng-template>
+
 <ng-template #rowMenu let-product>
-    <div class="row-menu" (click)="$event.stopPropagation()">
-        <button
-            type="button"
-            class="more-btn"
-            aria-haspopup="menu"
-            [attr.aria-expanded]="menuFor() === product.id"
-            [attr.aria-label]="'Actions pour ' + product.name"
-            (click)="toggleMenu(product.id)"
-        >
-            <app-icon name="more" />
-        </button>
-        @if (menuFor() === product.id) {
-            <div class="menu" role="menu">
-                <button type="button" role="menuitem" (click)="editProduct(product)">
-                    <app-icon name="edit" [size]="16" />
-                    Modifier
-                </button>
-                <button type="button" role="menuitem" class="danger" (click)="askDelete(product)">
-                    <app-icon name="ban" [size]="16" />
-                    Supprimer
-                </button>
-            </div>
-        }
-    </div>
+    @if (auth.isAdmin() || product.theoretical_stock > 0) {
+        <div class="row-menu" (click)="$event.stopPropagation()">
+            <button
+                type="button"
+                class="more-btn"
+                aria-haspopup="menu"
+                [attr.aria-expanded]="menuFor() === product.id"
+                [attr.aria-label]="'Actions pour ' + product.name"
+                (click)="toggleMenu(product.id)"
+            >
+                <app-icon name="more" />
+            </button>
+            @if (menuFor() === product.id) {
+                <div class="menu" role="menu">
+                    @if (product.theoretical_stock > 0) {
+                        <button type="button" role="menuitem" (click)="sellProduct(product)">
+                            <app-icon name="cart" [size]="16" />
+                            Vendre
+                        </button>
+                    }
+                    @if (auth.isAdmin()) {
+                        <button type="button" role="menuitem" (click)="addStock(product)">
+                            <app-icon name="stock-entry" [size]="16" />
+                            Ajouter du stock
+                        </button>
+                        <button type="button" role="menuitem" (click)="adjustProduct(product)">
+                            <app-icon name="edit" [size]="16" />
+                            Ajuster le stock
+                        </button>
+                        <button type="button" role="menuitem" (click)="editProduct(product)">
+                            <app-icon name="edit" [size]="16" />
+                            Modifier
+                        </button>
+                        <button
+                            type="button"
+                            role="menuitem"
+                            class="danger"
+                            (click)="askDelete(product)"
+                        >
+                            <app-icon name="ban" [size]="16" />
+                            Supprimer
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    }
 </ng-template>
 
 @if (auth.isAdmin()) {
-    <button type="button" class="fab" (click)="newProduct()" aria-label="Nouveau produit">
-        <app-icon name="plus" [size]="24" />
-    </button>
-
     <app-product-form (saved)="refresh()" />
+    <app-product-import (imported)="refresh()" />
+    <app-adjust-dialog (saved)="onAdjusted($event)" />
 }
 
 <dialog #confirm class="confirm" (click)="onConfirmBackdrop($event)">

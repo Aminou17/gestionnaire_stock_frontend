@@ -200,3 +200,19 @@ h3 {
 .retry:hover {
     text-decoration: underline;
 }
+
+@media (max-width: 767px) {
+    .icon-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+    }
+
+    .dot {
+        top: 1px;
+        right: 1px;
+        min-width: 15px;
+        height: 15px;
+        font-size: 10px;
+    }
+}

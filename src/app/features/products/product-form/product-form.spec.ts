@@ -13,12 +13,14 @@ describe("ProductForm", () => {
     let el: HTMLElement;
     let createProduct: ReturnType<typeof vi.fn>;
     let updateProduct: ReturnType<typeof vi.fn>;
+    let setImage: ReturnType<typeof vi.fn>;
     let createSupplier: ReturnType<typeof vi.fn>;
     let createCategory: ReturnType<typeof vi.fn>;
 
     beforeEach(async () => {
         createProduct = vi.fn(() => of({}));
         updateProduct = vi.fn(() => of({}));
+        setImage = vi.fn(() => of({ id: 21, image: null }));
         createSupplier = vi.fn(() => of({ id: 9, name: "Tissus du Faso", is_active: true }));
         createCategory = vi.fn(() =>
             of({
@@ -41,6 +43,7 @@ describe("ProductForm", () => {
                     useValue: {
                         createProduct,
                         updateProduct,
+                        setImage,
                         getProduct: () =>
                             of({
                                 id: 7,
@@ -98,6 +101,51 @@ describe("ProductForm", () => {
             minStock,
         });
 
+    it("should send the photo and its thumbnail once the product is created", () => {
+        createProduct.mockReturnValue(of({ id: 21 }));
+        component.openNew();
+        fill("FIXED", null);
+        component.photo.set({
+            image: "data:image/png;base64,AAAA",
+            thumb: "data:image/png;base64,BB",
+        });
+        component.submit();
+
+        expect(setImage).toHaveBeenCalledWith(
+            21,
+            "data:image/png;base64,AAAA",
+            "data:image/png;base64,BB",
+        );
+    });
+
+    it("should list what is still missing and say when everything is ready", () => {
+        component.openNew();
+        expect(component.missing()).toEqual([
+            "le nom",
+            "la catégorie",
+            "le fournisseur",
+            "le prix d'achat",
+            "le prix de vente",
+        ]);
+
+        fill("FIXED", null);
+        expect(component.missing()).toEqual([]);
+
+        component.setMode("NEGOTIABLE");
+        component.form.controls.maxDiscount.setValue(null);
+        expect(component.missing()).toEqual(["la remise maximale"]);
+        expect(component.requiredCount()).toBe(6);
+    });
+
+    it("should not touch the photo when it was not changed", () => {
+        createProduct.mockReturnValue(of({ id: 21 }));
+        component.openNew();
+        fill("FIXED", null);
+        component.submit();
+
+        expect(setImage).not.toHaveBeenCalled();
+    });
+
     it("should send a discount of 0 for a fixed price", () => {
         component.openNew();
         fill("FIXED", null);
@@ -114,7 +162,7 @@ describe("ProductForm", () => {
         await fixture.whenStable();
 
         const text = el.textContent!.replace(/\s+/g, " ");
-        expect(text).toContain("Marge : 6 000 F (40 %)");
+        expect(text).toMatch(/Marge\s*6 000 F \(40 %\)/);
         expect(text).toContain("entre 13 500 F et 15 000 F");
     });
 

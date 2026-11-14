@@ -125,3 +125,47 @@
         border-radius: 0;
     }
 }
+
+@media (max-width: 767px) {
+    :host(.stacked) .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 12px;
+        overflow: visible;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        mask-image: none;
+    }
+
+    :host(.stacked) .period {
+        display: block;
+    }
+
+    :host(.stacked) .period select {
+        width: 100%;
+    }
+}
+
+@media (max-width: 767px) {
+    :host(.flat) .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        mask-image: none;
+    }
+
+    :host(.flat) .period select {
+        width: 100%;
+        height: 44px;
+    }
+
+    :host(.flat) .custom-range {
+        margin-top: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+}

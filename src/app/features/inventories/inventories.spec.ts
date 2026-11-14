@@ -22,12 +22,12 @@ describe("Inventories", () => {
     let fixture: ComponentFixture<Inventories>;
     let el: HTMLElement;
 
-    async function render(getInventories: () => unknown) {
+    async function render(getInventories: () => unknown, exportFile = vi.fn()) {
         await TestBed.configureTestingModule({
             imports: [Inventories],
             providers: [
                 provideRouter([]),
-                { provide: InventoryService, useValue: { getInventories } },
+                { provide: InventoryService, useValue: { getInventories, exportFile } },
                 { provide: LowStockAlertService, useValue: { count: () => 0 } },
             ],
         }).compileComponents();
@@ -44,6 +44,30 @@ describe("Inventories", () => {
         // Intl met des espaces insécables dans les milliers
         expect(el.textContent?.replace(/\s/g, " ")).toContain("−27 600 F");
         expect(el.querySelector("a.inventory-link")?.getAttribute("href")).toBe("/inventories/10");
+        expect(el.textContent).toContain("Inventaire #10");
+    });
+
+    it("should export the list in the chosen format", async () => {
+        const exportFile = vi.fn(() => of(new Blob(["x"])));
+        URL.createObjectURL = vi.fn(() => "blob:test");
+        URL.revokeObjectURL = vi.fn();
+        await render(() => of([inventory]), exportFile);
+
+        fixture.componentInstance.exportFile("csv");
+
+        expect(exportFile).toHaveBeenCalledWith("csv");
+        expect(fixture.componentInstance.exporting()).toBe(false);
+        expect(el.querySelector("app-export-menu")).not.toBeNull();
+    });
+
+    it("should show an error when the export fails", async () => {
+        const exportFile = vi.fn(() => throwError(() => new Error("500")));
+        await render(() => of([inventory]), exportFile);
+
+        fixture.componentInstance.exportFile("pdf");
+        fixture.detectChanges();
+
+        expect(el.querySelector(".alert")?.textContent).toContain("Impossible d'exporter");
     });
 
     it("should tell which inventories already corrected the stock", async () => {
@@ -52,13 +76,16 @@ describe("Inventories", () => {
         );
 
         expect(el.querySelectorAll("tbody .badge-success").length).toBe(1);
-        expect(el.querySelectorAll("tbody .badge-neutral").length).toBe(1);
+        expect(el.querySelector("tbody .badge-success")?.textContent).toContain("Appliqué");
+        expect(el.querySelectorAll("tbody .badge-warning").length).toBe(1);
+        expect(el.querySelector("tbody .badge-warning")?.textContent).toContain("À appliquer");
     });
 
     it("should say when there is no inventory yet", async () => {
         await render(() => of([]));
 
-        expect(el.textContent).toContain("Aucun inventaire n'a encore été fait.");
+        expect(el.textContent).toContain("Aucun inventaire pour le moment");
+        expect(el.textContent).toContain("Faire un premier inventaire");
     });
 
     it("should offer to retry when the loading fails", async () => {

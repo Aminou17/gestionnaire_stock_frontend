@@ -73,7 +73,7 @@ describe("ProductPage", () => {
                     useValue: {
                         isAdmin: signal(isAdmin),
                         user: signal({ id: 1, name: "Admin Test", email: "a@test.com" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
                 {
@@ -96,9 +96,9 @@ describe("ProductPage", () => {
         expect(getProduct).toHaveBeenCalledWith(3);
         expect(text()).toContain("Savon Marseille");
         expect(text()).toContain("Hygiène");
-        expect(text()).toContain("Prix minimum");
+        expect(text()).toContain("Minimum 900 F");
         expect(text()).toContain("900 F");
-        expect(text()).toContain("10 (par défaut)");
+        expect(text()).toContain("Seuil d'alerte 10");
         expect(text()).toContain("600 F");
     });
 
@@ -108,6 +108,18 @@ describe("ProductPage", () => {
         expect(text()).not.toContain("Prix d'achat");
         expect(el.querySelector(".sell")).not.toBeNull();
         expect(el.querySelector(".more-btn")).toBeNull();
+    });
+
+    it("should show the purchase price and the margin to the admin only", async () => {
+        await render(true);
+        expect(text()).toContain("Marge");
+        expect(el.querySelector(".add-stock")).not.toBeNull();
+    });
+
+    it("should hide the margin and the add stock button from the manager", async () => {
+        await render(false);
+        expect(text()).not.toContain("Marge");
+        expect(el.querySelector(".add-stock")).toBeNull();
     });
 
     it("should go to the sale with this product", async () => {

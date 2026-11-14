@@ -4,7 +4,7 @@ import { ManualMovementType } from "./cash.model";
 export const CASH_REASONS: Record<ManualMovementType, { value: string; label: string }[]> = {
     DEPOSIT: [
         { value: "CHANGE", label: "Monnaie pour la caisse" },
-        { value: "OWNER_CONTRIBUTION", label: "Apport du propriétaire" },
+        { value: "OWNER_CONTRIBUTION", label: "Apport de l'administrateur" },
         { value: "OTHER", label: "Autre" },
     ],
     EXPENSE: [
@@ -19,7 +19,7 @@ export const CASH_REASONS: Record<ManualMovementType, { value: string; label: st
     WITHDRAWAL: [
         { value: "BANK_DEPOSIT", label: "Dépôt à la banque" },
         { value: "SAFE", label: "Mise au coffre" },
-        { value: "OWNER_WITHDRAWAL", label: "Retrait du propriétaire" },
+        { value: "OWNER_WITHDRAWAL", label: "Retrait de l'administrateur" },
         { value: "OTHER", label: "Autre" },
     ],
 };

@@ -8,7 +8,7 @@ import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { Icon } from "../../shared/icon/icon";
 import { getActivityLabel } from "../../shared/activity-label";
 
-// Cloche du propriétaire : ce qui demande son attention (stock et sécurité)
+// Cloche de l'administrateur : ce qui demande son attention (stock et sécurité)
 @Component({
     selector: "app-notifications",
     imports: [RouterLink, DatePipe, Icon],

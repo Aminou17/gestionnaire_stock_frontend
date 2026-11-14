@@ -21,11 +21,14 @@ import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { Product } from "../../core/stock/product.model";
 import { ProductService } from "../../core/stock/product.service";
 import { StockEntry, StockEntryPage } from "../../core/stock/stock-entry.model";
+import { AdjustDialog } from "../stock-movements/adjust-dialog/adjust-dialog";
 import { StockEntryService } from "../../core/stock/stock-entry.service";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
+import { BackState } from "../../core/back-link";
+import { productInitials } from "../products/product-look";
 
 const PAGE_SIZE = 20;
 // valeur de l'option "+ Créer un fournisseur"
@@ -48,6 +51,7 @@ const toId = (value: string | null) => {
         PageHeader,
         PeriodFilter,
         Icon,
+        AdjustDialog,
     ],
     templateUrl: "./stock-entries.html",
     styleUrl: "./stock-entries.css",
@@ -58,14 +62,31 @@ export class StockEntries implements AfterViewInit {
     private supplierService = inject(SupplierService);
     private stockAlerts = inject(LowStockAlertService);
     private router = inject(Router);
+
+    // la fiche produit ouverte sait ainsi revenir ici
+    backState(): BackState {
+        return { backTo: this.router.url, backLabel: "Entrées de stock" };
+    }
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
 
     private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("entryBox");
+    private adjustDialog = viewChild.required(AdjustDialog);
 
     protected newId = NEW_ID;
+    protected initials = productInitials;
+    protected quickQuantities = [5, 10, 20, 50];
+
+    // page d'où l'on vient (fiche produit, liste) : Annuler y ramène
+    private origin = (() => {
+        const state = this.router.currentNavigation()?.extras.state ?? history.state;
+        return typeof state?.backTo === "string" && state.backTo.startsWith("/")
+            ? (state.backTo as string)
+            : null;
+    })();
+    private justSaved = false;
 
     // ---------- Liste ----------
 
@@ -163,7 +184,7 @@ export class StockEntries implements AfterViewInit {
     });
     results = computed(() => (this.products.hasValue() ? this.products.value().data : []));
 
-    private quantity = signal<number | null>(null);
+    protected quantity = signal<number | null>(null);
     stockAfter = computed(() => {
         const product = this.product();
         const quantity = this.quantity();
@@ -250,6 +271,12 @@ export class StockEntries implements AfterViewInit {
                             return;
                         }
                         this.chooseProduct(product);
+
+                        // quantité conseillée depuis la page Alertes
+                        const quantity = Number(this.route.snapshot.queryParamMap.get("quantity"));
+                        if (Number.isInteger(quantity) && quantity > 0) {
+                            this.form.controls.quantity.setValue(quantity);
+                        }
                     },
                     error: () => this.formError.set("Ce produit est introuvable ou supprimé."),
                 });
@@ -281,6 +308,7 @@ export class StockEntries implements AfterViewInit {
     }
 
     openNew() {
+        this.justSaved = false;
         this.success.set(null);
         this.product.set(null);
         this.search.set("");
@@ -309,12 +337,18 @@ export class StockEntries implements AfterViewInit {
     // La fenêtre est fermée : plus besoin de chercher des produits
     onClosed() {
         this.dialogOpen.set(false);
+
+        // annulé : retour à la page d'où l'on vient, pas sur la liste des entrées
+        if (this.origin && !this.justSaved) {
+            this.router.navigateByUrl(this.origin, { replaceUrl: true });
+            return;
+        }
         // sans ça, un rechargement rouvrirait la fenêtre
         const params = this.route.snapshot.queryParamMap;
-        if (params.has("productId") || params.has("new")) {
+        if (params.has("productId") || params.has("new") || params.has("quantity")) {
             this.router.navigate([], {
                 relativeTo: this.route,
-                queryParams: { productId: null, new: null },
+                queryParams: { productId: null, new: null, quantity: null },
                 queryParamsHandling: "merge",
                 replaceUrl: true,
             });
@@ -335,11 +369,19 @@ export class StockEntries implements AfterViewInit {
             .getProduct(product.id)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((detail) => {
-                const known = this.supplierList().some((s) => s.id === detail.supplier_id);
-                if (known && !this.form.controls.supplierId.value) {
-                    this.form.controls.supplierId.setValue(detail.supplier_id);
+                const supplierId = detail.supplier_id;
+                const known = this.supplierList().some((s) => s.id === supplierId);
+                if (supplierId !== undefined && known && !this.form.controls.supplierId.value) {
+                    this.form.controls.supplierId.setValue(supplierId);
                 }
             });
+    }
+
+    // boutons moins et plus, et ajouts rapides à la quantité
+    addQuantity(amount: number) {
+        const control = this.form.controls.quantity;
+        control.setValue(Math.max(1, (control.value ?? 0) + amount));
+        control.markAsDirty();
     }
 
     changeProduct() {
@@ -425,6 +467,7 @@ export class StockEntries implements AfterViewInit {
             .subscribe({
                 next: () => {
                     this.saving.set(false);
+                    this.justSaved = true;
                     this.closeNew();
                     this.success.set(`Entrée enregistrée : +${quantity} « ${product.name} ».`);
                     this.refresh();
@@ -434,6 +477,33 @@ export class StockEntries implements AfterViewInit {
                     this.formError.set(err.error?.message ?? "Impossible d'enregistrer l'entrée.");
                 },
             });
+    }
+
+    // erreur de saisie : la fenêtre d'ajustement s'ouvre déjà réglée pour retirer cette quantité
+    notice = signal<string | null>(null);
+    correctError = signal<string | null>(null);
+
+    correct(entry: StockEntry) {
+        this.notice.set(null);
+        this.correctError.set(null);
+
+        this.productService
+            .getProduct(entry.product_id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (product) =>
+                    this.adjustDialog().show(product, {
+                        direction: "loss",
+                        quantity: Math.min(entry.quantity, product.theoretical_stock),
+                        reason: "correction",
+                    }),
+                error: () => this.correctError.set("Impossible d'ouvrir la correction."),
+            });
+    }
+
+    onCorrected(message: string) {
+        this.notice.set(message);
+        this.stockAlerts.alerts.reload();
     }
 
     private refresh() {

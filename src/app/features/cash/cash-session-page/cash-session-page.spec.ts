@@ -65,7 +65,7 @@ describe("CashSessionPage", () => {
                             email: "y@test.com",
                             role: "admin",
                         }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(0) } },
@@ -87,7 +87,7 @@ describe("CashSessionPage", () => {
         expect(text()).toContain("−500F");
         expect(text()).toContain("Montantattendu12000F");
         expect(text()).toContain("Montantcompté11500F");
-        expect(text()).toContain("ClôturéeparAwaK.");
+        expect(text()).toContain("ClôtureHeure19:00ParAwaK.");
         expect(text()).toContain("Vente#8");
     });
 
@@ -110,7 +110,7 @@ describe("CashSessionPage", () => {
         expect(text()).toContain("Ouverte");
         expect(text()).toContain("encoreouverte");
         expect(text()).not.toContain("Montantattendu");
-        expect(text()).not.toContain("Clôturéepar");
+        expect(text()).not.toContain("ClôtureHeure");
     });
 
     it("should say the session is not found on a 404", async () => {

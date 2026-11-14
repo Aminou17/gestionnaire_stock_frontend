@@ -4,6 +4,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 
 import { ManualMovementType } from "../../../core/cash/cash.model";
 import { CASH_REASONS } from "../../../core/cash/cash-reasons";
+import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementService } from "../../../core/cash/cash-movement.service";
 
 const TEXTS: Record<ManualMovementType, { title: string; hint: string; button: string }> = {
@@ -26,9 +27,9 @@ const TEXTS: Record<ManualMovementType, { title: string; hint: string; button: s
 
 @Component({
     selector: "app-cash-movement-dialog",
-    imports: [ReactiveFormsModule],
+    imports: [ReactiveFormsModule, FcfaPipe],
     templateUrl: "./cash-movement-dialog.html",
-    styleUrl: "./cash-movement-dialog.css",
+    styleUrl: "../../../shared/dialog/dialog.css",
 })
 export class CashMovementDialog {
     private movements = inject(CashMovementService);
@@ -39,7 +40,7 @@ export class CashMovementDialog {
     saved = output();
 
     form = this.fb.group({
-        amount: [0, [Validators.required, Validators.min(1)]],
+        amount: [0, [Validators.required, Validators.min(1), Validators.pattern(/^\d+$/)]],
         category: [""],
         reason: ["", Validators.maxLength(200)],
     });
@@ -57,10 +58,17 @@ export class CashMovementDialog {
         this.form.reset();
         this.error.set(null);
         this.dialog().nativeElement.showModal();
+        this.dialog().nativeElement.querySelector("input")?.select();
     }
 
     close() {
+        if (this.saving()) return;
         this.dialog().nativeElement.close();
+    }
+
+    // Échap ferme un <dialog> sans passer par close()
+    onCancel(event: Event) {
+        if (this.saving()) event.preventDefault();
     }
 
     // ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false

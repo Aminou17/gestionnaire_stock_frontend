@@ -1,23 +1,5 @@
-<app-page-header title="Caisse">
-    @if (auth.isAdmin()) {
-        <a
-            routerLink="/cash/movements"
-            class="btn btn-outline header-link"
-            aria-label="Mouvements de caisse"
-        >
-            <app-icon name="movements" [size]="18" />
-            <span>Mouvements</span>
-        </a>
-    }
-    <a
-        routerLink="/cash/sessions"
-        class="btn btn-outline header-link"
-        aria-label="Historique des caisses"
-    >
-        <app-icon name="receipt" [size]="18" />
-        <span>Historique</span>
-    </a>
-</app-page-header>
+<app-page-header title="Caisse" />
+<app-cash-tabs />
 
 @if (today.isLoading() && !today.hasValue()) {
     <div class="layout" aria-busy="true">
@@ -100,9 +82,6 @@
                         </span>
                         <small class="muted">
                             Ouverte à {{ cash.openedAt | date: "HH:mm" }}
-                            @if (cash.openedByName) {
-                                par {{ cash.openedByName }}
-                            }
                             @if (cash.closedAt) {
                                 · clôturée à {{ cash.closedAt | date: "HH:mm" }}
                             }
@@ -149,16 +128,19 @@
                         }
                     } @else {
                         <p class="muted note">
-                            Votre caisse du jour est clôturée. Vous pourrez ouvrir une nouvelle
-                            caisse demain.
+                            Journée terminée. La prochaine caisse s'ouvre demain.
                         </p>
-                        <a [routerLink]="['/cash/sessions', cash.id]" class="btn btn-outline">
+                        <a
+                            [routerLink]="['/cash/sessions', cash.id]"
+                            [state]="backState"
+                            class="btn btn-outline"
+                        >
                             Voir le détail de la journée
                         </a>
                     }
                 } @else {
                     <div class="status-head">
-                        <span class="badge badge-neutral">Ma caisse est fermée</span>
+                        <span class="badge badge-neutral">Caisse non ouverte</span>
                     </div>
                     <div class="balance">
                         <small>Vous n'avez pas ouvert votre caisse aujourd'hui</small>
@@ -174,16 +156,20 @@
             @if (auth.isAdmin() && team().length > 0) {
                 <section class="card panel team" aria-label="Caisses de l'équipe">
                     <div class="card-header">
-                        <h2>Caisses du jour</h2>
+                        <h2>Suivi des caisses</h2>
                     </div>
                     <ul class="team-list">
                         @for (member of team(); track member.id) {
                             <li>
-                                <a [routerLink]="['/cash/sessions', member.id]" class="team-row">
+                                <a
+                                    [routerLink]="['/cash/sessions', member.id]"
+                                    [state]="backState"
+                                    class="team-row"
+                                >
                                     <span class="team-name">
                                         <strong>{{ member.openedByName ?? "—" }}</strong>
                                         <small class="muted"
-                                            >Ventes en espèces {{ member.salesTotal | fcfa }}</small
+                                            >Ventes {{ member.salesTotal | fcfa }}</small
                                         >
                                     </span>
                                     <span class="team-state">
@@ -201,7 +187,11 @@
                                                     [class.in]="member.difference > 0"
                                                     [class.out]="member.difference < 0"
                                                 >
-                                                    Écart {{ member.difference | fcfa: true }}
+                                                    @if (member.difference === 0) {
+                                                        Aucun écart
+                                                    } @else {
+                                                        Écart {{ member.difference | fcfa: true }}
+                                                    }
                                                 </strong>
                                             }
                                         }
@@ -213,7 +203,7 @@
                 </section>
             }
 
-            <!-- le gérant peut seulement ajouter de l'argent -->
+            <!-- l'employé peut seulement ajouter de l'argent -->
             @if (isOpen()) {
                 <section
                     class="quick"
@@ -226,7 +216,7 @@
                         (click)="movementDialog.open('DEPOSIT')"
                     >
                         <app-icon name="arrow-down" [size]="18" />
-                        {{ auth.isAdmin() ? "Ajouter" : "Ajouter de l'argent" }}
+                        Ajouter
                     </button>
                     @if (auth.isAdmin()) {
                         <button
@@ -252,13 +242,13 @@
             @if (cash()) {
                 <section class="card panel movements">
                     <div class="card-header">
-                        <!-- à l'aveugle, le serveur ne renvoie au gérant que ses propres mouvements -->
+                        <!-- à l'aveugle, le serveur ne renvoie à l'employé que ses propres mouvements -->
                         <h2>
                             {{
                                 cash()!.balance === null
                                     ? "Mes mouvements du jour"
                                     : team().length > 0
-                                      ? "Mouvements du jour, toutes les caisses"
+                                      ? "Tous les mouvements du jour"
                                       : "Mouvements du jour"
                             }}
                         </h2>
@@ -277,7 +267,7 @@
                     } @else if (session.hasValue()) {
                         <app-cash-movement-list
                             [movements]="latest()"
-                            emptyText="Aucun mouvement pour le moment. Les ventes en espèces apparaîtront ici."
+                            emptyText="Aucun mouvement pour le moment. Les ventes apparaîtront ici."
                         />
                     } @else {
                         @for (i of [1, 2, 3]; track i) {
@@ -293,16 +283,16 @@
                 <aside class="side">
                     <section class="card panel">
                         <div class="card-header">
-                            <h2>Résumé de la journée</h2>
+                            <h2>Mon résumé du jour</h2>
                         </div>
                         @if (session.hasValue()) {
                             <dl class="lines">
                                 <div>
-                                    <dt>Fond de caisse</dt>
+                                    <dt>Fonds de départ</dt>
                                     <dd>{{ cash.openingAmount | fcfa }}</dd>
                                 </div>
                                 <div>
-                                    <dt>Ventes en espèces</dt>
+                                    <dt>Ventes</dt>
                                     <dd class="in">{{ summary().sales | fcfa }}</dd>
                                 </div>
                                 @if (summary().deposits > 0) {
@@ -330,7 +320,7 @@
                                     </div>
                                 }
                                 <div class="total">
-                                    <dt>{{ isOpen() ? "Solde attendu" : "Solde final" }}</dt>
+                                    <dt>Solde attendu</dt>
                                     <dd>{{ cash.balance | fcfa }}</dd>
                                 </div>
                             </dl>
@@ -340,15 +330,22 @@
                                         <dt>Montant compté</dt>
                                         <dd>{{ session.value().actual_amount | fcfa }}</dd>
                                     </div>
-                                    <div>
-                                        <dt>Écart</dt>
-                                        <dd
-                                            [class.in]="session.value().difference! > 0"
-                                            [class.out]="session.value().difference! < 0"
-                                        >
-                                            {{ session.value().difference | fcfa: true }}
-                                        </dd>
-                                    </div>
+                                    @if (session.value().difference === 0) {
+                                        <div>
+                                            <dt>Écart</dt>
+                                            <dd>Aucun</dd>
+                                        </div>
+                                    } @else {
+                                        <div>
+                                            <dt>Écart</dt>
+                                            <dd
+                                                [class.in]="session.value().difference! > 0"
+                                                [class.out]="session.value().difference! < 0"
+                                            >
+                                                {{ session.value().difference | fcfa: true }}
+                                            </dd>
+                                        </div>
+                                    }
                                 </dl>
                                 @if (session.value().closing_note; as note) {
                                     <p class="note closing-note">Explication : {{ note }}</p>

@@ -87,7 +87,14 @@ describe("OpenCashDialog", () => {
         await clickSubmit();
 
         httpMock.expectNone("/api/cash_sessions/open");
-        expect(el.textContent).toContain("Le montant doit être positif ou nul.");
+        expect(el.textContent).toContain("Le montant doit être un nombre entier, positif ou nul.");
+    });
+
+    it("should refuse an amount with decimals", async () => {
+        await typeAmount("1250.5");
+        await clickSubmit();
+
+        httpMock.expectNone("/api/cash_sessions/open");
     });
 
     it("should close when clicking the backdrop but not inside the form", async () => {

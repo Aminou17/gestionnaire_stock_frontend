@@ -93,7 +93,7 @@ export class SettingsShop implements HasUnsavedChanges {
         this.form.disable({ emitEvent: false });
 
         // le backend remplace toute la fiche : on renvoie le message du ticket lu au chargement
-        // (un seul propriétaire modifie ces réglages, le risque de conflit est accepté)
+        // (un seul administrateur modifie ces réglages, le risque de conflit est accepté)
         const input = {
             ...this.form.getRawValue(),
             receiptFooter: this.settings.value().receipt_footer ?? "",

@@ -52,7 +52,7 @@ describe("CashSessions", () => {
                             email: "y@test.com",
                             role: "admin",
                         }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(0) } },

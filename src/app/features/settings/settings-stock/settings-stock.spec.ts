@@ -43,7 +43,7 @@ describe("SettingsStock", () => {
                     useValue: {
                         isAdmin: signal(true),
                         user: signal({ id: 1, name: "Admin", email: "a@t.com", role: "admin" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],

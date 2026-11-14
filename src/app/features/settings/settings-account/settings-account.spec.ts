@@ -28,7 +28,7 @@ describe("SettingsAccount", () => {
                     useValue: {
                         user,
                         isAdmin: signal(false),
-                        roleLabel: signal("Gérant"),
+                        roleLabel: signal("Employé"),
                         updateProfile,
                     },
                 },
@@ -59,7 +59,7 @@ describe("SettingsAccount", () => {
 
         expect(field("name").value).toBe("Awa Traoré");
         expect(field("email").value).toBe("awa@test.com");
-        expect(el.textContent).toContain("Gérant");
+        expect(el.textContent).toContain("Employé");
     });
 
     it("should save the profile with the email in lowercase", async () => {

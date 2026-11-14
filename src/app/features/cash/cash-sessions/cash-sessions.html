@@ -1,11 +1,31 @@
-<app-page-header
-    title="Historique des caisses"
-    section="Caisse"
-    back="/cash"
-    backLabel="Retour à la caisse"
-/>
+<app-page-header title="Historique des caisses" />
+<app-cash-tabs />
 
 <section class="card list-card">
+    <app-period-filter [chips]="true" (changed)="selectRange($event)">
+        @for (chip of statusChips; track chip.label) {
+            <button
+                type="button"
+                class="chip"
+                [attr.aria-pressed]="status() === chip.value"
+                (click)="selectStatus(chip.value)"
+            >
+                {{ chip.label }}
+            </button>
+        }
+
+        <app-export-menu
+            variant="chip"
+            [busy]="exporting()"
+            [disabled]="list().length === 0"
+            (picked)="exportFile($event)"
+        />
+    </app-period-filter>
+
+    @if (exportError()) {
+        <div class="alert alert-error" role="alert">{{ exportError() }}</div>
+    }
+
     @if (firstLoad()) {
         <div class="loading">
             @for (i of [1, 2, 3, 4, 5]; track i) {
@@ -20,7 +40,13 @@
             </button>
         </div>
     } @else if (list().length === 0) {
-        <div class="empty">Aucune caisse n'a encore été ouverte.</div>
+        <div class="empty">
+            {{
+                filtered()
+                    ? "Aucune caisse ne correspond à ces filtres."
+                    : "Aucune caisse n'a encore été ouverte."
+            }}
+        </div>
     } @else {
         <p class="count muted">{{ total() }} caisse{{ total() > 1 ? "s" : "" }}</p>
 
@@ -30,7 +56,7 @@
                     <tr>
                         <th>Date</th>
                         <th>Caisse de</th>
-                        <th class="num">Fond de caisse</th>
+                        <th class="num">Fonds de départ</th>
                         <th class="num">Attendu</th>
                         <th class="num">Compté</th>
                         <th class="num">Écart</th>
@@ -101,7 +127,7 @@
                     </div>
                     <div class="line">
                         <span class="meta muted"
-                            >{{ session.opened_by_name ?? "—" }} · Fond
+                            >{{ session.opened_by_name ?? "—" }} · Départ
                             {{ session.opening_amount | fcfa }}</span
                         >
                         @if (session.difference !== null) {

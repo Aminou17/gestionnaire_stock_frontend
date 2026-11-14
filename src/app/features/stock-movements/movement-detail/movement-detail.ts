@@ -7,14 +7,18 @@ import { AuthService } from "../../../core/auth/auth.service";
 import {
     MOVEMENT_TYPES,
     StockMovement,
+    adjustmentReasonLabel,
     isInventoryMovement,
+    isManualMovement,
     isOutgoingMovement,
+    saleId,
 } from "../../../core/stock/stock-movement.model";
+import { Icon } from "../../../shared/icon/icon";
 
 // Fenêtre de détail d'un mouvement, utilisée par la liste et par la fiche produit
 @Component({
     selector: "app-movement-detail",
-    imports: [RouterLink, DatePipe, DecimalPipe],
+    imports: [RouterLink, DatePipe, DecimalPipe, Icon],
     templateUrl: "./movement-detail.html",
     styleUrl: "./movement-detail.css",
 })
@@ -22,6 +26,9 @@ export class MovementDetail {
     protected auth = inject(AuthService);
     protected types = MOVEMENT_TYPES;
     protected isInventory = isInventoryMovement;
+    protected isManual = isManualMovement;
+    protected reasonLabel = adjustmentReasonLabel;
+    protected saleId = saleId;
 
     movement = input<StockMovement | null>(null);
     backState = input.required<BackState>();
@@ -34,13 +41,6 @@ export class MovementDetail {
         const change = isOutgoingMovement(movement) ? -movement.quantity : movement.quantity;
         return movement.stock_after - change;
     });
-
-    // une entrée ne mène nulle part : la page des entrées n'a pas de fiche
-    saleId(movement: StockMovement) {
-        return movement.type === "ENTRY" || isInventoryMovement(movement)
-            ? null
-            : movement.reference_id;
-    }
 
     show() {
         this.dialog().nativeElement.showModal();

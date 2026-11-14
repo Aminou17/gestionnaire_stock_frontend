@@ -11,7 +11,6 @@ app-page-header {
     display: grid;
     gap: 16px;
     width: 100%;
-    max-width: 960px;
 }
 
 .main,
@@ -183,5 +182,47 @@ app-page-header {
 @media print {
     .explain {
         display: none;
+    }
+}
+
+.steps {
+    display: grid;
+}
+
+.step {
+    padding-top: 12px;
+}
+
+.step + .step {
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+}
+
+.step-title {
+    margin-bottom: 2px;
+    color: var(--text);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.step .pending {
+    margin: 0;
+    padding: 8px 0 12px;
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .step + .step {
+        margin-top: 0;
+        padding-left: 24px;
+        border-top: 0;
+        border-left: 1px solid var(--border);
     }
 }

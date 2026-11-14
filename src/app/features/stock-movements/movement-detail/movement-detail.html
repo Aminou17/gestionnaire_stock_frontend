@@ -1,11 +1,24 @@
-<dialog #dialog class="detail" (click)="onBackdrop($event)">
+<dialog #dialog class="detail" aria-labelledby="movement-title" (click)="onBackdrop($event)">
     @if (movement(); as movement) {
         <div class="detail-body">
             <div class="detail-head">
-                <h2>Mouvement n° {{ movement.id }}</h2>
+                <h2 id="movement-title">Mouvement n° {{ movement.id }}</h2>
                 <span class="badge badge-{{ types[movement.type].tone }}">{{
                     types[movement.type].label
                 }}</span>
+            </div>
+
+            <div class="change">
+                <div class="change-qty" [class.minus]="types[movement.type].sign === '−'">
+                    <strong>{{ types[movement.type].sign }}{{ movement.quantity | number }}</strong>
+                    <small>{{ movement.quantity > 1 ? "unités" : "unité" }}</small>
+                </div>
+                <div class="change-stock" role="group" aria-label="Stock avant et après">
+                    <span>{{ stockBefore() | number }}</span>
+                    <app-icon name="chevron-right" [size]="16" />
+                    <strong>{{ movement.stock_after | number }}</strong>
+                    <small>en stock</small>
+                </div>
             </div>
 
             <dl>
@@ -24,58 +37,43 @@
                     <dt>Date</dt>
                     <dd>{{ movement.created_at | date: "d MMMM y 'à' HH:mm" }}</dd>
                 </div>
-                <div>
-                    <dt>Quantité</dt>
-                    <dd class="strong">
-                        {{ types[movement.type].sign }}{{ movement.quantity | number }}
-                    </dd>
-                </div>
-                <div>
-                    <dt>Stock avant</dt>
-                    <dd>{{ stockBefore() | number }}</dd>
-                </div>
-                <div>
-                    <dt>Stock après</dt>
-                    <dd class="strong">{{ movement.stock_after | number }}</dd>
-                </div>
                 @if (auth.isAdmin() && movement.user_name) {
                     <div>
                         <dt>Par</dt>
                         <dd>{{ movement.user_name }}</dd>
                     </div>
                 }
-                <div>
-                    <dt>Origine</dt>
-                    <dd>
-                        @if (saleId(movement); as id) {
-                            <a
-                                [routerLink]="['/sales', id]"
-                                [state]="backState()"
-                                class="sale-link"
-                                >{{
-                                    movement.type === "SALE"
-                                        ? "Vente #" + id
-                                        : "Remboursement de la vente #" + id
-                                }}</a
+                @if (saleId(movement); as id) {
+                    <div>
+                        <dt>Origine</dt>
+                        <dd>
+                            <a [routerLink]="['/sales', id]" [state]="backState()" class="sale-link"
+                                >Vente #{{ id }}</a
                             >
-                        } @else if (isInventory(movement)) {
+                        </dd>
+                    </div>
+                } @else if (isInventory(movement)) {
+                    <div>
+                        <dt>Origine</dt>
+                        <dd>
                             <a
                                 [routerLink]="['/inventories', movement.reference_id]"
                                 [state]="backState()"
                                 class="sale-link"
                                 >Inventaire #{{ movement.reference_id }}</a
                             >
-                        } @else if (movement.type === "ENTRY") {
-                            Entrée de stock
-                        } @else {
-                            <span class="muted">Vente d'un autre vendeur</span>
-                        }
-                    </dd>
-                </div>
+                        </dd>
+                    </div>
+                } @else if (isManual(movement)) {
+                    <div>
+                        <dt>Motif</dt>
+                        <dd>{{ reasonLabel(movement) }}</dd>
+                    </div>
+                }
             </dl>
 
             <div class="detail-actions">
-                <button type="button" class="btn btn-outline" (click)="close()">Fermer</button>
+                <button type="button" class="btn btn-primary" (click)="close()">Fermer</button>
             </div>
         </div>
     }

@@ -12,16 +12,16 @@ import { SettingsExport } from "./settings-export";
 describe("SettingsExport", () => {
     let fixture: ComponentFixture<SettingsExport>;
     let el: HTMLElement;
-    let productsCsv: ReturnType<typeof vi.fn>;
-    let salesCsv: ReturnType<typeof vi.fn>;
-    let exportCsv: ReturnType<typeof vi.fn>;
+    let productsFile: ReturnType<typeof vi.fn>;
+    let salesFile: ReturnType<typeof vi.fn>;
+    let exportFile: ReturnType<typeof vi.fn>;
     let click: ReturnType<typeof vi.fn>;
 
     async function render(salesError?: HttpErrorResponse) {
         const file = new Blob(["a;b"]);
-        productsCsv = vi.fn(() => of(file));
-        salesCsv = vi.fn(() => (salesError ? throwError(() => salesError) : of(file)));
-        exportCsv = vi.fn(() => of(file));
+        productsFile = vi.fn(() => of(file));
+        salesFile = vi.fn(() => (salesError ? throwError(() => salesError) : of(file)));
+        exportFile = vi.fn(() => of(file));
 
         // jsdom ne sait pas créer d'adresse de fichier ni cliquer sur un lien de téléchargement
         URL.createObjectURL = vi.fn(() => "blob:test");
@@ -32,14 +32,14 @@ describe("SettingsExport", () => {
             imports: [SettingsExport],
             providers: [
                 provideRouter([]),
-                { provide: ExportService, useValue: { productsCsv, salesCsv } },
-                { provide: StockMovementService, useValue: { exportCsv } },
+                { provide: ExportService, useValue: { productsFile, salesFile } },
+                { provide: StockMovementService, useValue: { exportFile } },
                 {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
                         user: signal({ id: 1, name: "Admin", email: "a@t.com", role: "admin" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -50,14 +50,23 @@ describe("SettingsExport", () => {
         await fixture.whenStable();
     }
 
-    const buttons = () => [...el.querySelectorAll<HTMLButtonElement>(".export-item > .btn")];
+    const menus = () => [...el.querySelectorAll<HTMLElement>(".export-item > app-export-menu")];
+
+    // ouvre le menu de la ligne puis choisit le format
+    function pick(index: number, format: "pdf" | "csv" = "pdf") {
+        menus()[index].querySelector<HTMLButtonElement>(".trigger")!.click();
+        fixture.detectChanges();
+        menus()
+            [index].querySelectorAll<HTMLButtonElement>(".item")
+            [format === "pdf" ? 0 : 1].click();
+    }
 
     afterEach(() => vi.restoreAllMocks());
 
     it("should offer the three exports", async () => {
         await render();
 
-        expect(buttons()).toHaveLength(3);
+        expect(menus()).toHaveLength(3);
         expect(el.textContent).toContain("Produits");
         expect(el.textContent).toContain("Ventes");
         expect(el.textContent).toContain("Mouvements de stock");
@@ -66,40 +75,38 @@ describe("SettingsExport", () => {
     it("should download the products", async () => {
         await render();
 
-        buttons()[0].click();
+        pick(0);
         await fixture.whenStable();
 
-        expect(productsCsv).toHaveBeenCalled();
+        expect(productsFile).toHaveBeenCalled();
         expect(click).toHaveBeenCalled();
     });
 
     it("should export every sale when no period is chosen", async () => {
         await render();
 
-        buttons()[1].click();
+        pick(1, "csv");
         await fixture.whenStable();
 
-        expect(salesCsv).toHaveBeenCalledWith(null, null);
+        expect(salesFile).toHaveBeenCalledWith(null, null, "csv");
     });
 
     it("should download the stock movements without any filter", async () => {
         await render();
 
-        buttons()[2].click();
+        pick(2);
         await fixture.whenStable();
 
-        expect(exportCsv).toHaveBeenCalledWith({
-            from: null,
-            to: null,
-            type: null,
-            productId: null,
-        });
+        expect(exportFile).toHaveBeenCalledWith(
+            { from: null, to: null, type: null, productId: null },
+            "pdf",
+        );
     });
 
     it("should tell the owner to reduce the period when there are too many sales", async () => {
         await render(new HttpErrorResponse({ status: 413 }));
 
-        buttons()[1].click();
+        pick(1);
         await fixture.whenStable();
 
         expect(el.textContent).toContain("réduisez la période");
@@ -109,7 +116,7 @@ describe("SettingsExport", () => {
     it("should show a generic error under the failing export only", async () => {
         await render(new HttpErrorResponse({ status: 500 }));
 
-        buttons()[1].click();
+        pick(1);
         await fixture.whenStable();
 
         const alerts = el.querySelectorAll(".export-alert");

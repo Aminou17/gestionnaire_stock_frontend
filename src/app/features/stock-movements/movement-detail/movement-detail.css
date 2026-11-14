@@ -2,10 +2,16 @@
     width: min(440px, calc(100% - 32px));
     padding: 0;
     border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border-radius: 16px;
     background: var(--surface);
     color: var(--text);
     box-shadow: var(--shadow-dialog);
+}
+
+/* le focus automatique de la fenêtre ne doit pas dessiner de contour */
+.detail:focus,
+.detail:focus-visible {
+    outline: none;
 }
 
 .detail::backdrop {
@@ -14,8 +20,8 @@
 
 .detail-body {
     display: grid;
-    gap: 8px;
-    padding: 24px;
+    gap: 16px;
+    padding: 16px;
 }
 
 .detail-head {
@@ -27,7 +33,69 @@
 
 .detail h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
+}
+
+/* la variation en grand, et le stock avant puis après */
+.change {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-hover);
+}
+
+.change-qty {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+}
+
+.change-qty strong {
+    color: var(--success);
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.change-qty.minus strong {
+    color: var(--danger);
+}
+
+.change small {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.change-stock {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    justify-items: center;
+    gap: 2px 8px;
+    font-variant-numeric: tabular-nums;
+}
+
+.change-stock span {
+    color: var(--text-muted);
+    font-size: 16px;
+}
+
+.change-stock app-icon {
+    color: var(--text-muted);
+}
+
+.change-stock strong {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.change-stock small {
+    grid-column: 1 / -1;
 }
 
 .detail dl {
@@ -42,6 +110,10 @@
     border-bottom: 1px solid var(--border);
 }
 
+.detail dl > div:last-child {
+    border-bottom: 0;
+}
+
 .detail dt {
     flex-shrink: 0;
     color: var(--text-muted);
@@ -54,23 +126,13 @@
     margin: 0;
     overflow-wrap: anywhere;
     text-align: right;
+    font-size: 14px;
     font-variant-numeric: tabular-nums;
 }
 
-.detail .strong {
-    font-weight: 700;
-}
-
-.detail-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 8px;
-}
-
-@media (max-width: 767px) {
-    .detail-actions .btn {
-        width: 100%;
-    }
+.detail-actions .btn {
+    width: 100%;
+    min-height: 44px;
 }
 
 .sale-link {

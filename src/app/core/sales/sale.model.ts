@@ -18,7 +18,7 @@ export interface NewSalePayment {
     secondPayment?: {
         paymentMethod: PaymentMethod;
         amountPaid: number;
-        };
+    };
 }
 
 export interface Sale {
@@ -26,6 +26,8 @@ export interface Sale {
     user_id: number;
     user_name: string | null;
     user_role: "admin" | "manager" | null;
+    // seulement sur la fiche d'une vente
+    user_avatar?: string | null;
     total: number;
     payment_method?: PaymentMethod;
     customer_name?: string | null;

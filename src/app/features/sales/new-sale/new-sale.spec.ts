@@ -97,7 +97,7 @@ describe("NewSale", () => {
                             email: "a@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
-                        roleLabel: signal(isAdmin ? "Propriétaire" : "Gérant"),
+                        roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                     },
                 },
             ],
@@ -127,8 +127,18 @@ describe("NewSale", () => {
         await fixture.whenStable();
 
         expect(el.querySelector(".total")!.textContent!.replace(/\s/g, " ")).toContain("3 000 F");
-        expect(results()[0].disabled).toBe(true);
+        expect(results()[0].classList).toContain("in-cart");
         expect(submitBtn().disabled).toBe(false);
+    });
+
+    it("should remove the product when its tile is clicked again", async () => {
+        await render();
+        await add(0);
+        expect(el.querySelectorAll(".line").length).toBe(1);
+
+        await add(0);
+        expect(el.querySelectorAll(".line").length).toBe(0);
+        expect(results()[0].classList).not.toContain("in-cart");
     });
 
     it("should not let an out of stock product be added", async () => {
@@ -142,7 +152,7 @@ describe("NewSale", () => {
         await add(0);
         await add(1);
 
-        const price = el.querySelector<HTMLInputElement>(".price-field input")!;
+        const price = el.querySelector<HTMLInputElement>(".price-input")!;
         price.value = "9000";
         price.dispatchEvent(new Event("change"));
         await fixture.whenStable();
@@ -162,7 +172,7 @@ describe("NewSale", () => {
         await render();
         await add(1);
 
-        const price = el.querySelector<HTMLInputElement>(".price-field input")!;
+        const price = el.querySelector<HTMLInputElement>(".price-input")!;
         price.value = "8000";
         price.dispatchEvent(new Event("change"));
         await fixture.whenStable();

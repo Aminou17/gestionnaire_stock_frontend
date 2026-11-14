@@ -78,7 +78,7 @@ describe("UserPage", () => {
                     useValue: {
                         isAdmin: signal(true),
                         user: signal({ id: 1, name: "Awa", email: "awa@test.com", role: "admin" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -99,7 +99,7 @@ describe("UserPage", () => {
         await render();
 
         expect(text()).toContain("Moussa Traoré");
-        expect(text()).toContain("Gérant");
+        expect(text()).toContain("Employé");
         expect(text()).toContain("moussa@test.com");
         expect(text()).toContain("Jamais connecté");
         expect(text()).toContain("Vente enregistrée");

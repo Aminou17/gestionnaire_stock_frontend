@@ -1,9 +1,4 @@
-<a routerLink="/sales" class="back">
-    <app-icon name="chevron-left" [size]="18" />
-    Ventes
-</a>
-
-<app-page-header title="Nouvelle vente" section="Ventes" />
+<app-page-header title="Nouvelle vente" [back]="back.link" [backLabel]="back.label" />
 
 @if (cash.error()) {
     <div class="alert alert-error banner" role="alert">
@@ -16,6 +11,9 @@
         <app-icon name="alert" />
         @if (cashClosedToday()) {
             <span>Votre caisse du jour est clôturée : les ventes reprennent demain.</span>
+            @if (auth.isAdmin()) {
+                <button type="button" class="link-btn" (click)="reopen()">Rouvrir la caisse</button>
+            }
         } @else {
             <span>Votre caisse est fermée : ouvrez-la pour enregistrer une vente.</span>
             <a routerLink="/cash">Ouvrir la caisse</a>
@@ -29,21 +27,41 @@
             <h2>Produits</h2>
         </div>
 
-        <label class="search">
-            <app-icon name="search" [size]="18" />
-            <input
-                class="input"
-                type="search"
-                placeholder="Rechercher un produit…"
-                aria-label="Rechercher un produit"
-                (input)="onSearch($any($event.target).value)"
-            />
-        </label>
+        <div class="toolbar">
+            <label class="search">
+                <app-icon name="search" [size]="18" />
+                <input
+                    class="input"
+                    type="search"
+                    placeholder="Rechercher…"
+                    aria-label="Rechercher un produit"
+                    (input)="onSearch($any($event.target).value)"
+                />
+            </label>
+
+            @if (categoryChips().length > 1) {
+                <label class="category">
+                    <span class="sr-only">Catégorie</span>
+                    <select
+                        class="chip"
+                        [class.active]="categoryId() !== null"
+                        (change)="selectCategory($any($event.target).value)"
+                    >
+                        <option value="">Catégorie</option>
+                        @for (category of categoryChips(); track category.id) {
+                            <option [value]="category.id">{{ category.name }}</option>
+                        }
+                    </select>
+                </label>
+            }
+        </div>
 
         @if (products.isLoading() && results().length === 0) {
-            @for (i of [1, 2, 3, 4]; track i) {
-                <div class="skeleton row-skeleton"></div>
-            }
+            <div class="tiles">
+                @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                    <div class="skeleton tile-skeleton"></div>
+                }
+            </div>
         } @else if (products.error()) {
             <div class="empty">
                 Impossible de charger les produits.
@@ -52,41 +70,39 @@
                 </button>
             </div>
         } @else {
-            <ul class="results" [class.reloading]="products.isLoading()">
+            <ul class="tiles" [class.reloading]="products.isLoading()">
                 @for (product of results(); track product.id) {
                     <li>
                         <button
                             type="button"
                             class="result"
-                            [disabled]="product.theoretical_stock <= 0 || inCart(product)"
-                            (click)="addProduct(product)"
+                            [attr.title]="product.name"
+                            [attr.aria-pressed]="inCart(product)"
+                            [class.in-cart]="inCart(product)"
+                            [disabled]="product.theoretical_stock <= 0"
+                            (click)="toggleProduct(product)"
                         >
-                            <span class="result-text">
-                                <strong>{{ product.name }}</strong>
-                                <small class="muted">
-                                    {{ product.category_name }} · Stock
-                                    <span class="stock-{{ product.stock_status }}">{{
-                                        product.theoretical_stock
-                                    }}</span>
-                                </small>
-                            </span>
-                            <span class="result-price">
-                                <strong>{{ product.sale_price | fcfa }}</strong>
-                                @if (product.pricing_mode === "NEGOTIABLE") {
-                                    <span class="badge badge-violet"
-                                        >Min. {{ minPrice(product) | fcfa }}</span
-                                    >
+                            <strong class="result-name">{{ product.name }}</strong>
+                            @if (product.theoretical_stock > 0 && product.stock_status !== "OK") {
+                                <small class="stock"
+                                    >Plus que {{ product.theoretical_stock }}</small
+                                >
+                            }
+                            <span class="result-foot">
+                                <strong class="result-price">{{
+                                    product.sale_price | fcfa
+                                }}</strong>
+                                @if (product.theoretical_stock <= 0) {
+                                    <span class="badge badge-danger">Rupture</span>
+                                } @else {
+                                    <span class="add" aria-hidden="true">
+                                        <app-icon
+                                            [name]="inCart(product) ? 'check' : 'plus'"
+                                            [size]="16"
+                                        />
+                                    </span>
                                 }
                             </span>
-                            @if (product.theoretical_stock <= 0) {
-                                <span class="badge badge-danger">Rupture</span>
-                            } @else if (inCart(product)) {
-                                <span class="badge badge-primary">Ajouté</span>
-                            } @else {
-                                <span class="add" aria-hidden="true"
-                                    ><app-icon name="plus" [size]="18"
-                                /></span>
-                            }
                         </button>
                     </li>
                 } @empty {
@@ -101,7 +117,7 @@
             </ul>
             @if (moreResults()) {
                 <p class="more-hint muted">
-                    Seuls les 20 premiers produits sont affichés : précisez la recherche.
+                    Seuls les 24 premiers produits sont affichés : précisez la recherche.
                 </p>
             }
         }
@@ -127,7 +143,17 @@
                 @for (line of cart(); track line.product.id) {
                     <li class="line">
                         <div class="line-head">
-                            <strong>{{ line.product.name }}</strong>
+                            <span class="line-name">
+                                <strong>{{ line.product.name }}</strong>
+                                @if (lineError(line); as message) {
+                                    <small class="field-error" role="alert">{{ message }}</small>
+                                } @else if (line.product.pricing_mode === "NEGOTIABLE") {
+                                    <small class="muted"
+                                        >Prix entre {{ minPrice(line.product) | fcfa }} et
+                                        {{ line.product.sale_price | fcfa }}</small
+                                    >
+                                }
+                            </span>
                             <button
                                 type="button"
                                 class="icon-btn"
@@ -168,21 +194,18 @@
                             </div>
 
                             @if (line.product.pricing_mode === "NEGOTIABLE") {
-                                <label class="price-field">
-                                    <span class="muted">Prix unitaire</span>
-                                    <input
-                                        class="input"
-                                        type="number"
-                                        inputmode="numeric"
-                                        [min]="minPrice(line.product)"
-                                        [max]="line.product.sale_price"
-                                        [value]="line.unitPrice"
-                                        step="1"
-                                        [class.invalid]="!!lineError(line)"
-                                        [attr.aria-label]="'Prix unitaire de ' + line.product.name"
-                                        (change)="onPriceChange(line, $any($event.target))"
-                                    />
-                                </label>
+                                <input
+                                    class="input price-input"
+                                    type="number"
+                                    inputmode="numeric"
+                                    [min]="minPrice(line.product)"
+                                    [max]="line.product.sale_price"
+                                    [value]="line.unitPrice"
+                                    step="1"
+                                    [class.invalid]="!!lineError(line)"
+                                    [attr.aria-label]="'Prix unitaire de ' + line.product.name"
+                                    (change)="onPriceChange(line, $any($event.target))"
+                                />
                             } @else {
                                 <span class="muted unit">× {{ line.unitPrice | fcfa }}</span>
                             }
@@ -191,15 +214,6 @@
                                 line.quantity * line.unitPrice | fcfa
                             }}</strong>
                         </div>
-
-                        @if (lineError(line); as message) {
-                            <small class="field-error" role="alert">{{ message }}</small>
-                        } @else if (line.product.pricing_mode === "NEGOTIABLE") {
-                            <small class="muted hint"
-                                >Entre {{ minPrice(line.product) | fcfa }} et
-                                {{ line.product.sale_price | fcfa }}</small
-                            >
-                        }
                     </li>
                 }
             </ul>
@@ -348,7 +362,7 @@
                                 (input)="onReceivedChange(received)"
                             />
                         </label>
-                        <div class="chips" aria-label="Montants rapides">
+                        <div class="chips" role="group" aria-label="Montants rapides">
                             @for (amount of cashSuggestions(); track amount) {
                                 <button
                                     type="button"
@@ -384,8 +398,8 @@
                             </div>
                         } @else {
                             <small class="muted hint"
-                                >Indiquez la part en espèces : le reste du total sera payé en
-                                mobile money.</small
+                                >Indiquez la part en espèces : le reste du total sera payé en mobile
+                                money.</small
                             >
                         }
                     }
@@ -401,6 +415,11 @@
                             <a routerLink="/cash">Ouvrir la caisse</a>
                         }
                     </span>
+                    @if (cashClosedToday() && auth.isAdmin()) {
+                        <button type="button" class="link-btn" (click)="reopen()">
+                            Rouvrir la caisse
+                        </button>
+                    }
                 </p>
             }
             <button
@@ -431,3 +450,5 @@
         </button>
     </div>
 }
+
+<app-reopen-cash-dialog #reopenCash (reopened)="cash.reload()" />

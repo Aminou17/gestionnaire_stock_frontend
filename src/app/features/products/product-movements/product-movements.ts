@@ -9,7 +9,9 @@ import { MovementDetail } from "../../stock-movements/movement-detail/movement-d
 import {
     MOVEMENT_TYPES,
     StockMovement,
+    adjustmentReasonLabel,
     isInventoryMovement,
+    isManualMovement,
 } from "../../../core/stock/stock-movement.model";
 import { StockMovementService } from "../../../core/stock/stock-movement.service";
 
@@ -33,6 +35,8 @@ export class ProductMovements {
 
     protected types = MOVEMENT_TYPES;
     protected isInventory = isInventoryMovement;
+    protected isManual = isManualMovement;
+    protected reasonLabel = adjustmentReasonLabel;
 
     private detailDialog = viewChild.required<MovementDetail>("detail");
     selected = signal<StockMovement | null>(null);
@@ -51,9 +55,13 @@ export class ProductMovements {
                 type: null,
                 productId: params,
                 page: 1,
-                limit: 5,
+                limit: 3,
             }),
     });
+
+    reload() {
+        this.movements.reload();
+    }
 
     list = computed(() => (this.movements.hasValue() ? this.movements.value().data : []));
     total = computed(() => (this.movements.hasValue() ? this.movements.value().total : 0));

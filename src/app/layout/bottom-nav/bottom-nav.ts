@@ -1,6 +1,7 @@
 import { Component, inject } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
+import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { Icon } from "../../shared/icon/icon";
 import { LayoutService } from "../layout.service";
 
@@ -13,11 +14,12 @@ import { LayoutService } from "../layout.service";
 })
 export class BottomNav {
     protected layout = inject(LayoutService);
+    protected alerts = inject(LowStockAlertService);
 
-    links = [
+    // "Vendre" est au milieu : c'est l'action la plus fréquente
+    left = [
         { label: "Accueil", path: "/dashboard", icon: "dashboard" },
-        { label: "Ventes", path: "/sales", icon: "cart" },
         { label: "Produits", path: "/products", icon: "box" },
-        { label: "Caisse", path: "/cash", icon: "banknote" },
     ] as const;
+    right = [{ label: "Caisse", path: "/cash", icon: "banknote" }] as const;
 }

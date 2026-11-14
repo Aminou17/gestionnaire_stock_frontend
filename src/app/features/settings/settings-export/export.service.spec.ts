@@ -19,24 +19,26 @@ describe("ExportService", () => {
     afterEach(() => httpMock.verify());
 
     it("should download the products as a file", () => {
-        service.productsCsv().subscribe();
+        service.productsFile("pdf").subscribe();
 
-        const req = httpMock.expectOne("/api/exports/products");
+        const req = httpMock.expectOne((r) => r.url === "/api/exports/products");
+        expect(req.request.params.get("format")).toBe("pdf");
         expect(req.request.responseType).toBe("blob");
         req.flush(new Blob(["a"]));
     });
 
     it("should send the period only when it is set", () => {
-        service.salesCsv("2026-11-01", "2026-11-12").subscribe();
+        service.salesFile("2026-11-01", "2026-11-12", "csv").subscribe();
         const withPeriod = httpMock.expectOne(
             (r) => r.url === "/api/exports/sales" && r.params.get("startDate") === "2026-11-01",
         );
         expect(withPeriod.request.params.get("endDate")).toBe("2026-11-12");
+        expect(withPeriod.request.params.get("format")).toBe("csv");
         withPeriod.flush(new Blob(["a"]));
 
-        service.salesCsv(null, null).subscribe();
-        const all = httpMock.expectOne("/api/exports/sales");
-        expect(all.request.params.keys()).toEqual([]);
+        service.salesFile(null, null, "pdf").subscribe();
+        const all = httpMock.expectOne((r) => r.url === "/api/exports/sales");
+        expect(all.request.params.keys()).toEqual(["format"]);
         all.flush(new Blob(["a"]));
     });
 });

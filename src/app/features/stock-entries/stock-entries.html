@@ -102,6 +102,13 @@
             reçue{{ (counters()?.units ?? 0) > 1 ? "s" : "" }}
         </p>
 
+        @if (notice()) {
+            <div class="alert alert-success" role="status">{{ notice() }}</div>
+        }
+        @if (correctError()) {
+            <div class="alert alert-error" role="alert">{{ correctError() }}</div>
+        }
+
         <div class="table-wrap">
             <table [class.reloading]="entries.isLoading() && page() === 1">
                 <thead>
@@ -111,6 +118,7 @@
                         <th>Fournisseur</th>
                         <th class="num">Quantité</th>
                         <th>Par</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -126,6 +134,7 @@
                             <td>
                                 <a
                                     [routerLink]="['/products', entry.product_id]"
+                                    [state]="backState()"
                                     class="product-link"
                                     >{{ entry.product_name }}</a
                                 >
@@ -133,6 +142,11 @@
                             <td>{{ entry.supplier_name }}</td>
                             <td class="num quantity">+{{ entry.quantity }}</td>
                             <td class="muted">{{ entry.user_name }}</td>
+                            <td class="correct-cell">
+                                <button type="button" class="correct-btn" (click)="correct(entry)">
+                                    Corriger
+                                </button>
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -144,9 +158,12 @@
             @for (entry of list(); track entry.id) {
                 <li class="entry-card">
                     <div class="line">
-                        <a [routerLink]="['/products', entry.product_id]" class="product-link">{{
-                            entry.product_name
-                        }}</a>
+                        <a
+                            [routerLink]="['/products', entry.product_id]"
+                            [state]="backState()"
+                            class="product-link"
+                            >{{ entry.product_name }}</a
+                        >
                         <strong class="quantity">+{{ entry.quantity }}</strong>
                     </div>
                     <span class="meta muted">
@@ -157,6 +174,9 @@
                         }}
                         · {{ entry.supplier_name }}
                     </span>
+                    <button type="button" class="correct-btn" (click)="correct(entry)">
+                        Corriger la quantité
+                    </button>
                 </li>
             }
         </ul>
@@ -189,25 +209,47 @@
     (close)="onClosed()"
 >
     <form class="confirm-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <h2 id="entry-title">Nouvelle entrée de stock</h2>
+        <h2 id="entry-title">{{ product() ? "Ajouter du stock" : "Nouvelle entrée de stock" }}</h2>
 
         <!-- 1. Produit reçu -->
         <div class="field">
-            <span class="field-label">Produit reçu</span>
             @if (product(); as product) {
                 <div class="chosen">
-                    <span>
+                    <span class="thumb">
+                        @if (product.image) {
+                            <img [src]="product.image" alt="" />
+                        } @else {
+                            {{ initials(product.name) }}
+                        }
+                    </span>
+                    <span class="chosen-text">
                         <strong>{{ product.name }}</strong>
-                        <small class="muted"
-                            >{{ product.category_name }} · Stock actuel
-                            {{ product.theoretical_stock }}</small
-                        >
+                        <small class="muted">{{ product.category_name }}</small>
                     </span>
                     <button type="button" class="link-btn" (click)="changeProduct()">
                         Changer
                     </button>
                 </div>
+
+                <!-- stock actuel, entrée et nouveau stock d'un coup d'œil -->
+                <div class="sum" aria-live="polite">
+                    <div>
+                        <span class="sum-label">Actuel</span>
+                        <strong>{{ product.theoretical_stock }}</strong>
+                    </div>
+                    <span class="sum-op" aria-hidden="true">+</span>
+                    <div>
+                        <span class="sum-label">Entrée</span>
+                        <strong>{{ quantity() ?? 0 }}</strong>
+                    </div>
+                    <span class="sum-op" aria-hidden="true">=</span>
+                    <div class="sum-result">
+                        <span class="sum-label">Nouveau stock</span>
+                        <strong>{{ stockAfter() ?? product.theoretical_stock }}</strong>
+                    </div>
+                </div>
             } @else {
+                <span class="field-label">Produit reçu</span>
                 <label class="search">
                     <app-icon name="search" [size]="18" />
                     <input
@@ -222,7 +264,14 @@
                     @for (result of results(); track result.id) {
                         <li>
                             <button type="button" class="result" (click)="chooseProduct(result)">
-                                <strong>{{ result.name }}</strong>
+                                <span class="thumb small">
+                                    @if (result.image) {
+                                        <img [src]="result.image" alt="" />
+                                    } @else {
+                                        {{ initials(result.name) }}
+                                    }
+                                </span>
+                                <strong class="result-name">{{ result.name }}</strong>
                                 <small class="muted">Stock {{ result.theoretical_stock }}</small>
                             </button>
                         </li>
@@ -340,24 +389,51 @@
         }
 
         <!-- 3. Quantité -->
-        <label class="field">
-            <span class="field-label">Quantité reçue</span>
-            <input
-                class="input"
-                type="number"
-                inputmode="numeric"
-                min="1"
-                step="1"
-                formControlName="quantity"
-                placeholder="Ex. 20"
-                [class.invalid]="form.controls.quantity.touched && form.controls.quantity.invalid"
-            />
+        <div class="field">
+            <label class="field-label" for="entry-quantity">Quantité reçue</label>
+            <div class="stepper">
+                <button
+                    type="button"
+                    class="step-btn"
+                    aria-label="Une de moins"
+                    [disabled]="(quantity() ?? 0) <= 1"
+                    (click)="addQuantity(-1)"
+                >
+                    <app-icon name="minus" [size]="20" />
+                </button>
+                <input
+                    id="entry-quantity"
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    step="1"
+                    formControlName="quantity"
+                    placeholder="0"
+                    [class.invalid]="
+                        form.controls.quantity.touched && form.controls.quantity.invalid
+                    "
+                />
+                <button
+                    type="button"
+                    class="step-btn"
+                    aria-label="Une de plus"
+                    (click)="addQuantity(1)"
+                >
+                    <app-icon name="plus" [size]="20" />
+                </button>
+            </div>
+            <div class="quick">
+                @for (amount of quickQuantities; track amount) {
+                    <button type="button" class="chip" (click)="addQuantity(amount)">
+                        +{{ amount }}
+                    </button>
+                }
+            </div>
             @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
                 <small class="field-error">Entrez un nombre entier d'au moins 1.</small>
-            } @else if (stockAfter() !== null) {
-                <small class="muted">Stock après l'entrée : {{ stockAfter() }}</small>
             }
-        </label>
+        </div>
 
         @if (formError()) {
             <div class="alert alert-error" role="alert">{{ formError() }}</div>
@@ -376,8 +452,10 @@
                 @if (saving()) {
                     <span class="spinner"></span>
                 }
-                Enregistrer l'entrée
+                {{ quantity() ? "Ajouter " + quantity() + " au stock" : "Enregistrer l'entrée" }}
             </button>
         </div>
     </form>
 </dialog>
+
+<app-adjust-dialog (saved)="onCorrected($event)" />

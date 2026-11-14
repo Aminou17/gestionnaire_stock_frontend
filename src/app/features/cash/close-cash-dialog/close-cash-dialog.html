@@ -1,7 +1,12 @@
-<dialog #dialog (click)="onBackdropClick($event)" (cancel)="onCancel($event)">
+<dialog
+    #dialog
+    aria-labelledby="close-cash-title"
+    (click)="onBackdropClick($event)"
+    (cancel)="onCancel($event)"
+>
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         @if (step() === "count") {
-            <h2>Clôturer la caisse</h2>
+            <h2 id="close-cash-title">Clôturer la caisse</h2>
             <p class="muted">
                 @if (blind()) {
                     Comptez l'argent présent dans le tiroir et indiquez le montant. L'écart vous
@@ -29,7 +34,7 @@
                     class="input"
                     type="number"
                     min="0"
-                    step="500"
+                    step="1"
                     inputmode="numeric"
                     formControlName="actualAmount"
                     (input)="edited.set(true)"
@@ -41,6 +46,11 @@
                     <small class="field-error">Le montant doit être positif ou nul.</small>
                 }
             </label>
+
+            <app-cash-counter
+                #counter
+                (totalChange)="form.controls.actualAmount.setValue($event); edited.set(true)"
+            />
 
             @if (difference() !== null) {
                 <div

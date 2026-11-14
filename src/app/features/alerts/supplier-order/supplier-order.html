@@ -1,0 +1,174 @@
+<app-page-header title="Commander" section="Alertes" [back]="back.link" [backLabel]="back.label" />
+
+@if (supplier.error()) {
+    <section class="card empty">
+        @if (notFound()) {
+            <p>Ce fournisseur est introuvable.</p>
+            <a routerLink="/alerts" class="btn btn-outline btn-sm">Retour aux alertes</a>
+        } @else {
+            <p>Impossible de charger ce fournisseur.</p>
+            <button type="button" class="btn btn-outline btn-sm" (click)="supplier.reload()">
+                Réessayer
+            </button>
+        }
+    </section>
+} @else if (!supplier.hasValue()) {
+    @for (i of [1, 2, 3]; track i) {
+        <div class="skeleton block-skeleton"></div>
+    }
+} @else {
+    @let info = supplier.value();
+
+    <section class="card head">
+        <span class="avatar">{{ initials(info.name) }}</span>
+        <div class="head-text">
+            <strong>{{ info.name }}</strong>
+            <span class="muted">
+                @if (info.contact) {
+                    {{ info.contact }}
+                    @if (info.telephone) {
+                        ·
+                    }
+                }
+                {{ info.telephone }}
+            </span>
+        </div>
+        @if (phone()) {
+            <a class="btn btn-outline btn-sm" [href]="'tel:' + phone()">
+                <app-icon name="phone" [size]="16" />
+                Appeler
+            </a>
+        }
+    </section>
+
+    @if (alerts.hasValue() && items().length === 0) {
+        <section class="card empty">
+            <p>Plus rien à commander chez ce fournisseur.</p>
+            <a routerLink="/alerts" class="btn btn-outline btn-sm">Retour aux alertes</a>
+        </section>
+    } @else if (alerts.hasValue()) {
+        <section class="card">
+            <div class="card-head">
+                <h2>Produits à commander</h2>
+                <span class="muted">{{ chosen().length }} sur {{ items().length }}</span>
+            </div>
+
+            <ul class="lines">
+                @for (row of rows(); track row.alert.id) {
+                    <li [class.off]="!row.selected">
+                        <label class="check">
+                            <input
+                                type="checkbox"
+                                [checked]="row.selected"
+                                [attr.aria-label]="'Commander ' + row.alert.name"
+                                (change)="toggle(row.alert.id)"
+                            />
+                        </label>
+                        <div class="line-text">
+                            <strong>{{ row.alert.name }}</strong>
+                            <span class="muted line-sub">
+                                <span class="state-{{ row.alert.status }}">{{
+                                    row.alert.status === "OUT_OF_STOCK"
+                                        ? "En rupture"
+                                        : "Stock faible"
+                                }}</span>
+                                · en stock {{ row.alert.theoretical_stock }} · seuil
+                                {{ row.alert.min_stock }}
+                            </span>
+                        </div>
+                        <div class="stepper" [class.disabled]="!row.selected">
+                            <button
+                                type="button"
+                                aria-label="Une de moins"
+                                [disabled]="!row.selected || row.quantity <= 1"
+                                (click)="step(row.alert.id, -1)"
+                            >
+                                <app-icon name="minus" [size]="16" />
+                            </button>
+                            <input
+                                type="number"
+                                inputmode="numeric"
+                                min="1"
+                                [value]="row.quantity"
+                                [disabled]="!row.selected"
+                                [attr.aria-label]="'Quantité de ' + row.alert.name"
+                                (change)="setQuantity(row.alert.id, $any($event.target).value)"
+                            />
+                            <button
+                                type="button"
+                                aria-label="Une de plus"
+                                [disabled]="!row.selected"
+                                (click)="step(row.alert.id, 1)"
+                            >
+                                <app-icon name="plus" [size]="16" />
+                            </button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section class="card">
+            <div class="card-head">
+                <h2>Message</h2>
+                @if (edited()) {
+                    <button type="button" class="link-btn" (click)="resetMessage()">
+                        Rétablir
+                    </button>
+                }
+            </div>
+            <textarea
+                class="input"
+                rows="8"
+                aria-label="Message à envoyer"
+                [value]="message()"
+                (input)="editMessage($any($event.target).value)"
+            ></textarea>
+            <p class="hint muted">
+                Relisez et modifiez le texte si besoin. Changer une quantité le recompose.
+            </p>
+        </section>
+
+        @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+        }
+
+        <div class="actions">
+            @if (whatsappUrl(); as url) {
+                <a class="btn btn-primary whatsapp" [href]="url" target="_blank" rel="noopener">
+                    <app-icon name="message" [size]="18" />
+                    Envoyer sur WhatsApp
+                </a>
+            } @else {
+                <button type="button" class="btn btn-primary whatsapp" disabled>
+                    <app-icon name="message" [size]="18" />
+                    Envoyer sur WhatsApp
+                </button>
+                <p class="hint muted">
+                    @if (!phone()) {
+                        Ajoutez le téléphone de ce fournisseur sur
+                        <a [routerLink]="['/suppliers', info.id]">sa fiche</a>
+                        pour envoyer sur WhatsApp.
+                    } @else {
+                        Choisissez au moins un produit.
+                    }
+                </p>
+            }
+            <div class="actions-row">
+                <button type="button" class="btn btn-outline copy" (click)="copy()">
+                    <app-icon [name]="copied() ? 'check' : 'copy'" [size]="16" />
+                    {{ copied() ? "Copié" : "Copier le texte" }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline order-pdf"
+                    [disabled]="orderBusy()"
+                    (click)="downloadOrder('pdf')"
+                >
+                    <app-icon name="download" [size]="16" />
+                    {{ orderBusy() ? "Préparation…" : "Bon de commande" }}
+                </button>
+            </div>
+        </div>
+    }
+}

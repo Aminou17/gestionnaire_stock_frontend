@@ -16,18 +16,19 @@ import { AuthService } from "../../core/auth/auth.service";
 import { getRoleLabel } from "../../core/auth/role-label";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { Avatar } from "../../shared/avatar/avatar";
 import { PasswordDialog } from "./password-dialog/password-dialog";
 import { UserForm } from "./user-form/user-form";
-import { formatDeletion, formatLastLogin, getInitials } from "./user-display";
+import { formatDeletion, formatLastLogin } from "./user-display";
 import { UserAccount } from "./user.model";
 import { UserService } from "./user.service";
 
 type View = "active" | "deleted";
 
-// Page réservée au propriétaire (adminGuard sur la route, 403 côté backend)
+// Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-users",
-    imports: [RouterLink, PageHeader, Icon, UserForm, PasswordDialog],
+    imports: [RouterLink, PageHeader, Icon, Avatar, UserForm, PasswordDialog],
     templateUrl: "./users.html",
     styleUrl: "./users.css",
     host: {
@@ -67,7 +68,6 @@ export class Users {
         );
     });
 
-    protected getInitials = getInitials;
     protected getRoleLabel = getRoleLabel;
 
     toDelete = signal<UserAccount | null>(null);

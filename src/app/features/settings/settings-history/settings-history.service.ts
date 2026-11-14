@@ -13,7 +13,7 @@ interface AuditPage {
     data: SettingsChange[];
 }
 
-// dernière modification d'un réglage, lue dans le journal d'audit (réservé au propriétaire)
+// dernière modification d'un réglage, lue dans le journal d'audit (réservé à l'administrateur)
 @Injectable({ providedIn: "root" })
 export class SettingsHistoryService {
     private http = inject(HttpClient);

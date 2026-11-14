@@ -1,4 +1,8 @@
-<div class="card stat">
+<div class="card stat" [class.clickable]="!!link()">
+    @if (link()) {
+        <a class="cover" [routerLink]="link()" [attr.aria-label]="label()"></a>
+    }
+
     <div class="top">
         <span class="label">{{ label() }}</span>
         <span class="icon tone-{{ iconTone() }}"><app-icon [name]="icon()" [size]="18" /></span>

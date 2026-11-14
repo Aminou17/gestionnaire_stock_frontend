@@ -187,8 +187,6 @@ summary:focus-visible,
     place-items: center;
     background: var(--primary-soft);
     color: var(--primary-text);
-    font-size: 12px;
-    font-weight: 600;
 }
 
 .failed .avatar {

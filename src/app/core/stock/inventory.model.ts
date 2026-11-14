@@ -15,6 +15,8 @@ export interface InventoryItem {
     id: number;
     product_id: number;
     product_name: string;
+    // miniature du produit, absente quand il n'a pas de photo
+    image?: string | null;
     theoretical_stock: number;
     actual_stock: number;
     // stock réel moins stock théorique
@@ -23,6 +25,9 @@ export interface InventoryItem {
 }
 
 export interface InventoryDetail extends Inventory {
+    // photos de profil de l'auteur et de la personne qui a appliqué
+    user_avatar?: string | null;
+    applied_by_avatar?: string | null;
     items: InventoryItem[];
 }
 

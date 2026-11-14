@@ -1,6 +1,7 @@
 header {
     display: flex;
-    align-items: center;
+    /* la cloche reste sur la première ligne, que le titre ait un sous-titre ou non */
+    align-items: flex-start;
     gap: 16px;
     margin-bottom: 24px;
 }
@@ -21,6 +22,7 @@ header {
 .title-row {
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: 2px;
     min-width: 0;
 }
@@ -43,7 +45,7 @@ header {
 
 h1 {
     min-width: 0;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     margin: 0;
     font-size: 28px;
     font-weight: 700;
@@ -64,18 +66,43 @@ h1 {
     margin-left: auto;
     display: flex;
     align-items: center;
+    min-height: 44px;
     gap: 12px;
 }
 
+/* zone de clic de 44px autour d'une photo de 36px */
+.me {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+}
+
+.me app-avatar {
+    width: 36px;
+    height: 36px;
+    box-shadow: 0 0 0 1px var(--border);
+}
+
+.me:hover app-avatar {
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.me:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 0;
+}
+
 .menu-btn {
-    position: relative;
     width: 44px;
     height: 44px;
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--surface);
     color: var(--text);
-    display: grid;
+    display: none;
     place-items: center;
     cursor: pointer;
     flex-shrink: 0;
@@ -83,104 +110,6 @@ h1 {
 
 .menu-btn:hover {
     background: var(--surface-hover);
-}
-
-.menu-btn {
-    display: none;
-}
-
-.user {
-    position: relative;
-}
-
-.user-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 4px 8px 4px 4px;
-    border: 0;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--text);
-    cursor: pointer;
-    text-align: left;
-}
-
-.user-btn:hover {
-    background: var(--surface-hover);
-}
-
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--avatar-bg);
-    color: var(--avatar-text);
-    font-size: 14px;
-    font-weight: 700;
-    display: grid;
-    place-items: center;
-}
-
-.user-info {
-    display: grid;
-    line-height: 1.2;
-}
-
-.user-info strong {
-    font-size: 14px;
-}
-.user-info small {
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-.dropdown {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    z-index: 20;
-    width: 230px;
-    padding: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow-menu);
-}
-
-.dropdown-head {
-    display: grid;
-    padding: 8px 10px 10px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 6px;
-}
-
-.dropdown-head strong {
-    font-size: 14px;
-}
-.dropdown-head small {
-    font-size: 12px;
-    color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.dropdown button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--danger);
-    font-size: 14px;
-    cursor: pointer;
-}
-
-.dropdown button:hover {
-    background: var(--danger-soft);
 }
 
 @media (max-width: 1023px) {
@@ -191,46 +120,55 @@ h1 {
 
 @media (max-width: 767px) {
     header {
-        flex-wrap: wrap;
-        gap: 12px;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+
+    .actions {
+        gap: 8px;
     }
 
     h1 {
-        font-size: 22px;
+        font-size: 18px;
+        line-height: 1.2;
     }
 
-    /* sans sous-titre, le titre reste sur la ligne des boutons et se coupe s'il est trop long */
-    header:not(.stacked) .titles {
+    .title-row {
+        min-height: 36px;
+    }
+
+    .actions {
+        min-height: 36px;
+    }
+
+    .menu-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+    }
+
+    .me {
+        width: 36px;
+        height: 36px;
+    }
+
+    .me app-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* même barre pour toutes les pages : menu, titre sur une ou deux lignes, cloche, profil */
+    .titles {
         flex: 1;
     }
 
-    header:not(.stacked) h1 {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    /* le titre passe sur sa propre ligne seulement s'il a un sous-titre */
-    .stacked .titles {
-        order: 3;
-        flex-basis: 100%;
+    /* le sous-titre n'est qu'une description : il reste sur ordinateur */
+    .titles p:not(.breadcrumb) {
+        display: none;
     }
 
     .titles .breadcrumb {
         display: none;
-    }
-
-    .user-info,
-    .user-btn app-icon {
-        display: none;
-    }
-
-    .user-btn {
-        padding: 0;
-    }
-
-    .avatar {
-        width: 44px;
-        height: 44px;
     }
 }

@@ -2,7 +2,9 @@
     <div class="card-header">
         <h2>{{ title() }}</h2>
         @if (!loading() && !error()) {
-            <span class="total">Total : {{ total() | fcfa }}</span>
+            <span class="total" title="Ventes du jour moins les remboursements"
+                >Total : {{ total() | fcfa }}</span
+            >
         }
     </div>
 
@@ -36,12 +38,15 @@
                     >
                         <div class="plot">
                             @if (bar.netTotal !== 0) {
-                                <span class="bar-value">{{ bar.short }}</span>
+                                <span class="bar-value" [class.best]="bar.best">{{
+                                    bar.short
+                                }}</span>
                             }
                             <div
                                 class="bar"
                                 [class.today]="bar.isToday"
-                                [style.height.%]="bar.height"
+                                [class.none]="bar.netTotal <= 0"
+                                [style.height.%]="bar.netTotal > 0 ? bar.height : null"
                             ></div>
 
                             @if (hovered() === i) {
@@ -67,6 +72,5 @@
                 }
             </div>
         </div>
-        <p class="note">Montants nets : ventes du jour moins les remboursements.</p>
     }
 </section>

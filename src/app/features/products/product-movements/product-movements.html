@@ -36,6 +36,8 @@
                                 [state]="backState()"
                                 >Inventaire #{{ movement.reference_id }}</a
                             >
+                        } @else if (isManual(movement)) {
+                            · {{ reasonLabel(movement) }}
                         } @else if (movement.type !== "ENTRY" && movement.reference_id) {
                             ·
                             <a

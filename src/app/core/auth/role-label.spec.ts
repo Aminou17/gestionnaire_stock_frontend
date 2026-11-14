@@ -2,8 +2,8 @@ import { getRoleLabel } from "./role-label";
 
 describe("getRoleLabel", () => {
     it("should map each role to its label", () => {
-        expect(getRoleLabel("admin")).toBe("Propriétaire");
-        expect(getRoleLabel("manager")).toBe("Gérant");
+        expect(getRoleLabel("admin")).toBe("Administrateur");
+        expect(getRoleLabel("manager")).toBe("Employé");
     });
 
     // ancien backend ou donnée manquante : on n'invente pas de rôle

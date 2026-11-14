@@ -1,0 +1,258 @@
+<dialog
+    #dialog
+    class="sheet"
+    aria-labelledby="adjust-title"
+    (cancel)="onCancel($event)"
+    (close)="onClosed()"
+>
+    <form class="sheet-form" (submit)="$event.preventDefault(); submit()" novalidate>
+        <header class="sheet-head">
+            <h2 id="adjust-title" tabindex="-1" autofocus>Ajuster le stock</h2>
+            <button
+                type="button"
+                class="close-btn"
+                aria-label="Fermer"
+                [disabled]="saving()"
+                (click)="close()"
+            >
+                <app-icon name="close" [size]="20" />
+            </button>
+        </header>
+
+        <div class="sheet-body">
+            @if (product(); as chosen) {
+                <div class="chosen">
+                    <span class="thumb av-{{ chosen.id % 4 }}" aria-hidden="true">
+                        @if (chosen.image) {
+                            <img [src]="chosen.image" alt="" />
+                        } @else {
+                            {{ initials(chosen.name) }}
+                        }
+                    </span>
+                    <span class="chosen-text">
+                        <strong>{{ chosen.name }}</strong>
+                        <button type="button" class="link-btn" (click)="changeProduct()">
+                            Changer de produit
+                        </button>
+                    </span>
+                    <span class="chosen-stock">
+                        <strong>{{ chosen.theoretical_stock }}</strong>
+                        <small>en stock</small>
+                    </span>
+                </div>
+
+                <div class="choice" role="group" aria-label="Que s'est-il passé ?">
+                    <button
+                        type="button"
+                        class="loss"
+                        [class.on]="direction() === 'loss'"
+                        [attr.aria-pressed]="direction() === 'loss'"
+                        (click)="setDirection('loss')"
+                    >
+                        <app-icon name="arrow-up-right" [size]="18" />
+                        Retirer du stock
+                    </button>
+                    <button
+                        type="button"
+                        class="gain"
+                        [class.on]="direction() === 'gain'"
+                        [attr.aria-pressed]="direction() === 'gain'"
+                        (click)="setDirection('gain')"
+                    >
+                        <app-icon name="arrow-down" [size]="18" />
+                        Ajouter au stock
+                    </button>
+                </div>
+
+                @if (direction(); as dir) {
+                    <div class="field">
+                        <div class="qty-row">
+                            <label class="field-label" for="adjust-quantity">Quantité</label>
+                            <div class="stepper">
+                                <button
+                                    type="button"
+                                    class="step"
+                                    aria-label="Diminuer la quantité"
+                                    [disabled]="!quantity() || quantity()! <= 1"
+                                    (click)="step(-1)"
+                                >
+                                    −
+                                </button>
+                                <input
+                                    id="adjust-quantity"
+                                    class="quantity-input"
+                                    type="number"
+                                    inputmode="numeric"
+                                    min="1"
+                                    step="1"
+                                    placeholder="0"
+                                    [class.invalid]="tooMany()"
+                                    [value]="quantity() ?? ''"
+                                    (input)="setQuantity($any($event.target).value)"
+                                />
+                                <button
+                                    type="button"
+                                    class="step"
+                                    aria-label="Augmenter la quantité"
+                                    (click)="step(1)"
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+
+                        @if (tooMany()) {
+                            <p class="preview error" role="alert">
+                                Il n'y a que {{ chosen.theoretical_stock }} en stock.
+                            </p>
+                        } @else if (stockAfter() !== null) {
+                            <p class="preview" [class.loss]="direction() === 'loss'">
+                                <span>Stock après l'ajustement</span>
+                                <strong>
+                                    {{ chosen.theoretical_stock }}
+                                    <app-icon name="chevron-right" [size]="14" />
+                                    {{ stockAfter() }}
+                                </strong>
+                            </p>
+                        }
+                    </div>
+
+                    <div class="field reason-field">
+                        <span class="field-label" id="reason-label">Motif</span>
+                        <button
+                            type="button"
+                            class="reason-btn"
+                            aria-haspopup="listbox"
+                            aria-labelledby="reason-label"
+                            [attr.aria-expanded]="reasonOpen()"
+                            (click)="reasonOpen.set(!reasonOpen())"
+                        >
+                            <span [class.placeholder]="!reason()">
+                                {{ reasonLabel() || "Choisir un motif" }}
+                            </span>
+                            <app-icon name="chevron-down" [size]="16" [class.flip]="reasonOpen()" />
+                        </button>
+
+                        @if (reasonOpen()) {
+                            <ul class="reason-list" role="listbox" aria-labelledby="reason-label">
+                                @for (item of reasons[dir]; track item.value) {
+                                    <li role="presentation">
+                                        <button
+                                            type="button"
+                                            role="option"
+                                            [attr.aria-selected]="reason() === item.value"
+                                            (click)="chooseReason(item.value)"
+                                        >
+                                            <span class="dot dot-{{ tones[item.value] }}"></span>
+                                            <span class="reason-name">{{ item.label }}</span>
+                                            @if (reason() === item.value) {
+                                                <app-icon name="check" [size]="16" />
+                                            }
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    </div>
+
+                    <label class="field">
+                        <span class="field-label"
+                            >Note <span class="muted">(facultatif)</span></span
+                        >
+                        <input
+                            class="input"
+                            type="text"
+                            maxlength="200"
+                            [placeholder]="notePlaceholder()"
+                            [value]="note()"
+                            (input)="note.set($any($event.target).value)"
+                        />
+                    </label>
+                }
+            } @else {
+                <div class="field">
+                    <label class="search">
+                        <app-icon name="search" [size]="18" />
+                        <input
+                            class="input"
+                            type="search"
+                            placeholder="Rechercher un produit"
+                            aria-label="Rechercher le produit à ajuster"
+                            (input)="onSearch($any($event.target).value)"
+                        />
+                    </label>
+
+                    <ul class="results" [class.reloading]="products.isLoading()">
+                        @for (result of results(); track result.id) {
+                            <li>
+                                <button type="button" class="result" (click)="product.set(result)">
+                                    <span class="thumb av-{{ result.id % 4 }}" aria-hidden="true">
+                                        @if (result.image) {
+                                            <img [src]="result.image" alt="" />
+                                        } @else {
+                                            {{ initials(result.name) }}
+                                        }
+                                    </span>
+                                    <span class="result-name">{{ result.name }}</span>
+                                    <span class="result-stock">{{ result.theoretical_stock }}</span>
+                                </button>
+                            </li>
+                        } @empty {
+                            @if (products.error()) {
+                                <li class="no-result">
+                                    <span class="field-error"
+                                        >Impossible de chercher les produits.</span
+                                    >
+                                    <button
+                                        type="button"
+                                        class="link-btn inline"
+                                        (click)="products.reload()"
+                                    >
+                                        Réessayer
+                                    </button>
+                                </li>
+                            } @else if (products.isLoading()) {
+                                <li class="no-result muted">Recherche…</li>
+                            } @else {
+                                <li class="no-result muted">Aucun produit ne correspond.</li>
+                            }
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <footer class="sheet-foot">
+            @if (error()) {
+                <div class="alert alert-error" role="alert">{{ error() }}</div>
+            }
+
+            @if (missing(); as hint) {
+                <p class="hint">{{ hint }}</p>
+            }
+
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="saving()"
+                    (click)="close()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="submit"
+                    class="btn submit"
+                    [class.btn-primary]="direction() === 'gain'"
+                    [class.btn-danger]="direction() === 'loss'"
+                    [disabled]="!canSubmit()"
+                >
+                    @if (saving()) {
+                        <span class="spinner"></span>
+                    }
+                    {{ submitLabel() }}
+                </button>
+            </div>
+        </footer>
+    </form>
+</dialog>

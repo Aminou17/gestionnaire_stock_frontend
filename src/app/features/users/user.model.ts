@@ -1,6 +1,6 @@
 import { User, UserRole } from "../../core/auth/auth.service";
 
-// compte vu par le propriétaire dans la gestion des utilisateurs
+// compte vu par l'administrateur dans la gestion des utilisateurs
 export interface UserAccount extends User {
     is_active: boolean;
     created_at: string;

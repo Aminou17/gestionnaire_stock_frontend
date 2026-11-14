@@ -5,7 +5,7 @@ import { rxResource } from "@angular/core/rxjs-interop";
 import { AuthService } from "../auth/auth.service";
 import { AuditLogService } from "./audit-log.service";
 
-// Échecs du jour (connexions ratées, accès refusés) pour la cloche du propriétaire
+// Échecs du jour (connexions ratées, accès refusés) pour la cloche de l'administrateur
 @Injectable({ providedIn: "root" })
 export class SecurityAlertService {
     private auditService = inject(AuditLogService);

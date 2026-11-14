@@ -19,6 +19,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { formatPhone, toTelLink, toWhatsAppLink } from "../phone";
 import { SupplierForm } from "../supplier-form/supplier-form";
+import { BackState } from "../../../core/back-link";
 
 // nombre de livraisons montrées directement sur la fiche
 const PREVIEW_SIZE = 5;
@@ -33,6 +34,11 @@ export class SupplierPage {
     private supplierService = inject(SupplierService);
     private entryService = inject(StockEntryService);
     private router = inject(Router);
+
+    // la fiche produit ouverte sait ainsi revenir ici
+    backState(): BackState {
+        return { backTo: this.router.url, backLabel: "Fournisseur" };
+    }
     private destroyRef = inject(DestroyRef);
 
     private supplierForm = viewChild(SupplierForm);

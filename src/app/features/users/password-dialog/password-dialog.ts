@@ -8,7 +8,7 @@ import { generatePassword } from "../user-display";
 import { UserAccount } from "../user.model";
 import { UserService } from "../user.service";
 
-// Le propriétaire donne un nouveau mot de passe à quelqu'un qui a oublié le sien
+// L'administrateur donne un nouveau mot de passe à quelqu'un qui a oublié le sien
 @Component({
     selector: "app-password-dialog",
     imports: [ReactiveFormsModule, Icon],

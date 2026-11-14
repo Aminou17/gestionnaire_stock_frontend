@@ -2,7 +2,13 @@
 
 <div class="content">
     <section class="card profile">
-        <span class="avatar">{{ initials() }}</span>
+        <a
+            routerLink="/settings/account"
+            class="avatar-link"
+            aria-label="Changer ma photo de profil"
+        >
+            <app-avatar class="avatar" [photo]="auth.user()?.avatar" />
+        </a>
 
         <div class="profile-info">
             <strong>{{ auth.user()?.name }}</strong>
@@ -26,14 +32,37 @@
                             <small class="muted">{{ link.description }}</small>
                         </span>
 
-                        @if (link.path === "appearance") {
-                            <span class="item-value muted">{{ themeLabel() }}</span>
-                        }
-
                         <app-icon name="chevron-right" [size]="18" class="chevron" />
                     </a>
                 }
             </nav>
         </section>
     }
+
+    <section class="group">
+        <h2>Affichage</h2>
+
+        <div class="card list">
+            <button
+                type="button"
+                class="item theme-toggle"
+                role="switch"
+                [attr.aria-checked]="theme.theme() === 'dark'"
+                (click)="theme.toggle()"
+            >
+                <span class="item-icon">
+                    <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" [size]="20" />
+                </span>
+                <span class="item-text">
+                    <strong>Mode sombre</strong>
+                    <small class="muted">Mémorisé sur cet appareil</small>
+                </span>
+                <span
+                    class="switch"
+                    [class.on]="theme.theme() === 'dark'"
+                    aria-hidden="true"
+                ></span>
+            </button>
+        </div>
+    </section>
 </div>

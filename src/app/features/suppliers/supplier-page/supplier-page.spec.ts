@@ -92,7 +92,7 @@ describe("SupplierPage", () => {
                             email: "a@test.com",
                             role: "admin",
                         }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],

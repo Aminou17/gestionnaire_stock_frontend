@@ -73,9 +73,7 @@
         @if (s.payments.length > 0) {
             @for (payment of s.payments; track payment.id) {
                 <p class="receipt-line">
-                    <span
-                        >{{ payment.created_at | date: "dd/MM" }}
-                        {{ payment.payment_method === "MOBILE_MONEY" ? "Mobile money" : "Espèces" }}</span
+                    <span>{{ payment.created_at | date: "dd/MM" }} Payé</span
                     ><span>{{ payment.amount | fcfa }}</span>
                 </p>
                 @if (changeOf(payment); as change) {

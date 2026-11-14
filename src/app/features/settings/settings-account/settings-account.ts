@@ -1,14 +1,12 @@
 import { Component, DestroyRef, inject, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import {
-    NonNullableFormBuilder,
-    ReactiveFormsModule,
-    Validators,
-} from "@angular/forms";
+import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { filter } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { Avatar } from "../../../shared/avatar/avatar";
+import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
@@ -16,7 +14,7 @@ import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
 
 @Component({
     selector: "app-settings-account",
-    imports: [ReactiveFormsModule, PageHeader, Icon, UnsavedDialog],
+    imports: [ReactiveFormsModule, PageHeader, Icon, Avatar, UnsavedDialog],
     templateUrl: "./settings-account.html",
     styleUrls: ["../settings-section.css", "./settings-account.css"],
 })
@@ -34,6 +32,9 @@ export class SettingsAccount implements HasUnsavedChanges {
             [Validators.required, Validators.email, Validators.maxLength(150)],
         ],
     });
+
+    savingPhoto = signal(false);
+    photoError = signal("");
 
     savingProfile = signal(false);
     profileMessage = signal<{ ok: boolean; text: string } | null>(null);
@@ -60,6 +61,39 @@ export class SettingsAccount implements HasUnsavedChanges {
         const dirty = this.profileForm.dirty;
 
         return !dirty || this.leaveDialog().ask();
+    }
+
+    async onPhoto(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = "";
+        if (!file) return;
+
+        this.photoError.set("");
+        try {
+            this.sendPhoto(await resizeAvatar(file));
+        } catch (err) {
+            this.photoError.set((err as Error).message);
+        }
+    }
+
+    removePhoto() {
+        this.photoError.set("");
+        this.sendPhoto(null);
+    }
+
+    private sendPhoto(avatar: string | null) {
+        this.savingPhoto.set(true);
+        this.auth
+            .updateAvatar(avatar)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: () => this.savingPhoto.set(false),
+                error: (err) => {
+                    this.savingPhoto.set(false);
+                    this.photoError.set(errorText(err, "Impossible d'enregistrer la photo."));
+                },
+            });
     }
 
     cancelProfile() {

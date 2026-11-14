@@ -1,34 +1,48 @@
-<dialog #dialog (click)="onBackdropClick($event)">
+<dialog
+    #dialog
+    aria-labelledby="open-cash-title"
+    (click)="onBackdropClick($event)"
+    (cancel)="onCancel($event)"
+>
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <h2>Ouvrir la caisse</h2>
-        <p class="muted">
-            Indiquez le fond de caisse présent dans le tiroir au début de la journée.
-        </p>
+        <h2 id="open-cash-title">Ouvrir la caisse</h2>
+        <p class="muted">Indiquez le montant présent dans le tiroir au début de la journée.</p>
 
         @if (error()) {
             <div class="alert alert-error" role="alert">{{ error() }}</div>
         }
 
         <label class="field">
-            <span>Fond de caisse (F)</span>
+            <span>Fonds de départ (F)</span>
             <input
                 class="input"
                 type="number"
                 min="0"
-                step="500"
+                step="1"
                 inputmode="numeric"
                 formControlName="openingAmount"
+                (focus)="$any($event.target).select()"
+                [attr.aria-invalid]="
+                    form.controls.openingAmount.touched && form.controls.openingAmount.invalid
+                "
                 [class.invalid]="
                     form.controls.openingAmount.touched && form.controls.openingAmount.invalid
                 "
             />
+            @if (form.controls.openingAmount.valid && form.controls.openingAmount.value) {
+                <small class="muted">{{ form.controls.openingAmount.value | fcfa }}</small>
+            }
             @if (form.controls.openingAmount.touched && form.controls.openingAmount.invalid) {
-                <small class="field-error">Le montant doit être positif ou nul.</small>
+                <small class="field-error"
+                    >Le montant doit être un nombre entier, positif ou nul.</small
+                >
             }
         </label>
 
         <div class="actions">
-            <button type="button" class="btn btn-outline" (click)="close()">Annuler</button>
+            <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="close()">
+                Annuler
+            </button>
             <button type="submit" class="btn btn-primary" [disabled]="saving()">
                 @if (saving()) {
                     <span class="spinner"></span>

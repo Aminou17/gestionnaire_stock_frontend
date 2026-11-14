@@ -147,8 +147,22 @@ export const routes: Routes = [
             {
                 path: "alerts",
                 title: "Alertes de stock · Awa Bazin",
-                canActivate: [adminGuard],
                 loadComponent: () => import("./features/alerts/alerts").then((m) => m.Alerts),
+            },
+            {
+                path: "alerts/supplier/:id",
+                title: "Commande fournisseur · Awa Bazin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/alerts/supplier-order/supplier-order").then(
+                        (m) => m.SupplierOrder,
+                    ),
+            },
+            {
+                path: "alerts/rotation",
+                title: "Rotation des produits · Awa Bazin",
+                loadComponent: () =>
+                    import("./features/alerts/rotation/rotation").then((m) => m.Rotation),
             },
             {
                 path: "sales",
@@ -198,7 +212,7 @@ export const routes: Routes = [
                     ),
             },
             {
-                // le sommaire et les pages personnelles sont ouverts au gérant, le reste au propriétaire
+                // le sommaire et les pages personnelles sont ouverts à l'employé, le reste à l'administrateur
                 path: "settings",
                 children: [
                     {
@@ -235,6 +249,16 @@ export const routes: Routes = [
                         loadComponent: () =>
                             import("./features/settings/settings-stock/settings-stock").then(
                                 (m) => m.SettingsStock,
+                            ),
+                    },
+                    {
+                        path: "alert-email",
+                        title: "Email des alertes · Awa Bazin",
+                        canActivate: [adminGuard],
+                        canDeactivate: [unsavedChangesGuard],
+                        loadComponent: () =>
+                            import("./features/settings/settings-alert-email/settings-alert-email").then(
+                                (m) => m.SettingsAlertEmail,
                             ),
                     },
                     {
@@ -282,14 +306,6 @@ export const routes: Routes = [
                         loadComponent: () =>
                             import("./features/settings/settings-password/settings-password").then(
                                 (m) => m.SettingsPassword,
-                            ),
-                    },
-                    {
-                        path: "appearance",
-                        title: "Apparence · Awa Bazin",
-                        loadComponent: () =>
-                            import("./features/settings/settings-appearance/settings-appearance").then(
-                                (m) => m.SettingsAppearance,
                             ),
                     },
                 ],

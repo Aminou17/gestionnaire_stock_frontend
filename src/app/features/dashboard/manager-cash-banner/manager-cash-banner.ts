@@ -6,7 +6,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashSummary } from "../dashboard.model";
 
-// Bandeau de caisse du gérant : état, solde et bouton "Nouvelle vente"
+// Bandeau de caisse de l'employé : état, solde et bouton "Nouvelle vente"
 @Component({
     selector: "app-manager-cash-banner",
     imports: [RouterLink, FcfaPipe, Icon],

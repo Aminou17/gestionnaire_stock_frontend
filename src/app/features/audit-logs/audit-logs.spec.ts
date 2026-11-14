@@ -67,7 +67,7 @@ describe("AuditLogs", () => {
                     useValue: {
                         isAdmin: signal(true),
                         user: signal({ id: 1, name: "Awa", email: "a@test.com", role: "admin" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -84,7 +84,7 @@ describe("AuditLogs", () => {
         await render();
 
         expect(text()).toContain("Moussa Traoré a encaissé une vente de");
-        expect(el.querySelector(".entry .avatar")!.textContent!.trim()).toBe("MT");
+        expect(el.querySelector(".entry .avatar img")).not.toBeNull();
         expect(el.querySelector("a[href='/sales/12']")).not.toBeNull();
         expect(text()).toContain("IP 10.0.0.5");
     });
@@ -110,7 +110,7 @@ describe("AuditLogs", () => {
         );
 
         expect(text()).toContain("Moussa Traoré a essayé de restaurer une catégorie");
-        expect(text()).toContain("Réservé au propriétaire");
+        expect(text()).toContain("Réservé à l'administrateur");
         expect(text()).not.toContain("/categories");
     });
 

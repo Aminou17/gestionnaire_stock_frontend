@@ -39,7 +39,7 @@ describe("SettingsCash", () => {
                     useValue: {
                         isAdmin: signal(true),
                         user: signal({ id: 1, name: "Admin", email: "a@t.com", role: "admin" }),
-                        roleLabel: signal("Propriétaire"),
+                        roleLabel: signal("Administrateur"),
                     },
                 },
             ],
@@ -67,7 +67,7 @@ describe("SettingsCash", () => {
         await fixture.whenStable();
 
         expect(updateSettings).toHaveBeenCalledWith(false);
-        expect(el.textContent).toContain("Le gérant verra le solde attendu à la clôture.");
+        expect(el.textContent).toContain("L'employé verra le solde attendu à la clôture.");
     });
 
     it("should not show a fake value when loading fails", async () => {

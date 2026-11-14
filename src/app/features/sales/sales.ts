@@ -4,6 +4,7 @@ import {
     ElementRef,
     computed,
     effect,
+    LOCALE_ID,
     inject,
     linkedSignal,
     signal,
@@ -14,27 +15,47 @@ import { Router, RouterLink } from "@angular/router";
 import { map, of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
-import { getRoleLabel } from "../../core/auth/role-label";
 import { PaymentMethod, Sale, SalePage, SaleStatus } from "../../core/sales/sale.model";
 import { SaleService } from "../../core/sales/sale.service";
 import { ExportService } from "../settings/settings-export/export.service";
 import { UserService } from "../users/user.service";
+import { groupByDay } from "../../shared/day-label";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
+import { EmptyState } from "../../shared/empty-state/empty-state";
+import { ExportFormat } from "../../core/export-format";
+import { ExportMenu } from "../../shared/export-menu/export-menu";
 import { Icon } from "../../shared/icon/icon";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 
 const PAGE_SIZE = 20;
 
+const PERIOD_LABELS: Record<Exclude<PeriodRange["period"], "all">, string> = {
+    today: "Aujourd'hui",
+    week: "7 derniers jours",
+    month: "30 derniers jours",
+    custom: "Dates choisies",
+};
+
 type LoadedPage = SalePage & { page: number };
 
 @Component({
     selector: "app-sales",
-    imports: [RouterLink, DatePipe, PageHeader, PeriodFilter, Icon, FcfaPipe],
+    imports: [
+        RouterLink,
+        DatePipe,
+        PageHeader,
+        PeriodFilter,
+        ExportMenu,
+        Icon,
+        FcfaPipe,
+        EmptyState,
+    ],
     templateUrl: "./sales.html",
     styleUrl: "./sales.css",
 })
 export class Sales {
+    private locale = inject(LOCALE_ID);
     private saleService = inject(SaleService);
     private router = inject(Router);
     private userService = inject(UserService);
@@ -101,6 +122,9 @@ export class Sales {
     firstLoad = computed(() => this.sales.isLoading() && !this.last());
     hasMore = computed(() => this.list().length < this.total());
     loadingMore = computed(() => this.sales.isLoading() && this.page() > 1);
+
+    // téléphone : les ventes chargées, regroupées par jour (la liste est déjà triée par date)
+    days = computed(() => groupByDay(this.list(), this.locale));
 
     tabs = computed(() => {
         const counters = this.counters();
@@ -179,21 +203,45 @@ export class Sales {
         this.page.set(1);
     }
 
+    // téléphone : les filtres sont dans un panneau, ouvert par le bouton Filtres
+    filtersOpen = signal(false);
+    private periodFilter = viewChild(PeriodFilter);
+
+    // filtres actifs, affichés en pastilles qu'on retire d'un clic
+    activeFilters = computed(() => {
+        const filters: { key: "period" | "payment" | "seller"; label: string }[] = [];
+        const period = this.range().period;
+        if (period !== "all") filters.push({ key: "period", label: PERIOD_LABELS[period] });
+        const method = this.paymentMethod();
+        if (method)
+            filters.push({ key: "payment", label: method === "CASH" ? "Espèces" : "Mobile money" });
+        const seller = this.sellers().find((user) => user.id === this.sellerId());
+        if (this.sellerId() !== null)
+            filters.push({ key: "seller", label: seller?.name ?? "Vendeur" });
+        return filters;
+    });
+
+    clearFilter(key: "period" | "payment" | "seller") {
+        if (key === "period") this.periodFilter()?.selectPeriod("all");
+        if (key === "payment") this.selectPayment("");
+        if (key === "seller") this.selectSeller("");
+    }
+
     exporting = signal(false);
     exportError = signal<string | null>(null);
 
     // l'export existant prend la période choisie, pas les autres filtres
-    exportCsv() {
+    exportFile(format: ExportFormat) {
         this.exporting.set(true);
         this.exportError.set(null);
 
-        this.exportService.salesCsv(this.range().from, this.range().to).subscribe({
+        this.exportService.salesFile(this.range().from, this.range().to, format).subscribe({
             next: (file) => {
                 this.exporting.set(false);
                 const url = URL.createObjectURL(file);
                 const link = document.createElement("a");
                 link.href = url;
-                link.download = "ventes.csv";
+                link.download = `ventes.${format}`;
                 link.click();
                 setTimeout(() => URL.revokeObjectURL(url));
             },
@@ -229,10 +277,5 @@ export class Sales {
 
     isToday(date: string) {
         return new Date(date).toDateString() === new Date().toDateString();
-    }
-
-    // Libellé du rôle du vendeur (rien si le backend ne l'a pas envoyé)
-    roleLabel(role: Sale["user_role"]) {
-        return getRoleLabel(role);
     }
 }

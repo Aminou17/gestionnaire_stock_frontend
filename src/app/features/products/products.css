@@ -17,7 +17,7 @@ app-page-header {
     position: relative;
     display: grid;
     gap: 4px;
-    padding: 16px 18px;
+    padding: 16px;
     text-align: left;
     color: var(--text);
     cursor: pointer;
@@ -63,7 +63,7 @@ app-page-header {
 .dot {
     position: absolute;
     top: 50%;
-    right: 18px;
+    right: 16px;
     width: 9px;
     height: 9px;
     border-radius: 50%;
@@ -95,7 +95,7 @@ app-page-header {
 
 .search {
     position: relative;
-    flex: 2;
+    flex: 1;
     min-width: 0;
 }
 
@@ -114,14 +114,22 @@ app-page-header {
 
 .filters {
     display: flex;
-    flex: 2;
     gap: 12px;
 }
 
+.filters .field {
+    width: 220px;
+}
+
 .filters .input {
-    flex: 1;
-    min-width: 0;
     cursor: pointer;
+}
+
+.field-label,
+.sheet-head,
+.sheet-foot,
+.sheet-backdrop {
+    display: none;
 }
 
 .filter-btn {
@@ -146,7 +154,7 @@ app-page-header {
 .chips,
 .mobile-count,
 .cards,
-.fab {
+.head-menu {
     display: none;
 }
 
@@ -231,6 +239,53 @@ tbody tr:hover {
     font-weight: 600;
 }
 
+.avatar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    overflow: hidden;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.av-0 {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+.av-1 {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+.av-2 {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+.av-3 {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.product-cell,
+.stock-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.stock-cell {
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 /* le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
 .name-link {
     padding: 0;
@@ -306,7 +361,7 @@ td.num small {
     right: 0;
     top: calc(100% + 4px);
     z-index: 10;
-    width: 170px;
+    width: 190px;
     padding: 6px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -318,8 +373,8 @@ td.num small {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
+    gap: 8px;
+    padding: 8px 12px;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -420,16 +475,43 @@ td.num small {
 }
 
 @media (max-width: 1023px) {
+    .toolbar {
+        flex-wrap: wrap;
+    }
+
+    /* ligne 1 : recherche et bascule, ligne 2 : les trois filtres */
+    .search {
+        order: 1;
+    }
+
+    .filters {
+        order: 3;
+        flex-basis: 100%;
+    }
+
+    .filters .field {
+        flex: 1;
+    }
+
     .stats {
         gap: 12px;
     }
 
     .stat {
-        padding: 14px;
+        padding: 12px;
     }
 
     .dot {
-        right: 14px;
+        right: 12px;
+    }
+
+    .more-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .actions-col {
+        width: 64px;
     }
 
     th,
@@ -453,9 +535,27 @@ td.num small {
         gap: 12px;
     }
 
-    .new-product,
     .stats,
     .table-wrap {
+        display: none;
+    }
+
+    /* sur téléphone les boutons du haut ne gardent que l'icône */
+    .new-product {
+        width: 44px;
+        padding: 0;
+    }
+
+    /* l'import de fichier se fait sur ordinateur */
+    .desktop-only {
+        display: none;
+    }
+
+    .head-menu {
+        display: block;
+    }
+
+    .new-product span {
         display: none;
     }
 
@@ -463,9 +563,7 @@ td.num small {
         margin: 12px 0 0;
     }
 
-    /* place pour le bouton + flottant, qui ne cache plus le dernier badge */
     .list-card {
-        padding-bottom: 88px;
         background: transparent;
         border: 0;
     }
@@ -476,25 +574,88 @@ td.num small {
         border: 0;
     }
 
+    .search {
+        flex-basis: 0;
+    }
+
     .filter-btn {
         display: grid;
     }
 
+    /* les filtres s'ouvrent en feuille depuis le bas, comme les autres menus du téléphone */
     .filters {
         display: none;
-        flex-basis: 100%;
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 41;
         flex-direction: column;
+        gap: 16px;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+        border-radius: 16px 16px 0 0;
+        background: var(--surface);
+        box-shadow: var(--shadow-dialog);
     }
 
     .filters.open {
         display: flex;
     }
 
+    .sheet-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: var(--overlay);
+    }
+
+    .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sheet-head h2 {
+        margin: 0;
+        font-size: 18px;
+    }
+
+    .sheet-close {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        margin-right: -10px;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .filters .field {
+        display: grid;
+        gap: 6px;
+        flex: none;
+        width: auto;
+    }
+
+    .sheet-foot {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 8px;
+    }
+
+    /* compteurs : une rangée fine de pastilles qui servent de filtres */
     .chips {
         display: flex;
-        gap: 8px;
-        margin: 12px -16px 0;
-        padding: 0 16px 4px;
+        gap: 4px;
+        margin: 8px 0 0;
         overflow-x: auto;
         scrollbar-width: none;
     }
@@ -503,90 +664,80 @@ td.num small {
         display: none;
     }
 
-    .chip {
+    .chips .chip {
         flex-shrink: 0;
-        display: inline-flex;
-        align-items: center;
         gap: 6px;
-        height: 36px;
-        padding: 0 14px;
-        border: 1px solid var(--border);
+        min-height: 34px;
+        padding: 0 9px;
         border-radius: 999px;
-        background: var(--surface);
-        color: var(--text);
-        font-size: 14px;
-        font-weight: 600;
-        cursor: pointer;
+        font-size: 12.5px;
     }
 
-    .chip span {
-        font-weight: 500;
-        color: var(--text-muted);
-    }
-
-    .chip.selected {
-        background: var(--primary);
-        border-color: var(--primary);
-        color: var(--on-primary);
-    }
-
-    .chip.selected span {
-        color: var(--on-primary);
+    .chip-count {
+        font-size: 13px;
+        font-weight: 700;
     }
 
     .mobile-count {
-        display: block;
-        margin: 14px 0 10px;
-        font-size: 14px;
+        display: none;
     }
 
     .cards {
         display: grid;
-        gap: 12px;
+        gap: 8px;
         margin: 0;
         padding: 0;
         list-style: none;
     }
 
-    /* carte compacte : nom, catégorie, prix, stock */
+    /* carte compacte : photo, nom et stock, prix */
     .product-card {
-        display: grid;
-        gap: 4px;
-        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 80px;
+        padding: 12px;
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
     }
 
-    .line {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
+    .info {
+        display: grid;
+        flex: 1;
+        gap: 2px;
         min-width: 0;
     }
 
-    .line .name-link {
+    .info .name-link {
+        font-size: 15px;
+        line-height: 1.3;
+    }
+
+    .product-card .avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
         font-size: 16px;
-        min-width: 0;
     }
 
-    .line .more-btn {
-        margin: -10px -10px -10px 0;
+    .info .badge {
+        justify-self: start;
+        margin-top: 4px;
     }
 
-    .category {
+    .sub {
         font-size: 13px;
     }
 
     .price {
-        margin-top: 4px;
-        font-size: 18px;
+        flex-shrink: 0;
+        font-size: 16px;
         font-variant-numeric: tabular-nums;
     }
 
-    .stock {
-        font-size: 13px;
+    .product-card .row-menu {
+        margin-right: -8px;
     }
 
     .inactive .price {
@@ -598,25 +749,7 @@ td.num small {
     }
 
     .row-skeleton {
-        height: 110px;
-    }
-
-    /* bouton "+" au-dessus de la barre de navigation du bas */
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border: 0;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
-        cursor: pointer;
+        height: 72px;
     }
 
     /* cibles tactiles de 44 px minimum */
@@ -635,5 +768,351 @@ td.num small {
 
     .confirm-actions .btn {
         width: 100%;
+    }
+}
+
+/* sur très petit écran, l'en-tête n'a pas la place pour le menu d'import et d'export */
+@media (max-width: 374px) {
+    .head-menu {
+        display: none;
+    }
+}
+
+.menu button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* bascule liste ou grille, sur ordinateur seulement */
+.view-toggle {
+    display: flex;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.view-toggle button {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: var(--surface);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.view-toggle button[aria-pressed="true"] {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+/* téléphone : un seul bouton qui active ou coupe les carreaux */
+.view-single {
+    display: none;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text-muted);
+    place-items: center;
+    cursor: pointer;
+}
+
+.view-single[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+/* vue grille : un catalogue de grandes photos */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 16px;
+    list-style: none;
+}
+
+.gcard {
+    position: relative;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    overflow: hidden;
+    cursor: pointer;
+    transition: box-shadow 0.15s;
+}
+
+.gcard:hover {
+    box-shadow: var(--shadow-menu);
+}
+
+.gphoto {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.gphoto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.gmenu {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.gmenu .more-btn {
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: var(--shadow-menu);
+}
+
+.gbody {
+    display: grid;
+    align-content: start;
+    gap: 4px;
+    padding: 12px;
+}
+
+.gbody .name-link {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.gsub {
+    font-size: 13px;
+}
+
+.gfoot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.inactive .gphoto {
+    opacity: 0.5;
+}
+
+@media (max-width: 1023px) {
+    .view-toggle {
+        order: 2;
+    }
+}
+
+@media (min-width: 1024px) {
+    .head-menu {
+        display: none;
+    }
+}
+
+/* sur tablette comme sur téléphone, import et export se rangent dans le menu */
+@media (max-width: 1023px) {
+    .desktop-only {
+        display: none;
+    }
+}
+
+@media (min-width: 375px) and (max-width: 1023px) {
+    .head-menu {
+        display: block;
+    }
+}
+
+.new-product {
+    white-space: nowrap;
+}
+
+.name-link:focus-visible,
+.more-btn:focus-visible,
+.filter-btn:focus-visible,
+.view-toggle button:focus-visible,
+.menu button:focus-visible,
+.stat:focus-visible,
+.clear-filter:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* valeur du stock : le chiffre clé de l'admin, juste au-dessus des compteurs */
+.value-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+}
+
+.value-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.value-text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+}
+
+.value-label {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.value-amount {
+    font-size: 24px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.value-note {
+    flex-shrink: 0;
+    font-size: 13px;
+}
+
+@media (max-width: 767px) {
+    .value-card {
+        margin-bottom: 12px;
+    }
+
+    .value-amount {
+        font-size: 20px;
+    }
+}
+
+/* téléphone : le filtre reste après la recherche, la grille passe à deux colonnes */
+@media (max-width: 767px) {
+    .filter-btn {
+        order: 2;
+    }
+
+    .view-toggle {
+        display: none;
+    }
+
+    .view-single {
+        display: grid;
+        order: 3;
+    }
+
+    /* boutons du haut plus petits, comme la barre de l'en-tête */
+    .new-product {
+        width: 36px;
+        min-height: 36px;
+        height: 36px;
+    }
+
+    .head-menu .more-btn {
+        width: 36px;
+        min-width: 36px;
+        height: 36px;
+        padding: 0;
+    }
+
+    .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 0;
+    }
+}
+
+/* le bouton de l'en-tête a le même cadre que la cloche et les autres boutons */
+.head-menu .more-btn {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+}
+
+/* petit écran : la carte laisse plus de place au nom */
+@media (max-width: 399px) {
+    .product-card {
+        gap: 8px;
+    }
+
+    .product-card .avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 14px;
+    }
+
+    .price {
+        font-size: 15px;
+    }
+}
+
+/* téléphone : haut de page fin et léger */
+@media (max-width: 767px) {
+    :host {
+        gap: 8px;
+    }
+
+    .value-card {
+        gap: 8px;
+        margin-bottom: 0;
+        padding: 0 4px 0 12px;
+        min-height: 40px;
+        border-radius: 10px;
+    }
+
+    .value-icon,
+    .value-note {
+        display: none;
+    }
+
+    .value-text {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .value-label {
+        font-size: 13px;
+    }
+
+    .value-amount {
+        margin-left: auto;
+        font-size: 15px;
+        white-space: nowrap;
+    }
+
+    .search .input,
+    .filter-btn,
+    .view-single {
+        height: 40px;
+        min-height: 40px;
+    }
+
+    .filter-btn,
+    .view-single {
+        width: 40px;
+    }
+
+    .toolbar {
+        gap: 8px;
     }
 }

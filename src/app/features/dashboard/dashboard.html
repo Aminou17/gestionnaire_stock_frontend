@@ -1,20 +1,11 @@
-<app-page-header title="Tableau de bord" [subtitle]="today">
-    <!-- le gérant a son bouton "Nouvelle vente" sous le bandeau de caisse -->
-    @if (auth.isAdmin()) {
-        <a
-            routerLink="/sales/new"
-            class="btn btn-primary new-sale"
-            aria-label="Nouvelle vente"
-            [class.disabled]="!cashOpen()"
-            [attr.aria-disabled]="!cashOpen()"
-            [attr.tabindex]="cashOpen() ? null : -1"
-            [title]="cashOpen() ? '' : 'Ouvrez la caisse pour enregistrer une vente'"
-        >
-            <app-icon name="plus" [size]="18" />
-            <span>Nouvelle vente</span>
-        </a>
-    }
-</app-page-header>
+<app-page-header title="Tableau de bord" [subtitle]="today" />
+
+@if (reserved) {
+    <div class="alert alert-warning banner" role="alert">
+        <app-icon name="alert" />
+        <span>Cette page est réservée à l'administrateur de la boutique.</span>
+    </div>
+}
 
 @if (auth.isAdmin()) {
     @if (summary.error() || dailySales.error()) {
@@ -48,9 +39,63 @@
         </div>
     }
 
+    @if (firstSteps(); as start) {
+        <section class="start" aria-labelledby="start-title">
+            <div class="start-head">
+                <h2 id="start-title">Pour bien démarrer</h2>
+                <span class="start-count">{{ start.doneCount }} sur {{ start.steps.length }}</span>
+            </div>
+            <ol>
+                @for (step of start.steps; track step.label) {
+                    <li [class.done]="step.done">
+                        <span class="step-icon"
+                            ><app-icon [name]="step.done ? 'check' : step.icon" [size]="16"
+                        /></span>
+                        <span class="step-label">{{ step.label }}</span>
+                        @if (!step.done) {
+                            @if (step.link) {
+                                <a class="btn btn-outline btn-sm" [routerLink]="step.link"
+                                    >Commencer</a
+                                >
+                            } @else {
+                                <button
+                                    type="button"
+                                    class="btn btn-outline btn-sm"
+                                    (click)="openCash.open()"
+                                >
+                                    Ouvrir
+                                </button>
+                            }
+                        }
+                    </li>
+                }
+            </ol>
+        </section>
+    }
+
+    @if (todo().length > 0) {
+        <section class="todo" aria-label="À faire maintenant">
+            <h2>À faire maintenant</h2>
+            @for (item of todo(); track item.label) {
+                <div class="todo-item">
+                    <app-icon [name]="item.icon" />
+                    <span>{{ item.text }}</span>
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        (click)="item.reopenId ? reopenCash.open(item.reopenId) : openCash.open()"
+                    >
+                        {{ item.label }}
+                    </button>
+                </div>
+            }
+        </section>
+    }
+
     <section class="stats">
         <app-stat-card
             label="Ventes du jour"
+            link="/sales"
             icon="trending-up"
             [loading]="dailySales.isLoading()"
             [error]="!!dailySales.error()"
@@ -61,6 +106,7 @@
 
         <app-stat-card
             label="Caisse"
+            link="/cash"
             icon="banknote"
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
@@ -68,37 +114,31 @@
             [valueTone]="cash() ? undefined : 'muted'"
             [hint]="cashHint()"
         >
-            @if (canOpenCash()) {
-                <button
-                    type="button"
-                    class="btn btn-primary btn-sm open-cash"
-                    (click)="openCash.open()"
-                >
-                    Ouvrir la caisse
-                </button>
-            }
         </app-stat-card>
 
         <app-stat-card
-            label="Produits en alerte"
-            icon="alert"
-            iconTone="warning"
+            label="Bénéfice du jour"
+            icon="tag"
+            link="/sales"
             [loading]="summary.isLoading()"
-            [error]="!!summary.error()"
-            [value]="'' + alertCounts().total"
-            [valueTone]="alertCounts().total > 0 ? 'warning' : undefined"
-            [hint]="alertHint()"
+            [error]="!!summary.error() || profitMissing()"
+            [value]="summaryData()?.todayProfit ?? 0 | fcfa"
+            [valueTone]="profitTone()"
+            [hint]="profitHint()"
         />
 
         <!-- la valeur du stock repose sur le prix d'achat : réservée à l'admin -->
         <app-stat-card
             label="Valeur du stock"
+            link="/products"
             icon="package"
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
-            [value]="summaryData()?.stockValue | fcfa"
+            [value]="secret.revealed() ? (summaryData()?.stockValue | fcfa) : '••••••••'"
             [hint]="(summaryData()?.activeProducts ?? 0) + ' produits actifs'"
-        />
+        >
+            <span class="reveal"><app-reveal-toggle /></span>
+        </app-stat-card>
     </section>
 
     <section class="grid">
@@ -135,6 +175,7 @@
     </section>
 
     <app-open-cash-dialog #openCash (opened)="onCashOpened()" />
+    <app-reopen-cash-dialog #reopenCash (reopened)="onCashOpened()" />
 } @else {
     <!-- même ordre sur téléphone et sur ordinateur : la grille ne fait que placer les blocs -->
     <div class="manager">
@@ -175,6 +216,7 @@
         <app-stat-card
             class="m-today"
             label="Mes ventes du jour"
+            link="/sales"
             icon="trending-up"
             [loading]="dailySales.isLoading()"
             [error]="!!dailySales.error()"

@@ -1,0 +1,16 @@
+// pastille du produit : deux initiales et une couleur qui dépend de la catégorie
+export const productInitials = (name: string) => {
+    const words = name.split(/\s+/).filter((word) => /^\p{L}/u.test(word));
+    const letters = words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2);
+    return letters.toUpperCase();
+};
+
+export const categoryTone = (category: string) => {
+    let sum = 0;
+    for (const char of category) sum += char.charCodeAt(0);
+    return sum % 4;
+};
+
+// marge en pourcentage du prix de vente, null si le prix d'achat est inconnu
+export const marginPercent = (sale: number, purchase: number | undefined) =>
+    purchase === undefined || sale <= 0 ? null : Math.round(((sale - purchase) / sale) * 100);

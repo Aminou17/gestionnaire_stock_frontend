@@ -18,16 +18,17 @@ import { AuthService } from "../../../core/auth/auth.service";
 import { getRoleLabel } from "../../../core/auth/role-label";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { Avatar } from "../../../shared/avatar/avatar";
 import { getActivityIcon, getActivityLabel } from "../../../shared/activity-label";
 import { groupByDay } from "../../../shared/day-label";
 import { PasswordDialog } from "../password-dialog/password-dialog";
 import { UserForm } from "../user-form/user-form";
-import { formatDeletion, formatLastLogin, getInitials } from "../user-display";
+import { formatDeletion, formatLastLogin } from "../user-display";
 import { UserService } from "../user.service";
 
 @Component({
     selector: "app-user-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, UserForm, PasswordDialog],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, Avatar, UserForm, PasswordDialog],
     templateUrl: "./user-page.html",
     styleUrl: "./user-page.css",
 })
@@ -71,7 +72,6 @@ export class UserPage {
 
     isMe = computed(() => this.data()?.id === this.auth.user()?.id);
 
-    protected getInitials = getInitials;
     protected getRoleLabel = getRoleLabel;
     protected getActivityLabel = getActivityLabel;
 

@@ -4,37 +4,118 @@
     section="Stock"
 />
 
-<section class="card list-card">
-    @if (!alerts.error()) {
-        <div class="tabs" role="group" aria-label="Afficher">
+<section class="list-card" [class.readonly]="!auth.isAdmin()">
+    @if (snoozedNotice(); as notice) {
+        <div class="notice" role="status">
+            <span>
+                <strong>{{ notice.name }}</strong> est en sourdine pour {{ notice.days }} jours.
+            </span>
             <button
                 type="button"
-                class="tab"
-                [class.selected]="view() === 'all'"
+                class="btn btn-outline btn-sm"
+                [disabled]="busyId() === notice.id"
+                (click)="resume(notice.id)"
+            >
+                Annuler
+            </button>
+        </div>
+    }
+
+    @if (!alerts.error()) {
+        <div class="chips" role="group" aria-label="Afficher">
+            <button
+                type="button"
+                class="chip"
                 [attr.aria-pressed]="view() === 'all'"
                 (click)="view.set('all')"
             >
-                Tous <span>{{ all().length }}</span>
+                Tous <span class="count">{{ all().length }}</span>
             </button>
             <button
                 type="button"
-                class="tab"
-                [class.selected]="view() === 'out'"
+                class="chip chip-out"
                 [attr.aria-pressed]="view() === 'out'"
-                (click)="view.set('out')"
+                (click)="toggleView('out')"
             >
-                En rupture <span>{{ outCount() }}</span>
+                En rupture <span class="count">{{ outCount() }}</span>
             </button>
             <button
                 type="button"
-                class="tab"
-                [class.selected]="view() === 'low'"
+                class="chip chip-low"
                 [attr.aria-pressed]="view() === 'low'"
-                (click)="view.set('low')"
+                (click)="toggleView('low')"
             >
-                Stock faible <span>{{ lowCount() }}</span>
+                Stock faible <span class="count">{{ lowCount() }}</span>
             </button>
         </div>
+    }
+
+    @if (!alerts.error() && all().length > 0) {
+        <div class="toolbar">
+            <label class="search">
+                <app-icon name="search" [size]="18" />
+                <input
+                    class="input"
+                    type="search"
+                    placeholder="Rechercher un produit"
+                    aria-label="Rechercher un produit"
+                    [value]="search()"
+                    (input)="search.set($any($event.target).value)"
+                />
+            </label>
+
+            <button
+                type="button"
+                class="btn btn-outline filter-btn"
+                aria-label="Filtres"
+                [attr.aria-expanded]="filtersOpen()"
+                (click)="filtersOpen.set(!filtersOpen())"
+            >
+                <app-icon name="filter" [size]="18" />
+                <span class="filter-label">Filtres</span>
+                @if (activeFilters() > 0) {
+                    <span class="filter-count">{{ activeFilters() }}</span>
+                }
+            </button>
+
+            <div class="filters" [class.open]="filtersOpen()">
+                @if (suppliers().length > 0) {
+                    <select
+                        class="input"
+                        aria-label="Fournisseur"
+                        [value]="supplierId()"
+                        (change)="supplierId.set($any($event.target).value)"
+                    >
+                        <option value="">Tous les fournisseurs</option>
+                        @for (s of suppliers(); track s.id) {
+                            <option [value]="s.id" [selected]="supplierId() === '' + s.id">
+                                {{ s.name }}
+                            </option>
+                        }
+                    </select>
+                }
+
+                @if (categories().length > 0) {
+                    <select
+                        class="input"
+                        aria-label="Catégorie"
+                        [value]="categoryId()"
+                        (change)="categoryId.set($any($event.target).value)"
+                    >
+                        <option value="">Toutes les catégories</option>
+                        @for (c of categories(); track c.id) {
+                            <option [value]="c.id" [selected]="categoryId() === '' + c.id">
+                                {{ c.name }}
+                            </option>
+                        }
+                    </select>
+                }
+            </div>
+        </div>
+    }
+
+    @if (rowError()) {
+        <p class="export-error" role="alert">{{ rowError() }}</p>
     }
 
     @if (alerts.isLoading() && !alerts.hasValue()) {
@@ -44,7 +125,7 @@
             }
         </div>
     } @else if (alerts.error()) {
-        <div class="empty" role="alert">
+        <div class="empty card" role="alert">
             {{ errorMessage() }}
             @if (needsSettings()) {
                 <a routerLink="/settings/stock" class="btn btn-outline btn-sm">
@@ -57,59 +138,280 @@
             }
         </div>
     } @else if (list().length === 0) {
-        <div class="empty" role="status">
+        <div class="empty card" role="status">
             @if (all().length === 0) {
                 <app-icon name="check" [size]="24" aria-hidden="true" />
                 Tout est en ordre : aucun produit n'a atteint son seuil.
             } @else {
-                Aucun produit dans cette catégorie.
+                Aucun produit ne correspond à ces filtres.
+                @if (hasFilter()) {
+                    <button type="button" class="btn btn-outline btn-sm" (click)="resetFilters()">
+                        Effacer la recherche
+                    </button>
+                }
             }
         </div>
     } @else {
-        <div class="columns" aria-hidden="true">
-            <span>Produit</span>
-            <span>En stock</span>
-            <span>Seuil</span>
-            <span></span>
-        </div>
+        <div class="groups">
+            @for (group of groups(); track group.key) {
+                <section class="group card">
+                    @if (auth.isAdmin()) {
+                        <header class="group-head">
+                            <div class="group-title">
+                                @if (group.key !== "none") {
+                                    <a
+                                        class="group-name"
+                                        [routerLink]="['/alerts/supplier', group.key]"
+                                        [state]="backState()"
+                                        >{{ group.name }}</a
+                                    >
+                                } @else {
+                                    <strong class="group-name">{{ group.name }}</strong>
+                                }
+                                <span class="group-sub">
+                                    @if (group.contact) {
+                                        {{ group.contact }} ·
+                                    }
+                                    {{ group.items.length }}
+                                    {{ group.items.length === 1 ? "produit" : "produits" }}
+                                </span>
+                            </div>
+                            @if (group.key !== "none") {
+                                <a
+                                    class="btn btn-primary btn-sm order-btn"
+                                    [routerLink]="['/alerts/supplier', group.key]"
+                                    [state]="backState()"
+                                    [attr.aria-label]="'Commander chez ' + group.name"
+                                >
+                                    Commander
+                                </a>
+                            }
+                        </header>
+                    }
 
+                    <ul class="rows">
+                        @for (alert of group.items; track alert.id) {
+                            <li class="row" [class.out]="alert.status === 'OUT_OF_STOCK'">
+                                @if (alert.image) {
+                                    <span class="thumb" aria-hidden="true">
+                                        <img [src]="alert.image" alt="" />
+                                    </span>
+                                }
+
+                                <div class="info">
+                                    <a
+                                        class="name"
+                                        [routerLink]="['/products', alert.id]"
+                                        [state]="backState()"
+                                        >{{ alert.name }}</a
+                                    >
+                                    <p class="line">
+                                        @if (alert.status === "OUT_OF_STOCK") {
+                                            <span class="status">En rupture</span>
+                                        } @else {
+                                            <span class="status">
+                                                <span class="sr-only">Stock faible,</span>
+                                                {{ alert.theoretical_stock }} en stock
+                                            </span>
+                                        }
+                                        @if (alert.category_name) {
+                                            <span class="meta">{{ alert.category_name }}</span>
+                                        }
+                                    </p>
+                                </div>
+
+                                <p
+                                    class="order"
+                                    title="De quoi tenir un mois de ventes, au moins le double du seuil"
+                                >
+                                    <strong>+{{ alert.suggested_quantity }}</strong>
+                                    <span>À commander</span>
+                                </p>
+
+                                @if (auth.isAdmin()) {
+                                    <div class="end">
+                                        <a
+                                            class="btn btn-outline btn-sm restock"
+                                            routerLink="/stock-entries"
+                                            [state]="backState()"
+                                            [attr.aria-label]="'Réapprovisionner ' + alert.name"
+                                            [queryParams]="{
+                                                productId: alert.id,
+                                                quantity: alert.suggested_quantity,
+                                            }"
+                                        >
+                                            Réapprovisionner
+                                        </a>
+                                        <div class="menu-wrap">
+                                            <button
+                                                type="button"
+                                                class="more-btn"
+                                                [disabled]="busyId() === alert.id"
+                                                aria-haspopup="true"
+                                                [attr.aria-expanded]="openMenu() === 'r' + alert.id"
+                                                [attr.aria-label]="'Actions pour ' + alert.name"
+                                                (click)="
+                                                    toggleMenu(
+                                                        'r' + alert.id,
+                                                        $any($event.currentTarget)
+                                                    )
+                                                "
+                                            >
+                                                <app-icon name="more" [size]="20" />
+                                            </button>
+                                            @if (openMenu() === "r" + alert.id) {
+                                                <div class="backdrop" (click)="closeMenu()"></div>
+                                                <div
+                                                    class="menu-panel"
+                                                    role="dialog"
+                                                    [attr.aria-label]="alert.name"
+                                                >
+                                                    <div class="sheet-head">
+                                                        <strong class="sheet-title">{{
+                                                            alert.name
+                                                        }}</strong>
+                                                        <button
+                                                            type="button"
+                                                            class="sheet-close"
+                                                            aria-label="Fermer"
+                                                            (click)="closeMenu()"
+                                                        >
+                                                            <app-icon name="close" [size]="18" />
+                                                        </button>
+                                                    </div>
+                                                    <p class="sheet-info">
+                                                        <span class="last-entry"
+                                                            >Dernière entrée :
+                                                            {{ lastEntryLabel(alert) }}</span
+                                                        >
+                                                        @if (alert.days_left !== null) {
+                                                            <span class="days-left"
+                                                                >Stock pour
+                                                                {{
+                                                                    alert.days_left | daysLeft
+                                                                }}</span
+                                                            >
+                                                        }
+                                                    </p>
+                                                    <a
+                                                        class="menu-item sheet-only sheet-restock"
+                                                        routerLink="/stock-entries"
+                                                        [state]="backState()"
+                                                        [queryParams]="{
+                                                            productId: alert.id,
+                                                            quantity: alert.suggested_quantity,
+                                                        }"
+                                                        (click)="closeMenu()"
+                                                    >
+                                                        <app-icon name="stock-entry" [size]="18" />
+                                                        Réapprovisionner ({{
+                                                            alert.suggested_quantity
+                                                        }})
+                                                    </a>
+                                                    <button
+                                                        type="button"
+                                                        class="menu-item edit-threshold"
+                                                        (click)="
+                                                            editThreshold(
+                                                                alert.id,
+                                                                alert.min_stock
+                                                            );
+                                                            closeMenu()
+                                                        "
+                                                    >
+                                                        <app-icon name="edit" [size]="18" />
+                                                        Modifier le seuil ({{ alert.min_stock }})
+                                                    </button>
+                                                    <p class="menu-label">Mettre en sourdine</p>
+                                                    <div class="snooze-options">
+                                                        @for (days of snoozeOptions; track days) {
+                                                            <button
+                                                                type="button"
+                                                                class="menu-item snooze-option"
+                                                                (click)="snooze(alert, days)"
+                                                            >
+                                                                {{ days }} jours
+                                                            </button>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+
+                                @if (auth.isAdmin() && editingId() === alert.id) {
+                                    <div class="edit-row">
+                                        <label [for]="'seuil-' + alert.id">Nouveau seuil</label>
+                                        <input
+                                            class="input threshold-input"
+                                            type="number"
+                                            min="0"
+                                            inputmode="numeric"
+                                            [id]="'seuil-' + alert.id"
+                                            [value]="editValue()"
+                                            (input)="editValue.set($any($event.target).value)"
+                                            (keydown.enter)="saveThreshold(alert.id)"
+                                            (keydown.escape)="cancelEdit()"
+                                            (blur)="saveThreshold(alert.id)"
+                                        />
+                                    </div>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+        </div>
+    }
+
+    @if (!alerts.error() && all().length > 0 && !auth.isAdmin()) {
+        <p class="note">Pour réapprovisionner, prévenez l'administrateur.</p>
+    }
+
+    <div class="foot">
+        @if (toClearCount() > 0) {
+            <a class="clear-link" routerLink="/alerts/rotation" [queryParams]="{ vue: 'solder' }">
+                À solder : {{ toClearCount() }}
+                {{ toClearCount() === 1 ? "produit" : "produits" }} sans vente depuis 60 jours
+            </a>
+        }
+        <a class="rotation-link" routerLink="/alerts/rotation">
+            <app-icon name="trending-up" [size]="16" />
+            Rotation des produits
+        </a>
+    </div>
+</section>
+
+@if (auth.isAdmin() && snoozed().length > 0) {
+    <section class="card snoozed-card" aria-labelledby="snoozed-title">
+        <h2 id="snoozed-title" class="snoozed-title">En sourdine ({{ snoozed().length }})</h2>
         <ul class="rows">
-            @for (alert of list(); track alert.id) {
-                <li class="row" [class.out]="isOut(alert.theoretical_stock)">
-                    <div class="text">
-                        <a class="name" [routerLink]="['/products', alert.id]">{{ alert.name }}</a>
-                        <span
-                            class="badge"
-                            [class.badge-danger]="isOut(alert.theoretical_stock)"
-                            [class.badge-warning]="!isOut(alert.theoretical_stock)"
+            @for (item of snoozed(); track item.id) {
+                <li class="snoozed-row">
+                    <div class="info">
+                        <a
+                            class="name"
+                            [routerLink]="['/products', item.id]"
+                            [state]="backState()"
+                            >{{ item.name }}</a
                         >
-                            {{ isOut(alert.theoretical_stock) ? "En rupture" : "Stock faible" }}
+                        <span class="meta">
+                            En stock : {{ item.theoretical_stock }} · reprise le
+                            {{ item.snoozed_until | date: "dd/MM/yyyy" }}
                         </span>
                     </div>
-
-                    <span class="stock">
-                        <span class="mobile-label">En stock : </span>
-                        {{ alert.theoretical_stock }}
-                    </span>
-
-                    <span class="threshold">
-                        <span class="mobile-label">· Seuil : </span>
-                        {{ alert.min_stock }}
-                    </span>
-
-                    <div class="end">
-                        <a
-                            class="btn btn-outline btn-sm restock"
-                            routerLink="/stock-entries"
-                            [attr.aria-label]="'Réapprovisionner ' + alert.name"
-                            [queryParams]="{ productId: alert.id }"
-                        >
-                            <app-icon name="stock-entry" [size]="16" />
-                            Réapprovisionner
-                        </a>
-                    </div>
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        [attr.aria-label]="'Réactiver l\'alerte de ' + item.name"
+                        [disabled]="busyId() === item.id"
+                        (click)="resume(item.id)"
+                    >
+                        Réactiver
+                    </button>
                 </li>
             }
         </ul>
-    }
-</section>
+    </section>
+}

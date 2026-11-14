@@ -15,6 +15,43 @@
         </div>
     </div>
 
+    <div class="photo">
+        <button
+            type="button"
+            class="photo-btn"
+            (click)="fileInput.click()"
+            [disabled]="savingPhoto()"
+            aria-label="Changer la photo de profil"
+        >
+            <app-avatar [photo]="auth.user()?.avatar" />
+            <span class="photo-badge"><app-icon name="camera" [size]="14" /></span>
+        </button>
+        <div class="photo-text">
+            <strong>Photo de profil</strong>
+            <span class="muted">PNG ou JPEG, carrée de préférence</span>
+            @if (auth.user()?.avatar) {
+                <button
+                    type="button"
+                    class="photo-remove"
+                    (click)="removePhoto()"
+                    [disabled]="savingPhoto()"
+                >
+                    Retirer la photo
+                </button>
+            }
+        </div>
+        <input
+            #fileInput
+            type="file"
+            accept="image/png,image/jpeg"
+            hidden
+            (change)="onPhoto($event)"
+        />
+    </div>
+    @if (photoError()) {
+        <small class="field-error" role="alert">{{ photoError() }}</small>
+    }
+
     <label class="field">
         <span>Nom</span>
         <input

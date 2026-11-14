@@ -52,14 +52,15 @@ describe("StockMovementService", () => {
         req.flush({ data: [], total: 0, counters: {} });
     });
 
-    it("should download the csv with the same filters and no pagination", () => {
+    it("should download the file with the same filters and no pagination", () => {
         service
-            .exportCsv({ from: "2026-11-01", to: null, type: "ENTRY", productId: null })
+            .exportFile({ from: "2026-11-01", to: null, type: "ENTRY", productId: null }, "csv")
             .subscribe();
 
         const req = httpMock.expectOne((r) => r.url === `${API_URL}/stock_movements/export`);
         expect(req.request.responseType).toBe("blob");
-        expect(req.request.params.keys().sort()).toEqual(["startDate", "type"]);
+        expect(req.request.params.keys().sort()).toEqual(["format", "startDate", "type"]);
+        expect(req.request.params.get("format")).toBe("csv");
         req.flush(new Blob(["a"]));
     });
 });

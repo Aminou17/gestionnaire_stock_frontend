@@ -5,6 +5,7 @@ import { AuthService } from "../../core/auth/auth.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { Avatar } from "../../shared/avatar/avatar";
 import { IconName } from "../../shared/icon/icons";
 
 interface SettingsLink {
@@ -51,6 +52,13 @@ const GROUPS: SettingsGroup[] = [
                 description: "Seuil d'alerte général des produits",
             },
             {
+                path: "alert-email",
+                adminOnly: true,
+                icon: "mail",
+                label: "Email des alertes",
+                description: "Résumé du stock envoyé chaque matin par Gmail",
+            },
+            {
                 path: "cash",
                 adminOnly: true,
                 icon: "banknote",
@@ -74,7 +82,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "download",
                 label: "Sauvegarde et export",
-                description: "Produits, ventes et mouvements en fichier CSV",
+                description: "Produits, ventes et mouvements en PDF",
             },
         ],
     },
@@ -95,47 +103,23 @@ const GROUPS: SettingsGroup[] = [
             },
         ],
     },
-    {
-        title: "Affichage",
-        links: [
-            {
-                path: "appearance",
-                icon: "palette",
-                label: "Apparence",
-                description: "Thème clair ou sombre",
-            },
-        ],
-    },
 ];
 
 @Component({
     selector: "app-settings",
-    imports: [RouterLink, PageHeader, Icon],
+    imports: [RouterLink, PageHeader, Icon, Avatar],
     templateUrl: "./settings.html",
     styleUrl: "./settings.css",
 })
 export class Settings {
     protected auth = inject(AuthService);
-    private theme = inject(ThemeService);
+    protected theme = inject(ThemeService);
 
-    // le gérant ne voit que son compte et l'apparence
+    // l'employé ne voit que son compte
     groups = computed(() =>
         GROUPS.map((group) => ({
             ...group,
             links: group.links.filter((link) => this.auth.isAdmin() || !link.adminOnly),
         })).filter((group) => group.links.length > 0),
     );
-
-    themeLabel = computed(() => (this.theme.theme() === "dark" ? "Sombre" : "Clair"));
-
-    initials = computed(() => {
-        const name = this.auth.user()?.name ?? "";
-
-        return name
-            .split(" ")
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((part) => part[0].toUpperCase())
-            .join("");
-    });
 }

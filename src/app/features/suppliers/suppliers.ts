@@ -20,7 +20,7 @@ import { SupplierForm } from "./supplier-form/supplier-form";
 
 type View = "active" | "deleted";
 
-// Page réservée au propriétaire (adminGuard sur la route, 403 côté backend)
+// Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-suppliers",
     imports: [PageHeader, Icon, SupplierForm],

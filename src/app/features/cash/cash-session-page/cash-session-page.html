@@ -1,9 +1,4 @@
-<app-page-header
-    [title]="title()"
-    section="Caisse"
-    back="/cash/sessions"
-    backLabel="Retour à l'historique"
-/>
+<app-page-header [title]="title()" section="Caisse" [back]="backUrl" [backLabel]="backLabel" />
 
 <h1 class="print-title">Caisse du {{ title() }}</h1>
 
@@ -23,7 +18,7 @@
     <section class="card empty">
         <p>{{ errorMessage() }}</p>
         @if (notFound()) {
-            <a routerLink="/cash/sessions" class="btn btn-outline btn-sm">Retour à l'historique</a>
+            <a [routerLink]="backUrl" class="btn btn-outline btn-sm">{{ backLabel }}</a>
         } @else {
             <button type="button" class="btn btn-outline btn-sm" (click)="session.reload()">
                 Réessayer
@@ -70,6 +65,15 @@
                         </small>
                     }
                 </div>
+                @if (auth.isAdmin() && cash.status === "CLOSED") {
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        (click)="reopenDialog.open(cash.id)"
+                    >
+                        Rouvrir la caisse
+                    </button>
+                }
                 <button type="button" class="btn btn-outline print" (click)="print()">
                     <app-icon name="printer" [size]="18" />
                     Imprimer
@@ -93,26 +97,34 @@
                 <div class="card-header">
                     <h2>Déroulement</h2>
                 </div>
-                <dl class="lines">
-                    <div>
-                        <dt>Ouverte à</dt>
-                        <dd>{{ cash.opened_at | date: "HH:mm" }}</dd>
-                    </div>
-                    <div>
-                        <dt>Ouverte par</dt>
-                        <dd>{{ cash.opened_by_name ?? "—" }}</dd>
-                    </div>
-                    @if (cash.closed_at) {
+                <div class="steps">
+                    <dl class="lines step">
+                        <dt class="step-title">Ouverture</dt>
                         <div>
-                            <dt>Clôturée à</dt>
-                            <dd>{{ cash.closed_at | date: "HH:mm" }}</dd>
+                            <dt>Heure</dt>
+                            <dd>{{ cash.opened_at | date: "HH:mm" }}</dd>
                         </div>
                         <div>
-                            <dt>Clôturée par</dt>
-                            <dd>{{ cash.closed_by_name ?? "—" }}</dd>
+                            <dt>Par</dt>
+                            <dd>{{ cash.opened_by_name ?? "—" }}</dd>
                         </div>
-                    }
-                </dl>
+                    </dl>
+                    <dl class="lines step">
+                        <dt class="step-title">Clôture</dt>
+                        @if (cash.closed_at) {
+                            <div>
+                                <dt>Heure</dt>
+                                <dd>{{ cash.closed_at | date: "HH:mm" }}</dd>
+                            </div>
+                            <div>
+                                <dt>Par</dt>
+                                <dd>{{ cash.closed_by_name ?? "—" }}</dd>
+                            </div>
+                        } @else {
+                            <p class="muted pending">Pas encore clôturée.</p>
+                        }
+                    </dl>
+                </div>
             </section>
 
             <section class="card panel">
@@ -126,11 +138,11 @@
                 } @else {
                     <dl class="lines">
                         <div>
-                            <dt>Fond de caisse</dt>
+                            <dt>Fonds de départ</dt>
                             <dd>{{ cash.opening_amount | fcfa }}</dd>
                         </div>
                         <div>
-                            <dt>Ventes en espèces</dt>
+                            <dt>Ventes</dt>
                             <dd class="in">{{ summary().sales | fcfa }}</dd>
                         </div>
                         @if (summary().deposits > 0) {
@@ -175,3 +187,5 @@
 }
 
 <app-close-cash-dialog #closeDialog (closed)="session.reload()" />
+
+<app-reopen-cash-dialog #reopenDialog (reopened)="session.reload()" />

@@ -1,0 +1,43 @@
+.empty-state {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 48px 16px;
+    text-align: center;
+}
+
+.icon {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--icon-bg);
+    color: var(--icon-color);
+}
+
+.icon.tone-danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+h3 {
+    margin: 8px 0 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+p {
+    max-width: 320px;
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.action {
+    margin-top: 8px;
+}
+
+.action:empty {
+    display: none;
+}

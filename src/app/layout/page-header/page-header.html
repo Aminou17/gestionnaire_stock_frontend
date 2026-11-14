@@ -1,4 +1,4 @@
-<header [class.stacked]="subtitle()">
+<header>
     <button
         type="button"
         class="menu-btn"
@@ -32,33 +32,8 @@
             <app-notifications />
         }
 
-        <div class="user">
-            <button
-                type="button"
-                class="user-btn"
-                (click)="menuOpen.set(!menuOpen())"
-                [attr.aria-expanded]="menuOpen()"
-            >
-                <span class="avatar">{{ initials() }}</span>
-                <span class="user-info">
-                    <strong>{{ auth.user()?.name }}</strong>
-                    <small>{{ auth.roleLabel() }}</small>
-                </span>
-                <app-icon name="chevron-down" [size]="16" />
-            </button>
-
-            @if (menuOpen()) {
-                <div class="dropdown">
-                    <div class="dropdown-head">
-                        <strong>{{ auth.user()?.name }}</strong>
-                        <small>{{ auth.user()?.email }}</small>
-                    </div>
-                    <button type="button" (click)="auth.logout()">
-                        <app-icon name="logout" [size]="16" />
-                        Se déconnecter
-                    </button>
-                </div>
-            }
-        </div>
+        <a routerLink="/settings/account" class="me" aria-label="Mon profil">
+            <app-avatar [photo]="auth.user()?.avatar" />
+        </a>
     </div>
 </header>

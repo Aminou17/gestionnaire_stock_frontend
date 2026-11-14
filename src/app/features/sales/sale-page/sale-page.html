@@ -1,48 +1,8 @@
-<div class="topbar">
-    <a [routerLink]="back.link" class="back">
-        <app-icon name="chevron-left" [size]="18" />
-        {{ back.label }}
-    </a>
-
-    @if (data(); as sale) {
-        <nav class="pager" aria-label="Autres ventes">
-            @if (sale.previous_id; as id) {
-                <a
-                    class="pager-btn"
-                    [routerLink]="['/sales', id]"
-                    [state]="navState()"
-                    (click)="justCreated.set(false)"
-                    [attr.aria-label]="'Vente précédente, n° ' + id"
-                    title="Vente précédente"
-                >
-                    <app-icon name="chevron-left" [size]="18" />
-                </a>
-            } @else {
-                <span class="pager-btn disabled" aria-hidden="true">
-                    <app-icon name="chevron-left" [size]="18" />
-                </span>
-            }
-            @if (sale.next_id; as id) {
-                <a
-                    class="pager-btn"
-                    [routerLink]="['/sales', id]"
-                    [state]="navState()"
-                    (click)="justCreated.set(false)"
-                    [attr.aria-label]="'Vente suivante, n° ' + id"
-                    title="Vente suivante"
-                >
-                    <app-icon name="chevron-right" [size]="18" />
-                </a>
-            } @else {
-                <span class="pager-btn disabled" aria-hidden="true">
-                    <app-icon name="chevron-right" [size]="18" />
-                </span>
-            }
-        </nav>
-    }
-</div>
-
-<app-page-header [title]="data() ? 'Vente #' + data()!.id : 'Vente'" section="Ventes" />
+<app-page-header
+    [title]="data() ? 'Vente #' + data()!.id : 'Vente'"
+    [back]="back.link"
+    [backLabel]="back.label"
+/>
 
 @if (justCreated()) {
     <div class="alert alert-success banner" role="status">
@@ -93,6 +53,40 @@
     <div class="layout">
         <div class="main">
             <section class="card summary">
+                <nav class="pager" aria-label="Autres ventes">
+                    @if (sale.previous_id; as id) {
+                        <a
+                            class="pager-btn"
+                            [routerLink]="['/sales', id]"
+                            [state]="navState()"
+                            (click)="justCreated.set(false)"
+                            [attr.aria-label]="'Vente précédente, n° ' + id"
+                            title="Vente précédente"
+                        >
+                            <app-icon name="chevron-left" [size]="18" />
+                        </a>
+                    } @else {
+                        <span class="pager-btn disabled" aria-hidden="true">
+                            <app-icon name="chevron-left" [size]="18" />
+                        </span>
+                    }
+                    @if (sale.next_id; as id) {
+                        <a
+                            class="pager-btn"
+                            [routerLink]="['/sales', id]"
+                            [state]="navState()"
+                            (click)="justCreated.set(false)"
+                            [attr.aria-label]="'Vente suivante, n° ' + id"
+                            title="Vente suivante"
+                        >
+                            <app-icon name="chevron-right" [size]="18" />
+                        </a>
+                    } @else {
+                        <span class="pager-btn disabled" aria-hidden="true">
+                            <app-icon name="chevron-right" [size]="18" />
+                        </span>
+                    }
+                </nav>
                 <div class="summary-text">
                     <span
                         class="badge"
@@ -110,33 +104,42 @@
                         }}</span
                     >
                     <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
-                        sale.total | fcfa
+                        (hasReturns() ? net() : sale.total) | fcfa
                     }}</strong>
-                    <span class="summary-meta muted">
-                        <span>{{ sale.created_at | date: "EEEE d MMMM y 'à' HH:mm" }}</span>
-                        @if (sale.customer_name || sale.customer_phone) {
-                            <span class="customer">
-                                <app-icon name="user" [size]="14" />
-                                {{ sale.customer_name }}
+                    @if (hasReturns()) {
+                        <small class="muted"
+                            >sur {{ sale.total | fcfa }} · {{ returned() | fcfa }} rendus</small
+                        >
+                    }
+                    <div class="summary-meta">
+                        <span class="when">{{
+                            sale.created_at | date: "EEEE d MMMM y 'à' HH:mm"
+                        }}</span>
+                        <span class="customer">
+                            <app-icon name="user" [size]="14" />
+                            Client :
+                            @if (sale.customer_name || sale.customer_phone) {
+                                <strong>{{ sale.customer_name }}</strong>
                                 @if (sale.customer_phone) {
                                     <a [href]="'tel:' + sale.customer_phone">{{
                                         sale.customer_phone
                                     }}</a>
                                 }
-                            </span>
-                        }
+                            } @else {
+                                <span>—</span>
+                            }
+                        </span>
                         @if (auth.isAdmin() && sale.user_name) {
-                            <span class="seller" [title]="roleLabel(sale.user_role) ?? ''">
-                                <span class="seller-avatar" aria-hidden="true">{{
-                                    sellerInitials()
-                                }}</span>
+                            <span class="seller">
+                                <app-avatar
+                                    class="seller-avatar"
+                                    [photo]="sale.user_avatar"
+                                    aria-hidden="true"
+                                />
                                 {{ sale.user_name }}
-                                @if (roleLabel(sale.user_role); as role) {
-                                    <span class="seller-role">· {{ role }}</span>
-                                }
                             </span>
                         }
-                    </span>
+                    </div>
                 </div>
                 @if (settingsFailed()) {
                     <div class="alert alert-warning settings-alert" role="alert">
@@ -183,7 +186,7 @@
                     @if (canRefund()) {
                         <button
                             type="button"
-                            class="btn btn-outline refund-btn"
+                            class="refund-btn"
                             [disabled]="reloading()"
                             (click)="askRefund()"
                         >
@@ -260,25 +263,55 @@
                         </div>
                     </dl>
                 }
+            </section>
 
-                @if (sale.returns.length > 0) {
+            @if (sale.returns.length > 0) {
+                <section class="card sheet">
+                    <h2 class="section-title">Articles rendus</h2>
                     <ul class="returns" aria-label="Articles rendus">
                         @for (row of sale.returns; track row.id) {
                             <li>
-                                <span>
-                                    Rendu : {{ row.quantity }} × {{ row.product_name }}
-                                    <small class="muted">· {{ row.reason }}</small>
+                                <span class="return-text">
+                                    <strong>{{ row.quantity }} × {{ row.product_name }}</strong>
+                                    <small class="muted"
+                                        >{{ row.created_at | date: "d MMM" }} ·
+                                        {{ row.reason }}</small
+                                    >
                                 </span>
                                 <strong class="discount">−{{ row.amount | fcfa }}</strong>
                             </li>
                         }
                     </ul>
-                }
+                    <div class="returns-total">
+                        <span>Total rendu</span>
+                        <strong class="discount">−{{ sale.returned_amount | fcfa }}</strong>
+                    </div>
+                </section>
+            }
 
-                <div class="total" [class.cancelled]="sale.status === 'CANCELLED'">
-                    <span>Total</span>
-                    <strong>{{ sale.total | fcfa }}</strong>
-                </div>
+            <section class="card sheet">
+                <h2 class="section-title">Paiement</h2>
+                @if (hasReturns()) {
+                    <dl class="subtotals recap">
+                        <div>
+                            <dt>Total de la vente</dt>
+                            <dd>{{ sale.total | fcfa }}</dd>
+                        </div>
+                        <div>
+                            <dt>Rendu</dt>
+                            <dd class="returned">−{{ returned() | fcfa }}</dd>
+                        </div>
+                    </dl>
+                    <div class="total">
+                        <span>Net</span>
+                        <strong>{{ net() | fcfa }}</strong>
+                    </div>
+                } @else {
+                    <div class="total" [class.cancelled]="sale.status === 'CANCELLED'">
+                        <span>Total</span>
+                        <strong>{{ sale.total | fcfa }}</strong>
+                    </div>
+                }
 
                 <dl class="payment">
                     @if (showPayments()) {
@@ -286,12 +319,20 @@
                             <div>
                                 <dt>
                                     <app-icon
-                                        [name]="payment.payment_method === 'MOBILE_MONEY' ? 'phone' : 'banknote'"
+                                        [name]="
+                                            payment.payment_method === 'MOBILE_MONEY'
+                                                ? 'phone'
+                                                : 'banknote'
+                                        "
                                         [size]="16"
                                     />
                                     {{ payment.created_at | date: "d MMM, HH:mm" }}
                                     ·
-                                    {{ payment.payment_method === "MOBILE_MONEY" ? "Mobile money" : "Espèces" }}
+                                    {{
+                                        payment.payment_method === "MOBILE_MONEY"
+                                            ? "Mobile money"
+                                            : "Espèces"
+                                    }}
                                 </dt>
                                 <dd>{{ payment.amount | fcfa }}</dd>
                             </div>
@@ -331,46 +372,82 @@
             <section class="card panel">
                 <h2 class="section-title">Activité</h2>
                 <ol class="timeline">
-                    <li>
-                        <div class="event">
-                            <strong>Vente enregistrée</strong>
-                            <span class="muted">{{
-                                sale.created_at | date: "d MMM y, HH:mm"
-                            }}</span>
-                        </div>
-                        @for (move of saleMoves(); track move.id) {
-                            <button type="button" class="move" (click)="openMove(move)">
-                                <span class="move-name">{{ move.product_name }}</span>
-                                <span class="move-stock">
-                                    <strong class="out">−{{ move.quantity }}</strong>
-                                    · stock {{ move.stock_after + move.quantity | number }} →
-                                    {{ move.stock_after | number }}
-                                </span>
-                                <app-icon name="chevron-right" [size]="16" />
-                            </button>
-                        }
-                    </li>
-                    @if (sale.status === "CANCELLED") {
-                        <li class="danger">
+                    @for (event of timeline(); track event.key) {
+                        <li [class.danger]="event.kind === 'return' || event.kind === 'cancel'">
                             <div class="event">
-                                <strong>Vente remboursée</strong>
+                                @switch (event.kind) {
+                                    @case ("sale") {
+                                        <strong>Vente enregistrée</strong>
+                                    }
+                                    @case ("payment") {
+                                        <strong
+                                            >{{ event.payment!.amount | fcfa }} en
+                                            {{
+                                                event.payment!.payment_method === "MOBILE_MONEY"
+                                                    ? "mobile money"
+                                                    : "espèces"
+                                            }}</strong
+                                        >
+                                    }
+                                    @case ("return") {
+                                        <strong
+                                            >Rendu : {{ event.ret!.quantity }} ×
+                                            {{ event.ret!.product_name }}</strong
+                                        >
+                                        <span class="muted">{{ event.ret!.reason }}</span>
+                                    }
+                                    @case ("cancel") {
+                                        <strong>Vente remboursée</strong>
+                                    }
+                                }
                                 <span class="muted">
-                                    {{ sale.cancelled_at | date: "d MMM y, HH:mm" }}
-                                    @if (auth.isAdmin() && sale.cancelled_by_name) {
+                                    {{ event.at | date: "d MMM y, HH:mm" }}
+                                    @if (
+                                        auth.isAdmin() &&
+                                        event.kind === "return" &&
+                                        event.ret!.user_name
+                                    ) {
+                                        · par {{ event.ret!.user_name }}
+                                    }
+                                    @if (
+                                        auth.isAdmin() &&
+                                        event.kind === "cancel" &&
+                                        sale.cancelled_by_name
+                                    ) {
                                         · par {{ sale.cancelled_by_name }}
                                     }
                                 </span>
                             </div>
-                            @for (move of refundMoves(); track move.id) {
-                                <button type="button" class="move" (click)="openMove(move)">
-                                    <span class="move-name">{{ move.product_name }}</span>
-                                    <span class="move-stock">
-                                        <strong class="in">+{{ move.quantity }}</strong>
-                                        · stock {{ move.stock_after - move.quantity | number }} →
-                                        {{ move.stock_after | number }}
-                                    </span>
-                                    <app-icon name="chevron-right" [size]="16" />
+                            @if (event.moves.length > 1) {
+                                <button
+                                    type="button"
+                                    class="stock-toggle"
+                                    [attr.aria-expanded]="openStock().includes(event.key)"
+                                    (click)="toggleStock(event.key)"
+                                >
+                                    Stock : {{ event.moves.length }} produits
+                                    <app-icon name="chevron-down" [size]="16" />
                                 </button>
+                            }
+                            @if (event.moves.length === 1 || openStock().includes(event.key)) {
+                                @for (move of event.moves; track move.id) {
+                                    <button type="button" class="move" (click)="openMove(move)">
+                                        <span class="move-name">{{ move.product_name }}</span>
+                                        <span class="move-stock">
+                                            @if (move.type === "SALE") {
+                                                <strong class="out">−{{ move.quantity }}</strong>
+                                                · stock
+                                                {{ move.stock_after + move.quantity | number }}
+                                            } @else {
+                                                <strong class="in">+{{ move.quantity }}</strong>
+                                                · stock
+                                                {{ move.stock_after - move.quantity | number }}
+                                            }
+                                            → {{ move.stock_after | number }}
+                                        </span>
+                                        <app-icon name="chevron-right" [size]="16" />
+                                    </button>
+                                }
                             }
                         </li>
                     }
@@ -431,11 +508,9 @@
                 {{ cashPaid() | fcfa }} seront retirés de la caisse.
             }
             @if (otherPaid() > 0) {
-                {{ otherPaid() | fcfa }} payés par mobile money sont à rendre au client hors
-                caisse.
+                {{ otherPaid() | fcfa }} payés par mobile money sont à rendre au client hors caisse.
             }
-            Les produits sont remis en stock.
-            Cette action est définitive.
+            Les produits sont remis en stock. Cette action est définitive.
         </p>
 
         <label class="field">
@@ -542,8 +617,7 @@
                     <p class="muted">Monnaie à rendre : {{ change | fcfa }}</p>
                 }
             }
-        } @else {
-        }
+        } @else {}
 
         @if (payError()) {
             <div class="alert alert-error" role="alert">{{ payError() }}</div>

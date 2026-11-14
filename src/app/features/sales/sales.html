@@ -1,4 +1,13 @@
 <app-page-header title="Ventes">
+    @if (auth.isAdmin()) {
+        <app-export-menu
+            class="icon-phone"
+            ariaLabel="Exporter les ventes"
+            [busy]="exporting()"
+            [disabled]="list().length === 0"
+            (picked)="exportFile($event)"
+        />
+    }
     <a routerLink="/sales/new" class="btn btn-primary new-sale">
         <app-icon name="plus" [size]="18" />
         <span>Nouvelle vente</span>
@@ -21,7 +30,6 @@
             } @else {
                 <strong class="stat-value tone-{{ tab.tone }}">{{ tab.count ?? "—" }}</strong>
             }
-            <span class="dot dot-{{ tab.tone }}"></span>
         </button>
     }
 
@@ -36,59 +44,92 @@
 </div>
 
 <section class="card list-card">
-    <app-period-filter (changed)="selectRange($event)">
-        <label class="filter">
-            <span class="muted">Paiement</span>
-            <select class="input" (change)="selectPayment($any($event.target).value)">
-                <option value="">Tous</option>
-                <option value="CASH">Espèces</option>
-                <option value="MOBILE_MONEY">Mobile money</option>
-            </select>
-        </label>
-        @if (auth.isAdmin()) {
+    <div class="filters" [class.open]="filtersOpen()" id="sales-filters">
+        <app-period-filter [chips]="true" [stacked]="true" (changed)="selectRange($event)">
             <label class="filter">
-                <span class="muted">Vendeur</span>
-                <select class="input" (change)="selectSeller($any($event.target).value)">
-                    <option value="">Tous</option>
-                    @for (user of sellers(); track user.id) {
-                        <option [value]="user.id">{{ user.name }}</option>
-                    }
+                <span class="sr-only">Paiement</span>
+                <select
+                    class="chip"
+                    [class.active]="paymentMethod() !== null"
+                    (change)="selectPayment($any($event.target).value)"
+                >
+                    <option value="" [selected]="paymentMethod() === null">
+                        Tous les paiements
+                    </option>
+                    <option value="CASH" [selected]="paymentMethod() === 'CASH'">Espèces</option>
+                    <option value="MOBILE_MONEY" [selected]="paymentMethod() === 'MOBILE_MONEY'">
+                        Mobile money
+                    </option>
                 </select>
             </label>
-        }
-        @if (auth.isAdmin()) {
-            <button
-                type="button"
-                class="btn btn-outline export"
-                [disabled]="exporting() || list().length === 0"
-                (click)="exportCsv()"
-            >
-                @if (exporting()) {
-                    <span class="spinner"></span>
-                } @else {
-                    <app-icon name="download" [size]="16" />
-                }
-                Exporter
-            </button>
-        }
-    </app-period-filter>
+            @if (auth.isAdmin()) {
+                <label class="filter">
+                    <span class="sr-only">Vendeur</span>
+                    <select
+                        class="chip"
+                        [class.active]="sellerId() !== null"
+                        (change)="selectSeller($any($event.target).value)"
+                    >
+                        <option value="" [selected]="sellerId() === null">Tous les vendeurs</option>
+                        @for (user of sellers(); track user.id) {
+                            <option [value]="user.id" [selected]="sellerId() === user.id">
+                                {{ user.name }}
+                            </option>
+                        }
+                    </select>
+                </label>
+            }
+        </app-period-filter>
+    </div>
 
     @if (exportError()) {
         <div class="alert alert-error list-error" role="alert">{{ exportError() }}</div>
     }
 
-    <div class="search">
-        <app-icon name="search" [size]="18" />
-        <input
-            type="search"
-            class="input"
-            [placeholder]="auth.isAdmin() ? 'Numéro de vente, vendeur ou client' : 'Numéro de vente ou client'"
-            aria-label="Rechercher une vente"
-            (input)="onSearch($any($event.target).value)"
-        />
+    <div class="searchbar">
+        <div class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                type="search"
+                class="input"
+                placeholder="Rechercher…"
+                aria-label="Rechercher une vente"
+                (input)="onSearch($any($event.target).value)"
+            />
+        </div>
+        <button
+            type="button"
+            class="filters-btn"
+            [class.on]="activeFilters().length > 0"
+            [attr.aria-expanded]="filtersOpen()"
+            aria-controls="sales-filters"
+            (click)="filtersOpen.set(!filtersOpen())"
+        >
+            <app-icon name="filter" [size]="18" />
+            Filtres
+            @if (activeFilters().length > 0) {
+                <span class="filters-count">{{ activeFilters().length }}</span>
+            }
+        </button>
     </div>
 
-    <div class="chips">
+    @if (activeFilters().length > 0) {
+        <div class="active-filters">
+            @for (filter of activeFilters(); track filter.key) {
+                <button
+                    type="button"
+                    class="active-chip"
+                    [attr.aria-label]="'Retirer le filtre ' + filter.label"
+                    (click)="clearFilter(filter.key)"
+                >
+                    {{ filter.label }}
+                    <app-icon name="close" [size]="14" />
+                </button>
+            }
+        </div>
+    }
+
+    <div class="status-chips">
         @for (tab of tabs(); track tab.label) {
             <button
                 type="button"
@@ -110,25 +151,38 @@
             }
         </div>
     } @else if (sales.error() && list().length === 0) {
-        <div class="empty">
-            Impossible de charger les ventes.
-            <button type="button" class="btn btn-outline btn-sm" (click)="sales.reload()">
+        <app-empty-state
+            icon="alert"
+            tone="danger"
+            title="Ventes indisponibles"
+            text="Vérifiez votre connexion, puis réessayez."
+        >
+            <button type="button" class="btn btn-outline" (click)="sales.reload()">
                 Réessayer
             </button>
-        </div>
+        </app-empty-state>
     } @else if (list().length === 0) {
-        <div class="empty">
-            @if (status() === "CANCELLED") {
-                Aucune vente remboursée sur cette période.
-            } @else {
-                @if (range().period === "all") {
-                    Aucune vente enregistrée pour le moment.
-                } @else {
-                    Aucune vente sur cette période.
-                }
-                <a routerLink="/sales/new" class="btn btn-outline btn-sm">Nouvelle vente</a>
-            }
-        </div>
+        @if (status() === "CANCELLED") {
+            <app-empty-state
+                icon="undo"
+                title="Aucune vente remboursée"
+                text="Les ventes remboursées de cette période apparaîtront ici."
+            />
+        } @else if (range().period === "all" && !search()) {
+            <app-empty-state
+                icon="cart"
+                title="Aucune vente pour le moment"
+                text="Votre première vente apparaîtra ici dès qu'elle sera enregistrée."
+            >
+                <a routerLink="/sales/new" class="btn btn-primary">Nouvelle vente</a>
+            </app-empty-state>
+        } @else {
+            <app-empty-state
+                icon="search"
+                title="Aucune vente trouvée"
+                text="Essayez une autre période ou un autre filtre."
+            />
+        }
     } @else {
         <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
         @if (sales.error() && page() === 1) {
@@ -140,13 +194,20 @@
             </div>
         }
 
-        <p class="mobile-count muted">
-            {{ total() }} vente{{ total() > 1 ? "s" : "" }}
-            <!-- le montant encaissé ne concerne pas les ventes remboursées -->
+        <!-- le montant encaissé ne concerne pas les ventes remboursées -->
+        <section class="summary" aria-label="Résumé">
             @if (status() !== "CANCELLED") {
-                · {{ counters()?.active_total | fcfa }} encaissés
+                <div class="summary-main">
+                    <span class="summary-label">Encaissé</span>
+                    <strong class="summary-amount">{{ counters()?.active_total | fcfa }}</strong>
+                </div>
             }
-        </p>
+            <span class="summary-count">
+                {{ total() }}
+                {{ status() === "CANCELLED" ? "remboursement" : "vente"
+                }}{{ total() > 1 ? "s" : "" }}
+            </span>
+        </section>
 
         <div class="table-wrap">
             <table [class.reloading]="sales.isLoading() && page() === 1">
@@ -188,9 +249,6 @@
                             @if (auth.isAdmin()) {
                                 <td>
                                     {{ sale.user_name }}
-                                    @if (roleLabel(sale.user_role); as role) {
-                                        <span class="muted">({{ role }})</span>
-                                    }
                                 </td>
                             }
                             <td>{{ sale.customer_name }}</td>
@@ -201,7 +259,9 @@
                                 @if (sale.status === "CANCELLED") {
                                     <span class="badge badge-danger">Remboursée</span>
                                 } @else if (due(sale) > 0) {
-                                    <span class="badge badge-warning">Reste {{ due(sale) | fcfa }}</span>
+                                    <span class="badge badge-warning"
+                                        >Reste {{ due(sale) | fcfa }}</span
+                                    >
                                 }
                             </td>
                         </tr>
@@ -210,52 +270,68 @@
             </table>
         </div>
 
-        <!-- Version téléphone : une carte par vente -->
-        <ul class="cards">
-            @for (sale of list(); track sale.id) {
-                <li
-                    class="sale-card"
-                    [class.cancelled]="sale.status === 'CANCELLED'"
-                    (click)="openSale(sale)"
-                >
-                    <div class="line">
-                        <a
-                            [routerLink]="['/sales', sale.id]"
-                            class="sale-link"
-                            (click)="$event.stopPropagation()"
-                            >Vente #{{ sale.id }}</a
-                        >
-                        @if (sale.status === "CANCELLED") {
-                            <span class="badge badge-danger">Remboursée</span>
-                        } @else if (due(sale) > 0) {
-                            <span class="badge badge-warning">Reste {{ due(sale) | fcfa }}</span>
+        <!-- Version téléphone : les ventes regroupées par jour -->
+        <div class="days">
+            @for (day of days(); track day.key) {
+                <section class="day">
+                    <h2 class="day-title">{{ day.label }}</h2>
+                    <ul class="day-card">
+                        @for (sale of day.items; track sale.id) {
+                            <li
+                                class="sale-row"
+                                [class.cancelled]="sale.status === 'CANCELLED'"
+                                (click)="openSale(sale)"
+                            >
+                                <div class="sale-main">
+                                    <div class="sale-top">
+                                        <a
+                                            [routerLink]="['/sales', sale.id]"
+                                            class="sale-link"
+                                            (click)="$event.stopPropagation()"
+                                            >Vente #{{ sale.id }}</a
+                                        >
+                                        @if (sale.status === "CANCELLED") {
+                                            <span class="badge badge-danger">Remboursée</span>
+                                        } @else if (due(sale) > 0) {
+                                            <span class="badge badge-warning"
+                                                >Reste {{ due(sale) | fcfa }}</span
+                                            >
+                                        }
+                                    </div>
+                                    <p class="sale-sub">
+                                        {{ sale.created_at | date: "HH:mm" }} ·
+                                        {{ sale.items_count }} article{{
+                                            sale.items_count > 1 ? "s" : ""
+                                        }}
+                                        @if (paymentLabel(sale.payment_method); as method) {
+                                            · {{ method }}
+                                        }
+                                    </p>
+                                    @if ((auth.isAdmin() && sale.user_name) || sale.customer_name) {
+                                        <p class="sale-who">
+                                            @if (auth.isAdmin() && sale.user_name) {
+                                                {{ sale.user_name }}
+                                            }
+                                            @if (
+                                                auth.isAdmin() &&
+                                                sale.user_name &&
+                                                sale.customer_name
+                                            ) {
+                                                ·
+                                            }
+                                            @if (sale.customer_name) {
+                                                Client : {{ sale.customer_name }}
+                                            }
+                                        </p>
+                                    }
+                                </div>
+                                <strong class="amount">{{ sale.total | fcfa }}</strong>
+                            </li>
                         }
-                    </div>
-                    <span class="meta muted">
-                        {{
-                            isToday(sale.created_at)
-                                ? "Aujourd'hui, " + (sale.created_at | date: "HH:mm")
-                                : (sale.created_at | date: "d MMM y, HH:mm")
-                        }}
-                        @if (auth.isAdmin() && sale.user_name) {
-                            · {{ sale.user_name }}
-                        }
-                        @if (sale.customer_name) {
-                            · Client : {{ sale.customer_name }}
-                        }
-                    </span>
-                    <div class="line">
-                        <span class="meta muted">
-                            {{ sale.items_count }} article{{ sale.items_count > 1 ? "s" : "" }}
-                            @if (paymentLabel(sale.payment_method); as method) {
-                                · {{ method }}
-                            }
-                        </span>
-                        <strong class="amount">{{ sale.total | fcfa }}</strong>
-                    </div>
-                </li>
+                    </ul>
+                </section>
             }
-        </ul>
+        </div>
 
         <!-- en vue, ce repère déclenche le chargement des 20 ventes suivantes -->
         @if (hasMore()) {
@@ -272,7 +348,3 @@
         }
     }
 </section>
-
-<a routerLink="/sales/new" class="fab" aria-label="Nouvelle vente">
-    <app-icon name="plus" [size]="24" />
-</a>
