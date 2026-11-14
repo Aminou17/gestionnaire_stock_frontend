@@ -2,6 +2,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, computed, inject, signal, viewChild } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
+import { FormsModule } from "@angular/forms";
 
 import { Icon } from "../../../shared/icon/icon";
 import { NewShopDialog } from "../new-shop-dialog/new-shop-dialog";
@@ -12,7 +13,7 @@ type View = "all" | ShopStatus;
 
 @Component({
     selector: "app-shops",
-    imports: [DatePipe, Icon, NewShopDialog],
+    imports: [DatePipe, FormsModule, Icon, NewShopDialog],
     templateUrl: "./shops.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shops.css"],
     host: {
@@ -25,6 +26,7 @@ export class Shops {
 
     private newShop = viewChild.required(NewShopDialog);
     private confirm = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
+    private trialDialog = viewChild.required<ElementRef<HTMLDialogElement>>("trialDialog");
 
     shops = rxResource({ stream: () => this.owner.getShops() });
 
@@ -55,6 +57,65 @@ export class Shops {
     pending = signal<OwnedShop | null>(null);
     updating = signal<number | null>(null);
     actionError = signal<string | null>(null);
+
+    // essai en cours, terminé ou absent, pour l'étiquette de la liste
+    trialState(shop: OwnedShop): { label: string; ended: boolean } | null {
+        if (!shop.trial_ends_at) return null;
+
+        const days = Math.ceil((new Date(shop.trial_ends_at).getTime() - Date.now()) / 86_400_000);
+        if (days <= 0) return { label: "Essai terminé", ended: true };
+
+        return { label: `Essai : ${days} jour${days > 1 ? "s" : ""} restant${days > 1 ? "s" : ""}`, ended: false };
+    }
+
+    // boutique dont on change l'essai, et la durée saisie (vide : retirer l'essai)
+    trialShop = signal<OwnedShop | null>(null);
+    trialDays = signal<number | null>(null);
+    trialError = signal<string | null>(null);
+    savingTrial = signal(false);
+
+    askTrial(shop: OwnedShop) {
+        this.menuFor.set(null);
+        this.trialShop.set(shop);
+        this.trialDays.set(null);
+        this.trialError.set(null);
+        this.trialDialog().nativeElement.showModal();
+    }
+
+    closeTrial() {
+        if (this.savingTrial()) return;
+        this.trialDialog().nativeElement.close();
+    }
+
+    onTrialCancel(event: Event) {
+        if (this.savingTrial()) event.preventDefault();
+    }
+
+    saveTrial() {
+        const shop = this.trialShop();
+        if (!shop) return;
+
+        const days = this.trialDays();
+        if (days !== null && (!Number.isInteger(days) || days < 1 || days > 365)) {
+            this.trialError.set("Indiquez un nombre de jours entre 1 et 365.");
+            return;
+        }
+
+        this.savingTrial.set(true);
+        this.trialError.set(null);
+
+        this.owner.setTrial(shop.id, days).subscribe({
+            next: () => {
+                this.savingTrial.set(false);
+                this.trialDialog().nativeElement.close();
+                this.shops.reload();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.savingTrial.set(false);
+                this.trialError.set(err.error?.message ?? "Impossible de changer l'essai.");
+            },
+        });
+    }
 
     openNewShop() {
         this.newShop().open();

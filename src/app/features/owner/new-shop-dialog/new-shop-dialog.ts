@@ -40,6 +40,8 @@ export class NewShopDialog {
         adminName: ["", [Validators.required, Validators.maxLength(100)]],
         email: ["", [Validators.required, Validators.email]],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
+        // vide : pas d'essai
+        trialDays: [null as number | null, [Validators.min(1), Validators.max(365)]],
     });
 
     saving = signal(false);
@@ -108,7 +110,7 @@ export class NewShopDialog {
             return;
         }
 
-        const { shopName, adminName, email, password } = this.form.getRawValue();
+        const { shopName, adminName, email, password, trialDays } = this.form.getRawValue();
         this.saving.set(true);
         this.error.set(null);
 
@@ -118,6 +120,7 @@ export class NewShopDialog {
                 adminName: adminName.trim(),
                 email: email.trim(),
                 password,
+                ...(trialDays ? { trialDays } : {}),
             })
             .subscribe({
                 next: (shop) => {

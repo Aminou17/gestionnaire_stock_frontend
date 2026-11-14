@@ -118,6 +118,9 @@
                             <small class="muted">Aucun administrateur actif</small>
                         }
                         <!-- sur téléphone, l'activité tient sur une ligne -->
+                        @if (trialState(shop); as trial) {
+                            <small class="trial" [class.ended]="trial.ended">{{ trial.label }}</small>
+                        }
                         <small class="shop-meta muted">
                             {{ shop.sales_last_30_days }}
                             vente{{ shop.sales_last_30_days > 1 ? "s" : "" }} en 30 j ·
@@ -163,6 +166,10 @@
                                 </button>
                                 @if (menuFor() === shop.id) {
                                     <div class="menu" role="menu">
+                                        <button type="button" role="menuitem" (click)="askTrial(shop)">
+                                            <app-icon name="clock" [size]="16" />
+                                            Modifier l'essai
+                                        </button>
                                         <button
                                             type="button"
                                             role="menuitem"
@@ -236,6 +243,53 @@
                     <span class="spinner"></span>
                 }
                 Suspendre
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog
+    #trialDialog
+    aria-labelledby="trial-title"
+    (cancel)="onTrialCancel($event)"
+    (close)="trialShop.set(null)"
+>
+    <form (submit)="$event.preventDefault(); saveTrial()">
+        <h2 id="trial-title">Essai de {{ trialShop()?.name }}</h2>
+        <p class="muted">
+            La durée compte à partir d'aujourd'hui. Laissez vide pour retirer l'essai. La boutique
+            n'est pas suspendue automatiquement à la fin.
+        </p>
+
+        @if (trialError()) {
+            <div class="alert alert-error" role="alert">{{ trialError() }}</div>
+        }
+
+        <label class="field">
+            <span>Jours d'essai</span>
+            <input
+                class="input"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                max="365"
+                step="1"
+                name="trialDays"
+                placeholder="Ex. : 30"
+                [ngModel]="trialDays()"
+                (ngModelChange)="trialDays.set($event)"
+            />
+        </label>
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="savingTrial()" (click)="closeTrial()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="savingTrial()">
+                @if (savingTrial()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer
             </button>
         </div>
     </form>

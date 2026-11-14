@@ -38,6 +38,7 @@ describe("NewShopDialog", () => {
             adminName: "Fatou Diallo",
             email: "fatou@exemple.com",
             password: "Provisoire-2026",
+            trialDays: null,
         });
 
     it("should create the shop and show the access to send, once", async () => {
@@ -47,6 +48,7 @@ describe("NewShopDialog", () => {
                 name: "Chez Fatou",
                 status: "ACTIVE",
                 created_at: "",
+                trial_ends_at: null,
                 admin: { id: 9, name: "Fatou Diallo", email: "fatou@exemple.com", role: "admin" },
             }),
         );
@@ -70,6 +72,42 @@ describe("NewShopDialog", () => {
         expect(text).toContain("Provisoire-2026");
     });
 
+    it("should send trialDays when it is filled", async () => {
+        createShop = vi.fn(() => of({ id: 3, name: "Chez Fatou", admin: { email: "fatou@exemple.com" } }));
+        const fixture = await render();
+        fill(fixture.componentInstance);
+        fixture.componentInstance.form.controls.trialDays.setValue(14);
+
+        fixture.componentInstance.submit();
+
+        expect(createShop.mock.calls[0][0].trialDays).toBe(14);
+    });
+
+    it("should not send trialDays when it is empty", async () => {
+        createShop = vi.fn(() => of({ id: 3, name: "Chez Fatou", admin: { email: "fatou@exemple.com" } }));
+        const fixture = await render();
+        fill(fixture.componentInstance);
+
+        fixture.componentInstance.submit();
+
+        expect("trialDays" in createShop.mock.calls[0][0]).toBe(false);
+    });
+
+    it("should refuse a trial of 0 or 400 days", async () => {
+        createShop = vi.fn();
+        const fixture = await render();
+        fill(fixture.componentInstance);
+
+        for (const days of [0, 400]) {
+            fixture.componentInstance.form.controls.trialDays.setValue(days);
+            fixture.componentInstance.submit();
+
+            expect(fixture.componentInstance.form.controls.trialDays.invalid).toBe(true);
+        }
+
+        expect(createShop).not.toHaveBeenCalled();
+    });
+
     it("should say when the access cannot be copied", async () => {
         createShop = vi.fn(() =>
             of({
@@ -77,6 +115,7 @@ describe("NewShopDialog", () => {
                 name: "Chez Fatou",
                 status: "ACTIVE",
                 created_at: "",
+                trial_ends_at: null,
                 admin: { id: 9, name: "Fatou Diallo", email: "fatou@exemple.com", role: "admin" },
             }),
         );
