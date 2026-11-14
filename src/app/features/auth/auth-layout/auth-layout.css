@@ -109,10 +109,16 @@ footer {
     box-shadow: var(--shadow-card);
 }
 
+/* marque du logiciel : la page de connexion sert à toutes les boutiques */
 .logo {
-    width: 96px;
-    height: auto;
+    width: 56px;
+    height: 56px;
     margin: 0 auto 20px;
+    border-radius: 16px;
+    background: var(--primary);
+    color: var(--on-primary);
+    display: grid;
+    place-items: center;
 }
 
 /* Tablette */
@@ -143,6 +149,7 @@ footer {
         padding: 28px 20px;
     }
     .logo {
-        width: 84px;
+        width: 48px;
+        height: 48px;
     }
 }

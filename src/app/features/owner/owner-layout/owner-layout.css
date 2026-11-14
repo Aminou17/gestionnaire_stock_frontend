@@ -1,0 +1,112 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background: var(--bg);
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 24px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.brand-icon {
+    width: 36px;
+    height: 36px;
+    flex: none;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--on-primary);
+    display: grid;
+    place-items: center;
+}
+
+.brand-name {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.brand-sub {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.tools {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.who {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.icon-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.content {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+@media (max-width: 767px) {
+    .topbar {
+        padding: 10px 16px;
+    }
+
+    .content {
+        padding: 16px;
+    }
+
+    /* sur téléphone : l'icône suffit, le nom reste dans le menu de déconnexion */
+    .who,
+    .tools .btn span {
+        display: none;
+    }
+
+    /* même bouton discret que le thème, l'en-tête reste léger */
+    .tools .btn {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        justify-content: center;
+        border-color: transparent;
+        background: transparent;
+        color: var(--text-muted);
+    }
+}

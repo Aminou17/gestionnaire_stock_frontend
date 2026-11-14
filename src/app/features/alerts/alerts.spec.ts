@@ -95,6 +95,7 @@ describe("Alerts", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(role === "admin"),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Awa Bazin",

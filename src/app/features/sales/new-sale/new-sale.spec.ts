@@ -91,6 +91,7 @@ describe("NewSale", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({
                             id: 6,
                             name: "Awa K.",

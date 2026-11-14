@@ -7,7 +7,7 @@ import { API_URL } from "../api.config";
 import { SecretValues } from "../../shared/secret/secret-values";
 import { getRoleLabel } from "./role-label";
 
-export type UserRole = "admin" | "manager";
+export type UserRole = "owner" | "admin" | "manager";
 
 export interface User {
     id: number;
@@ -37,6 +37,8 @@ export class AuthService {
 
     user = this._user.asReadonly();
     isAdmin = computed(() => this._user()?.role === "admin");
+    // propriétaire du logiciel : il gère les boutiques, pas une boutique
+    isOwner = computed(() => this._user()?.role === "owner");
     roleLabel = computed(() => getRoleLabel(this._user()?.role));
 
     get token() {

@@ -55,6 +55,8 @@ export type ActivityType =
 export interface Activity {
     type: ActivityType;
     referenceId: number;
+    // numéro de la vente dans la boutique, null hors vente
+    saleNumber: number | null;
     occurredAt: string;
     amount: number | null;
     quantity: number | null;

@@ -236,7 +236,7 @@
                                     [routerLink]="['/sales', sale.id]"
                                     class="sale-link"
                                     (click)="$event.stopPropagation()"
-                                    >#{{ sale.id }}</a
+                                    >#{{ sale.number }}</a
                                 >
                             </td>
                             <td>
@@ -288,7 +288,7 @@
                                             [routerLink]="['/sales', sale.id]"
                                             class="sale-link"
                                             (click)="$event.stopPropagation()"
-                                            >Vente #{{ sale.id }}</a
+                                            >Vente #{{ sale.number }}</a
                                         >
                                         @if (sale.status === "CANCELLED") {
                                             <span class="badge badge-danger">Remboursée</span>

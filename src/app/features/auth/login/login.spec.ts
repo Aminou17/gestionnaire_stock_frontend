@@ -10,11 +10,11 @@ describe("Login", () => {
     let fixture: ComponentFixture<Login>;
     let component: Login;
     let el: HTMLElement;
-    let auth: { login: ReturnType<typeof vi.fn> };
+    let auth: { login: ReturnType<typeof vi.fn>; isOwner: () => boolean };
     let router: Router;
 
     beforeEach(async () => {
-        auth = { login: vi.fn() };
+        auth = { login: vi.fn(), isOwner: () => false };
 
         await TestBed.configureTestingModule({
             imports: [Login],
@@ -65,6 +65,16 @@ describe("Login", () => {
 
         expect(auth.login).toHaveBeenCalledWith("awa@test.com", "secret", true);
         expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+    });
+
+    it("should send the owner to the list of shops", async () => {
+        auth.login.mockReturnValue(of({}));
+        auth.isOwner = () => true;
+        fillForm();
+        await submit();
+
+        expect(auth.login).toHaveBeenCalledWith("awa@test.com", "secret", true);
+        expect(router.navigate).toHaveBeenCalledWith(["/owner"]);
     });
 
     it("should pass remember = false when the box is unchecked", async () => {

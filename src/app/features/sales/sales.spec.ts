@@ -11,6 +11,7 @@ import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 
 const sale = (id: number, status: Sale["status"] = "ACTIVE"): Sale => ({
     id,
+    number: id + 100,
     user_id: 6,
     user_name: "Awa K.",
     user_role: "manager",
@@ -50,6 +51,7 @@ describe("Sales", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Yabre M.",

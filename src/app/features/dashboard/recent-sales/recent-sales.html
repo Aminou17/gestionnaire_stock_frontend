@@ -23,7 +23,7 @@
                 <li>
                     <a [routerLink]="['/sales', sale.id]" class="row">
                         <div class="main">
-                            <strong>Vente #{{ sale.id }}</strong>
+                            <strong>Vente #{{ sale.number }}</strong>
                             <small>
                                 {{
                                     isToday(sale.created_at)

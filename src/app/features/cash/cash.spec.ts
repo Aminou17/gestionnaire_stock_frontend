@@ -43,6 +43,7 @@ const detail = (overrides: Partial<CashSessionDetail> = {}): CashSessionDetail =
             user_name: "Awa K.",
             reference_type: "sale",
             reference_id: 12,
+            sale_number: 112,
             reason_category: null,
             reason: null,
             created_at: "2026-11-10T09:00:00",
@@ -87,6 +88,7 @@ describe("Cash", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({
                             id: userId,
                             name: "Yabre M.",
@@ -128,7 +130,7 @@ describe("Cash", () => {
 
         expect(text()).toContain("Macaisseouverte");
         expect(text()).toContain("9500F");
-        expect(text()).toContain("Vente#12");
+        expect(text()).toContain("Vente#112");
         expect(text()).toContain("Fondsdedépart5000F");
         expect(text()).not.toContain("Ventesenespèces4500F");
         expect(buttons()).toContain("Nouvelle vente");
@@ -138,9 +140,7 @@ describe("Cash", () => {
     it("should let the owner add, spend and withdraw money", async () => {
         await render();
 
-        expect(buttons()).toEqual(
-            expect.arrayContaining(["Ajouter", "Dépense", "Retrait"]),
-        );
+        expect(buttons()).toEqual(expect.arrayContaining(["Ajouter", "Dépense", "Retrait"]));
     });
 
     it("should let the manager add money but not take it out", async () => {

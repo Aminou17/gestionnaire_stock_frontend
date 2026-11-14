@@ -6,6 +6,7 @@ import { Sale } from "../../../core/sales/sale.model";
 
 const sale = (overrides: Partial<Sale>): Sale => ({
     id: 1,
+    number: 101,
     user_id: 1,
     user_name: "Yabre M.",
     user_role: "admin",

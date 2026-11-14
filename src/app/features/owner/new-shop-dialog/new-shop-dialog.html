@@ -1,0 +1,125 @@
+<dialog
+    #dialog
+    aria-labelledby="new-shop-title"
+    (click)="onBackdropClick($event)"
+    (cancel)="onCancel($event)"
+>
+    @if (done(); as done) {
+        <div class="done">
+            <span class="done-icon"><app-icon name="check" [size]="22" /></span>
+            <h2 id="new-shop-title">{{ done.shop.name }} est prête</h2>
+            <p class="muted">
+                Transmettez ces accès à {{ done.shop.admin.name }}. Le mot de passe ne sera plus
+                affiché ensuite.
+            </p>
+
+            <pre class="credentials">{{ credentials() }}</pre>
+
+            @if (copyFailed()) {
+                <div class="alert alert-error" role="alert">
+                    Copie impossible, sélectionnez le texte ci-dessus.
+                </div>
+            }
+
+            <div class="actions">
+                <button type="button" class="btn btn-outline" (click)="close()">Fermer</button>
+                <button #copyButton type="button" class="btn btn-primary" (click)="copy()">
+                    <app-icon [name]="copied() ? 'check' : 'copy'" [size]="16" />
+                    {{ copied() ? "Copié" : "Copier les accès" }}
+                </button>
+            </div>
+        </div>
+    } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <h2 id="new-shop-title">Nouvelle boutique</h2>
+            <p class="muted">Son administrateur pourra ensuite ajouter ses vendeurs.</p>
+
+            @if (error()) {
+                <div class="alert alert-error" role="alert">{{ error() }}</div>
+            }
+
+            <label class="field">
+                <span>Nom de la boutique</span>
+                <input
+                    class="input"
+                    formControlName="shopName"
+                    maxlength="80"
+                    autocomplete="organization"
+                    [class.invalid]="invalid('shopName')"
+                    [attr.aria-invalid]="invalid('shopName')"
+                />
+                @if (invalid("shopName")) {
+                    <small class="field-error">Indiquez le nom de la boutique.</small>
+                }
+            </label>
+
+            <label class="field">
+                <span>Nom de l'administrateur</span>
+                <input
+                    class="input"
+                    formControlName="adminName"
+                    maxlength="100"
+                    autocomplete="name"
+                    [class.invalid]="invalid('adminName')"
+                    [attr.aria-invalid]="invalid('adminName')"
+                />
+                @if (invalid("adminName")) {
+                    <small class="field-error">Indiquez le nom de la personne.</small>
+                }
+            </label>
+
+            <label class="field">
+                <span>Email de connexion</span>
+                <input
+                    class="input"
+                    type="email"
+                    formControlName="email"
+                    autocomplete="off"
+                    [class.invalid]="invalid('email')"
+                    [attr.aria-invalid]="invalid('email')"
+                />
+                @if (invalid("email")) {
+                    <small class="field-error">Indiquez une adresse email valide.</small>
+                }
+            </label>
+
+            <div class="field">
+                <label for="new-shop-password">Mot de passe provisoire</label>
+                <div class="password-row">
+                    <input
+                        id="new-shop-password"
+                        class="input"
+                        formControlName="password"
+                        autocomplete="new-password"
+                        spellcheck="false"
+                        [class.invalid]="invalid('password')"
+                        [attr.aria-invalid]="invalid('password')"
+                    />
+                    <button type="button" class="btn btn-outline" (click)="generatePassword()">
+                        Générer
+                    </button>
+                </div>
+                @if (invalid("password")) {
+                    <small class="field-error">Entre 8 et 72 caractères.</small>
+                }
+            </div>
+
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="saving()"
+                    (click)="close()"
+                >
+                    Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                    @if (saving()) {
+                        <span class="spinner"></span>
+                    }
+                    Créer la boutique
+                </button>
+            </div>
+        </form>
+    }
+</dialog>

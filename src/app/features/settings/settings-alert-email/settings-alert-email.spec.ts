@@ -51,6 +51,7 @@ describe("SettingsAlertEmail", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
+                        isOwner: signal(false),
                         user: signal({ id: 1, name: "Admin", email: "a@t.com", role: "admin" }),
                         roleLabel: signal("Administrateur"),
                     },

@@ -23,6 +23,8 @@ export interface NewSalePayment {
 
 export interface Sale {
     id: number;
+    // numéro de la vente dans la boutique, celui affiché et imprimé ; id sert aux liens
+    number: number;
     user_id: number;
     user_name: string | null;
     user_role: "admin" | "manager" | null;

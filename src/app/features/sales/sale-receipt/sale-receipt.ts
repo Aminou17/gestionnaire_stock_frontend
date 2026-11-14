@@ -21,7 +21,7 @@ export class SaleReceipt {
     // préfixe des réglages de vente, vide tant qu'ils ne sont pas chargés
     ticketPrefix = input("");
 
-    ticketNumber = computed(() => formatTicketNumber(this.sale().id, this.ticketPrefix()));
+    ticketNumber = computed(() => formatTicketNumber(this.sale().number, this.ticketPrefix()));
 
     // reste à payer sur une vente validée avec acompte
     due = computed(() =>

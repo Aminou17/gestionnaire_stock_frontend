@@ -91,6 +91,8 @@ export interface StockMovement {
     reference_type: string | null;
     // null pour l'employé quand la vente est celle d'un autre vendeur
     reference_id: number | null;
+    // numéro de la vente dans la boutique, masqué comme reference_id
+    sale_number?: number | null;
     // stock du produit juste après ce mouvement
     stock_after: number;
     created_at: string;

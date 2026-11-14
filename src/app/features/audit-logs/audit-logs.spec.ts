@@ -66,6 +66,7 @@ describe("AuditLogs", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
+                        isOwner: signal(false),
                         user: signal({ id: 1, name: "Awa", email: "a@test.com", role: "admin" }),
                         roleLabel: signal("Administrateur"),
                     },

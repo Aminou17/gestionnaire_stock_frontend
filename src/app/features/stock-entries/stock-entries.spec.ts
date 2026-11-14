@@ -114,6 +114,7 @@ describe("StockEntries", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Admin Test",

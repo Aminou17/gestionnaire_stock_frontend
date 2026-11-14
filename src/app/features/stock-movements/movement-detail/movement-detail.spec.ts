@@ -20,6 +20,7 @@ const movement = (
     user_name: "Admin Test",
     reference_type: referenceType,
     reference_id: referenceId,
+    sale_number: referenceId === null ? null : referenceId + 100,
     stock_after: 10,
     created_at: "2026-11-02T10:15:00",
 });
@@ -68,7 +69,7 @@ describe("MovementDetail", () => {
         await render(movement("SALE", 8));
 
         expect(origins().length).toBe(1);
-        expect(el.querySelector("dl")?.textContent).toContain("Vente #8");
+        expect(el.querySelector("dl")?.textContent).toContain("Vente #108");
     });
 
     it("should show a single Origine line for an inventory", async () => {

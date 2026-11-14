@@ -4,6 +4,7 @@ import { filter } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
+import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { Icon } from "../../shared/icon/icon";
 import { Avatar } from "../../shared/avatar/avatar";
@@ -27,6 +28,7 @@ export class Sidebar {
     protected layout = inject(LayoutService);
     protected theme = inject(ThemeService);
     protected alerts = inject(LowStockAlertService);
+    protected shop = inject(ShopSettingsService);
 
     // le manager ne voit que les pages auxquelles il a accès
     sections = computed(() => {

@@ -34,6 +34,7 @@ const closed: CashSessionDetail = {
             user_name: "Awa K.",
             reference_type: "sale",
             reference_id: 8,
+            sale_number: 108,
             reason: null,
             reason_category: null,
             created_at: "2026-11-10T09:00:00",
@@ -59,6 +60,7 @@ describe("CashSessionPage", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Yabre M.",
@@ -88,7 +90,7 @@ describe("CashSessionPage", () => {
         expect(text()).toContain("Montantattendu12000F");
         expect(text()).toContain("Montantcompté11500F");
         expect(text()).toContain("ClôtureHeure19:00ParAwaK.");
-        expect(text()).toContain("Vente#8");
+        expect(text()).toContain("Vente#108");
     });
 
     it("should not show a gap for a session that is still open", async () => {
