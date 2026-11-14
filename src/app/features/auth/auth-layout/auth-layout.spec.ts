@@ -15,7 +15,7 @@ describe("AuthLayout", () => {
 
         const page = fixture.nativeElement as HTMLElement;
         expect(page.querySelector(".logo")).not.toBeNull();
-        expect(page.textContent).toContain("Gestionnaire de stock");
+        expect(page.textContent).toContain("Boutiki");
         expect(page.textContent).not.toContain("Awa Bazin");
     });
 });

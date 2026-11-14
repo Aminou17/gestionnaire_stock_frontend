@@ -3,6 +3,7 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive } from "@angular/ro
 import { filter } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
+import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { ThemeService } from "../../core/theme/theme.service";
@@ -25,6 +26,8 @@ export class Sidebar {
     private el = inject(ElementRef);
     private router = inject(Router);
     protected auth = inject(AuthService);
+    protected productName = PRODUCT_NAME;
+    protected companyName = COMPANY_NAME;
     protected layout = inject(LayoutService);
     protected theme = inject(ThemeService);
     protected alerts = inject(LowStockAlertService);
