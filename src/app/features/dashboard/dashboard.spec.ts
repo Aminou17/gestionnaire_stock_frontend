@@ -106,6 +106,7 @@ describe("Dashboard", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Yabre M.",

@@ -1,0 +1,44 @@
+dialog {
+    width: min(460px, calc(100% - 32px));
+}
+
+.password-row {
+    display: flex;
+    gap: 8px;
+}
+
+.password-row .input {
+    flex: 1;
+    min-width: 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.done {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.done-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+/* les accès se lisent et se recopient tels quels */
+.credentials {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface-hover);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+}

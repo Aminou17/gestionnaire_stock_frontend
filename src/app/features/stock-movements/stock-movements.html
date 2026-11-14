@@ -374,10 +374,10 @@
                                         (click)="$event.stopPropagation()"
                                         >{{
                                             movement.type === "SALE"
-                                                ? "#" + id
+                                                ? "#" + movement.sale_number
                                                 : (movement.type === "ADJUSTMENT"
                                                       ? "Remboursement #"
-                                                      : "Vente #") + id
+                                                      : "Vente #") + movement.sale_number
                                         }}</a
                                     >
                                 } @else if (isInventory(movement)) {
@@ -463,7 +463,7 @@
                                                 >{{
                                                     (movement.type === "ADJUSTMENT"
                                                         ? "Remboursement #"
-                                                        : "Vente #") + id
+                                                        : "Vente #") + movement.sale_number
                                                 }}</a
                                             >
                                         } @else if (isInventory(movement)) {

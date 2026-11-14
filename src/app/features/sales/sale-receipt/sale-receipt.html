@@ -5,7 +5,7 @@
         @if (shop()?.logo; as logo) {
             <img class="receipt-logo" [src]="logo" alt="" width="160" height="80" />
         }
-        <strong class="receipt-shop">{{ shop()?.name || "Awa Bazin" }}</strong>
+        <strong class="receipt-shop">{{ shop()?.name }}</strong>
         @if (shop(); as info) {
             @if (info.address) {
                 <span>{{ info.address }}</span>

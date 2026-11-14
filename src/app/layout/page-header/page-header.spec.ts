@@ -11,7 +11,7 @@ describe("PageHeader", () => {
     let fixture: ComponentFixture<PageHeader>;
     let el: HTMLElement;
 
-    async function render(isAdmin: boolean) {
+    async function render(isAdmin: boolean, isOwner = false) {
         await TestBed.configureTestingModule({
             imports: [PageHeader],
             providers: [
@@ -20,6 +20,7 @@ describe("PageHeader", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(isOwner),
                         user: signal({
                             id: 1,
                             name: "Yabre Moussa",
@@ -65,5 +66,11 @@ describe("PageHeader", () => {
     it("should show the alert bell only to the admin", async () => {
         await render(false);
         expect(el.querySelector("app-notifications")).toBeNull();
+    });
+
+    it("should hide the shop menu and profile from the owner", async () => {
+        await render(false, true);
+        expect(el.querySelector(".menu-btn")).toBeNull();
+        expect(el.querySelector("a.me")).toBeNull();
     });
 });

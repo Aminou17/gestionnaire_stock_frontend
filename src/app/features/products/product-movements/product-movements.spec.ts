@@ -19,6 +19,7 @@ const movement = (
     quantity: 2,
     reference_type: type === "ENTRY" ? "stock_entry" : "sale",
     reference_id: referenceId,
+    sale_number: referenceId === null ? null : referenceId + 100,
     stock_after: 10,
     created_at: "2026-11-02T10:15:00",
 });
@@ -64,7 +65,7 @@ describe("ProductMovements", () => {
         expect(text).toContain("−2");
         expect(text).toContain("Entrée");
         expect(text).toContain("Remboursement");
-        expect(text).toContain("Vente #8");
+        expect(text).toContain("Vente #108");
 
         const all = el.querySelector<HTMLAnchorElement>(".card-header a")!;
         expect(all.textContent).toContain("Tout voir (12)");

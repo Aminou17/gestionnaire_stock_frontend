@@ -14,6 +14,7 @@ import { LowStockAlertService } from "../../../core/stock/low-stock-alert.servic
 
 const detail = (overrides: Partial<SaleDetail> = {}): SaleDetail => ({
     id: 6,
+    number: 106,
     user_id: 6,
     user_name: "Awa K.",
     user_role: "manager",
@@ -135,6 +136,7 @@ describe("SalePage", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Yabre M.",
@@ -157,7 +159,7 @@ describe("SalePage", () => {
     it("should list the products sold with the discount and the total", async () => {
         await render();
 
-        expect(text()).toContain("Vente #6");
+        expect(text()).toContain("Vente #106");
         expect(text()).toContain("Bazin riche");
         expect(text()).toContain("remise de 500 F sur 10 000 F");
         expect(text()).toContain("11 000 F");
@@ -360,7 +362,7 @@ describe("SalePage", () => {
 
         expect(print).toHaveBeenCalled();
         const receipt = el.querySelector(".receipt")!.textContent!;
-        expect(receipt).toContain("Ticket n° AB-000006");
+        expect(receipt).toContain("Ticket n° AB-000106");
         expect(receipt).toContain("Grand marché");
         expect(receipt).toContain("IFU IFU123");
         expect(receipt).toContain("Ni repris ni échangé.");
@@ -480,7 +482,7 @@ describe("SalePage", () => {
 
         expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
         const preview = el.querySelector(".ticket-dialog app-sale-receipt")!.textContent!;
-        expect(preview).toContain("Ticket n° AB-000006");
+        expect(preview).toContain("Ticket n° AB-000106");
         expect(preview).toContain("Grand marché");
     });
 });

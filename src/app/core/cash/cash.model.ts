@@ -12,6 +12,8 @@ export interface CashMovement {
     // "sale" pour une vente, "SALE_CANCELLATION" pour un remboursement, autre valeur pour une saisie manuelle
     reference_type: string | null;
     reference_id: number | null;
+    // numéro de la vente dans la boutique pour une vente ou un remboursement
+    sale_number?: number | null;
     // motif choisi dans la liste (voir cash-reasons.ts), null pour une vente ou un remboursement
     reason_category: string | null;
     // précision écrite, obligatoire seulement pour le motif Autre

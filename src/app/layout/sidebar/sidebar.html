@@ -1,9 +1,18 @@
 <aside class="sidebar" [class.open]="layout.sidebarOpen()" [class.collapsed]="layout.collapsed()">
     <div class="brand">
-        <span class="brand-icon"><app-icon name="box" [size]="20" /></span>
+        @if (shop.shopLogo(); as logo) {
+            <img class="brand-logo" [src]="logo" alt="" width="36" height="36" />
+        } @else {
+            <span class="brand-icon"><app-icon name="box" [size]="20" /></span>
+        }
         <div class="brand-text">
-            <div class="brand-name">Gestionnaire</div>
-            <div class="brand-sub">de Stock</div>
+            <div class="brand-name" [attr.title]="shop.shopName() || null">
+                {{ shop.shopName() || "Gestionnaire" }}
+            </div>
+            <!-- avec le nom de la boutique, pas de sous-titre : il serait coupé sur téléphone -->
+            @if (!shop.shopName()) {
+                <div class="brand-sub">de Stock</div>
+            }
         </div>
         <button type="button" class="close" (click)="close()" aria-label="Fermer le menu">
             <app-icon name="close" />

@@ -25,6 +25,7 @@ describe("Sidebar", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({ id: 1, name: "Yabre Moussa", email: "y@test.com" }),
                         roleLabel: signal(isAdmin ? "Administrateur" : "Employé"),
                         logout,

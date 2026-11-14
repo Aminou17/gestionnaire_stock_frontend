@@ -31,6 +31,7 @@ describe("SettingsPassword", () => {
                     useValue: {
                         user: signal(null),
                         isAdmin: signal(false),
+                        isOwner: signal(false),
                         roleLabel: signal("Employé"),
                         changePassword,
                     },

@@ -23,6 +23,7 @@ const movement = (
     user_name: "Admin Test",
     reference_type: type === "ENTRY" ? "stock_entry" : "sale",
     reference_id: referenceId,
+    sale_number: referenceId === null ? null : referenceId + 100,
     stock_after: 10,
     created_at: "2026-11-02T10:15:00",
 });
@@ -94,6 +95,7 @@ describe("StockMovements", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Yabre M.",
@@ -365,7 +367,7 @@ describe("StockMovements", () => {
 
         const row = el.querySelector(".movement-row")!;
         expect(row.textContent).not.toContain("Admin Test");
-        expect(row.querySelector(".sale-link")?.textContent).toContain("Vente #8");
+        expect(row.querySelector(".sale-link")?.textContent).toContain("Vente #108");
     });
 
     it("should only offer All and Outgoing chips to the manager", async () => {

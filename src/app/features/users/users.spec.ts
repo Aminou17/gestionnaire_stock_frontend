@@ -71,6 +71,7 @@ describe("Users", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
+                        isOwner: signal(false),
                         user: signal({ id: 1, name: me.name, email: me.email, role: "admin" }),
                         roleLabel: signal("Administrateur"),
                     },

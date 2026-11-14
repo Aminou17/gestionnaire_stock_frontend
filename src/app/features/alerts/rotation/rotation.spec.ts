@@ -90,6 +90,7 @@ describe("Rotation", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(true),
+                        isOwner: signal(false),
                         user: signal({
                             id: 1,
                             name: "Awa Bazin",

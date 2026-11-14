@@ -1,0 +1,242 @@
+<div class="head">
+    <div>
+        <h1>Boutiques</h1>
+        <p class="muted">
+            @if (shops.hasValue()) {
+                {{ salesLast30Days() }} vente{{ salesLast30Days() > 1 ? "s" : "" }} ces 30 derniers
+                jours
+            } @else {
+                Les boutiques qui utilisent le logiciel et leur activité.
+            }
+        </p>
+    </div>
+    <button type="button" class="btn btn-primary new-shop" (click)="openNewShop()">
+        <app-icon name="plus" [size]="18" />
+        <span>Nouvelle boutique</span>
+    </button>
+</div>
+
+<!-- les chiffres du résumé servent aussi de filtres, comme chez Stripe -->
+<section class="kpis" role="group" aria-label="Afficher">
+    <button
+        type="button"
+        class="card kpi"
+        [class.selected]="view() === 'all'"
+        [attr.aria-pressed]="view() === 'all'"
+        (click)="view.set('all')"
+    >
+        <span class="kpi-label">Toutes</span>
+        <strong>{{ shops.hasValue() ? all().length : "–" }}</strong>
+    </button>
+    <button
+        type="button"
+        class="card kpi"
+        [class.selected]="view() === 'ACTIVE'"
+        [attr.aria-pressed]="view() === 'ACTIVE'"
+        (click)="view.set('ACTIVE')"
+    >
+        <span class="kpi-label"><i class="dot dot-success"></i>Actives</span>
+        <strong>{{ shops.hasValue() ? activeCount() : "–" }}</strong>
+    </button>
+    <button
+        type="button"
+        class="card kpi"
+        [class.selected]="view() === 'SUSPENDED'"
+        [attr.aria-pressed]="view() === 'SUSPENDED'"
+        (click)="view.set('SUSPENDED')"
+    >
+        <span class="kpi-label"><i class="dot dot-warning"></i>Suspendues</span>
+        <strong [class.warn]="suspendedCount() > 0">{{
+            shops.hasValue() ? suspendedCount() : "–"
+        }}</strong>
+    </button>
+</section>
+
+<section class="card list-card">
+    <div class="toolbar">
+        <label class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Boutique, administrateur ou email…"
+                aria-label="Rechercher une boutique"
+                [value]="search()"
+                (input)="search.set($any($event.target).value)"
+            />
+        </label>
+    </div>
+
+    @if (actionError() && !pending()) {
+        <div class="alert alert-error list-error" role="alert">{{ actionError() }}</div>
+    }
+
+    @if (shops.isLoading() && all().length === 0) {
+        <div class="loading">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton row-skeleton"></div>
+            }
+        </div>
+    } @else if (shops.error() && all().length === 0) {
+        <div class="empty" role="alert">
+            Impossible de charger les boutiques.
+            <button type="button" class="btn btn-outline btn-sm" (click)="shops.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (list().length === 0) {
+        <div class="empty">
+            @if (search()) {
+                Aucune boutique ne correspond à « {{ search() }} ».
+                <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
+                    Effacer la recherche
+                </button>
+            } @else if (view() === "SUSPENDED") {
+                Aucune boutique suspendue.
+            } @else if (view() !== "all") {
+                Aucune boutique dans cette liste.
+            } @else {
+                Aucune boutique pour le moment.
+                <button type="button" class="btn btn-outline btn-sm" (click)="openNewShop()">
+                    Créer la première boutique
+                </button>
+            }
+        </div>
+    } @else {
+        <ul class="shops">
+            @for (shop of list(); track shop.id) {
+                <li class="shop" [class.suspended]="shop.status === 'SUSPENDED'">
+                    <span class="shop-icon" aria-hidden="true">{{ shop.name.charAt(0) }}</span>
+
+                    <div class="shop-text">
+                        <strong>{{ shop.name }}</strong>
+                        @if (shop.admin_email) {
+                            <small class="muted">
+                                {{ shop.admin_name }} · <span>{{ shop.admin_email }}</span>
+                            </small>
+                        } @else {
+                            <small class="muted">Aucun administrateur actif</small>
+                        }
+                        <!-- sur téléphone, l'activité tient sur une ligne -->
+                        <small class="shop-meta muted">
+                            {{ shop.sales_last_30_days }}
+                            vente{{ shop.sales_last_30_days > 1 ? "s" : "" }} en 30 j ·
+                            {{ shop.users_count }} compte{{ shop.users_count > 1 ? "s" : "" }}
+                        </small>
+                    </div>
+
+                    <dl class="shop-stats">
+                        <div>
+                            <dt>Comptes</dt>
+                            <dd>{{ shop.users_count }}</dd>
+                        </div>
+                        <div>
+                            <dt>Ventes 30 j</dt>
+                            <dd>{{ shop.sales_last_30_days }}</dd>
+                        </div>
+                        <div>
+                            <dt>Dernière vente</dt>
+                            <dd [class.muted]="!shop.last_sale_at">
+                                {{
+                                    shop.last_sale_at
+                                        ? (shop.last_sale_at | date: "d MMM y")
+                                        : "Aucune"
+                                }}
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <!-- pas de badge pour une boutique normale, seulement Suspendue -->
+                    <div class="shop-status">
+                        @if (shop.status === "ACTIVE") {
+                            <div class="row-menu">
+                                <button
+                                    type="button"
+                                    class="more-btn"
+                                    aria-haspopup="menu"
+                                    [attr.aria-expanded]="menuFor() === shop.id"
+                                    [attr.aria-label]="'Actions pour ' + shop.name"
+                                    [disabled]="updating() === shop.id"
+                                    (click)="toggleMenu(shop.id)"
+                                >
+                                    <app-icon name="more" />
+                                </button>
+                                @if (menuFor() === shop.id) {
+                                    <div class="menu" role="menu">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            class="danger"
+                                            (click)="askSuspend(shop)"
+                                        >
+                                            <app-icon name="ban" [size]="16" />
+                                            Suspendre la boutique
+                                        </button>
+                                    </div>
+                                }
+                            </div>
+                        } @else {
+                            <span class="badge badge-warning">Suspendue</span>
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm"
+                                [disabled]="updating() === shop.id"
+                                [attr.aria-label]="'Réactiver ' + shop.name"
+                                (click)="reactivate(shop)"
+                            >
+                                @if (updating() === shop.id) {
+                                    <span class="spinner"></span>
+                                } @else {
+                                    <app-icon name="undo" [size]="16" />
+                                }
+                                Réactiver
+                            </button>
+                        }
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+<button type="button" class="fab" (click)="openNewShop()" aria-label="Nouvelle boutique">
+    <app-icon name="plus" [size]="24" />
+</button>
+
+<app-new-shop-dialog (created)="shops.reload()" />
+
+<dialog
+    #confirm
+    aria-labelledby="suspend-title"
+    (cancel)="onConfirmCancel($event)"
+    (close)="pending.set(null)"
+>
+    <form (submit)="$event.preventDefault(); confirmSuspend()">
+        <h2 id="suspend-title">Suspendre {{ pending()?.name }} ?</h2>
+        <p class="muted">
+            Plus personne de cette boutique ne pourra se connecter, même avec une session déjà
+            ouverte. Ses données sont conservées et la boutique peut être réactivée à tout moment.
+        </p>
+
+        @if (actionError()) {
+            <div class="alert alert-error" role="alert">{{ actionError() }}</div>
+        }
+
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="updating() !== null"
+                (click)="closeConfirm()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-danger" [disabled]="updating() !== null">
+                @if (updating() !== null) {
+                    <span class="spinner"></span>
+                }
+                Suspendre
+            </button>
+        </div>
+    </form>
+</dialog>

@@ -1,5 +1,5 @@
 <app-page-header
-    [title]="data() ? 'Vente #' + data()!.id : 'Vente'"
+    [title]="data() ? 'Vente #' + data()!.number : 'Vente'"
     [back]="back.link"
     [backLabel]="back.label"
 />
@@ -60,7 +60,7 @@
                             [routerLink]="['/sales', id]"
                             [state]="navState()"
                             (click)="justCreated.set(false)"
-                            [attr.aria-label]="'Vente précédente, n° ' + id"
+                            aria-label="Vente précédente"
                             title="Vente précédente"
                         >
                             <app-icon name="chevron-left" [size]="18" />
@@ -76,7 +76,7 @@
                             [routerLink]="['/sales', id]"
                             [state]="navState()"
                             (click)="justCreated.set(false)"
-                            [attr.aria-label]="'Vente suivante, n° ' + id"
+                            aria-label="Vente suivante"
                             title="Vente suivante"
                         >
                             <app-icon name="chevron-right" [size]="18" />
@@ -502,7 +502,7 @@
     (cancel)="onRefundCancel($event)"
 >
     <form class="confirm-body" novalidate (submit)="$event.preventDefault(); refund()">
-        <h2 id="refund-title">Rembourser la vente #{{ data()?.id }} ?</h2>
+        <h2 id="refund-title">Rembourser la vente #{{ data()?.number }} ?</h2>
         <p class="muted">
             @if (cashPaid() > 0) {
                 {{ cashPaid() | fcfa }} seront retirés de la caisse.
@@ -558,7 +558,7 @@
     (cancel)="onPayCancel($event)"
 >
     <form class="confirm-body" novalidate (submit)="$event.preventDefault(); pay()">
-        <h2 id="pay-title">Encaisser sur la vente #{{ data()?.id }}</h2>
+        <h2 id="pay-title">Encaisser sur la vente #{{ data()?.number }}</h2>
         <p class="muted">Reste à payer : {{ due() | fcfa }}.</p>
 
         <div class="pay-methods">

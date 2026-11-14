@@ -208,7 +208,9 @@ export class SalePage {
         this.salesSettings.hasValue() ? this.salesSettings.value().ticket_prefix : "",
     );
 
-    ticketNumber = computed(() => formatTicketNumber(this.data()?.id ?? "", this.ticketPrefix()));
+    ticketNumber = computed(() =>
+        formatTicketNumber(this.data()?.number ?? "", this.ticketPrefix()),
+    );
 
     // un ticket sans son en-tête ni son préfixe serait faux : on bloque l'impression plutôt que de l'imprimer
     settingsReady = computed(() => this.shop.hasValue() && this.salesSettings.hasValue());

@@ -1,12 +1,14 @@
 <header>
-    <button
-        type="button"
-        class="menu-btn"
-        (click)="layout.sidebarOpen.set(true)"
-        aria-label="Ouvrir le menu"
-    >
-        <app-icon name="menu" [size]="20" />
-    </button>
+    @if (!auth.isOwner()) {
+        <button
+            type="button"
+            class="menu-btn"
+            (click)="layout.sidebarOpen.set(true)"
+            aria-label="Ouvrir le menu"
+        >
+            <app-icon name="menu" [size]="20" />
+        </button>
+    }
 
     <div class="titles">
         @if (section()) {
@@ -32,8 +34,10 @@
             <app-notifications />
         }
 
-        <a routerLink="/settings/account" class="me" aria-label="Mon profil">
-            <app-avatar [photo]="auth.user()?.avatar" />
-        </a>
+        @if (!auth.isOwner()) {
+            <a routerLink="/settings/account" class="me" aria-label="Mon profil">
+                <app-avatar [photo]="auth.user()?.avatar" />
+            </a>
+        }
     </div>
 </header>

@@ -26,7 +26,7 @@
                     <div class="text">
                         @switch (item.type) {
                             @case ("SALE") {
-                                <strong>Vente #{{ item.referenceId }}</strong>
+                                <strong>Vente #{{ item.saleNumber }}</strong>
                                 <small
                                     >{{ item.userName }} · {{ item.itemsCount }} article{{
                                         (item.itemsCount ?? 0) > 1 ? "s" : ""
@@ -37,7 +37,7 @@
                             @case ("REFUND") {
                                 <strong>Remboursement</strong>
                                 <small
-                                    >Vente #{{ item.referenceId }} annulée · {{ when(item) }}</small
+                                    >Vente #{{ item.saleNumber }} annulée · {{ when(item) }}</small
                                 >
                             }
                             @case ("STOCK_ENTRY") {

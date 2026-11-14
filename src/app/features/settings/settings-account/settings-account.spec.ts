@@ -28,6 +28,7 @@ describe("SettingsAccount", () => {
                     useValue: {
                         user,
                         isAdmin: signal(false),
+                        isOwner: signal(false),
                         roleLabel: signal("Employé"),
                         updateProfile,
                     },

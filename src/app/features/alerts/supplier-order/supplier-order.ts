@@ -51,9 +51,7 @@ export class SupplierOrder {
 
     // le nom de la boutique signe le message
     private shop = rxResource({ stream: () => this.shopService.getSettings() });
-    private shopName = computed(() =>
-        this.shop.hasValue() && this.shop.value().name ? this.shop.value().name : "Awa Bazin",
-    );
+    private shopName = computed(() => (this.shop.hasValue() ? this.shop.value().name : ""));
 
     // mêmes alertes que la liste : une seule requête partagée
     alerts = this.alertService.alerts;
@@ -91,7 +89,9 @@ export class SupplierOrder {
         const lines = this.chosen().map((row) => `- ${row.alert.name} : ${row.quantity}`);
         return [
             `Bonjour ${supplier?.contact || supplier?.name || ""},`.replace(" ,", ","),
-            `Ici la boutique ${this.shopName()}. Je voudrais commander :`,
+            this.shopName()
+                ? `Ici la boutique ${this.shopName()}. Je voudrais commander :`
+                : "Je voudrais commander :",
             ...lines,
             "Merci de me confirmer la disponibilité et le délai de livraison.",
         ].join("\n");

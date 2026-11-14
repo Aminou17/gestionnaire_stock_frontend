@@ -41,6 +41,7 @@
     /* Avatar */
     --avatar-bg: linear-gradient(135deg, #3b82f6, #6366f1);
     --avatar-text: #ffffff;
+    --logo-bg: #ffffff;
 
     /* États : vert = Validée, rouge = Remboursée / Rupture, orange = alertes */
     --success: #15803d;

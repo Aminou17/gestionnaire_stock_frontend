@@ -75,6 +75,7 @@ describe("CategoryPage", () => {
                     provide: AuthService,
                     useValue: {
                         isAdmin: signal(admin),
+                        isOwner: signal(false),
                         user: signal({
                             id: 6,
                             name: "Awa K.",
