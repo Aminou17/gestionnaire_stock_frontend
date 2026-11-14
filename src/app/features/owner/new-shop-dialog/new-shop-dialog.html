@@ -104,6 +104,27 @@
                 }
             </div>
 
+            <label class="field">
+                <span>Jours d'essai (facultatif)</span>
+                <input
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    max="365"
+                    step="1"
+                    formControlName="trialDays"
+                    placeholder="Ex. : 30"
+                    [class.invalid]="invalid('trialDays')"
+                    [attr.aria-invalid]="invalid('trialDays')"
+                />
+                @if (invalid("trialDays")) {
+                    <small class="field-error">Un nombre de jours entre 1 et 365.</small>
+                } @else {
+                    <small class="muted">Laissez vide pour une boutique sans période d'essai.</small>
+                }
+            </label>
+
             <div class="actions">
                 <button
                     type="button"

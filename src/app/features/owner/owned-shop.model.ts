@@ -6,6 +6,7 @@ export interface OwnedShop {
     name: string;
     status: ShopStatus;
     created_at: string;
+    trial_ends_at: string | null;
     admin_name: string | null;
     admin_email: string | null;
     users_count: number;
@@ -18,6 +19,8 @@ export interface NewShopInput {
     adminName: string;
     email: string;
     password: string;
+    // absent : pas d'essai
+    trialDays?: number;
 }
 
 export interface CreatedShop {
@@ -25,5 +28,6 @@ export interface CreatedShop {
     name: string;
     status: ShopStatus;
     created_at: string;
+    trial_ends_at: string | null;
     admin: { id: number; name: string; email: string; role: "admin" };
 }

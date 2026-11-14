@@ -435,3 +435,13 @@ h1 {
         cursor: pointer;
     }
 }
+
+.trial {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 12.5px;
+}
+
+.trial.ended {
+    color: var(--warning, #b45309);
+}

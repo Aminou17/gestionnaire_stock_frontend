@@ -10,6 +10,7 @@ const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
     name: "Awa Bazin",
     status: "ACTIVE",
     created_at: "2026-11-01T10:00:00.000Z",
+    trial_ends_at: null,
     admin_name: "Awa",
     admin_email: "awa@exemple.com",
     users_count: 8,
@@ -19,12 +20,13 @@ const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
 });
 
 describe("Shops", () => {
-    let service: { getShops: any; setStatus: any; createShop: any };
+    let service: { getShops: any; setStatus: any; setTrial: any; createShop: any };
 
     const render = async (shops: OwnedShop[]) => {
         service = {
             getShops: vi.fn(() => of(shops)),
             setStatus: vi.fn(() => of({})),
+            setTrial: vi.fn(() => of({})),
             createShop: vi.fn(),
         };
         await TestBed.configureTestingModule({
@@ -110,10 +112,122 @@ describe("Shops", () => {
         expect(service.setStatus).toHaveBeenCalledWith(1, "ACTIVE");
     });
 
+    const inDays = (days: number) => new Date(Date.now() + days * 86_400_000 - 3_600_000).toISOString();
+
+    it("should show the days left of the trial", async () => {
+        const fixture = await render([shop({ trial_ends_at: inDays(12) })]);
+        const label = fixture.nativeElement.querySelector(".trial");
+
+        expect(label.textContent).toContain("Essai : 12 jours restants");
+        expect(label.classList.contains("ended")).toBe(false);
+    });
+
+    it("should say when the trial is over", async () => {
+        const fixture = await render([shop({ trial_ends_at: inDays(-3) })]);
+        const label = fixture.nativeElement.querySelector(".trial");
+
+        expect(label.textContent).toContain("Essai terminé");
+        expect(label.classList.contains("ended")).toBe(true);
+    });
+
+    it("should show nothing when the shop has no trial", async () => {
+        const fixture = await render([shop({ trial_ends_at: null })]);
+
+        expect(fixture.nativeElement.querySelector(".trial")).toBeNull();
+    });
+
+    it("should open the trial dialog from the menu", async () => {
+        const fixture = await render([shop()]);
+        const el = fixture.nativeElement as HTMLElement;
+
+        (el.querySelector(".more-btn") as HTMLButtonElement).click();
+        await fixture.whenStable();
+        (el.querySelector(".menu button:not(.danger)") as HTMLButtonElement).click();
+        await fixture.whenStable();
+
+        expect(el.querySelector(".menu")).toBeNull();
+        expect(el.querySelector("#trial-title")?.textContent).toContain("Essai de Awa Bazin");
+        expect(fixture.componentInstance.trialShop()?.id).toBe(1);
+    });
+
+    it("should send the number of days typed", async () => {
+        const fixture = await render([shop()]);
+        fixture.componentInstance.askTrial(shop());
+        fixture.componentInstance.trialDays.set(45);
+
+        fixture.componentInstance.saveTrial();
+
+        expect(service.setTrial).toHaveBeenCalledWith(1, 45);
+    });
+
+    it("should accept the limits 1 and 365", async () => {
+        const fixture = await render([shop()]);
+
+        for (const days of [1, 365]) {
+            fixture.componentInstance.askTrial(shop());
+            fixture.componentInstance.trialDays.set(days);
+            fixture.componentInstance.saveTrial();
+            expect(service.setTrial).toHaveBeenLastCalledWith(1, days);
+        }
+
+        expect(fixture.componentInstance.trialError()).toBeNull();
+    });
+
+    it("should send null to remove the trial when the field is empty", async () => {
+        const fixture = await render([shop()]);
+        fixture.componentInstance.askTrial(shop());
+
+        fixture.componentInstance.saveTrial();
+
+        expect(service.setTrial).toHaveBeenCalledWith(1, null);
+    });
+
+    it("should refuse a number of days outside 1 to 365 without calling the API", async () => {
+        const fixture = await render([shop()]);
+        fixture.componentInstance.askTrial(shop());
+
+        for (const days of [0, 366, -5, 1.5]) {
+            fixture.componentInstance.trialDays.set(days);
+            fixture.componentInstance.saveTrial();
+
+            expect(fixture.componentInstance.trialError()).toContain("entre 1 et 365");
+        }
+
+        expect(service.setTrial).not.toHaveBeenCalled();
+    });
+
+    it("should show the message of the API when the trial cannot be changed", async () => {
+        const fixture = await render([shop()]);
+        service.setTrial.mockReturnValue(
+            throwError(() => ({ error: { message: "La durée d'essai doit être un nombre de jours entre 1 et 365." } })),
+        );
+        fixture.componentInstance.askTrial(shop());
+        fixture.componentInstance.trialDays.set(30);
+
+        fixture.componentInstance.saveTrial();
+        await fixture.whenStable();
+
+        expect(fixture.componentInstance.savingTrial()).toBe(false);
+        expect(fixture.nativeElement.querySelector("dialog[aria-labelledby=trial-title] [role=alert]")?.textContent)
+            .toContain("entre 1 et 365");
+    });
+
+    it("should reload the list after the trial is saved", async () => {
+        const fixture = await render([shop()]);
+        fixture.componentInstance.askTrial(shop());
+        fixture.componentInstance.trialDays.set(30);
+
+        fixture.componentInstance.saveTrial();
+        await fixture.whenStable();
+
+        expect(service.getShops).toHaveBeenCalledTimes(2);
+    });
+
     it("should offer to retry when the list cannot be loaded", async () => {
         service = {
             getShops: vi.fn(() => throwError(() => new Error("x"))),
             setStatus: vi.fn(),
+            setTrial: vi.fn(),
             createShop: vi.fn(),
         };
         await TestBed.configureTestingModule({

@@ -40,4 +40,17 @@ describe("OwnerShopService", () => {
         expect(status.request.body).toEqual({ status: "SUSPENDED" });
         status.flush({});
     });
+
+    it("should patch the trial of a shop with trialDays", () => {
+        service.setTrial(3, 30).subscribe();
+        const trial = httpMock.expectOne("/api/shops/3/trial");
+        expect(trial.request.method).toBe("PATCH");
+        expect(trial.request.body).toEqual({ trialDays: 30 });
+        trial.flush({});
+
+        service.setTrial(3, null).subscribe();
+        const removed = httpMock.expectOne("/api/shops/3/trial");
+        expect(removed.request.body).toEqual({ trialDays: null });
+        removed.flush({});
+    });
 });

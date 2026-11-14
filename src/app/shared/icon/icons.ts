@@ -145,6 +145,7 @@ export const ICONS = {
         "m15 5 4 4",
     ],
     ban: [circle(12, 12, 10), "m4.9 4.9 14.2 14.2"],
+    clock: [circle(12, 12, 10), "M12 6v6l4 2"],
     download: ["M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4", "m7 10 5 5 5-5", "M12 15V3"],
     list: ["M8 6h13", "M8 12h13", "M8 18h13", "M3 6h.01", "M3 12h.01", "M3 18h.01"],
     grid: ["M3 3h7v7H3z", "M14 3h7v7h-7z", "M14 14h7v7h-7z", "M3 14h7v7H3z"],

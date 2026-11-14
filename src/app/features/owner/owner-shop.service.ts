@@ -16,6 +16,11 @@ export class OwnerShopService {
         return this.http.post<CreatedShop>(`${API_URL}/shops`, input);
     }
 
+    // jours d'essai à partir d'aujourd'hui, ou null pour retirer l'essai
+    setTrial(id: number, trialDays: number | null) {
+        return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/trial`, { trialDays });
+    }
+
     setStatus(id: number, status: ShopStatus) {
         return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/status`, { status });
     }
