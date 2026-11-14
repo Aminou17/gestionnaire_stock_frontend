@@ -445,3 +445,13 @@ h1 {
 .trial.ended {
     color: var(--warning, #b45309);
 }
+
+.shop-link {
+    color: inherit;
+    text-decoration: none;
+    width: fit-content;
+}
+
+.shop-link:hover strong {
+    text-decoration: underline;
+}

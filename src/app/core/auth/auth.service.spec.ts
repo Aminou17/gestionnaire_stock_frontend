@@ -126,6 +126,42 @@ describe("AuthService", () => {
         );
     });
 
+    it("should post the email to the forgot-password endpoint", () => {
+        setup();
+
+        service.forgotPassword("awa@test.com").subscribe();
+
+        const req = httpMock.expectOne("/api/auth/forgot-password");
+        expect(req.request.method).toBe("POST");
+        expect(req.request.body).toEqual({ email: "awa@test.com" });
+        expect(req.request.headers.has("Authorization")).toBe(false);
+        req.flush({ message: "ok" });
+    });
+
+    it("should post the token and the new password to the reset-password endpoint", () => {
+        setup();
+
+        service.resetPassword("a".repeat(64), "nouveau-mdp").subscribe();
+
+        const req = httpMock.expectOne("/api/auth/reset-password");
+        expect(req.request.method).toBe("POST");
+        expect(req.request.body).toEqual({ token: "a".repeat(64), newPassword: "nouveau-mdp" });
+        req.flush({ message: "ok" });
+    });
+
+    it("should remove mustChangePassword from the kept user after changing the password", () => {
+        localStorage.setItem("token", fakeToken());
+        localStorage.setItem("user", JSON.stringify({ ...user, mustChangePassword: true }));
+        setup();
+        expect(service.user()?.mustChangePassword).toBe(true);
+
+        service.changePassword("provisoire", "nouveau-mdp").subscribe();
+        httpMock.expectOne("/api/auth/password").flush({ message: "ok", token: fakeToken() });
+
+        expect(service.user()?.mustChangePassword).toBe(false);
+        expect(JSON.parse(localStorage.getItem("user")!).mustChangePassword).toBe(false);
+    });
+
     it("should clear the session and redirect to /login on logout", () => {
         localStorage.setItem("token", fakeToken());
         localStorage.setItem("user", JSON.stringify(user));

@@ -100,6 +100,14 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
             return { verb: "a changé son mot de passe" };
         case "PASSWORD_CHANGE_FAILED":
             return { verb: "a saisi un mauvais mot de passe actuel" };
+        case "PASSWORD_RESET_REQUESTED":
+            return { verb: "a demandé un lien pour changer son mot de passe" };
+        case "PASSWORD_RESET_COMPLETED":
+            return { verb: "a choisi un nouveau mot de passe avec le lien reçu" };
+        case "SHOP_ADMIN_RESET_LINK_SENT":
+            return { verb: "a envoyé un lien de réinitialisation du mot de passe à", object: String(d["email"] ?? name) };
+        case "SHOP_ADMIN_TEMP_PASSWORD_SET":
+            return { verb: "a donné un mot de passe provisoire à", object: String(d["email"] ?? name) };
         case "PROFILE_UPDATED":
             return { verb: "a modifié son profil" };
 

@@ -22,6 +22,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
             if (error.status === 401 && isApi && !isLogin) {
                 auth.logout();
             }
+            if (error.status === 403 && isApi && error.error?.code === "PASSWORD_CHANGE_REQUIRED") {
+                auth.requirePasswordChange();
+            }
             return throwError(() => error);
         }),
     );

@@ -3,17 +3,19 @@ import { DatePipe } from "@angular/common";
 import { Component, ElementRef, computed, inject, signal, viewChild } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
+import { Router, RouterLink } from "@angular/router";
 
 import { Icon } from "../../../shared/icon/icon";
 import { NewShopDialog } from "../new-shop-dialog/new-shop-dialog";
 import { OwnedShop, ShopStatus } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
+import { trialStateOf } from "../trial-state";
 
 type View = "all" | ShopStatus;
 
 @Component({
     selector: "app-shops",
-    imports: [DatePipe, FormsModule, Icon, NewShopDialog],
+    imports: [DatePipe, FormsModule, RouterLink, Icon, NewShopDialog],
     templateUrl: "./shops.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shops.css"],
     host: {
@@ -23,6 +25,7 @@ type View = "all" | ShopStatus;
 })
 export class Shops {
     private owner = inject(OwnerShopService);
+    private router = inject(Router);
 
     private newShop = viewChild.required(NewShopDialog);
     private confirm = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
@@ -58,14 +61,8 @@ export class Shops {
     updating = signal<number | null>(null);
     actionError = signal<string | null>(null);
 
-    // essai en cours, terminé ou absent, pour l'étiquette de la liste
-    trialState(shop: OwnedShop): { label: string; ended: boolean } | null {
-        if (!shop.trial_ends_at) return null;
-
-        const days = Math.ceil((new Date(shop.trial_ends_at).getTime() - Date.now()) / 86_400_000);
-        if (days <= 0) return { label: "Essai terminé", ended: true };
-
-        return { label: `Essai : ${days} jour${days > 1 ? "s" : ""} restant${days > 1 ? "s" : ""}`, ended: false };
+    trialState(shop: OwnedShop) {
+        return trialStateOf(shop.trial_ends_at);
     }
 
     // boutique dont on change l'essai, et la durée saisie (vide : retirer l'essai)
@@ -115,6 +112,11 @@ export class Shops {
                 this.trialError.set(err.error?.message ?? "Impossible de changer l'essai.");
             },
         });
+    }
+
+    openShop(shop: OwnedShop) {
+        this.menuFor.set(null);
+        this.router.navigate(["/owner/shops", shop.id]);
     }
 
     openNewShop() {

@@ -8,12 +8,16 @@ import { AuthService } from "./auth.service";
 describe("authInterceptor", () => {
     let http: HttpClient;
     let httpMock: HttpTestingController;
-    let auth: { token: string | null; logout: ReturnType<typeof vi.fn> };
+    let auth: {
+        token: string | null;
+        logout: ReturnType<typeof vi.fn>;
+        requirePasswordChange: ReturnType<typeof vi.fn>;
+    };
 
     const unauthorized = { status: 401, statusText: "Unauthorized" };
 
     beforeEach(() => {
-        auth = { token: "abc123", logout: vi.fn() };
+        auth = { token: "abc123", logout: vi.fn(), requirePasswordChange: vi.fn() };
 
         TestBed.configureTestingModule({
             providers: [
@@ -80,5 +84,29 @@ describe("authInterceptor", () => {
             .flush({ message: "Email ou mot de passe incorrect." }, unauthorized);
 
         expect(auth.logout).not.toHaveBeenCalled();
+    });
+
+    it("should ask for a password change on a 403 PASSWORD_CHANGE_REQUIRED", () => {
+        http.get("/api/products").subscribe({ error: () => {} });
+
+        httpMock
+            .expectOne("/api/products")
+            .flush(
+                { code: "PASSWORD_CHANGE_REQUIRED", message: "Vous devez d'abord choisir votre propre mot de passe." },
+                { status: 403, statusText: "Forbidden" },
+            );
+
+        expect(auth.requirePasswordChange).toHaveBeenCalled();
+        expect(auth.logout).not.toHaveBeenCalled();
+    });
+
+    it("should not ask for a password change on another 403", () => {
+        http.get("/api/products").subscribe({ error: () => {} });
+
+        httpMock
+            .expectOne("/api/products")
+            .flush({ message: "Accès refusé." }, { status: 403, statusText: "Forbidden" });
+
+        expect(auth.requirePasswordChange).not.toHaveBeenCalled();
     });
 });

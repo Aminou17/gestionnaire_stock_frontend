@@ -15,6 +15,8 @@ export interface User {
     email: string;
     role: UserRole;
     avatar?: string | null;
+    // mot de passe provisoire donné par le service client : à changer avant tout le reste
+    mustChangePassword?: boolean;
 }
 
 interface LoginResponse {
@@ -78,6 +80,24 @@ export class AuthService {
             .pipe(tap((res) => this.openSession(res, true)));
     }
 
+    forgotPassword(email: string) {
+        return this.http.post<{ message: string }>(`${API_URL}/auth/forgot-password`, { email });
+    }
+
+    resetPassword(token: string, newPassword: string) {
+        return this.http.post<{ message: string }>(`${API_URL}/auth/reset-password`, {
+            token,
+            newPassword,
+        });
+    }
+
+    // le serveur a refusé une requête : le mot de passe provisoire n'est pas encore changé
+    requirePasswordChange() {
+        const user = this._user();
+        if (user && !user.mustChangePassword) this.saveUser({ ...user, mustChangePassword: true });
+        this.router.navigate(["/settings/password"]);
+    }
+
     private openSession(res: LoginResponse, remember: boolean) {
         this.clearSession();
         this.storage = remember ? localStorage : sessionStorage;
@@ -134,6 +154,8 @@ export class AuthService {
                     // les anciens tokens sont refusés par le backend : celui-ci garde la session ouverte
                     this.storage.setItem("token", res.token);
                     this._token.set(res.token);
+                    const user = this._user();
+                    if (user?.mustChangePassword) this.saveUser({ ...user, mustChangePassword: false });
                 }),
             );
     }

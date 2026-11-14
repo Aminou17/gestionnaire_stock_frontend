@@ -1,4 +1,5 @@
 import { TestBed } from "@angular/core/testing";
+import { provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
 import { OwnedShop } from "../owned-shop.model";
@@ -31,7 +32,7 @@ describe("Shops", () => {
         };
         await TestBed.configureTestingModule({
             imports: [Shops],
-            providers: [{ provide: OwnerShopService, useValue: service }],
+            providers: [provideRouter([]), { provide: OwnerShopService, useValue: service }],
         }).compileComponents();
         const fixture = TestBed.createComponent(Shops);
         await fixture.whenStable();
@@ -142,7 +143,10 @@ describe("Shops", () => {
 
         (el.querySelector(".more-btn") as HTMLButtonElement).click();
         await fixture.whenStable();
-        (el.querySelector(".menu button:not(.danger)") as HTMLButtonElement).click();
+        const trialItem = Array.from(el.querySelectorAll<HTMLButtonElement>(".menu button")).find((b) =>
+            b.textContent?.includes("Modifier l'essai"),
+        );
+        trialItem!.click();
         await fixture.whenStable();
 
         expect(el.querySelector(".menu")).toBeNull();
@@ -232,7 +236,7 @@ describe("Shops", () => {
         };
         await TestBed.configureTestingModule({
             imports: [Shops],
-            providers: [{ provide: OwnerShopService, useValue: service }],
+            providers: [provideRouter([]), { provide: OwnerShopService, useValue: service }],
         }).compileComponents();
         const fixture = TestBed.createComponent(Shops);
         await fixture.whenStable();

@@ -1,0 +1,259 @@
+<app-page-header
+    [title]="shop.hasValue() ? shop.value().name : 'Boutique'"
+    subtitle="Contact, comptes et activité de la boutique"
+    section="Espace propriétaire"
+    back="/owner"
+    backLabel="Retour aux boutiques"
+/>
+
+@if (message(); as msg) {
+    <div class="alert" [class.alert-error]="!msg.ok" [class.alert-success]="msg.ok" role="status">
+        {{ msg.text }}
+    </div>
+}
+
+@if (shop.isLoading() && !shop.hasValue()) {
+    <div class="card block"><div class="skeleton line"></div><div class="skeleton line"></div></div>
+} @else if (shop.error() && !shop.hasValue()) {
+    <div class="card block empty" role="alert">
+        Impossible de charger la boutique.
+        <button type="button" class="btn btn-outline btn-sm" (click)="shop.reload()">Réessayer</button>
+    </div>
+} @else if (shop.hasValue()) {
+    @let s = shop.value();
+
+    <section class="card block">
+        <div class="block-head">
+            <h2>Résumé</h2>
+            @if (s.status === "SUSPENDED") {
+                <span class="badge badge-warning">Suspendue</span>
+            } @else {
+                <span class="badge badge-success">Active</span>
+            }
+        </div>
+
+        <dl class="facts">
+            <div>
+                <dt>Inscrite le</dt>
+                <dd>{{ s.created_at | date: "d MMM y" }}</dd>
+            </div>
+            <div>
+                <dt>Essai</dt>
+                <dd>
+                    @if (trial(); as t) {
+                        <span class="trial" [class.ended]="t.ended">{{ t.label }}</span>
+                    } @else {
+                        Aucun
+                    }
+                </dd>
+            </div>
+            <div>
+                <dt>Produits</dt>
+                <dd>{{ s.products_count }}</dd>
+            </div>
+            <div>
+                <dt>Ventes sur 30 jours</dt>
+                <dd>{{ s.sales_last_30_days }}</dd>
+            </div>
+            <div>
+                <dt>Dernière vente</dt>
+                <dd>{{ s.last_sale_at ? (s.last_sale_at | date: "d MMM y") : "Aucune" }}</dd>
+            </div>
+            <div>
+                <dt>Téléphone</dt>
+                <dd>{{ s.phone || "Non renseigné" }}</dd>
+            </div>
+            <div class="wide">
+                <dt>Adresse</dt>
+                <dd>{{ s.address || "Non renseignée" }}</dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="card block">
+        <div class="block-head">
+            <h2>Comptes</h2>
+            <span class="muted">{{ s.users.length }}</span>
+        </div>
+
+        <ul class="accounts">
+            @for (account of s.users; track account.id) {
+                <li class="account" [class.inactive]="!account.is_active">
+                    <div class="account-text">
+                        <strong>{{ account.name }}</strong>
+                        <small class="muted">{{ account.email }}</small>
+                        <small class="muted">
+                            {{ roleLabel(account.role) }} ·
+                            @if (!account.is_active) {
+                                compte supprimé
+                            } @else if (account.last_login_at) {
+                                dernière connexion le {{ account.last_login_at | date: "d MMM y" }}
+                            } @else {
+                                jamais connecté
+                            }
+                        </small>
+                    </div>
+
+                    @if (account.is_active) {
+                        <div class="account-actions">
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm"
+                                [disabled]="busy()"
+                                [attr.aria-label]="'Envoyer un lien de réinitialisation à ' + account.name"
+                                (click)="sendLink(account)"
+                            >
+                                <app-icon name="mail" [size]="16" />
+                                Envoyer un lien
+                            </button>
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm"
+                                [disabled]="busy()"
+                                [attr.aria-label]="'Mot de passe provisoire pour ' + account.name"
+                                (click)="askTempPassword(account)"
+                            >
+                                <app-icon name="key" [size]="16" />
+                                Mot de passe provisoire
+                            </button>
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+        <p class="muted hint">
+            Le lien arrive par e-mail et la personne choisit son mot de passe, vous ne le voyez
+            jamais. Le mot de passe provisoire sert seulement si elle n'a plus accès à son e-mail.
+        </p>
+    </section>
+
+    <section class="card block">
+        <div class="block-head"><h2>Abonnement et accès</h2></div>
+
+        <form class="trial-form" (submit)="$event.preventDefault(); saveTrial()">
+            <label class="field">
+                <span>Jours d'essai à partir d'aujourd'hui</span>
+                <input
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    max="365"
+                    step="1"
+                    name="trialDays"
+                    placeholder="Vide pour retirer l'essai"
+                    [ngModel]="trialDays()"
+                    (ngModelChange)="trialDays.set($event)"
+                />
+            </label>
+            <button type="submit" class="btn btn-primary" [disabled]="busy()">Enregistrer</button>
+        </form>
+
+        <div class="status-row">
+            @if (s.status === "ACTIVE") {
+                <p class="muted">
+                    Suspendre empêche toute la boutique de se connecter. Ses données sont gardées.
+                </p>
+                <button type="button" class="btn btn-danger btn-sm" [disabled]="busy()" (click)="askSuspend()">
+                    <app-icon name="ban" [size]="16" />
+                    Suspendre la boutique
+                </button>
+            } @else {
+                <p class="muted">La boutique est suspendue : plus personne ne peut s'y connecter.</p>
+                <button
+                    type="button"
+                    class="btn btn-outline btn-sm"
+                    [disabled]="busy()"
+                    (click)="setStatus('ACTIVE')"
+                >
+                    <app-icon name="undo" [size]="16" />
+                    Réactiver la boutique
+                </button>
+            }
+        </div>
+    </section>
+}
+
+<dialog #suspendDialog aria-labelledby="suspend-title">
+    <form (submit)="$event.preventDefault(); setStatus('SUSPENDED')">
+        <h2 id="suspend-title">Suspendre {{ shop.hasValue() ? shop.value().name : "la boutique" }} ?</h2>
+        <p class="muted">
+            Plus personne de cette boutique ne pourra se connecter, même avec une session déjà
+            ouverte. Ses données sont conservées et la boutique peut être réactivée à tout moment.
+        </p>
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="busy()" (click)="closeSuspend()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-danger" [disabled]="busy()">
+                @if (busy()) {
+                    <span class="spinner"></span>
+                }
+                Suspendre
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog
+    #passwordDialog
+    aria-labelledby="temp-title"
+    (cancel)="onPasswordCancel($event)"
+    (close)="onPasswordClosed()"
+>
+    @if (tempPassword(); as password) {
+        <div class="done">
+            <h2 id="temp-title">Mot de passe provisoire</h2>
+            <p class="muted">
+                Transmettez ces accès à {{ tempAccount()?.name }}. Le mot de passe ne sera plus
+                affiché ensuite, et il devra le changer à sa première connexion.
+            </p>
+
+            <pre class="credentials">{{ credentials() }}</pre>
+
+            @if (copyFailed()) {
+                <div class="alert alert-error" role="alert">
+                    Copie impossible, sélectionnez le texte ci-dessus.
+                </div>
+            }
+
+            <div class="actions">
+                <button type="button" class="btn btn-outline" (click)="closePasswordDialog()">Fermer</button>
+                <button type="button" class="btn btn-primary" (click)="copy()">
+                    <app-icon [name]="copied() ? 'check' : 'copy'" [size]="16" />
+                    {{ copied() ? "Copié" : "Copier les accès" }}
+                </button>
+            </div>
+        </div>
+    } @else {
+        <form (submit)="$event.preventDefault(); confirmTempPassword()">
+            <h2 id="temp-title">Donner un mot de passe provisoire ?</h2>
+            <p class="muted">
+                {{ tempAccount()?.name }} sera déconnecté(e) partout et devra choisir son propre mot
+                de passe à la prochaine connexion. Préférez le lien par e-mail quand la personne peut
+                lire sa boîte mail.
+            </p>
+
+            @if (tempError()) {
+                <div class="alert alert-error" role="alert">{{ tempError() }}</div>
+            }
+
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="busy()"
+                    (click)="closePasswordDialog()"
+                >
+                    Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="busy()">
+                    @if (busy()) {
+                        <span class="spinner"></span>
+                    }
+                    Créer le mot de passe
+                </button>
+            </div>
+        </form>
+    }
+</dialog>
