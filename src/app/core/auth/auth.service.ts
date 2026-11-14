@@ -23,6 +23,13 @@ interface LoginResponse {
     user: User;
 }
 
+export interface RegisterData {
+    shopName: string;
+    adminName: string;
+    email: string;
+    password: string;
+}
+
 @Injectable({ providedIn: "root" })
 export class AuthService {
     private http = inject(HttpClient);
@@ -59,16 +66,25 @@ export class AuthService {
     }
 
     login(email: string, password: string, remember = true) {
-        return this.http.post<LoginResponse>(`${API_URL}/auth/login`, { email, password }).pipe(
-            tap((res) => {
-                this.clearSession();
-                this.storage = remember ? localStorage : sessionStorage;
-                this.storage.setItem("token", res.token);
-                this.storage.setItem("user", JSON.stringify(res.user));
-                this._token.set(res.token);
-                this._user.set(res.user);
-            }),
-        );
+        return this.http
+            .post<LoginResponse>(`${API_URL}/auth/login`, { email, password })
+            .pipe(tap((res) => this.openSession(res, remember)));
+    }
+
+    // la boutique est créée et le commerçant est connecté tout de suite
+    register(data: RegisterData) {
+        return this.http
+            .post<LoginResponse>(`${API_URL}/auth/register`, data)
+            .pipe(tap((res) => this.openSession(res, true)));
+    }
+
+    private openSession(res: LoginResponse, remember: boolean) {
+        this.clearSession();
+        this.storage = remember ? localStorage : sessionStorage;
+        this.storage.setItem("token", res.token);
+        this.storage.setItem("user", JSON.stringify(res.user));
+        this._token.set(res.token);
+        this._user.set(res.user);
     }
 
     // le nom ou le rôle a pu changer depuis la connexion
