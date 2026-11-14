@@ -27,6 +27,12 @@ export const routes: Routes = [
                 loadComponent: () => import("./features/auth/login/login").then((m) => m.Login),
             },
             {
+                path: "register",
+                title: "Créer ma boutique",
+                loadComponent: () =>
+                    import("./features/auth/register/register").then((m) => m.Register),
+            },
+            {
                 path: "forgot-password",
                 title: "Mot de passe oublié",
                 loadComponent: () =>

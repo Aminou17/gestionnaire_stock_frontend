@@ -73,3 +73,21 @@ h1 {
     margin: 0;
     accent-color: var(--primary);
 }
+
+.switch {
+    margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.switch a {
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.switch a:hover {
+    text-decoration: underline;
+}
