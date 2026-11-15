@@ -23,14 +23,14 @@
 
 h3 {
     margin: 8px 0 0;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
 }
 
 p {
     max-width: 320px;
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 

@@ -1,0 +1,20 @@
+<dialog
+    #box
+    class="confirm"
+    aria-labelledby="logout-title"
+    (click)="onBackdrop($event)"
+    (cancel)="auth.logoutAsked.set(false)"
+    (close)="auth.logoutAsked.set(false)"
+>
+    <div class="confirm-body">
+        <h2 id="logout-title">Se déconnecter ?</h2>
+        <p class="muted">Vous devrez saisir votre mot de passe pour revenir.</p>
+
+        <div class="confirm-actions">
+            <button type="button" class="btn btn-outline" (click)="stay()">Rester connecté</button>
+            <button type="button" class="btn btn-danger" (click)="auth.logout()">
+                Se déconnecter
+            </button>
+        </div>
+    </div>
+</dialog>

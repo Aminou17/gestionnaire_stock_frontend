@@ -32,8 +32,8 @@
 .zoom p {
     margin: 0;
     color: #fff;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
     text-align: center;
 }
 

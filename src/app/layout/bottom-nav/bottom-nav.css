@@ -23,8 +23,8 @@ button {
     border: 0;
     background: transparent;
     color: var(--text-muted);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-medium);
     text-decoration: none;
     cursor: pointer;
 }
@@ -44,15 +44,15 @@ button {
     border-radius: 999px;
     background: var(--danger-strong);
     color: #fff;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-semibold);
     line-height: 16px;
     text-align: center;
 }
 
 .sell {
     color: var(--primary-text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .sell-icon {
@@ -69,7 +69,7 @@ button {
 
 a.active {
     color: var(--primary-text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 @media (max-width: 767px) {

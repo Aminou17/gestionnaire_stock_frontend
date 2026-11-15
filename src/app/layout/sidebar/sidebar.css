@@ -18,6 +18,29 @@
     padding: 4px 8px 20px;
 }
 
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 4px;
+    margin: -4px;
+    border-radius: 12px;
+    color: inherit;
+    text-decoration: none;
+    transition: background 0.15s ease;
+}
+
+.brand-link:hover {
+    background: var(--sidebar-hover, rgb(255 255 255 / 0.08));
+}
+
+.brand-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 .brand-icon {
     width: 36px;
     flex: none;
@@ -51,13 +74,13 @@
     overflow: hidden;
     overflow-wrap: anywhere;
     color: var(--sidebar-text-strong);
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-body);
     line-height: 1.3;
 }
 
 .brand-sub {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--sidebar-muted);
 }
 
@@ -72,30 +95,6 @@
     cursor: pointer;
 }
 
-.new-sale {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    height: 44px;
-    margin: 4px 0 8px;
-    border-radius: 10px;
-    background: var(--primary);
-    color: var(--primary-contrast, #fff);
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.new-sale:hover {
-    filter: brightness(1.08);
-}
-
-.new-sale:focus-visible {
-    outline: 2px solid var(--sidebar-text-strong);
-    outline-offset: 2px;
-}
-
 .search-btn {
     display: flex;
     align-items: center;
@@ -108,7 +107,7 @@
     background: var(--sidebar-hover);
     color: var(--sidebar-text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--fs-body);
     cursor: pointer;
 }
 
@@ -119,7 +118,7 @@
 .search-btn kbd {
     margin-left: auto;
     font: inherit;
-    font-size: 11px;
+    font-size: var(--fs-micro);
     opacity: 0.7;
 }
 
@@ -134,8 +133,8 @@ nav {
 
 .section-title {
     margin: 18px 12px 6px;
-    font-size: 11px;
-    font-weight: 600;
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-semibold);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--sidebar-muted);
@@ -151,7 +150,7 @@ nav .group {
     padding: 0 12px;
     border-radius: 8px;
     color: var(--sidebar-text);
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-decoration: none;
     transition:
         background 0.15s,
@@ -163,7 +162,7 @@ nav .group {
     border: 0;
     background: transparent;
     font: inherit;
-    font-size: 14px;
+    font-size: var(--fs-body);
     cursor: pointer;
 }
 
@@ -215,7 +214,7 @@ nav .group:hover {
 nav a.active {
     background: var(--sidebar-active);
     color: var(--sidebar-text-strong);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .count {
@@ -227,8 +226,8 @@ nav a.active {
     border-radius: 999px;
     background: var(--danger-strong);
     color: var(--notification-text);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     display: grid;
     place-items: center;
 }
@@ -249,7 +248,7 @@ nav a.active {
     border-radius: 8px;
     background: transparent;
     color: var(--sidebar-muted);
-    font-size: 13px;
+    font-size: var(--fs-small);
     cursor: pointer;
     text-align: left;
 }
@@ -298,14 +297,14 @@ nav a.active {
 
 .who strong {
     color: var(--sidebar-text-strong);
-    font-size: 14px;
+    font-size: var(--fs-body);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .who small {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--sidebar-muted);
 }
 
@@ -339,7 +338,7 @@ nav a.active {
     border-radius: 8px;
     background: transparent;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-decoration: none;
     cursor: pointer;
     text-align: left;
@@ -399,6 +398,11 @@ nav a.active {
         padding-inline: 12px;
     }
 
+    .collapsed .brand-link {
+        flex: none;
+        justify-content: center;
+    }
+
     .collapsed .brand {
         justify-content: center;
         padding-inline: 0;
@@ -433,10 +437,6 @@ nav a.active {
         justify-content: center;
         padding: 0;
         position: relative;
-    }
-
-    .collapsed .new-sale {
-        font-size: 0;
     }
 
     /* l'étiquette du nombre d'alertes devient un point sur l'icône */
