@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 
-import { BackState } from "../../../core/back-link";
+import { BackState, getBackLink } from "../../../core/back-link";
 import { ProductRotation, RotationSpeed } from "../../../core/stock/low-stock-alert.model";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -44,6 +44,7 @@ const speeds: RotationSpeed[] = ["FAST", "NORMAL", "SLOW", "DORMANT"];
     styleUrl: "./rotation.css",
 })
 export class Rotation {
+    protected back = getBackLink("/alerts", "Retour aux alertes");
     private alertService = inject(LowStockAlertService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);

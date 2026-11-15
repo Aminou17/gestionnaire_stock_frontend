@@ -11,6 +11,7 @@ import { Router } from "@angular/router";
 import { filter } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { getBackLink } from "../../../core/back-link";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
@@ -34,6 +35,10 @@ export class SettingsPassword implements HasUnsavedChanges {
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
     private router = inject(Router);
+
+    protected back = this.auth.isOwner()
+        ? getBackLink("/owner", "Retour aux boutiques")
+        : getBackLink("/settings", "Retour aux paramètres");
 
     private leaveDialog = viewChild.required(UnsavedDialog);
 

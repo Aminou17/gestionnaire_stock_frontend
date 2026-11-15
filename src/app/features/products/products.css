@@ -133,16 +133,65 @@ app-page-header {
 }
 
 .filter-btn {
+    position: relative;
     display: none;
-    width: 44px;
-    height: 44px;
     flex-shrink: 0;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px;
     border: 1px solid var(--border);
     border-radius: 8px;
     background: var(--surface);
     color: var(--text);
-    place-items: center;
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
     cursor: pointer;
+}
+
+/* nombre de filtres actifs, sur le coin du bouton */
+.filter-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-semibold);
+}
+
+/* bouton flottant, téléphone seulement */
+.fab {
+    display: none;
+    position: fixed;
+    right: 16px;
+    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 16px);
+    z-index: 30;
+    align-items: center;
+    gap: 8px;
+    height: 48px;
+    padding: 0 20px 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    box-shadow: var(--shadow-menu);
+    cursor: pointer;
+}
+
+.fab:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
 }
 
 .filter-btn.active {
@@ -540,10 +589,13 @@ td.num small {
         display: none;
     }
 
-    /* sur téléphone les boutons du haut ne gardent que l'icône */
+    /* sur téléphone, le bouton flottant remplace celui de l'en-tête */
     .new-product {
-        width: 44px;
-        padding: 0;
+        display: none;
+    }
+
+    .fab {
+        display: inline-flex;
     }
 
     /* l'import de fichier se fait sur ordinateur */
@@ -553,10 +605,6 @@ td.num small {
 
     .head-menu {
         display: block;
-    }
-
-    .new-product span {
-        display: none;
     }
 
     .list-error {
@@ -579,7 +627,7 @@ td.num small {
     }
 
     .filter-btn {
-        display: grid;
+        display: inline-flex;
     }
 
     /* les filtres s'ouvrent en feuille depuis le bas, comme les autres menus du téléphone */
@@ -1019,13 +1067,6 @@ td.num small {
         order: 3;
     }
 
-    /* boutons du haut plus petits, comme la barre de l'en-tête */
-    .new-product {
-        width: 36px;
-        min-height: 36px;
-        height: 36px;
-    }
-
     .head-menu .more-btn {
         width: 36px;
         min-width: 36px;
@@ -1033,10 +1074,26 @@ td.num small {
         padding: 0;
     }
 
+    /* carreaux compacts : photo en 4/3 au lieu d'un grand carré */
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
         padding: 0;
+    }
+
+    .gphoto {
+        aspect-ratio: 4 / 3;
+        font-size: var(--fs-heading);
+    }
+
+    .gbody {
+        gap: 2px;
+        padding: 12px;
+    }
+
+    /* la liste se termine au-dessus du bouton flottant */
+    .list-card {
+        padding-bottom: 56px;
     }
 }
 
@@ -1107,7 +1164,6 @@ td.num small {
         min-height: 40px;
     }
 
-    .filter-btn,
     .view-single {
         width: 40px;
     }

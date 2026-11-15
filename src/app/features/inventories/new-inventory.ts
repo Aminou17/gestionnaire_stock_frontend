@@ -9,6 +9,7 @@ import { ProductService } from "../../core/stock/product.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { categoryTone, productInitials } from "../products/product-look";
+import { getBackLink } from "../../core/back-link";
 
 // même limite que le backend
 const MAX_STOCK = 1000000;
@@ -20,6 +21,7 @@ const MAX_STOCK = 1000000;
     styleUrl: "./new-inventory.css",
 })
 export class NewInventory {
+    protected back = getBackLink("/inventories", "Retour aux inventaires");
     private inventoryService = inject(InventoryService);
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);

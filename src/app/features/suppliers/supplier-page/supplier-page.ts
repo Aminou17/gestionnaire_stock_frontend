@@ -20,7 +20,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
 import { SupplierForm } from "../supplier-form/supplier-form";
-import { BackState } from "../../../core/back-link";
+import { BackState, getBackLink } from "../../../core/back-link";
 
 // nombre de livraisons montrées directement sur la fiche
 const PREVIEW_SIZE = 5;
@@ -32,6 +32,7 @@ const PREVIEW_SIZE = 5;
     styleUrl: "./supplier-page.css",
 })
 export class SupplierPage {
+    protected back = getBackLink("/suppliers", "Retour aux fournisseurs");
     private supplierService = inject(SupplierService);
     private entryService = inject(StockEntryService);
     private router = inject(Router);

@@ -156,6 +156,12 @@ describe("NewSale", () => {
         await fixture.whenStable();
     }
 
+    // le champ du prix négocié est replié tant qu'on ne clique pas sur le lien
+    async function openPrice() {
+        el.querySelector<HTMLButtonElement>(".price-link")!.click();
+        await fixture.whenStable();
+    }
+
     it("should add a product to the cart and compute the total", async () => {
         await render();
         // sans produit, le pied du panier n'existe pas encore
@@ -174,6 +180,8 @@ describe("NewSale", () => {
         await render();
         await add(1);
         expect(el.querySelector(".recap")).toBeNull();
+        expect(el.querySelector(".price-input")).toBeNull();
+        await openPrice();
 
         const price = el.querySelector<HTMLInputElement>(".price-input")!;
         price.value = "9000";
@@ -275,6 +283,7 @@ describe("NewSale", () => {
         await render();
         await add(0);
         await add(1);
+        await openPrice();
 
         const price = el.querySelector<HTMLInputElement>(".price-input")!;
         price.value = "9000";
@@ -289,12 +298,16 @@ describe("NewSale", () => {
             ],
             { paymentMethod: "CASH", amountReceived: 10500 },
         );
-        expect(navigate).toHaveBeenCalledWith(["/sales", 9], { state: { created: true } });
+        expect(navigate).toHaveBeenCalledWith(["/sales", 9], {
+            state: { created: true },
+            replaceUrl: false,
+        });
     });
 
     it("should block a negotiated price below the minimum", async () => {
         await render();
         await add(1);
+        await openPrice();
 
         const price = el.querySelector<HTMLInputElement>(".price-input")!;
         price.value = "8000";
@@ -632,5 +645,183 @@ describe("NewSale", () => {
             paymentMethod: "MOBILE_MONEY",
             amountPaid: payment.secondPayment.amountPaid,
         });
+    });
+
+    describe("carreaux", () => {
+        const gridButton = () =>
+            el.querySelector<HTMLButtonElement>(
+                ".view-toggle button[aria-label='Vue en carreaux']",
+            )!;
+        const tiles = () => [...el.querySelectorAll<HTMLElement>(".gtile")];
+
+        beforeEach(() => localStorage.removeItem("new-sale-view"));
+        afterAll(() => localStorage.removeItem("new-sale-view"));
+
+        it("should switch to tiles and remember the choice", async () => {
+            await render();
+            expect(tiles().length).toBe(0);
+
+            gridButton().click();
+            await fixture.whenStable();
+
+            expect(tiles().length).toBe(3);
+            expect(el.querySelectorAll(".tile").length).toBe(0);
+            expect(localStorage.getItem("new-sale-view")).toBe("grid");
+
+            fixture.destroy();
+            TestBed.resetTestingModule();
+            await render();
+            expect(tiles().length).toBe(3);
+        });
+
+        it("should add one more at each tap and show the quantity, then take one off", async () => {
+            await render();
+            gridButton().click();
+            await fixture.whenStable();
+
+            const tap = async () => {
+                tiles()[0].querySelector<HTMLButtonElement>(".gmain")!.click();
+                await fixture.whenStable();
+            };
+            await tap();
+            await tap();
+
+            expect(tiles()[0].querySelector(".gqty")!.textContent).toContain("2");
+            expect(el.querySelector(".stepper input")).toHaveProperty("value", "2");
+
+            tiles()[0].querySelector<HTMLButtonElement>(".gqty button")!.click();
+            await fixture.whenStable();
+            expect(tiles()[0].querySelector(".gqty")!.textContent).toContain("1");
+
+            tiles()[0].querySelector<HTMLButtonElement>(".gqty button")!.click();
+            await fixture.whenStable();
+            expect(tiles()[0].querySelector(".gqty")).toBeNull();
+            expect(el.querySelectorAll(".line").length).toBe(0);
+        });
+
+        it("should disable an out of stock tile and keep the photo zoom apart", async () => {
+            await render();
+            gridButton().click();
+            await fixture.whenStable();
+
+            expect(tiles()[2].querySelector<HTMLButtonElement>(".gmain")!.disabled).toBe(true);
+            expect(tiles()[2].textContent).toContain("Rupture");
+
+            tiles()[1].querySelector<HTMLButtonElement>(".gcorner")!.click();
+            await fixture.whenStable();
+            expect(el.querySelectorAll(".line").length).toBe(0);
+        });
+    });
+
+    describe("feuille du panier", () => {
+        it("should open from the bar without moving the page, and close with the cross", async () => {
+            await render();
+            await add(0);
+            const scroll = vi.fn();
+            Element.prototype.scrollIntoView = scroll;
+
+            el.querySelector<HTMLButtonElement>(".bar-info")!.click();
+            await fixture.whenStable();
+            expect(el.querySelector(".cart")!.classList).toContain("open");
+            expect(el.querySelector(".cart-bar")).toBeNull();
+
+            el.querySelector<HTMLButtonElement>(".sheet-close")!.click();
+            // le retour d'historique est asynchrone
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            await fixture.whenStable();
+            expect(el.querySelector(".cart")!.classList).not.toContain("open");
+            expect(scroll).not.toHaveBeenCalled();
+        });
+
+        it("should close on the back button", async () => {
+            await render();
+            await add(0);
+            el.querySelector<HTMLButtonElement>(".bar-info")!.click();
+            await fixture.whenStable();
+
+            window.dispatchEvent(new PopStateEvent("popstate"));
+            await fixture.whenStable();
+
+            expect(el.querySelector(".cart")!.classList).not.toContain("open");
+        });
+
+        it("should encash straight from the bar when the cart is ready", async () => {
+            await render();
+            await add(0);
+
+            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .btn")!;
+            expect(bar.textContent).toContain("Encaisser");
+            bar.click();
+
+            expect(createSale).toHaveBeenCalledTimes(1);
+        });
+
+        it("should open the cart instead when the sale is not ready", async () => {
+            await render({ cash: null });
+            await add(0);
+
+            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .btn")!;
+            expect(bar.textContent).toContain("Voir le panier");
+            bar.click();
+            await fixture.whenStable();
+
+            expect(createSale).not.toHaveBeenCalled();
+            expect(el.querySelector(".cart")!.classList).toContain("open");
+        });
+    });
+
+    it("should open the cash dialog from the banner and refresh the cash", async () => {
+        HTMLDialogElement.prototype.showModal = function () {
+            this.setAttribute("open", "");
+        };
+        await render({ cash: null });
+        const dialog = el.querySelector("app-open-cash-dialog dialog")!;
+        expect(dialog.hasAttribute("open")).toBe(false);
+
+        el.querySelector<HTMLButtonElement>(".banner .link-btn")!.click();
+        await fixture.whenStable();
+
+        expect(dialog.hasAttribute("open")).toBe(true);
+        expect(el.querySelector(".banner a")).toBeNull();
+    });
+
+    it("should suggest bills adapted to the total", async () => {
+        await render();
+        await add(1);
+        const chips = () =>
+            [...el.querySelectorAll<HTMLButtonElement>(".chips .chip")].map((c) =>
+                c.textContent!.replace(/\s/g, " ").trim(),
+            );
+
+        expect(chips()).toEqual(["Montant exact", "20 000 F", "50 000 F"]);
+    });
+
+    it("should show a big change and say when the amount is exact", async () => {
+        await render();
+        await add(0);
+        await type("input[placeholder='Ex. 10 000']", "1500");
+
+        expect(el.querySelector(".change")!.textContent).toContain("Compte juste");
+    });
+
+    it("should encash with the Enter key from the received amount", async () => {
+        await render();
+        await add(0);
+
+        el.querySelector<HTMLInputElement>("#received")!.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+        );
+
+        expect(createSale).toHaveBeenCalledTimes(1);
+    });
+
+    it("should focus the search with the slash key", async () => {
+        await render();
+        fixture.detectChanges();
+        const search = el.querySelector<HTMLInputElement>(".search input")!;
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "/", bubbles: true }));
+
+        expect(document.activeElement).toBe(search);
     });
 });

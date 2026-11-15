@@ -1,8 +1,8 @@
 <app-page-header
     title="Mon profil"
     section="Paramètres"
-    back="/settings"
-    backLabel="Retour aux paramètres"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 <section class="card identity" aria-label="Photo et nom">

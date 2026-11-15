@@ -25,6 +25,7 @@ import { PasswordDialog } from "../password-dialog/password-dialog";
 import { UserForm } from "../user-form/user-form";
 import { formatDeletion, formatLastLogin } from "../user-display";
 import { UserService } from "../user.service";
+import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-user-page",
@@ -33,6 +34,7 @@ import { UserService } from "../user.service";
     styleUrl: "./user-page.css",
 })
 export class UserPage {
+    protected back = getBackLink("/users", "Retour aux utilisateurs");
     private userService = inject(UserService);
     private auth = inject(AuthService);
     private router = inject(Router);

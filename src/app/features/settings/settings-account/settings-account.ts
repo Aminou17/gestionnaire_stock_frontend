@@ -14,6 +14,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
+import { getBackLink } from "../../../core/back-link";
 
 // une session ouverte avant l'arrivée du prénom et du nom n'a que le nom complet
 const namesOf = (user: User | null) => {
@@ -31,6 +32,7 @@ const namesOf = (user: User | null) => {
     styleUrls: ["../settings-section.css", "./settings-account.css"],
 })
 export class SettingsAccount implements HasUnsavedChanges {
+    protected back = getBackLink("/settings", "Retour aux paramètres");
     protected auth = inject(AuthService);
     protected theme = inject(ThemeService);
     private destroyRef = inject(DestroyRef);

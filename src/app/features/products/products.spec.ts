@@ -206,15 +206,39 @@ describe("Products", () => {
         await render(true, [product({ purchase_price: 1100 })]);
 
         expect(el.querySelector(".new-product")).not.toBeNull();
+        expect(el.querySelector(".fab")?.textContent).toContain("Nouveau produit");
         expect(el.querySelector(".product-card .more-btn")).not.toBeNull();
         expect(text()).toContain("Prix d'achat");
+    });
+
+    it("should label the filter button and count the active filters", async () => {
+        await render(true, [product({})]);
+
+        const button = el.querySelector(".filter-btn") as HTMLButtonElement;
+        expect(button.textContent).toContain("Filtre");
+        expect(el.querySelector(".filter-count")).toBeNull();
+
+        const sort = [...el.querySelectorAll(".filters select")].pop() as HTMLSelectElement;
+        sort.value = "name";
+        sort.dispatchEvent(new Event("change"));
+        fixture.detectChanges();
+
+        expect(el.querySelector(".filter-count")?.textContent?.trim()).toBe("1");
+    });
+
+    it("should load photos lazily", async () => {
+        await render(true, [product({ image: "data:image/jpeg;base64,AAAA" })]);
+
+        const img = el.querySelector(".product-card img") as HTMLImageElement;
+        expect(img.getAttribute("loading")).toBe("lazy");
+        expect(img.getAttribute("decoding")).toBe("async");
     });
 
     it("should show the list read-only to the manager", async () => {
         await render(false, [product({})]);
 
         expect(el.querySelector(".new-product")).toBeNull();
-        expect(el.querySelector(".new-product")).toBeNull();
+        expect(el.querySelector(".fab")).toBeNull();
         expect(text()).not.toContain("Prix d'achat");
         expect(text()).not.toContain("Marge");
         expect(el.querySelectorAll(".filters select").length).toBe(2);

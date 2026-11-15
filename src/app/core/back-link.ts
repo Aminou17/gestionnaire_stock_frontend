@@ -23,11 +23,15 @@ export const getBackLink = (fallbackUrl: string, fallbackLabel: string) => {
         label:
             fromState && typeof state.backLabel === "string"
                 ? state.backLabel
-                : previous
+                : previous && !isSamePage(previous, fallbackUrl)
                   ? "Retour"
                   : fallbackLabel,
     };
 };
+
+// la page d'où l'on vient est la liste habituelle : on garde son libellé précis
+const isSamePage = (url: string, fallbackUrl: string) =>
+    url.split("?")[0] === fallbackUrl.split("?")[0];
 
 // la page visitée juste avant, sauf un formulaire de création, l'accueil ou la page elle-même
 const previousPage = (router: Router) => {

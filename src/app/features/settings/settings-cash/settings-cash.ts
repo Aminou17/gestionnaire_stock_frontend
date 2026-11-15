@@ -11,6 +11,7 @@ import { errorText } from "../error-text";
 import { SettingsHistory } from "../settings-history/settings-history";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
+import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-settings-cash",
@@ -19,6 +20,7 @@ import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
     styleUrls: ["../settings-section.css", "./settings-cash.css"],
 })
 export class SettingsCash implements HasUnsavedChanges {
+    protected back = getBackLink("/settings", "Retour aux paramètres");
     private cashService = inject(CashSettingsService);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);

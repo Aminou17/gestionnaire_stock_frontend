@@ -11,6 +11,7 @@ import { errorText } from "../error-text";
 import { SettingsHistory } from "../settings-history/settings-history";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
+import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-settings-stock",
@@ -19,6 +20,7 @@ import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
     styleUrls: ["../settings-section.css", "./settings-stock.css"],
 })
 export class SettingsStock implements HasUnsavedChanges {
+    protected back = getBackLink("/settings", "Retour aux paramètres");
     private stockService = inject(StockSettingsService);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);

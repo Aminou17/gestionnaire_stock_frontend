@@ -2,8 +2,8 @@
     [title]="shop.hasValue() ? shop.value().name : 'Boutique'"
     subtitle="Contact, comptes et activité de la boutique"
     section="Espace propriétaire"
-    back="/owner"
-    backLabel="Retour aux boutiques"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 @if (message(); as msg) {
