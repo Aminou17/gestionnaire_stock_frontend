@@ -38,7 +38,7 @@
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton wide"></span>
         } @else {
-            <strong class="stat-value">{{ counters()?.active_total | fcfa }}</strong>
+            <strong appMoney class="stat-value">{{ counters()?.active_total | fcfa }}</strong>
         }
     </div>
 </div>
@@ -195,18 +195,19 @@
         }
 
         <!-- le montant encaissé ne concerne pas les ventes remboursées -->
-        <section class="summary" aria-label="Résumé">
+        <section class="summary" [class.refunded]="status() === 'CANCELLED'" aria-label="Résumé">
             @if (status() !== "CANCELLED") {
                 <div class="summary-main">
                     <span class="summary-label">Encaissé</span>
-                    <strong class="summary-amount">{{ counters()?.active_total | fcfa }}</strong>
+                    <strong appMoney class="summary-amount">{{
+                        counters()?.active_total | fcfa
+                    }}</strong>
                 </div>
+            } @else {
+                <span class="summary-count">
+                    {{ total() }} remboursement{{ total() > 1 ? "s" : "" }}
+                </span>
             }
-            <span class="summary-count">
-                {{ total() }}
-                {{ status() === "CANCELLED" ? "remboursement" : "vente"
-                }}{{ total() > 1 ? "s" : "" }}
-            </span>
         </section>
 
         <div class="table-wrap">
@@ -251,7 +252,18 @@
                                     {{ sale.user_name }}
                                 </td>
                             }
-                            <td>{{ sale.customer_name }}</td>
+                            <td>
+                                @if (sale.customer_id) {
+                                    <a
+                                        class="customer-link"
+                                        [routerLink]="['/customers', sale.customer_id]"
+                                        (click)="$event.stopPropagation()"
+                                        >{{ sale.customer_name }}</a
+                                    >
+                                } @else {
+                                    {{ sale.customer_name }}
+                                }
+                            </td>
                             <td>{{ paymentLabel(sale.payment_method) }}</td>
                             <td class="num">{{ sale.items_count }}</td>
                             <td class="num strong">{{ sale.total | fcfa }}</td>
@@ -320,7 +332,20 @@
                                                 ·
                                             }
                                             @if (sale.customer_name) {
-                                                Client : {{ sale.customer_name }}
+                                                Client :
+                                                @if (sale.customer_id) {
+                                                    <a
+                                                        class="customer-link"
+                                                        [routerLink]="[
+                                                            '/customers',
+                                                            sale.customer_id,
+                                                        ]"
+                                                        (click)="$event.stopPropagation()"
+                                                        >{{ sale.customer_name }}</a
+                                                    >
+                                                } @else {
+                                                    {{ sale.customer_name }}
+                                                }
                                             }
                                         </p>
                                     }

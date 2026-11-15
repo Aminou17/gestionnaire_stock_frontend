@@ -7,6 +7,7 @@ import { of, throwError } from "rxjs";
 import { NewSale } from "./new-sale";
 import { AuthService } from "../../../core/auth/auth.service";
 import { CashSessionService, TodayCash } from "../../../core/cash/cash-session.service";
+import { CustomerService } from "../../../core/customers/customer.service";
 import { SaleService } from "../../../core/sales/sale.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
@@ -35,6 +36,19 @@ const bazin = product(4, "Bazin riche", {
 });
 const savon = product(5, "Savon", { theoretical_stock: 0, stock_status: "OUT_OF_STOCK" });
 
+const mireille = {
+    id: 12,
+    name: "Mireille Ngoma",
+    phone: "+242066123456",
+    note: null,
+    is_active: true,
+    created_at: "2026-01-01",
+    purchases_count: 3,
+    total_spent: 9000,
+    due_amount: 2500,
+    last_purchase_at: null,
+};
+
 let preselected: Product = bazin;
 
 describe("NewSale", () => {
@@ -48,17 +62,27 @@ describe("NewSale", () => {
         isAdmin = false,
         productId = null as string | null,
         createFails = false,
+        customerGone = false,
+        customersFail = false,
     } = {}) {
         createSale = vi.fn(() =>
-            createFails
+            customerGone
                 ? throwError(
                       () =>
                           new HttpErrorResponse({
-                              status: 409,
-                              error: { message: "Stock insuffisant pour le produit 3." },
+                              status: 404,
+                              error: { message: "Client introuvable ou désactivé." },
                           }),
                   )
-                : of({ id: 9 }),
+                : createFails
+                  ? throwError(
+                        () =>
+                            new HttpErrorResponse({
+                                status: 409,
+                                error: { message: "Stock insuffisant pour le produit 3." },
+                            }),
+                    )
+                  : of({ id: 9 }),
         );
 
         await TestBed.configureTestingModule({
@@ -74,6 +98,15 @@ describe("NewSale", () => {
                     },
                 },
                 { provide: SaleService, useValue: { createSale } },
+                {
+                    provide: CustomerService,
+                    useValue: {
+                        getCustomers: () =>
+                            customersFail
+                                ? throwError(() => new HttpErrorResponse({ status: 500 }))
+                                : of({ rows: [mireille], total: 1, page: 1, limit: 5 }),
+                    },
+                },
                 { provide: CashSessionService, useValue: { getTodayCash: () => of(cash) } },
                 {
                     provide: ProductService,
@@ -333,12 +366,14 @@ describe("NewSale", () => {
         await add(0);
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
+        el.querySelector<HTMLButtonElement>(".free-link")!.click();
+        await fixture.whenStable();
         await type("input[placeholder='Nom du client']", " Fatou Ndiaye ");
         el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
         await fixture.whenStable();
         await type("input[placeholder^='Tout payer']", "500");
 
-        expect(text()).toContain("Reste à payer plus tard");
+        expect(text()).toContain("Reste à payer");
         submitBtn().click();
         expect(createSale).toHaveBeenCalledWith(
             [{ productId: 3, quantity: 1 }],
@@ -349,6 +384,134 @@ describe("NewSale", () => {
                 customerName: "Fatou Ndiaye",
             }),
         );
+    });
+
+    it("should send the customer id and show what the customer already owes", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
+        await fixture.whenStable();
+        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
+        await fixture.whenStable();
+        el.querySelector<HTMLButtonElement>(".picker-row")!.click();
+        await fixture.whenStable();
+
+        expect(text()).toContain("Mireille Ngoma");
+        expect(text()).toContain("Doit déjà 2 500 F");
+
+        submitBtn().click();
+        const payment = createSale.mock.calls[0][1];
+        expect(payment.customerId).toBe(12);
+        expect(payment.customerName).toBeUndefined();
+        expect(payment.customerPhone).toBeUndefined();
+    });
+
+    it("should list recent customers as soon as the customer block opens", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelector("#customer-list")).not.toBeNull();
+        expect(el.querySelector(".picker-row")!.textContent).toContain("Mireille Ngoma");
+    });
+
+    it("should offer the matching customer when a known phone is typed in free entry", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
+        await fixture.whenStable();
+        el.querySelector<HTMLButtonElement>(".free-link")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder='Téléphone']", "06 61 23 456");
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        await fixture.whenStable();
+
+        expect(el.querySelector(".match")!.textContent).toContain("C'est Mireille Ngoma ?");
+
+        el.querySelector<HTMLButtonElement>(".match button")!.click();
+        await fixture.whenStable();
+        submitBtn().click();
+        expect(createSale.mock.calls[0][1].customerId).toBe(12);
+    });
+
+    async function openPicker() {
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
+        await fixture.whenStable();
+        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
+        await fixture.whenStable();
+    }
+
+    it("should expose the customer picker as a combobox and close it with Escape", async () => {
+        await render();
+        await openPicker();
+        const input = el.querySelector<HTMLInputElement>(".picker input")!;
+
+        expect(input.getAttribute("role")).toBe("combobox");
+        expect(input.getAttribute("aria-expanded")).toBe("true");
+        expect(el.querySelector("#customer-list")!.getAttribute("role")).toBe("listbox");
+        expect(el.querySelector(".picker-row")!.getAttribute("role")).toBe("option");
+
+        input.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+        await fixture.whenStable();
+
+        expect(el.querySelector("#customer-list")).toBeNull();
+        expect(input.getAttribute("aria-expanded")).toBe("false");
+    });
+
+    it("should close the picker on a click elsewhere but not inside it", async () => {
+        await render();
+        await openPicker();
+
+        el.querySelector<HTMLElement>(".picker-list")!.click();
+        await fixture.whenStable();
+        expect(el.querySelector("#customer-list")).not.toBeNull();
+
+        document.body.click();
+        await fixture.whenStable();
+        expect(el.querySelector("#customer-list")).toBeNull();
+    });
+
+    it("should tell the search failed instead of saying no customer was found", async () => {
+        await render({ customersFail: true });
+        await openPicker();
+
+        expect(el.querySelector(".picker-error")!.getAttribute("role")).toBe("alert");
+        expect(text()).toContain("Impossible de charger les clients");
+        expect(text()).not.toContain("Aucun client trouvé");
+        expect(text()).toContain("Réessayer");
+    });
+
+    it("should drop the chosen customer when the API says it is gone", async () => {
+        await render({ customerGone: true });
+        await openPicker();
+        el.querySelector<HTMLButtonElement>(".picker-row")!.click();
+        await fixture.whenStable();
+        expect(text()).toContain("Mireille Ngoma");
+
+        submitBtn().click();
+        await fixture.whenStable();
+
+        expect(text()).toContain("Ce client n'existe plus ou a été désactivé");
+        expect(el.querySelector(".picked")).toBeNull();
+        expect(el.querySelector(".picker input")).not.toBeNull();
+        expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("should accept a deposit when a customer card is chosen", async () => {
+        await render();
+        await add(0);
+        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
+        await fixture.whenStable();
+        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
+        await fixture.whenStable();
+        el.querySelector<HTMLButtonElement>(".picker-row")!.click();
+        await fixture.whenStable();
+        await type("input[placeholder^='Tout payer']", "500");
+
+        expect(text()).not.toContain("Indiquez le nom ou le téléphone");
+        expect(submitBtn().disabled).toBe(false);
     });
 
     it("should refuse a deposit above the total", async () => {

@@ -22,6 +22,8 @@ import { SalesSettingsService } from "../../../core/sales/sales-settings.service
 import { formatTicketNumber } from "../../../core/sales/ticket-number";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { StockMovement } from "../../../core/stock/stock-movement.model";
+import { shareReceiptImage } from "../sale-receipt/receipt-image";
+import { receiptLink } from "../sale-receipt/receipt-message";
 import { SaleReceipt } from "../sale-receipt/sale-receipt";
 import { MovementDetail } from "../../stock-movements/movement-detail/movement-detail";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -54,6 +56,10 @@ interface TimelineEvent {
     ],
     templateUrl: "./sale-page.html",
     styleUrls: ["./sale-page.css", "./sale-page-dialogs.css"],
+    host: {
+        "(document:click)": "closeMenuOutside($event)",
+        "(document:keydown.escape)": "closeMenuWithKey()",
+    },
 })
 export class SalePage {
     private saleService = inject(SaleService);
@@ -211,6 +217,69 @@ export class SalePage {
     ticketNumber = computed(() =>
         formatTicketNumber(this.data()?.number ?? "", this.ticketPrefix()),
     );
+
+    // lien WhatsApp du reçu en texte, prêt dès que le nom de la boutique et le préfixe sont connus
+    whatsAppReceipt = computed(() => {
+        const sale = this.data();
+        const shop = this.shopInfo();
+        if (!sale || !shop || !this.settingsReady()) return null;
+        return receiptLink(
+            sale,
+            shop.name,
+            this.shopService.defaultCountryCode(),
+            this.ticketPrefix(),
+            shop.receipt_footer ?? "",
+        );
+    });
+
+    menuOpen = signal(false);
+
+    // Échap ramène le focus sur le bouton, sinon il tombe sur la page
+    closeMenuWithKey() {
+        if (!this.menuOpen()) return;
+
+        this.menuOpen.set(false);
+        document.querySelector<HTMLElement>('.action-menu [aria-label="Autres actions"]')?.focus();
+    }
+
+    closeMenuOutside(event: Event) {
+        if (!(event.target as HTMLElement).closest(".action-menu")) this.menuOpen.set(false);
+    }
+
+    private captureBox = viewChild<ElementRef<HTMLElement>>("captureBox");
+    sharing = signal(false);
+    shareNotice = signal("");
+    shareError = signal(false);
+
+    async shareImage() {
+        // on photographie le ticket, pas le bloc qui le décale hors de l'écran
+        const box = this.captureBox()?.nativeElement.firstElementChild as HTMLElement | null;
+        const sale = this.data();
+        if (!box || !sale) return;
+
+        this.sharing.set(true);
+        this.shareNotice.set("");
+        this.shareError.set(false);
+        try {
+            const result = await shareReceiptImage(
+                box,
+                `Ticket-${this.ticketNumber()}.png`,
+                sale.customer_phone,
+                this.shopService.defaultCountryCode(),
+            );
+            if (result === "copied") {
+                this.shareNotice.set("Image copiée. Collez-la dans la conversation avec Ctrl+V.");
+            } else if (result === "downloaded") {
+                this.shareNotice.set(
+                    "Image téléchargée. Glissez-la dans la conversation WhatsApp.",
+                );
+            }
+        } catch {
+            this.shareError.set(true);
+        } finally {
+            this.sharing.set(false);
+        }
+    }
 
     // un ticket sans son en-tête ni son préfixe serait faux : on bloque l'impression plutôt que de l'imprimer
     settingsReady = computed(() => this.shop.hasValue() && this.salesSettings.hasValue());

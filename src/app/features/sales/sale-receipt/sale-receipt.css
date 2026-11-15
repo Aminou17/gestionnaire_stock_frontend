@@ -5,14 +5,16 @@
 /* largeur d'un rouleau de caisse, le reste de la feuille reste blanc */
 .receipt {
     display: grid;
-    gap: 10px;
+    gap: 16px;
     width: 72mm;
     margin: 0 auto;
     padding-top: 4mm;
-    color: #000;
-    font-family: "Courier New", monospace;
+    color: #111827;
+    /* police de caisse, comme les tickets de supermarché */
+    font-family: "Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace;
     font-size: 12px;
-    line-height: 1.35;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .receipt header,
@@ -24,8 +26,8 @@
 }
 
 .receipt header {
-    padding-bottom: 10px;
-    border-bottom: 1px dashed #000;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed #d1d5db;
 }
 
 .receipt-logo {
@@ -33,35 +35,52 @@
     max-width: 160px;
     height: auto;
     max-height: 80px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     object-fit: contain;
 }
 
 .receipt-shop {
-    margin-bottom: 4px;
-    font-size: 18px;
-    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
-.receipt-gap {
-    height: 6px;
+.receipt-meta {
+    color: #374151;
+    font-size: 12px;
 }
 
-.receipt-policy {
-    margin-top: 4px;
-    font-size: 11px;
+.receipt-client {
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+/* petite annonce de la boutique, réglée dans Paramètres */
+.receipt-announce {
+    width: 100%;
+    margin: 0 0 6px;
+    padding: 8px 10px;
+    border: 1px dashed #9ca3af;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    overflow-wrap: anywhere;
 }
 
 .receipt-cancelled {
-    margin-top: 6px;
-    padding: 2px 6px;
-    border: 1px solid #000;
+    margin-top: 8px;
+    padding: 2px 8px;
+    border: 1px solid #b91c1c;
+    border-radius: 4px;
+    color: #b91c1c;
 }
 
 .receipt-items {
     display: grid;
-    gap: 8px;
+    gap: 12px;
 }
 
 .receipt-item {
@@ -69,12 +88,13 @@
 }
 
 .receipt-name {
-    font-weight: 700;
+    font-weight: 600;
 }
 
 .receipt-note {
     padding-left: 12px;
-    font-style: italic;
+    color: #374151;
+    font-size: 12px;
 }
 
 .receipt-line {
@@ -82,28 +102,83 @@
     justify-content: space-between;
     gap: 8px;
     margin: 0;
+    font-variant-numeric: tabular-nums;
 }
 
 .receipt-item .receipt-line {
     padding-left: 12px;
+    color: #374151;
 }
 
 .receipt-sums {
     display: grid;
-    gap: 2px;
-    padding-top: 10px;
-    border-top: 1px dashed #000;
+    gap: 4px;
+    padding-top: 16px;
+    border-top: 1px dashed #d1d5db;
 }
 
+/* le total est la seule ligne en grand */
 .receipt-total {
-    margin-top: 6px;
-    padding-top: 6px;
-    border-top: 1px solid #000;
-    font-size: 16px;
+    align-items: baseline;
+    margin: 4px 0 8px;
+    font-size: 24px;
     font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.receipt-total span:first-child {
+    font-size: 13px;
+    letter-spacing: 0.06em;
+}
+
+.receipt-due {
+    font-weight: 600;
 }
 
 .receipt-thanks {
-    padding-top: 10px;
-    border-top: 1px dashed #000;
+    padding-top: 16px;
+    border-top: 1px dashed #d1d5db;
+    color: #374151;
+    font-size: 12px;
+}
+
+/* détail d'un paiement en espèces : même alignement que les autres montants, en retrait */
+.receipt-sub {
+    padding-left: 12px;
+    color: #374151;
+    font-size: 12px;
+}
+
+/* coordonnées et mentions légales : papier seulement */
+.on-paper {
+    display: none;
+}
+
+@media print {
+    .receipt {
+        color: #000;
+        font-size: 12px;
+    }
+
+    .on-paper {
+        display: block;
+    }
+
+    .receipt-line.on-paper {
+        display: flex;
+    }
+
+    .receipt-meta,
+    .receipt-note,
+    .receipt-sub,
+    .receipt-thanks,
+    .receipt-item .receipt-line {
+        color: #000;
+    }
+
+    .receipt header,
+    .receipt-sums,
+    .receipt-thanks {
+        border-color: #000;
+    }
 }

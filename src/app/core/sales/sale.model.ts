@@ -12,6 +12,8 @@ export interface NewSalePayment {
     // mobile money seulement, le numéro de la transaction
     // acompte : montant payé maintenant, absent = vente payée en totalité
     amountPaid?: number;
+    // fiche client : le backend en tire le nom et le téléphone
+    customerId?: number;
     customerName?: string;
     customerPhone?: string;
     // second mode de paiement : le reste du total payé autrement
@@ -32,6 +34,8 @@ export interface Sale {
     user_avatar?: string | null;
     total: number;
     payment_method?: PaymentMethod;
+    // null pour une vente sans fiche client
+    customer_id?: number | null;
     customer_name?: string | null;
     customer_phone?: string | null;
     // déjà encaissé : le reste à payer est total - paid_amount

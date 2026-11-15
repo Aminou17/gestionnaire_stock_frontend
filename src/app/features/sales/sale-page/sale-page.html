@@ -52,7 +52,12 @@
 } @else if (data(); as sale) {
     <div class="layout">
         <div class="main">
-            <section class="card summary">
+            <section
+                class="card summary"
+                [class.is-due]="sale.status !== 'CANCELLED' && due() > 0"
+                [class.is-paid]="sale.status !== 'CANCELLED' && due() <= 0"
+                [class.is-refunded]="sale.status === 'CANCELLED'"
+            >
                 <nav class="pager" aria-label="Autres ventes">
                     @if (sale.previous_id; as id) {
                         <a
@@ -93,13 +98,15 @@
                         [class]="
                             sale.status === 'CANCELLED'
                                 ? 'badge badge-danger'
-                                : 'badge badge-success'
+                                : due() > 0
+                                  ? 'badge badge-warning'
+                                  : 'badge badge-success'
                         "
                         >{{
                             sale.status === "CANCELLED"
                                 ? "Remboursée"
                                 : due() > 0
-                                  ? "Reste " + (due() | number) + " F"
+                                  ? "Reste à payer"
                                   : "Payée"
                         }}</span
                     >
@@ -117,9 +124,16 @@
                         }}</span>
                         <span class="customer">
                             <app-icon name="user" [size]="14" />
-                            Client :
                             @if (sale.customer_name || sale.customer_phone) {
-                                <strong>{{ sale.customer_name }}</strong>
+                                @if (sale.customer_id) {
+                                    <a
+                                        class="customer-link"
+                                        [routerLink]="['/customers', sale.customer_id]"
+                                        >{{ sale.customer_name }}</a
+                                    >
+                                } @else {
+                                    <strong>{{ sale.customer_name }}</strong>
+                                }
                                 @if (sale.customer_phone) {
                                     <a [href]="'tel:' + sale.customer_phone">{{
                                         sale.customer_phone
@@ -141,6 +155,15 @@
                         }
                     </div>
                 </div>
+                @if (shareNotice(); as notice) {
+                    <div class="alert alert-success settings-alert" role="status">{{ notice }}</div>
+                }
+                @if (shareError()) {
+                    <div class="alert alert-warning settings-alert" role="alert">
+                        Impossible de fabriquer l'image du reçu. Utilisez le bouton WhatsApp pour
+                        l'envoyer en texte.
+                    </div>
+                }
                 @if (settingsFailed()) {
                     <div class="alert alert-warning settings-alert" role="alert">
                         Impossible de charger l'en-tête du ticket : l'impression est bloquée.
@@ -154,24 +177,6 @@
                     </div>
                 }
                 <div class="summary-actions">
-                    <button
-                        type="button"
-                        class="btn btn-outline"
-                        [disabled]="!settingsReady()"
-                        (click)="openTicket()"
-                    >
-                        <app-icon name="receipt" [size]="18" />
-                        Ticket
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-outline"
-                        [disabled]="!settingsReady()"
-                        (click)="print()"
-                    >
-                        <app-icon name="printer" [size]="18" />
-                        Imprimer
-                    </button>
                     @if (canPay()) {
                         <button
                             type="button"
@@ -183,17 +188,86 @@
                             Encaisser
                         </button>
                     }
-                    @if (canRefund()) {
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        [disabled]="!settingsReady()"
+                        (click)="openTicket()"
+                    >
+                        <app-icon name="receipt" [size]="18" />
+                        Ticket
+                    </button>
+                    @if (justCreated()) {
                         <button
                             type="button"
-                            class="refund-btn"
-                            [disabled]="reloading()"
-                            (click)="askRefund()"
+                            class="btn btn-outline"
+                            [disabled]="!settingsReady() || sharing()"
+                            (click)="shareImage()"
                         >
-                            <app-icon name="undo" [size]="18" />
-                            Rembourser
+                            <app-icon name="image" [size]="18" />
+                            Envoyer en image
                         </button>
                     }
+                    <div class="action-menu">
+                        <button
+                            type="button"
+                            class="btn btn-outline more-btn"
+                            aria-haspopup="menu"
+                            aria-label="Autres actions"
+                            [attr.aria-expanded]="menuOpen()"
+                            (click)="menuOpen.set(!menuOpen())"
+                        >
+                            <app-icon name="more" [size]="18" />
+                        </button>
+                        @if (menuOpen()) {
+                            <div class="menu" role="menu">
+                                @if (!justCreated()) {
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        [disabled]="!settingsReady() || sharing()"
+                                        (click)="menuOpen.set(false); shareImage()"
+                                    >
+                                        <app-icon name="image" [size]="16" />
+                                        Envoyer en image
+                                    </button>
+                                }
+                                @if (whatsAppReceipt(); as link) {
+                                    <a
+                                        role="menuitem"
+                                        [href]="link"
+                                        target="_blank"
+                                        rel="noopener"
+                                        (click)="menuOpen.set(false)"
+                                    >
+                                        <app-icon name="message" [size]="16" />
+                                        Envoyer en texte
+                                    </a>
+                                }
+                                <button
+                                    type="button"
+                                    role="menuitem"
+                                    [disabled]="!settingsReady()"
+                                    (click)="menuOpen.set(false); print()"
+                                >
+                                    <app-icon name="printer" [size]="16" />
+                                    Imprimer
+                                </button>
+                                @if (canRefund()) {
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        class="refund-btn"
+                                        [disabled]="reloading()"
+                                        (click)="menuOpen.set(false); askRefund()"
+                                    >
+                                        <app-icon name="undo" [size]="16" />
+                                        Rembourser
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
                 </div>
             </section>
 
@@ -305,11 +379,6 @@
                     <div class="total">
                         <span>Net</span>
                         <strong>{{ net() | fcfa }}</strong>
-                    </div>
-                } @else {
-                    <div class="total" [class.cancelled]="sale.status === 'CANCELLED'">
-                        <span>Total</span>
-                        <strong>{{ sale.total | fcfa }}</strong>
                     </div>
                 }
 
@@ -483,6 +552,13 @@
         </div>
     }
 </dialog>
+
+<!-- copie hors de l'écran, photographiée pour l'image du reçu -->
+@if (data(); as sale) {
+    <div #captureBox class="capture" aria-hidden="true">
+        <app-sale-receipt [sale]="sale" [shop]="shopInfo()" [ticketPrefix]="ticketPrefix()" />
+    </div>
+}
 
 <!-- copie imprimée, cachée à l'écran -->
 @if (data(); as sale) {
