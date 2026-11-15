@@ -21,8 +21,8 @@ app-page-header {
     background: none;
     color: var(--primary-text);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
@@ -44,13 +44,13 @@ app-page-header {
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
 .stat-value {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
@@ -74,7 +74,7 @@ app-page-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .supplier-filter .input {
@@ -97,14 +97,14 @@ app-page-header {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 th {
     padding: 12px 16px;
     text-align: left;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     color: var(--text-muted);
     white-space: nowrap;
     border-bottom: 1px solid var(--border);
@@ -122,7 +122,7 @@ tbody tr:hover {
 
 .product-link {
     color: var(--text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-decoration: none;
 }
 
@@ -138,7 +138,7 @@ tbody tr:hover {
 /* une entrée ajoute du stock : bleu, la couleur des entrées dans l'activité */
 .quantity {
     color: var(--primary-text);
-    font-weight: 700;
+    font-weight: var(--fw-semibold);
 }
 
 .reloading {
@@ -159,7 +159,7 @@ tbody tr:hover {
     gap: 10px;
     min-height: 56px;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .more .spinner {
@@ -208,12 +208,12 @@ tbody tr:hover {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .field-label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .search {
@@ -260,7 +260,7 @@ tbody tr:hover {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: left;
     cursor: pointer;
 }
@@ -272,7 +272,7 @@ tbody tr:hover {
 
 .no-result {
     padding: 14px 12px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .chosen {
@@ -297,7 +297,7 @@ tbody tr:hover {
 }
 
 .chosen small {
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .thumb {
@@ -310,15 +310,15 @@ tbody tr:hover {
     border-radius: 12px;
     background: var(--neutral-soft);
     color: var(--text-muted);
-    font-size: 15px;
-    font-weight: 700;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
 }
 
 .thumb.small {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    font-size: 12px;
+    font-size: var(--fs-caption);
 }
 
 .thumb img {
@@ -352,18 +352,18 @@ tbody tr:hover {
 }
 
 .sum-label {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--text-muted);
 }
 
 .sum strong {
-    font-size: 20px;
+    font-size: var(--fs-figure);
     font-variant-numeric: tabular-nums;
 }
 
 .sum-op {
     color: var(--text-muted);
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 .sum-result {
@@ -374,7 +374,7 @@ tbody tr:hover {
 
 .sum-result strong {
     color: var(--primary-text);
-    font-size: 24px;
+    font-size: var(--fs-kpi);
 }
 
 .stepper {
@@ -386,8 +386,8 @@ tbody tr:hover {
 .stepper .input {
     height: 48px;
     text-align: center;
-    font-size: 20px;
-    font-weight: 700;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
     -moz-appearance: textfield;
     appearance: textfield;
 }
@@ -486,7 +486,7 @@ tbody tr:hover {
     }
 
     .stat-value {
-        font-size: 18px;
+        font-size: var(--fs-heading);
     }
 
     /* place pour le bouton + flottant */
@@ -512,7 +512,7 @@ tbody tr:hover {
     .mobile-count {
         display: block;
         margin: 14px 0 10px;
-        font-size: 14px;
+        font-size: var(--fs-body);
     }
 
     .cards {
@@ -543,16 +543,16 @@ tbody tr:hover {
         display: block;
         min-height: 44px;
         padding-top: 10px;
-        font-size: 16px;
+        font-size: var(--fs-lead);
         overflow-wrap: anywhere;
     }
 
     .entry-card .quantity {
-        font-size: 18px;
+        font-size: var(--fs-heading);
     }
 
     .meta {
-        font-size: 13px;
+        font-size: var(--fs-small);
     }
 
     .loading {
@@ -602,8 +602,8 @@ tbody tr:hover {
     background: none;
     color: var(--primary-text);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 

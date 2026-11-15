@@ -25,8 +25,8 @@
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
@@ -46,8 +46,8 @@
     border: 0;
     background: none;
     color: var(--primary-text);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
     cursor: pointer;
 }
 
@@ -71,15 +71,15 @@
     background: var(--surface);
     color: var(--text-muted);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--fs-small);
     text-align: left;
     cursor: pointer;
 }
 
 .stat strong {
     color: var(--text);
-    font-size: 22px;
-    font-weight: 700;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -116,8 +116,8 @@
     padding: 8px 16px 8px 60px;
     border-bottom: 1px solid var(--border);
     background: var(--bg);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-muted);
@@ -201,20 +201,20 @@ summary:focus-visible,
 }
 
 .sentence {
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.4;
     color: var(--text);
     overflow-wrap: anywhere;
 }
 
 .sentence strong {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .meta {
     display: flex;
     flex-wrap: wrap;
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
@@ -234,13 +234,13 @@ summary:focus-visible,
     gap: 8px;
     padding: 0 16px 16px 60px;
     background: var(--surface-hover);
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .detail-title {
     margin: 4px 0 0;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     color: var(--text-muted);
 }
 
@@ -300,7 +300,7 @@ summary:focus-visible,
     justify-self: start;
     min-height: 32px;
     color: var(--primary-text);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
 }
 
 .reloading {
@@ -318,7 +318,7 @@ summary:focus-visible,
 
 .count {
     margin: 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .loading {
