@@ -80,7 +80,7 @@
     padding: 0;
     border: 0;
     background: none;
-    color: var(--primary);
+    color: var(--primary-text);
     font: inherit;
     font-weight: 600;
     text-decoration: underline;
@@ -116,5 +116,13 @@
     }
     .new-sale {
         width: 100%;
+    }
+    /* "Vendre" est déjà dans la barre du bas : la bannière reste une simple ligne d'état */
+    .new-sale.sell {
+        display: none;
+    }
+    .banner:has(.sell) {
+        flex-direction: row;
+        align-items: center;
     }
 }

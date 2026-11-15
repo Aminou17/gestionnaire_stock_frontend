@@ -101,7 +101,14 @@ describe("Dashboard", () => {
                         getRecentActivity: () => of([]),
                     },
                 },
-                { provide: SaleService, useValue: { getSales: () => of(sales) } },
+                {
+                    provide: SaleService,
+                    useValue: {
+                        getSales: () => of(sales),
+                        getSalesPage: () =>
+                            of({ data: [], total: 0, counters: { unpaid: 2, due_total: 12000 } }),
+                    },
+                },
                 {
                     provide: AuthService,
                     useValue: {
@@ -151,10 +158,10 @@ describe("Dashboard", () => {
         expect(text()).toContain("Marge de 40 %");
         // la valeur du stock reste masquée tant que le mot de passe n'est pas redonné
         expect(text()).not.toContain("4 860 000 F");
-        TestBed.inject(SecretValues).unlock();
+        TestBed.inject(SecretValues).revealed.set(true);
         fixture.detectChanges();
         expect(text()).toContain("4 860 000 F");
-        expect(text()).toContain("142 produits actifs");
+        expect(text()).toContain("142 produits");
         expect(text()).not.toContain("Panier moyen");
     });
 
@@ -248,6 +255,14 @@ describe("Dashboard", () => {
         expect(el.querySelector(".start")).toBeNull();
     });
 
+    it("should show how much customers still owe", async () => {
+        await render();
+
+        expect(text()).toContain("À encaisser");
+        expect(text()).toContain("12 000 F");
+        expect(text()).toContain("2 ventes à solder");
+    });
+
     it("should compare today with yesterday", async () => {
         await render();
         expect(text()).toContain("+7 % vs hier à cette heure");
@@ -265,7 +280,7 @@ describe("Dashboard", () => {
         await render();
 
         expect(text()).toContain("312 000 F");
-        expect(text()).toContain("Session ouverte à 08:05");
+        expect(text()).toContain("Ouverte à 08:05");
     });
 
     it("should offer to open the cash register when it is closed", async () => {
@@ -317,7 +332,8 @@ describe("Dashboard", () => {
 
         expect(text()).not.toContain("Valeur du stock");
         expect(text()).not.toContain("Bénéfice du jour");
-        expect(text()).not.toContain("Alertes de stock");
+        expect(text()).not.toContain("À encaisser");
+        expect(text()).not.toContain("À surveiller");
         expect(text()).not.toContain("null");
         expect(el.querySelector("app-stock-alerts")).toBeNull();
     });

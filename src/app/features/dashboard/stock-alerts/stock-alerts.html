@@ -1,6 +1,6 @@
 <section class="card alerts-card">
     <div class="card-header">
-        <h2>Alertes de stock</h2>
+        <h2>À surveiller</h2>
         <a [routerLink]="link()">Tout voir</a>
     </div>
 
@@ -19,15 +19,23 @@
         <ul>
             @for (alert of visible(); track alert.id) {
                 <li>
-                    <div class="product">
-                        <strong>{{ alert.name }}</strong>
-                        <small>{{ stock(alert) }} en stock · seuil {{ alert.min_stock }}</small>
-                    </div>
-                    @if (alert.status === "OUT_OF_STOCK") {
-                        <span class="badge badge-danger">Rupture</span>
-                    } @else {
-                        <span class="badge badge-warning">Stock faible</span>
-                    }
+                    <a class="row" [routerLink]="link()">
+                        <span
+                            class="qty"
+                            [class.out]="alert.status === 'OUT_OF_STOCK'"
+                            aria-hidden="true"
+                            >{{ stock(alert) }}</span
+                        >
+                        <div class="product">
+                            <strong>{{ alert.name }}</strong>
+                            <small>Seuil : {{ alert.min_stock }}</small>
+                        </div>
+                        @if (alert.status === "OUT_OF_STOCK") {
+                            <span class="badge badge-danger">Rupture</span>
+                        } @else {
+                            <span class="badge badge-warning">Faible</span>
+                        }
+                    </a>
                 </li>
             } @empty {
                 <li class="empty">Aucun produit sous le seuil minimum.</li>

@@ -1,4 +1,12 @@
-<app-page-header title="Tableau de bord" [subtitle]="today" />
+<app-page-header title="Tableau de bord" [subtitle]="today">
+    @if (auth.isAdmin()) {
+        <!-- sur téléphone, "Vendre" est déjà dans la barre du bas -->
+        <a routerLink="/sales/new" class="btn btn-primary header-sale">
+            <app-icon name="plus" [size]="18" />
+            Nouvelle vente
+        </a>
+    }
+</app-page-header>
 
 @if (reserved) {
     <div class="alert alert-warning banner" role="alert">
@@ -94,7 +102,11 @@
 
     <section class="stats">
         <app-stat-card
+            class="s-hero"
+            [hero]="true"
+            tone="primary"
             label="Ventes du jour"
+            [money]="true"
             link="/sales"
             icon="trending-up"
             [loading]="dailySales.isLoading()"
@@ -105,7 +117,9 @@
         />
 
         <app-stat-card
-            label="Caisse"
+            tone="success"
+            label="En caisse"
+            [money]="true"
             link="/cash"
             icon="banknote"
             [loading]="summary.isLoading()"
@@ -113,31 +127,44 @@
             [value]="cash() ? (cash()!.balance | fcfa) : 'Caisse fermée'"
             [valueTone]="cash() ? undefined : 'muted'"
             [hint]="cashHint()"
-        >
-        </app-stat-card>
+        />
 
         <app-stat-card
+            [tone]="dueTotal() > 0 ? 'warning' : 'success'"
+            label="À encaisser"
+            [money]="true"
+            link="/sales"
+            icon="wallet"
+            [loading]="salesPage.isLoading()"
+            [error]="!!salesPage.error()"
+            [value]="dueTotal() | fcfa"
+            [hint]="dueHint()"
+        />
+
+        <app-stat-card
+            [tone]="profitTone() === 'danger' ? 'danger' : 'success'"
             label="Bénéfice du jour"
+            [money]="true"
             icon="tag"
             link="/sales"
             [loading]="summary.isLoading()"
             [error]="!!summary.error() || profitMissing()"
             [value]="summaryData()?.todayProfit ?? 0 | fcfa"
-            [valueTone]="profitTone()"
             [hint]="profitHint()"
         />
 
         <!-- la valeur du stock repose sur le prix d'achat : réservée à l'admin -->
         <app-stat-card
             label="Valeur du stock"
-            link="/products"
+            [toggles]="true"
+            (toggled)="secret.toggle()"
             icon="package"
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
             [value]="secret.revealed() ? (summaryData()?.stockValue | fcfa) : '••••••••'"
-            [hint]="(summaryData()?.activeProducts ?? 0) + ' produits actifs'"
+            [hint]="(summaryData()?.activeProducts ?? 0) + ' produits'"
         >
-            <span class="reveal"><app-reveal-toggle /></span>
+            <app-reveal-toggle />
         </app-stat-card>
     </section>
 
@@ -215,7 +242,10 @@
 
         <app-stat-card
             class="m-today"
+            [hero]="true"
+            tone="primary"
             label="Mes ventes du jour"
+            [money]="true"
             link="/sales"
             icon="trending-up"
             [loading]="dailySales.isLoading()"

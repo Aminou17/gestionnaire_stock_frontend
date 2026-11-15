@@ -1,16 +1,17 @@
-import { Component, input } from "@angular/core";
+import { Component, input, output } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { Icon } from "../../../shared/icon/icon";
 import { IconName } from "../../../shared/icon/icons";
+import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 type Tone = "primary" | "success" | "warning" | "danger" | "muted";
-// une seule couleur d'accent : bleu, sauf l'orange réservé aux alertes
-type IconTone = "primary" | "warning";
+// couleur de la carte : fond teinté et liseré
+type CardTone = "primary" | "success" | "warning" | "danger";
 
 @Component({
     selector: "app-stat-card",
-    imports: [Icon, RouterLink],
+    imports: [MoneyToggle, Icon, RouterLink],
     templateUrl: "./stat-card.html",
     styleUrl: "./stat-card.css",
 })
@@ -19,10 +20,17 @@ export class StatCard {
     icon = input.required<IconName>();
     value = input<string>();
     hint = input<string>();
-    iconTone = input<IconTone>("primary");
+    tone = input<CardTone>();
+    // la grande carte du haut de page
+    hero = input(false);
     valueTone = input<Tone>();
     hintTone = input<Tone>("muted");
     link = input<string>();
+    // montant important : un clic le masque en points
+    money = input(false);
+    // la carte sert d'interrupteur (valeur masquée) au lieu de mener à une page
+    toggles = input(false);
+    toggled = output<void>();
     loading = input(false);
     error = input(false);
 }

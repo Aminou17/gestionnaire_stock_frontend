@@ -1,13 +1,14 @@
 .chart-card {
-    padding: 20px;
+    padding: 16px;
     height: 100%;
     display: flex;
     flex-direction: column;
 }
 
 .total {
-    font-size: 13px;
-    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
 
@@ -31,7 +32,7 @@
 
 .chart {
     flex: 1;
-    min-height: 240px;
+    min-height: 180px;
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 2px;
@@ -151,7 +152,7 @@
 
 @media (max-width: 767px) {
     .chart {
-        min-height: 200px;
+        min-height: 150px;
     }
     .bar-value {
         font-size: 10px;

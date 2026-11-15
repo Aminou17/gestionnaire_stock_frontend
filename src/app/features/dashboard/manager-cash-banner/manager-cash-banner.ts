@@ -5,11 +5,12 @@ import { RouterLink } from "@angular/router";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashSummary } from "../dashboard.model";
+import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 // Bandeau de caisse de l'employé : état, solde et bouton "Nouvelle vente"
 @Component({
     selector: "app-manager-cash-banner",
-    imports: [RouterLink, FcfaPipe, Icon],
+    imports: [MoneyToggle, RouterLink, FcfaPipe, Icon],
     templateUrl: "./manager-cash-banner.html",
     styleUrl: "./manager-cash-banner.css",
 })
