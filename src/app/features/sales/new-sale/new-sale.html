@@ -619,7 +619,7 @@
     </div>
 }
 
-<!-- photo du produit : image ou initiales, l'image s'agrandit au clic -->
+<!-- photo du produit : l'image s'agrandit au clic, les initiales proposent d'ajouter une photo (administrateur) -->
 <ng-template #thumb let-product>
     <span class="thumb av-{{ tone(product.category_name) }}">
         @if (product.image) {
@@ -630,12 +630,41 @@
                 (click)="zoomImage(product)"
             >
                 <img [src]="product.image" alt="" />
+                <span class="thumb-hint" aria-hidden="true"
+                    ><app-icon name="search" [size]="12"
+                /></span>
+            </button>
+        } @else if (auth.isAdmin()) {
+            <button
+                type="button"
+                class="thumb-add"
+                [disabled]="photoBusyId() === product.id"
+                [attr.aria-label]="'Ajouter une photo pour ' + product.name"
+                (click)="askPhoto(product)"
+            >
+                {{ initials(product.name) }}
+                <span class="thumb-hint" aria-hidden="true"
+                    ><app-icon name="camera" [size]="12"
+                /></span>
             </button>
         } @else {
             {{ initials(product.name) }}
         }
     </span>
 </ng-template>
+
+<input #photoInput type="file" accept="image/png,image/jpeg" hidden (change)="pickPhoto($event)" />
+
+@if (photoNotice(); as notice) {
+    <div
+        class="photo-notice alert"
+        [class.alert-success]="notice.kind === 'success'"
+        [class.alert-error]="notice.kind === 'error'"
+        [attr.role]="notice.kind === 'error' ? 'alert' : 'status'"
+    >
+        {{ notice.text }}
+    </div>
+}
 
 @if (zoom(); as photo) {
     <app-photo-zoom [src]="photo.src" [name]="photo.name" (closed)="zoom.set(null)" />

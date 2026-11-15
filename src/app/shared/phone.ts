@@ -75,6 +75,12 @@ export const formatPhone = (phone: string, defaultCode = DEFAULT_COUNTRY_CODE) =
     return phone;
 };
 
+// toujours avec l'indicatif du pays : +226 66 09 90 60
+export const formatInternational = (phone: string, defaultCode = DEFAULT_COUNTRY_CODE) => {
+    const { code, national } = splitPhone(phone, defaultCode);
+    return `+${code} ${groupNational(national)}`;
+};
+
 export const toTelLink = (phone: string, defaultCode: string) =>
     `tel:+${internationalDigits(phone, defaultCode)}`;
 

@@ -34,54 +34,18 @@
     }
 
     <div class="card stat stat-static">
-        <span class="stat-label">Montant encaissé</span>
+        <span class="stat-label">{{ summary().label }}</span>
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton wide"></span>
         } @else {
-            <strong appMoney class="stat-value">{{ counters()?.active_total | fcfa }}</strong>
+            <strong appMoney class="stat-value tone-{{ summary().tone }}">{{
+                summary().amount | fcfa
+            }}</strong>
         }
     </div>
 </div>
 
 <section class="card list-card">
-    <div class="filters" [class.open]="filtersOpen()" id="sales-filters">
-        <app-period-filter [chips]="true" [stacked]="true" (changed)="selectRange($event)">
-            <label class="filter">
-                <span class="sr-only">Paiement</span>
-                <select
-                    class="chip"
-                    [class.active]="paymentMethod() !== null"
-                    (change)="selectPayment($any($event.target).value)"
-                >
-                    <option value="" [selected]="paymentMethod() === null">
-                        Tous les paiements
-                    </option>
-                    <option value="CASH" [selected]="paymentMethod() === 'CASH'">Espèces</option>
-                    <option value="MOBILE_MONEY" [selected]="paymentMethod() === 'MOBILE_MONEY'">
-                        Mobile money
-                    </option>
-                </select>
-            </label>
-            @if (auth.isAdmin()) {
-                <label class="filter">
-                    <span class="sr-only">Vendeur</span>
-                    <select
-                        class="chip"
-                        [class.active]="sellerId() !== null"
-                        (change)="selectSeller($any($event.target).value)"
-                    >
-                        <option value="" [selected]="sellerId() === null">Tous les vendeurs</option>
-                        @for (user of sellers(); track user.id) {
-                            <option [value]="user.id" [selected]="sellerId() === user.id">
-                                {{ user.name }}
-                            </option>
-                        }
-                    </select>
-                </label>
-            }
-        </app-period-filter>
-    </div>
-
     @if (exportError()) {
         <div class="alert alert-error list-error" role="alert">{{ exportError() }}</div>
     }
@@ -92,25 +56,184 @@
             <input
                 type="search"
                 class="input"
-                placeholder="Rechercher…"
-                aria-label="Rechercher une vente"
+                placeholder="Vente, client…"
+                aria-label="Rechercher par numéro de vente, client, téléphone ou vendeur"
+                title="Numéro de vente, nom ou téléphone du client, vendeur"
                 (input)="onSearch($any($event.target).value)"
             />
         </div>
-        <button
-            type="button"
-            class="filters-btn"
-            [class.on]="activeFilters().length > 0"
-            [attr.aria-expanded]="filtersOpen()"
-            aria-controls="sales-filters"
-            (click)="filtersOpen.set(!filtersOpen())"
-        >
-            <app-icon name="filter" [size]="18" />
-            Filtres
-            @if (activeFilters().length > 0) {
-                <span class="filters-count">{{ activeFilters().length }}</span>
+
+        <div class="filter-anchor">
+            <button
+                type="button"
+                class="filters-btn"
+                [class.on]="activeFilters().length > 0"
+                [attr.aria-expanded]="filtersOpen()"
+                aria-controls="sales-filters"
+                (click)="filtersOpen.set(!filtersOpen())"
+            >
+                <app-icon name="filter" [size]="18" />
+                Filtre
+                @if (activeFilters().length > 0) {
+                    <span class="filters-count">{{ activeFilters().length }}</span>
+                }
+            </button>
+
+            @if (filtersOpen()) {
+                <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
             }
-        </button>
+
+            <!-- téléphone : fenêtre qui monte du bas ; ordinateur : petit panneau sous le bouton -->
+            <div
+                class="filters"
+                [class.open]="filtersOpen()"
+                id="sales-filters"
+                role="dialog"
+                aria-label="Filtre des ventes"
+            >
+                <div class="sheet-head">
+                    <h2>Filtre</h2>
+                    <button
+                        type="button"
+                        class="sheet-close"
+                        aria-label="Fermer le filtre"
+                        (click)="filtersOpen.set(false)"
+                    >
+                        <app-icon name="close" [size]="20" />
+                    </button>
+                </div>
+
+                <div role="group" aria-label="Période">
+                    <span class="field-label">Période</span>
+                    <div class="options">
+                        @for (choice of periodChoices; track choice.value) {
+                            <button
+                                type="button"
+                                class="option"
+                                [attr.aria-pressed]="range().period === choice.value"
+                                (click)="selectPeriod(choice.value)"
+                            >
+                                {{ choice.label }}
+                            </button>
+                        }
+                    </div>
+
+                    @if (range().period === "custom") {
+                        <div class="custom-range" role="group" aria-label="Dates choisies">
+                            <label class="date-field">
+                                <span>Du</span>
+                                <input
+                                    #fromInput
+                                    class="input"
+                                    type="date"
+                                    [max]="customTo()"
+                                    [value]="customFrom()"
+                                    [class.invalid]="!!customError()"
+                                    [attr.aria-invalid]="!!customError()"
+                                    (change)="applyCustomRange(fromInput.value, toInput.value)"
+                                />
+                            </label>
+                            <label class="date-field">
+                                <span>Au</span>
+                                <input
+                                    #toInput
+                                    class="input"
+                                    type="date"
+                                    [min]="customFrom()"
+                                    [value]="customTo()"
+                                    [class.invalid]="!!customError()"
+                                    [attr.aria-invalid]="!!customError()"
+                                    (change)="applyCustomRange(fromInput.value, toInput.value)"
+                                />
+                            </label>
+                            @if (customError()) {
+                                <p class="field-error range-error" role="alert">
+                                    {{ customError() }}
+                                </p>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div role="group" aria-label="Paiement">
+                    <span class="field-label">Paiement</span>
+                    <div class="options">
+                        <button
+                            type="button"
+                            class="option"
+                            [attr.aria-pressed]="paymentMethod() === null"
+                            (click)="selectPayment(null)"
+                        >
+                            Tous
+                        </button>
+                        <button
+                            type="button"
+                            class="option"
+                            [attr.aria-pressed]="paymentMethod() === 'CASH'"
+                            (click)="selectPayment('CASH')"
+                        >
+                            <app-icon name="banknote" [size]="16" />
+                            Espèces
+                        </button>
+                        <button
+                            type="button"
+                            class="option"
+                            [attr.aria-pressed]="paymentMethod() === 'MOBILE_MONEY'"
+                            (click)="selectPayment('MOBILE_MONEY')"
+                        >
+                            <app-icon name="phone" [size]="16" />
+                            Mobile money
+                        </button>
+                    </div>
+                </div>
+
+                @if (auth.isAdmin() && sellers().length > 1) {
+                    <div role="group" aria-label="Vendeur">
+                        <span class="field-label">Vendeur</span>
+                        <div class="options">
+                            <button
+                                type="button"
+                                class="option"
+                                [attr.aria-pressed]="sellerId() === null"
+                                (click)="selectSeller(null)"
+                            >
+                                Tous
+                            </button>
+                            @for (user of sellers(); track user.id) {
+                                <button
+                                    type="button"
+                                    class="option"
+                                    [attr.aria-pressed]="sellerId() === user.id"
+                                    (click)="selectSeller(user.id)"
+                                >
+                                    <app-avatar class="seller-avatar" [photo]="user.avatar" />
+                                    {{ user.name }}
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+
+                <div class="sheet-foot">
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        [disabled]="activeFilters().length === 0"
+                        (click)="resetFilters()"
+                    >
+                        Réinitialiser
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        [disabled]="!!customError()"
+                        (click)="filtersOpen.set(false)"
+                    >
+                        Voir {{ total() }} vente{{ total() > 1 ? "s" : "" }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     @if (activeFilters().length > 0) {
@@ -168,7 +291,13 @@
                 title="Aucune vente remboursée"
                 text="Les ventes remboursées de cette période apparaîtront ici."
             />
-        } @else if (range().period === "all" && !search()) {
+        } @else if (unpaid()) {
+            <app-empty-state
+                icon="check"
+                title="Aucune vente à solder"
+                text="Toutes les ventes de cette période sont payées."
+            />
+        } @else if (range().period === "all" && !search() && activeFilters().length === 0) {
             <app-empty-state
                 icon="cart"
                 title="Aucune vente pour le moment"
@@ -194,20 +323,13 @@
             </div>
         }
 
-        <!-- le montant encaissé ne concerne pas les ventes remboursées -->
-        <section class="summary" [class.refunded]="status() === 'CANCELLED'" aria-label="Résumé">
-            @if (status() !== "CANCELLED") {
-                <div class="summary-main">
-                    <span class="summary-label">Encaissé</span>
-                    <strong appMoney class="summary-amount">{{
-                        counters()?.active_total | fcfa
-                    }}</strong>
-                </div>
-            } @else {
-                <span class="summary-count">
-                    {{ total() }} remboursement{{ total() > 1 ? "s" : "" }}
-                </span>
-            }
+        <!-- téléphone : la carte suit la puce choisie (encaissé, reste à encaisser, remboursé) -->
+        <section class="summary" [attr.data-tone]="summary().tone" aria-label="Résumé">
+            <div class="summary-main">
+                <span class="summary-label">{{ summary().label }}</span>
+                <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>
+            </div>
+            <span class="summary-count">{{ summary().note }}</span>
         </section>
 
         <div class="table-wrap">

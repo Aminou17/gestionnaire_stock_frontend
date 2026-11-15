@@ -105,6 +105,8 @@ export interface SaleCounters {
     // ventes validées pas encore soldées, et reste à encaisser sur elles
     unpaid: number;
     due_total: number;
+    // total rendu aux clients sur les ventes remboursées
+    cancelled_total: number;
 }
 
 export interface SalePage {

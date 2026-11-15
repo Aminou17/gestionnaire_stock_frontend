@@ -175,7 +175,67 @@ app-page-header {
     cursor: zoom-in;
 }
 
+/* pastille de la loupe ou de l'appareil photo, dans le coin de la miniature */
+.thumb {
+    position: relative;
+}
+
+.thumb-add {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.thumb-add:disabled {
+    cursor: progress;
+    opacity: 0.6;
+}
+
+.thumb-hint {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--surface);
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+}
+
+/* la loupe ne se montre qu'au survol sur ordinateur, l'appareil photo reste visible */
+.thumb-zoom .thumb-hint {
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.thumb-zoom:hover .thumb-hint,
+.thumb-zoom:focus-visible .thumb-hint {
+    opacity: 1;
+}
+
+.photo-notice {
+    position: fixed;
+    right: 16px;
+    bottom: calc(88px + env(safe-area-inset-bottom));
+    left: 16px;
+    z-index: 30;
+    max-width: 420px;
+    margin-inline: auto;
+    box-shadow: var(--shadow-card);
+}
+
 .thumb-zoom:focus-visible,
+.thumb-add:focus-visible,
 .result:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;

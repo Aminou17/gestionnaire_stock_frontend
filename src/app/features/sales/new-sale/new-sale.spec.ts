@@ -57,6 +57,7 @@ describe("NewSale", () => {
     let el: HTMLElement;
     let createSale: ReturnType<typeof vi.fn>;
     let navigate: ReturnType<typeof vi.fn>;
+    let setImage: ReturnType<typeof vi.fn>;
 
     async function render({
         cash = { status: "OPEN", balance: 1000 } as TodayCash | null,
@@ -66,6 +67,7 @@ describe("NewSale", () => {
         customerGone = false,
         customersFail = false,
     } = {}) {
+        setImage = vi.fn(() => of({ id: 1, image: "data:image/jpeg;base64,NEUVE" }));
         createSale = vi.fn(() =>
             customerGone
                 ? throwError(
@@ -115,6 +117,7 @@ describe("NewSale", () => {
                         getProducts: () =>
                             of({ data: [riz, bazin, savon], total: 3, counters: {} }),
                         getProduct: () => of(preselected),
+                        setImage,
                     },
                 },
                 {
@@ -221,6 +224,35 @@ describe("NewSale", () => {
         );
 
         preselected = bazin;
+    });
+
+    it("should offer the admin to add a photo and show it at once", async () => {
+        await render({ isAdmin: true });
+        // le redimensionnement passe par un canvas : on le remplace dans le test
+        (fixture.componentInstance as unknown as { resize: unknown }).resize = () =>
+            Promise.resolve("data:image/jpeg;base64,NEUVE");
+
+        const add = el.querySelector<HTMLButtonElement>(".tile .thumb-add")!;
+        expect(add.getAttribute("aria-label")).toBe("Ajouter une photo pour Riz");
+
+        const input = el.querySelector<HTMLInputElement>("input[type=file]")!;
+        const file = new File(["x"], "riz.jpg", { type: "image/jpeg" });
+        Object.defineProperty(input, "files", { value: [file] });
+        add.click();
+        input.dispatchEvent(new Event("change"));
+        await vi.waitFor(() => expect(setImage).toHaveBeenCalled());
+        await fixture.whenStable();
+
+        expect(setImage.mock.calls[0][0]).toBe(riz.id);
+        expect(el.querySelector(".tile .thumb-zoom img")).not.toBeNull();
+        expect(el.querySelector(".photo-notice")!.textContent).toContain("Photo ajoutée");
+    });
+
+    it("should not offer the manager to add a photo", async () => {
+        await render();
+
+        expect(el.querySelector(".thumb-add")).toBeNull();
+        expect(el.querySelector("input[type=file]")).not.toBeNull();
     });
 
     it("should remove the product when its tile is clicked again", async () => {
