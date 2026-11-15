@@ -4,10 +4,11 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { Icon } from "../../../shared/icon/icon";
 
 @Component({
     selector: "app-forgot-password",
-    imports: [ReactiveFormsModule, RouterLink],
+    imports: [ReactiveFormsModule, RouterLink, Icon],
     templateUrl: "./forgot-password.html",
     styleUrls: ["../login/login.css", "./forgot-password.css"],
 })

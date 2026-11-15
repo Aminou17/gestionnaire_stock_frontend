@@ -165,19 +165,6 @@ footer {
     box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
 }
 
-/* marque du logiciel : la page de connexion sert à toutes les boutiques */
-.logo {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 20px;
-    border-radius: 16px;
-    background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.35);
-    color: var(--on-primary);
-    display: grid;
-    place-items: center;
-}
-
 /* Tablette */
 @media (max-width: 1023px) {
     .page {
@@ -252,9 +239,5 @@ footer {
         border: 0;
         border-radius: 28px 28px 0 0;
         box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
-    }
-    /* la marque est déjà dans le bandeau */
-    .logo {
-        display: none;
     }
 }

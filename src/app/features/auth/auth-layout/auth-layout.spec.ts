@@ -14,7 +14,7 @@ describe("AuthLayout", () => {
         await fixture.whenStable();
 
         const page = fixture.nativeElement as HTMLElement;
-        expect(page.querySelector(".logo")).not.toBeNull();
+        expect(page.querySelector(".brand-icon")).not.toBeNull();
         expect(page.textContent).toContain("Boutiki");
         expect(page.textContent).not.toContain("Awa Bazin");
     });
