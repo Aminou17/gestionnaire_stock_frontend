@@ -164,7 +164,7 @@ describe("CategoryPage", () => {
 
         expect(text()).toContain("Valeur du stock");
         expect(text()).not.toContain("245 500 F");
-        TestBed.inject(SecretValues).unlock();
+        TestBed.inject(SecretValues).revealed.set(true);
         fixture.detectChanges();
         expect(text()).toContain("245 500 F");
         expect(text()).toContain("Modifiée le");

@@ -29,7 +29,7 @@ header {
 
 h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 /* la flèche retour ne sert que sur téléphone, où le formulaire prend tout l'écran */
@@ -66,15 +66,15 @@ h2 {
 
 .group h3 {
     margin: 0;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--text-muted);
 }
 
 .field > span:first-child {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .row {
@@ -103,7 +103,7 @@ h2 {
     right: 12px;
     transform: translateY(-50%);
     color: var(--text-muted);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     pointer-events: none;
 }
 
@@ -117,7 +117,7 @@ h2 {
     border-radius: 8px;
     background: var(--success-soft);
     color: var(--success);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .margin strong {
@@ -144,7 +144,7 @@ h2 {
     border-radius: 8px;
     background: transparent;
     color: var(--text-muted);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
@@ -169,7 +169,7 @@ h2 {
 
 .range {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 
@@ -179,13 +179,13 @@ h2 {
 
 .hint {
     margin: 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
     color: var(--text-muted);
 }
 
 .field > label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .new-supplier {
@@ -325,8 +325,8 @@ footer {
 /* champs de prix plus grands : c'est le coeur du formulaire */
 .money .input {
     height: 48px;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
 }
 
 /* la zone défile : le navigateur la focalise à l'ouverture, sans cadre */
@@ -375,18 +375,18 @@ h2:focus {
     flex: 1;
     gap: 2px;
     min-width: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .progress-text small {
-    font-size: 13px;
+    font-size: var(--fs-small);
     line-height: 1.4;
 }
 
 .progress-count {
     flex-shrink: 0;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -405,7 +405,7 @@ h2:focus {
     border-radius: 50%;
     background: var(--primary-soft);
     color: var(--primary-text);
-    font-size: 12px;
+    font-size: var(--fs-caption);
     letter-spacing: 0;
 }
 

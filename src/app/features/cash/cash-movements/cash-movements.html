@@ -7,7 +7,7 @@
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton"></span>
         } @else {
-            <strong class="stat-value in">{{ summary()?.totalIn | fcfa }}</strong>
+            <strong appMoney class="stat-value in">{{ summary()?.totalIn | fcfa }}</strong>
         }
     </div>
     <div class="card stat">
@@ -15,21 +15,90 @@
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton"></span>
         } @else {
-            <strong class="stat-value out">{{ summary()?.totalOut | fcfa }}</strong>
+            <strong appMoney class="stat-value out">{{ summary()?.totalOut | fcfa }}</strong>
         }
     </div>
 </div>
 
 <section class="card list-card">
-    <app-period-filter [chips]="true" (changed)="selectRange($event)">
+    <div class="phone-bar">
+        <button
+            type="button"
+            class="chip"
+            [class.selected]="type() === null"
+            [attr.aria-pressed]="type() === null"
+            (click)="selectType(null)"
+        >
+            Tous
+        </button>
+
+        <button
+            type="button"
+            class="filter-btn"
+            [class.active]="filtersOpen() || activeFilters().length > 0"
+            [attr.aria-expanded]="filtersOpen()"
+            aria-label="Filtre"
+            (click)="filtersOpen.set(!filtersOpen())"
+        >
+            <app-icon name="filter" [size]="18" />
+            <span>Filtre</span>
+            @if (activeFilters().length > 0) {
+                <span class="filter-count">{{ activeFilters().length }}</span>
+            }
+        </button>
+
+        @for (filter of activeFilters(); track filter.key) {
+            <button
+                type="button"
+                class="active-chip"
+                [attr.aria-label]="'Retirer le filtre ' + filter.label"
+                (click)="clearFilter(filter.key)"
+            >
+                <span>{{ filter.label }}</span>
+                <app-icon name="close" [size]="14" />
+            </button>
+        }
+    </div>
+
+    <!-- sur ordinateur ce bloc se fond dans la page ; sur téléphone c'est la fenêtre qui monte du bas -->
+    <div class="filters" [class.open]="filtersOpen()">
+        <div class="sheet-head">
+            <h2>Filtres</h2>
+            <button
+                type="button"
+                class="sheet-close"
+                aria-label="Fermer les filtres"
+                (click)="filtersOpen.set(false)"
+            >
+                <app-icon name="close" [size]="20" />
+            </button>
+        </div>
+
+        <span class="field-label sheet-only" aria-hidden="true">Période</span>
+        <app-period-filter #period [chips]="true" [flat]="true" (changed)="selectRange($event)" />
+
+        <div class="type-group" role="group" aria-label="Type de mouvement">
+            <span class="field-label sheet-only">Type</span>
+            <div class="type-options">
+                @for (item of types; track item.label) {
+                    @if (item.value !== null) {
+                        <button
+                            type="button"
+                            class="chip"
+                            [attr.aria-pressed]="type() === item.value"
+                            (click)="selectType(item.value)"
+                        >
+                            {{ item.label }}
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+
         @if (reasons().length > 0) {
-            <label class="reason-filter">
-                <span class="sr-only">Motif</span>
-                <select
-                    class="chip"
-                    [class.active]="category() !== null"
-                    (change)="selectCategory($any($event.target).value)"
-                >
+            <div class="reason-group" role="group" aria-label="Motif">
+                <span class="field-label sheet-only">Motif</span>
+                <select class="input" (change)="selectCategory($any($event.target).value)">
                     <option value="" [selected]="category() === null">Tous les motifs</option>
                     @for (reason of reasons(); track reason.value) {
                         <option [value]="reason.value" [selected]="category() === reason.value">
@@ -37,23 +106,22 @@
                         </option>
                     }
                 </select>
-            </label>
+            </div>
         }
-    </app-period-filter>
 
-    <div class="chips">
-        @for (item of types; track item.label) {
-            <button
-                type="button"
-                class="chip"
-                [class.selected]="type() === item.value"
-                [attr.aria-pressed]="type() === item.value"
-                (click)="selectType(item.value)"
-            >
-                {{ item.label }}
+        <div class="sheet-foot">
+            <button type="button" class="btn btn-outline" (click)="resetFilters()">
+                Réinitialiser
             </button>
-        }
+            <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
+                Voir {{ total() }} mouvement{{ total() > 1 ? "s" : "" }}
+            </button>
+        </div>
     </div>
+
+    @if (filtersOpen()) {
+        <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
+    }
 
     @if (firstLoad()) {
         <div class="loading">

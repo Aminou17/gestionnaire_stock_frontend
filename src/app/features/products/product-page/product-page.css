@@ -28,7 +28,7 @@
 
 .identity h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
     line-height: 1.25;
     overflow-wrap: anywhere;
 }
@@ -43,8 +43,8 @@
     border-radius: var(--radius);
     background: var(--neutral-soft);
     color: var(--text-muted);
-    font-size: 22px;
-    font-weight: 700;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-semibold);
 }
 
 button.photo {
@@ -104,19 +104,19 @@ button.photo:focus-visible {
 }
 
 .kpi-label {
-    font-size: 13px;
+    font-size: var(--fs-small);
     color: var(--text-muted);
 }
 
 .kpi-value {
-    font-size: 28px;
+    font-size: var(--fs-kpi);
     line-height: 1.1;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
 }
 
 .kpi-note {
-    font-size: 13px;
+    font-size: var(--fs-small);
     color: var(--text-muted);
 }
 
@@ -127,8 +127,8 @@ button.photo:focus-visible {
 }
 
 .kpi-small {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -150,7 +150,7 @@ dl > div + div {
 }
 
 dt {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
@@ -160,14 +160,14 @@ dd {
     justify-content: flex-end;
     gap: 8px;
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: right;
     font-variant-numeric: tabular-nums;
 }
 
 .strong {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
 }
 
 .stock-LOW {
@@ -263,7 +263,7 @@ dd {
     border-radius: 8px;
     background: transparent;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-body);
     cursor: pointer;
 }
 
@@ -301,12 +301,12 @@ dd {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 
@@ -322,7 +322,7 @@ dd {
     }
 
     .kpi-value {
-        font-size: 26px;
+        font-size: var(--fs-kpi);
     }
 
     /* Vendre prend toute la largeur, les autres actions passent en dessous */
@@ -420,4 +420,3 @@ app-page-header {
     box-shadow: var(--shadow-menu);
     cursor: pointer;
 }
-

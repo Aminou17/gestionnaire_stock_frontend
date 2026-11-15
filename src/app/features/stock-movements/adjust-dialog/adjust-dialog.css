@@ -51,7 +51,7 @@
 .sheet-head h2 {
     outline: none;
     margin: 0;
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 .close-btn {
@@ -89,8 +89,8 @@
 
 .field-label {
     color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
 }
 
 /* choix du produit */
@@ -151,8 +151,8 @@
     flex: 1;
     min-width: 0;
     overflow: hidden;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -163,13 +163,13 @@
     border-radius: 999px;
     background: var(--neutral-soft);
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: var(--fs-caption);
     font-variant-numeric: tabular-nums;
 }
 
 .no-result {
     padding: 16px 12px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .thumb {
@@ -180,8 +180,8 @@
     height: 40px;
     overflow: hidden;
     border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .thumb img {
@@ -230,8 +230,8 @@
 
 .chosen-text strong {
     overflow-wrap: anywhere;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     line-height: 1.3;
 }
 
@@ -242,8 +242,8 @@
 }
 
 .chosen-stock strong {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--fs-heading);
+    font-weight: var(--fw-semibold);
     line-height: 1;
     font-variant-numeric: tabular-nums;
 }
@@ -251,7 +251,7 @@
 .chosen-stock small {
     margin-top: 4px;
     color: var(--text-muted);
-    font-size: 11px;
+    font-size: var(--fs-micro);
 }
 
 .link-btn {
@@ -262,8 +262,8 @@
     background: none;
     color: var(--primary-text);
     font: inherit;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-medium);
     cursor: pointer;
 }
 
@@ -291,8 +291,8 @@
     background: var(--surface);
     color: var(--text-muted);
     font: inherit;
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
     cursor: pointer;
 }
 
@@ -300,14 +300,14 @@
     border-color: var(--danger);
     background: var(--danger-soft);
     color: var(--danger);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .choice button.gain.on {
     border-color: var(--success);
     background: var(--success-soft);
     color: var(--success);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 /* quantité : boutons moins et plus, grand chiffre au centre */
@@ -331,7 +331,7 @@
     border-radius: 8px;
     background: var(--surface);
     color: var(--text);
-    font-size: 20px;
+    font-size: var(--fs-figure);
     line-height: 1;
     cursor: pointer;
 }
@@ -354,8 +354,8 @@
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
     text-align: center;
     appearance: textfield;
@@ -387,7 +387,7 @@
     border-radius: 8px;
     background: var(--success-soft);
     color: var(--success);
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .preview.loss {
@@ -399,15 +399,15 @@
     justify-content: flex-start;
     background: var(--danger-soft);
     color: var(--danger);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .preview strong {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -429,7 +429,7 @@
 
 .actions .btn {
     min-height: 44px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 /* inactif mais lisible : fond neutre, texte net, pas un bouton fantôme */
@@ -453,7 +453,7 @@
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--fs-body);
     cursor: pointer;
 }
 
@@ -495,7 +495,7 @@
     background: none;
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: left;
     cursor: pointer;
 }
@@ -512,7 +512,7 @@
 .reason-list button[aria-selected="true"] {
     background: var(--primary-soft);
     color: var(--primary-text);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
 }
 
 .dot {
@@ -542,13 +542,13 @@
 .hint {
     margin: 0;
     color: var(--text-muted);
-    font-size: 13px;
+    font-size: var(--fs-small);
     text-align: center;
 }
 
 .field-error {
     color: var(--danger);
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .reloading {

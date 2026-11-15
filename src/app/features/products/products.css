@@ -35,13 +35,13 @@ app-page-header {
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
 .stat-value {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -175,12 +175,12 @@ app-page-header {
     padding: 4px 4px 4px 12px;
     border-radius: 10px;
     background: var(--primary-soft);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .supplier-filter a {
     color: var(--primary-text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-decoration: none;
 }
 
@@ -212,14 +212,14 @@ app-page-header {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 th {
     padding: 12px 16px;
     text-align: left;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     color: var(--text-muted);
     white-space: nowrap;
     border-bottom: 1px solid var(--border);
@@ -236,7 +236,7 @@ tbody tr:hover {
 }
 
 .name {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .avatar {
@@ -246,8 +246,8 @@ tbody tr:hover {
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    font-size: 13px;
-    font-weight: 700;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     overflow: hidden;
 }
 
@@ -293,7 +293,7 @@ tbody tr:hover {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-align: left;
     cursor: pointer;
 }
@@ -311,11 +311,11 @@ tbody tr,
 
 td.num small {
     display: block;
-    font-size: 12px;
+    font-size: var(--fs-caption);
 }
 
 .strong {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .inactive .name,
@@ -379,7 +379,7 @@ td.num small {
     border-radius: 8px;
     background: transparent;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: left;
     cursor: pointer;
 }
@@ -411,7 +411,7 @@ td.num small {
     gap: 10px;
     min-height: 56px;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 /* le spinner global est blanc (boutons bleus) : ici il suit le texte */
@@ -459,12 +459,12 @@ td.num small {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 
@@ -616,7 +616,7 @@ td.num small {
 
     .sheet-head h2 {
         margin: 0;
-        font-size: 18px;
+        font-size: var(--fs-heading);
     }
 
     .sheet-close {
@@ -634,8 +634,8 @@ td.num small {
 
     .field-label {
         display: block;
-        font-size: 13px;
-        font-weight: 500;
+        font-size: var(--fs-small);
+        font-weight: var(--fw-medium);
     }
 
     .filters .field {
@@ -655,7 +655,7 @@ td.num small {
     .chips {
         display: flex;
         gap: 4px;
-        margin: 8px 0 0;
+        margin: 8px 0 14px;
         overflow-x: auto;
         scrollbar-width: none;
     }
@@ -670,12 +670,12 @@ td.num small {
         min-height: 34px;
         padding: 0 9px;
         border-radius: 999px;
-        font-size: 12.5px;
+        font-size: var(--fs-caption);
     }
 
     .chip-count {
-        font-size: 13px;
-        font-weight: 700;
+        font-size: var(--fs-small);
+        font-weight: var(--fw-semibold);
     }
 
     .mobile-count {
@@ -710,7 +710,7 @@ td.num small {
     }
 
     .info .name-link {
-        font-size: 15px;
+        font-size: var(--fs-body);
         line-height: 1.3;
     }
 
@@ -718,7 +718,7 @@ td.num small {
         width: 56px;
         height: 56px;
         border-radius: 12px;
-        font-size: 16px;
+        font-size: var(--fs-lead);
     }
 
     .info .badge {
@@ -727,12 +727,12 @@ td.num small {
     }
 
     .sub {
-        font-size: 13px;
+        font-size: var(--fs-small);
     }
 
     .price {
         flex-shrink: 0;
-        font-size: 16px;
+        font-size: var(--fs-lead);
         font-variant-numeric: tabular-nums;
     }
 
@@ -859,8 +859,8 @@ td.num small {
     display: grid;
     place-items: center;
     aspect-ratio: 1;
-    font-size: 32px;
-    font-weight: 700;
+    font-size: var(--fs-kpi);
+    font-weight: var(--fw-semibold);
 }
 
 .gphoto img {
@@ -896,7 +896,7 @@ td.num small {
 }
 
 .gsub {
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .gfoot {
@@ -979,19 +979,19 @@ td.num small {
 }
 
 .value-label {
-    font-size: 13px;
+    font-size: var(--fs-small);
     color: var(--text-muted);
 }
 
 .value-amount {
-    font-size: 24px;
+    font-size: var(--fs-kpi);
     line-height: 1.2;
     font-variant-numeric: tabular-nums;
 }
 
 .value-note {
     flex-shrink: 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 @media (max-width: 767px) {
@@ -1000,7 +1000,7 @@ td.num small {
     }
 
     .value-amount {
-        font-size: 20px;
+        font-size: var(--fs-figure);
     }
 }
 
@@ -1056,11 +1056,11 @@ td.num small {
     .product-card .avatar {
         width: 44px;
         height: 44px;
-        font-size: 14px;
+        font-size: var(--fs-body);
     }
 
     .price {
-        font-size: 15px;
+        font-size: var(--fs-body);
     }
 }
 
@@ -1091,12 +1091,12 @@ td.num small {
     }
 
     .value-label {
-        font-size: 13px;
+        font-size: var(--fs-small);
     }
 
     .value-amount {
         margin-left: auto;
-        font-size: 15px;
+        font-size: var(--fs-body);
         white-space: nowrap;
     }
 

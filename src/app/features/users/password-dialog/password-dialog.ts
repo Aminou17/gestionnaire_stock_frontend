@@ -7,6 +7,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { generatePassword } from "../user-display";
 import { UserAccount } from "../user.model";
 import { UserService } from "../user.service";
+import { copyText } from "../../../shared/copy-text";
 
 // L'administrateur donne un nouveau mot de passe à quelqu'un qui a oublié le sien
 @Component({
@@ -78,10 +79,9 @@ export class PasswordDialog {
     copyPassword() {
         const password = this.savedPassword();
         if (!password) return;
-        navigator.clipboard
-            .writeText(password)
-            .then(() => this.copied.set(true))
-            .catch(() => this.error.set("Copie impossible, recopiez-le à la main."));
+        copyText(password).then((ok) =>
+            ok ? this.copied.set(true) : this.error.set("Copie impossible, recopiez-le à la main."),
+        );
     }
 
     submit() {

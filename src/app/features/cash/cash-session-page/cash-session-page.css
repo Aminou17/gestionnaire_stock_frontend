@@ -43,15 +43,15 @@ app-page-header {
 }
 
 .gap {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: var(--fs-kpi);
+    font-weight: var(--fw-bold);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
 
 .note {
     margin: 4px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     overflow-wrap: anywhere;
 }
 
@@ -70,7 +70,7 @@ app-page-header {
     gap: 12px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .lines > div:last-child {
@@ -83,7 +83,7 @@ app-page-header {
 
 .lines dd {
     margin: 0;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
     text-align: right;
 }
@@ -165,7 +165,7 @@ app-page-header {
     .print-title {
         display: block;
         margin: 0 0 12px;
-        font-size: 20px;
+        font-size: var(--fs-figure);
     }
 }
 
@@ -176,7 +176,7 @@ app-page-header {
 .blind-note {
     margin: 0;
     padding: 8px 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 @media print {
@@ -201,8 +201,8 @@ app-page-header {
 .step-title {
     margin-bottom: 2px;
     color: var(--text);
-    font-size: 12px;
-    font-weight: 700;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     letter-spacing: 0.04em;
     text-transform: uppercase;
 }
@@ -210,7 +210,7 @@ app-page-header {
 .step .pending {
     margin: 0;
     padding: 8px 0 12px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 @media (min-width: 768px) {

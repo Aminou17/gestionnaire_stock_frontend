@@ -2,6 +2,7 @@ import { Component, computed, output, signal } from "@angular/core";
 
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
+import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 // billets et pièces en F CFA
 const DENOMINATIONS = [10000, 5000, 2000, 1000, 500, 250, 100, 50, 25, 10, 5];
@@ -9,7 +10,7 @@ const DENOMINATIONS = [10000, 5000, 2000, 1000, 500, 250, 100, 50, 25, 10, 5];
 // Aide au comptage du tiroir : on tape le nombre de billets et de pièces, le total est calculé
 @Component({
     selector: "app-cash-counter",
-    imports: [FcfaPipe, Icon],
+    imports: [MoneyToggle, FcfaPipe, Icon],
     templateUrl: "./cash-counter.html",
     styleUrl: "./cash-counter.css",
 })

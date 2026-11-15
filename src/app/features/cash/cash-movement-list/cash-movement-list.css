@@ -41,8 +41,8 @@
 }
 
 .label {
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     color: var(--text);
     text-decoration: none;
 }
@@ -60,7 +60,7 @@ a.label:hover {
 }
 
 .amount {
-    font-size: 14px;
+    font-size: var(--fs-body);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
@@ -74,13 +74,13 @@ a.label:hover {
     padding: 24px 0;
     text-align: center;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .reason {
     display: block;
     color: var(--text);
-    font-size: 13px;
+    font-size: var(--fs-small);
     overflow-wrap: anywhere;
 }
 

@@ -5,18 +5,18 @@
     padding: 12px;
     border-radius: 8px;
     background: var(--neutral-soft);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .expected strong {
-    font-size: 18px;
+    font-size: var(--fs-heading);
     font-variant-numeric: tabular-nums;
 }
 
 .gap {
     padding: 12px;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .gap.ok {
@@ -27,7 +27,7 @@
 .gap.warn {
     background: var(--warning-soft);
     color: var(--warning);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .note {
