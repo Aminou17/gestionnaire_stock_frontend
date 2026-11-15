@@ -1,43 +1,41 @@
 <div class="heading">
+    <span class="mark" aria-hidden="true"><app-icon name="box" [size]="22" /></span>
     @if (step() === 1) {
         <h1>Créer ma boutique</h1>
-        <p>Prête en une minute, sans carte bancaire.</p>
-        <span class="trial"><app-icon name="check" [size]="14" /> 30 jours d'essai gratuit</span>
+        <p>Prête en une minute. Vous pourrez tout modifier ensuite.</p>
     } @else {
         <h1>Votre compte</h1>
-        <p>Vous serez l'administrateur de {{ form.controls.shopName.value }}.</p>
+        <p>Vous serez l'administrateur de {{ previewName() }}.</p>
     }
 </div>
 
-<div class="steps">
-    <ol class="steps-labels">
-        <li [class.current]="step() === 1" [class.done]="step() > 1">
-            <span class="dot">
-                @if (step() > 1) {
-                    <app-icon name="check" [size]="12" />
-                } @else {
-                    1
-                }
-            </span>
-            Boutique
-        </li>
-        <li [class.current]="step() === 2">
-            <span class="dot">2</span>
-            Votre compte
-        </li>
-    </ol>
-    <div
-        class="steps-bar"
-        role="progressbar"
-        aria-label="Progression de l'inscription"
-        aria-valuemin="1"
-        aria-valuemax="2"
-        [attr.aria-valuenow]="step()"
-    >
-        <span class="on"></span>
+<ol class="stepper" aria-label="Progression de l'inscription">
+    <li class="step" [class.current]="step() === 1" [class.done]="step() > 1">
+        <span class="step-dot">
+            @if (step() > 1) {
+                <app-icon name="check" [size]="16" />
+            } @else {
+                <app-icon name="store" [size]="16" />
+            }
+        </span>
+        <span class="step-text">
+            <small>Étape 1</small>
+            <strong>Boutique</strong>
+        </span>
+    </li>
+
+    <li class="step-line" aria-hidden="true">
         <span [class.on]="step() === 2"></span>
-    </div>
-</div>
+    </li>
+
+    <li class="step" [class.current]="step() === 2">
+        <span class="step-dot"><app-icon name="user" [size]="16" /></span>
+        <span class="step-text">
+            <small>Étape 2</small>
+            <strong>Compte</strong>
+        </span>
+    </li>
+</ol>
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     @if (error()) {
@@ -45,7 +43,31 @@
     }
 
     @if (step() === 1) {
-        <div class="panel">
+        <div class="panel" [class.from-left]="direction() === 'back'">
+            <div class="shop-card" aria-hidden="true">
+                <div class="shop-head">
+                    <span class="shop-logo">
+                        @if (logo(); as logoUrl) {
+                            <img [src]="logoUrl" alt="" />
+                        } @else if (initials()) {
+                            {{ initials() }}
+                        } @else {
+                            <app-icon name="store" [size]="22" />
+                        }
+                    </span>
+                    <span class="shop-info">
+                        <strong [class.placeholder]="!previewName()">
+                            {{ previewName() || "Nom de votre boutique" }}
+                        </strong>
+                        <small>Aperçu sur vos tickets</small>
+                    </span>
+                </div>
+                <div class="shop-ticket">
+                    <span>Ticket n° 0001</span>
+                    <span>1 500 F</span>
+                </div>
+            </div>
+
             <div class="group">
                 <div class="float">
                     <app-icon name="store" [size]="18" />
@@ -55,7 +77,7 @@
                         type="text"
                         formControlName="shopName"
                         autocomplete="organization"
-                        placeholder=" "
+                        placeholder="Ex. Chez Fatou"
                         maxlength="80"
                         [class.invalid]="isInvalid('shopName')"
                         [attr.aria-invalid]="isInvalid('shopName')"
@@ -66,10 +88,6 @@
                     <small class="field-error" role="alert">
                         Le nom de la boutique est obligatoire.
                     </small>
-                } @else {
-                    <small class="hint"
-                        >Il s'affiche sur vos tickets. Vous pourrez le changer.</small
-                    >
                 }
             </div>
 
@@ -83,34 +101,38 @@
                     aria-label="Logo de la boutique"
                     (change)="onLogoChosen($event)"
                 />
-                <div class="logo-pick">
-                    <button
-                        type="button"
-                        class="logo-preview"
-                        [attr.aria-label]="logo() ? 'Changer le logo' : 'Ajouter un logo'"
-                        (click)="logoInput.click()"
-                    >
-                        @if (logo(); as logoUrl) {
-                            <img [src]="logoUrl" alt="Aperçu du logo" />
-                        } @else {
-                            <app-icon name="image" [size]="22" />
-                        }
+                <div
+                    class="drop"
+                    [class.dragging]="dragging()"
+                    [class.has-logo]="logo()"
+                    (dragover)="onDragOver($event)"
+                    (dragleave)="dragging.set(false)"
+                    (drop)="onDrop($event)"
+                >
+                    <button type="button" class="drop-main" (click)="logoInput.click()">
+                        <span class="drop-icon">
+                            @if (logo(); as logoUrl) {
+                                <img [src]="logoUrl" alt="Aperçu du logo" />
+                            } @else {
+                                <app-icon name="upload" [size]="20" />
+                            }
+                        </span>
+                        <span class="drop-text">
+                            @if (logo()) {
+                                <strong>Logo ajouté</strong>
+                                <small>Touchez pour le changer</small>
+                            } @else {
+                                <strong>Ajouter un logo</strong>
+                                <small>
+                                    <span class="drag-hint">Glissez-déposez ou </span>PNG ou JPEG,
+                                    facultatif
+                                </small>
+                            }
+                        </span>
                     </button>
-                    <span class="logo-text">
-                        <strong>Logo</strong>
-                        <small>Facultatif, PNG ou JPEG</small>
-                    </span>
                     @if (logo()) {
                         <button type="button" class="btn btn-outline btn-sm" (click)="removeLogo()">
                             Retirer
-                        </button>
-                    } @else {
-                        <button
-                            type="button"
-                            class="btn btn-outline btn-sm"
-                            (click)="logoInput.click()"
-                        >
-                            Ajouter
                         </button>
                     }
                 </div>
@@ -125,7 +147,7 @@
             <app-icon name="chevron-right" [size]="18" />
         </button>
     } @else {
-        <div class="panel">
+        <div class="panel" [class.from-left]="direction() === 'back'">
             <div class="names">
                 <div class="group">
                     <div class="float no-icon">
@@ -135,7 +157,6 @@
                             type="text"
                             formControlName="firstName"
                             autocomplete="given-name"
-                            placeholder=" "
                             maxlength="50"
                             [class.invalid]="isInvalid('firstName')"
                             [attr.aria-invalid]="isInvalid('firstName')"
@@ -155,7 +176,6 @@
                             type="text"
                             formControlName="lastName"
                             autocomplete="family-name"
-                            placeholder=" "
                             maxlength="50"
                             [class.invalid]="isInvalid('lastName')"
                             [attr.aria-invalid]="isInvalid('lastName')"
@@ -169,7 +189,7 @@
             </div>
 
             <div class="group">
-                <div class="float">
+                <div class="float has-status">
                     <app-icon name="mail" [size]="18" />
                     <input
                         id="register-email"
@@ -177,18 +197,27 @@
                         type="email"
                         formControlName="email"
                         autocomplete="email"
-                        placeholder=" "
+                        placeholder="vous@exemple.com"
                         [class.invalid]="isInvalid('email')"
                         [attr.aria-invalid]="isInvalid('email')"
                     />
                     <label for="register-email">Adresse email</label>
+                    @if (form.controls.email.valid) {
+                        <span class="valid-mark" aria-hidden="true">
+                            <app-icon name="check" [size]="12" />
+                        </span>
+                    }
                 </div>
                 @if (hasError("email", "required")) {
                     <small class="field-error" role="alert">L'adresse email est obligatoire.</small>
-                } @else if (hasError("email", "email")) {
+                } @else if (hasError("email", "email") || hasError("email", "pattern")) {
                     <small class="field-error" role="alert"
                         >L'adresse email n'est pas valide.</small
                     >
+                } @else if (form.controls.email.valid) {
+                    <small class="hint ok">Adresse valide. Elle servira à vous connecter.</small>
+                } @else {
+                    <small class="hint">Elle servira à vous connecter.</small>
                 }
             </div>
 
@@ -201,7 +230,6 @@
                         [type]="showPassword() ? 'text' : 'password'"
                         formControlName="password"
                         autocomplete="new-password"
-                        placeholder=" "
                         [class.invalid]="isInvalid('password')"
                         [attr.aria-invalid]="isInvalid('password')"
                     />
@@ -233,19 +261,35 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block" [disabled]="loading()">
-            @if (loading()) {
+        <button
+            type="submit"
+            class="btn btn-primary btn-block"
+            [class.success]="done()"
+            [disabled]="loading() || done()"
+        >
+            @if (done()) {
+                <app-icon name="check" [size]="18" /> Boutique créée
+            } @else if (loading()) {
                 <span class="spinner"></span> Création…
             } @else {
                 Créer ma boutique
             }
         </button>
 
-        <button type="button" class="text-link" [disabled]="loading()" (click)="back()">
+        <button type="button" class="text-link" [disabled]="loading() || done()" (click)="back()">
             <app-icon name="chevron-left" [size]="16" />
             Modifier la boutique
         </button>
     }
 </form>
 
+<ul class="assurance">
+    <li><app-icon name="check" [size]="14" /> 30 jours gratuits</li>
+    <li><app-icon name="check" [size]="14" /> Sans carte bancaire</li>
+</ul>
+
 <p class="switch">Déjà un compte ? <a routerLink="/login">Se connecter</a></p>
+
+<p class="legal">
+    En créant votre boutique, vous acceptez les conditions d'utilisation de Boutiki.
+</p>

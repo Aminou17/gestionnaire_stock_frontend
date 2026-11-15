@@ -64,15 +64,15 @@
     flex-direction: column;
 }
 
-/* Feuille blanche arrondie qui porte le formulaire */
+/* Feuille blanche arrondie qui porte le formulaire, la présentation sombre continue dessous */
 .card {
     flex: 1;
     width: 100%;
     max-width: 520px;
     align-self: center;
-    padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+    padding: 24px;
     border: 0;
-    border-radius: 28px 28px 0 0;
+    border-radius: 28px;
     background: var(--surface);
     box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
 }
@@ -81,11 +81,89 @@
     display: none;
 }
 
+/* Présentation sous le formulaire (téléphone et tablette) */
+.mobile-pitch {
+    width: 100%;
+    max-width: 520px;
+    align-self: center;
+    padding: 40px 24px calc(24px + env(safe-area-inset-bottom));
+    color: #fff;
+}
+
+.mobile-intro h2 {
+    margin: 0 0 8px;
+    font-size: var(--fs-figure);
+    line-height: 1.2;
+    font-weight: var(--fw-bold);
+    letter-spacing: -0.02em;
+}
+
+.mobile-intro p {
+    margin: 0;
+    color: var(--sidebar-pitch);
+    font-size: var(--fs-body);
+    line-height: 1.5;
+}
+
+.mobile-pitch .showcase {
+    max-width: none;
+    margin-top: 16px;
+    padding: 40px 0 44px;
+}
+
+.mobile-pitch .mini-sale {
+    right: 0;
+}
+
+.mobile-pitch .mini-alert {
+    left: 0;
+}
+
+.benefits {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 16px 0 24px;
+    padding: 0;
+    list-style: none;
+}
+
+.benefits li {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 12px 4px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-text-soft);
+    font-size: var(--fs-caption);
+    text-align: center;
+}
+
+.benefit-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: rgba(96, 165, 250, 0.16);
+    color: #93c5fd;
+}
+
+.mobile-pitch .figures {
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;
+}
+
+.mobile-pitch footer {
+    text-align: center;
+}
+
 /* Tablette : la feuille devient une carte détachée du bas de l'écran */
 @media (min-width: 600px) and (max-width: 1023px) {
     .card {
         flex: none;
-        margin-bottom: 48px;
         padding: 32px;
         border-radius: 24px;
         box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
@@ -99,7 +177,8 @@
         background: var(--surface);
     }
 
-    .mobile-hero {
+    .mobile-hero,
+    .mobile-pitch {
         display: none;
     }
 
@@ -346,6 +425,7 @@
 }
 
 .figures dt {
+    white-space: nowrap;
     font-size: var(--fs-lead);
     font-weight: var(--fw-semibold);
 }

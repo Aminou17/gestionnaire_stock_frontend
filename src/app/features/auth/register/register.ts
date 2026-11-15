@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, ElementRef, inject, signal } from "@angular/core";
+import { Component, ElementRef, computed, inject, signal } from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 
@@ -28,26 +29,65 @@ export class Register {
         shopName: ["", [Validators.required, Validators.maxLength(80)]],
         firstName: ["", [Validators.required, Validators.maxLength(50)]],
         lastName: ["", [Validators.required, Validators.maxLength(50)]],
-        email: ["", [Validators.required, Validators.email]],
+        // Validators.email accepte "nom@domaine" : on exige aussi un point dans le domaine
+        email: [
+            "",
+            [Validators.required, Validators.email, Validators.pattern(/^\S+@\S+\.\S{2,}$/)],
+        ],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
     });
 
     // 1 : la boutique, 2 : le compte de l'administrateur
     step = signal<1 | 2>(1);
     loading = signal(false);
+    done = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
+
+    // sens de la transition entre les deux étapes
+    direction = signal<"forward" | "back">("forward");
+
+    // aperçu en direct de la boutique
+    private shopNameValue = toSignal(this.form.controls.shopName.valueChanges, {
+        initialValue: "",
+    });
+    previewName = computed(() => this.shopNameValue().trim());
+    initials = computed(() =>
+        this.previewName()
+            .split(/\s+/)
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((word) => word[0].toUpperCase())
+            .join(""),
+    );
 
     // logo facultatif : réduit tout de suite, envoyé avec l'inscription
     logo = signal<string | null>(null);
     logoError = signal<string | null>(null);
+    dragging = signal(false);
 
-    async onLogoChosen(event: Event) {
+    onLogoChosen(event: Event) {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
         input.value = "";
-        if (!file) return;
 
+        if (file) this.loadLogo(file);
+    }
+
+    onDragOver(event: DragEvent) {
+        event.preventDefault();
+        this.dragging.set(true);
+    }
+
+    onDrop(event: DragEvent) {
+        event.preventDefault();
+        this.dragging.set(false);
+
+        const file = event.dataTransfer?.files?.[0];
+        if (file) this.loadLogo(file);
+    }
+
+    private async loadLogo(file: File) {
         this.logoError.set(null);
 
         try {
@@ -83,11 +123,13 @@ export class Register {
         }
 
         this.error.set(null);
+        this.direction.set("forward");
         this.goTo(2, "#register-firstName");
     }
 
     back() {
         this.error.set(null);
+        this.direction.set("back");
         this.goTo(1, "#register-shopName");
     }
 
@@ -131,7 +173,10 @@ export class Register {
                 ...(logo ? { logo } : {}),
             })
             .subscribe({
-                next: () => this.router.navigate(["/dashboard"]),
+                next: () => {
+                    this.done.set(true);
+                    this.router.navigate(["/dashboard"]);
+                },
                 error: (err: HttpErrorResponse) => {
                     this.loading.set(false);
                     if (err.status === 0 || err.status >= 502) {

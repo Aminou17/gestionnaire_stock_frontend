@@ -27,8 +27,9 @@ describe("PasswordStrength", () => {
     it("should show the hint before typing", () => {
         const el = render("");
 
-        expect(el.textContent).toContain("8 caractères au moins");
+        expect(el.textContent).toContain("Choisissez-en un solide");
         expect(el.querySelectorAll(".on").length).toBe(0);
+        expect(el.querySelectorAll(".met").length).toBe(0);
     });
 
     it("should say when the password is too short", () => {
@@ -40,5 +41,15 @@ describe("PasswordStrength", () => {
 
         expect(el.textContent).toContain("Excellent");
         expect(el.querySelectorAll(".on").length).toBe(4);
+        expect(el.querySelectorAll(".met").length).toBe(4);
+    });
+
+    it("should tick only the criteria that are met", () => {
+        const el = render("motdepasse1");
+        const met = Array.from(el.querySelectorAll(".met")).map((li) => li.textContent);
+
+        expect(met.length).toBe(2);
+        expect(met[0]).toContain("8 caractères");
+        expect(met[1]).toContain("chiffre");
     });
 });
