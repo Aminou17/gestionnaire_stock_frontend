@@ -10,23 +10,37 @@
             {{ editing() ? "Modifier l'utilisateur" : "Nouvel utilisateur" }}
         </h2>
 
-        <label class="field">
-            <span>Nom complet</span>
-            <input
-                #nameInput
-                class="input"
-                type="text"
-                formControlName="name"
-                placeholder="Ex. Moussa Traoré"
-                maxlength="100"
-                autocomplete="off"
-                [class.invalid]="invalid('name')"
-                [attr.aria-invalid]="invalid('name')"
-            />
-            @if (invalid("name")) {
-                <small class="field-error" role="alert">Le nom est obligatoire.</small>
-            }
-        </label>
+        <div class="names">
+            <label class="field">
+                <span>Prénom</span>
+                <input
+                    #firstNameInput
+                    class="input"
+                    type="text"
+                    formControlName="firstName"
+                    placeholder="Ex. Moussa"
+                    maxlength="50"
+                    autocomplete="off"
+                    [class.invalid]="invalid('firstName')"
+                    [attr.aria-invalid]="invalid('firstName')"
+                />
+                @if (invalid("firstName")) {
+                    <small class="field-error" role="alert">Le prénom est obligatoire.</small>
+                }
+            </label>
+
+            <label class="field">
+                <span>Nom</span>
+                <input
+                    class="input"
+                    type="text"
+                    formControlName="lastName"
+                    placeholder="Ex. Traoré"
+                    maxlength="50"
+                    autocomplete="off"
+                />
+            </label>
+        </div>
 
         <label class="field">
             <span>Adresse email</span>

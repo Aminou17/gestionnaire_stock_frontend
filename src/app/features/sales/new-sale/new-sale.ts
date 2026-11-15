@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import {
     Component,
@@ -26,11 +27,12 @@ import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { CustomerForm } from "../../customers/customer-form/customer-form";
-import { productInitials } from "../../products/product-look";
+import { categoryTone, productInitials } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { formatPhone, phoneKey, splitPhone } from "../../../shared/phone";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
+import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 interface CartLine {
@@ -48,7 +50,17 @@ export const getMinPrice = (product: Product) =>
 
 @Component({
     selector: "app-new-sale",
-    imports: [FormsModule, PageHeader, Icon, FcfaPipe, ReopenCashDialog, CustomerForm, PhoneField],
+    imports: [
+        FormsModule,
+        NgTemplateOutlet,
+        PageHeader,
+        Icon,
+        FcfaPipe,
+        ReopenCashDialog,
+        CustomerForm,
+        PhoneField,
+        PhotoZoom,
+    ],
     templateUrl: "./new-sale.html",
     styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
     // la barre du panier en bas d'écran demande de la place sous la page
@@ -70,12 +82,15 @@ export class NewSale {
     protected auth = inject(AuthService);
     protected back = getBackLink("/sales", "Ventes");
     protected initials = productInitials;
+    protected tone = categoryTone;
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
     search = signal("");
     categoryId = signal<number | null>(null);
     cart = signal<CartLine[]>([]);
     saving = signal(false);
+    // photo agrandie au centre de l'écran
+    zoom = signal<{ src: string; name: string } | null>(null);
     error = signal<string | null>(null);
 
     private searchTimer?: ReturnType<typeof setTimeout>;
@@ -117,6 +132,11 @@ export class NewSale {
     total = computed(() =>
         this.cart().reduce((sum, line) => sum + line.quantity * line.unitPrice, 0),
     );
+    // total au prix catalogue : l'écart avec le total est la remise accordée
+    subtotal = computed(() =>
+        this.cart().reduce((sum, line) => sum + line.quantity * line.product.sale_price, 0),
+    );
+    discount = computed(() => Math.max(0, this.subtotal() - this.total()));
     // paiement : espèces par défaut, comme au comptoir
     paymentMethod = signal<PaymentMethod>("CASH");
     amountReceived = signal<number | null>(null);
@@ -427,6 +447,30 @@ export class NewSale {
         const line = this.cart().find((l) => l.product.id === product.id);
         if (line) this.removeLine(line);
         else this.addProduct(product);
+    }
+
+    // la liste ne porte que la miniature : on affiche celle-ci tout de suite, puis la photo en grand
+    zoomImage(product: Product) {
+        if (!product.image) return;
+
+        this.zoom.set({ src: product.image, name: product.name });
+        this.productService
+            .getProduct(product.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (full) => {
+                    const current = this.zoom();
+                    if (full.image && current?.name === product.name) {
+                        this.zoom.set({ src: full.image, name: product.name });
+                    }
+                },
+                error: () => undefined,
+            });
+    }
+
+    clearCart() {
+        this.cart.set([]);
+        this.error.set(null);
     }
 
     removeLine(line: CartLine) {

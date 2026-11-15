@@ -1,0 +1,134 @@
+import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { HttpErrorResponse } from "@angular/common/http";
+import { Router, provideRouter } from "@angular/router";
+import { of, throwError } from "rxjs";
+
+import { Register } from "./register";
+import { AuthService } from "../../../core/auth/auth.service";
+
+describe("Register", () => {
+    let fixture: ComponentFixture<Register>;
+    let component: Register;
+    let el: HTMLElement;
+    let auth: { register: ReturnType<typeof vi.fn> };
+    let router: Router;
+
+    beforeEach(async () => {
+        auth = { register: vi.fn(() => of({})) };
+
+        await TestBed.configureTestingModule({
+            imports: [Register],
+            providers: [provideRouter([]), { provide: AuthService, useValue: auth }],
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(Register);
+        component = fixture.componentInstance;
+        el = fixture.nativeElement;
+        router = TestBed.inject(Router);
+        vi.spyOn(router, "navigate").mockResolvedValue(true);
+        await fixture.whenStable();
+    });
+
+    async function submit() {
+        el.querySelector<HTMLButtonElement>('button[type="submit"]')!.click();
+        await fixture.whenStable();
+    }
+
+    async function goToAccountStep() {
+        component.form.patchValue({ shopName: "Chez Fatou" });
+        await submit();
+    }
+
+    function fillAccount() {
+        component.form.patchValue({
+            firstName: "Fatou",
+            lastName: "Diallo",
+            email: "Fatou@Exemple.com",
+            password: "Boutique-2026!",
+        });
+    }
+
+    it("should start on the shop step", () => {
+        expect(component.step()).toBe(1);
+        expect(el.textContent).toContain("Nom de la boutique");
+        expect(el.querySelector("#register-firstName")).toBeNull();
+    });
+
+    it("should not leave the shop step without a shop name", async () => {
+        await submit();
+
+        expect(component.step()).toBe(1);
+        expect(el.textContent).toContain("Le nom de la boutique est obligatoire.");
+    });
+
+    it("should show separate first and last name fields on the account step", async () => {
+        await goToAccountStep();
+
+        expect(component.step()).toBe(2);
+        expect(el.querySelector("#register-firstName")).not.toBeNull();
+        expect(el.querySelector("#register-lastName")).not.toBeNull();
+        expect(el.textContent).toContain("Chez Fatou");
+    });
+
+    it("should go back to the shop step and keep the typed values", async () => {
+        await goToAccountStep();
+
+        el.querySelector<HTMLButtonElement>(".text-link")!.click();
+        await fixture.whenStable();
+
+        expect(component.step()).toBe(1);
+        expect(component.form.controls.shopName.value).toBe("Chez Fatou");
+    });
+
+    it("should show errors and not call the API when the account is incomplete", async () => {
+        await goToAccountStep();
+        await submit();
+
+        expect(auth.register).not.toHaveBeenCalled();
+        expect(el.textContent).toContain("Le mot de passe est obligatoire.");
+    });
+
+    it("should register with first name, last name and a lowercase email", async () => {
+        await goToAccountStep();
+        fillAccount();
+        await submit();
+
+        expect(auth.register).toHaveBeenCalledWith({
+            shopName: "Chez Fatou",
+            firstName: "Fatou",
+            lastName: "Diallo",
+            email: "fatou@exemple.com",
+            password: "Boutique-2026!",
+        });
+        expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+    });
+
+    it("should show the API message and stay on the page", async () => {
+        auth.register.mockReturnValue(
+            throwError(
+                () =>
+                    new HttpErrorResponse({
+                        status: 409,
+                        error: { message: "Cet email est déjà utilisé." },
+                    }),
+            ),
+        );
+
+        await goToAccountStep();
+        fillAccount();
+        await submit();
+
+        expect(el.querySelector('[role="alert"]')?.textContent).toContain(
+            "Cet email est déjà utilisé.",
+        );
+        expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it("should show the password strength while typing", async () => {
+        await goToAccountStep();
+        component.form.patchValue({ password: "Boutique-2026!" });
+        await fixture.whenStable();
+
+        expect(el.querySelector("app-password-strength")?.textContent).toContain("Excellent");
+    });
+});

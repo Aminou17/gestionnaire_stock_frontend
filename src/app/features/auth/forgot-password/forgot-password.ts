@@ -10,7 +10,7 @@ import { Icon } from "../../../shared/icon/icon";
     selector: "app-forgot-password",
     imports: [ReactiveFormsModule, RouterLink, Icon],
     templateUrl: "./forgot-password.html",
-    styleUrls: ["../login/login.css", "./forgot-password.css"],
+    styleUrls: ["../auth-form.css", "./forgot-password.css"],
 })
 export class ForgotPassword {
     private auth = inject(AuthService);

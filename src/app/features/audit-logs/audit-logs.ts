@@ -1,18 +1,30 @@
-import { DatePipe, NgTemplateOutlet } from "@angular/common";
+import { DatePipe, NgTemplateOutlet, formatDate } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, LOCALE_ID, computed, inject, linkedSignal, signal } from "@angular/core";
+import {
+    Component,
+    LOCALE_ID,
+    computed,
+    inject,
+    linkedSignal,
+    signal,
+    viewChild,
+} from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { map } from "rxjs";
 
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
-import { Avatar } from "../../shared/avatar/avatar";
-import { LABELS } from "../../shared/activity-label";
+import {
+    ActivityTone,
+    LABELS,
+    getActivityIcon,
+    getActivityTone,
+} from "../../shared/activity-label";
 import { groupByDay } from "../../shared/day-label";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
 import { UserService } from "../users/user.service";
-import { getAuditAuthor } from "../../core/audit/audit-author";
+import { getAuditAuthor, getAuditFirstName } from "../../core/audit/audit-author";
 import {
     AuditCategory,
     AuditLog,
@@ -20,6 +32,7 @@ import {
     SECURITY_ACTIONS,
 } from "../../core/audit/audit-log.model";
 import { AuditLogService } from "../../core/audit/audit-log.service";
+import { IconName } from "../../shared/icon/icons";
 import {
     AuditChange,
     AuditSentence,
@@ -39,7 +52,11 @@ interface Row {
     note: string | null;
     changes: AuditChange[];
     link: (string | number)[] | null;
-    expandable: boolean;
+    initials: string;
+    icon: IconName;
+    tone: ActivityTone;
+    // détail : une feuille s'ouvre seulement s'il y a quelque chose de plus à lire
+    hasDetail: boolean;
 }
 
 // fiches que l'on peut ouvrir depuis une ligne du journal
@@ -51,20 +68,29 @@ const ENTITY_LINKS: Record<string, string> = {
     category: "/categories",
 };
 
+const PERIOD_LABELS: Record<string, string> = {
+    today: "Aujourd'hui",
+    week: "7 derniers jours",
+    month: "30 derniers jours",
+};
+
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 // Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-audit-logs",
-    imports: [RouterLink, DatePipe, NgTemplateOutlet, PageHeader, PeriodFilter, Icon, Avatar],
+    imports: [RouterLink, DatePipe, NgTemplateOutlet, PageHeader, PeriodFilter, Icon],
     templateUrl: "./audit-logs.html",
     styleUrl: "./audit-logs.css",
+    host: { "(document:keydown.escape)": "filtersOpen.set(false); selected.set(null)" },
 })
 export class AuditLogs {
     private auditService = inject(AuditLogService);
     private userService = inject(UserService);
     private route = inject(ActivatedRoute);
     private locale = inject(LOCALE_ID);
+    private periodFilter = viewChild.required<PeriodFilter>("period");
+    private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
     // /audit-logs?result=FAILURE : arrivée depuis la cloche, sur les échecs de sécurité
     private fromAlert = this.route.snapshot.queryParamMap.get("result") === "FAILURE";
@@ -74,7 +100,10 @@ export class AuditLogs {
     userId = signal<number | null>(null);
     action = signal<string | null>(null);
     onlyFailures = signal(this.fromAlert);
+    search = signal("");
     page = signal(1);
+    filtersOpen = signal(false);
+    selected = signal<Row | null>(null);
 
     // les actions de l'onglet, triées par libellé
     actions = computed(() => {
@@ -95,6 +124,7 @@ export class AuditLogs {
             action: this.action(),
             result: this.onlyFailures() ? ("FAILURE" as const) : null,
             category: this.tab(),
+            search: this.search(),
             page: this.page(),
             limit: PAGE_SIZE,
         }),
@@ -119,6 +149,9 @@ export class AuditLogs {
     ];
 
     skeletonRows = [1, 2, 3, 4, 5, 6];
+
+    protected getAuditAuthor = getAuditAuthor;
+    protected getAuditFirstName = getAuditFirstName;
 
     // dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
@@ -150,17 +183,23 @@ export class AuditLogs {
     firstLoad = computed(() => this.logs.isLoading() && !this.last());
     hasMore = computed(() => this.list().length < this.total());
     loadingMore = computed(() => this.logs.isLoading() && this.page() > 1);
-    filtered = computed(
-        () =>
-            this.range().period !== "all" ||
-            this.userId() !== null ||
-            this.action() !== null ||
-            this.onlyFailures(),
-    );
-    // la période se règle dans son propre sélecteur, Effacer ne la touche pas
-    clearable = computed(
-        () => this.userId() !== null || this.action() !== null || this.onlyFailures(),
-    );
+    filtered = computed(() => this.activeFilters().length > 0 || this.search() !== "");
+
+    // les filtres posés, en puces avec croix sous la barre de recherche
+    activeFilters = computed(() => {
+        const filters: { key: "period" | "user" | "action" | "failures"; label: string }[] = [];
+        const { period, from, to } = this.range();
+
+        if (period !== "all")
+            filters.push({ key: "period", label: this.periodLabel(period, from, to) });
+        if (this.userId() !== null) filters.push({ key: "user", label: this.userName() });
+        if (this.action() !== null) {
+            filters.push({ key: "action", label: LABELS[this.action()!] ?? "Autre action" });
+        }
+        if (this.onlyFailures()) filters.push({ key: "failures", label: "Échecs" });
+
+        return filters;
+    });
 
     errorMessage = computed(() => {
         const err = this.logs.error();
@@ -168,16 +207,24 @@ export class AuditLogs {
         return "Impossible de charger le journal.";
     });
 
-    protected getAuditAuthor = getAuditAuthor;
-
     selectTab(tab: AuditCategory) {
         if (this.tab() === tab) return;
         this.tab.set(tab);
         // une action de l'autre onglet ne donnerait aucun résultat
         this.action.set(null);
+        this.onlyFailures.set(false);
         this.page.set(1);
         // pas de lignes de l'ancien onglet pendant le chargement du nouveau
         this.last.set(undefined);
+    }
+
+    // on attend la fin de la frappe avant d'interroger le serveur
+    onSearch(value: string) {
+        clearTimeout(this.searchTimer);
+        this.searchTimer = setTimeout(() => {
+            this.search.set(value.trim());
+            this.page.set(1);
+        }, 300);
     }
 
     selectRange(range: PeriodRange) {
@@ -205,7 +252,15 @@ export class AuditLogs {
         this.page.set(1);
     }
 
+    clearFilter(key: "period" | "user" | "action" | "failures") {
+        if (key === "period") this.periodFilter().selectPeriod("all");
+        if (key === "user") this.selectUser("");
+        if (key === "action") this.selectAction("");
+        if (key === "failures") this.setFailures(false);
+    }
+
     resetFilters() {
+        this.periodFilter().selectPeriod("all");
         this.userId.set(null);
         this.action.set(null);
         this.onlyFailures.set(false);
@@ -222,11 +277,30 @@ export class AuditLogs {
         this.page.update((page) => page + 1);
     }
 
-    // une tentative sans compte connu n'a pas d'initiales
+    open(row: Row) {
+        this.selected.set(row);
+    }
 
     // une adresse IPv4 arrive sous la forme ::ffff:127.0.0.1
     cleanIp(ip: string) {
         return ip.replace(/^::ffff:/, "");
+    }
+
+    // deux lettres : "Awa Bazin" donne AB, un email donne ses deux premières lettres
+    private initialsOf(author: string) {
+        const words = author.split(/[\s@.]+/).filter(Boolean);
+        const letters = words.length > 1 ? words[0][0] + words[1][0] : author.slice(0, 2);
+        return letters.toUpperCase();
+    }
+
+    private userName() {
+        const user = this.users.value()?.find((item) => item.id === this.userId());
+        return user?.name ?? "Personne";
+    }
+
+    private periodLabel(period: string, from: string | null, to: string | null) {
+        if (PERIOD_LABELS[period]) return PERIOD_LABELS[period];
+        return `${formatDate(from!, "d MMM", this.locale)} au ${formatDate(to!, "d MMM", this.locale)}`;
     }
 
     private entityLink(log: AuditLog) {
@@ -258,6 +332,8 @@ export class AuditLogs {
             const sentence = getAuditSentence(log);
             const changes = getAuditChanges(log);
             const link = this.entityLink(log);
+            const failed = log.result === "FAILURE";
+            const author = getAuditAuthor(log);
             return {
                 log,
                 times,
@@ -265,8 +341,11 @@ export class AuditLogs {
                 note: sentence.note ? capitalize(sentence.note) : null,
                 changes,
                 link,
-                // la ligne s'ouvre seulement si elle a quelque chose de plus à montrer
-                expandable: times.length > 1 || changes.length > 0 || link !== null,
+                initials: this.initialsOf(author),
+                icon: failed ? "alert" : getActivityIcon(log.action),
+                tone: getActivityTone(log.action, failed),
+                // sans fiche à ouvrir, la ligne montre son détail plutôt que de rester muette
+                hasDetail: times.length > 1 || changes.length > 0 || link === null,
             };
         });
     }

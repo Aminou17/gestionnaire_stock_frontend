@@ -1,9 +1,15 @@
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
+import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { ThemeService } from "../../core/theme/theme.service";
+import { CashSettingsService } from "../../core/cash/cash-settings.service";
+import { SalesSettingsService } from "../../core/sales/sales-settings.service";
+import { ShopSettingsService } from "../../core/shop/shop-settings.service";
+import { AlertEmailService } from "../../core/stock/alert-email.service";
+import { StockSettingsService } from "../../core/stock/stock-settings.service";
 import { Settings } from "./settings";
 
 describe("Settings", () => {
@@ -17,6 +23,26 @@ describe("Settings", () => {
             imports: [Settings],
             providers: [
                 provideRouter([]),
+                {
+                    provide: ShopSettingsService,
+                    useValue: { getSettings: () => of({ name: "Chez Awa", logo: null }) },
+                },
+                {
+                    provide: StockSettingsService,
+                    useValue: { getSettings: () => of({ id: 1, min_stock: 5 }) },
+                },
+                {
+                    provide: AlertEmailService,
+                    useValue: { getSettings: () => of({ enabled: true, hasPassword: true }) },
+                },
+                {
+                    provide: CashSettingsService,
+                    useValue: { getSettings: () => of({ blind_close: false }) },
+                },
+                {
+                    provide: SalesSettingsService,
+                    useValue: { getSettings: () => of({ ticket_prefix: "" }) },
+                },
                 { provide: ThemeService, useValue: { theme, toggle } },
                 {
                     provide: AuthService,
@@ -30,6 +56,7 @@ describe("Settings", () => {
                             role: "admin",
                         }),
                         roleLabel: signal("Administrateur"),
+                        logoutAsked: signal(false),
                     },
                 },
             ],
@@ -72,6 +99,31 @@ describe("Settings", () => {
         await render(false);
 
         expect(hrefs()).toEqual(["/account", "/password"]);
+    });
+
+    it("should show the state of the main settings for the administrator", async () => {
+        await render();
+
+        const text = el.textContent!;
+
+        expect(text).toContain("Chez Awa");
+        expect(text).toContain("Seuil : 5");
+        expect(text).toContain("Gmail connecté");
+    });
+
+    it("should not read the settings for the manager", async () => {
+        await render(false);
+
+        expect(el.querySelector(".status")).toBeNull();
+    });
+
+    it("should ask to log out", async () => {
+        await render();
+        const logoutAsked = TestBed.inject(AuthService).logoutAsked;
+
+        el.querySelector<HTMLButtonElement>(".logout")!.click();
+
+        expect(logoutAsked()).toBe(true);
     });
 
     it("should show the dark mode as a switch and toggle it from the page", async () => {

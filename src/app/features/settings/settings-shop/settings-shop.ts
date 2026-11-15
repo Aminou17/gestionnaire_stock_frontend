@@ -1,7 +1,17 @@
-import { Component, DestroyRef, effect, inject, signal, untracked, viewChild } from "@angular/core";
-import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import {
+    Component,
+    DestroyRef,
+    ElementRef,
+    computed,
+    effect,
+    inject,
+    signal,
+    untracked,
+    viewChild,
+} from "@angular/core";
+import { rxResource, takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { filter } from "rxjs";
+import { filter, map, startWith } from "rxjs";
 
 import { Router } from "@angular/router";
 
@@ -12,6 +22,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { countryName } from "../../../shared/country-codes";
 import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
+import { LogoResizerService } from "../logo-resizer.service";
 import { SettingsHistory } from "../settings-history/settings-history";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
@@ -27,6 +38,7 @@ export class SettingsShop implements HasUnsavedChanges {
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
     private router = inject(Router);
+    private logoResizer = inject(LogoResizerService);
 
     // on peut arriver ici depuis le ticket de caisse : Retour y ramène
     back = getBackLink("/settings", "Retour aux paramètres");
@@ -43,6 +55,31 @@ export class SettingsShop implements HasUnsavedChanges {
         rccm: ["", Validators.maxLength(50)],
         defaultCountryCode: ["", [Validators.required, Validators.pattern(/^[1-9][0-9]{0,3}$/)]],
     });
+
+    // l'aperçu du ticket et l'en-tête suivent la saisie
+    values = toSignal(
+        this.form.valueChanges.pipe(
+            startWith(null),
+            map(() => this.form.getRawValue()),
+        ),
+        { initialValue: this.form.getRawValue() },
+    );
+
+    logo = computed(() => (this.settings.hasValue() ? this.settings.value().logo : null));
+
+    // deux initiales du nom, affichées tant qu'il n'y a pas de logo
+    initials = computed(() => {
+        const words = this.values().name.trim().split(/\s+/).filter(Boolean);
+        return words
+            .slice(0, 2)
+            .map((word) => word[0].toUpperCase())
+            .join("");
+    });
+
+    // le logo s'enregistre tout de suite, séparément des champs
+    logoBusy = signal(false);
+    logoMessage = signal<{ ok: boolean; text: string } | null>(null);
+    private fileInput = viewChild.required<ElementRef<HTMLInputElement>>("fileInput");
 
     saving = signal(false);
     // relit la dernière modification affichée en bas de page après chaque enregistrement
@@ -63,7 +100,11 @@ export class SettingsShop implements HasUnsavedChanges {
             if (!this.settings.hasValue()) return;
 
             const settings = this.settings.value();
-            untracked(() => this.fill(settings));
+
+            // un changement de logo recharge la fiche : la saisie en cours doit survivre
+            untracked(() => {
+                if (this.form.pristine) this.fill(settings);
+            });
         });
     }
 
@@ -87,7 +128,7 @@ export class SettingsShop implements HasUnsavedChanges {
 
     canLeave() {
         // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
-        if (this.saving()) return false;
+        if (this.saving() || this.logoBusy()) return false;
 
         return !this.form.dirty || this.leaveDialog().ask();
     }
@@ -123,6 +164,7 @@ export class SettingsShop implements HasUnsavedChanges {
                     this.form.enable({ emitEvent: false });
                     this.saveCount.update((n) => n + 1);
                     this.settings.set(settings);
+                    this.fill(settings);
                     this.message.set({ ok: true, text: "Informations enregistrées." });
                 },
                 error: (err) => {
@@ -134,6 +176,62 @@ export class SettingsShop implements HasUnsavedChanges {
                     });
                 },
             });
+    }
+
+    pickLogo() {
+        this.fileInput().nativeElement.click();
+    }
+
+    async onLogoChosen(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+
+        // le même fichier doit pouvoir être choisi une seconde fois
+        input.value = "";
+        if (!file) return;
+
+        this.logoBusy.set(true);
+        this.logoMessage.set(null);
+
+        try {
+            const logo = await this.logoResizer.resize(file);
+            this.shopService
+                .updateLogo(logo)
+                .pipe(takeUntilDestroyed(this.destroyRef))
+                .subscribe({
+                    next: (settings) => this.onLogoSaved(settings, "Logo enregistré."),
+                    error: (err) =>
+                        this.onLogoFailed(errorText(err, "Impossible d'enregistrer le logo.")),
+                });
+        } catch (err) {
+            this.onLogoFailed((err as Error).message);
+        }
+    }
+
+    removeLogo() {
+        this.logoBusy.set(true);
+        this.logoMessage.set(null);
+
+        this.shopService
+            .removeLogo()
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (settings) => this.onLogoSaved(settings, "Logo supprimé."),
+                error: (err) =>
+                    this.onLogoFailed(errorText(err, "Impossible de supprimer le logo.")),
+            });
+    }
+
+    private onLogoSaved(settings: ShopSettings, text: string) {
+        this.logoBusy.set(false);
+        this.settings.set(settings);
+        this.saveCount.update((n) => n + 1);
+        this.logoMessage.set({ ok: true, text });
+    }
+
+    private onLogoFailed(text: string) {
+        this.logoBusy.set(false);
+        this.logoMessage.set({ ok: false, text });
     }
 
     private fill(settings: ShopSettings) {

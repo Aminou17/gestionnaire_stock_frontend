@@ -13,6 +13,8 @@ import { UserService } from "./user.service";
 const me: UserAccount = {
     id: 1,
     name: "Awa Bazin",
+    first_name: "Awa",
+    last_name: "Bazin",
     email: "awa@test.com",
     role: "admin",
     is_active: true,
@@ -24,6 +26,8 @@ const moussa: UserAccount = {
     ...me,
     id: 2,
     name: "Moussa Traoré",
+    first_name: "Moussa",
+    last_name: "Traoré",
     email: "moussa@test.com",
     role: "manager",
     last_login_at: null,

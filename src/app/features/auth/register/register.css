@@ -1,24 +1,129 @@
-.hint {
-    color: var(--text-muted);
-    font-size: var(--fs-caption);
+.trial {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
+/* progression : deux étapes nommées et une barre en deux segments */
+.steps {
+    display: grid;
+    gap: 8px;
+}
+
+.steps-labels {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.steps-labels li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+}
+
+.steps-labels li.current,
+.steps-labels li.done {
+    color: var(--text);
+}
+
+.dot {
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--neutral-soft);
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-semibold);
+    transition: background 0.2s;
+}
+
+.current .dot {
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.done .dot {
+    background: var(--success);
+    color: var(--on-primary);
+}
+
+.steps-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+}
+
+.steps-bar span {
+    height: 4px;
+    border-radius: 999px;
+    background: var(--border);
+    transition: background 0.3s;
+}
+
+.steps-bar .on {
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+/* le contenu d'une étape arrive avec un léger glissement */
+.panel {
+    display: grid;
+    gap: 16px;
+    animation: slide 0.3s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.names {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: start;
+}
+
+/* prénom et nom : pas d'icône, le libellé commence à gauche */
+.float.no-icon .input {
+    padding-left: 16px;
+}
+
+.float.no-icon label {
+    left: 17px;
+}
+
+/* logo facultatif : une ligne, comme un réglage */
 .logo-pick {
     display: flex;
     align-items: center;
     gap: 12px;
+    padding: 12px;
+    border: 1px dashed var(--border);
+    border-radius: 12px;
 }
 
 .logo-preview {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 72px;
-    height: 72px;
+    width: 48px;
+    height: 48px;
     flex: none;
-    border: 1px dashed var(--border);
-    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    padding: 0;
     overflow: hidden;
+    border: 0;
+    border-radius: 12px;
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    cursor: pointer;
 }
 
 .logo-preview img {
@@ -27,10 +132,29 @@
     object-fit: contain;
 }
 
-.logo-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.logo-preview:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.logo-text {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+}
+
+.logo-text strong {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+}
+
+.logo-text small {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.logo-pick .btn-sm {
+    height: 36px;
 }
 
 .visually-hidden {
@@ -41,15 +165,36 @@
     clip: rect(0 0 0 0);
 }
 
-.trial {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 12px;
-    padding: 5px 12px;
-    border-radius: 999px;
-    background: var(--success-soft);
-    color: var(--success);
-    font-size: var(--fs-caption);
+.switch {
+    margin: 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.switch a {
     font-weight: var(--fw-semibold);
+    text-decoration: none;
+}
+
+.switch a:hover {
+    text-decoration: underline;
+}
+
+@keyframes slide {
+    from {
+        opacity: 0;
+        transform: translateX(12px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .panel {
+        animation: none;
+    }
+
+    .steps-bar span,
+    .dot {
+        transition: none;
+    }
 }

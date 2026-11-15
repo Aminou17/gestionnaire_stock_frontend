@@ -69,3 +69,18 @@ export const getActivityIcon = (action: string): IconName => {
     if (action.endsWith("SETTINGS_UPDATED") || action.startsWith("SHOP_")) return "settings";
     return "audit";
 };
+
+export type ActivityTone = "success" | "info" | "danger" | "violet" | "neutral";
+
+// la couleur dit la nature de l'action : création, modification, suppression, sécurité
+export const getActivityTone = (action: string, failed = false): ActivityTone => {
+    if (failed || action.endsWith("_DEACTIVATED") || action.endsWith("_REMOVED")) return "danger";
+    if (action === "SALE_CANCELLED" || action === "SALE_ITEM_RETURNED") return "danger";
+    if (action === "AUTH_LOGIN_SUCCEEDED") return "neutral";
+    if (action.startsWith("PASSWORD_") || action.startsWith("SHOP_ADMIN_")) return "violet";
+    if (action === "USER_PASSWORD_RESET") return "violet";
+    if (action.endsWith("_EXPORTED")) return "neutral";
+    if (action.endsWith("_CREATED") || action.endsWith("_RESTORED")) return "success";
+    if (action === "CASH_SESSION_OPENED" || action === "SALE_PAYMENT_ADDED") return "success";
+    return "info";
+};

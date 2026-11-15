@@ -29,33 +29,62 @@
             <h2>Votre boutique, sous contrôle.</h2>
             <p>Ventes, caisse et stock au même endroit, avec des alertes avant la rupture.</p>
 
-            <div class="preview" aria-hidden="true">
-                <div class="preview-top">
-                    <span>Ventes du jour</span>
-                    <span class="preview-chip">+12 %</span>
+            <div class="showcase" aria-hidden="true">
+                <div class="mini mini-sale">
+                    <span class="mini-icon ok"><app-icon name="check" [size]="14" /></span>
+                    <span class="mini-text">
+                        <strong>Vente encaissée</strong>
+                        <small>15 000 F · à l'instant</small>
+                    </span>
                 </div>
-                <strong>284 500 F</strong>
-                <svg viewBox="0 0 120 40" preserveAspectRatio="none">
-                    <polygon points="0,40 0,30 20,26 40,31 60,18 80,22 100,9 120,12 120,40" />
-                    <polyline points="0,30 20,26 40,31 60,18 80,22 100,9 120,12" />
-                </svg>
-            </div>
 
-            <ul>
-                <li>
-                    <span class="tile"><app-icon name="cart" [size]="16" /></span>
-                    Ventes et caisse suivies en temps réel
-                </li>
-                <li>
-                    <span class="tile"><app-icon name="alert" [size]="16" /></span>
-                    Alertes quand un produit passe sous son seuil
-                </li>
-                <li>
-                    <span class="tile"><app-icon name="clipboard" [size]="16" /></span>
-                    Inventaires et journal d'audit complets
-                </li>
-            </ul>
+                <div class="main-card">
+                    <div class="main-top">
+                        <span>Ventes de la semaine</span>
+                        <span class="chip-up">+12 %</span>
+                    </div>
+                    <strong class="main-figure">284 500 F</strong>
+                    <div class="bars">
+                        @for (height of bars; track $index) {
+                            <span
+                                class="bar"
+                                [class.last]="$last"
+                                [style.height.%]="height"
+                                [style.animation-delay.ms]="$index * 70"
+                            ></span>
+                        }
+                    </div>
+                    <div class="days">
+                        @for (day of days; track $index) {
+                            <span>{{ day }}</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="mini mini-alert">
+                    <span class="mini-icon warn"><app-icon name="alert" [size]="14" /></span>
+                    <span class="mini-text">
+                        <strong>Stock faible</strong>
+                        <small>Riz parfumé · 2 restants</small>
+                    </span>
+                </div>
+            </div>
         </div>
+
+        <dl class="figures">
+            <div>
+                <dt>30 jours</dt>
+                <dd>d'essai gratuit</dd>
+            </div>
+            <div>
+                <dt>2 minutes</dt>
+                <dd>pour démarrer</dd>
+            </div>
+            <div>
+                <dt>Sur téléphone</dt>
+                <dd>comme sur ordinateur</dd>
+            </div>
+        </dl>
 
         <footer>© {{ year }} {{ productName }} · {{ companyName }}</footer>
     </aside>
@@ -65,8 +94,8 @@
             <span class="hero-icon" aria-hidden="true">
                 <svg
                     viewBox="0 0 24 24"
-                    width="30"
-                    height="30"
+                    width="24"
+                    height="24"
                     fill="none"
                     stroke="currentColor"
                     stroke-width="2"
@@ -80,8 +109,10 @@
                     <path d="M12 22V12" />
                 </svg>
             </span>
-            <span class="hero-name">{{ productName }}</span>
-            <span class="hero-tag">Votre boutique, sous contrôle.</span>
+            <span class="hero-text">
+                <span class="hero-name">{{ productName }}</span>
+                <span class="hero-tag">Votre boutique, sous contrôle.</span>
+            </span>
         </div>
 
         <div class="card">

@@ -1,34 +1,39 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, inject, signal } from "@angular/core";
+import { Component, ElementRef, inject, signal } from "@angular/core";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { Icon } from "../../../shared/icon/icon";
 import { LogoResizerService } from "../../settings/logo-resizer.service";
+import { PasswordStrength } from "../password-strength/password-strength";
 
-type Field = "shopName" | "adminName" | "email" | "password";
+type Field = "shopName" | "firstName" | "lastName" | "email" | "password";
 
 @Component({
     selector: "app-register",
-    imports: [ReactiveFormsModule, RouterLink, Icon],
+    imports: [ReactiveFormsModule, RouterLink, Icon, PasswordStrength],
     templateUrl: "./register.html",
-    styleUrls: ["../login/login.css", "./register.css"],
+    styleUrls: ["../auth-form.css", "./register.css"],
 })
 export class Register {
     private auth = inject(AuthService);
     private router = inject(Router);
     private fb = inject(NonNullableFormBuilder);
     private resizer = inject(LogoResizerService);
+    private host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     // mêmes limites que l'API
     form = this.fb.group({
         shopName: ["", [Validators.required, Validators.maxLength(80)]],
-        adminName: ["", [Validators.required, Validators.maxLength(100)]],
+        firstName: ["", [Validators.required, Validators.maxLength(50)]],
+        lastName: ["", [Validators.required, Validators.maxLength(50)]],
         email: ["", [Validators.required, Validators.email]],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
     });
 
+    // 1 : la boutique, 2 : le compte de l'administrateur
+    step = signal<1 | 2>(1);
     loading = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
@@ -67,9 +72,38 @@ export class Register {
         return control.touched && control.invalid;
     }
 
-    submit() {
+    next() {
         // des espaces seuls passent Validators.required
-        for (const field of ["shopName", "adminName"] as const) {
+        const shopName = this.form.controls.shopName;
+        shopName.setValue(shopName.value.trim());
+
+        if (shopName.invalid) {
+            shopName.markAsTouched();
+            return;
+        }
+
+        this.error.set(null);
+        this.goTo(2, "#register-firstName");
+    }
+
+    back() {
+        this.error.set(null);
+        this.goTo(1, "#register-shopName");
+    }
+
+    // le champ n'existe qu'après l'affichage de l'étape
+    private goTo(step: 1 | 2, focus: string) {
+        this.step.set(step);
+        setTimeout(() => this.host.nativeElement.querySelector<HTMLInputElement>(focus)?.focus());
+    }
+
+    submit() {
+        if (this.step() === 1) {
+            this.next();
+            return;
+        }
+
+        for (const field of ["firstName", "lastName"] as const) {
             const control = this.form.controls[field];
             control.setValue(control.value.trim());
         }
@@ -82,7 +116,7 @@ export class Register {
         this.loading.set(true);
         this.error.set(null);
 
-        const { shopName, adminName, email, password } = this.form.getRawValue();
+        const { shopName, firstName, lastName, email, password } = this.form.getRawValue();
 
         const logo = this.logo();
 
@@ -90,7 +124,8 @@ export class Register {
         this.auth
             .register({
                 shopName,
-                adminName,
+                firstName,
+                lastName,
                 email: email.trim().toLowerCase(),
                 password,
                 ...(logo ? { logo } : {}),

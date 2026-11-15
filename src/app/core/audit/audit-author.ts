@@ -6,3 +6,7 @@ export const getAuditAuthor = (log: AuditLog) => {
     const email = log.details?.["attemptedEmail"];
     return typeof email === "string" && email ? email : "Inconnu";
 };
+
+// dans la phrase du journal, le prénom suffit ; le nom complet est dans le détail
+export const getAuditFirstName = (log: AuditLog) =>
+    log.user_name ? log.user_name.trim().split(/\s+/)[0] : getAuditAuthor(log);

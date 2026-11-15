@@ -25,7 +25,8 @@ describe("UserService", () => {
 
     it("should create a user with POST", () => {
         const input = {
-            name: "Moussa",
+            firstName: "Moussa",
+            lastName: "Traoré",
             email: "moussa@test.com",
             role: "manager" as const,
             password: "motdepasse",
@@ -39,7 +40,14 @@ describe("UserService", () => {
     });
 
     it("should update a user with PUT", () => {
-        service.updateUser(3, { name: "Moussa", email: "m@test.com", role: "admin" }).subscribe();
+        service
+            .updateUser(3, {
+                firstName: "Moussa",
+                lastName: "Traoré",
+                email: "m@test.com",
+                role: "admin",
+            })
+            .subscribe();
 
         const req = httpMock.expectOne("/api/users/3");
         expect(req.request.method).toBe("PUT");

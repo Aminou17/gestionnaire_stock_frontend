@@ -1,0 +1,270 @@
+/* Styles communs : connexion, inscription, mot de passe oublié et nouveau mot de passe */
+
+:host {
+    display: grid;
+    gap: 24px;
+    animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+form {
+    display: grid;
+    gap: 16px;
+}
+
+.heading h1 {
+    margin: 0 0 8px;
+    font-size: 26px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.heading p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-lead);
+    line-height: 1.5;
+}
+
+/* pastille d'état en haut des pages de mot de passe */
+.status {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.status.ok {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.status.warn {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+/* champ avec libellé qui monte quand on écrit (le placeholder est un espace) */
+.group {
+    display: grid;
+    gap: 6px;
+}
+
+.float {
+    position: relative;
+}
+
+.float > app-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.15s;
+}
+
+.float:focus-within > app-icon {
+    color: var(--primary);
+}
+
+.float .input {
+    height: 56px;
+    padding: 22px 16px 6px 46px;
+    border-radius: 12px;
+    font-size: var(--fs-lead);
+}
+
+.float .input:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.float .input.invalid:focus {
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 14%, transparent);
+}
+
+.float label {
+    position: absolute;
+    left: 47px;
+    top: 19px;
+    color: var(--text-muted);
+    font-size: var(--fs-lead);
+    line-height: 1.2;
+    pointer-events: none;
+    transition:
+        top 0.15s,
+        font-size 0.15s,
+        color 0.15s;
+}
+
+.float .input:focus + label,
+.float .input:not(:placeholder-shown) + label,
+.float .input:-webkit-autofill + label {
+    top: 9px;
+    font-size: var(--fs-caption);
+}
+
+.float .input:focus + label {
+    color: var(--primary-text);
+}
+
+.float .input.invalid + label {
+    color: var(--danger);
+}
+
+.float.has-toggle .input {
+    padding-right: 52px;
+}
+
+.toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.toggle:hover {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.toggle:focus-visible,
+.text-link:focus-visible,
+.forgot:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.field-error {
+    padding-left: 4px;
+    color: var(--danger);
+    font-size: var(--fs-small);
+}
+
+.hint {
+    padding-left: 4px;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.alert {
+    border-radius: 12px;
+    padding: 12px 16px;
+}
+
+/* boutons larges, plus hauts que les boutons de l'application */
+.btn.btn-block {
+    height: 52px;
+    border-radius: 12px;
+    font-size: var(--fs-lead);
+}
+
+.btn-primary.btn-block {
+    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 8px 20px rgba(37, 99, 235, 0.28);
+    transition:
+        transform 0.15s,
+        box-shadow 0.15s,
+        filter 0.15s;
+}
+
+.btn-primary.btn-block:hover:not(:disabled) {
+    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+    filter: brightness(1.06);
+    transform: translateY(-1px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 12px 24px rgba(37, 99, 235, 0.34);
+}
+
+.btn-primary.btn-block:active:not(:disabled) {
+    transform: none;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.text-link {
+    justify-self: center;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0 12px;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-body);
+    cursor: pointer;
+    font-weight: var(--fw-medium);
+    text-decoration: none;
+}
+
+.text-link:hover {
+    color: var(--text);
+}
+
+.forgot:hover {
+    text-decoration: underline;
+}
+
+.forgot {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+    text-decoration: none;
+}
+
+/* séparateur avec un mot au milieu */
+.or {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.or::before,
+.or::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :host {
+        animation: none;
+    }
+
+    .float > app-icon,
+    .float label,
+    .btn-primary.btn-block {
+        transition: none;
+    }
+}

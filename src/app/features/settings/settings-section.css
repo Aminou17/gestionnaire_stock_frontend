@@ -17,17 +17,25 @@
     display: flex;
     align-items: flex-start;
     gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
 }
 
+/* même pastille pleine à dégradé que la page Paramètres */
 .section-icon {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     border-radius: 10px;
-    background: var(--primary-soft);
-    color: var(--primary);
+    background: linear-gradient(
+        145deg,
+        var(--tone, #3b82f6),
+        color-mix(in srgb, var(--tone, #3b82f6) 70%, #000)
+    );
+    box-shadow: 0 3px 8px color-mix(in srgb, var(--tone, #3b82f6) 30%, transparent);
+    color: #fff;
 }
 
 .section-head h2 {
@@ -37,8 +45,8 @@
 }
 
 .section-head p {
-    margin: 4px 0 0;
-    font-size: var(--fs-body);
+    margin: 2px 0 0;
+    font-size: var(--fs-small);
     line-height: 1.5;
 }
 
@@ -60,6 +68,79 @@
     gap: 8px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
+}
+
+/* un ticket de caisse sur papier blanc, même en thème sombre */
+.ticket {
+    display: grid;
+    gap: 10px;
+    padding: 20px 18px 24px;
+    border-radius: 4px;
+    background: #fff;
+    color: #111;
+    font-family: "Courier New", monospace;
+    font-size: var(--fs-caption);
+    line-height: 1.4;
+    border: 1px solid var(--border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    overflow-wrap: anywhere;
+}
+
+.ticket-head,
+.ticket-foot {
+    display: grid;
+    justify-items: center;
+    gap: 2px;
+    text-align: center;
+}
+
+.ticket-head {
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #111;
+}
+
+.ticket-shop {
+    margin-bottom: 4px;
+    font-size: var(--fs-lead);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.ticket-gap {
+    margin-top: 6px;
+}
+
+.ticket-body p,
+.ticket-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0;
+}
+
+.ticket-body p {
+    padding-left: 12px;
+}
+
+.ticket-total {
+    padding-top: 8px;
+    border-top: 1px solid #111;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+}
+
+.ticket-foot {
+    padding-top: 10px;
+    border-top: 1px dashed #111;
+}
+
+.ticket-logo {
+    width: auto;
+    max-width: 160px;
+    height: auto;
+    max-height: 80px;
+    margin-bottom: 4px;
+    object-fit: contain;
 }
 
 @media (max-width: 767px) {

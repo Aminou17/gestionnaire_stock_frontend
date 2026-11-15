@@ -58,4 +58,23 @@ describe("AuditLogService", () => {
         expect(req.request.params.keys().sort()).toEqual(["limit", "page"]);
         req.flush({ data: [], pagination: { page: 1, limit: 25, total: 0, totalPages: 0 } });
     });
+
+    it("should send the search text", () => {
+        service
+            .getLogs({
+                from: null,
+                to: null,
+                userId: null,
+                action: null,
+                result: null,
+                search: "bazin",
+                page: 1,
+                limit: 25,
+            })
+            .subscribe();
+
+        const req = http.expectOne((r) => r.url === "/api/audit-logs");
+        expect(req.request.params.get("search")).toBe("bazin");
+        req.flush({ data: [], pagination: { page: 1, limit: 25, total: 0, totalPages: 0 } });
+    });
 });

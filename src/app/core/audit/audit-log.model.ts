@@ -25,6 +25,7 @@ export interface AuditLogFilters {
     action: string | null;
     result: "FAILURE" | null;
     category?: AuditCategory | null;
+    search?: string | null;
     page: number;
     limit: number;
 }

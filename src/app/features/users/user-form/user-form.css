@@ -24,6 +24,19 @@
     font-size: var(--fs-heading);
 }
 
+/* prénom et nom côte à côte, l'un sous l'autre sur un petit écran */
+.names {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 479px) {
+    .names {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* rôle : deux cartes à cocher, avec ce que chaque rôle permet */
 .roles {
     display: grid;

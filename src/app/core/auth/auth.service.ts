@@ -11,7 +11,10 @@ export type UserRole = "owner" | "admin" | "manager";
 
 export interface User {
     id: number;
+    // nom complet : prénom, espace, nom
     name: string;
+    firstName?: string;
+    lastName?: string;
     email: string;
     role: UserRole;
     avatar?: string | null;
@@ -27,7 +30,8 @@ interface LoginResponse {
 
 export interface RegisterData {
     shopName: string;
-    adminName: string;
+    firstName: string;
+    lastName: string;
     email: string;
     password: string;
     logo?: string;
@@ -118,8 +122,8 @@ export class AuthService {
         );
     }
 
-    updateProfile(name: string, email: string) {
-        return this.http.put<User>(`${API_URL}/auth/me`, { name, email }).pipe(
+    updateProfile(firstName: string, lastName: string, email: string) {
+        return this.http.put<User>(`${API_URL}/auth/me`, { firstName, lastName, email }).pipe(
             tap((user) => {
                 // la réponse ne renvoie pas la photo : on garde celle qu'on a
                 this.saveUser({ ...user, avatar: this._user()?.avatar });

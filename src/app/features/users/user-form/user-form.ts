@@ -30,7 +30,7 @@ export class UserForm {
     private destroyRef = inject(DestroyRef);
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
-    private nameInput = viewChild.required<ElementRef<HTMLInputElement>>("nameInput");
+    private firstNameInput = viewChild.required<ElementRef<HTMLInputElement>>("firstNameInput");
 
     saved = output<UserAccount>();
 
@@ -55,9 +55,10 @@ export class UserForm {
         },
     ];
 
-    // mêmes limites que le backend (VARCHAR(100), mot de passe de 8 caractères au moins)
+    // mêmes limites que le backend (50 pour le prénom et le nom, 100 pour l'email, mot de passe de 8 caractères au moins)
     form = inject(NonNullableFormBuilder).group({
-        name: ["", [Validators.required, Validators.maxLength(100)]],
+        firstName: ["", [Validators.required, Validators.maxLength(50)]],
+        lastName: ["", Validators.maxLength(50)],
         email: ["", [Validators.required, Validators.email, Validators.maxLength(100)]],
         role: ["manager" as UserRole, Validators.required],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
@@ -76,7 +77,8 @@ export class UserForm {
         this.formError.set(null);
         this.showPassword.set(false);
         this.form.reset({
-            name: user?.name ?? "",
+            firstName: user?.first_name ?? "",
+            lastName: user?.last_name ?? "",
             email: user?.email ?? "",
             role: user?.role ?? "manager",
             password: user ? "" : generatePassword(),
@@ -92,7 +94,7 @@ export class UserForm {
         else this.form.controls.role.enable();
 
         this.dialog().nativeElement.showModal();
-        this.nameInput().nativeElement.focus();
+        this.firstNameInput().nativeElement.focus();
     }
 
     close() {
@@ -119,7 +121,7 @@ export class UserForm {
         this.showPassword.set(true);
     }
 
-    invalid(field: "name" | "email" | "password") {
+    invalid(field: "firstName" | "email" | "password") {
         const control = this.form.controls[field];
         return control.touched && control.invalid;
     }
@@ -128,7 +130,11 @@ export class UserForm {
         if (this.saving()) return;
 
         const value = this.form.getRawValue();
-        this.form.patchValue({ name: value.name.trim(), email: value.email.trim().toLowerCase() });
+        this.form.patchValue({
+            firstName: value.firstName.trim(),
+            lastName: value.lastName.trim(),
+            email: value.email.trim().toLowerCase(),
+        });
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;
@@ -136,14 +142,16 @@ export class UserForm {
 
         const editing = this.editing();
         const input: UserInput = {
-            name: value.name.trim(),
+            firstName: value.firstName.trim(),
+            lastName: value.lastName.trim(),
             email: value.email.trim().toLowerCase(),
             role: value.role,
         };
 
         if (
             editing &&
-            editing.name === input.name &&
+            editing.first_name === input.firstName &&
+            editing.last_name === input.lastName &&
             editing.email === input.email &&
             editing.role === input.role
         ) {
