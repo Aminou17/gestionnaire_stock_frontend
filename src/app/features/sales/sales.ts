@@ -1,4 +1,4 @@
-import { DatePipe } from "@angular/common";
+import { DatePipe, formatDate } from "@angular/common";
 import {
     Component,
     ElementRef,
@@ -275,6 +275,32 @@ export class Sales {
     // reste à payer sur une vente validée avec acompte
     due(sale: Sale) {
         return sale.status === "ACTIVE" ? sale.total - sale.paid_amount : 0;
+    }
+
+    // seul l'admin, et seulement s'il y a plusieurs vendeurs, a besoin de voir qui a vendu
+    private severalSellers = computed(
+        () => new Set(this.list().map((sale) => sale.user_id)).size > 1,
+    );
+
+    iconName(sale: Sale) {
+        if (sale.status === "CANCELLED") return "undo";
+        return sale.payment_method === "MOBILE_MONEY" ? "phone" : "banknote";
+    }
+
+    tone(sale: Sale) {
+        if (sale.status === "CANCELLED") return "danger";
+        return this.due(sale) > 0 ? "warning" : "success";
+    }
+
+    // heure, client (ou vendeur), nombre d'articles
+    subtitle(sale: Sale) {
+        const parts = [formatDate(sale.created_at, "HH:mm", this.locale)];
+        const who =
+            sale.customer_name ||
+            (this.auth.isAdmin() && this.severalSellers() ? sale.user_name : null);
+        if (who) parts.push(who);
+        parts.push(`${sale.items_count} article${sale.items_count > 1 ? "s" : ""}`);
+        return parts.join(" · ");
     }
 
     isToday(date: string) {

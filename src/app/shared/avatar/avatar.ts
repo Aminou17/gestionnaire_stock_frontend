@@ -1,10 +1,10 @@
-import { Component, input } from "@angular/core";
+import { Component, computed, input, signal } from "@angular/core";
 
 // Photo de profil, ou la silhouette par défaut quand la personne n'en a pas.
 // La taille vient du CSS de l'endroit où on l'utilise.
 @Component({
     selector: "app-avatar",
-    template: `<img [src]="photo() || defaultPhoto" alt="" />`,
+    template: `<img [src]="src()" alt="" (error)="failedPhoto.set(photo())" />`,
     styles: `
         :host {
             display: inline-block;
@@ -24,5 +24,11 @@ import { Component, input } from "@angular/core";
 export class Avatar {
     photo = input<string | null | undefined>(null);
 
-    protected defaultPhoto = "/avatar-default.png";
+    // photo illisible : on retombe sur la silhouette
+    protected failedPhoto = signal<string | null | undefined>(undefined);
+
+    protected src = computed(() => {
+        const photo = this.photo();
+        return photo && photo !== this.failedPhoto() ? photo : "/avatar-default.png";
+    });
 }

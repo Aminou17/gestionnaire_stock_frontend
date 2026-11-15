@@ -144,10 +144,6 @@ td .badge + .badge {
         height: 44px;
     }
 
-    .session-card {
-        min-height: 56px;
-    }
-
     .list-card {
         background: transparent;
         border: 0;
@@ -166,38 +162,79 @@ td .badge + .badge {
     }
 
     .session-card {
-        display: grid;
-        gap: 4px;
-        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 84px;
+        padding: 14px 16px;
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
         cursor: pointer;
     }
 
-    .line {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
+    .session-card:active {
+        background: var(--surface-hover);
+    }
+
+    .session-icon {
+        display: grid;
+        place-items: center;
+        flex: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+    }
+
+    .session-icon.success {
+        background: var(--success-soft);
+        color: var(--success);
+    }
+
+    .session-icon.warning {
+        background: var(--warning-soft);
+        color: var(--warning);
+    }
+
+    .session-icon.danger {
+        background: var(--danger-soft);
+        color: var(--danger);
+    }
+
+    .session-icon.primary {
+        background: var(--primary-soft);
+        color: var(--primary-text);
+    }
+
+    .session-main {
+        display: grid;
+        flex: 1;
+        gap: 2px;
         min-width: 0;
     }
 
-    .session-card .line:first-child {
-        flex-wrap: wrap;
-    }
-
     .session-card .session-link {
-        margin-right: auto;
         font-size: var(--fs-lead);
     }
 
-    .meta {
+    .session-sub {
+        margin: 0;
+        overflow: hidden;
+        color: var(--text-muted);
         font-size: var(--fs-small);
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
-    .gap {
-        font-size: var(--fs-body);
+    .session-end {
+        display: grid;
+        flex: none;
+        justify-items: end;
+        gap: 6px;
+    }
+
+    .session-amount {
+        font-size: var(--fs-heading);
         font-variant-numeric: tabular-nums;
     }
 }
@@ -205,4 +242,11 @@ td .badge + .badge {
 .chip:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+/* très petit écran : sans pastille d'icône, la date tient sur une ligne */
+@media (max-width: 359px) {
+    .session-icon {
+        display: none;
+    }
 }

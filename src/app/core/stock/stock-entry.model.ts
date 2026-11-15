@@ -2,6 +2,8 @@ export interface StockEntry {
     id: number;
     product_id: number;
     product_name: string;
+    // miniature en data URL, null sans photo
+    image?: string | null;
     supplier_id: number;
     supplier_name: string;
     user_id: number;

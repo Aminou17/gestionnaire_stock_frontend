@@ -294,63 +294,30 @@
                                 [class.cancelled]="sale.status === 'CANCELLED'"
                                 (click)="openSale(sale)"
                             >
+                                <span class="sale-icon" [class]="tone(sale)">
+                                    <app-icon [name]="iconName(sale)" [size]="18" />
+                                </span>
                                 <div class="sale-main">
-                                    <div class="sale-top">
-                                        <a
-                                            [routerLink]="['/sales', sale.id]"
-                                            class="sale-link"
-                                            (click)="$event.stopPropagation()"
-                                            >Vente #{{ sale.number }}</a
+                                    <a
+                                        [routerLink]="['/sales', sale.id]"
+                                        class="sale-link"
+                                        (click)="$event.stopPropagation()"
+                                        >Vente #{{ sale.number }}</a
+                                    >
+                                    <p class="sale-sub">{{ subtitle(sale) }}</p>
+                                </div>
+                                <div class="sale-end">
+                                    <strong class="amount">{{ sale.total | fcfa }}</strong>
+                                    @if (sale.status === "CANCELLED") {
+                                        <span class="badge badge-danger">Remboursée</span>
+                                    } @else if (due(sale) > 0) {
+                                        <span class="badge badge-warning"
+                                            >Reste {{ due(sale) | fcfa }}</span
                                         >
-                                        @if (sale.status === "CANCELLED") {
-                                            <span class="badge badge-danger">Remboursée</span>
-                                        } @else if (due(sale) > 0) {
-                                            <span class="badge badge-warning"
-                                                >Reste {{ due(sale) | fcfa }}</span
-                                            >
-                                        }
-                                    </div>
-                                    <p class="sale-sub">
-                                        {{ sale.created_at | date: "HH:mm" }} ·
-                                        {{ sale.items_count }} article{{
-                                            sale.items_count > 1 ? "s" : ""
-                                        }}
-                                        @if (paymentLabel(sale.payment_method); as method) {
-                                            · {{ method }}
-                                        }
-                                    </p>
-                                    @if ((auth.isAdmin() && sale.user_name) || sale.customer_name) {
-                                        <p class="sale-who">
-                                            @if (auth.isAdmin() && sale.user_name) {
-                                                {{ sale.user_name }}
-                                            }
-                                            @if (
-                                                auth.isAdmin() &&
-                                                sale.user_name &&
-                                                sale.customer_name
-                                            ) {
-                                                ·
-                                            }
-                                            @if (sale.customer_name) {
-                                                Client :
-                                                @if (sale.customer_id) {
-                                                    <a
-                                                        class="customer-link"
-                                                        [routerLink]="[
-                                                            '/customers',
-                                                            sale.customer_id,
-                                                        ]"
-                                                        (click)="$event.stopPropagation()"
-                                                        >{{ sale.customer_name }}</a
-                                                    >
-                                                } @else {
-                                                    {{ sale.customer_name }}
-                                                }
-                                            }
-                                        </p>
+                                    } @else {
+                                        <span class="badge badge-success">Payée</span>
                                     }
                                 </div>
-                                <strong class="amount">{{ sale.total | fcfa }}</strong>
                             </li>
                         }
                     </ul>

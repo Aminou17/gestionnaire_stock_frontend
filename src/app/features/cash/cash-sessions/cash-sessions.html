@@ -109,36 +109,30 @@
         <ul class="cards">
             @for (session of list(); track session.id) {
                 <li class="session-card" (click)="openSession(session)">
-                    <div class="line">
+                    <span class="session-icon" [class]="state(session).tone">
+                        <app-icon name="wallet" [size]="18" />
+                    </span>
+                    <div class="session-main">
                         <a
                             [routerLink]="['/cash/sessions', session.id]"
                             class="session-link"
                             (click)="$event.stopPropagation()"
-                            >{{ session.session_date | date: "EEE d MMM y" }}</a
+                            >{{ session.session_date | date: "EEEE d MMMM" }}</a
                         >
-                        @if (session.status === "OPEN") {
-                            <span class="badge badge-success">Ouverte</span>
-                        } @else {
-                            <span class="badge badge-neutral">Clôturée</span>
-                        }
-                        @if (session.explanation_pending) {
-                            <span class="badge badge-warning">Écart à expliquer</span>
+                        <p class="session-sub">{{ hours(session) }}</p>
+                        @if (session.opening_amount !== null) {
+                            <p class="session-sub">Ouverture {{ session.opening_amount | fcfa }}</p>
                         }
                     </div>
-                    <div class="line">
-                        <span class="meta muted"
-                            >{{ session.opened_by_name ?? "—" }} · Départ
-                            {{ session.opening_amount | fcfa }}</span
-                        >
-                        @if (session.difference !== null) {
-                            <strong
-                                class="gap"
-                                [class.in]="session.difference > 0"
-                                [class.out]="session.difference < 0"
-                            >
-                                Écart {{ session.difference | fcfa: true }}
-                            </strong>
+                    <div class="session-end">
+                        @if (session.actual_amount !== null) {
+                            <strong class="session-amount">{{
+                                session.actual_amount | fcfa
+                            }}</strong>
                         }
+                        <span class="badge badge-{{ state(session).tone }}">{{
+                            state(session).label
+                        }}</span>
                     </div>
                 </li>
             }
