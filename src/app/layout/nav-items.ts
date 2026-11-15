@@ -22,6 +22,7 @@ export const SECTIONS: NavSection[] = [
         items: [
             { label: "Tableau de bord", path: "/dashboard", icon: "dashboard" },
             { label: "Ventes", path: "/sales", icon: "cart" },
+            { label: "Clients", path: "/customers", icon: "user" },
             { label: "Caisse", path: "/cash", icon: "banknote" },
             { label: "Produits", path: "/products", icon: "package" },
             {
@@ -31,9 +32,10 @@ export const SECTIONS: NavSection[] = [
                     { label: "Mouvements", path: "/stock-movements", icon: "movements" },
                     {
                         label: "Ajuster le stock",
-                        path: "/stock-movements",
+                        path: "/products",
                         queryParams: { adjust: "1" },
                         icon: "edit",
+                        exact: true,
                         adminOnly: true,
                     },
                     {

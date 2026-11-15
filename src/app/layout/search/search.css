@@ -37,7 +37,7 @@ input {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 kbd {
@@ -45,7 +45,7 @@ kbd {
     border: 1px solid var(--border);
     border-radius: 6px;
     font: inherit;
-    font-size: 11px;
+    font-size: var(--fs-micro);
 }
 
 ul {
@@ -64,7 +64,7 @@ li {
     padding: 0 12px;
     border-radius: 8px;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-body);
     cursor: pointer;
 }
 
@@ -83,7 +83,7 @@ li.active {
 
 small {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: var(--fs-caption);
     white-space: nowrap;
 }
 
@@ -92,7 +92,7 @@ small {
     padding: 24px 16px;
     color: var(--text-muted);
     text-align: center;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 @media (max-width: 767px) {

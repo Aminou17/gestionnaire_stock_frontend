@@ -1,33 +1,30 @@
 <aside class="sidebar" [class.open]="layout.sidebarOpen()" [class.collapsed]="layout.collapsed()">
     <div class="brand">
-        @if (shop.shopLogo(); as logo) {
-            <img class="brand-logo" [src]="logo" alt="" width="36" height="36" />
-        } @else {
-            <span class="brand-icon"><app-icon name="box" [size]="20" /></span>
-        }
-        <div class="brand-text">
-            <div class="brand-name" [attr.title]="shop.shopName() || null">
-                {{ shop.shopName() || productName }}
-            </div>
-            <!-- avec le nom de la boutique, pas de sous-titre : il serait coupé sur téléphone -->
-            @if (!shop.shopName()) {
-                <div class="brand-sub">par {{ companyName }}</div>
+        <a
+            class="brand-link"
+            [routerLink]="auth.isAdmin() ? '/settings/shop' : '/dashboard'"
+            [attr.aria-label]="auth.isAdmin() ? 'Paramètres de la boutique' : 'Tableau de bord'"
+            (click)="close()"
+        >
+            @if (shop.shopLogo(); as logo) {
+                <img class="brand-logo" [src]="logo" alt="" width="36" height="36" />
+            } @else {
+                <span class="brand-icon"><app-icon name="box" [size]="20" /></span>
             }
-        </div>
+            <div class="brand-text">
+                <div class="brand-name" [attr.title]="shop.shopName() || null">
+                    {{ shop.shopName() || productName }}
+                </div>
+                <!-- avec le nom de la boutique, pas de sous-titre : il serait coupé sur téléphone -->
+                @if (!shop.shopName()) {
+                    <div class="brand-sub">par {{ companyName }}</div>
+                }
+            </div>
+        </a>
         <button type="button" class="close" (click)="close()" aria-label="Fermer le menu">
             <app-icon name="close" />
         </button>
     </div>
-
-    <a
-        class="new-sale"
-        routerLink="/sales/new"
-        [attr.title]="layout.collapsed() ? 'Nouvelle vente' : null"
-        (click)="close()"
-    >
-        <app-icon name="plus" [size]="18" />
-        <span class="label">Nouvelle vente</span>
-    </a>
 
     <button
         type="button"
@@ -47,61 +44,20 @@
                 <p class="section-title">{{ section.title }}</p>
             }
             @for (item of section.items; track item.label) {
-                @if (item.children) {
-                    <button
-                        type="button"
-                        class="group"
-                        (click)="toggleGroup(item.label)"
-                        [attr.aria-expanded]="openGroups().includes(item.label)"
-                    >
-                        <app-icon [name]="item.icon" />
-                        <span class="label">{{ item.label }}</span>
-                        @if (
-                            hasAlerts(item) &&
-                            !openGroups().includes(item.label) &&
-                            alerts.count() > 0
-                        ) {
-                            <span class="count">{{ alerts.count() }}</span>
-                        }
-                        <app-icon
-                            class="arrow"
-                            [class.turned]="openGroups().includes(item.label)"
-                            name="chevron-down"
-                            [size]="16"
-                        />
-                    </button>
-                    <div class="children" [class.shown]="openGroups().includes(item.label)">
-                        @for (child of item.children; track child.label) {
-                            <a
-                                [routerLink]="child.path"
-                                [queryParams]="child.queryParams"
-                                routerLinkActive="active"
-                                [routerLinkActiveOptions]="{ exact: !!child.exact }"
-                                [attr.title]="layout.collapsed() ? child.label : null"
-                                (click)="close()"
-                            >
-                                <app-icon [name]="child.icon" />
-                                <span class="label">{{ child.label }}</span>
-                                @if (child.path === "/alerts" && alerts.count() > 0) {
-                                    <span class="count">{{ alerts.count() }}</span>
-                                }
-                            </a>
-                        }
-                    </div>
-                } @else {
-                    <a
-                        [routerLink]="item.path"
-                        routerLinkActive="active"
-                        [attr.title]="layout.collapsed() ? item.label : null"
-                        (click)="close()"
-                    >
-                        <app-icon [name]="item.icon" />
-                        <span class="label">{{ item.label }}</span>
-                        @if (item.path === "/alerts" && alerts.count() > 0) {
-                            <span class="count">{{ alerts.count() }}</span>
-                        }
-                    </a>
-                }
+                <a
+                    [routerLink]="item.path"
+                    [queryParams]="item.queryParams"
+                    routerLinkActive="active"
+                    [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                    [attr.title]="layout.collapsed() ? item.label : null"
+                    (click)="close()"
+                >
+                    <app-icon [name]="item.icon" />
+                    <span class="label">{{ item.label }}</span>
+                    @if (item.path === "/alerts" && alerts.count() > 0) {
+                        <span class="count">{{ alerts.count() }}</span>
+                    }
+                </a>
             }
         }
     </nav>
@@ -138,7 +94,12 @@
                         Mode sombre
                         <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
                     </button>
-                    <button type="button" class="logout" role="menuitem" (click)="auth.logout()">
+                    <button
+                        type="button"
+                        class="logout"
+                        role="menuitem"
+                        (click)="profileOpen.set(false); auth.logoutAsked.set(true)"
+                    >
                         <app-icon name="logout" [size]="16" />
                         Se déconnecter
                     </button>

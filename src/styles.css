@@ -76,6 +76,31 @@
 
     --radius: 12px;
     --bottom-nav-height: 64px;
+
+    /* Échelle typographique (modèle : Tableau de bord) */
+    --fs-title: 28px;
+    --fs-kpi: 28px;
+    --fs-figure: 22px;
+    --fs-heading: 17px;
+    --fs-lead: 16px;
+    --fs-body: 14px;
+    --fs-small: 13px;
+    --fs-caption: 12px;
+    --fs-micro: 11px;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    --lh-body: 1.4;
+    --ls-title: -0.02em;
+}
+
+/* Sur téléphone, titres et gros chiffres rétrécissent comme sur le Tableau de bord */
+@media (max-width: 767px) {
+    :root {
+        --fs-title: 18px;
+        --fs-kpi: 24px;
+    }
 }
 
 /* Thème sombre : seulement si l'utilisateur l'active */
@@ -160,6 +185,8 @@ body {
         sans-serif;
     background: var(--bg);
     color: var(--text);
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
     -webkit-font-smoothing: antialiased;
 }
 
@@ -176,7 +203,16 @@ textarea {
 }
 
 a {
-    color: var(--primary);
+    color: var(--primary-text);
+}
+
+/* 16 px minimum dans les champs sur téléphone, sinon iOS zoome au focus */
+@media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
 }
 
 .field {
@@ -186,8 +222,8 @@ a {
 
 .field > span,
 .field > label {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
 }
 
 .input {
@@ -198,6 +234,7 @@ a {
     border-radius: 8px;
     background: var(--surface);
     color: var(--text);
+    font-size: var(--fs-body);
     outline: none;
     transition:
         border-color 0.15s,
@@ -215,14 +252,14 @@ a {
 
 .field-error {
     color: var(--danger);
-    font-size: 12px;
+    font-size: var(--fs-caption);
 }
 
 .alert {
     border-radius: 8px;
     padding: 10px 12px;
-    font-size: 14px;
-    line-height: 1.4;
+    font-size: var(--fs-body);
+    line-height: var(--lh-body);
 }
 
 .alert-error {
@@ -248,7 +285,8 @@ a {
     padding: 0 18px;
     border: 1px solid transparent;
     border-radius: 8px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -302,7 +340,7 @@ a {
 .btn-sm {
     height: 34px;
     padding: 0 12px;
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .btn-block {
@@ -340,14 +378,14 @@ a {
 
 .card-header h2 {
     margin: 0;
-    font-size: 17px;
-    font-weight: 600;
+    font-size: var(--fs-heading);
+    font-weight: var(--fw-semibold);
     letter-spacing: -0.01em;
 }
 
 .card-header a {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
     text-decoration: none;
 }
 
@@ -361,8 +399,8 @@ a {
     height: 22px;
     padding: 0 9px;
     border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     white-space: nowrap;
 }
 
@@ -416,7 +454,7 @@ a {
 .empty {
     padding: 24px 0;
     text-align: center;
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
@@ -437,15 +475,15 @@ a {
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     white-space: nowrap;
     cursor: pointer;
 }
 
 .tab span {
     margin-left: 4px;
-    font-weight: 400;
+    font-weight: var(--fw-regular);
 }
 
 .tab:hover {
@@ -483,16 +521,16 @@ a {
         border: 1px solid var(--border);
         border-radius: var(--radius);
         background: var(--surface);
-        font-size: 13px;
-        font-weight: 500;
+        font-size: var(--fs-small);
+        font-weight: var(--fw-medium);
     }
 
     .tiles .tab span {
         order: -1;
         margin: 0;
         color: var(--text);
-        font-size: 22px;
-        font-weight: 700;
+        font-size: var(--fs-figure);
+        font-weight: var(--fw-bold);
         line-height: 1.1;
         font-variant-numeric: tabular-nums;
     }
@@ -558,8 +596,8 @@ a {
     border-radius: 999px;
     background-color: var(--surface);
     color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
     white-space: nowrap;
     cursor: pointer;
 }
@@ -605,4 +643,27 @@ select.chip {
     .chip {
         height: 44px;
     }
+}
+
+/* montants masquables d'un clic (directive appMoney) */
+.money {
+    position: relative;
+}
+
+.money-zone {
+    cursor: pointer;
+}
+
+.money-hidden {
+    color: transparent !important;
+    user-select: none;
+}
+
+.money-hidden::after {
+    content: "••••••";
+    position: absolute;
+    inset: 0;
+    color: var(--text-muted);
+    text-align: inherit;
+    letter-spacing: 1px;
 }
