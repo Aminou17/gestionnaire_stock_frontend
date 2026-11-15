@@ -124,9 +124,7 @@
                         >
                     }
                     <div class="summary-meta">
-                        <span class="when">{{
-                            sale.created_at | date: "EEEE d MMMM y 'à' HH:mm"
-                        }}</span>
+                        <span class="when">{{ sale.created_at | date: "EEE d MMM y, HH:mm" }}</span>
                         <span class="customer">
                             <app-icon name="user" [size]="14" />
                             @if (sale.customer_name || sale.customer_phone) {
@@ -291,7 +289,14 @@
             <section class="card sheet">
                 <h2 class="section-title">
                     Produits vendus
-                    <span class="muted">({{ itemsCount() }})</span>
+                    <span class="muted"
+                        >({{ sale.items.length }}
+                        {{ sale.items.length > 1 ? "produits" : "produit" }}
+                        @if (itemsCount() !== sale.items.length) {
+                            · {{ itemsCount() }} pièces
+                        }
+                        )</span
+                    >
                 </h2>
                 <ul class="items">
                     @for (item of sale.items; track item.id) {
@@ -309,10 +314,14 @@
                                             {{ item.quantity }} × {{ item.unit_price | fcfa }}
                                         }
                                         @if (item.discount_amount > 0) {
+                                            {{ item.quantity > 1 ? "·" : "" }}
+                                            au lieu de {{ item.reference_price | fcfa }}
+                                            ·
                                             <span class="discount"
-                                                >{{ item.quantity > 1 ? "· " : "" }}remise de
-                                                {{ item.discount_amount | fcfa }} sur
-                                                {{ item.reference_price | fcfa }}</span
+                                                >remise
+                                                {{
+                                                    item.quantity * item.discount_amount | fcfa
+                                                }}</span
                                             >
                                         }
                                     </small>
@@ -341,6 +350,10 @@
                             <dd class="discount">−{{ discounts() | fcfa }}</dd>
                         </div>
                     </dl>
+                    <div class="total">
+                        <span>Total</span>
+                        <strong>{{ sale.total | fcfa }}</strong>
+                    </div>
                 }
             </section>
 
@@ -387,6 +400,22 @@
                     </div>
                 }
 
+                @if (showPayments() && sale.status === "ACTIVE") {
+                    <div
+                        class="progress"
+                        role="progressbar"
+                        aria-label="Part déjà payée"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        [attr.aria-valuenow]="paidPercent()"
+                    >
+                        <span [style.width.%]="paidPercent()"></span>
+                    </div>
+                    <p class="progress-text">
+                        <strong>{{ paidPercent() }} % payé</strong>
+                    </p>
+                }
+
                 <dl class="payment">
                     @if (showPayments()) {
                         @for (payment of sale.payments; track payment.id) {
@@ -411,9 +440,13 @@
                                 <dd>{{ payment.amount | fcfa }}</dd>
                             </div>
                         }
+                        <div class="paid-total">
+                            <dt>Payé</dt>
+                            <dd>{{ sale.paid_amount | fcfa }}</dd>
+                        </div>
                         @if (due() > 0) {
                             <div class="due">
-                                <dt>Reste à payer</dt>
+                                <dt>Reste à payer sur {{ sale.total | fcfa }}</dt>
                                 <dd>{{ due() | fcfa }}</dd>
                             </div>
                         }
@@ -678,6 +711,13 @@
                 (input)="payAmount.set(readNumber(payAmountInput))"
             />
         </label>
+        <div class="quick-amounts" aria-label="Montants rapides">
+            @for (share of [0.25, 0.5, 1]; track share) {
+                <button type="button" class="chip" (click)="payShare(share)">
+                    {{ share === 1 ? "Solde" : share * 100 + " %" }}
+                </button>
+            }
+        </div>
 
         @if (payMethod() === "CASH") {
             <label class="field">

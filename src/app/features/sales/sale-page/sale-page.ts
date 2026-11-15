@@ -326,6 +326,16 @@ export class SalePage {
         }
     }
 
+    // part du total déjà encaissée, pour la barre de progression
+    paidPercent = computed(() => {
+        const sale = this.data();
+        return sale && sale.total > 0 ? Math.floor((sale.paid_amount / sale.total) * 100) : 0;
+    });
+    // remplit le montant avec une part du reste à payer
+    payShare(share: number) {
+        this.payAmount.set(Math.max(1, Math.round(this.due() * share)));
+    }
+
     // reste à payer d'une vente validée (acompte)
     due = computed(() => {
         const sale = this.data();
