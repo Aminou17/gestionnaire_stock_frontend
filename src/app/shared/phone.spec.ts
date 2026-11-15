@@ -1,4 +1,5 @@
 import {
+    formatInternational,
     formatPhone,
     groupNational,
     normalizePhone,
@@ -88,5 +89,12 @@ describe("international format", () => {
         expect(phoneKey("66 09 90 60", "226")).toBe(phoneKey("+226 66 09 90 60", "226"));
         expect(phoneKey("+242 66 09 90 60", "226")).not.toBe(phoneKey("66 09 90 60", "226"));
         expect(phoneKey("", "226")).toBe("");
+    });
+});
+
+describe("formatInternational", () => {
+    it("should always show the country code", () => {
+        expect(formatInternational("66099060", "226")).toBe("+226 66 09 90 60");
+        expect(formatInternational("+242 06 123 45 67", "226")).toBe("+242 06 123 45 67");
     });
 });

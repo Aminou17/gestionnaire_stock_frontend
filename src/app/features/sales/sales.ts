@@ -21,22 +21,27 @@ import { ExportService } from "../settings/settings-export/export.service";
 import { UserService } from "../users/user.service";
 import { groupByDay } from "../../shared/day-label";
 import { PageHeader } from "../../layout/page-header/page-header";
-import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
+import { Period, PeriodRange, validateRange } from "../../shared/period-filter/period-filter";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { ExportFormat } from "../../core/export-format";
 import { ExportMenu } from "../../shared/export-menu/export-menu";
+import { Avatar } from "../../shared/avatar/avatar";
 import { Icon } from "../../shared/icon/icon";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { MoneyToggle } from "../../shared/money/money-toggle";
 
 const PAGE_SIZE = 20;
 
-const PERIOD_LABELS: Record<Exclude<PeriodRange["period"], "all">, string> = {
-    today: "Aujourd'hui",
-    week: "7 derniers jours",
-    month: "30 derniers jours",
-    custom: "Dates choisies",
-};
+// choix de période de la fenêtre Filtre
+const PERIOD_CHOICES: { value: Period; label: string }[] = [
+    { value: "all", label: "Toutes" },
+    { value: "today", label: "Aujourd'hui" },
+    { value: "week", label: "7 jours" },
+    { value: "month", label: "Ce mois" },
+    { value: "custom", label: "Personnalisée" },
+];
+
+type FilterKey = "period" | "payment" | "seller";
 
 type LoadedPage = SalePage & { page: number };
 
@@ -47,7 +52,7 @@ type LoadedPage = SalePage & { page: number };
         RouterLink,
         DatePipe,
         PageHeader,
-        PeriodFilter,
+        Avatar,
         ExportMenu,
         Icon,
         FcfaPipe,
@@ -55,6 +60,7 @@ type LoadedPage = SalePage & { page: number };
     ],
     templateUrl: "./sales.html",
     styleUrl: "./sales.css",
+    host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
 })
 export class Sales {
     private locale = inject(LOCALE_ID);
@@ -179,11 +185,6 @@ export class Sales {
         return value === "UNPAID" ? this.unpaid() : !this.unpaid() && this.status() === value;
     }
 
-    selectRange(range: PeriodRange) {
-        this.range.set(range);
-        this.page.set(1);
-    }
-
     // la recherche part 300 ms après la dernière frappe
     private searchTimer?: ReturnType<typeof setTimeout>;
 
@@ -195,25 +196,33 @@ export class Sales {
         }, 300);
     }
 
-    selectPayment(value: string) {
-        this.paymentMethod.set(value === "CASH" || value === "MOBILE_MONEY" ? value : null);
+    selectPayment(value: PaymentMethod | null) {
+        this.paymentMethod.set(value);
         this.page.set(1);
     }
 
-    selectSeller(value: string) {
-        this.sellerId.set(Number(value) || null);
+    selectSeller(value: number | null) {
+        this.sellerId.set(value);
         this.page.set(1);
     }
 
-    // téléphone : les filtres sont dans un panneau, ouvert par le bouton Filtres
+    // fenêtre Filtre : fenêtre du bas sur téléphone, petit panneau sur ordinateur
     filtersOpen = signal(false);
-    private periodFilter = viewChild(PeriodFilter);
+    periodChoices = PERIOD_CHOICES;
+    customFrom = signal("");
+    customTo = signal("");
+    customError = signal<string | null>(null);
 
     // filtres actifs, affichés en pastilles qu'on retire d'un clic
     activeFilters = computed(() => {
-        const filters: { key: "period" | "payment" | "seller"; label: string }[] = [];
-        const period = this.range().period;
-        if (period !== "all") filters.push({ key: "period", label: PERIOD_LABELS[period] });
+        const filters: { key: FilterKey; label: string }[] = [];
+        const { period, from, to } = this.range();
+        if (period === "custom") filters.push({ key: "period", label: this.customLabel(from, to) });
+        else if (period !== "all")
+            filters.push({
+                key: "period",
+                label: this.periodChoices.find((c) => c.value === period)!.label,
+            });
         const method = this.paymentMethod();
         if (method)
             filters.push({ key: "payment", label: method === "CASH" ? "Espèces" : "Mobile money" });
@@ -223,10 +232,98 @@ export class Sales {
         return filters;
     });
 
-    clearFilter(key: "period" | "payment" | "seller") {
-        if (key === "period") this.periodFilter()?.selectPeriod("all");
-        if (key === "payment") this.selectPayment("");
-        if (key === "seller") this.selectSeller("");
+    // carte du haut : elle suit la puce choisie (toutes, à solder, remboursées)
+    summary = computed(() => {
+        const counters = this.counters();
+        const plural = (n: number | undefined, word: string) =>
+            `${n ?? 0} ${word}${(n ?? 0) > 1 ? "s" : ""}`;
+
+        if (this.status() === "CANCELLED") {
+            return {
+                label: "Remboursé",
+                amount: counters?.cancelled_total,
+                tone: "danger",
+                note: plural(counters?.cancelled, "remboursement"),
+            };
+        }
+        if (this.unpaid()) {
+            return {
+                label: "Reste à encaisser",
+                amount: counters?.due_total,
+                tone: "warning",
+                note: plural(counters?.unpaid, "vente"),
+            };
+        }
+        return {
+            label: "Encaissé",
+            amount: counters?.active_total,
+            tone: "success",
+            note: plural(counters?.active, "vente"),
+        };
+    });
+
+    selectPeriod(period: Period) {
+        this.customError.set(null);
+
+        if (period === "custom") {
+            // on part des 7 derniers jours : il ne reste qu'à ajuster
+            if (!this.customFrom()) {
+                this.customFrom.set(this.daysAgo(6));
+                this.customTo.set(this.daysAgo(0));
+            }
+            this.setRange("custom", this.customFrom(), this.customTo());
+            return;
+        }
+
+        const from =
+            period === "today"
+                ? this.daysAgo(0)
+                : period === "week"
+                  ? this.daysAgo(6)
+                  : period === "month"
+                    ? formatDate(new Date(), "yyyy-MM-01", this.locale)
+                    : null;
+        this.setRange(period, from, from ? this.daysAgo(0) : null);
+    }
+
+    applyCustomRange(from: string, to: string) {
+        this.customFrom.set(from);
+        this.customTo.set(to);
+
+        const error = validateRange(from, to, this.daysAgo(0));
+        this.customError.set(error);
+        if (!error) this.setRange("custom", from, to);
+    }
+
+    private setRange(period: Period, from: string | null, to: string | null) {
+        this.range.set({ period, from, to });
+        this.page.set(1);
+    }
+
+    private daysAgo(days: number) {
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        return formatDate(date, "yyyy-MM-dd", this.locale);
+    }
+
+    private customLabel(from: string | null, to: string | null) {
+        if (!from || !to) return "Dates choisies";
+        const short = (date: string) => formatDate(date, "d MMM", this.locale);
+        return from === to ? short(from) : `${short(from)} au ${short(to)}`;
+    }
+
+    clearFilter(key: FilterKey) {
+        if (key === "period") this.selectPeriod("all");
+        if (key === "payment") this.selectPayment(null);
+        if (key === "seller") this.selectSeller(null);
+    }
+
+    resetFilters() {
+        this.customFrom.set("");
+        this.customTo.set("");
+        this.selectPeriod("all");
+        this.selectPayment(null);
+        this.selectSeller(null);
     }
 
     exporting = signal(false);

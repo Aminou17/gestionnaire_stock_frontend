@@ -145,23 +145,25 @@
                                     }
                                 }
                                 @if (sale.customer_phone) {
-                                    <a class="phone-link" [href]="'tel:' + sale.customer_phone">{{
-                                        sale.customer_phone
-                                    }}</a>
+                                    <span class="phone-line">
+                                        <a class="phone-link" [href]="'tel:' + sale.customer_phone">{{
+                                            customerPhone()
+                                        }}</a>
+                                        @if (customerWhatsApp(); as link) {
+                                            <a
+                                                class="wa-chip"
+                                                [href]="link"
+                                                target="_blank"
+                                                rel="noopener"
+                                                aria-label="Écrire au client sur WhatsApp"
+                                                title="Écrire sur WhatsApp"
+                                            >
+                                                <app-whatsapp-icon [size]="14" />
+                                            </a>
+                                        }
+                                    </span>
                                 }
                             </span>
-                            @if (customerWhatsApp(); as link) {
-                                <a
-                                    class="wa-chip"
-                                    [href]="link"
-                                    target="_blank"
-                                    rel="noopener"
-                                    aria-label="Écrire au client sur WhatsApp"
-                                    title="Écrire sur WhatsApp"
-                                >
-                                    <app-whatsapp-icon [size]="18" />
-                                </a>
-                            }
                         } @else {
                             <span class="fact-text muted">Sans client</span>
                         }
@@ -720,11 +722,14 @@
             />
         </label>
         <div class="quick-amounts" aria-label="Montants rapides">
-            @for (share of [0.25, 0.5, 1]; track share) {
-                <button type="button" class="chip" (click)="payShare(share)">
-                    {{ share === 1 ? "Solde" : share * 100 + " %" }}
+            @for (amount of quickAmounts(); track amount) {
+                <button type="button" class="chip" (click)="payQuick(amount)">
+                    {{ amount | fcfa }}
                 </button>
             }
+            <button type="button" class="chip chip-balance" (click)="payQuick(due())">
+                Solde · {{ due() | fcfa }}
+            </button>
         </div>
 
         @if (payMethod() === "CASH") {

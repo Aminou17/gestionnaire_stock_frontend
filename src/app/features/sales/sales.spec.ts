@@ -33,7 +33,15 @@ describe("Sales", () => {
             of({
                 data: sales,
                 total: sales.length,
-                counters: { all: 2, active: 1, cancelled: 1, active_total: 3000 },
+                counters: {
+                    all: 5,
+                    active: 4,
+                    cancelled: 1,
+                    active_total: 3000,
+                    unpaid: 2,
+                    due_total: 7500,
+                    cancelled_total: 1200,
+                },
                 filters,
             }),
         );
@@ -116,28 +124,100 @@ describe("Sales", () => {
         expect(text()).toContain("Reste");
     });
 
+    const open = async () => {
+        el.querySelector<HTMLButtonElement>(".filters-btn")!.click();
+        await fixture.whenStable();
+    };
+
+    const pick = async (label: string) => {
+        const button = [...el.querySelectorAll<HTMLButtonElement>(".option")].find(
+            (option) => option.textContent!.trim() === label,
+        )!;
+        button.click();
+        await fixture.whenStable();
+    };
+
     it("should send today's dates when the period is today", async () => {
         await render();
-        const select = el.querySelector<HTMLSelectElement>(".period select")!;
-        select.value = "today";
-        select.dispatchEvent(new Event("change"));
-        await fixture.whenStable();
+        await open();
+        await pick("Aujourd'hui");
 
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(filters.from).toBe(filters.to);
+        expect(el.querySelector(".active-chip")?.textContent).toContain("Aujourd'hui");
+    });
+
+    it("should start the month on the first day", async () => {
+        await render();
+        await open();
+        await pick("Ce mois");
+
+        const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
+        expect(filters.from).toMatch(/-01$/);
     });
 
     it("should send the payment method chosen in the filter", async () => {
         await render();
-        const select = el.querySelector<HTMLSelectElement>(".filter select")!;
-        select.value = "MOBILE_MONEY";
-        select.dispatchEvent(new Event("change"));
-        await fixture.whenStable();
+        await open();
+        await pick("Mobile money");
 
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.paymentMethod).toBe("MOBILE_MONEY");
         expect(filters.page).toBe(1);
+        expect(el.querySelector(".filters-count")?.textContent).toContain("1");
+    });
+
+    it("should remove a filter with the cross of its chip and reset them all", async () => {
+        await render();
+        await open();
+        await pick("Espèces");
+        await pick("7 jours");
+        expect(el.querySelectorAll(".active-chip").length).toBe(2);
+
+        el.querySelector<HTMLButtonElement>(".active-chip")!.click();
+        await fixture.whenStable();
+        expect(el.querySelectorAll(".active-chip").length).toBe(1);
+
+        const reset = [...el.querySelectorAll<HTMLButtonElement>(".sheet-foot .btn")][0];
+        reset.click();
+        await fixture.whenStable();
+        expect(el.querySelectorAll(".active-chip").length).toBe(0);
+        expect(getSalesPage.mock.lastCall![0]).toEqual(
+            expect.objectContaining({ paymentMethod: null, from: null, to: null }),
+        );
+    });
+
+    it("should show the number of results on the button of the filter", async () => {
+        await render();
+        await open();
+        expect(el.querySelector(".sheet-foot .btn-primary")?.textContent).toContain(
+            "Voir 2 ventes",
+        );
+    });
+
+    it("should follow the chip in the summary card", async () => {
+        await render();
+        const summary = () => ({
+            textContent: el.querySelector(".summary")!.textContent!.replace(/\s/g, " "),
+            getAttribute: (name: string) => el.querySelector(".summary")!.getAttribute(name),
+        });
+        expect(summary().getAttribute("data-tone")).toBe("success");
+        expect(summary().textContent).toContain("Encaissé");
+        expect(summary().textContent).toContain("3 000 F");
+
+        el.querySelectorAll<HTMLButtonElement>(".stat")[1].click();
+        await fixture.whenStable();
+        expect(summary().getAttribute("data-tone")).toBe("warning");
+        expect(summary().textContent).toContain("Reste à encaisser");
+        expect(summary().textContent).toContain("7 500 F");
+        expect(summary().textContent).toContain("2 ventes");
+
+        el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
+        await fixture.whenStable();
+        expect(summary().getAttribute("data-tone")).toBe("danger");
+        expect(summary().textContent).toContain("Remboursé");
+        expect(summary().textContent).toContain("1 200 F");
     });
 
     it("should send the search text after a short delay", async () => {
@@ -162,7 +242,7 @@ describe("Sales", () => {
 
     it("should not offer the seller filter to a manager", async () => {
         await render(false);
-        expect(el.querySelectorAll(".filter").length).toBe(1);
+        expect(el.querySelector("[aria-label='Vendeur']")).toBeNull();
     });
 
     it("should invite to make a sale when there is none", async () => {
@@ -170,12 +250,10 @@ describe("Sales", () => {
         expect(text()).toContain("Aucune vente pour le moment");
     });
 
-    it("should show a second row of dates for a custom period, prefilled with the last 7 days", async () => {
+    it("should prefill a custom period with the last 7 days", async () => {
         await render();
-        const select = el.querySelector<HTMLSelectElement>(".period select")!;
-        select.value = "custom";
-        select.dispatchEvent(new Event("change"));
-        await fixture.whenStable();
+        await open();
+        await pick("Personnalisée");
 
         const dates = el.querySelectorAll<HTMLInputElement>(".custom-range input[type='date']");
         expect(dates.length).toBe(2);
@@ -186,10 +264,8 @@ describe("Sales", () => {
 
     it("should not reload the list when the custom period is invalid", async () => {
         await render();
-        const select = el.querySelector<HTMLSelectElement>(".period select")!;
-        select.value = "custom";
-        select.dispatchEvent(new Event("change"));
-        await fixture.whenStable();
+        await open();
+        await pick("Personnalisée");
         const calls = getSalesPage.mock.calls.length;
 
         const [from, to] = el.querySelectorAll<HTMLInputElement>(".custom-range input");

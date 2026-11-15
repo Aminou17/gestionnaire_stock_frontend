@@ -3,6 +3,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import {
     Component,
     DestroyRef,
+    ElementRef,
     afterNextRender,
     computed,
     inject,
@@ -29,6 +30,7 @@ import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dial
 import { CustomerForm } from "../../customers/customer-form/customer-form";
 import { categoryTone, productInitials } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { formatPhone, phoneKey, splitPhone } from "../../../shared/phone";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
@@ -82,6 +84,7 @@ export class NewSale {
     protected auth = inject(AuthService);
     protected back = getBackLink("/sales", "Ventes");
     protected initials = productInitials;
+    protected resize = resizeAvatar;
     protected tone = categoryTone;
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
@@ -92,7 +95,13 @@ export class NewSale {
     // photo agrandie au centre de l'écran
     zoom = signal<{ src: string; name: string } | null>(null);
     error = signal<string | null>(null);
+    // ajout d'une photo depuis la liste : produit en cours d'envoi, puis message de retour
+    photoBusyId = signal<number | null>(null);
+    photoNotice = signal<{ kind: "success" | "error"; text: string } | null>(null);
 
+    private photoInput = viewChild<ElementRef<HTMLInputElement>>("photoInput");
+    private photoTarget: Product | null = null;
+    private noticeTimer?: ReturnType<typeof setTimeout>;
     private searchTimer?: ReturnType<typeof setTimeout>;
 
     cash = rxResource({ stream: () => this.cashService.getTodayCash() });
@@ -466,6 +475,72 @@ export class NewSale {
                 },
                 error: () => undefined,
             });
+    }
+
+    // seul l'administrateur peut changer la photo d'un produit
+    askPhoto(product: Product) {
+        this.photoTarget = product;
+        this.photoInput()?.nativeElement.click();
+    }
+
+    async pickPhoto(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        const product = this.photoTarget;
+        input.value = "";
+        if (!file || !product) return;
+
+        this.photoBusyId.set(product.id);
+
+        try {
+            const [image, thumb] = await Promise.all([
+                this.resize(file, 320, 85000),
+                this.resize(file, 80, 15000),
+            ]);
+
+            this.productService.setImage(product.id, image, thumb).subscribe({
+                next: () => {
+                    this.photoBusyId.set(null);
+                    this.showPhoto(product.id, thumb);
+                    this.notify("success", "Photo ajoutée.");
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.photoBusyId.set(null);
+                    this.notify("error", err.error?.message ?? "La photo n'a pas pu être envoyée.");
+                },
+            });
+        } catch (err) {
+            this.photoBusyId.set(null);
+            this.notify("error", (err as Error).message);
+        }
+    }
+
+    // la miniature apparaît tout de suite, sans recharger la liste ni toucher au panier
+    private showPhoto(id: number, thumb: string) {
+        this.products.update((page) =>
+            page
+                ? {
+                      ...page,
+                      data: page.data.map((p) => (p.id === id ? { ...p, image: thumb } : p)),
+                  }
+                : page,
+        );
+        this.cart.update((lines) =>
+            lines.map((line) =>
+                line.product.id === id
+                    ? { ...line, product: { ...line.product, image: thumb } }
+                    : line,
+            ),
+        );
+    }
+
+    private notify(kind: "success" | "error", text: string) {
+        clearTimeout(this.noticeTimer);
+        this.photoNotice.set({ kind, text });
+        this.noticeTimer = setTimeout(
+            () => this.photoNotice.set(null),
+            kind === "success" ? 3000 : 6000,
+        );
     }
 
     clearCart() {

@@ -30,7 +30,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { Avatar } from "../../../shared/avatar/avatar";
 import { Icon } from "../../../shared/icon/icon";
 import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
-import { toWhatsAppLink } from "../../../shared/phone";
+import { formatInternational, toWhatsAppLink } from "../../../shared/phone";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 interface TimelineEvent {
@@ -341,9 +341,21 @@ export class SalePage {
         return sale && sale.total > 0 ? Math.floor((sale.paid_amount / sale.total) * 100) : 0;
     });
     // remplit le montant avec une part du reste à payer
-    payShare(share: number) {
-        this.payAmount.set(Math.max(1, Math.round(this.due() * share)));
+    // en Afrique on pense en billets, pas en pourcentages : les coupures sous le reste, puis le solde
+    quickAmounts = computed(() => {
+        const due = this.due();
+        const notes = [500, 1000, 2000, 5000, 10000, 25000, 50000, 100000];
+        return notes.filter((note) => note < due).slice(-3);
+    });
+
+    payQuick(amount: number) {
+        this.payAmount.set(Math.max(1, amount));
     }
+
+    customerPhone = computed(() => {
+        const phone = this.data()?.customer_phone;
+        return phone ? formatInternational(phone, this.shopService.defaultCountryCode()) : "";
+    });
 
     // reste à payer d'une vente validée (acompte)
     due = computed(() => {

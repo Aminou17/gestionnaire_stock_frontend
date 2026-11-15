@@ -149,10 +149,16 @@
     text-decoration: none;
 }
 
-/* bouton rond vert : ouvre la conversation du client */
+.phone-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* petit rond vert collé au numéro : ouvre la conversation du client */
 .wa-chip {
-    width: 36px;
-    height: 36px;
+    width: 26px;
+    height: 26px;
     flex: none;
     display: grid;
     place-items: center;
@@ -163,6 +169,10 @@
 }
 .wa-chip:hover {
     background: #d3f1e0;
+}
+
+.chip-balance {
+    font-weight: var(--fw-semibold);
 }
 
 /* trois actions de même hauteur : Ticket et Envoyer en image côte à côte */
@@ -841,5 +851,6 @@ app-page-header {
 
 .quick-amounts {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
 }
