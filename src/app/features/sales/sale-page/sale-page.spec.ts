@@ -169,7 +169,7 @@ describe("SalePage", () => {
 
         expect(text()).toContain("Vente #106");
         expect(text()).toContain("Bazin riche");
-        expect(text()).toContain("remise de 500 F sur 10 000 F");
+        expect(text()).toContain("au lieu de 10 000 F");
         expect(text()).toContain("11 000 F");
         expect(text()).toContain("Awa K.");
     });

@@ -692,3 +692,34 @@ app-page-header {
     background: #fff;
     pointer-events: none;
 }
+
+/* barre de progression d'un paiement échelonné */
+.progress {
+    height: 8px;
+    margin-top: 4px;
+    border-radius: 999px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--success);
+}
+
+.progress-text {
+    margin: 8px 0 4px;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+}
+
+.paid-total dd {
+    color: var(--success);
+}
+
+.quick-amounts {
+    display: flex;
+    gap: 8px;
+}
