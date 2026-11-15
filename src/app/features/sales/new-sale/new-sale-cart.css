@@ -1,66 +1,459 @@
-.method:hover {
+/* panier : colonne fixe à droite, l'en-tête et le bouton d'encaissement restent visibles */
+.cart {
+    position: sticky;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 16px;
+    padding: 16px;
+}
+
+.cart.cart-empty {
+    grid-template-rows: auto auto;
+}
+
+.cart-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.cart-header h2 {
+    margin: 0;
+    margin-right: auto;
+}
+
+.count {
+    font-size: var(--fs-small);
+}
+
+.clear {
+    min-height: 36px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-small);
+    cursor: pointer;
+}
+
+.clear:hover {
+    color: var(--danger);
+}
+
+.clear:focus-visible,
+.icon-btn:focus-visible,
+.add-customer:focus-visible,
+.method:focus-visible,
+.option:focus-visible,
+.free-link:focus-visible,
+.picker-row:focus-visible,
+.picked-change:focus-visible,
+.stepper button:focus-visible,
+.stepper input:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.empty-cart {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 32px 16px;
+    text-align: center;
+}
+
+.empty-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 8px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
+}
+
+.cart-body {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    overflow-y: auto;
+}
+
+/* lignes du panier */
+.lines {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.line {
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 12px;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+}
+
+.line:first-child {
+    border-top: 0;
+    padding-top: 0;
+}
+
+.line .thumb {
+    width: 48px;
+    height: 48px;
+}
+
+.line-main {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.line-name {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    line-height: 1.3;
+}
+
+.line-main small {
+    font-size: var(--fs-small);
+}
+
+.line-total {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.line-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stepper {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.stepper button {
+    width: 44px;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.stepper button:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.stepper button:disabled {
+    color: var(--text-muted);
+    opacity: 0.5;
+    cursor: default;
+}
+
+.stepper input {
+    width: 48px;
+    height: 100%;
+    border: 0;
+    border-inline: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: var(--fw-semibold);
+    text-align: center;
+    -moz-appearance: textfield;
+}
+
+.stepper input::-webkit-inner-spin-button,
+.stepper input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.price-input {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 128px;
+    height: 44px;
+}
+
+/* suppression discrète : grise, rouge seulement au survol */
+.icon-btn {
+    width: 44px;
+    height: 44px;
+    margin-left: auto;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.icon-btn:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+/* sections du panier : client, paiement */
+.section {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.section-title {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+}
+
+.add-customer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+    text-align: left;
+    cursor: pointer;
+}
+
+.add-customer small {
+    margin-left: auto;
+}
+
+.add-customer:hover {
     border-color: var(--primary);
+    background: var(--primary-soft);
+}
+
+/* modes de paiement en segments */
+.methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 4px;
+    border-radius: var(--radius);
+    background: var(--surface-hover);
+}
+
+.method {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.method:hover {
+    color: var(--text);
 }
 
 .method.active {
+    background: var(--surface);
+    box-shadow: var(--shadow-card);
+    color: var(--primary-text, var(--primary));
+    font-weight: var(--fw-semibold);
+}
+
+.options {
+    display: flex;
+    gap: 8px;
+}
+
+.option {
+    min-height: 40px;
+    padding: 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted, var(--text));
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.option::before {
+    content: "+ ";
+}
+
+.option.on {
     border-color: var(--primary);
     background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
     font-weight: var(--fw-semibold);
 }
 
-.method:focus-visible,
-.chip:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
+.option.on::before {
+    content: "✓ ";
+}
+
+.option:hover {
+    border-color: var(--primary);
 }
 
 .chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
 }
 
-.chip {
+.chips .chip {
     min-height: 36px;
-    padding: 0 12px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--surface);
-    color: var(--text);
-    font: inherit;
-    font-size: var(--fs-small);
-    font-variant-numeric: tabular-nums;
-    cursor: pointer;
 }
 
-.chip:hover,
-.chip.active {
-    border-color: var(--primary);
-    color: var(--primary-text, var(--primary));
-}
-
-.change {
+.change,
+.remaining {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
     padding: 12px 16px;
-    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
-    border-radius: 12px;
-    background: var(--success-soft);
-    color: var(--success);
+    border-radius: var(--radius);
     font-size: var(--fs-body);
 }
 
-.change strong {
+.change strong,
+.remaining strong {
     font-size: var(--fs-heading);
     font-variant-numeric: tabular-nums;
 }
 
-.customer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+.change {
+    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.remaining {
+    border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
+    background: var(--warning-soft, var(--surface));
+    color: var(--warning, var(--text));
+}
+
+.remaining.second {
+    border-color: color-mix(in srgb, var(--primary) 22%, transparent);
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
+}
+
+.closed-note {
+    display: flex;
+    align-items: flex-start;
     gap: 8px;
+    margin: 0;
+}
+
+.closed-note app-icon {
+    flex: none;
+    margin-top: 1px;
+}
+
+/* pied du panier : récapitulatif net et bouton d'encaissement */
+.cart-footer {
+    display: grid;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.recap {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.recap div,
+.total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+
+.recap dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.recap-discount dd {
+    color: var(--success);
+}
+
+.total span {
+    font-size: var(--fs-body);
+    color: var(--text-muted);
+}
+
+.total strong {
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* désactivé : bien distinct d'un bouton actif (même règle que la fiche produit) */
+.submit {
+    min-height: 48px;
+    font-size: var(--fs-lead);
+}
+
+.submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submit.busy:disabled {
+    opacity: 0.7;
+    cursor: progress;
+}
+
+.cart-bar {
+    display: none;
 }
 
 /* sélecteur de client : recherche, résultats, fiche choisie */
@@ -81,6 +474,12 @@
     padding-left: 40px;
 }
 
+/* la liste s'ouvre sous le champ avec un petit écart */
+.picker-zone {
+    display: grid;
+    gap: 8px;
+}
+
 .picker-list {
     margin: 0;
     padding: 4px;
@@ -96,7 +495,7 @@
     gap: 12px;
     width: 100%;
     min-height: 52px;
-    padding: 6px 8px;
+    padding: 8px;
     border: 0;
     border-radius: 8px;
     background: transparent;
@@ -108,13 +507,6 @@
 
 .picker-row:hover {
     background: var(--surface-hover);
-}
-
-.picker-row:focus-visible,
-.picked-change:focus-visible,
-.link-btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
 }
 
 .picker-new strong {
@@ -138,9 +530,9 @@
     color: var(--danger);
 }
 
-/* la liste s'ouvre sous le champ avec un petit écart */
-.picker-zone {
+.customer {
     display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
 
@@ -155,28 +547,13 @@
     font-weight: var(--fw-semibold);
 }
 
-.av-0,
 .av-add {
     background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
 }
 
-.av-1 {
-    background: var(--violet-soft);
-    color: var(--violet);
-}
-
-.av-2 {
-    background: var(--neutral-soft);
-    color: var(--text-muted);
-}
-
-.av-3 {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.picked {
+.picked,
+.match {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -232,18 +609,6 @@
     font-size: var(--fs-small);
 }
 
-.link-btn {
-    justify-self: start;
-    min-height: 36px;
-    padding: 0 4px;
-    border: 0;
-    background: transparent;
-    color: var(--primary-text, var(--primary));
-    font: inherit;
-    font-size: var(--fs-small);
-    cursor: pointer;
-}
-
 /* lien discret : la fiche client reste le chemin conseillé */
 .free-link {
     justify-self: start;
@@ -262,96 +627,27 @@
     text-decoration: underline;
 }
 
-.free-link:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-/* un numéro tapé qui est celui d'une fiche : on propose de la choisir */
-.match {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 8px 8px 12px;
-    border: 1px solid var(--primary);
-    border-radius: 10px;
-    background: var(--surface);
-}
-
-.remaining {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
-    border-radius: 12px;
-    background: var(--warning-soft, var(--surface));
-    color: var(--warning, var(--text));
-    font-size: var(--fs-body);
-}
-
-.remaining strong {
-    font-size: var(--fs-heading);
-    font-variant-numeric: tabular-nums;
-}
-
-.more-hint {
-    margin: 12px 0 0;
-    font-size: var(--fs-small);
-    text-align: center;
-}
-
-/* sur téléphone le bouton reste collé en bas de l'écran tant que le panier est visible */
-.submit-zone {
-    display: grid;
-}
-
-/* désactivé : bien distinct d'un bouton actif (même règle que la fiche produit) */
-.submit:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.submit.busy:disabled {
-    opacity: 0.7;
-    cursor: progress;
-}
-
-.closed-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin: 0 0 12px;
-}
-
-.closed-note app-icon {
-    flex: none;
-    margin-top: 1px;
-}
-
-.cart-bar {
-    display: none;
-}
-
 @media (max-width: 1023px) {
-    .layout {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
+    /* le panier passe sous les produits : on rappelle le total en bas d'écran */
     .cart {
         position: static;
         max-height: none;
     }
 
-    .lines {
+    /* panier vide : rien à montrer, la liste des produits suffit */
+    .cart.cart-empty:not(:has(.alert)) {
+        display: none;
+    }
+
+    .cart-empty .cart-header,
+    .cart-empty .empty-cart {
+        display: none;
+    }
+
+    .cart-body {
         overflow: visible;
     }
 
-    :host(.has-cart) {
-        padding-bottom: 72px;
-    }
-
-    /* le panier passe sous les produits : on rappelle le total en bas d'écran */
     .cart-bar {
         position: fixed;
         left: 0;
@@ -362,7 +658,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 10px 16px;
+        padding: 12px 16px;
         background: var(--surface);
         border-top: 1px solid var(--border);
     }
@@ -381,155 +677,26 @@
         color: var(--text-muted);
     }
 
-    .submit-zone {
+    /* total et bouton collés en bas tant que le panier est à l'écran */
+    .cart-footer {
         position: sticky;
         bottom: 0;
         z-index: 5;
         margin: 0 -16px -16px;
         padding: 12px 16px;
-        border-top: 1px solid var(--border);
-        border-radius: 0 0 var(--radius-lg, 16px) var(--radius-lg, 16px);
+        border-radius: 0 0 var(--radius) var(--radius);
         background: var(--surface);
     }
 
-    .submit {
-        min-height: 48px;
-    }
-
-    /* cibles tactiles de 44 px minimum (tablette comprise) */
-    .icon-btn,
-    .stepper button {
-        width: 44px;
-        height: 44px;
-    }
-
-    .stepper,
-    .price-input {
-        height: 44px;
-    }
-}
-
-@media (max-width: 767px) {
-    .line-body {
-        flex-wrap: nowrap;
-        gap: 8px;
-    }
-
-    /* sur petit écran le prix prend la place qui reste entre la quantité et le total */
-    .stepper {
-        flex: none;
-    }
-
-    .stepper input {
-        width: 40px;
-    }
-
-    .price-input {
-        flex: 1 1 0;
-        width: auto;
-        min-width: 0;
-    }
-
-    .line-total {
-        flex: none;
-    }
-
-    .line {
-        gap: 8px;
-        padding: 12px 0;
-    }
-
-    /* le bloc paiement n'est plus une carte dans une carte */
-    .payment {
-        padding: 12px 0 0;
-        border: 0;
-        border-top: 1px solid var(--border);
-        border-radius: 0;
-        background: transparent;
-    }
-
-    .catalog,
-    .cart {
-        padding: 16px;
-    }
-
-    /* sur téléphone la barre se pose au-dessus de la navigation du bas */
-    .cart-bar,
-    .submit-zone {
-        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
-    }
-
-    /* le catalogue se pose sur le fond de la page, comme la liste des produits */
-    .catalog {
-        padding: 0;
-        border: 0;
-        background: transparent;
-        box-shadow: none;
-    }
-
-    /* deux tuiles par ligne */
-    .tiles {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-    }
-
-    .result {
-        padding: 12px;
-        min-height: 88px;
-    }
-}
-
-@media (max-width: 1023px) {
-    .chip,
     .option {
         min-height: 44px;
     }
 }
 
-.options {
-    display: flex;
-    gap: 8px;
-}
-
-.option {
-    min-height: 40px;
-    padding: 0 14px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--surface);
-    color: var(--text-muted, var(--text));
-    font: inherit;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
-    cursor: pointer;
-}
-
-.option::before {
-    content: "+ ";
-}
-
-.option.on {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-    color: var(--primary-text, var(--primary));
-    font-weight: var(--fw-semibold);
-}
-
-.option.on::before {
-    content: "✓ ";
-}
-
-.option:hover {
-    border-color: var(--primary);
-}
-
-.option:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.remaining.second {
-    border-color: color-mix(in srgb, var(--primary) 22%, transparent);
-    background: var(--primary-soft);
-    color: var(--primary-text, var(--primary));
+@media (max-width: 767px) {
+    /* sur téléphone la barre se pose au-dessus de la navigation du bas */
+    .cart-bar,
+    .cart-footer {
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+    }
 }

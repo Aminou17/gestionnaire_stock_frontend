@@ -84,17 +84,16 @@ describe("AuditLogs", () => {
     it("should write who did what as a sentence, with a link to the sale", async () => {
         await render();
 
-        expect(text()).toContain("Moussa Traoré a encaissé une vente de");
-        expect(el.querySelector(".entry .avatar img")).not.toBeNull();
-        expect(el.querySelector("a[href='/sales/12']")).not.toBeNull();
-        expect(text()).toContain("IP 10.0.0.5");
+        expect(text()).toContain("Moussa a encaissé une vente de");
+        expect(el.querySelector("a.entry[href='/sales/12']")).not.toBeNull();
+        expect(el.querySelector(".entry .who")!.textContent).toContain("MT");
     });
 
     it("should show the email tried on a failed login", async () => {
         await render();
 
         expect(text()).toContain("intrus@test.com n'a pas pu se connecter");
-        expect(el.querySelector(".failed .avatar app-icon")).not.toBeNull();
+        expect(el.querySelector(".failed .pill-danger")).not.toBeNull();
     });
 
     it("should explain a denied access without showing the route", async () => {
@@ -110,12 +109,12 @@ describe("AuditLogs", () => {
             of({ data: [denied], pagination: { page: 1, limit: 25, total: 1, totalPages: 1 } }),
         );
 
-        expect(text()).toContain("Moussa Traoré a essayé de restaurer une catégorie");
+        expect(text()).toContain("Moussa a essayé de restaurer une catégorie");
         expect(text()).toContain("Réservé à l'administrateur");
         expect(text()).not.toContain("/categories");
     });
 
-    it("should show what changed when a row is opened", async () => {
+    it("should show what changed in a sheet when a row is opened", async () => {
         const updated: AuditLog = {
             ...sale,
             id: 4,
@@ -132,8 +131,14 @@ describe("AuditLogs", () => {
         );
 
         expect(text()).toContain("a modifié le produit Bazin riche");
-        expect(el.querySelectorAll(".changes dt").length).toBe(1);
+        expect(el.querySelector(".detail")).toBeNull();
+
+        el.querySelector<HTMLButtonElement>("button.entry")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelectorAll(".changes li").length).toBe(1);
         expect(text()).toContain("Prix de vente");
+        expect(el.querySelector(".detail a[href='/products/7']")).not.toBeNull();
     });
 
     it("should merge logins in a row of the same person", async () => {
@@ -176,7 +181,9 @@ describe("AuditLogs", () => {
 
     it("should ask only for failures when asked", async () => {
         await render();
-        el.querySelector<HTMLButtonElement>("button.chip")!.click();
+        el.querySelectorAll<HTMLButtonElement>(".tab")[1].click();
+        await fixture.whenStable();
+        el.querySelector<HTMLButtonElement>(".filters button.chip")!.click();
         await fixture.whenStable();
 
         expect(getLogs).toHaveBeenLastCalledWith(
@@ -242,6 +249,46 @@ describe("AuditLogs", () => {
         fixture.componentInstance.selectUser("2");
         await fixture.whenStable();
 
-        expect(text()).toContain("Rien ne correspond à ces filtres.");
+        expect(text()).toContain("Aucun événement pour ces filtres.");
+    });
+
+    it("should show the full name and the address of a row in its detail", async () => {
+        await render();
+        el.querySelector<HTMLButtonElement>("button.entry")!.click();
+        await fixture.whenStable();
+
+        expect(text()).toContain("203.0.113.9");
+        expect(text()).toContain("intrus@test.com");
+
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        await fixture.whenStable();
+        expect(el.querySelector(".detail")).toBeNull();
+    });
+
+    it("should search after a short pause", async () => {
+        await render();
+        const input = el.querySelector<HTMLInputElement>(".search input")!;
+        input.value = "bazin";
+        input.dispatchEvent(new Event("input"));
+        await new Promise((resolve) => setTimeout(resolve, 400));
+        await fixture.whenStable();
+
+        expect(getLogs).toHaveBeenLastCalledWith(
+            expect.objectContaining({ search: "bazin", page: 1 }),
+        );
+    });
+
+    it("should show the active filters as chips that can be removed", async () => {
+        await render();
+        fixture.componentInstance.selectAction("SALE_CREATED");
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        const chip = el.querySelector<HTMLButtonElement>(".active-chip")!;
+        expect(chip.textContent).toContain("Vente enregistrée");
+
+        chip.click();
+        await fixture.whenStable();
+        expect(getLogs).toHaveBeenLastCalledWith(expect.objectContaining({ action: null }));
     });
 });

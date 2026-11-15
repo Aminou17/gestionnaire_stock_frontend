@@ -2,6 +2,8 @@ import { User, UserRole } from "../../core/auth/auth.service";
 
 // compte vu par l'administrateur dans la gestion des utilisateurs
 export interface UserAccount extends User {
+    first_name: string;
+    last_name: string;
     is_active: boolean;
     created_at: string;
     last_login_at: string | null;
@@ -11,7 +13,8 @@ export interface UserAccount extends User {
 }
 
 export interface UserInput {
-    name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     role: UserRole;
     // seulement à la création

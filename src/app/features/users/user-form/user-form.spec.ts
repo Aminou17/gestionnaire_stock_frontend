@@ -11,6 +11,8 @@ import { UserService } from "../user.service";
 const moussa: UserAccount = {
     id: 2,
     name: "Moussa Traoré",
+    first_name: "Moussa",
+    last_name: "Traoré",
     email: "moussa@test.com",
     role: "manager",
     is_active: true,
@@ -73,7 +75,7 @@ describe("UserForm", () => {
         await submit();
 
         expect(createUser).not.toHaveBeenCalled();
-        expect(text()).toContain("Le nom est obligatoire.");
+        expect(text()).toContain("Le prénom est obligatoire.");
         expect(text()).toContain("Indiquez une adresse email valide.");
         expect(text()).toContain("au moins 8 caractères");
     });
@@ -82,14 +84,16 @@ describe("UserForm", () => {
         await render();
         fixture.componentInstance.openNew();
         form().patchValue({
-            name: "  Moussa Traoré ",
+            firstName: "  Moussa ",
+            lastName: " Traoré ",
             email: "Moussa@Test.com",
             password: "motdepasse",
         });
         await submit();
 
         expect(createUser).toHaveBeenCalledWith({
-            name: "Moussa Traoré",
+            firstName: "Moussa",
+            lastName: "Traoré",
             email: "moussa@test.com",
             role: "manager",
             password: "motdepasse",
@@ -112,7 +116,8 @@ describe("UserForm", () => {
         await submit();
 
         expect(updateUser).toHaveBeenCalledWith(2, {
-            name: "Moussa Traoré",
+            firstName: "Moussa",
+            lastName: "Traoré",
             email: "moussa@test.com",
             role: "admin",
         });
@@ -131,7 +136,11 @@ describe("UserForm", () => {
     it("should show the backend message", async () => {
         await render({ fails: true });
         fixture.componentInstance.openNew();
-        form().patchValue({ name: "Moussa", email: "moussa@test.com", password: "motdepasse" });
+        form().patchValue({
+            firstName: "Moussa",
+            email: "moussa@test.com",
+            password: "motdepasse",
+        });
         await submit();
 
         expect(text()).toContain("Cet email est déjà utilisé.");

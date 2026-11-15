@@ -1,13 +1,128 @@
+.layout {
+    display: grid;
+    gap: 16px;
+    width: 100%;
+    max-width: 1040px;
+}
+
+.forms {
+    display: grid;
+    gap: 16px;
+    min-width: 0;
+}
+
+.forms .section {
+    max-width: none;
+}
+
+@media (min-width: 1024px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr) 320px;
+        align-items: start;
+    }
+
+    /* l'aperçu reste visible pendant la saisie */
+    .preview-col {
+        position: sticky;
+        top: 24px;
+    }
+}
+
+.hero-skeleton {
+    height: 120px;
+}
+
+.card-skeleton {
+    height: 180px;
+}
+
+/* en-tête : logo et nom, comme la fiche d'une boutique Shopify */
+.hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface) 70%);
+}
+
+.logo-tile {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 88px;
+    height: 88px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--logo-bg);
+}
+
+.logo-tile img {
+    width: auto;
+    max-width: 72px;
+    height: auto;
+    max-height: 72px;
+    object-fit: contain;
+}
+
+.logo-tile.empty {
+    border: 0;
+    background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+    color: #fff;
+    font-size: 28px;
+    font-weight: var(--fw-bold);
+}
+
+.hero-text {
+    display: grid;
+    justify-items: start;
+    gap: 8px;
+    min-width: 0;
+}
+
+.hero-name {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--fs-heading);
+    font-weight: var(--fw-semibold);
+}
+
+.logo-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.remove {
+    color: var(--danger);
+}
+
+/* champ avec une icône discrète à gauche */
+.input-wrap {
+    position: relative;
+    display: block;
+}
+
+.input-wrap app-icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    translate: 0 -50%;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.input-wrap .input {
+    padding-left: 38px;
+}
+
 .pair {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-}
-
-@media (max-width: 767px) {
-    .pair {
-        grid-template-columns: 1fr;
-    }
 }
 
 .country-row {
@@ -39,4 +154,92 @@
 .country-name {
     color: var(--text-muted);
     font-size: var(--fs-small);
+}
+
+.preview-title {
+    margin: 0 0 8px;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+}
+
+/* barre d'enregistrement : n'existe que lorsqu'il y a des changements */
+.savebar {
+    position: sticky;
+    bottom: 16px;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-menu);
+    animation: rise 0.18s ease-out;
+}
+
+.savebar-text {
+    flex: 1;
+    min-width: 0;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+@media (max-width: 767px) {
+    .pair {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding: 16px;
+    }
+
+    .logo-tile {
+        width: 72px;
+        height: 72px;
+        border-radius: 16px;
+    }
+
+    .logo-tile img {
+        max-width: 56px;
+        max-height: 56px;
+    }
+
+    .logo-actions .btn-sm {
+        height: 36px;
+    }
+
+    /* au-dessus de la barre de navigation du bas */
+    .savebar {
+        bottom: calc(var(--bottom-nav-height) + 8px + env(safe-area-inset-bottom));
+        flex-wrap: wrap;
+    }
+
+    .savebar-text {
+        flex-basis: 100%;
+    }
+
+    .savebar .btn {
+        flex: 1;
+    }
+
+    .preview-col {
+        justify-self: center;
+        width: 100%;
+        max-width: 340px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .savebar {
+        animation: none;
+    }
 }

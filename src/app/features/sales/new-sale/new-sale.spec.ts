@@ -33,6 +33,7 @@ const bazin = product(4, "Bazin riche", {
     pricing_mode: "NEGOTIABLE",
     sale_price: 10000,
     max_discount: 1500,
+    image: "data:image/png;base64,MINIATURE",
 });
 const savon = product(5, "Savon", { theoretical_stock: 0, stock_status: "OUT_OF_STOCK" });
 
@@ -154,15 +155,72 @@ describe("NewSale", () => {
 
     it("should add a product to the cart and compute the total", async () => {
         await render();
-        expect(submitBtn().disabled).toBe(true);
+        // sans produit, le pied du panier n'existe pas encore
+        expect(el.querySelector(".cart-footer")).toBeNull();
 
         await add(0);
         el.querySelector<HTMLButtonElement>("[aria-label='Augmenter la quantité']")!.click();
         await fixture.whenStable();
 
         expect(el.querySelector(".total")!.textContent!.replace(/\s/g, " ")).toContain("3 000 F");
-        expect(results()[0].classList).toContain("in-cart");
+        expect(results()[0].closest(".tile")!.classList).toContain("in-cart");
         expect(submitBtn().disabled).toBe(false);
+    });
+
+    it("should show the discount between the subtotal and the total", async () => {
+        await render();
+        await add(1);
+        expect(el.querySelector(".recap")).toBeNull();
+
+        const price = el.querySelector<HTMLInputElement>(".price-input")!;
+        price.value = "9000";
+        price.dispatchEvent(new Event("change"));
+        await fixture.whenStable();
+
+        const recap = el.querySelector(".recap")!.textContent!.replace(/\s/g, " ");
+        expect(recap).toContain("10 000 F");
+        expect(recap).toContain("1 000 F");
+        expect(el.querySelector(".total")!.textContent!.replace(/\s/g, " ")).toContain("9 000 F");
+    });
+
+    it("should empty the cart with the clear button", async () => {
+        await render();
+        await add(0);
+        await add(1);
+
+        el.querySelector<HTMLButtonElement>(".cart-header .clear")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelectorAll(".line").length).toBe(0);
+        expect(el.querySelector(".empty-cart")).not.toBeNull();
+    });
+
+    it("should show the product total on the encash button", async () => {
+        await render();
+        await add(0);
+
+        expect(submitBtn().textContent!.replace(/\s/g, " ")).toContain("Encaisser 1 500 F");
+    });
+
+    it("should zoom on the photo without adding the product, then show the full photo", async () => {
+        HTMLDialogElement.prototype.showModal = function () {
+            this.setAttribute("open", "");
+        };
+        preselected = { ...bazin, image: "data:image/png;base64,GRANDE" };
+        await render();
+
+        el.querySelector<HTMLButtonElement>(".thumb-zoom")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelector("app-photo-zoom img")!.getAttribute("src")).toContain("GRANDE");
+        expect(el.querySelectorAll(".line").length).toBe(0);
+        // une ligne sans photo montre ses initiales, sans bouton
+        expect(el.querySelectorAll(".tile")[0].querySelector(".thumb-zoom")).toBeNull();
+        expect(el.querySelectorAll(".tile")[0].querySelector(".thumb")!.textContent).toContain(
+            "RI",
+        );
+
+        preselected = bazin;
     });
 
     it("should remove the product when its tile is clicked again", async () => {
@@ -172,7 +230,7 @@ describe("NewSale", () => {
 
         await add(0);
         expect(el.querySelectorAll(".line").length).toBe(0);
-        expect(results()[0].classList).not.toContain("in-cart");
+        expect(results()[0].closest(".tile")!.classList).not.toContain("in-cart");
     });
 
     it("should not let an out of stock product be added", async () => {

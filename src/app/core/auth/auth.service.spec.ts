@@ -99,13 +99,25 @@ describe("AuthService", () => {
     it("should update the profile and keep the new name in the session", () => {
         setup();
 
-        service.updateProfile("Awa Traoré", "awa@test.com").subscribe();
+        service.updateProfile("Awa", "Traoré", "awa@test.com").subscribe();
         const req = httpMock.expectOne("/api/auth/me");
         expect(req.request.method).toBe("PUT");
-        expect(req.request.body).toEqual({ name: "Awa Traoré", email: "awa@test.com" });
-        req.flush({ id: 1, name: "Awa Traoré", email: "awa@test.com", role: "admin" });
+        expect(req.request.body).toEqual({
+            firstName: "Awa",
+            lastName: "Traoré",
+            email: "awa@test.com",
+        });
+        req.flush({
+            id: 1,
+            name: "Awa Traoré",
+            firstName: "Awa",
+            lastName: "Traoré",
+            email: "awa@test.com",
+            role: "admin",
+        });
 
         expect(service.user()?.name).toBe("Awa Traoré");
+        expect(service.user()?.firstName).toBe("Awa");
     });
 
     it("should send both passwords to change the password", () => {

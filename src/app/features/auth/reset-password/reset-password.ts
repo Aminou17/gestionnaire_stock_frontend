@@ -11,6 +11,7 @@ import { ActivatedRoute, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { Icon } from "../../../shared/icon/icon";
+import { PasswordStrength } from "../password-strength/password-strength";
 
 const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
     const { newPassword, confirmPassword } = group.getRawValue();
@@ -20,9 +21,9 @@ const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
 
 @Component({
     selector: "app-reset-password",
-    imports: [ReactiveFormsModule, RouterLink, Icon],
+    imports: [ReactiveFormsModule, RouterLink, Icon, PasswordStrength],
     templateUrl: "./reset-password.html",
-    styleUrls: ["../login/login.css", "./reset-password.css"],
+    styleUrl: "../auth-form.css",
 })
 export class ResetPassword {
     private auth = inject(AuthService);

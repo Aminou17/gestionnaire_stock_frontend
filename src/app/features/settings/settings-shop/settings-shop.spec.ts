@@ -145,11 +145,30 @@ describe("SettingsShop", () => {
         expect(el.textContent).toContain("Le nom est obligatoire.");
     });
 
+    it("should show the save bar only when there are changes", async () => {
+        await render();
+
+        expect(el.querySelector(".savebar")).toBeNull();
+
+        await type("address", "Autre adresse");
+
+        expect(el.querySelector(".savebar")).not.toBeNull();
+    });
+
+    it("should preview the ticket header while typing", async () => {
+        await render();
+
+        await type("name", "Chez Awa");
+
+        expect(el.querySelector(".ticket")!.textContent).toContain("Chez Awa");
+        expect(el.querySelector(".hero-name")!.textContent).toContain("Chez Awa");
+    });
+
     it("should restore the saved values on cancel", async () => {
         await render();
 
         await type("address", "Autre adresse");
-        el.querySelector<HTMLButtonElement>(".actions .btn-outline")!.click();
+        el.querySelector<HTMLButtonElement>(".savebar .btn-outline")!.click();
         await fixture.whenStable();
 
         expect(input("address").value).toBe("Grand marché");

@@ -1,176 +1,30 @@
-form {
-    display: grid;
-    gap: 18px;
-}
-
-.heading {
-    text-align: center;
-    margin-bottom: 4px;
-}
-
-h1 {
-    margin: 0 0 6px;
-    font-size: var(--fs-figure);
-    letter-spacing: -0.02em;
-}
-
-.heading p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-body);
-}
-
-.forgot {
-    justify-self: center;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
-    text-decoration: none;
-}
-
-.forgot:hover {
-    text-decoration: underline;
-}
-
-/* champ avec son icône à gauche */
-.control {
-    position: relative;
-    display: block;
-}
-.control > app-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-    transition: color 0.15s;
-}
-.control:focus-within > app-icon {
-    color: var(--primary);
-}
-.control .input {
-    height: 48px;
-    padding-left: 44px;
-    border-radius: 12px;
-    background: var(--bg);
-}
-.control .input:focus {
-    background: var(--surface);
-}
-.password .input {
-    padding-right: 48px;
-}
-
-.toggle {
-    position: absolute;
-    right: 4px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    display: grid;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    color: var(--text-muted);
-    cursor: pointer;
-    border-radius: 10px;
-}
-
-.toggle:hover {
-    background: var(--primary-soft);
+/* se souvenir de moi et mot de passe oublié sur la même ligne */
+.row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
 }
 
 .remember {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: var(--fs-body);
+    min-height: 44px;
     color: var(--text-muted);
+    font-size: var(--fs-body);
     cursor: pointer;
-    width: fit-content;
 }
 
 .remember input {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     margin: 0;
     accent-color: var(--primary);
 }
 
-.switch {
-    margin: 0;
-    padding-top: 16px;
-    border-top: 1px solid var(--border);
-    text-align: center;
-    font-size: var(--fs-body);
-    color: var(--text-muted);
-}
-
-.switch a {
-    font-weight: var(--fw-semibold);
-    text-decoration: none;
-}
-
-.switch a:hover {
-    text-decoration: underline;
-}
-
-/* téléphone : cibles plus hautes, texte à 16 px pour éviter le zoom de iOS */
-@media (max-width: 767px) {
-    form {
-        gap: 20px;
+@media (max-width: 360px) {
+    .row {
+        flex-wrap: wrap;
     }
-    h1 {
-        font-size: 24px;
-    }
-    .control .input {
-        height: 52px;
-        font-size: 16px;
-    }
-    .remember {
-        min-height: 44px;
-        font-size: 15px;
-    }
-    .remember input {
-        width: 20px;
-        height: 20px;
-    }
-    .forgot,
-    .switch {
-        font-size: 15px;
-    }
-    .forgot {
-        min-height: 44px;
-        display: inline-flex;
-        align-items: center;
-    }
-}
-
-.btn-primary.btn-block {
-    height: 52px;
-    border-radius: 12px;
-    font-size: 16px;
-    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
-}
-
-/* pastille d'état en haut des pages de mot de passe */
-.status {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 16px;
-    display: grid;
-    place-items: center;
-    border-radius: 18px;
-    background: var(--primary-soft);
-    color: var(--primary);
-}
-.status.ok {
-    background: var(--success-soft);
-    color: var(--success);
-}
-.status.warn {
-    background: var(--warning-soft);
-    color: var(--warning);
 }

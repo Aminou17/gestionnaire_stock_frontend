@@ -5,8 +5,10 @@
     backLabel="Retour aux paramètres"
 />
 
-<form class="card section" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
-    <div class="hero">
+<section class="card identity" aria-label="Photo et nom">
+    <div class="cover" aria-hidden="true"></div>
+
+    <div class="identity-body">
         <button
             type="button"
             class="photo-btn"
@@ -15,20 +17,41 @@
             aria-label="Changer la photo de profil"
         >
             <app-avatar [photo]="auth.user()?.avatar" />
-            <span class="photo-badge"><app-icon name="camera" [size]="16" /></span>
+            <span class="photo-badge">
+                @if (savingPhoto()) {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="camera" [size]="16" />
+                }
+            </span>
         </button>
-        <strong class="hero-name">{{ auth.user()?.name }}</strong>
-        <span class="role-badge">{{ auth.roleLabel() }}</span>
-        @if (auth.user()?.avatar) {
+
+        <div class="identity-text">
+            <strong class="identity-name">{{ fullName() }}</strong>
+            <span class="role-badge">{{ auth.roleLabel() }}</span>
+        </div>
+
+        <div class="photo-actions">
             <button
                 type="button"
-                class="photo-remove"
-                (click)="removePhoto()"
+                class="btn btn-outline btn-sm"
                 [disabled]="savingPhoto()"
+                (click)="fileInput.click()"
             >
-                Retirer la photo
+                {{ auth.user()?.avatar ? "Changer la photo" : "Ajouter une photo" }}
             </button>
-        }
+            @if (auth.user()?.avatar) {
+                <button
+                    type="button"
+                    class="photo-remove"
+                    (click)="removePhoto()"
+                    [disabled]="savingPhoto()"
+                >
+                    Retirer
+                </button>
+            }
+        </div>
+
         <input
             #fileInput
             type="file"
@@ -37,25 +60,45 @@
             (change)="onPhoto($event)"
         />
     </div>
-    @if (photoError()) {
-        <small class="field-error" role="alert">{{ photoError() }}</small>
-    }
 
-    <label class="field">
-        <span>Nom</span>
-        <input
-            class="input"
-            type="text"
-            formControlName="name"
-            maxlength="100"
-            autocomplete="name"
-            [class.invalid]="invalidProfile('name')"
-            [attr.aria-invalid]="invalidProfile('name')"
-        />
-        @if (invalidProfile("name")) {
-            <small class="field-error" role="alert">Le nom est obligatoire.</small>
-        }
-    </label>
+    @if (photoError()) {
+        <small class="field-error photo-error" role="alert">{{ photoError() }}</small>
+    }
+</section>
+
+<h2 class="group-title">Informations personnelles</h2>
+
+<form class="card section" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
+    <div class="names">
+        <label class="field">
+            <span>Prénom</span>
+            <input
+                class="input"
+                type="text"
+                formControlName="firstName"
+                maxlength="50"
+                autocomplete="given-name"
+                [class.invalid]="invalidProfile('firstName')"
+                [attr.aria-invalid]="invalidProfile('firstName')"
+            />
+            @if (invalidProfile("firstName")) {
+                <small class="field-error" role="alert">Le prénom est obligatoire.</small>
+            }
+        </label>
+
+        <label class="field">
+            <span>Nom</span>
+            <input
+                class="input"
+                type="text"
+                formControlName="lastName"
+                maxlength="50"
+                autocomplete="family-name"
+                [class.invalid]="invalidProfile('lastName')"
+                [attr.aria-invalid]="invalidProfile('lastName')"
+            />
+        </label>
+    </div>
 
     <label class="field">
         <span>Adresse email</span>
@@ -70,6 +113,8 @@
         />
         @if (invalidProfile("email")) {
             <small class="field-error" role="alert">Indiquez une adresse email valide.</small>
+        } @else {
+            <small class="muted">Elle sert à vous connecter.</small>
         }
     </label>
 
@@ -84,29 +129,36 @@
         </div>
     }
 
-    <div class="actions">
-        <button
-            type="button"
-            class="btn btn-outline"
-            [disabled]="savingProfile() || profileForm.pristine"
-            (click)="cancelProfile()"
-        >
-            Annuler
-        </button>
-        <button
-            type="submit"
-            class="btn btn-primary"
-            [disabled]="savingProfile() || profileForm.pristine"
-        >
-            @if (savingProfile()) {
-                <span class="spinner"></span>
-            }
-            Enregistrer
-        </button>
+    <div class="form-footer">
+        @if (profileForm.dirty && !savingProfile()) {
+            <span class="dirty">Modifications non enregistrées</span>
+        }
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="savingProfile() || profileForm.pristine"
+                (click)="cancelProfile()"
+            >
+                Annuler
+            </button>
+            <button
+                type="submit"
+                class="btn btn-primary"
+                [disabled]="savingProfile() || profileForm.pristine"
+            >
+                @if (savingProfile()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer
+            </button>
+        </div>
     </div>
 </form>
 
-<section class="card section options" aria-label="Sécurité et préférences">
+<h2 class="group-title">Sécurité</h2>
+
+<section class="card options" aria-label="Sécurité">
     <a class="option" routerLink="/settings/password">
         <span class="option-icon"><app-icon name="key" [size]="18" /></span>
         <span class="option-text">Changer mon mot de passe</span>
@@ -120,7 +172,7 @@
             <small class="muted">Recevoir un lien par e-mail</small>
         </span>
         @if (sendingReset()) {
-            <span class="spinner"></span>
+            <span class="spinner spinner-dark"></span>
         }
     </button>
 
@@ -134,15 +186,27 @@
             {{ message.text }}
         </div>
     }
+</section>
 
-    <button type="button" class="option" (click)="theme.toggle()">
+<h2 class="group-title">Apparence</h2>
+
+<section class="card options" aria-label="Apparence">
+    <button
+        type="button"
+        class="option"
+        role="switch"
+        [attr.aria-checked]="theme.theme() === 'dark'"
+        (click)="theme.toggle()"
+    >
         <span class="option-icon">
             <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" [size]="18" />
         </span>
         <span class="option-text">Mode sombre</span>
         <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
     </button>
+</section>
 
+<section class="card options" aria-label="Session">
     <button type="button" class="option logout" (click)="auth.logoutAsked.set(true)">
         <span class="option-icon"><app-icon name="logout" [size]="18" /></span>
         <span class="option-text">Se déconnecter</span>

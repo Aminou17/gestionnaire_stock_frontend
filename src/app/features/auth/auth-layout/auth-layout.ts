@@ -14,4 +14,8 @@ export class AuthLayout {
     year = new Date().getFullYear();
     productName = PRODUCT_NAME;
     companyName = COMPANY_NAME;
+
+    // hauteur des barres du graphique d'exemple, en pourcentage
+    bars = [38, 52, 44, 66, 58, 82, 74];
+    days = ["L", "M", "M", "J", "V", "S", "D"];
 }

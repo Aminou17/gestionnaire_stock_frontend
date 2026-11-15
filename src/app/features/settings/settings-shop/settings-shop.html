@@ -1,159 +1,285 @@
 <app-page-header
-    title="Informations de la boutique"
-    subtitle="Coordonnées imprimées sur les tickets"
+    title="Boutique"
+    subtitle="Identité et coordonnées de votre boutique"
     section="Paramètres"
     [back]="backUrl"
     [backLabel]="back.label"
 />
 
-<form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>
-    <div class="section-head">
-        <span class="section-icon"><app-icon name="store" [size]="20" /></span>
-        <div>
-            <h2>Coordonnées</h2>
-            <p class="muted">Ces informations sont imprimées en haut de chaque ticket de caisse.</p>
-        </div>
+@if (settings.isLoading() && !settings.hasValue()) {
+    <div class="layout">
+        <div class="skeleton hero-skeleton"></div>
+        @for (i of [1, 2]; track i) {
+            <div class="skeleton card-skeleton"></div>
+        }
     </div>
-
-    @if (settings.isLoading() && !settings.hasValue()) {
-        @for (i of [1, 2, 3, 4]; track i) {
-            <div class="skeleton field-skeleton"></div>
-        }
-    } @else if (settings.error() && !settings.hasValue()) {
-        <div class="alert alert-error load-error" role="alert">
-            Impossible de charger les informations de la boutique.
-            <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
-                Réessayer
-            </button>
-        </div>
-    } @else {
-        <label class="field">
-            <span>Nom de la boutique</span>
-            <input
-                class="input"
-                type="text"
-                formControlName="name"
-                maxlength="80"
-                autocomplete="organization"
-                [class.invalid]="invalid('name')"
-                [attr.aria-invalid]="invalid('name')"
-            />
-            @if (invalid("name")) {
-                <small class="field-error" role="alert">Le nom est obligatoire.</small>
-            }
-        </label>
-
-        <label class="field">
-            <span>Adresse <small class="muted">(facultative)</small></span>
-            <input
-                class="input"
-                type="text"
-                formControlName="address"
-                maxlength="200"
-                placeholder="Ex. Marché Total, Brazzaville"
-                autocomplete="street-address"
-            />
-        </label>
-
-        <label class="field">
-            <span>Téléphone <small class="muted">(facultatif)</small></span>
-            <input
-                class="input"
-                type="tel"
-                formControlName="phone"
-                maxlength="40"
-                placeholder="Ex. +242 06 123 45 67"
-                autocomplete="tel"
-            />
-        </label>
-
-        <div class="field">
-            <label for="shop-country-code">Indicatif par défaut</label>
-            <div class="country-row">
-                <div class="code-box">
-                    <span class="plus" aria-hidden="true">+</span>
-                    <input
-                        id="shop-country-code"
-                        class="input"
-                        type="text"
-                        inputmode="numeric"
-                        maxlength="4"
-                        autocomplete="off"
-                        formControlName="defaultCountryCode"
-                        aria-describedby="shop-country-help"
-                        [class.invalid]="invalid('defaultCountryCode')"
-                        [attr.aria-invalid]="invalid('defaultCountryCode')"
-                        (input)="onCountryCodeInput($any($event.target))"
-                    />
+} @else if (settings.error() && !settings.hasValue()) {
+    <div class="alert alert-error load-error" role="alert">
+        Impossible de charger les informations de la boutique.
+        <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
+            Réessayer
+        </button>
+    </div>
+} @else {
+    <div class="layout">
+        <form class="forms" [formGroup]="form" (ngSubmit)="save()" novalidate>
+            <section class="card hero">
+                <div class="logo-tile" [class.empty]="!logo()">
+                    @if (logo(); as logo) {
+                        <img [src]="logo" alt="Logo de la boutique" width="160" height="80" />
+                    } @else {
+                        <span aria-hidden="true">{{ initials() || "B" }}</span>
+                    }
                 </div>
-                @if (countryName(); as country) {
-                    <span class="country-name">{{ country }}</span>
-                }
-            </div>
-            @if (invalid("defaultCountryCode")) {
-                <small class="field-error" role="alert">
-                    1 à 4 chiffres, sans 0 au début (ex. 242).
-                </small>
+
+                <div class="hero-text">
+                    <strong class="hero-name">{{ values().name.trim() || "Ma boutique" }}</strong>
+
+                    <div class="logo-actions">
+                        <input
+                            #fileInput
+                            type="file"
+                            accept="image/png,image/jpeg"
+                            hidden
+                            (change)="onLogoChosen($event)"
+                        />
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            [disabled]="logoBusy() || saving()"
+                            (click)="pickLogo()"
+                        >
+                            @if (logoBusy()) {
+                                <span class="spinner"></span>
+                            } @else {
+                                <app-icon name="camera" [size]="16" />
+                            }
+                            {{ logo() ? "Changer" : "Ajouter un logo" }}
+                        </button>
+
+                        @if (logo()) {
+                            <button
+                                type="button"
+                                class="btn btn-outline btn-sm remove"
+                                [disabled]="logoBusy() || saving()"
+                                (click)="removeLogo()"
+                            >
+                                Retirer
+                            </button>
+                        }
+                    </div>
+
+                    <small class="muted">PNG ou JPEG, imprimé en haut des tickets.</small>
+                </div>
+            </section>
+
+            @if (logoMessage(); as message) {
+                <div
+                    class="alert"
+                    [class.alert-success]="message.ok"
+                    [class.alert-error]="!message.ok"
+                    [attr.role]="message.ok ? 'status' : 'alert'"
+                >
+                    {{ message.text }}
+                </div>
             }
-            <small id="shop-country-help" class="muted">
-                Utilisé pour WhatsApp et les appels quand un numéro n'a pas d'indicatif.
-            </small>
-        </div>
 
-        <div class="pair">
-            <label class="field">
-                <span>N° IFU <small class="muted">(facultatif)</small></span>
-                <input
-                    class="input"
-                    type="text"
-                    formControlName="taxId"
-                    maxlength="50"
-                    autocomplete="off"
-                />
-            </label>
+            <section class="card section">
+                <div class="section-head">
+                    <span class="section-icon"><app-icon name="store" [size]="18" /></span>
+                    <div>
+                        <h2>Identité</h2>
+                        <p class="muted">Le nom affiché dans le menu et sur les tickets.</p>
+                    </div>
+                </div>
 
-            <label class="field">
-                <span>RCCM <small class="muted">(facultatif)</small></span>
-                <input
-                    class="input"
-                    type="text"
-                    formControlName="rccm"
-                    maxlength="50"
-                    autocomplete="off"
-                />
-            </label>
-        </div>
+                <label class="field">
+                    <span>Nom de la boutique</span>
+                    <span class="input-wrap">
+                        <app-icon name="store" [size]="16" />
+                        <input
+                            class="input"
+                            type="text"
+                            formControlName="name"
+                            maxlength="80"
+                            autocomplete="organization"
+                            [class.invalid]="invalid('name')"
+                            [attr.aria-invalid]="invalid('name')"
+                        />
+                    </span>
+                    @if (invalid("name")) {
+                        <small class="field-error" role="alert">Le nom est obligatoire.</small>
+                    }
+                </label>
+            </section>
 
-        @if (message(); as message) {
-            <div
-                class="alert"
-                [class.alert-success]="message.ok"
-                [class.alert-error]="!message.ok"
-                [attr.role]="message.ok ? 'status' : 'alert'"
-            >
-                {{ message.text }}
+            <section class="card section" style="--tone: #10b981">
+                <div class="section-head">
+                    <span class="section-icon"><app-icon name="phone" [size]="18" /></span>
+                    <div>
+                        <h2>Coordonnées</h2>
+                        <p class="muted">Pour que vos clients puissent vous joindre.</p>
+                    </div>
+                </div>
+
+                <label class="field">
+                    <span>Adresse <small class="muted">(facultative)</small></span>
+                    <span class="input-wrap">
+                        <app-icon name="map-pin" [size]="16" />
+                        <input
+                            class="input"
+                            type="text"
+                            formControlName="address"
+                            maxlength="200"
+                            placeholder="Ex. Marché Total, Brazzaville"
+                            autocomplete="street-address"
+                        />
+                    </span>
+                </label>
+
+                <label class="field">
+                    <span>Téléphone <small class="muted">(facultatif)</small></span>
+                    <span class="input-wrap">
+                        <app-icon name="phone" [size]="16" />
+                        <input
+                            class="input"
+                            type="tel"
+                            formControlName="phone"
+                            maxlength="40"
+                            placeholder="Ex. +242 06 123 45 67"
+                            autocomplete="tel"
+                        />
+                    </span>
+                </label>
+
+                <div class="field">
+                    <label for="shop-country-code">Indicatif par défaut</label>
+                    <div class="country-row">
+                        <div class="code-box">
+                            <span class="plus" aria-hidden="true">+</span>
+                            <input
+                                id="shop-country-code"
+                                class="input"
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="4"
+                                autocomplete="off"
+                                formControlName="defaultCountryCode"
+                                aria-describedby="shop-country-help"
+                                [class.invalid]="invalid('defaultCountryCode')"
+                                [attr.aria-invalid]="invalid('defaultCountryCode')"
+                                (input)="onCountryCodeInput($any($event.target))"
+                            />
+                        </div>
+                        @if (countryName(); as country) {
+                            <span class="country-name">{{ country }}</span>
+                        }
+                    </div>
+                    @if (invalid("defaultCountryCode")) {
+                        <small class="field-error" role="alert">
+                            1 à 4 chiffres, sans 0 au début (ex. 242).
+                        </small>
+                    }
+                    <small id="shop-country-help" class="muted">
+                        Utilisé pour WhatsApp et les appels quand un numéro n'a pas d'indicatif.
+                    </small>
+                </div>
+            </section>
+
+            <section class="card section" style="--tone: #6366f1">
+                <div class="section-head">
+                    <span class="section-icon"><app-icon name="audit" [size]="18" /></span>
+                    <div>
+                        <h2>Informations légales</h2>
+                        <p class="muted">Imprimées sur les tickets si vous les renseignez.</p>
+                    </div>
+                </div>
+
+                <div class="pair">
+                    <label class="field">
+                        <span>N° IFU <small class="muted">(facultatif)</small></span>
+                        <input
+                            class="input"
+                            type="text"
+                            formControlName="taxId"
+                            maxlength="50"
+                            autocomplete="off"
+                        />
+                    </label>
+
+                    <label class="field">
+                        <span>RCCM <small class="muted">(facultatif)</small></span>
+                        <input
+                            class="input"
+                            type="text"
+                            formControlName="rccm"
+                            maxlength="50"
+                            autocomplete="off"
+                        />
+                    </label>
+                </div>
+            </section>
+
+            @if (message(); as message) {
+                <div
+                    class="alert"
+                    [class.alert-success]="message.ok"
+                    [class.alert-error]="!message.ok"
+                    [attr.role]="message.ok ? 'status' : 'alert'"
+                >
+                    {{ message.text }}
+                </div>
+            }
+
+            <app-settings-history [actions]="['SHOP_SETTINGS_UPDATED']" [version]="saveCount()" />
+
+            @if (form.dirty || saving()) {
+                <div class="savebar" role="region" aria-label="Enregistrement">
+                    <span class="savebar-text">Modifications non enregistrées</span>
+
+                    <button
+                        type="button"
+                        class="btn btn-outline"
+                        [disabled]="saving()"
+                        (click)="cancel()"
+                    >
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                        @if (saving()) {
+                            <span class="spinner"></span>
+                        }
+                        Enregistrer
+                    </button>
+                </div>
+            }
+        </form>
+
+        <aside class="preview-col">
+            <h2 class="preview-title">Aperçu en haut du ticket</h2>
+
+            <div class="ticket" role="img" aria-label="Aperçu de l'en-tête du ticket de caisse">
+                <div class="ticket-head">
+                    @if (logo(); as logo) {
+                        <img class="ticket-logo" [src]="logo" alt="" width="160" height="80" />
+                    }
+                    <strong class="ticket-shop">{{ values().name.trim() || "Ma boutique" }}</strong>
+                    @if (values().address.trim()) {
+                        <span>{{ values().address }}</span>
+                    }
+                    @if (values().phone.trim()) {
+                        <span>Tél. {{ values().phone }}</span>
+                    }
+                    @if (values().taxId.trim()) {
+                        <span>IFU {{ values().taxId }}</span>
+                    }
+                    @if (values().rccm.trim()) {
+                        <span>RCCM {{ values().rccm }}</span>
+                    }
+                </div>
             </div>
-        }
-
-        <div class="actions">
-            <button
-                type="button"
-                class="btn btn-outline"
-                [disabled]="saving() || form.pristine"
-                (click)="cancel()"
-            >
-                Annuler
-            </button>
-            <button type="submit" class="btn btn-primary" [disabled]="saving() || form.pristine">
-                @if (saving()) {
-                    <span class="spinner"></span>
-                }
-                Enregistrer
-            </button>
-        </div>
-
-        <app-settings-history [actions]="['SHOP_SETTINGS_UPDATED']" [version]="saveCount()" />
-    }
-</form>
+        </aside>
+    </div>
+}
 
 <app-unsaved-dialog />

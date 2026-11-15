@@ -4,13 +4,14 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { Router, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { PRODUCT_NAME } from "../../../core/brand";
 import { Icon } from "../../../shared/icon/icon";
 
 @Component({
     selector: "app-login",
     imports: [ReactiveFormsModule, RouterLink, Icon],
     templateUrl: "./login.html",
-    styleUrl: "./login.css",
+    styleUrls: ["../auth-form.css", "./login.css"],
 })
 export class Login {
     private auth = inject(AuthService);
@@ -22,6 +23,8 @@ export class Login {
         password: ["", Validators.required],
         remember: [true],
     });
+
+    productName = PRODUCT_NAME;
 
     loading = signal(false);
     error = signal<string | null>(null);

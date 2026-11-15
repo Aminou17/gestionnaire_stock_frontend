@@ -190,6 +190,10 @@ export const ICONS = {
     ],
     copy: [rect(8, 8, 14, 14, 2), "M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"],
     check: ["M20 6 9 17l-5-5"],
+    "map-pin": [
+        "M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0",
+        circle(12, 10, 3),
+    ],
 } satisfies Record<string, string[]>;
 
 export type IconName = keyof typeof ICONS;

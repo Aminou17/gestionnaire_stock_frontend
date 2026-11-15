@@ -21,6 +21,7 @@ export class AuditLogService {
         if (filters.action) params["action"] = filters.action;
         if (filters.result) params["result"] = filters.result;
         if (filters.category) params["category"] = filters.category;
+        if (filters.search) params["search"] = filters.search;
 
         return this.http.get<AuditLogPage>(`${API_URL}/audit-logs`, { params });
     }

@@ -9,6 +9,8 @@ import { UserService } from "../user.service";
 const moussa: UserAccount = {
     id: 2,
     name: "Moussa Traoré",
+    first_name: "Moussa",
+    last_name: "Traoré",
     email: "moussa@test.com",
     role: "manager",
     is_active: true,

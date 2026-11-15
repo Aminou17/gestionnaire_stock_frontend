@@ -1,25 +1,160 @@
+/* Écrans de connexion : panneau de marque à gauche sur ordinateur, bandeau en haut sur téléphone */
+
 .page {
     display: grid;
-    grid-template-columns: minmax(360px, 480px) 1fr;
+    grid-template-columns: 1fr;
     min-height: 100vh;
     min-height: 100dvh;
+    background: radial-gradient(110% 40% at 50% 0%, #1d3a8a 0%, rgba(29, 58, 138, 0) 70%), #0b1730;
 }
 
-/* Panneau gauche */
-.brand-panel {
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    height: 100dvh;
+/* Bandeau de marque (téléphone et tablette) */
+.mobile-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 24px 24px;
+    color: #fff;
+}
+
+.mobile-hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+    background-size: 20px 20px;
+    mask-image: linear-gradient(180deg, #000, transparent);
+    pointer-events: none;
+}
+
+.hero-icon {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    flex: none;
+    display: grid;
+    place-items: center;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.hero-text {
+    position: relative;
+    display: grid;
+}
+
+.hero-name {
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-title);
+}
+
+.hero-tag {
+    font-size: var(--fs-small);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.content {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 32px 40px;
-    background:
-        radial-gradient(80% 50% at 0% 0%, rgba(59, 130, 246, 0.38), rgba(59, 130, 246, 0) 70%),
-        radial-gradient(70% 45% at 100% 100%, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 0) 70%),
-        #0b1730;
-    color: var(--sidebar-text-strong);
-    overflow: hidden;
+}
+
+/* Feuille blanche arrondie qui porte le formulaire */
+.card {
+    flex: 1;
+    width: 100%;
+    max-width: 520px;
+    align-self: center;
+    padding: 24px 24px calc(24px + env(safe-area-inset-bottom));
+    border: 0;
+    border-radius: 28px 28px 0 0;
+    background: var(--surface);
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.brand-panel {
+    display: none;
+}
+
+/* Tablette : la feuille devient une carte détachée du bas de l'écran */
+@media (min-width: 600px) and (max-width: 1023px) {
+    .card {
+        flex: none;
+        margin-bottom: 48px;
+        padding: 32px;
+        border-radius: 24px;
+        box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
+    }
+}
+
+/* Ordinateur : deux colonnes */
+@media (min-width: 1024px) {
+    .page {
+        grid-template-columns: minmax(480px, 1fr) minmax(480px, 1fr);
+        background: var(--surface);
+    }
+
+    .mobile-hero {
+        display: none;
+    }
+
+    .content {
+        align-items: center;
+        justify-content: center;
+        padding: 48px 32px;
+        background:
+            radial-gradient(70% 45% at 100% 0%, var(--primary-soft), transparent 70%),
+            var(--surface);
+    }
+
+    .card {
+        flex: none;
+        max-width: 400px;
+        padding: 0;
+        border-radius: 0;
+        background: none;
+        box-shadow: none;
+    }
+
+    .brand-panel {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        padding: 32px 48px;
+        overflow: hidden;
+        color: var(--sidebar-text-strong);
+        background:
+            radial-gradient(70% 50% at 0% 0%, rgba(59, 130, 246, 0.42), rgba(59, 130, 246, 0) 70%),
+            radial-gradient(
+                60% 50% at 100% 100%,
+                rgba(99, 102, 241, 0.38),
+                rgba(99, 102, 241, 0) 70%
+            ),
+            #0b1730;
+    }
+
+    /* petits points en filigrane, qui s'effacent vers le bas */
+    .brand-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+        background-size: 24px 24px;
+        mask-image: linear-gradient(180deg, #000 10%, transparent 80%);
+        pointer-events: none;
+    }
+
+    .brand-panel > * {
+        position: relative;
+    }
 }
 
 .brand {
@@ -33,15 +168,18 @@
     height: 40px;
     border-radius: 12px;
     background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
     display: grid;
     place-items: center;
 }
 
 .brand-name {
     font-weight: var(--fw-semibold);
-    font-size: var(--fs-body);
+    font-size: var(--fs-lead);
 }
+
 .brand-sub {
     font-size: var(--fs-caption);
     color: var(--sidebar-sub);
@@ -53,90 +191,169 @@
 
 .pitch h2 {
     margin: 0 0 12px;
-    font-size: var(--fs-kpi);
-    line-height: 1.2;
+    font-size: 32px;
+    line-height: 1.15;
     font-weight: var(--fw-bold);
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
 }
 
 .pitch p {
-    margin: 0 0 28px;
+    max-width: 420px;
+    margin: 0 0 40px;
     color: var(--sidebar-pitch);
     line-height: 1.5;
 }
 
-.pitch ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 14px;
+/* Maquette : un graphique entouré de deux notifications qui flottent doucement */
+.showcase {
+    position: relative;
+    max-width: 440px;
+    padding: 48px 0 44px;
 }
 
-.pitch li {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: var(--sidebar-text-soft);
-    font-size: var(--fs-body);
-}
-
-.tile {
-    width: 32px;
-    height: 32px;
-    flex: none;
-    display: grid;
-    place-items: center;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #93c5fd;
-}
-
-/* petite carte d'exemple, pour donner envie de voir l'intérieur */
-.preview {
-    margin: 0 0 28px;
-    padding: 16px 18px 0;
-    overflow: hidden;
+.main-card {
+    padding: 16px 16px 12px;
     border-radius: 16px;
-    background: linear-gradient(135deg, #3b82f6, #1e40af);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
 }
-.preview-top {
+
+.main-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.85);
+    font-size: var(--fs-small);
+    color: var(--sidebar-pitch);
 }
-.preview-chip {
-    padding: 3px 10px;
+
+.chip-up {
+    padding: 2px 8px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.2);
-    font-size: 12px;
-    font-weight: 600;
-    color: #fff;
+    background: rgba(74, 222, 128, 0.18);
+    color: #86efac;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
 }
-.preview strong {
+
+.main-figure {
     display: block;
-    margin-top: 8px;
-    font-size: 30px;
+    margin: 4px 0 16px;
+    font-size: 28px;
     letter-spacing: -0.02em;
 }
-.preview svg {
-    display: block;
-    width: 100%;
-    height: 56px;
-    margin-top: 6px;
+
+.bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 88px;
 }
-.preview polygon {
-    fill: rgba(255, 255, 255, 0.16);
+
+.bar {
+    flex: 1;
+    border-radius: 6px 6px 2px 2px;
+    background: rgba(147, 197, 253, 0.35);
+    transform-origin: bottom;
+    animation: grow 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.preview polyline {
-    fill: none;
-    stroke: #fff;
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
+
+.bar.last {
+    background: linear-gradient(180deg, #60a5fa, #3b82f6);
+}
+
+.days {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.days span {
+    flex: 1;
+    text-align: center;
+    font-size: var(--fs-micro);
+    color: var(--sidebar-muted);
+}
+
+.mini {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px 8px 8px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.3);
+    color: #0f172a;
+    animation: drift 6s ease-in-out infinite;
+}
+
+.mini-sale {
+    top: 0;
+    right: -24px;
+}
+
+.mini-alert {
+    bottom: 0;
+    left: -24px;
+    animation-delay: -3s;
+}
+
+.mini-icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+}
+
+.mini-icon.ok {
+    background: #e7f6ec;
+    color: #15803d;
+}
+
+.mini-icon.warn {
+    background: #fff1e6;
+    color: #c2410c;
+}
+
+.mini-text {
+    display: grid;
+    line-height: 1.3;
+}
+
+.mini-text strong {
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+}
+
+.mini-text small {
+    font-size: var(--fs-caption);
+    color: #5a6478;
+}
+
+/* chiffres clés, sans promesse chiffrée sur les ventes */
+.figures {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 24px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.figures dt {
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+}
+
+.figures dd {
+    margin: 2px 0 0;
+    font-size: var(--fs-caption);
+    color: var(--sidebar-sub);
 }
 
 footer {
@@ -144,100 +361,21 @@ footer {
     color: var(--sidebar-muted);
 }
 
-/* Formulaire */
-.content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 24px;
-    background:
-        radial-gradient(60% 40% at 100% 0%, var(--primary-soft), transparent 70%),
-        var(--bg);
-}
-
-.card {
-    width: 100%;
-    max-width: 400px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 36px 32px;
-    box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-}
-
-/* Tablette */
-@media (max-width: 1023px) {
-    .page {
-        grid-template-columns: 320px 1fr;
-    }
-    .brand-panel {
-        padding: 28px;
-    }
-    .pitch h2 {
-        font-size: var(--fs-kpi);
-    }
-    .preview {
-        display: none;
+@keyframes grow {
+    from {
+        transform: scaleY(0);
     }
 }
 
-.mobile-hero {
-    display: none;
+@keyframes drift {
+    50% {
+        transform: translateY(-6px);
+    }
 }
 
-/* Mobile : bandeau de marque en haut, formulaire dans une feuille blanche arrondie */
-@media (max-width: 767px) {
-    .page {
-        grid-template-columns: 1fr;
-        background:
-            radial-gradient(120% 50% at 50% 0%, #1e3a8a 0%, rgba(30, 58, 138, 0) 70%),
-            #0b1730;
-    }
-    .brand-panel {
-        display: none;
-    }
-    .content {
-        flex-direction: column;
-        align-items: stretch;
-        justify-content: flex-start;
-        padding: 0;
-        background: none;
-    }
-    .mobile-hero {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        padding: 40px 24px 32px;
-        color: #fff;
-    }
-    .hero-icon {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 8px;
-        display: grid;
-        place-items: center;
-        border-radius: 18px;
-        background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-        box-shadow:
-            0 12px 28px rgba(37, 99, 235, 0.45),
-            inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    }
-    .hero-name {
-        font-size: 24px;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-    }
-    .hero-tag {
-        font-size: 14px;
-        color: rgba(255, 255, 255, 0.7);
-    }
-    .card {
-        flex: 1;
-        max-width: none;
-        padding: 28px 20px calc(28px + env(safe-area-inset-bottom));
-        border: 0;
-        border-radius: 28px 28px 0 0;
-        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
+@media (prefers-reduced-motion: reduce) {
+    .bar,
+    .mini {
+        animation: none;
     }
 }

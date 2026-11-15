@@ -27,11 +27,16 @@ const part = (log: AuditLog, key: "before" | "after") => {
 };
 
 // le nom enregistré au moment de l'action, sinon le nom actuel renvoyé par l'API
-const objectName = (log: AuditLog) =>
-    text(part(log, "after")?.["name"]) ??
-    text(log.details?.["name"]) ??
-    log.entity_name ??
-    (log.entity_id ? `n° ${log.entity_id}` : undefined);
+const objectName = (log: AuditLog) => {
+    const name =
+        text(part(log, "after")?.["name"]) ??
+        text(log.details?.["name"]) ??
+        log.entity_name ??
+        (log.entity_id ? `n° ${log.entity_id}` : undefined);
+
+    // une vente se nomme par son numéro, comme dans la liste des ventes
+    return log.entity_type === "sale" ? name?.replace(/^n° /, "#") : name;
+};
 
 const PAYMENT: Record<string, string> = { CASH: "en espèces", MOBILE_MONEY: "par mobile money" };
 

@@ -10,7 +10,9 @@
     <div class="forms">
         <section class="card section">
             <div class="section-head">
-                <span class="section-icon"><app-icon name="image" [size]="20" /></span>
+                <span class="section-icon" style="--tone: #8b5cf6"
+                    ><app-icon name="image" [size]="18"
+                /></span>
                 <div>
                     <h2>Logo</h2>
                     <p class="muted">
@@ -97,7 +99,9 @@
 
         <form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>
             <div class="section-head">
-                <span class="section-icon"><app-icon name="receipt" [size]="20" /></span>
+                <span class="section-icon" style="--tone: #8b5cf6"
+                    ><app-icon name="receipt" [size]="18"
+                /></span>
                 <div>
                     <h2>Message en bas du ticket</h2>
                     <p class="muted">
@@ -130,7 +134,7 @@
                             backTo: '/settings/receipt',
                             backLabel: 'Retour au ticket de caisse',
                         }"
-                        >Informations de la boutique</a
+                        >Boutique</a
                     >, le préfixe du numéro dans
                     <a
                         routerLink="/settings/sales"
