@@ -22,7 +22,7 @@ import { PageHeader } from "../../layout/page-header/page-header";
         }
         h2 {
             margin: 0 0 8px;
-            font-size: 18px;
+            font-size: var(--fs-heading);
         }
         p {
             margin: 0 0 20px;
