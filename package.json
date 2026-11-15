@@ -1,9 +1,10 @@
 {
-  "name": "gestionnaire-stock-frontend",
+  "name": "boutiki-front",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:reseau": "ng serve --host 0.0.0.0",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -17,6 +18,8 @@
     "@angular/forms": "^22.2.0",
     "@angular/platform-browser": "^22.2.0",
     "@angular/router": "^22.2.0",
+    "@angular/service-worker": "^22.2.5",
+    "html-to-image": "1.11.13",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -28,5 +31,6 @@
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
     "vitest": "^5.0.0"
-  }
+  },
+  "description": "Front Angular de Boutiki"
 }
