@@ -131,4 +131,47 @@ describe("Register", () => {
 
         expect(el.querySelector("app-password-strength")?.textContent).toContain("Excellent");
     });
+
+    it("should preview the shop name and its initials while typing", async () => {
+        component.form.patchValue({ shopName: "Chez Fatou" });
+        await fixture.whenStable();
+
+        const card = el.querySelector(".shop-card")!;
+        expect(card.textContent).toContain("Chez Fatou");
+        expect(card.querySelector(".shop-logo")?.textContent).toContain("CF");
+    });
+
+    it("should tick the email only when it looks complete", async () => {
+        await goToAccountStep();
+
+        component.form.patchValue({ email: "fatou@exemple" });
+        await fixture.whenStable();
+        expect(el.querySelector(".valid-mark")).toBeNull();
+
+        component.form.patchValue({ email: "fatou@exemple.com" });
+        await fixture.whenStable();
+        expect(el.querySelector(".valid-mark")).not.toBeNull();
+    });
+
+    it("should show the success state on the button once the shop is created", async () => {
+        await goToAccountStep();
+        fillAccount();
+        await submit();
+
+        const button = el.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+        expect(button.textContent).toContain("Boutique créée");
+        expect(button.disabled).toBe(true);
+    });
+
+    it("should light up the logo zone while a file is dragged over it", async () => {
+        const zone = el.querySelector(".drop")!;
+
+        zone.dispatchEvent(new Event("dragover", { cancelable: true }));
+        await fixture.whenStable();
+        expect(zone.classList).toContain("dragging");
+
+        zone.dispatchEvent(new Event("dragleave"));
+        await fixture.whenStable();
+        expect(zone.classList).not.toContain("dragging");
+    });
 });
