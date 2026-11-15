@@ -1,0 +1,84 @@
+<dialog
+    #dialog
+    class="sheet"
+    aria-labelledby="customer-form-title"
+    (click)="onBackdrop($event)"
+    (cancel)="onCancel($event)"
+>
+    <form class="body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="head">
+            <h2 id="customer-form-title">
+                {{ editing() ? "Modifier le client" : "Nouveau client" }}
+            </h2>
+            <button type="button" class="close" aria-label="Fermer" (click)="close()">
+                <app-icon name="close" [size]="20" />
+            </button>
+        </div>
+
+        <label class="field">
+            <span>Nom</span>
+            <input
+                #nameInput
+                class="input"
+                type="text"
+                formControlName="name"
+                placeholder="Ex. Mireille Ngoma"
+                maxlength="100"
+                autocomplete="off"
+                [class.invalid]="form.controls.name.touched && form.controls.name.invalid"
+                [attr.aria-invalid]="form.controls.name.touched && form.controls.name.invalid"
+            />
+            @if (form.controls.name.touched && form.controls.name.invalid) {
+                <small class="field-error" role="alert">Le nom est obligatoire.</small>
+            }
+        </label>
+
+        <app-phone-field
+            formControlName="phone"
+            label="Téléphone"
+            [optional]="true"
+            [invalid]="form.controls.phone.touched && form.controls.phone.invalid"
+        />
+
+        <label class="field">
+            <span>Note <small class="muted">(facultatif)</small></span>
+            <textarea
+                class="input"
+                rows="2"
+                formControlName="note"
+                maxlength="500"
+                placeholder="Ex. Préfère les wax bleus, passe le samedi"
+            ></textarea>
+        </label>
+
+        @if (duplicate(); as existing) {
+            <div class="alert alert-warning duplicate" role="alert">
+                <p>
+                    Ce numéro est déjà celui de <strong>{{ existing.name }}</strong
+                    >{{ existing.is_active ? "" : " (désactivé)" }}.
+                </p>
+                <button
+                    type="button"
+                    class="btn btn-outline btn-sm"
+                    (click)="openDuplicate(existing)"
+                >
+                    Ouvrir sa fiche
+                </button>
+            </div>
+        } @else if (formError()) {
+            <div class="alert alert-error" role="alert">{{ formError() }}</div>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="close()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                {{ editing() ? "Enregistrer" : "Ajouter le client" }}
+            </button>
+        </div>
+    </form>
+</dialog>

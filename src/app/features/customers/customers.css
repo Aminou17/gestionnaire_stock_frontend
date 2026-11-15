@@ -1,0 +1,528 @@
+:host {
+    display: grid;
+    gap: 20px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+.list-card {
+    min-width: 0;
+}
+
+.new-customer {
+    white-space: nowrap;
+}
+
+/* barre du haut : recherche, filtre, puces */
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.search {
+    position: relative;
+    flex: 1 1 240px;
+    min-width: 0;
+}
+
+.search app-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search .input {
+    padding-left: 40px;
+}
+
+.phone-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    order: 3;
+    flex: 0 0 100%;
+}
+
+/* filtres choisis dans la fenêtre : petites puces sous Tous et Reste à payer */
+.active-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    order: 4;
+    flex: 0 0 100%;
+}
+
+.chip {
+    gap: 6px;
+    height: 40px;
+}
+
+.chip-count {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.chip[aria-pressed="true"] .chip-count {
+    color: inherit;
+    font-weight: var(--fw-semibold);
+}
+
+/* la puce Reste à payer prend la couleur d'alerte quand elle est active */
+.due-chip[aria-pressed="true"] {
+    border-color: var(--warning);
+    background-color: var(--warning-soft);
+    color: var(--warning);
+}
+
+.filter-wrap {
+    position: relative;
+}
+
+.filter-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.filter-btn.active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+/* petit compteur sur le coin : le nombre de filtres actifs */
+.filter-count {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    border-radius: 9px;
+    background: var(--primary);
+    color: #fff;
+    font-size: var(--fs-micro);
+    font-weight: var(--fw-semibold);
+}
+
+.active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--primary);
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+/* ordinateur : panneau sous le bouton Filtre */
+.filters {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 20;
+    width: 340px;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow-menu);
+}
+
+.filters.open {
+    display: flex;
+}
+
+.sheet-head {
+    display: none;
+}
+
+.sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 19;
+}
+
+.field-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+}
+
+.options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sheet-foot {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 8px;
+}
+
+.list-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 16px;
+}
+
+/* une ligne : pastille, nom, détails, reste à payer, total */
+.rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1.4fr) minmax(0, 1fr) auto 110px;
+    grid-template-areas:
+        "avatar name last due spent"
+        "avatar meta last due spent";
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 2px;
+    min-height: 68px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    color: inherit;
+    text-decoration: none;
+}
+
+/* chaque ligne est un lien dans son li */
+li:last-child > .row {
+    border-bottom: 0;
+}
+
+.row:hover {
+    background: var(--surface-hover);
+}
+
+.avatar {
+    grid-area: avatar;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+}
+
+.av-0 {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+.av-1 {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+.av-2 {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+.av-3 {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.inactive .avatar {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+
+.name {
+    grid-area: name;
+    overflow: hidden;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.inactive .name {
+    color: var(--text-muted);
+}
+
+.meta {
+    grid-area: meta;
+    font-size: var(--fs-small);
+}
+
+.phone-number {
+    white-space: nowrap;
+}
+
+/* sur ordinateur, le nombre d'achats a sa propre colonne */
+.meta-count {
+    display: none;
+}
+
+.last {
+    grid-area: last;
+    font-size: var(--fs-small);
+}
+
+.due {
+    grid-area: due;
+    justify-self: start;
+}
+
+.spent {
+    grid-area: spent;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.reloading {
+    opacity: 0.6;
+    transition: opacity 0.15s;
+}
+
+.more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 56px;
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.more .spinner {
+    border-color: var(--border);
+    border-top-color: var(--primary);
+}
+
+.loading {
+    display: grid;
+    gap: 10px;
+    padding: 16px;
+}
+
+.row-skeleton {
+    height: 68px;
+}
+
+.row:focus-visible,
+.filter-btn:focus-visible,
+.active-chip:focus-visible,
+.sheet-close:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+@media (max-width: 767px) {
+    :host {
+        gap: 12px;
+    }
+
+    .new-customer {
+        width: 36px;
+        height: 36px;
+        min-height: 36px;
+        padding: 0;
+    }
+
+    .new-customer span {
+        display: none;
+    }
+
+    .list-card {
+        background: transparent;
+        border: 0;
+    }
+
+    .toolbar {
+        padding: 0 0 12px;
+        border: 0;
+        gap: 8px;
+    }
+
+    /* sans base fixe, le bouton Filtre reste sur la même ligne que la recherche */
+    .search {
+        flex: 1 1 0;
+    }
+
+    .phone-bar {
+        flex: 0 0 100%;
+        flex-wrap: nowrap;
+        gap: 6px;
+    }
+
+    .chip {
+        padding: 0 10px;
+        font-size: var(--fs-small);
+    }
+
+    .active-chip span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .list-error {
+        margin: 0 0 12px;
+    }
+
+    /* cartes aérées, comme les produits */
+    .rows {
+        display: grid;
+        gap: 12px;
+    }
+
+    .row,
+    li:last-child > .row {
+        grid-template-columns: 40px minmax(0, 1fr) auto;
+        grid-template-areas:
+            "avatar name spent"
+            "avatar meta spent"
+            "avatar due due";
+        column-gap: 12px;
+        min-height: 84px;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+    }
+
+    .row .due {
+        margin-top: 6px;
+    }
+
+    .last {
+        display: none;
+    }
+
+    .meta-count {
+        display: inline;
+    }
+
+    .loading {
+        padding: 0;
+    }
+
+    /* la fenêtre du filtre monte du bas */
+    .filter-wrap {
+        position: static;
+    }
+
+    .filters {
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 41;
+        width: auto;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 16px 16px 0 0;
+        box-shadow: var(--shadow-dialog);
+    }
+
+    .sheet-backdrop {
+        z-index: 40;
+        background: var(--overlay);
+    }
+
+    .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sheet-head h2 {
+        margin: 0;
+        font-size: var(--fs-heading);
+    }
+
+    .sheet-close {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        margin-right: -10px;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+}
+
+/* total des restes à payer, au-dessus de la liste filtrée */
+.due-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.due-summary strong {
+    font-size: var(--fs-h2, 1.25rem);
+}
+
+/* barre de relance sous la ligne : la bordure passe de la ligne à l'ensemble */
+li.with-remind {
+    border-bottom: 1px solid var(--border);
+}
+
+li.with-remind > .row {
+    border-bottom: 0;
+}
+
+li.with-remind:last-child {
+    border-bottom: 0;
+}
+
+.remind-bar {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 16px 12px;
+}
+
+@media (max-width: 767px) {
+    .remind-bar .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
