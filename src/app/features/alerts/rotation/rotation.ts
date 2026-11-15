@@ -1,4 +1,4 @@
-import { Component, ElementRef, afterNextRender, computed, inject, signal } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 
@@ -6,7 +6,10 @@ import { BackState } from "../../../core/back-link";
 import { ProductRotation, RotationSpeed } from "../../../core/stock/low-stock-alert.model";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { Icon } from "../../../shared/icon/icon";
+import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
 import { DaysLeftPipe } from "../../../shared/pipes/days-left.pipe";
+import { categoryTone, productInitials } from "../../products/product-look";
 
 // CLEAR : en stock et sans vente depuis 60 jours, à solder
 type View = "all" | RotationSpeed | "CLEAR";
@@ -17,6 +20,7 @@ const URGENT_DAYS = 14;
 // valeurs de ?vue= : la page Alertes envoie ici avec solder, et la fiche produit y revient avec la vue ouverte
 const viewParams: Record<string, View> = {
     vite: "FAST",
+    normal: "NORMAL",
     lent: "SLOW",
     inactifs: "DORMANT",
     solder: "CLEAR",
@@ -30,9 +34,12 @@ const labels: Record<RotationSpeed, string> = {
     DORMANT: "Ne bouge pas",
 };
 
+const speeds: RotationSpeed[] = ["FAST", "NORMAL", "SLOW", "DORMANT"];
+
 @Component({
     selector: "app-rotation",
-    imports: [RouterLink, PageHeader, DaysLeftPipe],
+    imports: [RouterLink, PageHeader, Icon, PhotoZoom, DaysLeftPipe],
+    host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
     templateUrl: "./rotation.html",
     styleUrl: "./rotation.css",
 })
@@ -51,10 +58,16 @@ export class Rotation {
     tabs: { value: View; label: string }[] = [
         { value: "all", label: "Tous" },
         { value: "FAST", label: "Vite" },
+        { value: "NORMAL", label: "Normal" },
         { value: "SLOW", label: "Lent" },
         { value: "DORMANT", label: "Inactifs" },
         { value: "CLEAR", label: "À solder" },
     ];
+
+    filtersOpen = signal(false);
+    explainOpen = signal(false);
+    zoom = signal<{ src: string; name: string } | null>(null);
+    initials = productInitials;
 
     // la fiche produit ouverte sait ainsi revenir ici, sur le même onglet
     backState = computed<BackState>(() => {
@@ -72,16 +85,6 @@ export class Rotation {
             ? "Rien à solder : chaque produit en stock s'est vendu ces 60 derniers jours."
             : "Aucun produit dans cette catégorie.",
     );
-
-    constructor() {
-        // sur téléphone les onglets défilent : l'onglet choisi depuis la page Alertes doit se voir
-        const host = inject(ElementRef<HTMLElement>);
-        afterNextRender(() => {
-            host.nativeElement
-                .querySelector(".tab.selected")
-                ?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-        });
-    }
 
     urgentCount = computed(
         () =>
@@ -106,6 +109,39 @@ export class Rotation {
             return days === 0 ? "Jamais vendu" : `Jamais vendu, en rayon depuis ${days} j`;
         }
         return days === 0 ? "Dernière vente aujourd'hui" : `Dernière vente il y a ${days} j`;
+    }
+
+    tone(product: ProductRotation) {
+        return categoryTone(product.category_name ?? product.name);
+    }
+
+    zoomImage(event: Event, product: ProductRotation) {
+        event.stopPropagation();
+        if (product.image) this.zoom.set({ src: product.image, name: product.name });
+    }
+
+    // la barre de répartition : la part de chaque vitesse parmi tous les produits
+    shares = computed(() => {
+        const total = this.all().length || 1;
+        return speeds.map((speed) => ({
+            speed,
+            label: labels[speed],
+            count: this.count(speed),
+            width: (this.count(speed) / total) * 100,
+        }));
+    });
+
+    splitLabel = computed(() =>
+        this.shares()
+            .filter((share) => share.count > 0)
+            .map((share) => `${share.label} ${share.count}`)
+            .join(", "),
+    );
+
+    activeLabel = computed(() => this.tabs.find((tab) => tab.value === this.view())?.label);
+
+    select(view: View) {
+        this.view.set(view);
     }
 
     label(speed: RotationSpeed) {

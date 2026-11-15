@@ -1,3 +1,4 @@
+import { signal } from "@angular/core";
 import { HttpErrorResponse } from "@angular/common/http";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ActivatedRoute, convertToParamMap, provideRouter } from "@angular/router";
@@ -72,7 +73,10 @@ describe("SupplierOrder", () => {
                 },
                 {
                     provide: ShopSettingsService,
-                    useValue: { getSettings: () => of({ name: "Awa Bazin" }) },
+                    useValue: {
+                        getSettings: () => of({ name: "Awa Bazin" }),
+                        defaultCountryCode: signal("242"),
+                    },
                 },
             ],
         }).compileComponents();

@@ -1,53 +1,226 @@
 <app-page-header
     title="Rotation des produits"
-    subtitle="Du plus vendu au moins vendu sur 30 jours"
+    subtitle="Vitesse de vente sur les 30 derniers jours"
     section="Stock"
     back="/alerts"
     backLabel="Retour aux alertes"
 />
 
-<section class="card list-card">
-    @if (!rotation.error() && urgentCount() > 0) {
-        <p class="summary">
-            <strong>{{ urgentCount() }}</strong>
-            {{ urgentCount() === 1 ? "produit qui sort vite a" : "produits qui sortent vite ont" }}
-            moins de 14 jours de stock.
-        </p>
-    }
+<section class="card intro">
+    <span class="intro-icon" aria-hidden="true"><app-icon name="trending-up" [size]="20" /></span>
 
+    <div class="intro-body">
+        <h2>Comment lire cette page</h2>
+        <p>
+            La rotation mesure la vitesse à laquelle chaque produit se vend. Elle est calculée sur
+            les 30 derniers jours (ventes moins retours) : cette période est fixe et ne se règle
+            pas.
+        </p>
+
+        <button
+            type="button"
+            class="intro-toggle"
+            [attr.aria-expanded]="explainOpen()"
+            aria-controls="rotation-rules"
+            (click)="explainOpen.set(!explainOpen())"
+        >
+            Comment sont classés les produits ?
+            <app-icon name="chevron-down" [size]="16" [class.turned]="explainOpen()" />
+        </button>
+
+        @if (explainOpen()) {
+            <dl id="rotation-rules" class="rules">
+                <div>
+                    <dt><span class="speed fast">Sort vite</span></dt>
+                    <dd>Le tiers des produits vendus en plus grande quantité.</dd>
+                </div>
+                <div>
+                    <dt><span class="speed normal">Normal</span></dt>
+                    <dd>Le tiers du milieu.</dd>
+                </div>
+                <div>
+                    <dt><span class="speed slow">Sort lentement</span></dt>
+                    <dd>Le tiers des produits vendus en plus petite quantité.</dd>
+                </div>
+                <div>
+                    <dt><span class="speed dormant">Ne bouge pas</span></dt>
+                    <dd>Aucune vente en 30 jours.</dd>
+                </div>
+                <div>
+                    <dt><span class="speed clear">À solder</span></dt>
+                    <dd>En stock, sans vente depuis 60 jours ou plus.</dd>
+                </div>
+            </dl>
+            <p class="rules-note">
+                Les jours restants sont le stock actuel divisé par la vente moyenne par jour. Le
+                classement compare vos produits entre eux : il n'y a pas de quantité fixe. En rouge,
+                un produit qui sort vite avec moins de 14 jours de stock.
+            </p>
+        }
+    </div>
+</section>
+
+@if (!rotation.error() && all().length > 0) {
+    <section class="card summary" aria-label="Répartition des produits">
+        <div class="split" role="img" [attr.aria-label]="'Répartition : ' + splitLabel()">
+            @for (share of shares(); track share.speed) {
+                @if (share.count > 0) {
+                    <i
+                        class="seg {{ share.speed.toLowerCase() }}"
+                        [style.width.%]="share.width"
+                    ></i>
+                }
+            }
+        </div>
+
+        <ul class="legend" aria-hidden="true">
+            @for (share of shares(); track share.speed) {
+                <li><i class="dot {{ share.speed.toLowerCase() }}"></i>{{ share.label }}</li>
+            }
+        </ul>
+
+        @if (urgentCount() > 0) {
+            <p class="urgent-note">
+                <strong>{{ urgentCount() }}</strong>
+                {{
+                    urgentCount() === 1
+                        ? "produit qui sort vite a"
+                        : "produits qui sortent vite ont"
+                }}
+                moins de 14 jours de stock.
+            </p>
+        }
+    </section>
+}
+
+<section class="card list-card">
     @if (!rotation.error()) {
-        <div class="tabs tiles" role="group" aria-label="Afficher">
-            @for (tab of tabs; track tab.value) {
+        <div class="toolbar">
+            <button
+                type="button"
+                class="chip all-chip"
+                [class.selected]="view() === 'all'"
+                [attr.aria-pressed]="view() === 'all'"
+                (click)="select('all')"
+            >
+                Tous <span class="chip-count">{{ count("all") }}</span>
+            </button>
+
+            <!-- ordinateur : une puce par vitesse -->
+            <div class="tabs-inline" role="group" aria-label="Afficher">
+                @for (tab of tabs; track tab.value) {
+                    @if (tab.value !== "all") {
+                        <button
+                            type="button"
+                            class="chip tab"
+                            [class.fast]="tab.value === 'FAST'"
+                            [class.slow]="tab.value === 'SLOW'"
+                            [class.selected]="view() === tab.value"
+                            [attr.aria-pressed]="view() === tab.value"
+                            (click)="select(tab.value)"
+                        >
+                            {{ tab.label }} <span class="chip-count">{{ count(tab.value) }}</span>
+                        </button>
+                    }
+                }
+            </div>
+
+            <!-- téléphone : un bouton Filtre qui ouvre la fenêtre du bas -->
+            <button
+                type="button"
+                class="filter-btn"
+                [class.active]="filtersOpen() || view() !== 'all'"
+                [attr.aria-expanded]="filtersOpen()"
+                aria-label="Filtre"
+                (click)="filtersOpen.set(!filtersOpen())"
+            >
+                <app-icon name="filter" [size]="18" />
+                <span>Filtre</span>
+            </button>
+
+            @if (view() !== "all") {
                 <button
                     type="button"
-                    class="tab"
-                    [class.fast]="tab.value === 'FAST'"
-                    [class.slow]="tab.value === 'SLOW'"
-                    [class.selected]="view() === tab.value"
-                    [attr.aria-pressed]="view() === tab.value"
-                    (click)="view.set(tab.value)"
+                    class="active-chip"
+                    [attr.aria-label]="'Retirer le filtre ' + activeLabel()"
+                    (click)="select('all')"
                 >
-                    {{ tab.label }} <span>{{ count(tab.value) }}</span>
+                    <span>{{ activeLabel() }}</span>
+                    <app-icon name="close" [size]="14" />
                 </button>
             }
         </div>
+
+        <div class="filters" [class.open]="filtersOpen()" role="group" aria-label="Filtres">
+            <div class="sheet-head">
+                <h2>Filtre</h2>
+                <button
+                    type="button"
+                    class="sheet-close"
+                    aria-label="Fermer le filtre"
+                    (click)="filtersOpen.set(false)"
+                >
+                    <app-icon name="close" [size]="20" />
+                </button>
+            </div>
+
+            <div>
+                <span class="field-label">Vitesse de vente</span>
+                <div class="options">
+                    @for (tab of tabs; track tab.value) {
+                        <button
+                            type="button"
+                            class="chip"
+                            [attr.aria-pressed]="view() === tab.value"
+                            (click)="select(tab.value)"
+                        >
+                            {{ tab.label }} <span class="chip-count">{{ count(tab.value) }}</span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="sheet-foot">
+                <button type="button" class="btn btn-outline" (click)="select('all')">
+                    Réinitialiser
+                </button>
+                <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
+                    Voir {{ list().length }} produit{{ list().length > 1 ? "s" : "" }}
+                </button>
+            </div>
+        </div>
+
+        @if (filtersOpen()) {
+            <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
+        }
     }
 
     @if (rotation.isLoading() && !rotation.hasValue()) {
-        <div class="loading">
-            @for (i of [1, 2, 3]; track i) {
+        <div class="loading" aria-busy="true">
+            @for (i of [1, 2, 3, 4]; track i) {
                 <div class="skeleton row-skeleton"></div>
             }
         </div>
     } @else if (rotation.error()) {
         <div class="empty" role="alert">
-            Impossible de charger la rotation des produits.
+            <span class="empty-icon" aria-hidden="true"><app-icon name="alert" [size]="22" /></span>
+            <p>Impossible de charger la rotation des produits.</p>
             <button type="button" class="btn btn-outline btn-sm" (click)="rotation.reload()">
                 Réessayer
             </button>
         </div>
     } @else if (list().length === 0) {
-        <div class="empty" role="status">{{ emptyMessage() }}</div>
+        <div class="empty" role="status">
+            <span class="empty-icon" aria-hidden="true"
+                ><app-icon name="trending-up" [size]="22"
+            /></span>
+            <p>{{ emptyMessage() }}</p>
+            @if (view() !== "all") {
+                <button type="button" class="btn btn-outline btn-sm" (click)="select('all')">
+                    Voir tous les produits
+                </button>
+            }
+        </div>
     } @else {
         <div class="columns" aria-hidden="true">
             <span>Produit</span>
@@ -59,6 +232,21 @@
         <ul class="rows">
             @for (product of list(); track product.id) {
                 <li class="row">
+                    <span class="thumb av-{{ tone(product) }}">
+                        @if (product.image) {
+                            <button
+                                type="button"
+                                class="thumb-zoom"
+                                [attr.aria-label]="'Agrandir la photo de ' + product.name"
+                                (click)="zoomImage($event, product)"
+                            >
+                                <img [src]="product.image" alt="" />
+                            </button>
+                        } @else {
+                            {{ initials(product.name) }}
+                        }
+                    </span>
+
                     <div class="identity">
                         <a
                             class="name"
@@ -67,33 +255,30 @@
                             >{{ product.name }}</a
                         >
                         <div class="meta-line">
-                            <span
-                                class="speed"
-                                [class.fast]="product.speed === 'FAST'"
-                                [class.slow]="product.speed === 'SLOW'"
-                                >{{ label(product.speed) }}</span
-                            >
+                            <span class="speed {{ product.speed.toLowerCase() }}">{{
+                                label(product.speed)
+                            }}</span>
                             @if (product.to_clear) {
-                                <span class="clear">À solder</span>
+                                <span class="speed clear">À solder</span>
                             }
                             @if (product.category_name) {
                                 <span class="meta">{{ product.category_name }}</span>
                             }
-                            @if (product.speed === "DORMANT" && product.idle_days !== null) {
-                                <span class="meta idle">{{ idleLabel(product) }}</span>
-                            }
                         </div>
+                        @if (product.speed === "DORMANT" && product.idle_days !== null) {
+                            <span class="meta idle">{{ idleLabel(product) }}</span>
+                        }
                     </div>
 
                     <div class="figures">
                         <span class="counts">
                             <span class="sold">
-                                <span class="mobile-label">Vendu </span>
+                                <span class="mobile-label">Vendu : </span>
                                 {{ product.sold_last_30_days }}
                             </span>
 
                             <span class="stock">
-                                <span class="mobile-label">En stock </span>
+                                <span class="mobile-label">Stock : </span>
                                 {{ product.theoretical_stock }}
                             </span>
                         </span>
@@ -123,3 +308,7 @@
         </ul>
     }
 </section>
+
+@if (zoom(); as photo) {
+    <app-photo-zoom [src]="photo.src" [name]="photo.name" (closed)="zoom.set(null)" />
+}
