@@ -134,22 +134,66 @@ footer {
     }
 }
 
-/* Mobile : on garde uniquement le formulaire */
+.mobile-hero {
+    display: none;
+}
+
+/* Mobile : bandeau de marque en haut, formulaire dans une feuille blanche arrondie */
 @media (max-width: 767px) {
     .page {
         grid-template-columns: 1fr;
+        background:
+            radial-gradient(120% 50% at 50% 0%, #1e3a8a 0%, rgba(30, 58, 138, 0) 70%),
+            #0b1730;
     }
     .brand-panel {
         display: none;
     }
     .content {
-        padding: 24px 16px;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 0;
+    }
+    .mobile-hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 40px 24px 32px;
+        color: #fff;
+    }
+    .hero-icon {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 8px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+        box-shadow:
+            0 12px 28px rgba(37, 99, 235, 0.45),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    .hero-name {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+    }
+    .hero-tag {
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
     }
     .card {
-        padding: 28px 20px;
+        flex: 1;
+        max-width: none;
+        padding: 28px 20px calc(28px + env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 28px 28px 0 0;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.18);
     }
+    /* la marque est déjà dans le bandeau */
     .logo {
-        width: 48px;
-        height: 48px;
+        display: none;
     }
 }

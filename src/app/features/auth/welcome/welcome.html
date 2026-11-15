@@ -1,0 +1,46 @@
+<div class="screen">
+    <header>
+        <span class="brand">{{ productName }}</span>
+        @if (!isLast()) {
+            <button type="button" class="skip" (click)="finish('/login')">Passer</button>
+        }
+    </header>
+
+    <div class="track" #track (scroll)="onScroll()">
+        @for (slide of slides; track slide.title) {
+            <section class="slide">
+                <div class="art" aria-hidden="true">
+                    <span class="halo"></span>
+                    <span class="disc"><app-icon [name]="slide.icon" [size]="56" /></span>
+                </div>
+                <h1>{{ slide.title }}</h1>
+                <p>{{ slide.text }}</p>
+            </section>
+        }
+    </div>
+
+    <footer>
+        <div class="dots" role="tablist">
+            @for (slide of slides; track slide.title; let i = $index) {
+                <button
+                    type="button"
+                    role="tab"
+                    class="dot"
+                    [class.on]="i === current()"
+                    [attr.aria-selected]="i === current()"
+                    [attr.aria-label]="'Page ' + (i + 1)"
+                    (click)="goTo(i)"
+                ></button>
+            }
+        </div>
+
+        <button type="button" class="cta" (click)="next()">
+            {{ isLast() ? "Créer ma boutique" : "Suivant" }}
+        </button>
+
+        <p class="login-link">
+            Déjà un compte ?
+            <button type="button" (click)="finish('/login')">Se connecter</button>
+        </p>
+    </footer>
+</div>

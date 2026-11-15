@@ -8,6 +8,12 @@
         @for (i of [1, 2, 3, 4]; track i) {
             <div class="skeleton row-skeleton"></div>
         }
+    } @else if (notConfigured()) {
+        <div class="empty">
+            Fixez le seuil à partir duquel un produit passe en alerte, et vous serez prévenu avant
+            la rupture.
+            <a class="btn btn-primary btn-sm" routerLink="/settings/stock">Définir le seuil</a>
+        </div>
     } @else if (error()) {
         <div class="empty">
             Impossible de charger les alertes.

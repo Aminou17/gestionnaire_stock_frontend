@@ -87,6 +87,12 @@ export class Dashboard {
         this.stockAlerts.alerts.hasValue() ? this.stockAlerts.alerts.value() : [],
     );
 
+    // une boutique neuve n'a pas encore fixé son seuil : le backend répond 409, ce n'est pas une panne
+    alertsNotConfigured = computed(() => {
+        const error = this.stockAlerts.alerts.error() as { status?: number; cause?: { status?: number } };
+        return (error?.status ?? error?.cause?.status) === 409;
+    });
+
     // nombre de ruptures et de stocks faibles
     alertCounts = computed(() => {
         const alerts = this.alertList();

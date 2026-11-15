@@ -13,6 +13,7 @@ export class StockAlerts {
     alerts = input<LowStockAlert[]>([]);
     loading = input(false);
     error = input(false);
+    notConfigured = input(false);
     // la page des alertes est réservée à l'admin : l'employé est envoyé vers les produits
     link = input("/alerts");
     retry = output();

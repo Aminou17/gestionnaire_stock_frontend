@@ -179,7 +179,8 @@
         <app-stock-alerts
             [alerts]="alertList()"
             [loading]="stockAlerts.alerts.isLoading()"
-            [error]="!!stockAlerts.alerts.error()"
+            [error]="!!stockAlerts.alerts.error() && !alertsNotConfigured()"
+            [notConfigured]="alertsNotConfigured()"
             link="/alerts"
             (retry)="stockAlerts.alerts.reload()"
         />
