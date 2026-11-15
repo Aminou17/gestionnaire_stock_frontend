@@ -16,7 +16,7 @@ import { ProductService } from "../../../core/stock/product.service";
 import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
 import { StockSettingsService } from "../../../core/stock/stock-settings.service";
 import { SupplierService } from "../../../core/stock/supplier.service";
-import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
+import { resizeAvatar, resizeThumb } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
@@ -376,7 +376,7 @@ export class ProductForm {
         try {
             const [image, thumb] = await Promise.all([
                 resizeAvatar(file, 320, 85000),
-                resizeAvatar(file, 120, 19000),
+                resizeThumb(file),
             ]);
             this.photo.set({ image, thumb });
         } catch (err) {

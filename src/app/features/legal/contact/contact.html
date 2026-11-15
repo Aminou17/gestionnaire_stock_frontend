@@ -1,0 +1,65 @@
+<app-legal-page
+    title="Contact"
+    intro="Une question, un blocage, une idée ? Nous sommes là pour vous aider."
+>
+    <div class="ways">
+        <a class="card way" [href]="mailto">
+            <span class="way-icon mail"><app-icon name="mail" [size]="20" /></span>
+            <span class="way-text">
+                <strong>E-mail</strong>
+                <small class="muted">{{ contact.email }}</small>
+            </span>
+            <app-icon name="arrow-up-right" [size]="16" class="way-arrow" />
+        </a>
+
+        <a class="card way" [href]="whatsapp" target="_blank" rel="noopener">
+            <span class="way-icon wa"><app-whatsapp-icon [size]="20" /></span>
+            <span class="way-text">
+                <strong>WhatsApp</strong>
+                <small class="muted">{{ contact.whatsappDisplay }}</small>
+            </span>
+            <app-icon name="arrow-up-right" [size]="16" class="way-arrow" />
+        </a>
+    </div>
+
+    <p class="hours muted">
+        <app-icon name="clock" [size]="14" />
+        Nous répondons en général sous un jour ouvré, souvent plus vite sur WhatsApp. Ces délais
+        sont indicatifs et sans engagement.
+    </p>
+
+    <section class="faq" aria-labelledby="faq-title">
+        <h2 id="faq-title">Questions fréquentes</h2>
+
+        <div class="card faq-list">
+            @for (item of questions; track item.question; let i = $index) {
+                <div class="item">
+                    <h3>
+                        <button
+                            type="button"
+                            [attr.aria-expanded]="openIndex === i"
+                            [attr.aria-controls]="'faq-' + i"
+                            (click)="toggle(i)"
+                        >
+                            <span>{{ item.question }}</span>
+                            <app-icon
+                                name="chevron-down"
+                                [size]="18"
+                                class="chevron"
+                                [class.open]="openIndex === i"
+                            />
+                        </button>
+                    </h3>
+                    @if (openIndex === i) {
+                        <p [id]="'faq-' + i" class="answer">{{ item.answer }}</p>
+                    }
+                </div>
+            }
+        </div>
+    </section>
+
+    <p class="more muted">
+        Pour en savoir plus : <a routerLink="/privacy">politique de confidentialité</a> et
+        <a routerLink="/terms">conditions d'utilisation</a>.
+    </p>
+</app-legal-page>

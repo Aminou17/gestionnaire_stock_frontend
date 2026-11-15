@@ -85,7 +85,7 @@ describe("Inventories", () => {
         await render(() => of([]));
 
         expect(el.textContent).toContain("Aucun inventaire pour le moment");
-        expect(el.textContent).toContain("Faire un premier inventaire");
+        expect(el.textContent).toContain("Nouvel inventaire");
     });
 
     it("should offer to retry when the loading fails", async () => {

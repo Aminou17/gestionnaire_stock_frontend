@@ -96,6 +96,29 @@ describe("Sidebar", () => {
         expect(adjust.getAttribute("href")).toBe("/products?adjust=1");
     });
 
+    it("should show Settings to everyone and Subscription and help links to the admin", async () => {
+        const admin = await render(true);
+        const links = (el: HTMLElement) =>
+            [...el.querySelectorAll<HTMLAnchorElement>(".secondary a")].map((a) =>
+                a.getAttribute("href"),
+            );
+
+        expect(links(admin)).toEqual([
+            "/settings",
+            "/subscription",
+            "/contact",
+            "/privacy",
+            "/terms",
+        ]);
+    });
+
+    it("should hide Subscription from the manager", async () => {
+        const el = await render(false);
+
+        expect(el.querySelector(".secondary a[href='/subscription']")).toBeNull();
+        expect(el.querySelector(".secondary a[href='/settings']")).not.toBeNull();
+    });
+
     it("should show the default picture, the name and the role in the profile", async () => {
         const el = await render(true);
 

@@ -8,10 +8,11 @@
 
 @if (settings.isLoading() && !settings.hasValue()) {
     <div class="layout">
-        <div class="skeleton hero-skeleton"></div>
-        @for (i of [1, 2]; track i) {
-            <div class="skeleton card-skeleton"></div>
-        }
+        <div class="forms">
+            @for (i of [1, 2, 3]; track i) {
+                <div class="skeleton card-skeleton"></div>
+            }
+        </div>
     </div>
 } @else if (settings.error() && !settings.hasValue()) {
     <div class="alert alert-error load-error" role="alert">
@@ -21,82 +22,82 @@
         </button>
     </div>
 } @else {
-    <div class="layout">
-        <form class="forms" [formGroup]="form" (ngSubmit)="save()" novalidate>
-            <section class="card hero">
-                <div class="logo-tile" [class.empty]="!logo()">
-                    @if (logo(); as logo) {
-                        <img [src]="logo" alt="Logo de la boutique" width="160" height="80" />
-                    } @else {
-                        <span aria-hidden="true">{{ initials() || "B" }}</span>
-                    }
+    <form class="layout" [formGroup]="form" (ngSubmit)="save()" novalidate>
+        <div class="forms">
+            <section class="block" aria-labelledby="shop-identity">
+                <div class="block-head">
+                    <h2 id="shop-identity">Identité</h2>
+                    <p class="muted">Le nom et le logo affichés dans le menu et sur les tickets.</p>
                 </div>
 
-                <div class="hero-text">
-                    <strong class="hero-name">{{ values().name.trim() || "Ma boutique" }}</strong>
-
-                    <div class="logo-actions">
-                        <input
-                            #fileInput
-                            type="file"
-                            accept="image/png,image/jpeg"
-                            hidden
-                            (change)="onLogoChosen($event)"
-                        />
-                        <button
-                            type="button"
-                            class="btn btn-outline btn-sm"
-                            [disabled]="logoBusy() || saving()"
-                            (click)="pickLogo()"
-                        >
-                            @if (logoBusy()) {
-                                <span class="spinner"></span>
+                <div class="card block-card">
+                    <div class="logo-row">
+                        <div class="logo-tile" [class.empty]="!logo()">
+                            @if (logo(); as logo) {
+                                <img
+                                    [src]="logo"
+                                    alt="Logo de la boutique"
+                                    width="160"
+                                    height="80"
+                                />
                             } @else {
-                                <app-icon name="camera" [size]="16" />
+                                <span aria-hidden="true">{{ initials() || "B" }}</span>
                             }
-                            {{ logo() ? "Changer" : "Ajouter un logo" }}
-                        </button>
+                        </div>
 
-                        @if (logo()) {
-                            <button
-                                type="button"
-                                class="btn btn-outline btn-sm remove"
-                                [disabled]="logoBusy() || saving()"
-                                (click)="removeLogo()"
-                            >
-                                Retirer
-                            </button>
-                        }
+                        <div class="logo-text">
+                            <strong>Logo</strong>
+                            <small class="muted">PNG ou JPEG, imprimé en haut des tickets.</small>
+
+                            <div class="logo-actions">
+                                <input
+                                    #fileInput
+                                    type="file"
+                                    accept="image/png,image/jpeg"
+                                    hidden
+                                    (change)="onLogoChosen($event)"
+                                />
+                                <button
+                                    type="button"
+                                    class="btn btn-outline btn-sm"
+                                    [disabled]="logoBusy() || saving()"
+                                    (click)="pickLogo()"
+                                >
+                                    @if (logoBusy()) {
+                                        <span class="spinner"></span>
+                                    } @else {
+                                        <app-icon name="camera" [size]="16" />
+                                    }
+                                    {{ logo() ? "Changer" : "Ajouter un logo" }}
+                                </button>
+
+                                @if (logo()) {
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline btn-sm remove"
+                                        [disabled]="logoBusy() || saving()"
+                                        (click)="removeLogo()"
+                                    >
+                                        Retirer
+                                    </button>
+                                }
+                            </div>
+                        </div>
                     </div>
 
-                    <small class="muted">PNG ou JPEG, imprimé en haut des tickets.</small>
-                </div>
-            </section>
+                    @if (logoMessage(); as message) {
+                        <div
+                            class="alert"
+                            [class.alert-success]="message.ok"
+                            [class.alert-error]="!message.ok"
+                            [attr.role]="message.ok ? 'status' : 'alert'"
+                        >
+                            {{ message.text }}
+                        </div>
+                    }
 
-            @if (logoMessage(); as message) {
-                <div
-                    class="alert"
-                    [class.alert-success]="message.ok"
-                    [class.alert-error]="!message.ok"
-                    [attr.role]="message.ok ? 'status' : 'alert'"
-                >
-                    {{ message.text }}
-                </div>
-            }
-
-            <section class="card section">
-                <div class="section-head">
-                    <span class="section-icon"><app-icon name="store" [size]="18" /></span>
-                    <div>
-                        <h2>Identité</h2>
-                        <p class="muted">Le nom affiché dans le menu et sur les tickets.</p>
-                    </div>
-                </div>
-
-                <label class="field">
-                    <span>Nom de la boutique</span>
-                    <span class="input-wrap">
-                        <app-icon name="store" [size]="16" />
+                    <label class="field">
+                        <span>Nom de la boutique</span>
                         <input
                             class="input"
                             type="text"
@@ -106,26 +107,22 @@
                             [class.invalid]="invalid('name')"
                             [attr.aria-invalid]="invalid('name')"
                         />
-                    </span>
-                    @if (invalid("name")) {
-                        <small class="field-error" role="alert">Le nom est obligatoire.</small>
-                    }
-                </label>
+                        @if (invalid("name")) {
+                            <small class="field-error" role="alert">Le nom est obligatoire.</small>
+                        }
+                    </label>
+                </div>
             </section>
 
-            <section class="card section" style="--tone: #10b981">
-                <div class="section-head">
-                    <span class="section-icon"><app-icon name="phone" [size]="18" /></span>
-                    <div>
-                        <h2>Coordonnées</h2>
-                        <p class="muted">Pour que vos clients puissent vous joindre.</p>
-                    </div>
+            <section class="block" aria-labelledby="shop-contact">
+                <div class="block-head">
+                    <h2 id="shop-contact">Coordonnées</h2>
+                    <p class="muted">Pour que vos clients puissent vous joindre.</p>
                 </div>
 
-                <label class="field">
-                    <span>Adresse <small class="muted">(facultative)</small></span>
-                    <span class="input-wrap">
-                        <app-icon name="map-pin" [size]="16" />
+                <div class="card block-card">
+                    <label class="field">
+                        <span>Adresse</span>
                         <input
                             class="input"
                             type="text"
@@ -134,13 +131,11 @@
                             placeholder="Ex. Marché Total, Brazzaville"
                             autocomplete="street-address"
                         />
-                    </span>
-                </label>
+                        <small class="muted">Facultative. Imprimée sur le ticket.</small>
+                    </label>
 
-                <label class="field">
-                    <span>Téléphone <small class="muted">(facultatif)</small></span>
-                    <span class="input-wrap">
-                        <app-icon name="phone" [size]="16" />
+                    <label class="field">
+                        <span>Téléphone</span>
                         <input
                             class="input"
                             type="tel"
@@ -149,55 +144,53 @@
                             placeholder="Ex. +242 06 123 45 67"
                             autocomplete="tel"
                         />
-                    </span>
-                </label>
+                        <small class="muted">Facultatif. Imprimé sur le ticket.</small>
+                    </label>
 
-                <div class="field">
-                    <label for="shop-country-code">Indicatif par défaut</label>
-                    <div class="country-row">
-                        <div class="code-box">
-                            <span class="plus" aria-hidden="true">+</span>
-                            <input
-                                id="shop-country-code"
-                                class="input"
-                                type="text"
-                                inputmode="numeric"
-                                maxlength="4"
-                                autocomplete="off"
-                                formControlName="defaultCountryCode"
-                                aria-describedby="shop-country-help"
-                                [class.invalid]="invalid('defaultCountryCode')"
-                                [attr.aria-invalid]="invalid('defaultCountryCode')"
-                                (input)="onCountryCodeInput($any($event.target))"
-                            />
+                    <div class="field">
+                        <label for="shop-country-code">Indicatif par défaut</label>
+                        <div class="country-row">
+                            <div class="code-box">
+                                <span class="plus" aria-hidden="true">+</span>
+                                <input
+                                    id="shop-country-code"
+                                    class="input"
+                                    type="text"
+                                    inputmode="numeric"
+                                    maxlength="4"
+                                    autocomplete="off"
+                                    formControlName="defaultCountryCode"
+                                    aria-describedby="shop-country-help"
+                                    [class.invalid]="invalid('defaultCountryCode')"
+                                    [attr.aria-invalid]="invalid('defaultCountryCode')"
+                                    (input)="onCountryCodeInput($any($event.target))"
+                                />
+                            </div>
+                            @if (countryName(); as country) {
+                                <span class="country-name">{{ country }}</span>
+                            }
                         </div>
-                        @if (countryName(); as country) {
-                            <span class="country-name">{{ country }}</span>
+                        @if (invalid("defaultCountryCode")) {
+                            <small class="field-error" role="alert">
+                                1 à 4 chiffres, sans 0 au début (ex. 242).
+                            </small>
                         }
-                    </div>
-                    @if (invalid("defaultCountryCode")) {
-                        <small class="field-error" role="alert">
-                            1 à 4 chiffres, sans 0 au début (ex. 242).
+                        <small id="shop-country-help" class="muted">
+                            Utilisé pour WhatsApp et les appels quand un numéro n'a pas d'indicatif.
                         </small>
-                    }
-                    <small id="shop-country-help" class="muted">
-                        Utilisé pour WhatsApp et les appels quand un numéro n'a pas d'indicatif.
-                    </small>
+                    </div>
                 </div>
             </section>
 
-            <section class="card section" style="--tone: #6366f1">
-                <div class="section-head">
-                    <span class="section-icon"><app-icon name="audit" [size]="18" /></span>
-                    <div>
-                        <h2>Informations légales</h2>
-                        <p class="muted">Imprimées sur les tickets si vous les renseignez.</p>
-                    </div>
+            <section class="block" aria-labelledby="shop-legal">
+                <div class="block-head">
+                    <h2 id="shop-legal">Informations légales</h2>
+                    <p class="muted">Imprimées sur les tickets si vous les renseignez.</p>
                 </div>
 
-                <div class="pair">
+                <div class="card block-card">
                     <label class="field">
-                        <span>N° IFU <small class="muted">(facultatif)</small></span>
+                        <span>N° IFU</span>
                         <input
                             class="input"
                             type="text"
@@ -205,10 +198,11 @@
                             maxlength="50"
                             autocomplete="off"
                         />
+                        <small class="muted">Facultatif. Identifiant fiscal unique.</small>
                     </label>
 
                     <label class="field">
-                        <span>RCCM <small class="muted">(facultatif)</small></span>
+                        <span>N° RCCM</span>
                         <input
                             class="input"
                             type="text"
@@ -216,6 +210,7 @@
                             maxlength="50"
                             autocomplete="off"
                         />
+                        <small class="muted">Facultatif. Registre du commerce.</small>
                     </label>
                 </div>
             </section>
@@ -230,33 +225,13 @@
                     {{ message.text }}
                 </div>
             }
+        </div>
 
-            <app-settings-history [actions]="['SHOP_SETTINGS_UPDATED']" [version]="saveCount()" />
-
-            @if (form.dirty || saving()) {
-                <div class="savebar" role="region" aria-label="Enregistrement">
-                    <span class="savebar-text">Modifications non enregistrées</span>
-
-                    <button
-                        type="button"
-                        class="btn btn-outline"
-                        [disabled]="saving()"
-                        (click)="cancel()"
-                    >
-                        Annuler
-                    </button>
-                    <button type="submit" class="btn btn-primary" [disabled]="saving()">
-                        @if (saving()) {
-                            <span class="spinner"></span>
-                        }
-                        Enregistrer
-                    </button>
-                </div>
-            }
-        </form>
-
-        <aside class="preview-col">
-            <h2 class="preview-title">Aperçu en haut du ticket</h2>
+        <aside class="block preview-col" aria-labelledby="shop-preview">
+            <div class="block-head">
+                <h2 id="shop-preview">Aperçu du ticket</h2>
+                <p class="muted">L'en-tête tel qu'il sera imprimé.</p>
+            </div>
 
             <div class="ticket" role="img" aria-label="Aperçu de l'en-tête du ticket de caisse">
                 <div class="ticket-head">
@@ -279,7 +254,34 @@
                 </div>
             </div>
         </aside>
-    </div>
+
+        <app-settings-history
+            class="history"
+            [actions]="['SHOP_SETTINGS_UPDATED']"
+            [version]="saveCount()"
+        />
+
+        @if (form.dirty || saving()) {
+            <div class="savebar" role="region" aria-label="Enregistrement">
+                <span class="savebar-text">Modifications non enregistrées</span>
+
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="saving()"
+                    (click)="cancel()"
+                >
+                    Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="saving()">
+                    @if (saving()) {
+                        <span class="spinner"></span>
+                    }
+                    Enregistrer les modifications
+                </button>
+            </div>
+        }
+    </form>
 }
 
 <app-unsaved-dialog />

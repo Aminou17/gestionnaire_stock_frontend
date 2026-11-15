@@ -314,7 +314,7 @@
         }
     } @else {
         <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
-        @if (sales.error() && page() === 1) {
+        @if (sales.error()) {
             <div class="alert alert-error list-error" role="alert">
                 Impossible de charger les ventes.
                 <button type="button" class="btn btn-outline btn-sm" (click)="sales.reload()">
@@ -333,7 +333,7 @@
         </section>
 
         <div class="table-wrap">
-            <table [class.reloading]="sales.isLoading() && page() === 1">
+            <table [class.reloading]="sales.isLoading()">
                 <thead>
                     <tr>
                         <th>N°</th>
@@ -447,18 +447,11 @@
             }
         </div>
 
-        <!-- en vue, ce repère déclenche le chargement des 20 ventes suivantes -->
-        @if (hasMore()) {
-            <div #sentinel class="more">
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                    Chargement…
-                } @else if (sales.error()) {
-                    <button type="button" class="btn btn-outline btn-sm" (click)="sales.reload()">
-                        Réessayer
-                    </button>
-                }
-            </div>
-        }
+        <app-pagination
+            [total]="total()"
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [attached]="true"
+        />
     }
 </section>

@@ -34,6 +34,22 @@ export const routes: Routes = [
         ],
     },
     {
+        // pages publiques : visibles avec ou sans session
+        path: "privacy",
+        title: "Politique de confidentialité",
+        loadComponent: () => import("./features/legal/privacy/privacy").then((m) => m.Privacy),
+    },
+    {
+        path: "terms",
+        title: "Conditions d'utilisation",
+        loadComponent: () => import("./features/legal/terms/terms").then((m) => m.Terms),
+    },
+    {
+        path: "contact",
+        title: "Contact",
+        loadComponent: () => import("./features/legal/contact/contact").then((m) => m.Contact),
+    },
+    {
         path: "welcome",
         title: "Bienvenue",
         canActivate: [guestGuard],
@@ -156,6 +172,13 @@ export const routes: Routes = [
                 canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/audit-logs/audit-logs").then((m) => m.AuditLogs),
+            },
+            {
+                path: "subscription",
+                title: "Abonnement",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/subscription/subscription").then((m) => m.Subscription),
             },
             {
                 path: "inventories",

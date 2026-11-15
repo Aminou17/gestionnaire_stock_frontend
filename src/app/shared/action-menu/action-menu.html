@@ -1,0 +1,52 @@
+<button
+    #trigger
+    type="button"
+    class="more-btn"
+    aria-haspopup="menu"
+    [attr.aria-expanded]="open()"
+    [attr.aria-label]="label()"
+    [disabled]="disabled()"
+    (click)="toggle()"
+>
+    <app-icon [name]="icon()" />
+</button>
+
+<div
+    #panel
+    class="panel"
+    popover="auto"
+    role="menu"
+    [attr.aria-label]="title() ?? label()"
+    (toggle)="onToggle($event)"
+>
+    @if (title()) {
+        <strong class="sheet-title">{{ title() }}</strong>
+    }
+
+    @for (item of items(); track item.id) {
+        @if (item.link) {
+            <a
+                role="menuitem"
+                class="item"
+                [class.danger]="item.danger"
+                [routerLink]="item.link"
+                (click)="pick(item)"
+            >
+                <app-icon [name]="item.icon" [size]="18" />
+                {{ item.label }}
+            </a>
+        } @else {
+            <button
+                type="button"
+                role="menuitem"
+                class="item"
+                [class.danger]="item.danger"
+                [disabled]="item.disabled"
+                (click)="pick(item)"
+            >
+                <app-icon [name]="item.icon" [size]="18" />
+                {{ item.label }}
+            </button>
+        }
+    }
+</div>

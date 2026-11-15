@@ -10,7 +10,7 @@ import { AuthService } from "../../../core/auth/auth.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { ProductService } from "../../../core/stock/product.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
-import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
+import { resizeAvatar, resizeThumb } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ProductForm } from "../product-form/product-form";
@@ -96,7 +96,7 @@ export class ProductPage {
         try {
             const [image, thumb] = await Promise.all([
                 resizeAvatar(file, 320, 85000),
-                resizeAvatar(file, 80, 15000),
+                resizeThumb(file),
             ]);
             this.sendPhoto(image, thumb);
         } catch (err) {

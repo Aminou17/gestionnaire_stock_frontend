@@ -157,9 +157,7 @@ app-page-header {
 
 /* focus clavier bien visible, en clair comme en sombre */
 .name:focus-visible,
-.more-btn:focus-visible,
-.chip:focus-visible,
-.menu button:focus-visible {
+.chip:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
@@ -171,69 +169,6 @@ app-page-header {
 .reloading {
     opacity: 0.6;
     transition: opacity 0.15s;
-}
-
-.row-menu {
-    position: relative;
-}
-
-.more-btn {
-    width: 40px;
-    height: 40px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-muted);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-}
-
-.more-btn:hover,
-.more-btn[aria-expanded="true"] {
-    background: var(--neutral-soft);
-    color: var(--text);
-}
-
-.menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 4px);
-    z-index: 10;
-    width: 170px;
-    padding: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow-menu);
-}
-
-.menu button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 40px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font-size: var(--fs-body);
-    text-align: left;
-    cursor: pointer;
-}
-
-.menu button:hover {
-    background: var(--surface-hover);
-}
-
-.menu button.danger {
-    color: var(--danger);
-}
-
-.menu button.danger:hover {
-    background: var(--danger-soft);
 }
 
 .loading {
@@ -352,17 +287,6 @@ app-page-header {
 
     .loading {
         padding: 0;
-    }
-
-    /* cibles tactiles de 44 px minimum */
-    .more-btn {
-        width: 44px;
-        height: 44px;
-        margin-right: -8px;
-    }
-
-    .menu button {
-        min-height: 44px;
     }
 
     .fab {

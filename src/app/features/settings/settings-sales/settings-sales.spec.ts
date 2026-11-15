@@ -95,7 +95,7 @@ describe("SettingsSales", () => {
             ticketPrefix: "AB",
             defaultMaxDiscount: null,
         });
-        expect(el.textContent).toContain("Réglages des ventes enregistrés.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("should refuse a prefix with a space", async () => {
@@ -122,11 +122,11 @@ describe("SettingsSales", () => {
 
         await type("ticketPrefix", "ZZ");
         await submit();
-        expect(el.textContent).toContain("Réglages des ventes enregistrés.");
+        expect(el.textContent).toContain("Enregistré.");
 
         await type("ticketPrefix", "ZY");
 
-        expect(el.textContent).not.toContain("Réglages des ventes enregistrés.");
+        expect(el.textContent).not.toContain("Enregistré.");
     });
 
     it("should ask before leaving with unsaved changes", async () => {

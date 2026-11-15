@@ -28,11 +28,15 @@ describe("Sales", () => {
     let el: HTMLElement;
     let getSalesPage: ReturnType<typeof vi.fn>;
 
-    async function render(isAdmin = true, sales = [sale(6), sale(5, "CANCELLED")]) {
+    async function render(
+        isAdmin = true,
+        sales = [sale(6), sale(5, "CANCELLED")],
+        total = sales.length,
+    ) {
         getSalesPage = vi.fn((filters: SaleFilters) =>
             of({
                 data: sales,
-                total: sales.length,
+                total,
                 counters: {
                     all: 5,
                     active: 4,
@@ -104,6 +108,23 @@ describe("Sales", () => {
         el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
         await fixture.whenStable();
 
+        expect(getSalesPage).toHaveBeenLastCalledWith(
+            expect.objectContaining({ status: "CANCELLED", page: 1 }),
+        );
+    });
+
+    it("should page through the sales and return to page 1 when a filter changes", async () => {
+        await render(true, [sale(6)], 80);
+        expect(text()).toContain("1–25 sur 80");
+
+        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
+        await fixture.whenStable();
+        expect(getSalesPage).toHaveBeenLastCalledWith(
+            expect.objectContaining({ page: 2, limit: 25 }),
+        );
+
+        el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
+        await fixture.whenStable();
         expect(getSalesPage).toHaveBeenLastCalledWith(
             expect.objectContaining({ status: "CANCELLED", page: 1 }),
         );

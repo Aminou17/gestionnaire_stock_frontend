@@ -54,6 +54,9 @@ export class SettingsPassword implements HasUnsavedChanges {
     savingPassword = signal(false);
     passwordMessage = signal<{ ok: boolean; text: string } | null>(null);
 
+    sendingReset = signal(false);
+    resetMessage = signal<{ ok: boolean; text: string } | null>(null);
+
     constructor() {
         // dirty est faux après un reset : seule une saisie de l'utilisateur efface le message
         this.passwordForm.valueChanges
@@ -76,6 +79,29 @@ export class SettingsPassword implements HasUnsavedChanges {
         const dirty = this.passwordForm.dirty;
 
         return !dirty || this.leaveDialog().ask();
+    }
+
+    // même appel que la page Mot de passe oublié, avec l'adresse du compte connecté
+    sendReset() {
+        const email = this.auth.user()?.email;
+        if (!email || this.sendingReset()) return;
+
+        this.sendingReset.set(true);
+        this.resetMessage.set(null);
+
+        this.auth.forgotPassword(email).subscribe({
+            next: () => {
+                this.sendingReset.set(false);
+                this.resetMessage.set({ ok: true, text: "Un lien vous a été envoyé par e-mail." });
+            },
+            error: (err) => {
+                this.sendingReset.set(false);
+                this.resetMessage.set({
+                    ok: false,
+                    text: errorText(err, "Impossible d'envoyer le lien. Réessayez."),
+                });
+            },
+        });
     }
 
     savePassword() {

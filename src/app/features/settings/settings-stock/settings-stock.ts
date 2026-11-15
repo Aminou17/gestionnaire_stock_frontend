@@ -99,14 +99,14 @@ export class SettingsStock implements HasUnsavedChanges {
                     this.form.enable({ emitEvent: false });
                     this.saveCount.update((n) => n + 1);
                     this.settings.set(settings);
-                    this.message.set({ ok: true, text: "Seuil enregistré." });
+                    this.message.set({ ok: true, text: "Enregistré." });
                 },
                 error: (err) => {
                     this.saving.set(false);
                     this.form.enable({ emitEvent: false });
                     this.message.set({
                         ok: false,
-                        text: errorText(err, "Impossible d'enregistrer le seuil."),
+                        text: errorText(err, "Impossible d'enregistrer. Réessayez."),
                     });
                 },
             });

@@ -5,7 +5,9 @@ import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 
+import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Icon } from "../../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../../shared/pagination/pagination";
 import { NewShopDialog } from "../new-shop-dialog/new-shop-dialog";
 import { OwnedShop, ShopStatus } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
@@ -15,15 +17,17 @@ type View = "all" | ShopStatus;
 
 @Component({
     selector: "app-shops",
-    imports: [DatePipe, FormsModule, RouterLink, Icon, NewShopDialog],
+    imports: [DatePipe, FormsModule, RouterLink, Icon, ActionMenu, NewShopDialog, Pagination],
     templateUrl: "./shops.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shops.css"],
-    host: {
-        "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuFor.set(null)",
-    },
 })
 export class Shops {
+    protected shopActions: ActionItem[] = [
+        { id: "open", label: "Voir la fiche", icon: "eye" },
+        { id: "trial", label: "Modifier l'essai", icon: "clock" },
+        { id: "suspend", label: "Suspendre la boutique", icon: "ban", danger: true },
+    ];
+
     private owner = inject(OwnerShopService);
     private router = inject(Router);
 
@@ -35,7 +39,6 @@ export class Shops {
 
     search = signal("");
     view = signal<View>("all");
-    menuFor = signal<number | null>(null);
 
     all = computed(() => (this.shops.hasValue() ? this.shops.value() : []));
     activeCount = computed(() => this.all().filter((s) => s.status === "ACTIVE").length);
@@ -56,6 +59,12 @@ export class Shops {
         );
     });
 
+    paging = clientPaging(
+        () => this.list(),
+        "shops",
+        () => this.search() + this.view(),
+    );
+
     // boutique en cours de suspension, en attente de confirmation
     pending = signal<OwnedShop | null>(null);
     updating = signal<number | null>(null);
@@ -72,7 +81,6 @@ export class Shops {
     savingTrial = signal(false);
 
     askTrial(shop: OwnedShop) {
-        this.menuFor.set(null);
         this.trialShop.set(shop);
         this.trialDays.set(null);
         this.trialError.set(null);
@@ -115,7 +123,6 @@ export class Shops {
     }
 
     openShop(shop: OwnedShop) {
-        this.menuFor.set(null);
         this.router.navigate(["/owner/shops", shop.id]);
     }
 
@@ -123,18 +130,13 @@ export class Shops {
         this.newShop().open();
     }
 
-    toggleMenu(id: number) {
-        this.menuFor.set(this.menuFor() === id ? null : id);
-    }
-
-    onDocumentClick(event: Event) {
-        if (!(event.target as HTMLElement).closest(".row-menu")) {
-            this.menuFor.set(null);
-        }
+    onMenu(shop: OwnedShop, action: string) {
+        if (action === "open") this.openShop(shop);
+        if (action === "trial") this.askTrial(shop);
+        if (action === "suspend") this.askSuspend(shop);
     }
 
     askSuspend(shop: OwnedShop) {
-        this.menuFor.set(null);
         this.pending.set(shop);
         this.actionError.set(null);
         this.confirm().nativeElement.showModal();

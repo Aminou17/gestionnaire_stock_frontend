@@ -92,7 +92,7 @@
         </div>
 
         <ul class="rows" [class.reloading]="users.isLoading()">
-            @for (user of list(); track user.id) {
+            @for (user of paging.visible(); track user.id) {
                 <li class="row" [class.inactive]="!user.is_active" (click)="openUser(user)">
                     <div class="who">
                         <app-avatar class="avatar" [photo]="user.avatar" aria-hidden="true" />
@@ -149,59 +149,24 @@
                                 Restaurer
                             </button>
                         } @else {
-                            <div class="row-menu" (click)="$event.stopPropagation()">
-                                <button
-                                    type="button"
-                                    class="more-btn"
-                                    aria-haspopup="menu"
-                                    [attr.aria-expanded]="menuFor() === user.id"
-                                    [attr.aria-label]="'Actions pour ' + user.name"
-                                    (click)="toggleMenu(user.id)"
-                                >
-                                    <app-icon name="more" />
-                                </button>
-                                @if (menuFor() === user.id) {
-                                    <div class="menu" role="menu">
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            (click)="editUser(user)"
-                                        >
-                                            <app-icon name="edit" [size]="16" />
-                                            Modifier
-                                        </button>
-                                        @if (isMe(user)) {
-                                            <a role="menuitem" routerLink="/settings/account">
-                                                <app-icon name="key" [size]="16" />
-                                                Mon mot de passe
-                                            </a>
-                                        } @else {
-                                            <button
-                                                type="button"
-                                                role="menuitem"
-                                                (click)="resetPassword(user)"
-                                            >
-                                                <app-icon name="key" [size]="16" />
-                                                Nouveau mot de passe
-                                            </button>
-                                            <button
-                                                type="button"
-                                                role="menuitem"
-                                                class="danger"
-                                                (click)="askDelete(user)"
-                                            >
-                                                <app-icon name="trash" [size]="16" />
-                                                Supprimer
-                                            </button>
-                                        }
-                                    </div>
-                                }
-                            </div>
+                            <app-action-menu
+                                [items]="menuItems(user)"
+                                [label]="'Actions pour ' + user.name"
+                                [title]="user.name"
+                                (picked)="onMenu(user, $event)"
+                            />
                         }
                     </div>
                 </li>
             }
         </ul>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+            [attached]="true"
+        />
     }
 </section>
 

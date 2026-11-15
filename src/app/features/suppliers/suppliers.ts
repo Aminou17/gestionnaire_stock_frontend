@@ -14,7 +14,9 @@ import { Router } from "@angular/router";
 import { Supplier } from "../../core/stock/supplier.model";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { formatPhone } from "../../shared/phone";
 import { SupplierForm } from "./supplier-form/supplier-form";
@@ -24,15 +26,16 @@ type View = "active" | "deleted";
 // Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-suppliers",
-    imports: [PageHeader, Icon, SupplierForm],
+    imports: [PageHeader, Icon, ActionMenu, SupplierForm, Pagination],
     templateUrl: "./suppliers.html",
     styleUrl: "./suppliers.css",
-    host: {
-        "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuFor.set(null)",
-    },
 })
 export class Suppliers {
+    protected rowActions: ActionItem[] = [
+        { id: "edit", label: "Modifier", icon: "edit" },
+        { id: "delete", label: "Supprimer", icon: "trash", danger: true },
+    ];
+
     private supplierService = inject(SupplierService);
     private router = inject(Router);
     private shop = inject(ShopSettingsService);
@@ -46,7 +49,6 @@ export class Suppliers {
 
     search = signal("");
     view = signal<View>("active");
-    menuFor = signal<number | null>(null);
 
     activeCount = computed(() => this.all().filter((s) => s.is_active).length);
     deletedCount = computed(() => this.all().filter((s) => !s.is_active).length);
@@ -64,6 +66,12 @@ export class Suppliers {
         );
     });
 
+    paging = clientPaging(
+        () => this.list(),
+        "suppliers",
+        () => this.search() + this.view(),
+    );
+
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
     // suppression
@@ -76,7 +84,6 @@ export class Suppliers {
 
     selectView(view: View) {
         this.view.set(view);
-        this.menuFor.set(null);
         this.restoreError.set(null);
     }
 
@@ -84,14 +91,9 @@ export class Suppliers {
         this.router.navigate(["/suppliers", supplier.id]);
     }
 
-    toggleMenu(id: number) {
-        this.menuFor.set(this.menuFor() === id ? null : id);
-    }
-
-    onDocumentClick(event: Event) {
-        if (!(event.target as HTMLElement).closest(".row-menu")) {
-            this.menuFor.set(null);
-        }
+    onMenu(supplier: Supplier, action: string) {
+        if (action === "edit") this.editSupplier(supplier);
+        if (action === "delete") this.askDelete(supplier);
     }
 
     newSupplier() {
@@ -99,7 +101,6 @@ export class Suppliers {
     }
 
     editSupplier(supplier: Supplier) {
-        this.menuFor.set(null);
         this.supplierForm().openEdit(supplier);
     }
 
@@ -111,7 +112,6 @@ export class Suppliers {
     }
 
     askDelete(supplier: Supplier) {
-        this.menuFor.set(null);
         this.toDelete.set(supplier);
         this.deleteError.set(null);
         this.confirmDialog().nativeElement.showModal();

@@ -20,6 +20,7 @@ import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { ProductService } from "../../core/stock/product.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { DaysLeftPipe } from "../../shared/pipes/days-left.pipe";
 
 type View = "all" | "out" | "low";
@@ -41,7 +42,7 @@ interface AlertGroup {
 
 @Component({
     selector: "app-alerts",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, DaysLeftPipe],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, DaysLeftPipe, Pagination],
     templateUrl: "./alerts.html",
     styleUrl: "./alerts.css",
     host: {
@@ -122,7 +123,7 @@ export class Alerts {
     });
 
     // un bloc par fournisseur, le plus urgent en premier ; les produits sans fournisseur à la fin
-    groups = computed(() => {
+    allGroups = computed(() => {
         const byKey = new Map<string, AlertGroup>();
         for (const alert of this.list()) {
             const key = alert.supplier_id === null ? "none" : String(alert.supplier_id);
@@ -141,6 +142,25 @@ export class Alerts {
             ...groups.filter((g) => g.key !== "none"),
             ...groups.filter((g) => g.key === "none"),
         ];
+    });
+
+    // la pagination suit l'ordre des blocs : un fournisseur peut donc être coupé entre deux pages
+    paging = clientPaging(
+        () => this.allGroups().flatMap((group) => group.items),
+        "alerts",
+        () => [this.view(), this.search(), this.supplierId(), this.categoryId()].join("|"),
+    );
+
+    // les blocs de la page affichée, avec le nombre total de produits de chaque fournisseur
+    groups = computed(() => {
+        const shown = new Set(this.paging.visible().map((alert) => alert.id));
+        return this.allGroups()
+            .map((group) => ({
+                ...group,
+                total: group.items.length,
+                items: group.items.filter((alert) => shown.has(alert.id)),
+            }))
+            .filter((group) => group.items.length > 0);
     });
 
     // la fiche produit ouverte sait ainsi revenir ici, avec le même onglet et les mêmes filtres

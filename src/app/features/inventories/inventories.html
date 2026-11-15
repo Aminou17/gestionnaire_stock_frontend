@@ -36,14 +36,10 @@
             title="Aucun inventaire pour le moment"
             text="Comptez le stock du rayon : les écarts avec le stock du logiciel apparaîtront ici."
         >
-            <a routerLink="/inventories/new" class="btn btn-primary">
-                Faire un premier inventaire
-            </a>
+            <a routerLink="/inventories/new" class="btn btn-primary"> Nouvel inventaire </a>
         </app-empty-state>
     </section>
 } @else {
-    @let list = inventories.value();
-
     <section class="card list-card table-card">
         <div class="table-wrap">
             <table>
@@ -58,7 +54,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @for (inventory of list; track inventory.id) {
+                    @for (inventory of paging.visible(); track inventory.id) {
                         <tr (click)="openInventory(inventory)">
                             <td>
                                 <a
@@ -95,11 +91,18 @@
                 </tbody>
             </table>
         </div>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+            [attached]="true"
+        />
     </section>
 
     <!-- version téléphone : une carte par inventaire -->
     <ul class="cards">
-        @for (inventory of list; track inventory.id) {
+        @for (inventory of paging.visible(); track inventory.id) {
             <li>
                 <a
                     class="inventory-card"
@@ -143,4 +146,11 @@
             </li>
         }
     </ul>
+
+    <app-pagination
+        class="cards-pager"
+        [total]="paging.total()"
+        [(page)]="paging.page"
+        [(pageSize)]="paging.pageSize"
+    />
 }

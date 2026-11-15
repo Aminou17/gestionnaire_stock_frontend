@@ -98,13 +98,13 @@
             } @else {
                 Aucune boutique pour le moment.
                 <button type="button" class="btn btn-outline btn-sm" (click)="openNewShop()">
-                    Créer la première boutique
+                    Nouvelle boutique
                 </button>
             }
         </div>
     } @else {
         <ul class="shops">
-            @for (shop of list(); track shop.id) {
+            @for (shop of paging.visible(); track shop.id) {
                 <li class="shop" [class.suspended]="shop.status === 'SUSPENDED'">
                     <span class="shop-icon" aria-hidden="true">{{ shop.name.charAt(0) }}</span>
 
@@ -156,48 +156,13 @@
                     <!-- pas de badge pour une boutique normale, seulement Suspendue -->
                     <div class="shop-status">
                         @if (shop.status === "ACTIVE") {
-                            <div class="row-menu">
-                                <button
-                                    type="button"
-                                    class="more-btn"
-                                    aria-haspopup="menu"
-                                    [attr.aria-expanded]="menuFor() === shop.id"
-                                    [attr.aria-label]="'Actions pour ' + shop.name"
-                                    [disabled]="updating() === shop.id"
-                                    (click)="toggleMenu(shop.id)"
-                                >
-                                    <app-icon name="more" />
-                                </button>
-                                @if (menuFor() === shop.id) {
-                                    <div class="menu" role="menu">
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            (click)="openShop(shop)"
-                                        >
-                                            <app-icon name="eye" [size]="16" />
-                                            Voir la fiche
-                                        </button>
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            (click)="askTrial(shop)"
-                                        >
-                                            <app-icon name="clock" [size]="16" />
-                                            Modifier l'essai
-                                        </button>
-                                        <button
-                                            type="button"
-                                            role="menuitem"
-                                            class="danger"
-                                            (click)="askSuspend(shop)"
-                                        >
-                                            <app-icon name="ban" [size]="16" />
-                                            Suspendre la boutique
-                                        </button>
-                                    </div>
-                                }
-                            </div>
+                            <app-action-menu
+                                [items]="shopActions"
+                                [label]="'Actions pour ' + shop.name"
+                                [title]="shop.name"
+                                [disabled]="updating() === shop.id"
+                                (picked)="onMenu(shop, $event)"
+                            />
                         } @else {
                             <span class="badge badge-warning">Suspendue</span>
                             <button
@@ -219,6 +184,13 @@
                 </li>
             }
         </ul>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+            [attached]="true"
+        />
     }
 </section>
 

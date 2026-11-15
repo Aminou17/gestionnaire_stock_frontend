@@ -74,7 +74,7 @@ describe("Shops", () => {
         (el.querySelectorAll(".kpi")[2] as HTMLButtonElement).click();
         await fixture.whenStable();
 
-        const names = [...el.querySelectorAll(".shop strong")].map((e) => e.textContent);
+        const names = [...el.querySelectorAll(".shop a strong")].map((e) => e.textContent);
         expect(names).toEqual(["Chez Fatou"]);
     });
 
@@ -86,7 +86,7 @@ describe("Shops", () => {
         fixture.componentInstance.search.set("fatou");
         await fixture.whenStable();
 
-        const names = [...fixture.nativeElement.querySelectorAll(".shop strong")].map(
+        const names = [...fixture.nativeElement.querySelectorAll(".shop a strong")].map(
             (e: Element) => e.textContent,
         );
         expect(names).toEqual(["Chez Fatou"]);
@@ -98,7 +98,7 @@ describe("Shops", () => {
 
         (el.querySelector(".more-btn") as HTMLButtonElement).click();
         await fixture.whenStable();
-        (el.querySelector(".menu .danger") as HTMLButtonElement).click();
+        (el.querySelector(".item.danger") as HTMLButtonElement).click();
         await fixture.whenStable();
         expect(service.setStatus).not.toHaveBeenCalled();
         expect(el.querySelector("#suspend-title")?.textContent).toContain("Suspendre Awa Bazin");
@@ -144,13 +144,12 @@ describe("Shops", () => {
 
         (el.querySelector(".more-btn") as HTMLButtonElement).click();
         await fixture.whenStable();
-        const trialItem = Array.from(el.querySelectorAll<HTMLButtonElement>(".menu button")).find(
-            (b) => b.textContent?.includes("Modifier l'essai"),
+        const trialItem = Array.from(el.querySelectorAll<HTMLButtonElement>(".item")).find((b) =>
+            b.textContent?.includes("Modifier l'essai"),
         );
         trialItem!.click();
         await fixture.whenStable();
 
-        expect(el.querySelector(".menu")).toBeNull();
         expect(el.querySelector("#trial-title")?.textContent).toContain("Essai de Awa Bazin");
         expect(fixture.componentInstance.trialShop()?.id).toBe(1);
     });

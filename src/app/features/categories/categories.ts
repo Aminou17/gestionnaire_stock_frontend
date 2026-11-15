@@ -16,25 +16,28 @@ import { AuthService } from "../../core/auth/auth.service";
 import { Category } from "../../core/stock/category.model";
 import { CategoryService } from "../../core/stock/category.service";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 
 type View = "active" | "deleted";
 
 @Component({
     selector: "app-categories",
-    imports: [ReactiveFormsModule, PageHeader, Icon],
+    imports: [ReactiveFormsModule, PageHeader, Icon, ActionMenu, Pagination],
     templateUrl: "./categories.html",
     styleUrl: "./categories.css",
-    host: {
-        "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuFor.set(null)",
-    },
 })
 export class Categories {
     private categoryService = inject(CategoryService);
     private router = inject(Router);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
+
+    protected rowActions: ActionItem[] = [
+        { id: "edit", label: "Modifier", icon: "edit" },
+        { id: "delete", label: "Supprimer", icon: "trash", danger: true },
+    ];
 
     private formDialog = viewChild.required<ElementRef<HTMLDialogElement>>("formBox");
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirmBox");
@@ -45,7 +48,6 @@ export class Categories {
 
     search = signal("");
     view = signal<View>("active");
-    menuFor = signal<number | null>(null);
 
     activeCount = computed(() => this.all().filter((c) => c.is_active).length);
     deletedCount = computed(() => this.all().filter((c) => !c.is_active).length);
@@ -58,6 +60,12 @@ export class Categories {
             (c) => c.is_active !== showDeleted && c.name.toLowerCase().includes(search),
         );
     });
+
+    paging = clientPaging(
+        () => this.list(),
+        "categories",
+        () => this.search() + this.view(),
+    );
 
     // formulaire de création / modification
     editing = signal<Category | null>(null);
@@ -81,7 +89,6 @@ export class Categories {
 
     selectView(view: View) {
         this.view.set(view);
-        this.menuFor.set(null);
         this.restoreError.set(null);
     }
 
@@ -89,14 +96,9 @@ export class Categories {
         this.router.navigate(["/categories", category.id]);
     }
 
-    toggleMenu(id: number) {
-        this.menuFor.set(this.menuFor() === id ? null : id);
-    }
-
-    onDocumentClick(event: Event) {
-        if (!(event.target as HTMLElement).closest(".row-menu")) {
-            this.menuFor.set(null);
-        }
+    onMenu(category: Category, action: string) {
+        if (action === "edit") this.editCategory(category);
+        if (action === "delete") this.askDelete(category);
     }
 
     newCategory() {
@@ -104,7 +106,6 @@ export class Categories {
     }
 
     editCategory(category: Category) {
-        this.menuFor.set(null);
         this.openForm(category);
     }
 
@@ -167,7 +168,6 @@ export class Categories {
     }
 
     askDelete(category: Category) {
-        this.menuFor.set(null);
         this.toDelete.set(category);
         this.deleteError.set(null);
         this.confirmDialog().nativeElement.showModal();

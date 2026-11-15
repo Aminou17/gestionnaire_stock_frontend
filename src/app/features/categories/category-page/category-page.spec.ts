@@ -190,7 +190,7 @@ describe("CategoryPage", () => {
     it("should not offer to add, edit or delete to the manager", async () => {
         await render();
 
-        expect(text()).not.toContain("Ajouter un produit");
+        expect(text()).not.toContain("Nouveau produit");
         expect(el.querySelector(".manage")).toBeNull();
         expect(el.querySelector("app-product-form")).toBeNull();
     });
@@ -199,7 +199,7 @@ describe("CategoryPage", () => {
         await render({ admin: true });
 
         expect(el.querySelector(".sheet .actions .btn-primary")?.textContent).toContain(
-            "Ajouter un produit",
+            "Nouveau produit",
         );
         expect(text()).toContain("Voir les produits");
         expect(el.querySelector(".manage")?.textContent).toContain("Modifier");
@@ -209,7 +209,7 @@ describe("CategoryPage", () => {
     it("should offer only to add a product when the category is empty", async () => {
         await render({ admin: true, category: { ...wax, product_count: 0 } });
 
-        expect(text()).toContain("Ajouter un produit");
+        expect(text()).toContain("Nouveau produit");
         expect(text()).not.toContain("Voir les produits");
         expect(el.querySelector("a.count-link")).toBeNull();
     });

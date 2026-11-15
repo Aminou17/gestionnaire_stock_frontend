@@ -87,7 +87,7 @@
                                 [attr.aria-pressed]="status() === 'inactive'"
                                 (click)="selectStatus('inactive')"
                             >
-                                Désactivés
+                                Supprimés
                             </button>
                         </div>
                     </div>
@@ -173,7 +173,7 @@
                 text="Essayez un autre nom ou retirez un filtre."
             >
                 <button type="button" class="btn btn-outline" (click)="resetFilters()">
-                    Tout afficher
+                    Réinitialiser les filtres
                 </button>
             </app-empty-state>
         } @else {
@@ -184,7 +184,7 @@
             >
                 <button type="button" class="btn btn-primary" (click)="newCustomer()">
                     <app-icon name="plus" [size]="18" />
-                    Ajouter un client
+                    Nouveau client
                 </button>
             </app-empty-state>
         }
@@ -206,7 +206,7 @@
             </div>
         }
 
-        <ul class="rows" [class.reloading]="customers.isLoading() && page() === 1">
+        <ul class="rows" [class.reloading]="customers.isLoading()">
             @for (customer of list(); track customer.id) {
                 <li [class.with-remind]="unpaid()">
                     <a
@@ -242,7 +242,7 @@
                         </small>
 
                         @if (!customer.is_active) {
-                            <span class="badge badge-neutral due">Désactivé</span>
+                            <span class="badge badge-neutral due">Supprimé</span>
                         } @else if (customer.due_amount > 0) {
                             <span class="badge badge-warning due">
                                 Reste à payer {{ customer.due_amount | fcfa }}
@@ -275,23 +275,12 @@
             }
         </ul>
 
-        <!-- en vue, ce repère déclenche le chargement des clients suivants -->
-        @if (hasMore()) {
-            <div #sentinel class="more">
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                    Chargement…
-                } @else if (customers.error()) {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        (click)="customers.reload()"
-                    >
-                        Réessayer
-                    </button>
-                }
-            </div>
-        }
+        <app-pagination
+            [total]="total()"
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [attached]="true"
+        />
     }
 </section>
 

@@ -77,7 +77,7 @@ describe("SettingsStock", () => {
         await typeAndSubmit("5");
 
         expect(updateSettings).toHaveBeenCalledWith(5);
-        expect(el.textContent).toContain("Seuil enregistré.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("should refuse a negative threshold", async () => {

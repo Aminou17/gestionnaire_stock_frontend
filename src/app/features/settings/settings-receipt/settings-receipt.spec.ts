@@ -135,7 +135,7 @@ describe("SettingsReceipt", () => {
             rccm: "",
             receiptFooter: "Merci et à bientôt.",
         });
-        expect(el.textContent).toContain("Message du ticket enregistré.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("should link to the shop information", async () => {
@@ -188,7 +188,7 @@ describe("SettingsReceipt", () => {
 
         await chooseFile();
 
-        expect(el.textContent).toContain("Impossible d'enregistrer le logo.");
+        expect(el.textContent).toContain("Impossible d'enregistrer le logo. Réessayez.");
     });
 
     it("should delete the logo", async () => {

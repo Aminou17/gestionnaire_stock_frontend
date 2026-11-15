@@ -173,7 +173,7 @@ describe("Categories", () => {
         await render();
         el.querySelector<HTMLButtonElement>(".more-btn")!.click();
         await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".menu button")!.click();
+        el.querySelector<HTMLButtonElement>(".item")!.click();
         await fixture.whenStable();
 
         expect(el.querySelector<HTMLInputElement>("dialog input")!.value).toBe("Bazin riche");
@@ -185,7 +185,7 @@ describe("Categories", () => {
         await render();
         el.querySelectorAll<HTMLButtonElement>(".more-btn")[0].click();
         await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".menu .danger")!.click();
+        el.querySelector<HTMLButtonElement>(".item.danger")!.click();
         await fixture.whenStable();
 
         expect(text()).toContain("contient 3 produits");
@@ -196,7 +196,7 @@ describe("Categories", () => {
         await render();
         el.querySelectorAll<HTMLButtonElement>(".more-btn")[1].click();
         await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".menu .danger")!.click();
+        el.querySelectorAll<HTMLButtonElement>(".item.danger")[1].click();
         await fixture.whenStable();
         el.querySelector<HTMLButtonElement>("dialog .btn-danger")!.click();
 

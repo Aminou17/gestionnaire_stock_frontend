@@ -103,7 +103,7 @@ describe("SettingsShop", () => {
                 receiptFooter: "Ni repris ni échangé.",
             }),
         );
-        expect(el.textContent).toContain("Informations enregistrées.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("should show the default country code and its country", async () => {
@@ -161,7 +161,6 @@ describe("SettingsShop", () => {
         await type("name", "Chez Awa");
 
         expect(el.querySelector(".ticket")!.textContent).toContain("Chez Awa");
-        expect(el.querySelector(".hero-name")!.textContent).toContain("Chez Awa");
     });
 
     it("should restore the saved values on cancel", async () => {
@@ -204,10 +203,10 @@ describe("SettingsShop", () => {
 
         await type("address", "Marché Total");
         await submit();
-        expect(el.textContent).toContain("Informations enregistrées.");
+        expect(el.textContent).toContain("Enregistré.");
 
         await type("address", "Marché Total 2");
 
-        expect(el.textContent).not.toContain("Informations enregistrées.");
+        expect(el.textContent).not.toContain("Enregistré.");
     });
 });

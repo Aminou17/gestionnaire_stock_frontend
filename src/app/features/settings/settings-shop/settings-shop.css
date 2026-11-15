@@ -1,18 +1,47 @@
 .layout {
     display: grid;
-    gap: 16px;
+    gap: 24px;
     width: 100%;
     max-width: 1040px;
 }
 
 .forms {
     display: grid;
-    gap: 16px;
+    gap: 24px;
     min-width: 0;
 }
 
-.forms .section {
-    max-width: none;
+.card-skeleton {
+    height: 180px;
+}
+
+/* une section : titre et phrase d'aide au-dessus de la carte, comme dans Shopify */
+.block {
+    display: grid;
+    gap: 12px;
+    min-width: 0;
+}
+
+.block-head h2 {
+    margin: 0;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+}
+
+.block-head p {
+    margin: 4px 0 0;
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+.block-card {
+    display: grid;
+    gap: 24px;
+    padding: 24px;
+}
+
+.field small {
+    font-size: var(--fs-caption);
 }
 
 @media (min-width: 1024px) {
@@ -26,42 +55,36 @@
         position: sticky;
         top: 24px;
     }
+
+    .history,
+    .savebar {
+        grid-column: 1 / -1;
+    }
 }
 
-.hero-skeleton {
-    height: 120px;
-}
-
-.card-skeleton {
-    height: 180px;
-}
-
-/* en-tête : logo et nom, comme la fiche d'une boutique Shopify */
-.hero {
+.logo-row {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 20px;
-    background: linear-gradient(135deg, var(--primary-soft) 0%, var(--surface) 70%);
 }
 
 .logo-tile {
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    width: 88px;
-    height: 88px;
+    width: 80px;
+    height: 80px;
     overflow: hidden;
     border: 1px solid var(--border);
-    border-radius: 20px;
+    border-radius: 16px;
     background: var(--logo-bg);
 }
 
 .logo-tile img {
     width: auto;
-    max-width: 72px;
+    max-width: 64px;
     height: auto;
-    max-height: 72px;
+    max-height: 64px;
     object-fit: contain;
 }
 
@@ -70,59 +93,35 @@
     background: linear-gradient(145deg, #3b82f6, #1d4ed8);
     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
     color: #fff;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: var(--fw-bold);
 }
 
-.hero-text {
+.logo-text {
     display: grid;
     justify-items: start;
-    gap: 8px;
+    gap: 4px;
     min-width: 0;
 }
 
-.hero-name {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: var(--fs-heading);
+.logo-text strong {
+    font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
+}
+
+.logo-text small {
+    font-size: var(--fs-caption);
 }
 
 .logo-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+    margin-top: 8px;
 }
 
 .remove {
     color: var(--danger);
-}
-
-/* champ avec une icône discrète à gauche */
-.input-wrap {
-    position: relative;
-    display: block;
-}
-
-.input-wrap app-icon {
-    position: absolute;
-    top: 50%;
-    left: 12px;
-    translate: 0 -50%;
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.input-wrap .input {
-    padding-left: 38px;
-}
-
-.pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
 }
 
 .country-row {
@@ -156,13 +155,6 @@
     font-size: var(--fs-small);
 }
 
-.preview-title {
-    margin: 0 0 8px;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-    font-weight: var(--fw-semibold);
-}
-
 /* barre d'enregistrement : n'existe que lorsqu'il y a des changements */
 .savebar {
     position: sticky;
@@ -194,23 +186,8 @@
 }
 
 @media (max-width: 767px) {
-    .pair {
-        grid-template-columns: 1fr;
-    }
-
-    .hero {
+    .block-card {
         padding: 16px;
-    }
-
-    .logo-tile {
-        width: 72px;
-        height: 72px;
-        border-radius: 16px;
-    }
-
-    .logo-tile img {
-        max-width: 56px;
-        max-height: 56px;
     }
 
     .logo-actions .btn-sm {
@@ -227,14 +204,8 @@
         flex-basis: 100%;
     }
 
-    .savebar .btn {
+    .savebar .btn-primary {
         flex: 1;
-    }
-
-    .preview-col {
-        justify-self: center;
-        width: 100%;
-        max-width: 340px;
     }
 }
 

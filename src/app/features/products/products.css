@@ -453,22 +453,6 @@ td.num small {
     color: var(--danger);
 }
 
-.more {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 56px;
-    color: var(--text-muted);
-    font-size: var(--fs-body);
-}
-
-/* le spinner global est blanc (boutons bleus) : ici il suit le texte */
-.more .spinner {
-    border-color: var(--border);
-    border-top-color: var(--primary);
-}
-
 .loading {
     display: grid;
     gap: 10px;
@@ -876,10 +860,10 @@ td.num small {
     color: var(--primary-text);
 }
 
-/* vue grille : un catalogue de grandes photos */
+/* vue grille : une vignette nette par produit, texte centré dessous */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
     gap: 16px;
     margin: 0;
     padding: 16px;
@@ -903,30 +887,17 @@ td.num small {
     box-shadow: var(--shadow-menu);
 }
 
-.gphoto {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 1;
-    font-size: var(--fs-kpi);
-    font-weight: var(--fw-semibold);
-}
-
-.gphoto img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .gmenu {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 4px;
+    right: 4px;
 }
 
+/* bouton rond dans le coin, hors de la vignette */
 .gmenu .more-btn {
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: var(--surface);
-    box-shadow: var(--shadow-menu);
 }
 
 .gbody {
@@ -934,9 +905,11 @@ td.num small {
     align-content: start;
     gap: 4px;
     padding: 12px;
+    text-align: center;
 }
 
 .gbody .name-link {
+    text-align: center;
     display: -webkit-box;
     overflow: hidden;
     -webkit-line-clamp: 2;
@@ -951,8 +924,8 @@ td.num small {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
-    gap: 8px;
+    justify-content: center;
+    gap: 4px 8px;
     margin-top: 4px;
 }
 
@@ -1074,16 +1047,11 @@ td.num small {
         padding: 0;
     }
 
-    /* carreaux compacts : photo en 4/3 au lieu d'un grand carré */
+    /* carreaux compacts : vignette nette et texte dessous */
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
         padding: 0;
-    }
-
-    .gphoto {
-        aspect-ratio: 4 / 3;
-        font-size: var(--fs-heading);
     }
 
     .gbody {

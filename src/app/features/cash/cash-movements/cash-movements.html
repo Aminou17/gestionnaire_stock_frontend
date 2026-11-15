@@ -129,7 +129,7 @@
                 <div class="skeleton row-skeleton"></div>
             }
         </div>
-    } @else if (movements.error() && (list().length === 0 || page() === 1)) {
+    } @else if (movements.error()) {
         <div class="empty">
             Impossible de charger les mouvements.
             <button type="button" class="btn btn-outline btn-sm" (click)="movements.reload()">
@@ -157,21 +157,11 @@
             }
         </div>
 
-        @if (hasMore()) {
-            <div #sentinel class="more">
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                    Chargement…
-                } @else if (movements.error()) {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        (click)="movements.reload()"
-                    >
-                        Réessayer
-                    </button>
-                }
-            </div>
-        }
+        <app-pagination
+            [total]="total()"
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [attached]="true"
+        />
     }
 </section>

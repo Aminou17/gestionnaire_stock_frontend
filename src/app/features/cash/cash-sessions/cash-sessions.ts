@@ -1,16 +1,6 @@
 import { CashTabs } from "../cash-tabs/cash-tabs";
 import { DatePipe, formatDate } from "@angular/common";
-import {
-    Component,
-    LOCALE_ID,
-    ElementRef,
-    computed,
-    effect,
-    inject,
-    linkedSignal,
-    signal,
-    viewChild,
-} from "@angular/core";
+import { Component, LOCALE_ID, computed, inject, linkedSignal, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { Router, RouterLink } from "@angular/router";
 
@@ -21,13 +11,22 @@ import { ExportFormat } from "../../../core/export-format";
 import { ExportMenu } from "../../../shared/export-menu/export-menu";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
 import { Icon } from "../../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
-
-const PAGE_SIZE = 20;
 
 @Component({
     selector: "app-cash-sessions",
-    imports: [CashTabs, RouterLink, DatePipe, PageHeader, FcfaPipe, PeriodFilter, ExportMenu, Icon],
+    imports: [
+        CashTabs,
+        RouterLink,
+        DatePipe,
+        PageHeader,
+        FcfaPipe,
+        PeriodFilter,
+        ExportMenu,
+        Icon,
+        Pagination,
+    ],
     templateUrl: "./cash-sessions.html",
     styleUrl: "./cash-sessions.css",
 })
@@ -37,9 +36,8 @@ export class CashSessions {
     private cashService = inject(CashSessionService);
     private router = inject(Router);
 
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
-
     page = signal(1);
+    pageSize = storedPageSize("cash-sessions");
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     status = signal<CashSessionFilters["status"]>(null);
 
@@ -57,9 +55,9 @@ export class CashSessions {
     filtered = computed(() => this.range().period !== "all" || this.status() !== null);
 
     sessions = rxResource({
-        params: () => ({ page: this.page(), filters: this.filters() }),
+        params: () => ({ page: this.page(), size: this.pageSize(), filters: this.filters() }),
         stream: ({ params }) =>
-            this.cashService.getSessions(params.page, PAGE_SIZE, params.filters),
+            this.cashService.getSessions(params.page, params.size, params.filters),
     });
 
     selectRange(range: PeriodRange) {
@@ -96,46 +94,15 @@ export class CashSessions {
         });
     }
 
-    // sessions déjà chargées : les pages suivantes s'ajoutent au bout
-    list = linkedSignal<CashSessionPage | undefined, CashSession[]>({
+    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    last = linkedSignal<CashSessionPage | undefined, CashSessionPage | undefined>({
         source: () => (this.sessions.hasValue() ? this.sessions.value() : undefined),
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.pagination.page === 1 || !previous) return res.data;
-
-            const known = new Set(previous.value.map((session) => session.id));
-            return [...previous.value, ...res.data.filter((session) => !known.has(session.id))];
-        },
+        computation: (next, previous) => next ?? previous?.value,
     });
 
-    // on garde le dernier total pendant le chargement de la page suivante
-    total = linkedSignal<CashSessionPage | undefined, number>({
-        source: () => (this.sessions.hasValue() ? this.sessions.value() : undefined),
-        computation: (res, previous) => res?.pagination.total ?? previous?.value ?? 0,
-    });
-    firstLoad = computed(() => this.sessions.isLoading() && this.list().length === 0);
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.sessions.isLoading() && this.page() > 1);
-
-    constructor() {
-        // charger la page suivante quand le bas de la liste devient visible
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && this.hasMore() && !this.sessions.isLoading()) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
-        });
-    }
+    list = computed(() => this.last()?.data ?? []);
+    total = computed(() => this.last()?.pagination.total ?? 0);
+    firstLoad = computed(() => this.sessions.isLoading() && !this.last());
 
     // pastille d'état : écart de la clôture, ou caisse encore ouverte
     state(session: CashSession) {

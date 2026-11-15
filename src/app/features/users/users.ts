@@ -10,12 +10,14 @@ import {
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Router, RouterLink } from "@angular/router";
+import { Router } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { getRoleLabel } from "../../core/auth/role-label";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { Avatar } from "../../shared/avatar/avatar";
 import { PasswordDialog } from "./password-dialog/password-dialog";
 import { UserForm } from "./user-form/user-form";
@@ -28,13 +30,9 @@ type View = "active" | "deleted";
 // Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-users",
-    imports: [RouterLink, PageHeader, Icon, Avatar, UserForm, PasswordDialog],
+    imports: [PageHeader, Icon, Avatar, ActionMenu, UserForm, PasswordDialog, Pagination],
     templateUrl: "./users.html",
     styleUrl: "./users.css",
-    host: {
-        "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuFor.set(null)",
-    },
 })
 export class Users {
     private userService = inject(UserService);
@@ -52,7 +50,6 @@ export class Users {
 
     search = signal("");
     view = signal<View>("active");
-    menuFor = signal<number | null>(null);
 
     activeCount = computed(() => this.all().filter((u) => u.is_active).length);
     deletedCount = computed(() => this.all().filter((u) => !u.is_active).length);
@@ -67,6 +64,12 @@ export class Users {
                 (u.name.toLowerCase().includes(search) || u.email.toLowerCase().includes(search)),
         );
     });
+
+    paging = clientPaging(
+        () => this.list(),
+        "users",
+        () => this.search() + this.view(),
+    );
 
     protected getRoleLabel = getRoleLabel;
 
@@ -91,7 +94,6 @@ export class Users {
 
     selectView(view: View) {
         this.view.set(view);
-        this.menuFor.set(null);
         this.restoreError.set(null);
     }
 
@@ -99,14 +101,30 @@ export class Users {
         this.router.navigate(["/users", user.id]);
     }
 
-    toggleMenu(id: number) {
-        this.menuFor.set(this.menuFor() === id ? null : id);
+    menuItems(user: UserAccount): ActionItem[] {
+        const items: ActionItem[] = [{ id: "edit", label: "Modifier", icon: "edit" }];
+
+        if (this.isMe(user)) {
+            items.push({
+                id: "password",
+                label: "Mon mot de passe",
+                icon: "key",
+                link: "/settings/account",
+            });
+        } else {
+            items.push(
+                { id: "reset", label: "Nouveau mot de passe", icon: "key" },
+                { id: "delete", label: "Supprimer", icon: "trash", danger: true },
+            );
+        }
+
+        return items;
     }
 
-    onDocumentClick(event: Event) {
-        if (!(event.target as HTMLElement).closest(".row-menu")) {
-            this.menuFor.set(null);
-        }
+    onMenu(user: UserAccount, action: string) {
+        if (action === "edit") this.editUser(user);
+        if (action === "reset") this.resetPassword(user);
+        if (action === "delete") this.askDelete(user);
     }
 
     newUser() {
@@ -114,12 +132,10 @@ export class Users {
     }
 
     editUser(user: UserAccount) {
-        this.menuFor.set(null);
         this.userForm().openEdit(user);
     }
 
     resetPassword(user: UserAccount) {
-        this.menuFor.set(null);
         this.passwordDialog().open(user);
     }
 
@@ -131,7 +147,6 @@ export class Users {
     }
 
     askDelete(user: UserAccount) {
-        this.menuFor.set(null);
         this.toDelete.set(user);
         this.deleteError.set(null);
         this.confirmDialog().nativeElement.showModal();

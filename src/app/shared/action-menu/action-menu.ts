@@ -1,0 +1,74 @@
+import { Component, ElementRef, input, output, signal, viewChild } from "@angular/core";
+import { RouterLink } from "@angular/router";
+
+import { Icon } from "../icon/icon";
+import { IconName } from "../icon/icons";
+
+export interface ActionItem {
+    id: string;
+    label: string;
+    icon: IconName;
+    danger?: boolean;
+    disabled?: boolean;
+    // lien interne : l'entrée devient un lien au lieu d'un bouton
+    link?: string;
+}
+
+// Menu « ... » d'une ligne ou d'une carte. Le panneau est un popover (couche supérieure du
+// navigateur) : rien ne peut le recouvrir ni le couper, et un clic dedans ne traverse jamais
+// jusqu'à la ligne située derrière. Sur téléphone il monte du bas de l'écran.
+@Component({
+    selector: "app-action-menu",
+    imports: [Icon, RouterLink],
+    templateUrl: "./action-menu.html",
+    styleUrl: "./action-menu.css",
+    host: {
+        // la ligne parente est cliquable : le menu ne doit pas la déclencher
+        "(click)": "$event.stopPropagation()",
+    },
+})
+export class ActionMenu {
+    private trigger = viewChild.required<ElementRef<HTMLButtonElement>>("trigger");
+    private panel = viewChild.required<ElementRef<HTMLElement>>("panel");
+
+    items = input.required<ActionItem[]>();
+    // nom lu par les lecteurs d'écran, par exemple « Actions pour Awa »
+    label = input("Actions");
+    // titre de la feuille sur téléphone
+    title = input<string>();
+    icon = input<IconName>("more");
+    disabled = input(false);
+
+    picked = output<string>();
+
+    open = signal(false);
+
+    toggle() {
+        const panel = this.panel().nativeElement;
+
+        if (this.open()) {
+            panel.hidePopover?.();
+            return;
+        }
+
+        // sur ordinateur le CSS aligne le panneau sous le bouton, sur téléphone il se pose en bas
+        const rect = this.trigger().nativeElement.getBoundingClientRect();
+        panel.style.setProperty("--top", `${rect.bottom + 4}px`);
+        panel.style.setProperty("--right", `${window.innerWidth - rect.right}px`);
+
+        panel.showPopover?.();
+        this.open.set(true);
+        panel.querySelector<HTMLElement>(".item:not(:disabled)")?.focus();
+    }
+
+    // le navigateur ferme le popover lui-même (clic à côté, Échap) : on suit son état
+    onToggle(event: Event) {
+        this.open.set((event as ToggleEvent).newState === "open");
+    }
+
+    pick(item: ActionItem) {
+        this.panel().nativeElement.hidePopover?.();
+        this.open.set(false);
+        this.picked.emit(item.id);
+    }
+}

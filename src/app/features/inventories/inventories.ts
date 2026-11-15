@@ -10,11 +10,12 @@ import { PageHeader } from "../../layout/page-header/page-header";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { ExportMenu } from "../../shared/export-menu/export-menu";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 
 @Component({
     selector: "app-inventories",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, EmptyState, ExportMenu, FcfaPipe],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, EmptyState, ExportMenu, FcfaPipe, Pagination],
     templateUrl: "./inventories.html",
     styleUrl: "./inventories.css",
 })
@@ -25,6 +26,11 @@ export class Inventories {
     inventories = rxResource({
         stream: () => this.inventoryService.getInventories(),
     });
+
+    paging = clientPaging(
+        () => (this.inventories.hasValue() ? this.inventories.value() : []),
+        "inventories",
+    );
 
     private destroyRef = inject(DestroyRef);
 

@@ -67,12 +67,12 @@
             <button
                 type="button"
                 class="btn btn-outline filter-btn"
-                aria-label="Filtres"
+                aria-label="Filtre"
                 [attr.aria-expanded]="filtersOpen()"
                 (click)="filtersOpen.set(!filtersOpen())"
             >
                 <app-icon name="filter" [size]="18" />
-                <span class="filter-label">Filtres</span>
+                <span class="filter-label">Filtre</span>
                 @if (activeFilters() > 0) {
                     <span class="filter-count">{{ activeFilters() }}</span>
                 }
@@ -172,8 +172,8 @@
                                     @if (group.contact) {
                                         {{ group.contact }} ·
                                     }
-                                    {{ group.items.length }}
-                                    {{ group.items.length === 1 ? "produit" : "produits" }}
+                                    {{ group.total }}
+                                    {{ group.total === 1 ? "produit" : "produits" }}
                                 </span>
                             </div>
                             @if (group.key !== "none") {
@@ -363,6 +363,12 @@
                 </section>
             }
         </div>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+        />
     }
 
     @if (!alerts.error() && all().length > 0 && !auth.isAdmin()) {

@@ -63,6 +63,28 @@
     </nav>
 
     <div class="footer">
+        <div class="secondary">
+            @for (link of footerLinks(); track link.path) {
+                <a
+                    [routerLink]="link.path"
+                    routerLinkActive="active"
+                    [attr.title]="layout.collapsed() ? link.label : null"
+                    (click)="close()"
+                >
+                    <app-icon [name]="link.icon" />
+                    <span class="label">{{ link.label }}</span>
+                </a>
+            }
+
+            <p class="help label">
+                @for (link of helpLinks; track link.path) {
+                    <a [routerLink]="link.path" routerLinkActive="active" (click)="close()">
+                        {{ link.label }}
+                    </a>
+                }
+            </p>
+        </div>
+
         <button
             type="button"
             class="collapse"
@@ -84,10 +106,6 @@
                     <a routerLink="/settings/password" role="menuitem" (click)="close()">
                         <app-icon name="key" [size]="16" />
                         Mot de passe
-                    </a>
-                    <a routerLink="/settings" role="menuitem" (click)="close()">
-                        <app-icon name="settings" [size]="16" />
-                        Paramètres
                     </a>
                     <button type="button" role="menuitem" (click)="theme.toggle()">
                         <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" [size]="16" />

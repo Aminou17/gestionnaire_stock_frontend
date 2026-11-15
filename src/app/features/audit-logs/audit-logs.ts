@@ -15,6 +15,7 @@ import { map } from "rxjs";
 
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import {
     ActivityTone,
     LABELS,
@@ -39,10 +40,6 @@ import {
     getAuditChanges,
     getAuditSentence,
 } from "../../core/audit/audit-sentence";
-
-const PAGE_SIZE = 25;
-
-type LoadedPage = AuditLogPage & { page: number };
 
 // une ligne du journal ; plusieurs connexions de suite d'une même personne n'en font qu'une
 interface Row {
@@ -79,7 +76,7 @@ const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slic
 // Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-audit-logs",
-    imports: [RouterLink, DatePipe, NgTemplateOutlet, PageHeader, PeriodFilter, Icon],
+    imports: [RouterLink, DatePipe, NgTemplateOutlet, PageHeader, PeriodFilter, Icon, Pagination],
     templateUrl: "./audit-logs.html",
     styleUrl: "./audit-logs.css",
     host: { "(document:keydown.escape)": "filtersOpen.set(false); selected.set(null)" },
@@ -102,6 +99,7 @@ export class AuditLogs {
     onlyFailures = signal(this.fromAlert);
     search = signal("");
     page = signal(1);
+    pageSize = storedPageSize("audit");
     filtersOpen = signal(false);
     selected = signal<Row | null>(null);
 
@@ -126,10 +124,9 @@ export class AuditLogs {
             category: this.tab(),
             search: this.search(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
-        stream: ({ params }) =>
-            this.auditService.getLogs(params).pipe(map((res) => ({ ...res, page: params.page }))),
+        stream: ({ params }) => this.auditService.getLogs(params),
     });
 
     // compteurs en haut de l'onglet Sécurité, sur la période et la personne choisies
@@ -154,22 +151,12 @@ export class AuditLogs {
     protected getAuditFirstName = getAuditFirstName;
 
     // dernière réponse reçue : on la garde pendant le chargement de la suivante
-    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+    last = linkedSignal<AuditLogPage | undefined, AuditLogPage | undefined>({
         source: () => (this.logs.hasValue() ? this.logs.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // la page 1 remplace la liste, les suivantes s'ajoutent sans doublon
-    list = linkedSignal<LoadedPage | undefined, AuditLog[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return [];
-            if (res.page === 1 || !previous) return res.data;
-
-            const known = new Set(previous.value.map((log) => log.id));
-            return [...previous.value, ...res.data.filter((log) => !known.has(log.id))];
-        },
-    });
+    list = computed(() => this.last()?.data ?? []);
 
     days = computed(() =>
         groupByDay(this.list(), this.locale).map((day) => ({
@@ -181,8 +168,6 @@ export class AuditLogs {
 
     total = computed(() => this.last()?.pagination.total ?? 0);
     firstLoad = computed(() => this.logs.isLoading() && !this.last());
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.logs.isLoading() && this.page() > 1);
     filtered = computed(() => this.activeFilters().length > 0 || this.search() !== "");
 
     // les filtres posés, en puces avec croix sous la barre de recherche
@@ -271,10 +256,6 @@ export class AuditLogs {
         for (const stat of this.stats) {
             if (stat.count.error()) stat.count.reload();
         }
-    }
-
-    loadMore() {
-        this.page.update((page) => page + 1);
     }
 
     open(row: Row) {

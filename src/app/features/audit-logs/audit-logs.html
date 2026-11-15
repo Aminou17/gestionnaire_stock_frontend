@@ -186,7 +186,7 @@
             </ul>
         </section>
     </div>
-} @else if (logs.error() && (page() === 1 || list().length === 0)) {
+} @else if (logs.error() && list().length === 0) {
     <div class="card empty" role="alert">
         <app-icon name="alert" [size]="32" />
         <p>{{ errorMessage() }}</p>
@@ -218,7 +218,7 @@
         </div>
     }
 
-    <div class="days" [class.reloading]="logs.isLoading() && page() === 1">
+    <div class="days" [class.reloading]="logs.isLoading()">
         @for (day of days(); track day.key) {
             <section class="day">
                 <h2 class="day-title">{{ day.label }}</h2>
@@ -245,21 +245,7 @@
         }
     </div>
 
-    @if (hasMore() && !logs.error()) {
-        <div class="more">
-            <button
-                type="button"
-                class="btn btn-outline"
-                [disabled]="loadingMore()"
-                (click)="loadMore()"
-            >
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                }
-                Afficher plus
-            </button>
-        </div>
-    }
+    <app-pagination class="list-pager" [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
 }
 
 <!-- contenu d'une ligne : pastille de la personne, phrase, heure -->
@@ -376,7 +362,7 @@
 
         @if (row.link; as link) {
             <a class="btn btn-outline open-link" [routerLink]="link" (click)="selected.set(null)">
-                Ouvrir la fiche
+                Voir la fiche
                 <app-icon name="arrow-up-right" [size]="16" />
             </a>
         }

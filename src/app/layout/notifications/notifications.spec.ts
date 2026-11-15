@@ -40,6 +40,15 @@ describe("Notifications", () => {
                     provide: LowStockAlertService,
                     useValue: {
                         count: signal(stock),
+                        list: signal(
+                            Array.from({ length: stock }, (_, i) => ({
+                                id: i + 1,
+                                name: `Produit ${i + 1}`,
+                                theoretical_stock: i === 0 ? 0 : 2,
+                                min_stock: 5,
+                                status: i === 0 ? "OUT_OF_STOCK" : "LOW",
+                            })),
+                        ),
                         failed: signal(false),
                         loading: signal(false),
                         reload: vi.fn(),
@@ -85,8 +94,8 @@ describe("Notifications", () => {
         await render(2, [failedLogin]);
         await toggle();
 
-        expect(text()).toContain("2 produits à réapprovisionner");
-        expect(text()).toContain("1 échec aujourd'hui");
+        expect(text()).toContain("Produit 1 Rupture de stock");
+        expect(text()).toContain("Produit 2 Stock : 2 sur 5");
         expect(text()).toContain("Connexion échouée · intrus@test.com");
         expect(el.querySelector("a[href='/alerts']")).not.toBeNull();
         expect(el.querySelector("a[href='/audit-logs?result=FAILURE']")).not.toBeNull();
@@ -97,8 +106,7 @@ describe("Notifications", () => {
         await render(0, []);
         await toggle();
 
-        expect(text()).toContain("Tout est en ordre.");
-        expect(text()).toContain("Aucun échec aujourd'hui.");
+        expect(text()).toContain("Tout est à jour");
     });
 
     it("should close on an outside click and on Escape", async () => {
@@ -118,7 +126,7 @@ describe("Notifications", () => {
         await render(0, [], { failed: true });
         await toggle();
 
-        expect(text()).toContain("Impossible de charger les échecs du jour.");
+        expect(text()).toContain("Échecs du jour indisponibles.");
         expect(text()).not.toContain("Aucun échec aujourd'hui.");
 
         el.querySelector<HTMLButtonElement>(".retry")!.click();
@@ -129,15 +137,25 @@ describe("Notifications", () => {
         await render(0, [], { loading: true });
         await toggle();
 
-        expect(text()).toContain("Chargement…");
+        expect(el.querySelector(".skeleton-row")).not.toBeNull();
         expect(text()).not.toContain("Aucun échec aujourd'hui.");
+        expect(text()).not.toContain("Tout est à jour");
+    });
+
+    it("should close with the close button", async () => {
+        await render(0, []);
+        await toggle();
+        el.querySelector<HTMLButtonElement>(".close")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelector(".panel")).toBeNull();
     });
 
     it("should merge identical failures in a row", async () => {
         await render(0, [failedLogin, { ...failedLogin, id: 2 }]);
         await toggle();
 
-        expect(el.querySelectorAll(".latest li").length).toBe(1);
+        expect(el.querySelectorAll(".item").length).toBe(1);
         expect(text()).toContain("Connexion échouée · intrus@test.com ×2");
     });
 });

@@ -46,6 +46,8 @@ export class LowStockAlertService {
 
     count = computed(() => (this.alerts.hasValue() ? this.alerts.value().length : 0));
 
+    list = computed(() => (this.alerts.hasValue() ? this.alerts.value() : []));
+
     failed = computed(() => this.alerts.error() !== undefined);
     loading = computed(() => this.alerts.isLoading() && !this.alerts.hasValue());
 
