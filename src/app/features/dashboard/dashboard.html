@@ -109,6 +109,7 @@
             [money]="true"
             link="/sales"
             icon="trending-up"
+            [spark]="weekTrend()"
             [loading]="dailySales.isLoading()"
             [error]="!!dailySales.error()"
             [value]="todaySales()?.netTotal ?? 0 | fcfa"
@@ -155,6 +156,7 @@
 
         <!-- la valeur du stock repose sur le prix d'achat : réservée à l'admin -->
         <app-stat-card
+            tone="violet"
             label="Valeur du stock"
             [toggles]="true"
             (toggled)="secret.toggle()"
@@ -249,6 +251,7 @@
             [money]="true"
             link="/sales"
             icon="trending-up"
+            [spark]="weekTrend()"
             [loading]="dailySales.isLoading()"
             [error]="!!dailySales.error()"
             [value]="todaySales()?.netTotal ?? 0 | fcfa"

@@ -2,10 +2,11 @@ import { Component } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
 import { COMPANY_NAME, PRODUCT_NAME } from "../../../core/brand";
+import { Icon } from "../../../shared/icon/icon";
 
 @Component({
     selector: "app-auth-layout",
-    imports: [RouterOutlet],
+    imports: [RouterOutlet, Icon],
     templateUrl: "./auth-layout.html",
     styleUrl: "./auth-layout.css",
 })

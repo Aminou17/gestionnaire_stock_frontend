@@ -1,4 +1,4 @@
-/* couleur de la carte : bleu marque par défaut, vert = encaissé, orange = à surveiller, rouge = perte */
+/* couleur de la carte : bleu marque, vert = encaissé, orange = à surveiller, rouge = perte, violet = stock */
 .stat {
     --tone: var(--text-muted);
     position: relative;
@@ -13,6 +13,7 @@
     align-content: start;
     align-items: center;
     column-gap: 12px;
+    overflow: hidden;
 }
 
 .stat[data-tone="primary"] {
@@ -27,11 +28,18 @@
 .stat[data-tone="danger"] {
     --tone: var(--danger);
 }
+.stat[data-tone="violet"] {
+    --tone: var(--violet);
+}
 
-/* fond à peine teinté et liseré à gauche : lisible aussi en mode sombre */
+/* dégradé léger de la couleur vers le blanc, comme les cartes de Stripe ou de Linear */
 .stat[data-tone] {
-    background: color-mix(in srgb, var(--tone) 6%, var(--surface));
-    box-shadow: inset 3px 0 0 var(--tone);
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--tone) 13%, var(--surface)) 0%,
+        var(--surface) 75%
+    );
+    border-color: color-mix(in srgb, var(--tone) 22%, var(--border));
 }
 
 .label {
@@ -41,11 +49,12 @@
     color: var(--text-muted);
 }
 
+/* pastille d'icône pleine : c'est elle qui donne la couleur de la carte */
 .icon {
     grid-area: icon;
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
     display: grid;
     place-items: center;
     background: var(--neutral-soft);
@@ -61,36 +70,130 @@
 }
 
 .stat[data-tone] .icon {
-    background: color-mix(in srgb, var(--tone) 14%, transparent);
-    color: var(--tone);
+    background: linear-gradient(145deg, var(--tone), color-mix(in srgb, var(--tone) 70%, #000));
+    color: #fff;
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--tone) 35%, transparent);
 }
 
 .value {
     grid-area: value;
+    min-width: 0;
     margin-top: 12px;
     font-size: 24px;
-    font-weight: 600;
+    font-weight: 700;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     /* l'espace fine des milliers se lit mal en gras */
     word-spacing: 0.12em;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* "Caisse fermée" est un texte, pas un montant */
+.value.text-muted {
+    font-size: 18px;
+    font-weight: 600;
 }
 
 .hint {
     grid-area: hint;
     margin-top: 4px;
-    font-size: 13px;
+    font-size: 12.5px;
 }
 
-/* la grande carte : un seul chiffre fort en tête de page */
-.hero {
-    padding: 20px;
+/* la grande carte : bleu marque plein, un seul chiffre fort en tête de page */
+.hero,
+.hero[data-tone] {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "label icon"
+        "value spark"
+        "hint spark";
+    padding: 18px;
+    border: 0;
+    background:
+        radial-gradient(90% 120% at 100% 0%, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 60%),
+        linear-gradient(135deg, #3b82f6 0%, #1d4ed8 55%, #1e3a8a 100%);
+    color: #fff;
+    box-shadow: 0 14px 32px rgba(37, 99, 235, 0.32);
 }
 
-.hero .value {
-    font-size: 36px;
+.hero .label {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.hero .icon,
+.hero[data-tone] .icon {
+    justify-self: end;
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    box-shadow: none;
+}
+
+.hero .value,
+.hero .value.text-muted {
+    margin-top: 14px;
+    font-size: 32px;
     font-weight: 700;
+    color: #fff;
+}
+
+/* la variation devient une pastille claire sur le bleu */
+.hero .hint,
+.hero .hint.text-success,
+.hero .hint.text-warning,
+.hero .hint.text-muted {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 10px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.hero .hint.text-warning {
+    background: rgba(255, 237, 213, 0.95);
+    color: #9a3412;
+}
+
+.spark {
+    grid-area: spark;
+    align-self: end;
+    width: 110px;
+    height: 44px;
+    margin-bottom: 2px;
+}
+
+.spark-area {
+    fill: rgba(255, 255, 255, 0.16);
+}
+
+.spark-line {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+@media (min-width: 768px) {
+    .stat {
+        padding: 18px;
+    }
+    .value {
+        font-size: 26px;
+    }
+    .spark {
+        width: 150px;
+        height: 56px;
+    }
 }
 
 @media (min-width: 1200px) {
@@ -98,29 +201,14 @@
         align-content: center;
         padding: 24px;
     }
-    .hero .value {
+    .hero .value,
+    .hero .value.text-muted {
         font-size: 48px;
     }
-}
-
-/* la variation devient une pastille, pas une phrase colorée */
-.hero .hint {
-    justify-self: start;
-    margin-top: 8px;
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.hero .hint.text-success {
-    background: var(--success-soft);
-}
-.hero .hint.text-warning {
-    background: var(--warning-soft);
-}
-.hero .hint.text-muted {
-    background: var(--neutral-soft);
+    .spark {
+        width: 180px;
+        height: 72px;
+    }
 }
 
 .text-muted {
@@ -152,75 +240,23 @@
     margin-top: 8px;
 }
 
-/* téléphone : carreaux blancs comme avant, icône d'un côté, chiffre en dessous */
+.hero .skeleton {
+    background: rgba(255, 255, 255, 0.25);
+}
+
 @media (max-width: 767px) {
-    .stat[data-tone] {
-        background: var(--surface);
-        box-shadow: none;
-    }
-
-    .icon,
-    .stat[data-tone] .icon {
-        width: 36px;
-        height: 36px;
-        background: var(--icon-bg);
-        color: var(--icon-color);
-    }
-
-    .stat[data-tone="warning"] .icon {
-        background: var(--warning-soft);
-        color: var(--warning);
-    }
-
-    .stat[data-tone="danger"] .icon {
-        background: var(--danger-soft);
-        color: var(--danger);
-    }
-
     .stat {
         padding: 14px;
     }
-
     .label {
         font-size: 12.5px;
     }
-
     .value {
-        min-width: 0;
         margin-top: 10px;
         font-size: 21px;
-        font-weight: 700;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
-
-    .hero .value {
-        font-size: 30px;
-    }
-
-    /* "Caisse fermée" est un texte, pas un montant : plus petit pour tenir dans la carte */
     .value.text-muted {
         font-size: 17px;
-        font-weight: 600;
-    }
-
-    .hint {
-        font-size: 12.5px;
-    }
-
-    .hero {
-        padding: 16px;
-    }
-
-    .hero .hint,
-    .hero .hint.text-success,
-    .hero .hint.text-warning,
-    .hero .hint.text-muted {
-        margin-top: 6px;
-        padding: 0;
-        background: none;
-        font-size: 13px;
-        font-weight: 400;
     }
 }
 

@@ -4,10 +4,11 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { Router, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { Icon } from "../../../shared/icon/icon";
 
 @Component({
     selector: "app-login",
-    imports: [ReactiveFormsModule, RouterLink],
+    imports: [ReactiveFormsModule, RouterLink, Icon],
     templateUrl: "./login.html",
     styleUrl: "./login.css",
 })

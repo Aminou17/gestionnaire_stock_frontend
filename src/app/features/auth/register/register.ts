@@ -4,13 +4,14 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { Router, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { Icon } from "../../../shared/icon/icon";
 import { LogoResizerService } from "../../settings/logo-resizer.service";
 
 type Field = "shopName" | "adminName" | "email" | "password";
 
 @Component({
     selector: "app-register",
-    imports: [ReactiveFormsModule, RouterLink],
+    imports: [ReactiveFormsModule, RouterLink, Icon],
     templateUrl: "./register.html",
     styleUrls: ["../login/login.css", "./register.css"],
 })

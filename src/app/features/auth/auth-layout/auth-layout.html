@@ -28,10 +28,32 @@
         <div class="pitch">
             <h2>Votre boutique, sous contrôle.</h2>
             <p>Ventes, caisse et stock au même endroit, avec des alertes avant la rupture.</p>
+
+            <div class="preview" aria-hidden="true">
+                <div class="preview-top">
+                    <span>Ventes du jour</span>
+                    <span class="preview-chip">+12 %</span>
+                </div>
+                <strong>284 500 F</strong>
+                <svg viewBox="0 0 120 40" preserveAspectRatio="none">
+                    <polygon points="0,40 0,30 20,26 40,31 60,18 80,22 100,9 120,12 120,40" />
+                    <polyline points="0,30 20,26 40,31 60,18 80,22 100,9 120,12" />
+                </svg>
+            </div>
+
             <ul>
-                <li>Suivi des ventes et de la caisse en temps réel</li>
-                <li>Alertes quand un produit passe sous son seuil</li>
-                <li>Inventaires et journal d'audit complets</li>
+                <li>
+                    <span class="tile"><app-icon name="cart" [size]="16" /></span>
+                    Ventes et caisse suivies en temps réel
+                </li>
+                <li>
+                    <span class="tile"><app-icon name="alert" [size]="16" /></span>
+                    Alertes quand un produit passe sous son seuil
+                </li>
+                <li>
+                    <span class="tile"><app-icon name="clipboard" [size]="16" /></span>
+                    Inventaires et journal d'audit complets
+                </li>
             </ul>
         </div>
 
