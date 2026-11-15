@@ -15,6 +15,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { Icon } from "../../../shared/icon/icon";
 import { CreatedShop } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
+import { copyText } from "../../../shared/copy-text";
 
 // lettres et chiffres faciles à recopier : ni 0/O ni 1/l/I
 const PASSWORD_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
@@ -37,7 +38,10 @@ export class NewShopDialog {
 
     form = this.fb.group({
         shopName: ["", [Validators.required, Validators.maxLength(80)]],
-        adminName: ["", [Validators.required, Validators.maxLength(100)]],
+        firstName: ["", [Validators.required, Validators.maxLength(50)]],
+        lastName: ["", [Validators.required, Validators.maxLength(50)]],
+        phone: ["", [Validators.maxLength(40)]],
+        address: ["", [Validators.maxLength(500)]],
         email: ["", [Validators.required, Validators.email]],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
         // vide : pas d'essai
@@ -110,14 +114,17 @@ export class NewShopDialog {
             return;
         }
 
-        const { shopName, adminName, email, password, trialDays } = this.form.getRawValue();
+        const { shopName, firstName, lastName, phone, address, email, password, trialDays } =
+            this.form.getRawValue();
         this.saving.set(true);
         this.error.set(null);
 
         this.owner
             .createShop({
                 shopName: shopName.trim(),
-                adminName: adminName.trim(),
+                adminName: `${firstName.trim()} ${lastName.trim()}`,
+                ...(phone.trim() ? { phone: phone.trim() } : {}),
+                ...(address.trim() ? { address: address.trim() } : {}),
                 email: email.trim(),
                 password,
                 ...(trialDays ? { trialDays } : {}),
@@ -140,15 +147,8 @@ export class NewShopDialog {
     }
 
     copy() {
-        // le presse-papiers n'existe que sur une adresse sécurisée (https ou localhost)
-        const clipboard = navigator.clipboard;
-        if (!clipboard) {
-            this.copyFailed.set(true);
-            return;
-        }
-        clipboard.writeText(this.credentials()).then(
-            () => this.copied.set(true),
-            () => this.copyFailed.set(true),
+        copyText(this.credentials()).then((ok) =>
+            ok ? this.copied.set(true) : this.copyFailed.set(true),
         );
     }
 }

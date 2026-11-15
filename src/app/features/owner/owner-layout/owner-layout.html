@@ -9,6 +9,9 @@
 
     <div class="tools">
         <span class="who">{{ auth.user()?.name }}</span>
+        <a routerLink="/owner/mail" class="icon-btn" aria-label="E-mails d'envoi">
+            <app-icon name="mail" [size]="18" />
+        </a>
         <a routerLink="/owner/password" class="icon-btn" aria-label="Mot de passe">
             <app-icon name="key" [size]="18" />
         </a>
@@ -22,7 +25,7 @@
         >
             <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
         </button>
-        <button type="button" class="btn btn-outline btn-sm" (click)="auth.logout()">
+        <button type="button" class="btn btn-outline btn-sm" (click)="auth.logoutAsked.set(true)">
             <app-icon name="logout" [size]="16" />
             <span>Déconnexion</span>
         </button>
@@ -32,3 +35,5 @@
 <main class="content">
     <router-outlet />
 </main>
+
+<app-logout-dialog />

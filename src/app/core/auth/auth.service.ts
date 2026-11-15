@@ -30,6 +30,7 @@ export interface RegisterData {
     adminName: string;
     email: string;
     password: string;
+    logo?: string;
 }
 
 @Injectable({ providedIn: "root" })
@@ -155,14 +156,24 @@ export class AuthService {
                     this.storage.setItem("token", res.token);
                     this._token.set(res.token);
                     const user = this._user();
-                    if (user?.mustChangePassword) this.saveUser({ ...user, mustChangePassword: false });
+                    if (user?.mustChangePassword)
+                        this.saveUser({ ...user, mustChangePassword: false });
                 }),
             );
     }
 
+    // les boutons Déconnexion demandent d'abord confirmation ; logout() déconnecte tout de suite
+    logoutAsked = signal(false);
+
     logout() {
+        this.logoutAsked.set(false);
         this.clearSession();
         this.router.navigate(["/login"]);
+    }
+
+    // fin de session sans changer de page (après un nouveau mot de passe choisi avec le lien reçu)
+    endSession() {
+        this.clearSession();
     }
 
     private clearSession() {

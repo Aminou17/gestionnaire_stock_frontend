@@ -36,12 +36,12 @@
 }
 
 .brand-name {
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-body);
 }
 
 .brand-sub {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--text-muted);
 }
 
@@ -52,7 +52,7 @@
 }
 
 .who {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 

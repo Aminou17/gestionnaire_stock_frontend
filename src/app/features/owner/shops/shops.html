@@ -121,7 +121,9 @@
                         }
                         <!-- sur téléphone, l'activité tient sur une ligne -->
                         @if (trialState(shop); as trial) {
-                            <small class="trial" [class.ended]="trial.ended">{{ trial.label }}</small>
+                            <small class="trial" [class.ended]="trial.ended">{{
+                                trial.label
+                            }}</small>
                         }
                         <small class="shop-meta muted">
                             {{ shop.sales_last_30_days }}
@@ -176,7 +178,11 @@
                                             <app-icon name="eye" [size]="16" />
                                             Voir la fiche
                                         </button>
-                                        <button type="button" role="menuitem" (click)="askTrial(shop)">
+                                        <button
+                                            type="button"
+                                            role="menuitem"
+                                            (click)="askTrial(shop)"
+                                        >
                                             <app-icon name="clock" [size]="16" />
                                             Modifier l'essai
                                         </button>
@@ -292,7 +298,12 @@
         </label>
 
         <div class="actions">
-            <button type="button" class="btn btn-outline" [disabled]="savingTrial()" (click)="closeTrial()">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="savingTrial()"
+                (click)="closeTrial()"
+            >
                 Annuler
             </button>
             <button type="submit" class="btn btn-primary" [disabled]="savingTrial()">

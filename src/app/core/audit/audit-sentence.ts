@@ -40,6 +40,7 @@ const RESOURCES: Record<string, [string, string]> = {
     categories: ["une catégorie", "les catégories"],
     products: ["un produit", "les produits"],
     suppliers: ["un fournisseur", "les fournisseurs"],
+    customers: ["un client", "les clients"],
     users: ["un utilisateur", "les utilisateurs"],
     sales: ["une vente", "les ventes"],
     stock_entries: ["une entrée de stock", "les entrées de stock"],
@@ -105,9 +106,15 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
         case "PASSWORD_RESET_COMPLETED":
             return { verb: "a choisi un nouveau mot de passe avec le lien reçu" };
         case "SHOP_ADMIN_RESET_LINK_SENT":
-            return { verb: "a envoyé un lien de réinitialisation du mot de passe à", object: String(d["email"] ?? name) };
+            return {
+                verb: "a envoyé un lien de réinitialisation du mot de passe à",
+                object: String(d["email"] ?? name),
+            };
         case "SHOP_ADMIN_TEMP_PASSWORD_SET":
-            return { verb: "a donné un mot de passe provisoire à", object: String(d["email"] ?? name) };
+            return {
+                verb: "a donné un mot de passe provisoire à",
+                object: String(d["email"] ?? name),
+            };
         case "PROFILE_UPDATED":
             return { verb: "a modifié son profil" };
 
@@ -214,6 +221,15 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
             return { verb: "a supprimé le fournisseur", object: name };
         case "SUPPLIER_RESTORED":
             return { verb: "a restauré le fournisseur", object: name };
+
+        case "CUSTOMER_CREATED":
+            return { verb: "a ajouté le client", object: name };
+        case "CUSTOMER_UPDATED":
+            return { verb: "a modifié le client", object: name };
+        case "CUSTOMER_DEACTIVATED":
+            return { verb: "a désactivé le client", object: name };
+        case "CUSTOMER_RESTORED":
+            return { verb: "a restauré le client", object: name };
 
         case "USER_CREATED":
             return { verb: "a créé le compte de", object: name };

@@ -56,9 +56,14 @@ describe("ShopPage", () => {
     const render = async (shop: OwnedShopDetail = detail()) => {
         service = {
             getShop: vi.fn(() => of(shop)),
-            sendResetLink: vi.fn(() => of({ message: "Un lien a été envoyé à fatou@exemple.com." })),
+            sendResetLink: vi.fn(() =>
+                of({ message: "Un lien a été envoyé à fatou@exemple.com." }),
+            ),
             setTemporaryPassword: vi.fn(() =>
-                of({ user: { id: 7, name: "Fatou", email: "fatou@exemple.com" }, password: "Abcdefgh2345" }),
+                of({
+                    user: { id: 7, name: "Fatou", email: "fatou@exemple.com" },
+                    password: "Abcdefgh2345",
+                }),
             ),
             setTrial: vi.fn(() => of({})),
             setStatus: vi.fn(() => of({})),
@@ -68,7 +73,10 @@ describe("ShopPage", () => {
             providers: [
                 provideRouter([]),
                 { provide: OwnerShopService, useValue: service },
-                { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: "5" }) } } },
+                {
+                    provide: ActivatedRoute,
+                    useValue: { snapshot: { paramMap: convertToParamMap({ id: "5" }) } },
+                },
             ],
         }).compileComponents();
         const fixture = TestBed.createComponent(ShopPage);
@@ -77,7 +85,9 @@ describe("ShopPage", () => {
     };
 
     const button = (el: HTMLElement, text: string) =>
-        [...el.querySelectorAll("button")].find((b) => b.textContent?.includes(text)) as HTMLButtonElement;
+        [...el.querySelectorAll("button")].find((b) =>
+            b.textContent?.includes(text),
+        ) as HTMLButtonElement;
 
     beforeAll(() => {
         // jsdom n'implémente pas les fenêtres <dialog> ; d'autres specs posent une version sans événement close, on impose la nôtre
@@ -118,18 +128,24 @@ describe("ShopPage", () => {
         await fixture.whenStable();
 
         expect(service.sendResetLink).toHaveBeenCalledWith(5, 7);
-        expect(el.querySelector(".alert-success")?.textContent).toContain("Un lien a été envoyé à fatou@exemple.com.");
+        expect(el.querySelector(".alert-success")?.textContent).toContain(
+            "Un lien a été envoyé à fatou@exemple.com.",
+        );
     });
 
     it("should show the error when the link cannot be sent", async () => {
         const fixture = await render();
         const el = fixture.nativeElement as HTMLElement;
-        service.sendResetLink.mockReturnValue(httpError(503, "L'envoi d'e-mails n'est pas configuré."));
+        service.sendResetLink.mockReturnValue(
+            httpError(503, "L'envoi d'e-mails n'est pas configuré."),
+        );
 
         button(el, "Envoyer un lien").click();
         await fixture.whenStable();
 
-        expect(el.querySelector(".alert-error")?.textContent).toContain("L'envoi d'e-mails n'est pas configuré.");
+        expect(el.querySelector(".alert-error")?.textContent).toContain(
+            "L'envoi d'e-mails n'est pas configuré.",
+        );
     });
 
     it("should ask for confirmation before creating a temporary password", async () => {
@@ -140,7 +156,9 @@ describe("ShopPage", () => {
         await fixture.whenStable();
 
         expect(service.setTemporaryPassword).not.toHaveBeenCalled();
-        expect(el.querySelector("#temp-title")?.textContent).toContain("Donner un mot de passe provisoire ?");
+        expect(el.querySelector("#temp-title")?.textContent).toContain(
+            "Donner un mot de passe provisoire ?",
+        );
         expect(el.textContent).not.toContain("Abcdefgh2345");
     });
 
@@ -166,14 +184,18 @@ describe("ShopPage", () => {
     it("should show the error of the temporary password in the dialog", async () => {
         const fixture = await render();
         const el = fixture.nativeElement as HTMLElement;
-        service.setTemporaryPassword.mockReturnValue(httpError(404, "Compte introuvable dans cette boutique."));
+        service.setTemporaryPassword.mockReturnValue(
+            httpError(404, "Compte introuvable dans cette boutique."),
+        );
 
         button(el, "Mot de passe provisoire").click();
         await fixture.whenStable();
         button(el, "Créer le mot de passe").click();
         await fixture.whenStable();
 
-        expect(el.querySelector("dialog .alert-error")?.textContent).toContain("Compte introuvable dans cette boutique.");
+        expect(el.querySelector("dialog .alert-error")?.textContent).toContain(
+            "Compte introuvable dans cette boutique.",
+        );
         expect(fixture.componentInstance.tempPassword()).toBeNull();
     });
 
@@ -224,9 +246,13 @@ describe("ShopPage", () => {
         await fixture.whenStable();
 
         expect(service.setStatus).not.toHaveBeenCalled();
-        expect(el.querySelector<HTMLDialogElement>("dialog[aria-labelledby='suspend-title']")?.open).toBe(true);
+        expect(
+            el.querySelector<HTMLDialogElement>("dialog[aria-labelledby='suspend-title']")?.open,
+        ).toBe(true);
 
-        el.querySelector<HTMLButtonElement>("dialog[aria-labelledby='suspend-title'] button[type='submit']")!.click();
+        el.querySelector<HTMLButtonElement>(
+            "dialog[aria-labelledby='suspend-title'] button[type='submit']",
+        )!.click();
         await fixture.whenStable();
 
         expect(service.setStatus).toHaveBeenCalledWith(5, "SUSPENDED");

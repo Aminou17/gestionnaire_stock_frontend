@@ -53,19 +53,60 @@
                 }
             </label>
 
+            <div class="name-row">
+                <label class="field">
+                    <span>Prénom</span>
+                    <input
+                        class="input"
+                        formControlName="firstName"
+                        maxlength="50"
+                        autocomplete="off"
+                        [class.invalid]="invalid('firstName')"
+                        [attr.aria-invalid]="invalid('firstName')"
+                    />
+                    @if (invalid("firstName")) {
+                        <small class="field-error">Indiquez le prénom.</small>
+                    }
+                </label>
+
+                <label class="field">
+                    <span>Nom</span>
+                    <input
+                        class="input"
+                        formControlName="lastName"
+                        maxlength="50"
+                        autocomplete="off"
+                        [class.invalid]="invalid('lastName')"
+                        [attr.aria-invalid]="invalid('lastName')"
+                    />
+                    @if (invalid("lastName")) {
+                        <small class="field-error">Indiquez le nom.</small>
+                    }
+                </label>
+            </div>
+
             <label class="field">
-                <span>Nom de l'administrateur</span>
+                <span>Téléphone</span>
                 <input
                     class="input"
-                    formControlName="adminName"
-                    maxlength="100"
-                    autocomplete="name"
-                    [class.invalid]="invalid('adminName')"
-                    [attr.aria-invalid]="invalid('adminName')"
+                    type="tel"
+                    inputmode="tel"
+                    formControlName="phone"
+                    maxlength="40"
+                    autocomplete="off"
+                    placeholder="Ex. : 06 123 45 67"
                 />
-                @if (invalid("adminName")) {
-                    <small class="field-error">Indiquez le nom de la personne.</small>
-                }
+            </label>
+
+            <label class="field">
+                <span>Adresse de la boutique (facultatif)</span>
+                <input
+                    class="input"
+                    formControlName="address"
+                    maxlength="500"
+                    autocomplete="off"
+                    placeholder="Ex. : Marché Total, Brazzaville"
+                />
             </label>
 
             <label class="field">
@@ -121,7 +162,9 @@
                 @if (invalid("trialDays")) {
                     <small class="field-error">Un nombre de jours entre 1 et 365.</small>
                 } @else {
-                    <small class="muted">Laissez vide pour une boutique sans période d'essai.</small>
+                    <small class="muted"
+                        >Laissez vide pour une boutique sans période d'essai.</small
+                    >
                 }
             </label>
 

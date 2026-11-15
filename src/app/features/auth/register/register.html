@@ -22,8 +22,48 @@
         @if (hasError("shopName", "required")) {
             <small class="field-error">Le nom de la boutique est obligatoire.</small>
         }
-        <small class="hint">Il s'affiche dans l'application et sur les tickets. Vous pourrez le changer.</small>
+        <small class="hint"
+            >Il s'affiche dans l'application et sur les tickets. Vous pourrez le changer.</small
+        >
     </label>
+
+    <div class="field">
+        <span>Logo de la boutique (facultatif)</span>
+        <div class="logo-pick">
+            <div class="logo-preview">
+                @if (logo(); as logoUrl) {
+                    <img [src]="logoUrl" alt="Aperçu du logo" />
+                } @else {
+                    <span class="hint">Aucun</span>
+                }
+            </div>
+            <div class="logo-actions">
+                <input
+                    #logoInput
+                    class="visually-hidden"
+                    type="file"
+                    accept="image/png,image/jpeg"
+                    tabindex="-1"
+                    (change)="onLogoChosen($event)"
+                />
+                <button type="button" class="btn btn-outline btn-sm" (click)="logoInput.click()">
+                    {{ logo() ? "Changer" : "Ajouter un logo" }}
+                </button>
+                @if (logo()) {
+                    <button type="button" class="btn btn-outline btn-sm" (click)="removeLogo()">
+                        Retirer
+                    </button>
+                }
+            </div>
+        </div>
+        @if (logoError()) {
+            <small class="field-error">{{ logoError() }}</small>
+        }
+        <small class="hint"
+            >Il s'affichera dans le menu et sur les tickets. Vous pourrez le changer dans les
+            paramètres.</small
+        >
+    </div>
 
     <label class="field">
         <span>Votre nom</span>

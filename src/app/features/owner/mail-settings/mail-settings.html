@@ -1,0 +1,113 @@
+<a routerLink="/owner" class="back">
+    <app-icon name="chevron-left" [size]="16" />
+    Boutiques
+</a>
+
+<div class="head">
+    <h1>E-mails d'envoi</h1>
+    <p class="muted">L'adresse qui envoie les liens de mot de passe oublié aux boutiques.</p>
+</div>
+
+@if (settings.hasValue()) {
+    @let current = settings.value();
+    <div
+        class="status"
+        [class.ok]="current.activeSource !== 'none'"
+        [class.off]="current.activeSource === 'none'"
+        role="status"
+    >
+        <app-icon [name]="current.activeSource === 'none' ? 'alert' : 'check'" [size]="18" />
+        @switch (current.activeSource) {
+            @case ("database") {
+                <span>Les e-mails partent depuis {{ current.gmailUser }}.</span>
+            }
+            @case ("env") {
+                <span>
+                    Les e-mails partent depuis l'adresse réglée sur le serveur. Enregistrez la vôtre
+                    ci-dessous pour la remplacer.
+                </span>
+            }
+            @default {
+                <span>Aucune adresse d'envoi : les e-mails ne partent pas pour l'instant.</span>
+            }
+        }
+    </div>
+
+    @if (current.unreadable) {
+        <div class="alert alert-error" role="alert">
+            Le mot de passe enregistré n'est plus lisible. Saisissez-le de nouveau.
+        </div>
+    }
+} @else if (settings.error()) {
+    <div class="alert alert-error" role="alert">
+        Impossible de charger les réglages.
+        <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
+            Réessayer
+        </button>
+    </div>
+}
+
+<form class="card form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    <label class="field">
+        <span>Adresse Gmail</span>
+        <input
+            class="input"
+            type="email"
+            formControlName="gmailUser"
+            maxlength="150"
+            autocomplete="off"
+            placeholder="boutiki.contact@gmail.com"
+            [class.invalid]="invalid('gmailUser')"
+            [attr.aria-invalid]="invalid('gmailUser')"
+        />
+        @if (invalid("gmailUser")) {
+            <small class="field-error">Indiquez une adresse Gmail valide.</small>
+        }
+    </label>
+
+    <label class="field">
+        <span>Mot de passe d'application</span>
+        <input
+            class="input"
+            type="password"
+            formControlName="gmailPassword"
+            autocomplete="new-password"
+            [placeholder]="needsPassword() ? '16 lettres données par Google' : 'Déjà enregistré'"
+        />
+        <small class="muted">
+            Ce n'est pas le mot de passe de Gmail. Créez-le dans votre compte Google, Sécurité,
+            Validation en deux étapes, Mots de passe des applications.
+        </small>
+    </label>
+
+    @if (message(); as message) {
+        <div
+            class="alert"
+            [class.alert-success]="message.ok"
+            [class.alert-error]="!message.ok"
+            [attr.role]="message.ok ? 'status' : 'alert'"
+        >
+            {{ message.text }}
+        </div>
+    }
+
+    <div class="actions">
+        @if (settings.hasValue() && settings.value().gmailUser) {
+            <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="remove()">
+                Retirer
+            </button>
+            <button type="button" class="btn btn-outline" [disabled]="testing()" (click)="test()">
+                @if (testing()) {
+                    <span class="spinner"></span>
+                }
+                Envoyer un essai
+            </button>
+        }
+        <button type="submit" class="btn btn-primary" [disabled]="saving()">
+            @if (saving()) {
+                <span class="spinner"></span>
+            }
+            Enregistrer
+        </button>
+    </div>
+</form>

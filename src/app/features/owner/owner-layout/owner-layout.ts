@@ -5,12 +5,13 @@ import { PRODUCT_NAME } from "../../../core/brand";
 import { AuthService } from "../../../core/auth/auth.service";
 import { ThemeService } from "../../../core/theme/theme.service";
 import { Icon } from "../../../shared/icon/icon";
+import { LogoutDialog } from "../../../shared/logout-dialog/logout-dialog";
 
 // Le propriétaire n'a pas de boutique : ni menu de la caisse, ni alertes de stock,
 // seulement sa barre, la page des boutiques et son mot de passe
 @Component({
     selector: "app-owner-layout",
-    imports: [RouterOutlet, RouterLink, Icon],
+    imports: [RouterOutlet, RouterLink, Icon, LogoutDialog],
     templateUrl: "./owner-layout.html",
     styleUrl: "./owner-layout.css",
 })
