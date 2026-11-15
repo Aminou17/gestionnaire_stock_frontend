@@ -6,7 +6,6 @@
     margin: 0;
     padding: 12px;
     list-style: none;
-    border: 1px solid var(--border);
     border-radius: 14px;
     background: var(--surface-hover);
 }
@@ -118,8 +117,8 @@
 /* aperçu de la boutique, comme sur un ticket */
 .shop-card {
     overflow: hidden;
-    border: 1px solid var(--border);
     border-radius: 14px;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--border) 70%, transparent);
     background: linear-gradient(160deg, var(--primary-soft), var(--surface) 70%);
 }
 
@@ -329,7 +328,7 @@
 .switch {
     margin: 0;
     padding-top: 16px;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
     text-align: center;
     color: var(--text-muted);
     font-size: var(--fs-body);
@@ -348,8 +347,25 @@
     margin: -8px 0 0;
     text-align: center;
     color: var(--text-muted);
-    font-size: var(--fs-caption);
+    font-size: var(--fs-small);
     line-height: 1.5;
+}
+
+.legal a {
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--text) 30%, transparent);
+    text-underline-offset: 2px;
+}
+
+.legal a:hover {
+    text-decoration-color: currentColor;
+}
+
+.legal a:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 @keyframes slide {

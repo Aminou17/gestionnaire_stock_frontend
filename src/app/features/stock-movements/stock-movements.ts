@@ -3,9 +3,7 @@ import { HttpErrorResponse } from "@angular/common/http";
 import {
     Component,
     DestroyRef,
-    ElementRef,
     computed,
-    effect,
     LOCALE_ID,
     inject,
     linkedSignal,
@@ -39,9 +37,8 @@ import { PageHeader } from "../../layout/page-header/page-header";
 import { ExportFormat } from "../../core/export-format";
 import { ExportMenu } from "../../shared/export-menu/export-menu";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
-
-const PAGE_SIZE = 20;
 
 // petite icône de type dans le coin de la miniature (téléphone)
 const TYPE_ICONS = {
@@ -53,8 +50,6 @@ const TYPE_ICONS = {
     MANUAL_GAIN: "edit",
     MANUAL_LOSS: "edit",
 } as const;
-
-type LoadedPage = StockMovementPage & { page: number };
 
 const toId = (value: string | null) => {
     const id = Number(value);
@@ -73,6 +68,7 @@ const toId = (value: string | null) => {
         Icon,
         MovementDetail,
         AdjustDialog,
+        Pagination,
     ],
     templateUrl: "./stock-movements.html",
     styleUrl: "./stock-movements.css",
@@ -92,7 +88,6 @@ export class StockMovements {
 
     private periodFilter = viewChild.required<PeriodFilter>("period");
     private successTimer?: ReturnType<typeof setTimeout>;
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
     private detailDialog = viewChild.required<MovementDetail>("detail");
     private adjustDialog = viewChild.required<AdjustDialog>("adjust");
 
@@ -109,6 +104,7 @@ export class StockMovements {
     // arrivée depuis la fiche d'un produit : /stock-movements?productId=3
     productId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("productId")));
     page = signal(1);
+    pageSize = storedPageSize("movements");
     // mouvement dont le détail est ouvert
     selected = signal<StockMovement | null>(null);
     success = signal<string | null>(null);
@@ -125,37 +121,22 @@ export class StockMovements {
             type: this.type(),
             productId: this.productId(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
-        stream: ({ params }) =>
-            this.movementService
-                .getMovements(params)
-                .pipe(map((res) => ({ ...res, page: params.page }))),
+        stream: ({ params }) => this.movementService.getMovements(params),
     });
 
     // dernière réponse reçue : on la garde pendant le chargement de la suivante
-    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+    last = linkedSignal<StockMovementPage | undefined, StockMovementPage | undefined>({
         source: () => (this.movements.hasValue() ? this.movements.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // mouvements déjà chargés : la page 1 remplace la liste, les suivantes s'ajoutent sans doublon
-    list = linkedSignal<LoadedPage | undefined, StockMovement[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.page === 1 || !previous) return res.data;
-
-            const known = new Set(previous.value.map((movement) => movement.id));
-            return [...previous.value, ...res.data.filter((movement) => !known.has(movement.id))];
-        },
-    });
+    list = computed(() => this.last()?.data ?? []);
 
     total = computed(() => this.last()?.total ?? 0);
     counters = computed(() => this.last()?.counters);
     firstLoad = computed(() => this.movements.isLoading() && !this.last());
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.movements.isLoading() && this.page() > 1);
     filtered = computed(() => this.range().period !== "all" || this.productId() !== null);
 
     // le nom vient des mouvements chargés ; sans mouvement on ne le connaît pas
@@ -285,30 +266,6 @@ export class StockMovements {
     constructor() {
         this.destroyRef.onDestroy(() => {
             clearTimeout(this.successTimer);
-        });
-
-        // Charger la page suivante quand le bas de la liste devient visible
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    // après une erreur on n'ajoute pas la suite à une liste qui ne correspond plus aux filtres
-                    if (
-                        entry.isIntersecting &&
-                        this.hasMore() &&
-                        !this.movements.isLoading() &&
-                        !this.movements.error()
-                    ) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
         });
     }
 

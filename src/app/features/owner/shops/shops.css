@@ -245,72 +245,6 @@ h1 {
     gap: 6px;
 }
 
-/* même menu que Fournisseurs et Catégories */
-.row-menu {
-    position: relative;
-}
-
-.more-btn {
-    width: 40px;
-    height: 40px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-muted);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-}
-
-.more-btn:hover,
-.more-btn[aria-expanded="true"] {
-    background: var(--neutral-soft);
-    color: var(--text);
-}
-
-.more-btn:focus-visible,
-.menu button:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 4px);
-    z-index: 10;
-    width: 210px;
-    padding: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow-menu);
-}
-
-.menu button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 40px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font-size: var(--fs-body);
-    text-align: left;
-    cursor: pointer;
-}
-
-.menu button.danger {
-    color: var(--danger);
-}
-
-.menu button.danger:hover {
-    background: var(--danger-soft);
-}
-
 .fab {
     display: none;
 }
@@ -380,6 +314,11 @@ h1 {
         padding: 0;
     }
 
+    .shop-status .btn,
+    .empty .btn-sm {
+        min-height: 44px;
+    }
+
     .shops {
         display: grid;
         gap: 12px;
@@ -397,19 +336,6 @@ h1 {
 
     .shop-text strong {
         font-size: var(--fs-lead);
-    }
-
-    /* cibles tactiles de 44 px minimum */
-    .more-btn {
-        width: 44px;
-        height: 44px;
-        margin-right: -8px;
-    }
-
-    .menu button,
-    .shop-status .btn,
-    .empty .btn-sm {
-        min-height: 44px;
     }
 
     /* boutique suspendue : badge et Réactiver passent sur une seconde ligne */

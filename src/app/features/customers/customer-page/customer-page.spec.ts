@@ -47,10 +47,11 @@ describe("CustomerPage", () => {
         customer = awa,
         admin = true,
         sales = [sale(24), sale(14, { paid_amount: 11500, created_at: "2026-10-02T10:00:00Z" })],
+        total = 0,
     } = {}) {
         params = new BehaviorSubject(new Map([["id", "4"]]));
         getCustomerSales = vi.fn(() =>
-            of({ rows: sales, total: sales.length, page: 1, limit: 20 }),
+            of({ rows: sales, total: Math.max(sales.length, total), page: 1, limit: 10 }),
         );
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
@@ -117,7 +118,7 @@ describe("CustomerPage", () => {
 
     it("should let only the admin deactivate", async () => {
         await render({ admin: false });
-        expect(text()).not.toContain("Désactiver ce client");
+        expect(text()).not.toContain("Supprimer ce client");
     });
 
     it("should mark a refunded sale", async () => {
@@ -126,10 +127,11 @@ describe("CustomerPage", () => {
     });
 
     it("should start again at page 1 with the new sales when the customer changes", async () => {
-        await render();
-        fixture.componentInstance.loadMoreSales();
+        await render({ total: 30 });
+        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();
         expect(fixture.componentInstance.salesPage()).toBe(2);
+        expect(getCustomerSales).toHaveBeenLastCalledWith(4, 2, 10);
 
         getCustomerSales.mockImplementation((id: number) =>
             of({ rows: [sale(90 + id)], total: 1, page: 1, limit: 20 }),
@@ -138,7 +140,7 @@ describe("CustomerPage", () => {
         await fixture.whenStable();
 
         expect(fixture.componentInstance.salesPage()).toBe(1);
-        expect(getCustomerSales).toHaveBeenLastCalledWith(9, 1, 20);
+        expect(getCustomerSales).toHaveBeenLastCalledWith(9, 1, 10);
         expect(text()).toContain("Vente #99");
         expect(text()).not.toContain("Vente #24");
     });

@@ -94,8 +94,9 @@ describe("Users", () => {
         (target as HTMLElement).click();
         await fixture.whenStable();
     };
-    const menuItem = (label: string) =>
-        Array.from(el.querySelectorAll(".menu > *")).find((item) =>
+    // les entrées du menu d'une ligne (le panneau reste dans la page, fermé)
+    const menuItem = (row: number, label: string) =>
+        Array.from(rows()[row].querySelectorAll("app-action-menu .item")).find((item) =>
             item.textContent!.includes(label),
         )!;
 
@@ -118,8 +119,8 @@ describe("Users", () => {
         expect(rows()[0].textContent).toContain("Vous");
         await click(rows()[0].querySelector(".more-btn"));
 
-        expect(menuItem("Mon mot de passe")).toBeTruthy();
-        expect(menuItem("Supprimer")).toBeUndefined();
+        expect(menuItem(0, "Mon mot de passe")).toBeTruthy();
+        expect(menuItem(0, "Supprimer")).toBeUndefined();
     });
 
     it("should search by name or email", async () => {
@@ -143,7 +144,7 @@ describe("Users", () => {
     it("should delete a user after confirmation", async () => {
         await render();
         await click(rows()[1].querySelector(".more-btn"));
-        await click(menuItem("Supprimer"));
+        await click(menuItem(1, "Supprimer"));
 
         expect(text()).toContain("Moussa Traoré ne pourra plus se connecter");
         await click(el.querySelector(".confirm .btn-danger"));
@@ -154,7 +155,7 @@ describe("Users", () => {
     it("should show the backend message when delete fails", async () => {
         await render({ deleteFails: true });
         await click(rows()[1].querySelector(".more-btn"));
-        await click(menuItem("Supprimer"));
+        await click(menuItem(1, "Supprimer"));
         await click(el.querySelector(".confirm .btn-danger"));
 
         expect(text()).toContain("Cet utilisateur est déjà supprimé.");

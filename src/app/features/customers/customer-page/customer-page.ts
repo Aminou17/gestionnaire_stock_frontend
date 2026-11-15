@@ -22,19 +22,18 @@ import { CustomerService } from "../../../core/customers/customer.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
 import { productInitials } from "../../products/product-look";
 import { CustomerForm } from "../customer-form/customer-form";
 import { reminderLink } from "../customer-reminder";
 
-const SALES_PAGE_SIZE = 20;
-
-type LoadedSales = Paged<CustomerSale> & { loadedPage: number; customerId: number };
+type LoadedSales = Paged<CustomerSale> & { customerId: number };
 
 @Component({
     selector: "app-customer-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, CustomerForm, FcfaPipe],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, CustomerForm, FcfaPipe, Pagination],
     templateUrl: "./customer-page.html",
     styleUrl: "./customer-page.css",
 })
@@ -89,16 +88,17 @@ export class CustomerPage {
     // la fiche peut être réutilisée pour un autre client : on repart de la page 1
     salesPage = linkedSignal({ source: () => this.id(), computation: () => 1 });
 
+    salesPageSize = storedPageSize("customer-sales", 10);
+
     sales = rxResource({
-        params: () => (this.validId() ? { id: this.id()!, page: this.salesPage() } : undefined),
+        params: () =>
+            this.validId()
+                ? { id: this.id()!, page: this.salesPage(), size: this.salesPageSize() }
+                : undefined,
         stream: ({ params }) =>
-            this.customerService.getCustomerSales(params.id, params.page, SALES_PAGE_SIZE).pipe(
-                map((res): LoadedSales => ({
-                    ...res,
-                    loadedPage: params.page,
-                    customerId: params.id,
-                })),
-            ),
+            this.customerService
+                .getCustomerSales(params.id, params.page, params.size)
+                .pipe(map((res): LoadedSales => ({ ...res, customerId: params.id }))),
     });
 
     lastSales = linkedSignal<LoadedSales | undefined, LoadedSales | undefined>({
@@ -111,21 +111,9 @@ export class CustomerPage {
         },
     });
 
-    // la page 1 remplace la liste, les suivantes s'ajoutent
-    saleList = linkedSignal<LoadedSales | undefined, CustomerSale[]>({
-        source: this.lastSales,
-        computation: (res, previous) => {
-            if (!res) return [];
-            if (res.loadedPage === 1 || !previous) return res.rows;
-
-            const known = new Set(previous.value.map((sale) => sale.id));
-            return [...previous.value, ...res.rows.filter((sale) => !known.has(sale.id))];
-        },
-    });
+    saleList = computed(() => this.lastSales()?.rows ?? []);
 
     salesTotal = computed(() => this.lastSales()?.total ?? 0);
-    hasMoreSales = computed(() => this.saleList().length < this.salesTotal());
-    loadingMore = computed(() => this.sales.isLoading() && this.salesPage() > 1);
 
     // historique groupé par mois, du plus récent au plus ancien
     months = computed(() => {
@@ -157,11 +145,6 @@ export class CustomerPage {
     // reste à payer d'une vente non annulée
     due(sale: CustomerSale) {
         return sale.status === "ACTIVE" ? Math.max(sale.total - sale.paid_amount, 0) : 0;
-    }
-
-    loadMoreSales() {
-        if (this.sales.isLoading()) return;
-        this.salesPage.update((page) => page + 1);
     }
 
     editCustomer() {
@@ -216,7 +199,7 @@ export class CustomerPage {
                 error: (err: HttpErrorResponse) => {
                     this.deleting.set(false);
                     this.deleteError.set(
-                        err.error?.message ?? "Impossible de désactiver le client.",
+                        err.error?.message ?? "Impossible de supprimer le client.",
                     );
                 },
             });

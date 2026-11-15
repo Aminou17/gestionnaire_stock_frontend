@@ -139,14 +139,14 @@ export class SettingsReceipt implements HasUnsavedChanges {
                     this.settings.set(settings);
                     this.fillFooter(settings);
                     this.saveCount.update((n) => n + 1);
-                    this.message.set({ ok: true, text: "Message du ticket enregistré." });
+                    this.message.set({ ok: true, text: "Enregistré." });
                 },
                 error: (err) => {
                     this.saving.set(false);
                     this.form.enable({ emitEvent: false });
                     this.message.set({
                         ok: false,
-                        text: errorText(err, "Impossible d'enregistrer le message du ticket."),
+                        text: errorText(err, "Impossible d'enregistrer. Réessayez."),
                     });
                 },
             });
@@ -175,7 +175,9 @@ export class SettingsReceipt implements HasUnsavedChanges {
                 .subscribe({
                     next: (settings) => this.onLogoSaved(settings, "Logo enregistré."),
                     error: (err) =>
-                        this.onLogoFailed(errorText(err, "Impossible d'enregistrer le logo.")),
+                        this.onLogoFailed(
+                            errorText(err, "Impossible d'enregistrer le logo. Réessayez."),
+                        ),
                 });
         } catch (err) {
             this.onLogoFailed((err as Error).message);

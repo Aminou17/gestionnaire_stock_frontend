@@ -45,7 +45,7 @@
                 <p class="muted since">Client depuis {{ customer.created_at | date: "MMM y" }}</p>
             </div>
             @if (!customer.is_active) {
-                <span class="badge badge-neutral">Désactivé</span>
+                <span class="badge badge-neutral">Supprimé</span>
             }
         </div>
 
@@ -191,24 +191,14 @@
 
         @if (sales.error()) {
             <div class="alert alert-error" role="alert">
-                Impossible de charger la suite.
+                Impossible de charger les achats.
                 <button type="button" class="btn btn-outline btn-sm" (click)="sales.reload()">
                     Réessayer
                 </button>
             </div>
-        } @else if (hasMoreSales()) {
-            <button
-                type="button"
-                class="btn btn-outline more"
-                [disabled]="loadingMore()"
-                (click)="loadMoreSales()"
-            >
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                }
-                Voir les achats suivants
-            </button>
         }
+
+        <app-pagination [total]="salesTotal()" [(page)]="salesPage" [(pageSize)]="salesPageSize" />
     }
 
     @if (auth.isAdmin()) {
@@ -216,7 +206,7 @@
             @if (customer.is_active) {
                 <button type="button" class="btn btn-sm danger" (click)="askDelete()">
                     <app-icon name="ban" [size]="16" />
-                    Désactiver ce client
+                    Supprimer ce client
                 </button>
             } @else {
                 @if (restoreError()) {
@@ -233,7 +223,7 @@
                     } @else {
                         <app-icon name="undo" [size]="18" />
                     }
-                    Réactiver le client
+                    Restaurer ce client
                 </button>
             }
         </div>
@@ -253,10 +243,10 @@
         (cancel)="onConfirmCancel($event)"
     >
         <div class="confirm-body">
-            <h2 id="customer-delete-title">Désactiver ce client ?</h2>
+            <h2 id="customer-delete-title">Supprimer ce client ?</h2>
             <p class="muted">
                 « {{ data()?.name }} » ne sera plus proposé pour les nouvelles ventes. Ses achats
-                restent dans l'historique et vous pouvez le réactiver à tout moment.
+                restent dans l'historique et vous pouvez le restaurer à tout moment.
             </p>
 
             @if (deleteError()) {
@@ -281,7 +271,7 @@
                     @if (deleting()) {
                         <span class="spinner"></span>
                     }
-                    Désactiver
+                    Supprimer
                 </button>
             </div>
         </div>

@@ -55,14 +55,14 @@
             <div class="alert alert-warning duplicate" role="alert">
                 <p>
                     Ce numéro est déjà celui de <strong>{{ existing.name }}</strong
-                    >{{ existing.is_active ? "" : " (désactivé)" }}.
+                    >{{ existing.is_active ? "" : " (supprimé)" }}.
                 </p>
                 <button
                     type="button"
                     class="btn btn-outline btn-sm"
                     (click)="openDuplicate(existing)"
                 >
-                    Ouvrir sa fiche
+                    Voir la fiche
                 </button>
             </div>
         } @else if (formError()) {
@@ -77,7 +77,7 @@
                 @if (saving()) {
                     <span class="spinner"></span>
                 }
-                {{ editing() ? "Enregistrer" : "Ajouter le client" }}
+                {{ editing() ? "Enregistrer" : "Créer le client" }}
             </button>
         </div>
     </form>

@@ -1,5 +1,6 @@
 <app-page-header
     title="Mon profil"
+    subtitle="Votre nom, votre e-mail et votre photo"
     section="Paramètres"
     [back]="back.link"
     [backLabel]="back.label"
@@ -150,7 +151,7 @@
                 @if (savingProfile()) {
                     <span class="spinner"></span>
                 }
-                Enregistrer
+                Enregistrer les modifications
             </button>
         </div>
     </div>

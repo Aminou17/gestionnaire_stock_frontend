@@ -165,14 +165,14 @@ export class SettingsShop implements HasUnsavedChanges {
                     this.saveCount.update((n) => n + 1);
                     this.settings.set(settings);
                     this.fill(settings);
-                    this.message.set({ ok: true, text: "Informations enregistrées." });
+                    this.message.set({ ok: true, text: "Enregistré." });
                 },
                 error: (err) => {
                     this.saving.set(false);
                     this.form.enable({ emitEvent: false });
                     this.message.set({
                         ok: false,
-                        text: errorText(err, "Impossible d'enregistrer les informations."),
+                        text: errorText(err, "Impossible d'enregistrer. Réessayez."),
                     });
                 },
             });
@@ -201,7 +201,9 @@ export class SettingsShop implements HasUnsavedChanges {
                 .subscribe({
                     next: (settings) => this.onLogoSaved(settings, "Logo enregistré."),
                     error: (err) =>
-                        this.onLogoFailed(errorText(err, "Impossible d'enregistrer le logo.")),
+                        this.onLogoFailed(
+                            errorText(err, "Impossible d'enregistrer le logo. Réessayez."),
+                        ),
                 });
         } catch (err) {
             this.onLogoFailed((err as Error).message);

@@ -316,21 +316,6 @@ td.quantity {
     transition: opacity 0.15s;
 }
 
-.more {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    min-height: 56px;
-    color: var(--text-muted);
-    font-size: var(--fs-body);
-}
-
-.more .spinner {
-    border-color: var(--border);
-    border-top-color: var(--primary);
-}
-
 .loading {
     display: grid;
     gap: 10px;

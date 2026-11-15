@@ -42,4 +42,13 @@ describe("AuthLayout", () => {
 
         expect(card.compareDocumentPosition(pitch) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
+
+    it("should link to the legal pages under the form", async () => {
+        const page = await render();
+        const links = Array.from(page.querySelectorAll(".legal-links a")).map((link) =>
+            link.getAttribute("href"),
+        );
+
+        expect(links).toEqual(["/privacy", "/terms", "/contact"]);
+    });
 });

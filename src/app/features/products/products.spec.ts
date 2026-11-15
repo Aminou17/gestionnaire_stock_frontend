@@ -31,7 +31,6 @@ describe("Products", () => {
     let fixture: ComponentFixture<Products>;
     let el: HTMLElement;
     let getProducts: ReturnType<typeof vi.fn>;
-    let observerCallback: IntersectionObserverCallback;
 
     async function render(
         isAdmin: boolean,
@@ -52,19 +51,10 @@ describe("Products", () => {
             },
         };
         getProducts = vi.fn(() => of(page));
-        // jsdom ne gère ni <dialog> ni IntersectionObserver
+        // jsdom ne gère pas <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
-        vi.stubGlobal(
-            "IntersectionObserver",
-            class {
-                constructor(callback: IntersectionObserverCallback) {
-                    observerCallback = callback;
-                }
-                observe() {}
-                disconnect() {}
-            },
-        );
+        localStorage.removeItem("page-size-products");
 
         await TestBed.configureTestingModule({
             imports: [Products],
@@ -311,20 +301,41 @@ describe("Products", () => {
         expect(text(el.querySelector(".product-card .menu"))).toContain("Supprimer");
     });
 
-    it("should load 20 products, then the next page when the bottom is reached", async () => {
-        await render(true, [product({ id: 1 })], 30);
+    it("should load 25 products per page and go to the next page with Suivant", async () => {
+        await render(true, [product({ id: 1 })], 60);
         expect(getProducts).toHaveBeenLastCalledWith(
-            expect.objectContaining({ page: 1, limit: 20 }),
+            expect.objectContaining({ page: 1, limit: 25 }),
         );
+        expect(text(el.querySelector("app-pagination"))).toContain("1–25 sur 60");
 
-        observerCallback(
-            [{ isIntersecting: true } as IntersectionObserverEntry],
-            {} as IntersectionObserver,
-        );
+        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();
 
-        expect(getProducts).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2 }));
-        expect(el.querySelectorAll(".product-card").length).toBe(2);
+        expect(getProducts).toHaveBeenLastCalledWith(
+            expect.objectContaining({ page: 2, limit: 25 }),
+        );
+        expect(text(el.querySelector("app-pagination"))).toContain("26–50 sur 60");
+    });
+
+    it("should go back to the first page when the page size changes", async () => {
+        await render(true, [product({ id: 1 })], 120);
+        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
+        await fixture.whenStable();
+
+        const select = el.querySelector<HTMLSelectElement>("app-pagination select")!;
+        select.value = "50";
+        select.dispatchEvent(new Event("change"));
+        await fixture.whenStable();
+
+        expect(getProducts).toHaveBeenLastCalledWith(
+            expect.objectContaining({ page: 1, limit: 50 }),
+        );
+        expect(localStorage.getItem("page-size-products")).toBe("50");
+    });
+
+    it("should not show the pagination when everything fits one small page", async () => {
+        await render(true, [product({ id: 1 })], 4);
+        expect(el.querySelector("app-pagination nav")).toBeNull();
     });
 
     it("should filter by stock state and start again from the first page", async () => {

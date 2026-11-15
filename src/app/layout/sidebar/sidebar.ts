@@ -9,7 +9,7 @@ import { ThemeService } from "../../core/theme/theme.service";
 import { Icon } from "../../shared/icon/icon";
 import { Avatar } from "../../shared/avatar/avatar";
 import { LayoutService } from "../layout.service";
-import { SECTIONS } from "../nav-items";
+import { FOOTER_LINKS, HELP_LINKS, SECTIONS } from "../nav-items";
 
 @Component({
     selector: "app-sidebar",
@@ -41,6 +41,11 @@ export class Sidebar {
                 .filter((item) => isAdmin || !item.adminOnly),
         })).filter((section) => section.items.length > 0);
     });
+
+    footerLinks = computed(() =>
+        FOOTER_LINKS.filter((link) => this.auth.isAdmin() || !link.adminOnly),
+    );
+    helpLinks = HELP_LINKS;
 
     profileOpen = signal(false);
 

@@ -15,7 +15,6 @@ import {
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { map } from "rxjs";
 
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { Product } from "../../core/stock/product.model";
@@ -26,16 +25,14 @@ import { StockEntryService } from "../../core/stock/stock-entry.service";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
 import { BackState } from "../../core/back-link";
 import { PhotoZoom } from "../../shared/photo-zoom/photo-zoom";
 import { categoryTone, productInitials } from "../products/product-look";
 
-const PAGE_SIZE = 20;
 // valeur de l'option "+ Créer un fournisseur"
 const NEW_ID = -1;
-
-type LoadedPage = StockEntryPage & { page: number };
 
 const toId = (value: string | null) => {
     const id = Number(value);
@@ -54,6 +51,7 @@ const toId = (value: string | null) => {
         Icon,
         AdjustDialog,
         PhotoZoom,
+        Pagination,
     ],
     templateUrl: "./stock-entries.html",
     styleUrl: "./stock-entries.css",
@@ -80,7 +78,6 @@ export class StockEntries implements AfterViewInit {
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
 
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("entryBox");
     private adjustDialog = viewChild.required(AdjustDialog);
 
@@ -107,6 +104,7 @@ export class StockEntries implements AfterViewInit {
     // arrivée depuis la fiche d'un fournisseur : /stock-entries?supplierId=4
     supplierId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("supplierId")));
     page = signal(1);
+    pageSize = storedPageSize("entries");
 
     entries = rxResource({
         params: () => ({
@@ -114,37 +112,22 @@ export class StockEntries implements AfterViewInit {
             to: this.range().to,
             supplierId: this.supplierId(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
-        stream: ({ params }) =>
-            this.entryService
-                .getEntries(params)
-                .pipe(map((res) => ({ ...res, page: params.page }))),
+        stream: ({ params }) => this.entryService.getEntries(params),
     });
 
     // dernière réponse reçue : on la garde pendant le chargement de la suivante
-    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+    last = linkedSignal<StockEntryPage | undefined, StockEntryPage | undefined>({
         source: () => (this.entries.hasValue() ? this.entries.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // entrées déjà chargées : la page 1 remplace la liste, les suivantes s'ajoutent sans doublon
-    list = linkedSignal<LoadedPage | undefined, StockEntry[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.page === 1 || !previous) return res.data;
-
-            const known = new Set(previous.value.map((entry) => entry.id));
-            return [...previous.value, ...res.data.filter((entry) => !known.has(entry.id))];
-        },
-    });
+    list = computed(() => this.last()?.data ?? []);
 
     total = computed(() => this.last()?.total ?? 0);
     counters = computed(() => this.last()?.counters);
     firstLoad = computed(() => this.entries.isLoading() && !this.last());
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.entries.isLoading() && this.page() > 1);
     filtered = computed(() => this.range().period !== "all" || this.supplierId() !== null);
 
     suppliers = rxResource({ stream: () => this.supplierService.getSuppliers() });
@@ -207,24 +190,6 @@ export class StockEntries implements AfterViewInit {
 
     constructor() {
         this.destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
-
-        // Charger la page suivante quand le bas de la liste devient visible
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && this.hasMore() && !this.entries.isLoading()) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
-        });
 
         this.form.controls.quantity.valueChanges
             .pipe(takeUntilDestroyed())

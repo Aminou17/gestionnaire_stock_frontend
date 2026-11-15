@@ -270,15 +270,13 @@
                     Aucun mouvement pour le moment. Ils apparaissent avec les entrées et les ventes.
                 </p>
                 @if (auth.isAdmin()) {
-                    <a class="btn btn-primary" routerLink="/stock-entries">
-                        Faire une entrée de stock
-                    </a>
+                    <a class="btn btn-primary" routerLink="/stock-entries"> Nouvelle entrée </a>
                 }
             }
         </div>
     } @else {
         <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
-        @if (movements.error() && page() === 1) {
+        @if (movements.error()) {
             <div class="alert alert-error list-error" role="alert">
                 {{ errorMessage() }}
                 <button type="button" class="btn btn-outline btn-sm" (click)="movements.reload()">
@@ -295,7 +293,7 @@
         </div>
 
         <div class="table-wrap">
-            <table [class.reloading]="movements.isLoading() && page() === 1">
+            <table [class.reloading]="movements.isLoading()">
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -512,23 +510,12 @@
             }
         </div>
 
-        <!-- en vue, ce repère déclenche le chargement des 20 mouvements suivants -->
-        @if (hasMore()) {
-            <div #sentinel class="more">
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                    Chargement…
-                } @else if (movements.error()) {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        (click)="movements.reload()"
-                    >
-                        Réessayer
-                    </button>
-                }
-            </div>
-        }
+        <app-pagination
+            [total]="total()"
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [attached]="true"
+        />
     }
 </section>
 

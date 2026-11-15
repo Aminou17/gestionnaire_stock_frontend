@@ -103,14 +103,14 @@ describe("Customers", () => {
 
     it("should offer the inactive view only to the admin", async () => {
         await render({ admin: false });
-        expect(text()).not.toContain("Désactivés");
+        expect(text()).not.toContain("Supprimés");
     });
 
     it("should show a welcoming empty state without customers", async () => {
         await render({ rows: [] });
 
         expect(text()).toContain("Pas encore de client");
-        expect(text()).toContain("Ajouter un client");
+        expect(text()).toContain("Nouveau client");
     });
 
     async function pressDueChip() {

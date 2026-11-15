@@ -72,7 +72,7 @@
                 Aucune catégorie pour le moment.
                 @if (auth.isAdmin()) {
                     <button type="button" class="btn btn-outline btn-sm" (click)="newCategory()">
-                        Créer une catégorie
+                        Nouvelle catégorie
                     </button>
                 }
             }
@@ -91,7 +91,7 @@
             <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>
         }
         <ul class="rows" [class.reloading]="categories.isLoading()">
-            @for (category of list(); track category.id) {
+            @for (category of paging.visible(); track category.id) {
                 <li
                     class="row"
                     [class.inactive]="!category.is_active"
@@ -137,45 +137,25 @@
                     } @else if (!category.is_active) {
                         <span class="badge badge-neutral">Supprimée</span>
                     } @else if (auth.isAdmin()) {
-                        <div class="row-menu" (click)="$event.stopPropagation()">
-                            <button
-                                type="button"
-                                class="more-btn"
-                                aria-haspopup="menu"
-                                [attr.aria-expanded]="menuFor() === category.id"
-                                [attr.aria-label]="'Actions pour ' + category.name"
-                                (click)="toggleMenu(category.id)"
-                            >
-                                <app-icon name="more" />
-                            </button>
-                            @if (menuFor() === category.id) {
-                                <div class="menu" role="menu">
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        (click)="editCategory(category)"
-                                    >
-                                        <app-icon name="edit" [size]="16" />
-                                        Modifier
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        class="danger"
-                                        (click)="askDelete(category)"
-                                    >
-                                        <app-icon name="trash" [size]="16" />
-                                        Supprimer
-                                    </button>
-                                </div>
-                            }
-                        </div>
+                        <app-action-menu
+                            [items]="rowActions"
+                            [label]="'Actions pour ' + category.name"
+                            [title]="category.name"
+                            (picked)="onMenu(category, $event)"
+                        />
                     } @else {
                         <app-icon name="chevron-right" [size]="18" class="chevron" />
                     }
                 </li>
             }
         </ul>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+            [attached]="true"
+        />
     }
 </section>
 
@@ -243,7 +223,7 @@
                 @if (saving()) {
                     <span class="spinner"></span>
                 }
-                {{ editing() ? "Enregistrer" : "Créer" }}
+                {{ editing() ? "Enregistrer" : "Créer la catégorie" }}
             </button>
         </div>
     </form>

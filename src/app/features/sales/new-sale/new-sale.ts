@@ -7,6 +7,7 @@ import {
     computed,
     effect,
     inject,
+    linkedSignal,
     signal,
     viewChild,
 } from "@angular/core";
@@ -33,6 +34,7 @@ import { categoryTone, productInitials } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { formatPhone, phoneKey, splitPhone } from "../../../shared/phone";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
 import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
@@ -74,6 +76,7 @@ export const getMinPrice = (product: Product) =>
         CustomerForm,
         PhoneField,
         PhotoZoom,
+        Pagination,
     ],
     templateUrl: "./new-sale.html",
     styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
@@ -120,6 +123,7 @@ export class NewSale {
     // produits dont le champ de prix négocié est déplié
     priceOpenIds = signal<ReadonlySet<number>>(new Set());
 
+    private host = inject<ElementRef<HTMLElement>>(ElementRef);
     private photoInput = viewChild<ElementRef<HTMLInputElement>>("photoInput");
     private searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
     private photoTarget: Product | null = null;
@@ -134,16 +138,28 @@ export class NewSale {
         () => this.cash.hasValue() && this.cash.value()?.status === "CLOSED",
     );
 
+    // la page revient à 1 quand la recherche ou la catégorie change
+    page = linkedSignal({
+        source: () => `${this.search()}|${this.categoryId()}`,
+        computation: () => 1,
+    });
+    pageSize = storedPageSize("new-sale");
+
     products = rxResource({
-        params: () => ({ search: this.search(), categoryId: this.categoryId() }),
+        params: () => ({
+            search: this.search(),
+            categoryId: this.categoryId(),
+            page: this.page(),
+            limit: this.pageSize(),
+        }),
         stream: ({ params }) =>
             this.productService.getProducts({
                 search: params.search,
                 categoryId: params.categoryId,
                 stockStatus: null,
                 status: "active",
-                page: 1,
-                limit: 24,
+                page: params.page,
+                limit: params.limit,
             }),
     });
     // les puces ne montrent que les catégories qui ont des produits
@@ -154,10 +170,11 @@ export class NewSale {
             : [],
     );
     results = computed(() => (this.products.hasValue() ? this.products.value().data : []));
-    // on n'affiche que les 24 premiers : au-delà il faut préciser la recherche
-    moreResults = computed(() =>
-        this.products.hasValue() ? this.products.value().total > this.results().length : false,
-    );
+    // le dernier total est gardé pendant le chargement d'une autre page
+    resultsTotal = linkedSignal<number | undefined, number>({
+        source: () => (this.products.hasValue() ? this.products.value().total : undefined),
+        computation: (total, previous) => total ?? previous?.value ?? 0,
+    });
 
     itemsCount = computed(() => this.cart().reduce((sum, line) => sum + line.quantity, 0));
     total = computed(() =>
@@ -466,6 +483,11 @@ export class NewSale {
             ...lines,
             { product, quantity: 1, unitPrice: product.sale_price },
         ]);
+    }
+
+    // le catalogue défile dans son cadre sur ordinateur : on remonte en haut de la nouvelle page
+    resetCatalogScroll() {
+        this.host.nativeElement.querySelector(".tiles, .gtiles")?.scrollTo({ top: 0 });
     }
 
     setView(view: "list" | "grid") {

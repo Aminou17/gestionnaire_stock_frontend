@@ -166,14 +166,14 @@ describe("Suppliers", () => {
         await fixture.whenStable();
 
         expect(navigate).not.toHaveBeenCalled();
-        expect(el.querySelector(".menu")?.textContent).toContain("Modifier");
+        expect(el.querySelector("app-action-menu")?.textContent).toContain("Modifier");
     });
 
     it("should delete after confirmation and reload the list", async () => {
         await render();
         el.querySelector<HTMLButtonElement>(".more-btn")!.click();
         await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".menu .danger")!.click();
+        el.querySelector<HTMLButtonElement>(".item.danger")!.click();
         await fixture.whenStable();
 
         expect(text()).toContain("« Faso Distribution » ne sera plus proposé");

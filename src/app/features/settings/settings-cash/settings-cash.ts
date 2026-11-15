@@ -86,9 +86,7 @@ export class SettingsCash implements HasUnsavedChanges {
                     this.settings.set(settings);
                     this.message.set({
                         ok: true,
-                        text: settings.blind_close
-                            ? "L'employé clôturera sans voir le solde attendu."
-                            : "L'employé verra le solde attendu à la clôture.",
+                        text: "Enregistré.",
                     });
                 },
                 error: (err) => {
@@ -96,7 +94,7 @@ export class SettingsCash implements HasUnsavedChanges {
                     this.form.enable({ emitEvent: false });
                     this.message.set({
                         ok: false,
-                        text: errorText(err, "Impossible d'enregistrer le réglage."),
+                        text: errorText(err, "Impossible d'enregistrer. Réessayez."),
                     });
                 },
             });

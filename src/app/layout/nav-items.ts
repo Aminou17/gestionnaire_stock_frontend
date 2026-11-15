@@ -84,6 +84,18 @@ export const SECTIONS: NavSection[] = [
     },
 ];
 
+// liens secondaires en bas du menu : compte et boutique, puis aide
+export const FOOTER_LINKS: NavItem[] = [
+    { label: "Paramètres", path: "/settings", icon: "settings" },
+    { label: "Abonnement", path: "/subscription", icon: "card", adminOnly: true },
+];
+
+export const HELP_LINKS: NavItem[] = [
+    { label: "Contact", path: "/contact", icon: "message" },
+    { label: "Confidentialité", path: "/privacy", icon: "shield" },
+    { label: "Conditions", path: "/terms", icon: "file-text" },
+];
+
 // pages proposées par la recherche, selon le rôle
 export function searchablePages(
     isAdmin: boolean,
@@ -103,6 +115,16 @@ export function searchablePages(
         { label: "Nouvelle vente", hint: "Action", path: "/sales/new", icon: "plus" },
         ...pages,
         { label: "Paramètres", hint: "Compte", path: "/settings", icon: "settings" },
+        ...(isAdmin
+            ? [
+                  {
+                      label: "Abonnement",
+                      hint: "Compte",
+                      path: "/subscription",
+                      icon: "card" as const,
+                  },
+              ]
+            : []),
         { label: "Mon profil", hint: "Compte", path: "/settings/account", icon: "user" },
         { label: "Mot de passe", hint: "Compte", path: "/settings/password", icon: "key" },
     ];

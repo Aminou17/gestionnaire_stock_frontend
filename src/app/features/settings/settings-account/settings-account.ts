@@ -83,13 +83,13 @@ export class SettingsAccount implements HasUnsavedChanges {
         this.auth.forgotPassword(email).subscribe({
             next: () => {
                 this.sendingReset.set(false);
-                this.resetMessage.set({ ok: true, text: `Un lien a été envoyé à ${email}.` });
+                this.resetMessage.set({ ok: true, text: "Un lien vous a été envoyé par e-mail." });
             },
             error: (err) => {
                 this.sendingReset.set(false);
                 this.resetMessage.set({
                     ok: false,
-                    text: err.error?.message ?? "Impossible d'envoyer le lien, réessayez.",
+                    text: err.error?.message ?? "Impossible d'envoyer le lien. Réessayez.",
                 });
             },
         });
@@ -147,7 +147,9 @@ export class SettingsAccount implements HasUnsavedChanges {
                 next: () => this.savingPhoto.set(false),
                 error: (err) => {
                     this.savingPhoto.set(false);
-                    this.photoError.set(errorText(err, "Impossible d'enregistrer la photo."));
+                    this.photoError.set(
+                        errorText(err, "Impossible d'enregistrer la photo. Réessayez."),
+                    );
                 },
             });
     }
@@ -176,14 +178,14 @@ export class SettingsAccount implements HasUnsavedChanges {
                     this.savingProfile.set(false);
                     this.profileForm.enable({ emitEvent: false });
                     this.resetProfile();
-                    this.profileMessage.set({ ok: true, text: "Profil enregistré." });
+                    this.profileMessage.set({ ok: true, text: "Enregistré." });
                 },
                 error: (err) => {
                     this.savingProfile.set(false);
                     this.profileForm.enable({ emitEvent: false });
                     this.profileMessage.set({
                         ok: false,
-                        text: errorText(err, "Impossible d'enregistrer le profil."),
+                        text: errorText(err, "Impossible d'enregistrer. Réessayez."),
                     });
                 },
             });

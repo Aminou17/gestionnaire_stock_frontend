@@ -128,6 +128,40 @@ const GROUPS: SettingsGroup[] = [
             },
         ],
     },
+    {
+        title: "Aide et informations",
+        links: [
+            {
+                path: "/subscription",
+                tone: "#f97316",
+                adminOnly: true,
+                icon: "card",
+                label: "Abonnement",
+                description: "Votre formule et la facturation",
+            },
+            {
+                path: "/contact",
+                tone: "#0ea5e9",
+                icon: "mail",
+                label: "Contact",
+                description: "Une question ? Écrivez-nous",
+            },
+            {
+                path: "/privacy",
+                tone: "#10b981",
+                icon: "shield",
+                label: "Confidentialité",
+                description: "Comment vos données sont protégées",
+            },
+            {
+                path: "/terms",
+                tone: "#64748b",
+                icon: "file-text",
+                label: "Conditions d'utilisation",
+                description: "Les règles d'usage du service",
+            },
+        ],
+    },
 ];
 
 @Component({
@@ -210,6 +244,9 @@ export class Settings {
             const prefix = this.sales.value().ticket_prefix;
             statuses["sales"] = prefix ? { text: `Préfixe : ${prefix}` } : { text: "Sans préfixe" };
         }
+
+        // la fiche d'abonnement n'est pas encore lue ici : toute boutique démarre par un essai
+        if (this.auth.isAdmin()) statuses["/subscription"] = { text: "Essai gratuit" };
 
         return statuses;
     });

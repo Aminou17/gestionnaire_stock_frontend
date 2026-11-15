@@ -261,11 +261,6 @@ app-page-header {
     text-decoration: line-through;
 }
 
-.more {
-    justify-self: center;
-    min-height: 44px;
-}
-
 .admin-zone {
     display: grid;
     justify-items: start;

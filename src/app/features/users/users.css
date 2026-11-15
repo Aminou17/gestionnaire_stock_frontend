@@ -181,9 +181,7 @@ app-page-header {
 }
 
 .name:focus-visible,
-.more-btn:focus-visible,
-.tab:focus-visible,
-.menu > :focus-visible {
+.tab:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
@@ -191,71 +189,6 @@ app-page-header {
 .reloading {
     opacity: 0.6;
     transition: opacity 0.15s;
-}
-
-.row-menu {
-    position: relative;
-}
-
-.more-btn {
-    width: 40px;
-    height: 40px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-muted);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-}
-
-.more-btn:hover,
-.more-btn[aria-expanded="true"] {
-    background: var(--neutral-soft);
-    color: var(--text);
-}
-
-.menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 4px);
-    z-index: 10;
-    width: 200px;
-    padding: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow-menu);
-}
-
-.menu > * {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 40px;
-    padding: 0 10px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font: inherit;
-    font-size: var(--fs-body);
-    text-align: left;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.menu > *:hover {
-    background: var(--surface-hover);
-}
-
-.menu .danger {
-    color: var(--danger);
-}
-
-.menu .danger:hover {
-    background: var(--danger-soft);
 }
 
 .restore-btn {
@@ -443,17 +376,6 @@ app-page-header {
 
     .empty .btn-sm,
     .restore-btn {
-        min-height: 44px;
-    }
-
-    /* cibles tactiles de 44 px minimum */
-    .more-btn {
-        width: 44px;
-        height: 44px;
-        margin-right: -8px;
-    }
-
-    .menu > * {
         min-height: 44px;
     }
 

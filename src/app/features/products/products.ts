@@ -14,7 +14,6 @@ import {
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { map } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { CategoryService } from "../../core/stock/category.service";
@@ -34,6 +33,7 @@ import { Icon } from "../../shared/icon/icon";
 import { RevealToggle } from "../../shared/secret/reveal-toggle";
 import { SecretValues } from "../../shared/secret/secret-values";
 import { ExportMenu } from "../../shared/export-menu/export-menu";
+import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { ExportService } from "../settings/settings-export/export.service";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { AdjustDialog } from "../stock-movements/adjust-dialog/adjust-dialog";
@@ -41,7 +41,6 @@ import { ProductForm } from "./product-form/product-form";
 import { ProductImport } from "./product-import/product-import";
 import { categoryTone, marginPercent, productInitials } from "./product-look";
 
-const PAGE_SIZE = 20;
 const VIEW_KEY = "products-view";
 
 const readView = (): "list" | "grid" => {
@@ -60,8 +59,6 @@ const toId = (value: string | null) => {
 const toStockStatus = (value: string | null): StockStatus | null =>
     value === "OK" || value === "LOW" || value === "OUT_OF_STOCK" ? value : null;
 
-type LoadedPage = ProductPage & { page: number };
-
 @Component({
     selector: "app-products",
     imports: [
@@ -75,6 +72,7 @@ type LoadedPage = ProductPage & { page: number };
         ProductImport,
         ExportMenu,
         AdjustDialog,
+        Pagination,
     ],
     templateUrl: "./products.html",
     styleUrl: "./products.css",
@@ -97,7 +95,6 @@ export class Products {
     private importDialog = viewChild(ProductImport);
     private adjustDialog = viewChild(AdjustDialog);
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
 
     // le menu Stock > Ajuster le stock demande d'ouvrir la fenêtre dès que la page est affichée
     private adjustAsked = signal(false);
@@ -117,6 +114,7 @@ export class Products {
     status = signal<ProductStatus>("active");
     sort = signal<ProductSort>("default");
     page = signal(1);
+    pageSize = storedPageSize("products");
 
     sorts: { value: ProductSort; label: string }[] = [
         { value: "default", label: "Par défaut" },
@@ -162,13 +160,9 @@ export class Products {
             status: this.status(),
             sort: this.sort(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
-        // on garde le numéro de page pour savoir s'il faut remplacer ou ajouter
-        stream: ({ params }) =>
-            this.productService
-                .getProducts(params)
-                .pipe(map((res) => ({ ...res, page: params.page }))),
+        stream: ({ params }) => this.productService.getProducts(params),
     });
     categories = rxResource({ stream: () => this.categoryService.getCategories() });
 
@@ -180,20 +174,12 @@ export class Products {
     supplierName = computed(() => (this.supplier.hasValue() ? this.supplier.value()?.name : null));
 
     // dernière réponse reçue : on la garde pendant le chargement de la suivante
-    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+    last = linkedSignal<ProductPage | undefined, ProductPage | undefined>({
         source: () => (this.products.hasValue() ? this.products.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // produits déjà chargés : la page 1 remplace la liste, les suivantes s'ajoutent au bout
-    list = linkedSignal<LoadedPage | undefined, Product[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.page === 1 || !previous) return res.data;
-            return [...previous.value, ...res.data];
-        },
-    });
+    list = computed(() => this.last()?.data ?? []);
 
     total = computed(() => this.last()?.total ?? 0);
     // les compteurs viennent du résumé du backend, pas de la page chargée
@@ -209,8 +195,6 @@ export class Products {
     // valeur au prix d'achat : le backend ne l'envoie qu'à l'admin
     stockValue = computed(() => this.counters()?.stock_value);
     firstLoad = computed(() => this.products.isLoading() && !this.last());
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.products.isLoading() && this.page() > 1);
 
     tabs = computed(() => {
         const counters = this.counters();
@@ -287,25 +271,6 @@ export class Products {
             this.supplierId.set(supplierId);
             this.stockStatus.set(stockStatus);
             this.page.set(1);
-        });
-
-        // Charger la page suivante quand le bas de la liste devient visible
-        // (recréé à chaque ajout : si le bas est encore visible, on enchaîne la page suivante)
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && this.hasMore() && !this.products.isLoading()) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
         });
     }
 
@@ -472,11 +437,7 @@ export class Products {
     }
 
     refresh() {
-        if (this.page() === 1) {
-            this.products.reload();
-        } else {
-            this.page.set(1);
-        }
+        this.products.reload();
         this.stockAlerts.alerts.reload();
     }
 

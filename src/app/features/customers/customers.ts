@@ -2,7 +2,6 @@ import { DatePipe } from "@angular/common";
 import {
     Component,
     DestroyRef,
-    ElementRef,
     computed,
     effect,
     inject,
@@ -27,12 +26,11 @@ import { PageHeader } from "../../layout/page-header/page-header";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { formatPhone } from "../../shared/phone";
 import { productInitials } from "../products/product-look";
 import { CustomerForm } from "./customer-form/customer-form";
 import { reminderLink } from "./customer-reminder";
-
-const PAGE_SIZE = 20;
 
 const SORTS: { value: CustomerSort; label: string }[] = [
     { value: "recent", label: "Récents" },
@@ -41,11 +39,19 @@ const SORTS: { value: CustomerSort; label: string }[] = [
     { value: "due", label: "Plus gros restes" },
 ];
 
-type LoadedPage = CustomerPage & { loadedPage: number };
-
 @Component({
     selector: "app-customers",
-    imports: [PageHeader, Icon, EmptyState, CustomerForm, FcfaPipe, DatePipe, RouterLink],
+    imports: [
+        PageHeader,
+        Icon,
+        EmptyState,
+        CustomerForm,
+        FcfaPipe,
+        DatePipe,
+        RouterLink,
+        Pagination,
+        Pagination,
+    ],
     templateUrl: "./customers.html",
     styleUrl: "./customers.css",
 })
@@ -57,7 +63,6 @@ export class Customers {
     protected auth = inject(AuthService);
 
     private customerForm = viewChild.required(CustomerForm);
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
 
     protected sorts = SORTS;
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
@@ -68,6 +73,7 @@ export class Customers {
     unpaid = signal(false);
     sort = signal<CustomerSort>("recent");
     page = signal(1);
+    pageSize = storedPageSize("customers");
     filtersOpen = signal(false);
 
     private searchTimer?: ReturnType<typeof setTimeout>;
@@ -79,12 +85,9 @@ export class Customers {
             unpaid: this.unpaid(),
             sort: this.sort(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
-        stream: ({ params }) =>
-            this.customerService
-                .getCustomers(params)
-                .pipe(map((res): LoadedPage => ({ ...res, loadedPage: params.page }))),
+        stream: ({ params }) => this.customerService.getCustomers(params),
     });
 
     // compteurs des deux puces : ils suivent la recherche, pas les autres filtres
@@ -105,22 +108,12 @@ export class Customers {
     });
 
     // dernière réponse reçue : gardée pendant le chargement de la suivante
-    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+    last = linkedSignal<CustomerPage | undefined, CustomerPage | undefined>({
         source: () => (this.customers.hasValue() ? this.customers.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // la page 1 remplace la liste, les suivantes s'ajoutent sans doublon
-    list = linkedSignal<LoadedPage | undefined, Customer[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.loadedPage === 1 || !previous) return res.rows;
-
-            const known = new Set(previous.value.map((customer) => customer.id));
-            return [...previous.value, ...res.rows.filter((customer) => !known.has(customer.id))];
-        },
-    });
+    list = computed(() => this.last()?.rows ?? []);
 
     total = computed(() => this.last()?.total ?? 0);
     dueTotal = computed(() => this.last()?.due_total ?? 0);
@@ -130,8 +123,6 @@ export class Customers {
         return reminderLink(customer, this.shop.shopName(), this.shop.defaultCountryCode());
     }
     firstLoad = computed(() => this.customers.isLoading() && !this.last());
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.customers.isLoading() && this.page() > 1);
 
     // le tri par défaut suit la puce : les plus gros restes d'abord quand on relance
     defaultSort = computed<CustomerSort>(() => (this.unpaid() ? "due" : "recent"));
@@ -139,7 +130,7 @@ export class Customers {
     // filtres choisis dans la fenêtre (hors recherche, puces et tri par défaut), en petites puces
     activeFilters = computed(() => {
         const filters: { key: "status" | "sort"; label: string }[] = [];
-        if (this.status() === "inactive") filters.push({ key: "status", label: "Désactivés" });
+        if (this.status() === "inactive") filters.push({ key: "status", label: "Supprimés" });
         if (this.sort() !== this.defaultSort()) {
             filters.push({
                 key: "sort",
@@ -151,29 +142,6 @@ export class Customers {
 
     constructor() {
         this.destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
-
-        // charge la page suivante quand le bas de la liste devient visible
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (
-                        entry.isIntersecting &&
-                        this.hasMore() &&
-                        !this.customers.isLoading() &&
-                        !this.customers.error()
-                    ) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
-        });
     }
 
     onSearch(value: string) {

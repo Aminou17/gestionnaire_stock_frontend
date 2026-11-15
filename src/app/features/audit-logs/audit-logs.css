@@ -10,7 +10,7 @@ app-page-header {
 /* une chronologie se lit mieux sur une largeur limitée */
 .top-card,
 .days,
-.more,
+.list-pager,
 .empty,
 .list-error {
     width: 100%;
@@ -275,11 +275,6 @@ app-page-header {
 .reloading {
     opacity: 0.6;
     transition: opacity 0.15s;
-}
-
-.more {
-    display: grid;
-    justify-items: center;
 }
 
 .loading,
@@ -652,11 +647,6 @@ app-page-header {
 
     .chevron {
         display: none;
-    }
-
-    .more .btn {
-        width: 100%;
-        min-height: 44px;
     }
 
     .empty .btn-sm,

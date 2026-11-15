@@ -1,0 +1,103 @@
+<header class="top">
+    <div class="top-inner">
+        <button type="button" class="back" (click)="back()" aria-label="Retour">
+            <app-icon name="chevron-left" [size]="18" />
+            <span>Retour</span>
+        </button>
+
+        <a routerLink="/" class="brand" [attr.aria-label]="productName + ', accueil'">
+            <span class="brand-icon" aria-hidden="true"><app-icon name="box" [size]="16" /></span>
+            {{ productName }}
+        </a>
+
+        @if (auth.isLoggedIn()) {
+            <a routerLink="/dashboard" class="btn btn-outline btn-sm">Mon espace</a>
+        } @else {
+            <a routerLink="/login" class="btn btn-outline btn-sm">Se connecter</a>
+        }
+    </div>
+</header>
+
+<main class="page">
+    <div class="hero">
+        <h1>{{ title() }}</h1>
+        @if (intro()) {
+            <p class="intro">{{ intro() }}</p>
+        }
+        @if (updated()) {
+            <span class="badge badge-neutral">{{ updated() }}</span>
+        }
+    </div>
+
+    @if (sections().length) {
+        <div class="layout">
+            <aside class="toc" [class.open]="tocOpen()">
+                <button
+                    type="button"
+                    class="toc-toggle"
+                    [attr.aria-expanded]="tocOpen()"
+                    aria-controls="toc-list"
+                    (click)="tocOpen.set(!tocOpen())"
+                >
+                    <span><app-icon name="list" [size]="16" /> Sommaire</span>
+                    <app-icon name="chevron-down" [size]="16" class="toc-chevron" />
+                </button>
+
+                <nav id="toc-list" class="toc-list" aria-label="Sommaire">
+                    <p class="toc-title">Sommaire</p>
+                    <ol>
+                        @for (section of sections(); track section.id) {
+                            <li>
+                                <a
+                                    [href]="'#' + section.id"
+                                    [class.active]="activeId() === section.id"
+                                    [attr.aria-current]="
+                                        activeId() === section.id ? 'location' : null
+                                    "
+                                    (click)="goTo($event, section.id)"
+                                >
+                                    {{ section.title }}
+                                </a>
+                            </li>
+                        }
+                    </ol>
+                </nav>
+            </aside>
+
+            <article class="card doc">
+                @for (section of sections(); track section.id) {
+                    <section [id]="section.id" [attr.aria-labelledby]="section.id + '-title'">
+                        <h2 [id]="section.id + '-title'">
+                            <span class="num">{{ $index + 1 }}</span>
+                            {{ section.title }}
+                        </h2>
+                        @for (block of section.body; track $index) {
+                            @if (isList(block)) {
+                                <ul>
+                                    @for (item of block; track $index) {
+                                        <li>{{ item }}</li>
+                                    }
+                                </ul>
+                            } @else {
+                                <p>{{ block }}</p>
+                            }
+                        }
+                    </section>
+                }
+            </article>
+        </div>
+    } @else {
+        <ng-content />
+    }
+</main>
+
+<footer class="foot">
+    <nav aria-label="Informations légales">
+        <a routerLink="/privacy">Confidentialité</a>
+        <span aria-hidden="true">·</span>
+        <a routerLink="/terms">Conditions</a>
+        <span aria-hidden="true">·</span>
+        <a routerLink="/contact">Contact</a>
+    </nav>
+    <p>© {{ year }} {{ productName }} · {{ companyName }}</p>
+</footer>

@@ -1,18 +1,8 @@
 import { DatePipe, formatDate } from "@angular/common";
-import {
-    Component,
-    ElementRef,
-    computed,
-    effect,
-    LOCALE_ID,
-    inject,
-    linkedSignal,
-    signal,
-    viewChild,
-} from "@angular/core";
+import { Component, computed, LOCALE_ID, inject, linkedSignal, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { Router, RouterLink } from "@angular/router";
-import { map, of } from "rxjs";
+import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { PaymentMethod, Sale, SalePage, SaleStatus } from "../../core/sales/sale.model";
@@ -29,8 +19,7 @@ import { Avatar } from "../../shared/avatar/avatar";
 import { Icon } from "../../shared/icon/icon";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { MoneyToggle } from "../../shared/money/money-toggle";
-
-const PAGE_SIZE = 20;
+import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 
 // choix de période de la fenêtre Filtre
 const PERIOD_CHOICES: { value: Period; label: string }[] = [
@@ -42,8 +31,6 @@ const PERIOD_CHOICES: { value: Period; label: string }[] = [
 ];
 
 type FilterKey = "period" | "payment" | "seller";
-
-type LoadedPage = SalePage & { page: number };
 
 @Component({
     selector: "app-sales",
@@ -57,6 +44,7 @@ type LoadedPage = SalePage & { page: number };
         Icon,
         FcfaPipe,
         EmptyState,
+        Pagination,
     ],
     templateUrl: "./sales.html",
     styleUrl: "./sales.css",
@@ -70,12 +58,11 @@ export class Sales {
     private exportService = inject(ExportService);
     protected auth = inject(AuthService);
 
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
-
     // période choisie dans <app-period-filter> (toutes les dates au départ)
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     status = signal<SaleStatus | null>(null);
     page = signal(1);
+    pageSize = storedPageSize("sales");
     search = signal("");
     unpaid = signal(false);
     paymentMethod = signal<PaymentMethod | null>(null);
@@ -97,39 +84,22 @@ export class Sales {
             sellerId: this.sellerId(),
             search: this.search(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
-        // on garde le numéro de page pour savoir s'il faut remplacer ou ajouter
-        stream: ({ params }) =>
-            this.saleService
-                .getSalesPage(params)
-                .pipe(map((res) => ({ ...res, page: params.page }))),
+        stream: ({ params }) => this.saleService.getSalesPage(params),
     });
 
     // dernière réponse reçue : on la garde pendant le chargement de la suivante
-    last = linkedSignal<LoadedPage | undefined, LoadedPage | undefined>({
+    last = linkedSignal<SalePage | undefined, SalePage | undefined>({
         source: () => (this.sales.hasValue() ? this.sales.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // ventes déjà chargées : la page 1 remplace la liste, les suivantes s'ajoutent au bout
-    list = linkedSignal<LoadedPage | undefined, Sale[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.page === 1 || !previous) return res.data;
-
-            // une vente créée pendant le défilement décale les pages : on évite les doublons
-            const known = new Set(previous.value.map((sale) => sale.id));
-            return [...previous.value, ...res.data.filter((sale) => !known.has(sale.id))];
-        },
-    });
+    list = computed(() => this.last()?.data ?? []);
 
     total = computed(() => this.last()?.total ?? 0);
     counters = computed(() => this.last()?.counters);
     firstLoad = computed(() => this.sales.isLoading() && !this.last());
-    hasMore = computed(() => this.list().length < this.total());
-    loadingMore = computed(() => this.sales.isLoading() && this.page() > 1);
 
     // téléphone : les ventes chargées, regroupées par jour (la liste est déjà triée par date)
     days = computed(() => groupByDay(this.list(), this.locale));
@@ -160,26 +130,6 @@ export class Sales {
             },
         ] as const;
     });
-
-    constructor() {
-        // Charger la page suivante quand le bas de la liste devient visible
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && this.hasMore() && !this.sales.isLoading()) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
-        });
-    }
 
     isSelected(value: SaleStatus | "UNPAID" | null) {
         return value === "UNPAID" ? this.unpaid() : !this.unpaid() && this.status() === value;

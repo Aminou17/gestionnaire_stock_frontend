@@ -87,7 +87,7 @@ describe("SettingsAccount", () => {
         await submit(0);
 
         expect(updateProfile).toHaveBeenCalledWith("Awa", "Bazin", "awa.b@test.com");
-        expect(el.textContent).toContain("Profil enregistré.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("should not save a profile without a first name", async () => {

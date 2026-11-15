@@ -1,0 +1,127 @@
+:host {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.more-btn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+}
+
+.more-btn:hover,
+.more-btn[aria-expanded="true"] {
+    background: var(--neutral-soft);
+    color: var(--text);
+}
+
+.more-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.more-btn:focus-visible,
+.item:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.panel {
+    inset: auto;
+    margin: 0;
+    min-width: 220px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    box-shadow: var(--shadow-dialog);
+    color: var(--text);
+}
+
+.panel:popover-open {
+    display: grid;
+}
+
+@media (min-width: 768px) {
+    .panel {
+        top: var(--top);
+        right: var(--right);
+    }
+}
+
+.sheet-title {
+    display: none;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-body);
+    text-align: left;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.item:hover {
+    background: var(--surface-hover);
+}
+
+.item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.item.danger {
+    color: var(--danger);
+}
+
+.item.danger:hover {
+    background: var(--danger-soft);
+}
+
+@media (max-width: 767px) {
+    /* cible tactile de 44 px sur le bouton, il déborde un peu pour s'aligner sur le bord de la carte */
+    .more-btn {
+        width: 44px;
+        height: 44px;
+        margin-right: -8px;
+    }
+
+    .panel::backdrop {
+        background: rgb(15 23 42 / 0.45);
+    }
+
+    .panel {
+        inset: auto 0 0;
+        width: 100%;
+        gap: 2px;
+        padding: 8px 12px calc(16px + env(safe-area-inset-bottom));
+        border: 0;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .sheet-title {
+        display: block;
+        padding: 8px 12px 12px;
+        font-size: var(--fs-lead);
+    }
+
+    .item {
+        min-height: 48px;
+    }
+}

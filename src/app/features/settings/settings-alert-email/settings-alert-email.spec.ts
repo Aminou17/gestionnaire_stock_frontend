@@ -94,7 +94,7 @@ describe("SettingsAlertEmail", () => {
         expect(updateSettings).toHaveBeenCalledWith(
             expect.objectContaining({ recipient: "proprietaire@gmail.com", gmailPassword: "" }),
         );
-        expect(el.textContent).toContain("Réglages enregistrés.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("refuse une adresse non valide sans appeler le serveur", async () => {

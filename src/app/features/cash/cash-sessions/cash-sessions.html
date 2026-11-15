@@ -138,21 +138,11 @@
             }
         </ul>
 
-        @if (hasMore()) {
-            <div #sentinel class="more">
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                    Chargement…
-                } @else if (sessions.error()) {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        (click)="sessions.reload()"
-                    >
-                        Réessayer
-                    </button>
-                }
-            </div>
-        }
+        <app-pagination
+            [total]="total()"
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [attached]="true"
+        />
     }
 </section>

@@ -68,7 +68,7 @@ describe("SettingsCash", () => {
         await fixture.whenStable();
 
         expect(updateSettings).toHaveBeenCalledWith(false);
-        expect(el.textContent).toContain("L'employé verra le solde attendu à la clôture.");
+        expect(el.textContent).toContain("Enregistré.");
     });
 
     it("should not show a fake value when loading fails", async () => {

@@ -134,7 +134,7 @@ describe("StockMovements", () => {
         await render({});
 
         expect(getMovements).toHaveBeenCalledWith(
-            expect.objectContaining({ page: 1, limit: 20, type: null, productId: null }),
+            expect.objectContaining({ page: 1, limit: 25, type: null, productId: null }),
         );
         const stats = el.querySelectorAll(".stat");
         expect(stats.length).toBe(6);

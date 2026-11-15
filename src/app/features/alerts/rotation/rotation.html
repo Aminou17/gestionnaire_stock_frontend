@@ -230,7 +230,7 @@
         </div>
 
         <ul class="rows">
-            @for (product of list(); track product.id) {
+            @for (product of paging.visible(); track product.id) {
                 <li class="row">
                     <span class="thumb av-{{ tone(product) }}">
                         @if (product.image) {
@@ -306,6 +306,13 @@
                 </li>
             }
         </ul>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+            [attached]="true"
+        />
     }
 </section>
 

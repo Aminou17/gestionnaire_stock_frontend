@@ -1,0 +1,77 @@
+<app-page-header title="Abonnement" subtitle="Votre formule et les offres à venir" />
+
+<div class="content">
+    <section class="card current" aria-labelledby="current-title">
+        <div class="current-head">
+            <span class="current-icon" aria-hidden="true"><app-icon name="tag" [size]="20" /></span>
+            <div class="current-text">
+                <h2 id="current-title">Votre formule</h2>
+                <p class="muted">Toutes les fonctionnalités sont incluses.</p>
+            </div>
+            <span class="badge badge-success">Essai gratuit</span>
+        </div>
+
+        <p class="reassure" role="status">
+            Les abonnements ne sont pas encore disponibles. {{ productName }} est en phase de
+            lancement : vous profitez de toutes les fonctionnalités sans frais. Nous vous
+            préviendrons bien avant la fin de l'essai.
+        </p>
+    </section>
+
+    <section aria-labelledby="plans-title">
+        <h2 id="plans-title" class="group-title">Formules à venir</h2>
+
+        <div class="plans">
+            @for (plan of plans; track plan.name) {
+                <article class="card plan" aria-label="{{ plan.name }}, bientôt disponible">
+                    <div class="plan-head">
+                        <h3>{{ plan.name }}</h3>
+                        <span class="badge badge-neutral">Bientôt</span>
+                    </div>
+                    <p class="muted tagline">{{ plan.tagline }}</p>
+                    <p class="price">Tarifs communiqués prochainement</p>
+
+                    <ul>
+                        @for (feature of plan.features; track feature) {
+                            <li>
+                                <app-icon name="check" [size]="16" />
+                                {{ feature }}
+                            </li>
+                        }
+                    </ul>
+                </article>
+            }
+        </div>
+
+        <p class="muted note">Aperçu indicatif : le contenu des formules peut évoluer.</p>
+    </section>
+
+    <section class="card payments" aria-labelledby="pay-title">
+        <h2 id="pay-title" class="group-title">Moyens de paiement prévus</h2>
+
+        <ul class="pills">
+            @for (method of payments; track method.label) {
+                <li class="pill">
+                    <app-icon [name]="method.icon" [size]="16" />
+                    {{ method.label }}
+                    <span class="badge badge-neutral">Bientôt</span>
+                </li>
+            }
+        </ul>
+    </section>
+
+    <section class="card help" aria-labelledby="help-title">
+        <div>
+            <h2 id="help-title">Une question sur les formules ?</h2>
+            <p class="muted">Écrivez-nous, nous vous répondons avec plaisir.</p>
+        </div>
+
+        <div class="actions">
+            <a routerLink="/contact" class="btn btn-primary">Nous contacter</a>
+            <a [href]="whatsapp" target="_blank" rel="noopener" class="btn btn-outline wa">
+                <app-whatsapp-icon [size]="18" />
+                WhatsApp
+            </a>
+        </div>
+    </section>
+</div>

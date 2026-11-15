@@ -66,7 +66,7 @@
             } @else {
                 Aucun fournisseur pour le moment.
                 <button type="button" class="btn btn-outline btn-sm" (click)="newSupplier()">
-                    Ajouter un fournisseur
+                    Nouveau fournisseur
                 </button>
             }
         </div>
@@ -84,7 +84,7 @@
             <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>
         }
         <ul class="rows" [class.reloading]="suppliers.isLoading()">
-            @for (supplier of list(); track supplier.id) {
+            @for (supplier of paging.visible(); track supplier.id) {
                 <li
                     class="row"
                     [class.inactive]="!supplier.is_active"
@@ -135,43 +135,23 @@
                             Restaurer
                         </button>
                     } @else {
-                        <div class="row-menu" (click)="$event.stopPropagation()">
-                            <button
-                                type="button"
-                                class="more-btn"
-                                aria-haspopup="menu"
-                                [attr.aria-expanded]="menuFor() === supplier.id"
-                                [attr.aria-label]="'Actions pour ' + supplier.name"
-                                (click)="toggleMenu(supplier.id)"
-                            >
-                                <app-icon name="more" />
-                            </button>
-                            @if (menuFor() === supplier.id) {
-                                <div class="menu" role="menu">
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        (click)="editSupplier(supplier)"
-                                    >
-                                        <app-icon name="edit" [size]="16" />
-                                        Modifier
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        class="danger"
-                                        (click)="askDelete(supplier)"
-                                    >
-                                        <app-icon name="trash" [size]="16" />
-                                        Supprimer
-                                    </button>
-                                </div>
-                            }
-                        </div>
+                        <app-action-menu
+                            [items]="rowActions"
+                            [label]="'Actions pour ' + supplier.name"
+                            [title]="supplier.name"
+                            (picked)="onMenu(supplier, $event)"
+                        />
                     }
                 </li>
             }
         </ul>
+
+        <app-pagination
+            [total]="paging.total()"
+            [(page)]="paging.page"
+            [(pageSize)]="paging.pageSize"
+            [attached]="true"
+        />
     }
 </section>
 

@@ -440,10 +440,10 @@ kbd {
     color: #fff;
 }
 
-/* carreaux : grandes vignettes tactiles */
+/* carreaux : vignette nette et texte centré dessous */
 .gtiles {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 12px;
     margin: 0;
     padding: 0;
@@ -508,26 +508,12 @@ kbd {
     outline-offset: -2px;
 }
 
-.gphoto {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 1;
-    font-size: var(--fs-kpi);
-    font-weight: var(--fw-semibold);
-    overflow: hidden;
-}
-
-.gphoto img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
 .gbody {
     display: grid;
     align-content: start;
     gap: 4px;
     padding: 12px;
+    text-align: center;
 }
 
 .gname {
@@ -544,7 +530,7 @@ kbd {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: 4px 8px;
 }
 
@@ -556,8 +542,8 @@ kbd {
 /* loupe ou appareil photo, dans le coin de la vignette */
 .gcorner {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 4px;
+    right: 4px;
     display: grid;
     place-items: center;
     width: 36px;
@@ -633,12 +619,6 @@ kbd {
     gap: 8px;
     margin: 0;
     padding: 32px 16px;
-}
-
-.more-hint {
-    margin: 12px 0 0;
-    font-size: var(--fs-small);
-    text-align: center;
 }
 
 @media (max-width: 1023px) {

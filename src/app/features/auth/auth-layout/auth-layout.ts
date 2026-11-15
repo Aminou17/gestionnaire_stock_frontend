@@ -1,13 +1,13 @@
 import { NgTemplateOutlet } from "@angular/common";
 import { Component } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
+import { RouterLink, RouterOutlet } from "@angular/router";
 
 import { COMPANY_NAME, PRODUCT_NAME } from "../../../core/brand";
 import { Icon } from "../../../shared/icon/icon";
 
 @Component({
     selector: "app-auth-layout",
-    imports: [RouterOutlet, NgTemplateOutlet, Icon],
+    imports: [RouterOutlet, RouterLink, NgTemplateOutlet, Icon],
     templateUrl: "./auth-layout.html",
     styleUrl: "./auth-layout.css",
 })

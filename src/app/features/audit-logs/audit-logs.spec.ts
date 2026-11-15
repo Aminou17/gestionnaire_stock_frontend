@@ -207,17 +207,21 @@ describe("AuditLogs", () => {
         );
     });
 
-    it("should add the next page without duplicates", async () => {
+    it("should show the next page in place of the first one", async () => {
         await render(({ page }) =>
             of({
-                data: page === 1 ? [sale] : [sale, failedLogin],
-                pagination: { page, limit: 25, total: 2, totalPages: 2 },
+                data: page === 1 ? [sale] : [failedLogin],
+                pagination: { page, limit: 25, total: 30, totalPages: 2 },
             }),
         );
-        el.querySelector<HTMLButtonElement>(".more .btn")!.click();
+        expect(text()).toContain("1–25 sur 30");
+
+        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();
 
-        expect(el.querySelectorAll(".entry").length).toBe(2);
+        expect(getLogs).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2, limit: 25 }));
+        expect(el.querySelectorAll(".entry").length).toBe(1);
+        expect(text()).toContain("26–30 sur 30");
     });
 
     it("should offer to retry when the first page fails", async () => {
@@ -228,18 +232,17 @@ describe("AuditLogs", () => {
         expect(el.querySelector(".empty button")).not.toBeNull();
     });
 
-    it("should not skip a page when the next one fails", async () => {
+    it("should keep the pagination and show the error when the next page fails", async () => {
         await render(({ page }) =>
             page === 1
-                ? of({ data: [sale], pagination: { page, limit: 25, total: 2, totalPages: 2 } })
+                ? of({ data: [sale], pagination: { page, limit: 25, total: 30, totalPages: 2 } })
                 : throwError(() => new HttpErrorResponse({ status: 500 })),
         );
-        el.querySelector<HTMLButtonElement>(".more .btn")!.click();
+        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();
 
-        expect(el.querySelector(".entry")).not.toBeNull();
         expect(el.querySelector(".list-error")).not.toBeNull();
-        expect(el.querySelector(".more .btn")).toBeNull();
+        expect(el.querySelector("app-pagination .prev")).not.toBeNull();
     });
 
     it("should say when no entry matches the filters", async () => {

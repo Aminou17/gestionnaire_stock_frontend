@@ -11,6 +11,7 @@ describe("SettingsPassword", () => {
     let fixture: ComponentFixture<SettingsPassword>;
     let el: HTMLElement;
     let changePassword: ReturnType<typeof vi.fn>;
+    let forgotPassword: ReturnType<typeof vi.fn>;
     let router: Router;
 
     async function render(passwordError?: string, mustChangePassword = false) {
@@ -23,6 +24,8 @@ describe("SettingsPassword", () => {
                 : of({ message: "ok" }),
         );
 
+        forgotPassword = vi.fn(() => of({ message: "ok" }));
+
         await TestBed.configureTestingModule({
             imports: [SettingsPassword],
             providers: [
@@ -30,11 +33,12 @@ describe("SettingsPassword", () => {
                 {
                     provide: AuthService,
                     useValue: {
-                        user: signal(mustChangePassword ? { mustChangePassword: true } : null),
+                        user: signal({ email: "awa@test.com", mustChangePassword }),
                         isAdmin: signal(false),
                         isOwner: signal(false),
                         roleLabel: signal("Employé"),
                         changePassword,
+                        forgotPassword,
                     },
                 },
             ],
@@ -148,5 +152,15 @@ describe("SettingsPassword", () => {
         await submit(0);
 
         expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it("should send the reset link to the account e-mail", async () => {
+        await render();
+
+        el.querySelector<HTMLButtonElement>(".forgot")!.click();
+        await fixture.whenStable();
+
+        expect(forgotPassword).toHaveBeenCalledWith("awa@test.com");
+        expect(el.textContent).toContain("Un lien vous a été envoyé par e-mail.");
     });
 });

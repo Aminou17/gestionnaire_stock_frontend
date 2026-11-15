@@ -92,13 +92,17 @@ describe("Settings", () => {
             "/export",
             "/account",
             "/password",
+            "/subscription",
+            "/contact",
+            "/privacy",
+            "/terms",
         ]);
     });
 
     it("should only offer the account to the manager", async () => {
         await render(false);
 
-        expect(hrefs()).toEqual(["/account", "/password"]);
+        expect(hrefs()).toEqual(["/account", "/password", "/contact", "/privacy", "/terms"]);
     });
 
     it("should show the state of the main settings for the administrator", async () => {
@@ -109,6 +113,7 @@ describe("Settings", () => {
         expect(text).toContain("Chez Awa");
         expect(text).toContain("Seuil : 5");
         expect(text).toContain("Gmail connecté");
+        expect(text).toContain("Essai gratuit");
     });
 
     it("should not read the settings for the manager", async () => {

@@ -11,7 +11,8 @@ app-page-header {
     min-width: 0;
 }
 
-.cards {
+.cards,
+.cards-pager {
     display: none;
 }
 
@@ -140,6 +141,10 @@ tbody tr:hover {
         height: 36px;
         min-height: 36px;
         padding: 0;
+    }
+
+    .cards-pager {
+        display: block;
     }
 
     .cards {

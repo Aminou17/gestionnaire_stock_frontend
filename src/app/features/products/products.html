@@ -295,7 +295,7 @@
         <p class="empty">Aucun produit à afficher.</p>
     } @else {
         <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
-        @if (products.error() && page() === 1) {
+        @if (products.error()) {
             <div class="alert alert-error list-error" role="alert">
                 Impossible de charger les produits.
                 <button type="button" class="btn btn-outline btn-sm" (click)="products.reload()">
@@ -308,7 +308,7 @@
 
         @if (view() === "list") {
             <div class="table-wrap">
-                <table [class.reloading]="products.isLoading() && page() === 1">
+                <table [class.reloading]="products.isLoading()">
                     <thead>
                         <tr>
                             <th>Produit</th>
@@ -479,23 +479,12 @@
             </ul>
         }
 
-        <!-- en vue, ce repère déclenche le chargement des 20 produits suivants -->
-        @if (hasMore()) {
-            <div #sentinel class="more">
-                @if (loadingMore()) {
-                    <span class="spinner"></span>
-                    Chargement…
-                } @else if (products.error()) {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        (click)="products.reload()"
-                    >
-                        Réessayer
-                    </button>
-                }
-            </div>
-        }
+        <app-pagination
+            [total]="total()"
+            [(page)]="page"
+            [(pageSize)]="pageSize"
+            [attached]="view() === 'list'"
+        />
     }
 </section>
 

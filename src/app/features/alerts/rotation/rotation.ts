@@ -7,6 +7,7 @@ import { ProductRotation, RotationSpeed } from "../../../core/stock/low-stock-al
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { Pagination, clientPaging } from "../../../shared/pagination/pagination";
 import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
 import { DaysLeftPipe } from "../../../shared/pipes/days-left.pipe";
 import { categoryTone, productInitials } from "../../products/product-look";
@@ -38,7 +39,7 @@ const speeds: RotationSpeed[] = ["FAST", "NORMAL", "SLOW", "DORMANT"];
 
 @Component({
     selector: "app-rotation",
-    imports: [RouterLink, PageHeader, Icon, PhotoZoom, DaysLeftPipe],
+    imports: [RouterLink, PageHeader, Icon, PhotoZoom, DaysLeftPipe, Pagination],
     host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
     templateUrl: "./rotation.html",
     styleUrl: "./rotation.css",
@@ -80,6 +81,12 @@ export class Rotation {
     });
 
     list = computed(() => this.filter(this.view()));
+
+    paging = clientPaging(
+        () => this.list(),
+        "rotation",
+        () => this.view(),
+    );
 
     emptyMessage = computed(() =>
         this.view() === "CLEAR"

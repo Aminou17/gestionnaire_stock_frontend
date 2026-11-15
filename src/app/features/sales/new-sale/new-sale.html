@@ -238,11 +238,12 @@
                     }
                 </ul>
             }
-            @if (moreResults()) {
-                <p class="more-hint muted">
-                    Seuls les 24 premiers produits sont affichés : précisez la recherche.
-                </p>
-            }
+            <app-pagination
+                [total]="resultsTotal()"
+                [(page)]="page"
+                [(pageSize)]="pageSize"
+                (pageChange)="resetCatalogScroll()"
+            />
         }
     </section>
 

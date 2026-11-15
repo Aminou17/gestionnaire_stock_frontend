@@ -1,10 +1,9 @@
 import { Icon } from "../../../shared/icon/icon";
+import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { CashTabs } from "../cash-tabs/cash-tabs";
 import {
     Component,
-    ElementRef,
     computed,
-    effect,
     LOCALE_ID,
     inject,
     linkedSignal,
@@ -24,8 +23,6 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementList } from "../cash-movement-list/cash-movement-list";
 import { MoneyToggle } from "../../../shared/money/money-toggle";
 
-const PAGE_SIZE = 20;
-
 const TYPES: { label: string; value: CashMovementType | null }[] = [
     { label: "Tous", value: null },
     { label: "Ventes", value: "SALE" },
@@ -38,7 +35,16 @@ const TYPES: { label: string; value: CashMovementType | null }[] = [
 @Component({
     host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
     selector: "app-cash-movements",
-    imports: [MoneyToggle, CashTabs, Icon, PageHeader, PeriodFilter, FcfaPipe, CashMovementList],
+    imports: [
+        MoneyToggle,
+        CashTabs,
+        Icon,
+        PageHeader,
+        PeriodFilter,
+        FcfaPipe,
+        CashMovementList,
+        Pagination,
+    ],
     templateUrl: "./cash-movements.html",
     styleUrl: "./cash-movements.css",
 })
@@ -46,13 +52,12 @@ export class CashMovements {
     private movementService = inject(CashMovementService);
     private locale = inject(LOCALE_ID);
 
-    private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
-
     types = TYPES;
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     type = signal<CashMovementType | null>(null);
     category = signal<string | null>(null);
     page = signal(1);
+    pageSize = storedPageSize("cash-movements");
     filtersOpen = signal(false);
     private periodFilter = viewChild.required<PeriodFilter>("period");
 
@@ -69,7 +74,7 @@ export class CashMovements {
             to: this.range().to,
             category: this.category(),
             page: this.page(),
-            limit: PAGE_SIZE,
+            limit: this.pageSize(),
         }),
         stream: ({ params }) => this.movementService.getMovements(params),
     });
@@ -80,17 +85,7 @@ export class CashMovements {
         computation: (next, previous) => next ?? previous?.value,
     });
 
-    // la page 1 remplace la liste, les suivantes s'ajoutent au bout
-    list = linkedSignal<CashMovementPage | undefined, CashMovementRow[]>({
-        source: this.last,
-        computation: (res, previous) => {
-            if (!res) return previous?.value ?? [];
-            if (res.pagination.page === 1 || !previous) return res.data;
-
-            const known = new Set(previous.value.map((movement) => movement.id));
-            return [...previous.value, ...res.data.filter((m) => !known.has(m.id))];
-        },
-    });
+    list = computed(() => this.last()?.data ?? []);
 
     // les mouvements chargés, regroupés par jour
     days = computed(() => groupByDay(this.list(), this.locale));
@@ -98,30 +93,8 @@ export class CashMovements {
     total = computed(() => this.last()?.pagination.total ?? 0);
     summary = computed(() => this.last()?.summary);
     // les squelettes remplacent aussi l'ancienne liste quand on change de filtre
-    firstLoad = computed(() => this.movements.isLoading() && (!this.last() || this.page() === 1));
+    firstLoad = computed(() => this.movements.isLoading() && !this.last());
     // d'après le nombre de pages : une page qui n'apporte rien de nouveau ne relance pas le chargement
-    hasMore = computed(() => this.page() < (this.last()?.pagination.totalPages ?? 0));
-    loadingMore = computed(() => this.movements.isLoading() && this.page() > 1);
-
-    constructor() {
-        // charger la page suivante quand le bas de la liste devient visible
-        effect((onCleanup) => {
-            this.list();
-            const sentinel = this.sentinel()?.nativeElement;
-            if (!sentinel) return;
-
-            const observer = new IntersectionObserver(
-                ([entry]) => {
-                    if (entry.isIntersecting && this.hasMore() && !this.movements.isLoading()) {
-                        this.page.update((page) => page + 1);
-                    }
-                },
-                { rootMargin: "200px" },
-            );
-            observer.observe(sentinel);
-            onCleanup(() => observer.disconnect());
-        });
-    }
 
     // filtres choisis dans la fenêtre, affichés en puces à côté du bouton
     activeFilters = computed(() => {
