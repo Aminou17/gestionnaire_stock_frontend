@@ -27,6 +27,7 @@ import { ExportFormat } from "../../core/export-format";
 import { ExportMenu } from "../../shared/export-menu/export-menu";
 import { Icon } from "../../shared/icon/icon";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
+import { MoneyToggle } from "../../shared/money/money-toggle";
 
 const PAGE_SIZE = 20;
 
@@ -42,6 +43,7 @@ type LoadedPage = SalePage & { page: number };
 @Component({
     selector: "app-sales",
     imports: [
+        MoneyToggle,
         RouterLink,
         DatePipe,
         PageHeader,

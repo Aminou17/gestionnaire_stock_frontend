@@ -9,20 +9,28 @@ import {
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { FormsModule } from "@angular/forms";
 import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { getBackLink } from "../../../core/back-link";
 import { CashSessionService } from "../../../core/cash/cash-session.service";
+import { Customer } from "../../../core/customers/customer.model";
+import { CustomerService } from "../../../core/customers/customer.service";
 import { PaymentMethod } from "../../../core/sales/sale.model";
 import { SaleService } from "../../../core/sales/sale.service";
+import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { CategoryService } from "../../../core/stock/category.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
+import { CustomerForm } from "../../customers/customer-form/customer-form";
+import { productInitials } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { formatPhone, phoneKey, splitPhone } from "../../../shared/phone";
+import { PhoneField } from "../../../shared/phone-field/phone-field";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 interface CartLine {
@@ -40,22 +48,29 @@ export const getMinPrice = (product: Product) =>
 
 @Component({
     selector: "app-new-sale",
-    imports: [PageHeader, Icon, FcfaPipe, ReopenCashDialog],
+    imports: [FormsModule, PageHeader, Icon, FcfaPipe, ReopenCashDialog, CustomerForm, PhoneField],
     templateUrl: "./new-sale.html",
     styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
     // la barre du panier en bas d'écran demande de la place sous la page
-    host: { "[class.has-cart]": "cart().length > 0" },
+    host: {
+        "[class.has-cart]": "cart().length > 0",
+        "(document:click)": "onDocumentClick($event)",
+    },
 })
 export class NewSale {
     private saleService = inject(SaleService);
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);
     private cashService = inject(CashSessionService);
+    private customerService = inject(CustomerService);
     private stockAlerts = inject(LowStockAlertService);
     private router = inject(Router);
+    private shop = inject(ShopSettingsService);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
     protected back = getBackLink("/sales", "Ventes");
+    protected initials = productInitials;
+    protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
     search = signal("");
     categoryId = signal<number | null>(null);
@@ -108,8 +123,59 @@ export class NewSale {
 
     // client facultatif, obligatoire (nom ou téléphone) pour un acompte
     showCustomer = signal(false);
+    // client choisi dans les fiches : la vente part avec son id
+    customer = signal<Customer | null>(null);
+    // saisie libre du nom et du téléphone, sans créer de fiche
+    freeEntry = signal(false);
     customerName = signal("");
     customerPhone = signal("");
+    customerQuery = signal("");
+    pickerOpen = signal(false);
+    private customerTimer?: ReturnType<typeof setTimeout>;
+    private phoneTimer?: ReturnType<typeof setTimeout>;
+    // téléphone tapé en saisie libre, retenu après une pause pour ne pas chercher à chaque touche
+    phoneSearch = signal("");
+
+    // sans texte, on propose les clients les plus récents
+    customerResults = rxResource({
+        params: () => (this.pickerOpen() ? { search: this.customerQuery() } : undefined),
+        stream: ({ params }) =>
+            this.customerService.getCustomers({ search: params.search, limit: 5 }),
+    });
+    customerList = computed(() =>
+        this.customerResults.hasValue() ? this.customerResults.value().rows : [],
+    );
+    // assez de chiffres après l'indicatif pour chercher une fiche
+    private searchable = (phone: string) =>
+        splitPhone(phone, this.shop.defaultCountryCode()).national.length >= 6;
+    private phoneKey = (phone: string) => phoneKey(phone, this.shop.defaultCountryCode());
+    // en saisie libre, un numéro tapé qui est celui d'une fiche la propose
+    phoneResults = rxResource({
+        params: () => {
+            const search = this.phoneSearch();
+            return this.freeEntry() && this.searchable(search) ? { search } : undefined;
+        },
+        stream: ({ params }) =>
+            this.customerService.getCustomers({ search: params.search, limit: 5 }),
+    });
+    phoneMatch = computed(() => {
+        const typed = this.phoneKey(this.customerPhone());
+        if (!this.searchable(typed) || typed !== this.phoneKey(this.phoneSearch())) return null;
+        if (!this.phoneResults.hasValue()) return null;
+
+        return (
+            this.phoneResults
+                .value()
+                .rows.find((row) => this.phoneKey(row.phone ?? "") === typed) ?? null
+        );
+    });
+    // un client est identifié par sa fiche ou par un nom ou un téléphone saisi
+    hasCustomer = computed(
+        () =>
+            this.customer() !== null ||
+            !!this.customerName().trim() ||
+            !!this.customerPhone().trim(),
+    );
     // acompte : montant payé maintenant, vide = la vente est payée en totalité
     deposit = signal<number | null>(null);
     toPay = computed(() => this.deposit() ?? this.total());
@@ -129,7 +195,7 @@ export class NewSale {
                 : null;
         }
         if (deposit > this.total()) return "L'acompte dépasse le total de la vente.";
-        if (deposit < this.total() && !this.customerName().trim() && !this.customerPhone().trim())
+        if (deposit < this.total() && !this.hasCustomer())
             return "Indiquez le nom ou le téléphone du client pour un acompte.";
         return null;
     });
@@ -158,11 +224,82 @@ export class NewSale {
     showDeposit = signal(false);
 
     toggleCustomer() {
-        if (this.showCustomer()) {
-            this.customerName.set("");
-            this.customerPhone.set("");
-        }
+        if (this.showCustomer()) this.clearCustomer();
         this.showCustomer.update((value) => !value);
+        // la liste des clients récents est visible dès l'ouverture
+        this.pickerOpen.set(this.showCustomer());
+    }
+
+    private clearCustomer() {
+        this.customer.set(null);
+        this.freeEntry.set(false);
+        this.customerName.set("");
+        this.customerPhone.set("");
+        this.customerQuery.set("");
+        this.phoneSearch.set("");
+        this.pickerOpen.set(false);
+    }
+
+    onCustomerSearch(value: string) {
+        this.pickerOpen.set(true);
+        clearTimeout(this.customerTimer);
+        this.customerTimer = setTimeout(() => this.customerQuery.set(value.trim()), 250);
+    }
+
+    closePicker(search?: HTMLInputElement) {
+        // le focus rouvre la liste : on le rend d'abord, on ferme ensuite
+        search?.focus();
+        this.pickerOpen.set(false);
+    }
+
+    // un clic à côté du sélecteur referme la liste
+    onDocumentClick(event: Event) {
+        if (!this.pickerOpen()) return;
+        if ((event.target as HTMLElement).closest(".picker-zone, .add-customer")) return;
+
+        this.pickerOpen.set(false);
+    }
+
+    onPhoneInput(value: string) {
+        this.customerPhone.set(value);
+        clearTimeout(this.phoneTimer);
+        this.phoneTimer = setTimeout(() => this.phoneSearch.set(value.trim()), 300);
+    }
+
+    chooseCustomer(customer: Customer) {
+        this.customer.set(customer);
+        this.freeEntry.set(false);
+        this.customerName.set("");
+        this.customerPhone.set("");
+        this.phoneSearch.set("");
+        this.pickerOpen.set(false);
+        this.customerQuery.set("");
+    }
+
+    changeCustomer() {
+        this.customer.set(null);
+    }
+
+    useFreeEntry() {
+        this.freeEntry.set(true);
+        this.pickerOpen.set(false);
+    }
+
+    backToPicker() {
+        this.freeEntry.set(false);
+        this.customerName.set("");
+        this.customerPhone.set("");
+    }
+
+    // ce qui a été tapé sert de départ à la fiche : un numéro va dans le téléphone
+    openNewCustomer(form: CustomerForm) {
+        const text = this.customerQuery();
+        const isPhone = /^[0-9+\-.() ]+$/.test(text);
+        form.openNew(isPhone ? { phone: text } : { name: text });
+    }
+
+    onCustomerCreated(customer: Customer) {
+        this.chooseCustomer(customer);
     }
 
     toggleDeposit() {
@@ -171,7 +308,10 @@ export class NewSale {
         this.deposit.set(null);
         this.amountReceived.set(null);
         // sans client, personne ne pourrait réclamer le solde
-        if (this.showDeposit()) this.showCustomer.set(true);
+        if (this.showDeposit() && !this.showCustomer()) {
+            this.showCustomer.set(true);
+            this.pickerOpen.set(true);
+        }
     }
 
     toggleSplit() {
@@ -226,7 +366,11 @@ export class NewSale {
             observer.observe(cart);
             this.destroyRef.onDestroy(() => observer.disconnect());
         });
-        this.destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
+        this.destroyRef.onDestroy(() => {
+            clearTimeout(this.searchTimer);
+            clearTimeout(this.customerTimer);
+            clearTimeout(this.phoneTimer);
+        });
 
         // arrivée depuis le bouton "Vendre" d'un produit
         const productId = Number(inject(ActivatedRoute).snapshot.queryParamMap.get("productId"));
@@ -258,6 +402,10 @@ export class NewSale {
 
     inCart(product: Product) {
         return this.cart().some((line) => line.product.id === product.id);
+    }
+
+    quantityOf(product: Product) {
+        return this.cart().find((line) => line.product.id === product.id)?.quantity ?? 0;
     }
 
     addProduct(product: Product) {
@@ -340,6 +488,7 @@ export class NewSale {
         const method = this.paymentMethod();
         const received = this.amountReceived();
         const deposit = this.deposit();
+        const customerId = this.customer()?.id;
         const customerName = this.customerName().trim();
         const customerPhone = this.customerPhone().trim();
         const payment = {
@@ -355,8 +504,9 @@ export class NewSale {
                       },
                   }
                 : {}),
-            ...(customerName ? { customerName } : {}),
-            ...(customerPhone ? { customerPhone } : {}),
+            ...(customerId ? { customerId } : {}),
+            ...(!customerId && customerName ? { customerName } : {}),
+            ...(!customerId && customerPhone ? { customerPhone } : {}),
         };
 
         this.saleService
@@ -370,6 +520,21 @@ export class NewSale {
                 },
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);
+
+                    // la fiche choisie a été désactivée entre-temps : on la retire
+                    if (
+                        err.status === 404 &&
+                        customerId &&
+                        /client/i.test(err.error?.message ?? "")
+                    ) {
+                        this.customer.set(null);
+                        this.pickerOpen.set(true);
+                        this.error.set(
+                            "Ce client n'existe plus ou a été désactivé. Choisissez-en un autre.",
+                        );
+                        return;
+                    }
+
                     this.error.set(err.error?.message ?? "Impossible d'enregistrer la vente.");
                     // stock ou caisse ont pu changer entre-temps
                     this.products.reload();

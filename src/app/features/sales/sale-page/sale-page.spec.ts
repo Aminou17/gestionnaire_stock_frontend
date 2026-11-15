@@ -107,6 +107,7 @@ describe("SalePage", () => {
                 {
                     provide: ShopSettingsService,
                     useValue: {
+                        defaultCountryCode: signal("242"),
                         getSettings: () =>
                             of({
                                 name: "Awa Bazin",
@@ -156,6 +157,13 @@ describe("SalePage", () => {
 
     const text = () => el.textContent!.replace(/\s/g, " ");
 
+    // les actions secondaires sont dans le menu "..."
+    const openMenu = async () => {
+        el.querySelector<HTMLButtonElement>(".more-btn")!.click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+    };
+
     it("should list the products sold with the discount and the total", async () => {
         await render();
 
@@ -168,16 +176,19 @@ describe("SalePage", () => {
 
     it("should let only the owner refund an active sale", async () => {
         await render();
+        await openMenu();
         expect(el.querySelector(".refund-btn")).not.toBeNull();
 
         TestBed.resetTestingModule();
         await render({ isAdmin: false });
+        await openMenu();
         expect(el.querySelector(".refund-btn")).toBeNull();
         expect(text()).not.toContain("Vendeur");
     });
 
     it("should require a reason before refunding", async () => {
         await render();
+        await openMenu();
         el.querySelector<HTMLButtonElement>(".refund-btn")!.click();
         el.querySelector<HTMLButtonElement>("dialog button[type='submit']")!.click();
         await fixture.whenStable();
@@ -277,6 +288,7 @@ describe("SalePage", () => {
         expect(text()).toContain("Remboursée");
         expect(text()).toContain("par Yabre M.");
         expect(text()).toContain("Motif : Erreur de saisie");
+        await openMenu();
         expect(el.querySelector(".refund-btn")).toBeNull();
     });
 
@@ -342,6 +354,7 @@ describe("SalePage", () => {
 
     it("should block the printing when the ticket settings cannot be loaded", async () => {
         await render({ salesSettingsError: true });
+        await openMenu();
 
         const buttons = [...el.querySelectorAll<HTMLButtonElement>(".summary-actions button")];
         const ticket = buttons.find((b) => b.textContent!.includes("Ticket"))!;
@@ -354,6 +367,7 @@ describe("SalePage", () => {
 
     it("should print the receipt", async () => {
         await render();
+        await openMenu();
         const print = vi.spyOn(window, "print").mockImplementation(() => {});
 
         [...el.querySelectorAll<HTMLButtonElement>(".summary-actions button")]

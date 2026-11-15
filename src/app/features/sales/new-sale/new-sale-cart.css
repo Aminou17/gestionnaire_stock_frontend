@@ -6,7 +6,7 @@
     border-color: var(--primary);
     background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .method:focus-visible,
@@ -29,7 +29,7 @@
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--fs-small);
     font-variant-numeric: tabular-nums;
     cursor: pointer;
 }
@@ -44,15 +44,16 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
+    border-radius: 12px;
     background: var(--success-soft);
     color: var(--success);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .change strong {
-    font-size: 18px;
+    font-size: var(--fs-heading);
     font-variant-numeric: tabular-nums;
 }
 
@@ -62,26 +63,247 @@
     gap: 8px;
 }
 
+/* sélecteur de client : recherche, résultats, fiche choisie */
+.picker {
+    position: relative;
+}
+
+.picker app-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.picker .input {
+    padding-left: 40px;
+}
+
+.picker-list {
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.picker-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 52px;
+    padding: 6px 8px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.picker-row:hover {
+    background: var(--surface-hover);
+}
+
+.picker-row:focus-visible,
+.picked-change:focus-visible,
+.link-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.picker-new strong {
+    color: var(--primary-text, var(--primary));
+}
+
+.picker-empty {
+    padding: 12px 8px;
+    font-size: var(--fs-body);
+}
+
+.picker-error,
+.picker-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.picker-error {
+    justify-content: space-between;
+    color: var(--danger);
+}
+
+/* la liste s'ouvre sous le champ avec un petit écart */
+.picker-zone {
+    display: grid;
+    gap: 8px;
+}
+
+.avatar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
+}
+
+.av-0,
+.av-add {
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
+}
+
+.av-1 {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+
+.av-2 {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+
+.av-3 {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.picked {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 8px 12px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+.picked-text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+}
+
+.picked-text strong,
+.picked-text small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.picked-text strong {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+}
+
+.picked-change {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.picked-change:hover {
+    background: var(--surface-hover);
+}
+
+.picked-due {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--warning-soft, var(--surface));
+    color: var(--warning);
+    font-size: var(--fs-small);
+}
+
+.link-btn {
+    justify-self: start;
+    min-height: 36px;
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: var(--primary-text, var(--primary));
+    font: inherit;
+    font-size: var(--fs-small);
+    cursor: pointer;
+}
+
+/* lien discret : la fiche client reste le chemin conseillé */
+.free-link {
+    justify-self: start;
+    min-height: 36px;
+    padding: 0 4px;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-small);
+    cursor: pointer;
+}
+
+.free-link:hover {
+    color: var(--text);
+    text-decoration: underline;
+}
+
+.free-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* un numéro tapé qui est celui d'une fiche : on propose de la choisir */
+.match {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 8px 8px 12px;
+    border: 1px solid var(--primary);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
 .remaining {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    padding: 10px 12px;
-    border-radius: 8px;
+    padding: 12px 16px;
+    border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
+    border-radius: 12px;
     background: var(--warning-soft, var(--surface));
     color: var(--warning, var(--text));
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .remaining strong {
-    font-size: 18px;
+    font-size: var(--fs-heading);
     font-variant-numeric: tabular-nums;
 }
 
 .more-hint {
     margin: 12px 0 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
     text-align: center;
+}
+
+/* sur téléphone le bouton reste collé en bas de l'écran tant que le panier est visible */
+.submit-zone {
+    display: grid;
 }
 
 /* désactivé : bien distinct d'un bouton actif (même règle que la fiche produit) */
@@ -150,13 +372,28 @@
     }
 
     .cart-bar strong {
-        font-size: 18px;
+        font-size: var(--fs-heading);
         font-variant-numeric: tabular-nums;
     }
 
     .cart-bar small {
-        font-size: 12px;
+        font-size: var(--fs-caption);
         color: var(--text-muted);
+    }
+
+    .submit-zone {
+        position: sticky;
+        bottom: 0;
+        z-index: 5;
+        margin: 0 -16px -16px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+        border-radius: 0 0 var(--radius-lg, 16px) var(--radius-lg, 16px);
+        background: var(--surface);
+    }
+
+    .submit {
+        min-height: 48px;
     }
 
     /* cibles tactiles de 44 px minimum (tablette comprise) */
@@ -217,8 +454,17 @@
     }
 
     /* sur téléphone la barre se pose au-dessus de la navigation du bas */
-    .cart-bar {
+    .cart-bar,
+    .submit-zone {
         bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+    }
+
+    /* le catalogue se pose sur le fond de la page, comme la liste des produits */
+    .catalog {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        box-shadow: none;
     }
 
     /* deux tuiles par ligne */
@@ -242,20 +488,19 @@
 
 .options {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
 }
 
 .option {
     min-height: 40px;
     padding: 0 14px;
-    border: 1px dashed var(--border);
+    border: 1px solid var(--border);
     border-radius: 999px;
-    background: transparent;
+    background: var(--surface);
     color: var(--text-muted, var(--text));
     font: inherit;
-    font-size: 14px;
-    font-weight: 500;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
     cursor: pointer;
 }
 
@@ -264,11 +509,10 @@
 }
 
 .option.on {
-    border-style: solid;
     border-color: var(--primary);
     background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .option.on::before {
@@ -285,6 +529,7 @@
 }
 
 .remaining.second {
+    border-color: color-mix(in srgb, var(--primary) 22%, transparent);
     background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
 }

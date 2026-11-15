@@ -53,10 +53,10 @@
 }
 
 .summary-total {
-    font-size: 36px;
+    font-size: var(--fs-kpi);
     line-height: 1.1;
     white-space: nowrap;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
@@ -66,12 +66,92 @@
     text-decoration: line-through;
 }
 
+/* teinte et liseré selon l'état : orange reste à payer, vert payée, rouge remboursée */
+.summary.is-due {
+    border-left: 3px solid var(--warning);
+    background: linear-gradient(135deg, var(--warning-soft) 0%, var(--surface) 65%);
+}
+
+.summary.is-paid {
+    border-left: 3px solid var(--success);
+    background: linear-gradient(135deg, var(--success-soft) 0%, var(--surface) 65%);
+}
+
+.summary.is-refunded {
+    border-left: 3px solid var(--danger);
+    background: linear-gradient(135deg, var(--danger-soft) 0%, var(--surface) 65%);
+}
+
+/* une action principale, le reste dans le menu */
 .summary-actions {
     display: flex;
-    flex-wrap: wrap;
     gap: 8px;
-    padding-top: 16px;
+}
+
+.summary-actions > .btn {
+    flex: 1;
+}
+
+.action-menu {
+    position: relative;
+}
+
+.action-menu .more-btn {
+    width: 44px;
+    padding: 0;
+    flex: none;
+}
+
+.action-menu .menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    z-index: 10;
+    display: grid;
+    width: 220px;
+    padding: 6px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow-menu);
+}
+
+.action-menu .menu > * {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-body);
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.action-menu .menu > *:hover:not(:disabled) {
+    background: var(--surface-hover);
+}
+
+.action-menu .menu > *:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.action-menu .menu .refund-btn {
+    margin-top: 4px;
     border-top: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
+    color: var(--danger);
+}
+
+.action-menu .menu .refund-btn:hover:not(:disabled) {
+    background: var(--danger-soft);
 }
 
 .subtotals {
@@ -92,7 +172,7 @@
     justify-items: start;
     gap: 6px;
     margin-top: 6px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .summary-meta > span {
@@ -107,9 +187,21 @@
     text-transform: uppercase;
 }
 
-.customer strong {
+.customer strong,
+.customer-link {
     color: var(--text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
+}
+
+.customer-link {
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 3px;
+}
+
+.customer-link:hover {
+    color: var(--primary-text);
+    text-decoration-color: currentColor;
 }
 
 .seller {
@@ -117,7 +209,7 @@
     align-items: center;
     gap: 6px;
     color: var(--text);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
 }
 
 .seller-avatar {
@@ -147,7 +239,7 @@
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--fs-small);
     text-align: left;
     cursor: pointer;
 }
@@ -164,7 +256,7 @@
 
 .move-name {
     min-width: 0;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     overflow-wrap: anywhere;
 }
 
@@ -221,7 +313,7 @@
     align-items: center;
     gap: 12px;
     min-height: 32px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .payment dt {
@@ -237,7 +329,7 @@
 
 .payment dd {
     margin: 0;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
     overflow-wrap: anywhere;
     text-align: right;
@@ -308,7 +400,7 @@
     position: relative;
     display: grid;
     gap: 2px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .timeline li::before {
@@ -347,7 +439,7 @@
 
 .pager-btn:hover {
     background: var(--surface-hover);
-    color: var(--primary);
+    color: var(--primary-text);
 }
 
 .pager-btn.disabled {
@@ -359,7 +451,7 @@
     margin: -12px 0 -12px auto;
     padding: 12px 0;
     color: inherit;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .sheet {
@@ -387,13 +479,13 @@ dl > div {
 }
 
 dt {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
 dd {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: right;
 }
 
@@ -403,8 +495,8 @@ dd::first-letter {
 
 .section-title {
     margin: 16px 0 4px;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
 }
 
 .items {
@@ -435,7 +527,7 @@ dd::first-letter {
     display: block;
     padding: 12px 0;
     color: var(--text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-decoration: none;
     overflow-wrap: anywhere;
 }
@@ -449,14 +541,14 @@ dd::first-letter {
 
 .items li:hover .item-name,
 .item-name:hover {
-    color: var(--primary);
+    color: var(--primary-text);
 }
 
 .item-text small {
     margin-top: -12px;
     padding-bottom: 12px;
     pointer-events: none;
-    font-size: 13px;
+    font-size: var(--fs-small);
     font-variant-numeric: tabular-nums;
 }
 
@@ -472,12 +564,12 @@ dd::first-letter {
     align-items: baseline;
     justify-content: space-between;
     padding-top: 16px;
-    font-size: 15px;
+    font-size: var(--fs-body);
 }
 
 .total strong {
-    font-size: 24px;
-    font-weight: 700;
+    font-size: var(--fs-kpi);
+    font-weight: var(--fw-bold);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
@@ -497,7 +589,7 @@ dd::first-letter {
     border: 1px solid color-mix(in srgb, var(--danger) 25%, transparent);
     background: var(--danger-soft);
     color: var(--danger);
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.4;
 }
 
@@ -519,8 +611,8 @@ dd::first-letter {
     background: transparent;
     color: var(--danger);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
@@ -553,12 +645,12 @@ dd::first-letter {
 }
 
 .summary-text small {
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .recap dd.returned {
     color: var(--danger);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .stock-toggle {
@@ -570,10 +662,10 @@ dd::first-letter {
     padding: 0;
     border: 0;
     background: none;
-    color: var(--primary);
+    color: var(--primary-text);
     font: inherit;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
@@ -589,4 +681,14 @@ dd::first-letter {
 /* la barre du haut (menu, cloche, profil) reste en première ligne, comme sur les autres pages */
 app-page-header {
     order: -1;
+}
+
+/* hors de l'écran mais bien dessiné, pour la photo du ticket */
+.capture {
+    position: fixed;
+    top: 0;
+    left: -10000px;
+    width: 80mm;
+    background: #fff;
+    pointer-events: none;
 }

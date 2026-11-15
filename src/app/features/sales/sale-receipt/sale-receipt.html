@@ -7,31 +7,31 @@
         }
         <strong class="receipt-shop">{{ shop()?.name }}</strong>
         @if (shop(); as info) {
+            <!-- coordonnées de la boutique : sur le papier seulement, l'écran et l'image restent sobres -->
             @if (info.address) {
-                <span>{{ info.address }}</span>
+                <span class="on-paper">{{ info.address }}</span>
             }
             @if (info.phone) {
-                <span>Tél. {{ info.phone }}</span>
+                <span class="on-paper">Tél. {{ info.phone }}</span>
             }
             @if (info.tax_id) {
-                <span>IFU {{ info.tax_id }}</span>
+                <span class="on-paper">IFU {{ info.tax_id }}</span>
             }
             @if (info.rccm) {
-                <span>RCCM {{ info.rccm }}</span>
+                <span class="on-paper">RCCM {{ info.rccm }}</span>
             }
         }
-        <span class="receipt-gap"></span>
-        <span>Ticket n° {{ ticketNumber() }}</span>
-        <span>{{ s.created_at | date: "dd/MM/y 'à' HH:mm" }}</span>
+        <span class="receipt-meta">Ticket n° {{ ticketNumber() }}</span>
+        <span class="receipt-meta">{{ s.created_at | date: "dd/MM/y 'à' HH:mm" }}</span>
         <!-- le manager ne voit que ses ventes : son propre nom peut figurer sur son ticket -->
         @if (s.user_name) {
-            <span>Servi par {{ s.user_name }}</span>
+            <span class="receipt-meta on-paper">Servi par {{ s.user_name }}</span>
         }
         @if (s.customer_name) {
-            <span>Client : {{ s.customer_name }}</span>
+            <span class="receipt-client">Client : {{ s.customer_name }}</span>
         }
         @if (s.customer_phone) {
-            <span>Tél. client : {{ s.customer_phone }}</span>
+            <span class="receipt-meta on-paper">Tél. client : {{ s.customer_phone }}</span>
         }
         @if (s.status === "CANCELLED") {
             <strong class="receipt-cancelled">VENTE REMBOURSÉE</strong>
@@ -56,7 +56,7 @@
     </div>
 
     <div class="receipt-sums">
-        <p class="receipt-line">
+        <p class="receipt-line on-paper">
             <span>Articles</span><span>{{ itemsCount() }}</span>
         </p>
         @if (discounts() > 0) {
@@ -73,21 +73,30 @@
         @if (s.payments.length > 0) {
             @for (payment of s.payments; track payment.id) {
                 <p class="receipt-line">
-                    <span>{{ payment.created_at | date: "dd/MM" }} Payé</span
+                    <span>
+                        @if (s.payments.length > 1) {
+                            {{ payment.created_at | date: "dd/MM" }}
+                        }
+                        Payé</span
                     ><span>{{ payment.amount | fcfa }}</span>
                 </p>
                 @if (changeOf(payment); as change) {
-                    <span class="receipt-note"
-                        >Reçu {{ payment.amount_received! | fcfa }}, rendu {{ change | fcfa }}</span
-                    >
+                    <p class="receipt-line receipt-sub">
+                        <span>Reçu</span><span>{{ payment.amount_received! | fcfa }}</span>
+                    </p>
+                    <p class="receipt-line receipt-sub">
+                        <span>Rendu</span><span>{{ change | fcfa }}</span>
+                    </p>
                 }
             }
             @if (s.status === "ACTIVE") {
-                <p class="receipt-line receipt-total">
-                    <span>MONTANT PAYÉ</span><span>{{ s.paid_amount | fcfa }}</span>
-                </p>
-                @if (due() > 0 || s.payments.length > 1) {
+                @if (s.payments.length > 1) {
                     <p class="receipt-line">
+                        <span>Total payé</span><span>{{ s.paid_amount | fcfa }}</span>
+                    </p>
+                }
+                @if (due() > 0 || s.payments.length > 1) {
+                    <p class="receipt-line receipt-due">
                         <span>Reste à payer</span><span>{{ due() | fcfa }}</span>
                     </p>
                 }
@@ -109,9 +118,9 @@
     </div>
 
     <footer class="receipt-thanks">
-        <span>Merci de votre visite !</span>
         @if (shop()?.receipt_footer; as footer) {
-            <span class="receipt-policy">{{ footer }}</span>
+            <p class="receipt-announce">{{ footer }}</p>
         }
+        <span>Merci de votre visite !</span>
     </footer>
 </section>
