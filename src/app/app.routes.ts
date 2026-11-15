@@ -6,6 +6,7 @@ import { guestGuard } from "./core/auth/guest.guard";
 import { ownerGuard } from "./core/auth/owner.guard";
 import { passwordChangeGuard } from "./core/auth/password-change.guard";
 import { shopGuard } from "./core/auth/shop.guard";
+import { welcomeGuard } from "./features/auth/welcome/welcome.guard";
 import { AuthLayout } from "./features/auth/auth-layout/auth-layout";
 import { unsavedChangesGuard } from "./features/settings/unsaved-changes.guard";
 import { MainLayout } from "./layout/main-layout/main-layout";
@@ -33,6 +34,12 @@ export const routes: Routes = [
         ],
     },
     {
+        path: "welcome",
+        title: "Bienvenue",
+        canActivate: [guestGuard],
+        loadComponent: () => import("./features/auth/welcome/welcome").then((m) => m.Welcome),
+    },
+    {
         path: "",
         component: AuthLayout,
         canActivate: [guestGuard],
@@ -40,11 +47,13 @@ export const routes: Routes = [
             {
                 path: "login",
                 title: "Connexion",
+                canActivate: [welcomeGuard],
                 loadComponent: () => import("./features/auth/login/login").then((m) => m.Login),
             },
             {
                 path: "register",
                 title: "Créer ma boutique",
+                canActivate: [welcomeGuard],
                 loadComponent: () =>
                     import("./features/auth/register/register").then((m) => m.Register),
             },
