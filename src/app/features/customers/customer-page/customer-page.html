@@ -1,0 +1,289 @@
+<app-page-header
+    [title]="data()?.name ?? 'Client'"
+    section="Clients"
+    [back]="back.link"
+    [backLabel]="back.label"
+>
+    @if (canManage()) {
+        <button type="button" class="btn btn-outline edit-btn" (click)="editCustomer()">
+            <app-icon name="edit" [size]="18" />
+            <span>Modifier</span>
+        </button>
+    }
+</app-page-header>
+
+@if (customer.isLoading() && !data()) {
+    <div class="skeleton hero-skeleton"></div>
+    <div class="skeleton stats-skeleton"></div>
+    <div class="skeleton row-skeleton"></div>
+    <div class="skeleton row-skeleton"></div>
+} @else if (!data() && (customer.error() || notFound())) {
+    <section class="card empty">
+        @if (notFound()) {
+            Ce client est introuvable.
+            <a routerLink="/customers" class="btn btn-outline btn-sm">Retour aux clients</a>
+        } @else {
+            Impossible de charger le client.
+            <button type="button" class="btn btn-outline btn-sm" (click)="customer.reload()">
+                Réessayer
+            </button>
+        }
+    </section>
+} @else if (data(); as customer) {
+    <section class="card hero">
+        <div class="identity">
+            <span class="avatar av-{{ customer.id % 4 }}" aria-hidden="true">{{
+                initials(customer.name)
+            }}</span>
+            <div class="identity-text">
+                <h2>{{ customer.name }}</h2>
+                <p class="muted">
+                    @if (customer.phone) {
+                        <span class="phone-number">{{ formatPhone(customer.phone) }}</span>
+                    }
+                </p>
+                <p class="muted since">Client depuis {{ customer.created_at | date: "MMM y" }}</p>
+            </div>
+            @if (!customer.is_active) {
+                <span class="badge badge-neutral">Désactivé</span>
+            }
+        </div>
+
+        @if (customer.note) {
+            <p class="note">{{ customer.note }}</p>
+        }
+
+        @if (customer.phone) {
+            <div class="contact">
+                <a class="btn btn-outline" [href]="telLink(customer.phone)">
+                    <app-icon name="phone" [size]="18" />
+                    Appeler
+                </a>
+                <a
+                    class="btn btn-outline"
+                    [href]="whatsAppLink(customer.phone)"
+                    target="_blank"
+                    rel="noopener"
+                    [attr.aria-label]="'Écrire sur WhatsApp à ' + customer.name"
+                >
+                    <app-icon name="message" [size]="18" />
+                    WhatsApp
+                </a>
+            </div>
+        } @else if (canManage()) {
+            <button type="button" class="link-btn" (click)="editCustomer()">
+                <app-icon name="plus" [size]="16" />
+                Ajouter un téléphone
+            </button>
+        }
+    </section>
+
+    @if (customer.due_amount > 0) {
+        <section class="due-card" aria-label="Reste à payer">
+            <div class="due-text">
+                <span class="due-label">Reste à payer</span>
+                <strong class="due-amount">{{ customer.due_amount | fcfa }}</strong>
+            </div>
+            @if (reminder(); as link) {
+                <a class="btn btn-primary remind" [href]="link" target="_blank" rel="noopener">
+                    <app-icon name="message" [size]="18" />
+                    Relancer sur WhatsApp
+                </a>
+            } @else if (canManage()) {
+                <button type="button" class="btn btn-outline remind" (click)="editCustomer()">
+                    Ajouter un numéro pour le relancer
+                </button>
+            }
+        </section>
+    }
+
+    <section class="card stats" aria-label="Résumé des achats">
+        <div>
+            <strong>{{ customer.total_spent | fcfa }}</strong>
+            <span>Total dépensé</span>
+        </div>
+        <div>
+            <strong>{{ customer.purchases_count }}</strong>
+            <span>Achat{{ customer.purchases_count > 1 ? "s" : "" }}</span>
+        </div>
+        <div>
+            <strong>
+                @if (customer.last_purchase_at) {
+                    {{ customer.last_purchase_at | date: "d MMM" }}
+                } @else {
+                    —
+                }
+            </strong>
+            <span>Dernier achat</span>
+        </div>
+    </section>
+
+    <h2 class="section-title">Achats</h2>
+
+    @if (sales.isLoading() && !lastSales()) {
+        <div class="skeleton row-skeleton"></div>
+        <div class="skeleton row-skeleton"></div>
+    } @else if (sales.error() && saleList().length === 0) {
+        <section class="card empty">
+            Impossible de charger les achats.
+            <button type="button" class="btn btn-outline btn-sm" (click)="sales.reload()">
+                Réessayer
+            </button>
+        </section>
+    } @else if (saleList().length === 0) {
+        <section class="card empty">
+            <app-icon name="cart" [size]="32" />
+            <p>Aucun achat pour le moment.</p>
+            @if (customer.is_active) {
+                <a routerLink="/sales/new" class="btn btn-primary">
+                    <app-icon name="plus" [size]="18" />
+                    Nouvelle vente
+                </a>
+            }
+        </section>
+    } @else {
+        @for (month of months(); track month.key) {
+            <section class="month">
+                <h3 class="month-title">{{ month.label }}</h3>
+                <ul class="month-card card">
+                    @for (sale of month.items; track sale.id) {
+                        <li>
+                            <a
+                                class="sale-row"
+                                [routerLink]="['/sales', sale.id]"
+                                [state]="backState()"
+                            >
+                                <span class="sale-icon"
+                                    ><app-icon name="receipt" [size]="18"
+                                /></span>
+                                <span class="sale-main">
+                                    <span class="sale-title">Vente #{{ sale.number }}</span>
+                                    <small class="muted">
+                                        <span class="nowrap">{{
+                                            sale.created_at | date: "d MMM, HH:mm"
+                                        }}</span>
+                                        ·
+                                        <span class="nowrap"
+                                            >{{ sale.items_count }} article{{
+                                                sale.items_count > 1 ? "s" : ""
+                                            }}</span
+                                        >
+                                    </small>
+                                </span>
+                                <span class="sale-side">
+                                    <strong [class.cancelled]="sale.status === 'CANCELLED'">{{
+                                        sale.total | fcfa
+                                    }}</strong>
+                                    @if (sale.status === "CANCELLED") {
+                                        <span class="badge badge-danger">Remboursée</span>
+                                    } @else if (due(sale) > 0) {
+                                        <span class="badge badge-warning"
+                                            >Reste {{ due(sale) | fcfa }}</span
+                                        >
+                                    }
+                                </span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
+        @if (sales.error()) {
+            <div class="alert alert-error" role="alert">
+                Impossible de charger la suite.
+                <button type="button" class="btn btn-outline btn-sm" (click)="sales.reload()">
+                    Réessayer
+                </button>
+            </div>
+        } @else if (hasMoreSales()) {
+            <button
+                type="button"
+                class="btn btn-outline more"
+                [disabled]="loadingMore()"
+                (click)="loadMoreSales()"
+            >
+                @if (loadingMore()) {
+                    <span class="spinner"></span>
+                }
+                Voir les achats suivants
+            </button>
+        }
+    }
+
+    @if (auth.isAdmin()) {
+        <div class="admin-zone">
+            @if (customer.is_active) {
+                <button type="button" class="btn btn-sm danger" (click)="askDelete()">
+                    <app-icon name="ban" [size]="16" />
+                    Désactiver ce client
+                </button>
+            } @else {
+                @if (restoreError()) {
+                    <div class="alert alert-error" role="alert">{{ restoreError() }}</div>
+                }
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="restoring()"
+                    (click)="restoreCustomer()"
+                >
+                    @if (restoring()) {
+                        <span class="spinner"></span>
+                    } @else {
+                        <app-icon name="undo" [size]="18" />
+                    }
+                    Réactiver le client
+                </button>
+            }
+        </div>
+    }
+}
+
+@if (canManage()) {
+    <app-customer-form (saved)="onSaved()" />
+}
+
+@if (auth.isAdmin()) {
+    <dialog
+        #confirmBox
+        class="confirm"
+        aria-labelledby="customer-delete-title"
+        (click)="onConfirmBackdrop($event)"
+        (cancel)="onConfirmCancel($event)"
+    >
+        <div class="confirm-body">
+            <h2 id="customer-delete-title">Désactiver ce client ?</h2>
+            <p class="muted">
+                « {{ data()?.name }} » ne sera plus proposé pour les nouvelles ventes. Ses achats
+                restent dans l'historique et vous pouvez le réactiver à tout moment.
+            </p>
+
+            @if (deleteError()) {
+                <div class="alert alert-error" role="alert">{{ deleteError() }}</div>
+            }
+
+            <div class="confirm-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="deleting()"
+                    (click)="closeConfirm()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    [disabled]="deleting()"
+                    (click)="deleteCustomer()"
+                >
+                    @if (deleting()) {
+                        <span class="spinner"></span>
+                    }
+                    Désactiver
+                </button>
+            </div>
+        </div>
+    </dialog>
+}

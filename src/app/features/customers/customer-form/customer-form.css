@@ -1,0 +1,108 @@
+/* au centre sur ordinateur, feuille collée en bas sur téléphone */
+.sheet {
+    width: min(460px, calc(100% - 32px));
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.sheet::backdrop {
+    background: var(--overlay);
+}
+
+.body {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.head h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+}
+
+.close {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-right: -8px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.close:hover {
+    background: var(--neutral-soft);
+}
+
+.close:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.hint {
+    font-size: var(--fs-caption);
+}
+
+textarea.input {
+    height: auto;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.duplicate {
+    display: grid;
+    gap: 8px;
+    justify-items: start;
+}
+
+.duplicate p {
+    margin: 0;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+@media (max-width: 767px) {
+    .sheet {
+        width: 100%;
+        max-width: 100%;
+        margin: auto 0 0;
+        border: 0;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .body {
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    }
+
+    .close {
+        width: 44px;
+        height: 44px;
+    }
+
+    .actions {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+    }
+
+    .actions .btn {
+        min-height: 44px;
+    }
+}
