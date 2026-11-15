@@ -58,50 +58,12 @@
                 [class.is-paid]="sale.status !== 'CANCELLED' && due() <= 0"
                 [class.is-refunded]="sale.status === 'CANCELLED'"
             >
-                <nav class="pager" aria-label="Autres ventes">
-                    @if (sale.previous_id; as id) {
-                        <a
-                            class="pager-btn"
-                            [routerLink]="['/sales', id]"
-                            [state]="navState()"
-                            (click)="justCreated.set(false)"
-                            aria-label="Vente précédente"
-                            title="Vente précédente"
-                        >
-                            <app-icon name="chevron-left" [size]="18" />
-                        </a>
-                    } @else {
-                        <span class="pager-btn disabled" aria-hidden="true">
-                            <app-icon name="chevron-left" [size]="18" />
-                        </span>
-                    }
-                    @if (sale.next_id; as id) {
-                        <a
-                            class="pager-btn"
-                            [routerLink]="['/sales', id]"
-                            [state]="navState()"
-                            (click)="justCreated.set(false)"
-                            aria-label="Vente suivante"
-                            title="Vente suivante"
-                        >
-                            <app-icon name="chevron-right" [size]="18" />
-                        </a>
-                    } @else {
-                        <span class="pager-btn disabled" aria-hidden="true">
-                            <app-icon name="chevron-right" [size]="18" />
-                        </span>
-                    }
-                </nav>
-                <div class="summary-text">
+                <div class="summary-top">
                     <span
-                        class="badge"
-                        [class]="
-                            sale.status === 'CANCELLED'
-                                ? 'badge badge-danger'
-                                : due() > 0
-                                  ? 'badge badge-warning'
-                                  : 'badge badge-success'
-                        "
+                        class="status"
+                        [class.st-due]="sale.status !== 'CANCELLED' && due() > 0"
+                        [class.st-paid]="sale.status !== 'CANCELLED' && due() <= 0"
+                        [class.st-refunded]="sale.status === 'CANCELLED'"
                         >{{
                             sale.status === "CANCELLED"
                                 ? "Remboursée"
@@ -110,6 +72,43 @@
                                   : "Payée"
                         }}</span
                     >
+                    <nav class="pager" aria-label="Autres ventes">
+                        @if (sale.previous_id; as id) {
+                            <a
+                                class="pager-btn"
+                                [routerLink]="['/sales', id]"
+                                [state]="navState()"
+                                (click)="justCreated.set(false)"
+                                aria-label="Vente précédente"
+                                title="Vente précédente"
+                            >
+                                <app-icon name="chevron-left" [size]="18" />
+                            </a>
+                        } @else {
+                            <span class="pager-btn disabled" aria-hidden="true">
+                                <app-icon name="chevron-left" [size]="18" />
+                            </span>
+                        }
+                        @if (sale.next_id; as id) {
+                            <a
+                                class="pager-btn"
+                                [routerLink]="['/sales', id]"
+                                [state]="navState()"
+                                (click)="justCreated.set(false)"
+                                aria-label="Vente suivante"
+                                title="Vente suivante"
+                            >
+                                <app-icon name="chevron-right" [size]="18" />
+                            </a>
+                        } @else {
+                            <span class="pager-btn disabled" aria-hidden="true">
+                                <app-icon name="chevron-right" [size]="18" />
+                            </span>
+                        }
+                    </nav>
+                </div>
+
+                <div class="summary-text">
                     <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
                         (due() > 0 ? due() : hasReturns() ? net() : sale.total) | fcfa
                     }}</strong>
@@ -123,30 +122,52 @@
                             >sur {{ sale.total | fcfa }} · {{ returned() | fcfa }} rendus</small
                         >
                     }
-                    <div class="summary-meta">
+                </div>
+
+                <ul class="facts">
+                    <li>
+                        <span class="fact-icon"><app-icon name="clock" [size]="16" /></span>
                         <span class="when">{{ sale.created_at | date: "EEE d MMM y, HH:mm" }}</span>
-                        <span class="customer">
-                            <app-icon name="user" [size]="14" />
-                            @if (sale.customer_name || sale.customer_phone) {
-                                @if (sale.customer_id) {
-                                    <a
-                                        class="customer-link"
-                                        [routerLink]="['/customers', sale.customer_id]"
-                                        >{{ sale.customer_name }}</a
-                                    >
-                                } @else {
-                                    <strong>{{ sale.customer_name }}</strong>
+                    </li>
+                    <li>
+                        <span class="fact-icon"><app-icon name="user" [size]="16" /></span>
+                        @if (sale.customer_name || sale.customer_phone) {
+                            <span class="fact-text">
+                                @if (sale.customer_name) {
+                                    @if (sale.customer_id) {
+                                        <a
+                                            class="customer-link"
+                                            [routerLink]="['/customers', sale.customer_id]"
+                                            >{{ sale.customer_name }}</a
+                                        >
+                                    } @else {
+                                        <strong>{{ sale.customer_name }}</strong>
+                                    }
                                 }
                                 @if (sale.customer_phone) {
-                                    <a [href]="'tel:' + sale.customer_phone">{{
+                                    <a class="phone-link" [href]="'tel:' + sale.customer_phone">{{
                                         sale.customer_phone
                                     }}</a>
                                 }
-                            } @else {
-                                <span>—</span>
+                            </span>
+                            @if (customerWhatsApp(); as link) {
+                                <a
+                                    class="wa-chip"
+                                    [href]="link"
+                                    target="_blank"
+                                    rel="noopener"
+                                    aria-label="Écrire au client sur WhatsApp"
+                                    title="Écrire sur WhatsApp"
+                                >
+                                    <app-whatsapp-icon [size]="18" />
+                                </a>
                             }
-                        </span>
-                        @if (auth.isAdmin() && sale.user_name) {
+                        } @else {
+                            <span class="fact-text muted">Sans client</span>
+                        }
+                    </li>
+                    @if (auth.isAdmin() && sale.user_name) {
+                        <li>
                             <a class="seller" [routerLink]="['/users', sale.user_id]">
                                 <app-avatar
                                     class="seller-avatar"
@@ -155,16 +176,16 @@
                                 />
                                 {{ sale.user_name }}
                             </a>
-                        }
-                    </div>
-                </div>
+                        </li>
+                    }
+                </ul>
                 @if (shareNotice(); as notice) {
                     <div class="alert alert-success settings-alert" role="status">{{ notice }}</div>
                 }
                 @if (shareError()) {
                     <div class="alert alert-warning settings-alert" role="alert">
-                        Impossible de fabriquer l'image du reçu. Utilisez le bouton WhatsApp pour
-                        l'envoyer en texte.
+                        Impossible de fabriquer l'image du reçu. Utilisez « Envoyer en texte » dans
+                        le menu.
                     </div>
                 }
                 @if (settingsFailed()) {
@@ -183,7 +204,7 @@
                     @if (canPay()) {
                         <button
                             type="button"
-                            class="btn btn-primary"
+                            class="act act-pay"
                             [disabled]="reloading()"
                             (click)="askPay()"
                         >
@@ -193,28 +214,26 @@
                     }
                     <button
                         type="button"
-                        class="btn btn-outline"
+                        class="act act-ticket"
                         [disabled]="!settingsReady()"
                         (click)="openTicket()"
                     >
                         <app-icon name="receipt" [size]="18" />
                         Ticket
                     </button>
-                    @if (justCreated()) {
-                        <button
-                            type="button"
-                            class="btn btn-outline"
-                            [disabled]="!settingsReady() || sharing()"
-                            (click)="shareImage()"
-                        >
-                            <app-icon name="image" [size]="18" />
-                            Envoyer en image
-                        </button>
-                    }
+                    <button
+                        type="button"
+                        class="act act-image"
+                        [disabled]="!settingsReady() || sharing()"
+                        (click)="shareImage()"
+                    >
+                        <app-whatsapp-icon [size]="18" />
+                        Envoyer en image
+                    </button>
                     <div class="action-menu">
                         <button
                             type="button"
-                            class="btn btn-outline more-btn"
+                            class="act act-more more-btn"
                             aria-haspopup="menu"
                             aria-label="Autres actions"
                             [attr.aria-expanded]="menuOpen()"
@@ -224,17 +243,6 @@
                         </button>
                         @if (menuOpen()) {
                             <div class="menu" role="menu">
-                                @if (!justCreated()) {
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        [disabled]="!settingsReady() || sharing()"
-                                        (click)="menuOpen.set(false); shareImage()"
-                                    >
-                                        <app-icon name="image" [size]="16" />
-                                        Envoyer en image
-                                    </button>
-                                }
                                 @if (whatsAppReceipt(); as link) {
                                     <a
                                         role="menuitem"

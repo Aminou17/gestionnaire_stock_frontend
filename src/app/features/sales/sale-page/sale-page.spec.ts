@@ -352,6 +352,27 @@ describe("SalePage", () => {
         expect(subtotals).toContain("−500 F");
     });
 
+    it("should always offer the ticket and the image sending side by side", async () => {
+        await render();
+
+        const labels = [...el.querySelectorAll<HTMLButtonElement>(".summary-actions .act")].map(
+            (b) => b.textContent!.trim(),
+        );
+        expect(labels).toContain("Ticket");
+        expect(labels).toContain("Envoyer en image");
+    });
+
+    it("should link the customer phone to WhatsApp when there is one", async () => {
+        await render();
+
+        const link = el.querySelector<HTMLAnchorElement>(".wa-chip");
+        if (el.textContent!.includes("Sans client")) {
+            expect(link).toBeNull();
+        } else {
+            expect(link!.href).toContain("https://wa.me/");
+        }
+    });
+
     it("should block the printing when the ticket settings cannot be loaded", async () => {
         await render({ salesSettingsError: true });
         await openMenu();

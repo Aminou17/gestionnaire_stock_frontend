@@ -29,6 +29,8 @@ import { MovementDetail } from "../../stock-movements/movement-detail/movement-d
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Avatar } from "../../../shared/avatar/avatar";
 import { Icon } from "../../../shared/icon/icon";
+import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
+import { toWhatsAppLink } from "../../../shared/phone";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 interface TimelineEvent {
@@ -44,6 +46,7 @@ interface TimelineEvent {
 @Component({
     selector: "app-sale-page",
     imports: [
+        WhatsappIcon,
         RouterLink,
         DatePipe,
         DecimalPipe,
@@ -230,6 +233,12 @@ export class SalePage {
             this.ticketPrefix(),
             shop.receipt_footer ?? "",
         );
+    });
+
+    // ouvre la conversation WhatsApp du client, sans message écrit
+    customerWhatsApp = computed(() => {
+        const phone = this.data()?.customer_phone;
+        return phone ? toWhatsAppLink(phone, this.shopService.defaultCountryCode()) : null;
     });
 
     menuOpen = signal(false);
