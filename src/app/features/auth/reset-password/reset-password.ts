@@ -31,7 +31,10 @@ export class ResetPassword {
 
     form = inject(NonNullableFormBuilder).group(
         {
-            newPassword: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
+            newPassword: [
+                "",
+                [Validators.required, Validators.minLength(8), Validators.maxLength(72)],
+            ],
             confirmPassword: ["", Validators.required],
         },
         { validators: passwordsMatch },
@@ -62,6 +65,8 @@ export class ResetPassword {
         this.auth.resetPassword(this.token, this.form.getRawValue().newPassword).subscribe({
             next: () => {
                 this.loading.set(false);
+                // le mot de passe a changé : une session ouverte sur cet appareil ne vaut plus rien
+                this.auth.endSession();
                 this.done.set(true);
             },
             error: (err: HttpErrorResponse) => {

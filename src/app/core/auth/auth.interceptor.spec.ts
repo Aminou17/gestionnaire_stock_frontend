@@ -89,12 +89,13 @@ describe("authInterceptor", () => {
     it("should ask for a password change on a 403 PASSWORD_CHANGE_REQUIRED", () => {
         http.get("/api/products").subscribe({ error: () => {} });
 
-        httpMock
-            .expectOne("/api/products")
-            .flush(
-                { code: "PASSWORD_CHANGE_REQUIRED", message: "Vous devez d'abord choisir votre propre mot de passe." },
-                { status: 403, statusText: "Forbidden" },
-            );
+        httpMock.expectOne("/api/products").flush(
+            {
+                code: "PASSWORD_CHANGE_REQUIRED",
+                message: "Vous devez d'abord choisir votre propre mot de passe.",
+            },
+            { status: 403, statusText: "Forbidden" },
+        );
 
         expect(auth.requirePasswordChange).toHaveBeenCalled();
         expect(auth.logout).not.toHaveBeenCalled();

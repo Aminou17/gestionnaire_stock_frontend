@@ -35,6 +35,29 @@ describe("audit sentence", () => {
         ).toBe("Moussa");
     });
 
+    it("should write a sentence for each customer action", () => {
+        expect(
+            getAuditSentence(log({ action: "CUSTOMER_CREATED", details: { name: "Awa Kouba" } })),
+        ).toEqual({ verb: "a ajouté le client", object: "Awa Kouba" });
+
+        expect(
+            getAuditSentence(
+                log({
+                    action: "CUSTOMER_DEACTIVATED",
+                    entity_type: "customer",
+                    entity_name: "Awa",
+                }),
+            ),
+        ).toEqual({ verb: "a désactivé le client", object: "Awa" });
+
+        expect(getAuditSentence(log({ action: "CUSTOMER_UPDATED" })).verb).toBe(
+            "a modifié le client",
+        );
+        expect(getAuditSentence(log({ action: "CUSTOMER_RESTORED" })).verb).toBe(
+            "a restauré le client",
+        );
+    });
+
     it("should give the amount and the payment of a sale", () => {
         const sentence = getAuditSentence(
             log({ action: "SALE_CREATED", details: { total: 25000, paymentMethod: "CASH" } }),

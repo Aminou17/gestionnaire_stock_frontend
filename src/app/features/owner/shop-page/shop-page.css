@@ -19,7 +19,7 @@
 
 .block-head h2 {
     margin: 0;
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 .facts {
@@ -30,13 +30,13 @@
 }
 
 .facts dt {
-    font-size: 12.5px;
+    font-size: var(--fs-caption);
     color: var(--text-muted);
 }
 
 .facts dd {
     margin: 2px 0 0;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     overflow-wrap: anywhere;
 }
 
@@ -95,7 +95,7 @@
 
 .hint {
     margin: 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
     line-height: 1.5;
 }
 
@@ -120,7 +120,7 @@
 
 .status-row p {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 
@@ -142,7 +142,8 @@
     background: var(--surface-2, var(--primary-soft));
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    font-size: 13px;
+    font-size: var(--fs-small);
+    -webkit-user-select: all;
     user-select: all;
 }
 

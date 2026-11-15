@@ -4,6 +4,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { Router, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { LogoResizerService } from "../../settings/logo-resizer.service";
 
 type Field = "shopName" | "adminName" | "email" | "password";
 
@@ -17,6 +18,7 @@ export class Register {
     private auth = inject(AuthService);
     private router = inject(Router);
     private fb = inject(NonNullableFormBuilder);
+    private resizer = inject(LogoResizerService);
 
     // mêmes limites que l'API
     form = this.fb.group({
@@ -29,6 +31,30 @@ export class Register {
     loading = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
+
+    // logo facultatif : réduit tout de suite, envoyé avec l'inscription
+    logo = signal<string | null>(null);
+    logoError = signal<string | null>(null);
+
+    async onLogoChosen(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = "";
+        if (!file) return;
+
+        this.logoError.set(null);
+
+        try {
+            this.logo.set(await this.resizer.resize(file));
+        } catch (err) {
+            this.logoError.set((err as Error).message);
+        }
+    }
+
+    removeLogo() {
+        this.logo.set(null);
+        this.logoError.set(null);
+    }
 
     hasError(field: Field, code: string) {
         const control = this.form.controls[field];
@@ -57,15 +83,25 @@ export class Register {
 
         const { shopName, adminName, email, password } = this.form.getRawValue();
 
+        const logo = this.logo();
+
         // l'API n'accepte que des emails en minuscules
         this.auth
-            .register({ shopName, adminName, email: email.trim().toLowerCase(), password })
+            .register({
+                shopName,
+                adminName,
+                email: email.trim().toLowerCase(),
+                password,
+                ...(logo ? { logo } : {}),
+            })
             .subscribe({
                 next: () => this.router.navigate(["/dashboard"]),
                 error: (err: HttpErrorResponse) => {
                     this.loading.set(false);
                     if (err.status === 0 || err.status >= 502) {
-                        this.error.set("Impossible de joindre le serveur. Vérifiez votre connexion.");
+                        this.error.set(
+                            "Impossible de joindre le serveur. Vérifiez votre connexion.",
+                        );
                     } else {
                         this.error.set(err.error?.message ?? "Une erreur est survenue, réessayez.");
                     }

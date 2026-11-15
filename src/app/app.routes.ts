@@ -18,6 +18,21 @@ const upcoming: [string, string, boolean][] = [];
 export const routes: Routes = [
     { path: "", pathMatch: "full", redirectTo: "dashboard" },
     {
+        // le lien reçu par e-mail s'ouvre même si quelqu'un est déjà connecté sur cet appareil
+        path: "reset-password",
+        component: AuthLayout,
+        children: [
+            {
+                path: "",
+                title: "Nouveau mot de passe",
+                loadComponent: () =>
+                    import("./features/auth/reset-password/reset-password").then(
+                        (m) => m.ResetPassword,
+                    ),
+            },
+        ],
+    },
+    {
         path: "",
         component: AuthLayout,
         canActivate: [guestGuard],
@@ -32,14 +47,6 @@ export const routes: Routes = [
                 title: "Créer ma boutique",
                 loadComponent: () =>
                     import("./features/auth/register/register").then((m) => m.Register),
-            },
-            {
-                path: "reset-password",
-                title: "Nouveau mot de passe",
-                loadComponent: () =>
-                    import("./features/auth/reset-password/reset-password").then(
-                        (m) => m.ResetPassword,
-                    ),
             },
             {
                 path: "forgot-password",
@@ -200,6 +207,20 @@ export const routes: Routes = [
                     import("./features/sales/sale-page/sale-page").then((m) => m.SalePage),
             },
             {
+                path: "customers",
+                title: "Clients",
+                loadComponent: () =>
+                    import("./features/customers/customers").then((m) => m.Customers),
+            },
+            {
+                path: "customers/:id",
+                title: "Client",
+                loadComponent: () =>
+                    import("./features/customers/customer-page/customer-page").then(
+                        (m) => m.CustomerPage,
+                    ),
+            },
+            {
                 path: "cash",
                 title: "Caisse",
                 loadComponent: () => import("./features/cash/cash").then((m) => m.Cash),
@@ -353,6 +374,14 @@ export const routes: Routes = [
                 title: "Boutique",
                 loadComponent: () =>
                     import("./features/owner/shop-page/shop-page").then((m) => m.ShopPage),
+            },
+            {
+                path: "mail",
+                title: "E-mails d'envoi",
+                loadComponent: () =>
+                    import("./features/owner/mail-settings/mail-settings").then(
+                        (m) => m.MailSettingsPage,
+                    ),
             },
             {
                 path: "password",

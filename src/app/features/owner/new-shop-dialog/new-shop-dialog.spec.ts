@@ -35,7 +35,10 @@ describe("NewShopDialog", () => {
     const fill = (dialog: NewShopDialog) =>
         dialog.form.setValue({
             shopName: " Chez Fatou ",
-            adminName: "Fatou Diallo",
+            firstName: "Fatou",
+            lastName: " Diallo ",
+            phone: "06 123 45 67",
+            address: "",
             email: "fatou@exemple.com",
             password: "Provisoire-2026",
             trialDays: null,
@@ -63,6 +66,7 @@ describe("NewShopDialog", () => {
         expect(createShop).toHaveBeenCalledWith({
             shopName: "Chez Fatou",
             adminName: "Fatou Diallo",
+            phone: "06 123 45 67",
             email: "fatou@exemple.com",
             password: "Provisoire-2026",
         });
@@ -73,7 +77,9 @@ describe("NewShopDialog", () => {
     });
 
     it("should send trialDays when it is filled", async () => {
-        createShop = vi.fn(() => of({ id: 3, name: "Chez Fatou", admin: { email: "fatou@exemple.com" } }));
+        createShop = vi.fn(() =>
+            of({ id: 3, name: "Chez Fatou", admin: { email: "fatou@exemple.com" } }),
+        );
         const fixture = await render();
         fill(fixture.componentInstance);
         fixture.componentInstance.form.controls.trialDays.setValue(14);
@@ -84,7 +90,9 @@ describe("NewShopDialog", () => {
     });
 
     it("should not send trialDays when it is empty", async () => {
-        createShop = vi.fn(() => of({ id: 3, name: "Chez Fatou", admin: { email: "fatou@exemple.com" } }));
+        createShop = vi.fn(() =>
+            of({ id: 3, name: "Chez Fatou", admin: { email: "fatou@exemple.com" } }),
+        );
         const fixture = await render();
         fill(fixture.componentInstance);
 
@@ -126,9 +134,13 @@ describe("NewShopDialog", () => {
 
         // adresse en http : le navigateur ne donne pas de presse-papiers
         Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
+        const execCommand = vi.fn(() => false);
+        document.execCommand = execCommand;
         fixture.componentInstance.copy();
+        await new Promise((resolve) => setTimeout(resolve));
         delete (navigator as { clipboard?: Clipboard }).clipboard;
         await fixture.whenStable();
+        expect(execCommand).toHaveBeenCalledWith("copy");
 
         const alert = fixture.nativeElement.querySelector(".done [role=alert]");
         expect(alert?.textContent).toContain("Copie impossible");

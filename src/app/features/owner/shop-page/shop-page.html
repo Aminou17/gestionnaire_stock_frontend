@@ -13,11 +13,16 @@
 }
 
 @if (shop.isLoading() && !shop.hasValue()) {
-    <div class="card block"><div class="skeleton line"></div><div class="skeleton line"></div></div>
+    <div class="card block">
+        <div class="skeleton line"></div>
+        <div class="skeleton line"></div>
+    </div>
 } @else if (shop.error() && !shop.hasValue()) {
     <div class="card block empty" role="alert">
         Impossible de charger la boutique.
-        <button type="button" class="btn btn-outline btn-sm" (click)="shop.reload()">Réessayer</button>
+        <button type="button" class="btn btn-outline btn-sm" (click)="shop.reload()">
+            Réessayer
+        </button>
     </div>
 } @else if (shop.hasValue()) {
     @let s = shop.value();
@@ -100,7 +105,9 @@
                                 type="button"
                                 class="btn btn-outline btn-sm"
                                 [disabled]="busy()"
-                                [attr.aria-label]="'Envoyer un lien de réinitialisation à ' + account.name"
+                                [attr.aria-label]="
+                                    'Envoyer un lien de réinitialisation à ' + account.name
+                                "
                                 (click)="sendLink(account)"
                             >
                                 <app-icon name="mail" [size]="16" />
@@ -154,12 +161,19 @@
                 <p class="muted">
                     Suspendre empêche toute la boutique de se connecter. Ses données sont gardées.
                 </p>
-                <button type="button" class="btn btn-danger btn-sm" [disabled]="busy()" (click)="askSuspend()">
+                <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    [disabled]="busy()"
+                    (click)="askSuspend()"
+                >
                     <app-icon name="ban" [size]="16" />
                     Suspendre la boutique
                 </button>
             } @else {
-                <p class="muted">La boutique est suspendue : plus personne ne peut s'y connecter.</p>
+                <p class="muted">
+                    La boutique est suspendue : plus personne ne peut s'y connecter.
+                </p>
                 <button
                     type="button"
                     class="btn btn-outline btn-sm"
@@ -176,13 +190,20 @@
 
 <dialog #suspendDialog aria-labelledby="suspend-title">
     <form (submit)="$event.preventDefault(); setStatus('SUSPENDED')">
-        <h2 id="suspend-title">Suspendre {{ shop.hasValue() ? shop.value().name : "la boutique" }} ?</h2>
+        <h2 id="suspend-title">
+            Suspendre {{ shop.hasValue() ? shop.value().name : "la boutique" }} ?
+        </h2>
         <p class="muted">
             Plus personne de cette boutique ne pourra se connecter, même avec une session déjà
             ouverte. Ses données sont conservées et la boutique peut être réactivée à tout moment.
         </p>
         <div class="actions">
-            <button type="button" class="btn btn-outline" [disabled]="busy()" (click)="closeSuspend()">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="busy()"
+                (click)="closeSuspend()"
+            >
                 Annuler
             </button>
             <button type="submit" class="btn btn-danger" [disabled]="busy()">
@@ -218,7 +239,9 @@
             }
 
             <div class="actions">
-                <button type="button" class="btn btn-outline" (click)="closePasswordDialog()">Fermer</button>
+                <button type="button" class="btn btn-outline" (click)="closePasswordDialog()">
+                    Fermer
+                </button>
                 <button type="button" class="btn btn-primary" (click)="copy()">
                     <app-icon [name]="copied() ? 'check' : 'copy'" [size]="16" />
                     {{ copied() ? "Copié" : "Copier les accès" }}
@@ -230,8 +253,8 @@
             <h2 id="temp-title">Donner un mot de passe provisoire ?</h2>
             <p class="muted">
                 {{ tempAccount()?.name }} sera déconnecté(e) partout et devra choisir son propre mot
-                de passe à la prochaine connexion. Préférez le lien par e-mail quand la personne peut
-                lire sa boîte mail.
+                de passe à la prochaine connexion. Préférez le lien par e-mail quand la personne
+                peut lire sa boîte mail.
             </p>
 
             @if (tempError()) {

@@ -7,14 +7,14 @@ import { OwnerLayout } from "./owner-layout";
 
 describe("OwnerLayout", () => {
     it("should show the owner space with a way to sign out", async () => {
-        const logout = vi.fn();
+        const logoutAsked = signal(false);
         await TestBed.configureTestingModule({
             imports: [OwnerLayout],
             providers: [
                 provideRouter([]),
                 {
                     provide: AuthService,
-                    useValue: { user: signal({ name: "Yabré" }), logout },
+                    useValue: { user: signal({ name: "Yabré" }), logoutAsked },
                 },
             ],
         }).compileComponents();
@@ -28,6 +28,7 @@ describe("OwnerLayout", () => {
         const password = el.querySelector('a[aria-label="Mot de passe"]');
         expect(password?.getAttribute("href")).toBe("/owner/password");
         (el.querySelector(".tools .btn") as HTMLButtonElement).click();
-        expect(logout).toHaveBeenCalled();
+        // un seul clic ouvre la confirmation, il ne déconnecte pas
+        expect(logoutAsked()).toBe(true);
     });
 });

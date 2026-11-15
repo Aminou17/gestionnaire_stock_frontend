@@ -34,11 +34,11 @@
 }
 
 .brand-name {
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: var(--fw-semibold);
+    font-size: var(--fs-body);
 }
 .brand-sub {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--sidebar-sub);
 }
 
@@ -48,9 +48,9 @@
 
 .pitch h2 {
     margin: 0 0 12px;
-    font-size: 30px;
+    font-size: var(--fs-kpi);
     line-height: 1.2;
-    font-weight: 700;
+    font-weight: var(--fw-bold);
     letter-spacing: -0.02em;
 }
 
@@ -73,7 +73,7 @@
     align-items: center;
     gap: 12px;
     color: var(--sidebar-text-soft);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .pitch li::before {
@@ -87,7 +87,7 @@
 }
 
 footer {
-    font-size: 12px;
+    font-size: var(--fs-caption);
     color: var(--sidebar-muted);
 }
 
@@ -130,7 +130,7 @@ footer {
         padding: 28px;
     }
     .pitch h2 {
-        font-size: 24px;
+        font-size: var(--fs-kpi);
     }
 }
 

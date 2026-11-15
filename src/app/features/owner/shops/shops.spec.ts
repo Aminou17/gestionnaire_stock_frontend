@@ -113,7 +113,8 @@ describe("Shops", () => {
         expect(service.setStatus).toHaveBeenCalledWith(1, "ACTIVE");
     });
 
-    const inDays = (days: number) => new Date(Date.now() + days * 86_400_000 - 3_600_000).toISOString();
+    const inDays = (days: number) =>
+        new Date(Date.now() + days * 86_400_000 - 3_600_000).toISOString();
 
     it("should show the days left of the trial", async () => {
         const fixture = await render([shop({ trial_ends_at: inDays(12) })]);
@@ -143,8 +144,8 @@ describe("Shops", () => {
 
         (el.querySelector(".more-btn") as HTMLButtonElement).click();
         await fixture.whenStable();
-        const trialItem = Array.from(el.querySelectorAll<HTMLButtonElement>(".menu button")).find((b) =>
-            b.textContent?.includes("Modifier l'essai"),
+        const trialItem = Array.from(el.querySelectorAll<HTMLButtonElement>(".menu button")).find(
+            (b) => b.textContent?.includes("Modifier l'essai"),
         );
         trialItem!.click();
         await fixture.whenStable();
@@ -203,7 +204,9 @@ describe("Shops", () => {
     it("should show the message of the API when the trial cannot be changed", async () => {
         const fixture = await render([shop()]);
         service.setTrial.mockReturnValue(
-            throwError(() => ({ error: { message: "La durée d'essai doit être un nombre de jours entre 1 et 365." } })),
+            throwError(() => ({
+                error: { message: "La durée d'essai doit être un nombre de jours entre 1 et 365." },
+            })),
         );
         fixture.componentInstance.askTrial(shop());
         fixture.componentInstance.trialDays.set(30);
@@ -212,8 +215,10 @@ describe("Shops", () => {
         await fixture.whenStable();
 
         expect(fixture.componentInstance.savingTrial()).toBe(false);
-        expect(fixture.nativeElement.querySelector("dialog[aria-labelledby=trial-title] [role=alert]")?.textContent)
-            .toContain("entre 1 et 365");
+        expect(
+            fixture.nativeElement.querySelector("dialog[aria-labelledby=trial-title] [role=alert]")
+                ?.textContent,
+        ).toContain("entre 1 et 365");
     });
 
     it("should reload the list after the trial is saved", async () => {

@@ -1,5 +1,7 @@
 // essai en cours, terminé ou absent, pour l'étiquette d'une boutique
-export const trialStateOf = (trialEndsAt: string | null): { label: string; ended: boolean } | null => {
+export const trialStateOf = (
+    trialEndsAt: string | null,
+): { label: string; ended: boolean } | null => {
     if (!trialEndsAt) return null;
 
     const days = Math.ceil((new Date(trialEndsAt).getTime() - Date.now()) / 86_400_000);

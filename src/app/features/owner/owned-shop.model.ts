@@ -17,6 +17,8 @@ export interface OwnedShop {
 export interface NewShopInput {
     shopName: string;
     adminName: string;
+    phone?: string;
+    address?: string;
     email: string;
     password: string;
     // absent : pas d'essai

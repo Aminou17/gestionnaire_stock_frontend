@@ -11,6 +11,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { ShopAccount } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
 import { trialStateOf } from "../trial-state";
+import { copyText } from "../../../shared/copy-text";
 
 @Component({
     selector: "app-shop-page",
@@ -28,7 +29,9 @@ export class ShopPage {
     shop = rxResource({ stream: () => this.owner.getShop(this.id) });
 
     roleLabel = getRoleLabel;
-    trial = computed(() => trialStateOf(this.shop.hasValue() ? this.shop.value().trial_ends_at : null));
+    trial = computed(() =>
+        trialStateOf(this.shop.hasValue() ? this.shop.value().trial_ends_at : null),
+    );
 
     // résultat des actions de la page (lien envoyé, essai modifié...)
     message = signal<{ ok: boolean; text: string } | null>(null);
@@ -118,14 +121,8 @@ export class ShopPage {
     }
 
     copy() {
-        const clipboard = navigator.clipboard;
-        if (!clipboard) {
-            this.copyFailed.set(true);
-            return;
-        }
-        clipboard.writeText(this.credentials()).then(
-            () => this.copied.set(true),
-            () => this.copyFailed.set(true),
+        copyText(this.credentials()).then((ok) =>
+            ok ? this.copied.set(true) : this.copyFailed.set(true),
         );
     }
 
@@ -148,7 +145,10 @@ export class ShopPage {
                 this.trialDays.set(null);
                 this.message.set({
                     ok: true,
-                    text: days === null ? "Essai retiré." : `Essai de ${days} jours à partir d'aujourd'hui.`,
+                    text:
+                        days === null
+                            ? "Essai retiré."
+                            : `Essai de ${days} jours à partir d'aujourd'hui.`,
                 });
                 this.shop.reload();
             },
@@ -173,12 +173,14 @@ export class ShopPage {
         this.owner.setStatus(this.id, status).subscribe({
             next: () => {
                 this.busy.set(false);
-                if (this.suspendDialog().nativeElement.open) this.suspendDialog().nativeElement.close();
+                if (this.suspendDialog().nativeElement.open)
+                    this.suspendDialog().nativeElement.close();
                 this.shop.reload();
             },
             error: (err: HttpErrorResponse) => {
                 this.fail(err, "Impossible de changer le statut.");
-                if (this.suspendDialog().nativeElement.open) this.suspendDialog().nativeElement.close();
+                if (this.suspendDialog().nativeElement.open)
+                    this.suspendDialog().nativeElement.close();
             },
         });
     }
