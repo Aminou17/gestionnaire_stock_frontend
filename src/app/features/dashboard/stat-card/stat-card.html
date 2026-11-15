@@ -1,12 +1,24 @@
-<div class="card stat" [class.clickable]="!!link()">
+<div class="card stat" [class.hero]="hero()" [class.clickable]="!!link()" [attr.data-tone]="tone()">
     @if (link()) {
         <a class="cover" [routerLink]="link()" [attr.aria-label]="label()"></a>
     }
 
-    <div class="top">
-        <span class="label">{{ label() }}</span>
-        <span class="icon tone-{{ iconTone() }}"><app-icon [name]="icon()" [size]="18" /></span>
-    </div>
+    @if (!link() && toggles()) {
+        <button
+            type="button"
+            class="cover"
+            [attr.aria-label]="label()"
+            (click)="toggled.emit()"
+        ></button>
+    }
+
+    <span class="label">{{ label() }}</span>
+    @if (toggles()) {
+        <!-- l'œil de la valeur masquée prend la place de l'icône, au-dessus du bouton qui couvre la carte -->
+        <span class="eye"><ng-content /></span>
+    } @else {
+        <span class="icon"><app-icon [name]="icon()" [size]="18" /></span>
+    }
 
     @if (loading()) {
         <div class="skeleton value-skeleton"></div>
@@ -15,9 +27,21 @@
         <div class="value text-muted">—</div>
         <div class="hint text-muted">Données indisponibles</div>
     } @else {
-        <div class="value" [class]="valueTone() ? 'text-' + valueTone() : ''">{{ value() }}</div>
-        <div class="hint text-{{ hintTone() }}">{{ hint() }}</div>
+        @if (money()) {
+            <div
+                class="value money-value"
+                [class]="valueTone() ? 'text-' + valueTone() : ''"
+                appMoney
+            >
+                {{ value() }}
+            </div>
+        } @else {
+            <div class="value" [class]="valueTone() ? 'text-' + valueTone() : ''">
+                {{ value() }}
+            </div>
+        }
+        @if (hint()) {
+            <div class="hint text-{{ hintTone() }}">{{ hint() }}</div>
+        }
     }
-
-    <ng-content />
 </div>

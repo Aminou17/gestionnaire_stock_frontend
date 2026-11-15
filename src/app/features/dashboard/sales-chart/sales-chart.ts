@@ -3,18 +3,19 @@ import { Component, computed, input, output, signal } from "@angular/core";
 
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { DailySales } from "../dashboard.model";
+import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 const DAY_LABELS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
 
 @Component({
     selector: "app-sales-chart",
-    imports: [DatePipe, FcfaPipe],
+    imports: [MoneyToggle, DatePipe, FcfaPipe],
     templateUrl: "./sales-chart.html",
     styleUrl: "./sales-chart.css",
 })
 export class SalesChart {
-    // l'employé voit "Mes ventes sur 7 jours"
-    title = input("Ventes des 7 derniers jours");
+    // l'employé voit "Mes 7 derniers jours"
+    title = input("7 derniers jours");
     days = input<DailySales[]>([]);
     loading = input(false);
     error = input(false);

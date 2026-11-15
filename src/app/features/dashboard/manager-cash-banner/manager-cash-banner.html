@@ -25,7 +25,7 @@
             @if (cash()!.balance !== null) {
                 <div class="balance">
                     <small>Solde</small>
-                    <strong>{{ cash()!.balance | fcfa }}</strong>
+                    <strong appMoney>{{ cash()!.balance | fcfa }}</strong>
                 </div>
             }
         } @else {
@@ -43,7 +43,7 @@
     </div>
 
     @if (canSell()) {
-        <a routerLink="/sales/new" class="btn btn-primary new-sale">
+        <a routerLink="/sales/new" class="btn btn-primary new-sale sell">
             <app-icon name="plus" [size]="18" />
             Nouvelle vente
         </a>

@@ -3,7 +3,7 @@
         <h2>{{ title() }}</h2>
         @if (!loading() && !error()) {
             <span class="total" title="Ventes du jour moins les remboursements"
-                >Total : {{ total() | fcfa }}</span
+                ><span appMoney>{{ total() | fcfa }}</span></span
             >
         }
     </div>

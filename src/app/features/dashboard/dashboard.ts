@@ -2,6 +2,7 @@ import { DatePipe, formatDate } from "@angular/common";
 import { Component, LOCALE_ID, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, RouterLink } from "@angular/router";
+import { EMPTY } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { SaleService } from "../../core/sales/sale.service";
@@ -62,6 +63,19 @@ export class Dashboard {
     comparison = rxResource({ stream: () => this.dashboard.getSalesComparison() });
     activity = rxResource({ stream: () => this.dashboard.getRecentActivity(5) });
     sales = rxResource({ stream: () => this.saleService.getSales(5) });
+    // une page d'une vente suffit : on ne lit que les compteurs (reste à encaisser)
+    salesPage = rxResource({
+        stream: () =>
+            this.auth.isAdmin()
+                ? this.saleService.getSalesPage({
+                      status: null,
+                      from: null,
+                      to: null,
+                      page: 1,
+                      limit: 1,
+                  })
+                : EMPTY,
+    });
 
     // value() lève une exception quand la ressource est en erreur : on passe par hasValue()
     summaryData = computed(() => (this.summary.hasValue() ? this.summary.value() : undefined));
@@ -78,6 +92,18 @@ export class Dashboard {
         const alerts = this.alertList();
         const out = alerts.filter((a) => a.status === "OUT_OF_STOCK").length;
         return { out, low: alerts.length - out, total: alerts.length };
+    });
+
+    // ce que les clients doivent encore : acomptes pas soldés
+    dueTotal = computed(() =>
+        this.salesPage.hasValue() ? (this.salesPage.value().counters?.due_total ?? 0) : 0,
+    );
+    dueHint = computed(() => {
+        const count = this.salesPage.hasValue()
+            ? (this.salesPage.value().counters?.unpaid ?? 0)
+            : 0;
+        if (count === 0) return "Tout est encaissé";
+        return `${count} vente${count > 1 ? "s" : ""} à solder`;
     });
 
     profitHint = computed(() => {
@@ -117,15 +143,15 @@ export class Dashboard {
         const sign = change > 0 ? "+" : change < 0 ? "−" : "";
         return {
             text: `${sign}${Math.abs(change)} % vs hier à cette heure`,
-            tone: change >= 0 ? ("success" as const) : ("danger" as const),
+            tone: change >= 0 ? ("success" as const) : ("warning" as const),
         };
     });
 
     cashHint = computed(() => {
         const cash = this.cash();
-        if (!cash) return "Aucune session aujourd'hui";
+        if (!cash) return "";
         if (cash.status === "OPEN")
-            return `Session ouverte à ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
+            return `Ouverte à ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
         return `Clôturée à ${formatDate(cash.closedAt!, "HH:mm", this.locale)}`;
     });
 
@@ -181,6 +207,7 @@ export class Dashboard {
         this.summary.reload();
         this.dailySales.reload();
         this.comparison.reload();
+        this.salesPage.reload();
     }
 
     onCashOpened() {

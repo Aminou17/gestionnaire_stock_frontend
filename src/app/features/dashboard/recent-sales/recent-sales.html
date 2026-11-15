@@ -44,6 +44,10 @@
                             }}</span>
                             @if (sale.status === "CANCELLED") {
                                 <span class="badge badge-danger">Remboursée</span>
+                            } @else if (due(sale) > 0) {
+                                <span class="badge badge-warning"
+                                    >Reste {{ due(sale) | fcfa }}</span
+                                >
                             }
                         </div>
                     </a>

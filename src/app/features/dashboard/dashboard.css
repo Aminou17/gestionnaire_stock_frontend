@@ -140,8 +140,37 @@ app-page-header {
 
 .stats {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.s-hero {
+    grid-column: 1 / -1;
+}
+
+/* ordinateur large : la grande carte à gauche, les quatre autres en carré à droite */
+@media (min-width: 1200px) {
+    .stats {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+    }
+    .s-hero {
+        grid-column: 1 / 3;
+        grid-row: 1 / 3;
+    }
+}
+
+.header-sale {
+    gap: 8px;
+}
+
+@media (max-width: 767px) {
+    .header-sale {
+        display: none;
+    }
+    .stats {
+        gap: 12px;
+    }
 }
 
 .grid {
@@ -155,12 +184,6 @@ app-page-header {
     grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
 }
 
-@media (max-width: 1279px) {
-    .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 1199px) {
     .grid,
     .grid-bottom {
@@ -168,19 +191,16 @@ app-page-header {
     }
 }
 
-@media (max-width: 767px) {
-    :host {
-        gap: 16px;
-    }
-    .stats {
-        gap: 12px;
+/* tablette : ce qu'il faut surveiller passe avant le graphique */
+@media (min-width: 768px) and (max-width: 1199px) {
+    app-stock-alerts {
+        order: -1;
     }
 }
 
-/* deux cartes par ligne sur téléphone : quatre cartes empilées cachaient le graphique */
-@media (max-width: 479px) {
-    .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 767px) {
+    :host {
+        gap: 16px;
     }
 }
 
@@ -217,12 +237,4 @@ app-page-header {
     .m-close {
         grid-column: 1 / -1;
     }
-}
-
-/* l'œil de la valeur du stock passe au-dessus du lien qui couvre la carte */
-.reveal {
-    position: absolute;
-    right: 8px;
-    bottom: 8px;
-    z-index: 1;
 }

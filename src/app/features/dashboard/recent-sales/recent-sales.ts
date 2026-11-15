@@ -21,6 +21,11 @@ export class RecentSales {
     showSeller = input(true);
     retry = output();
 
+    // reste à payer d'une vente validée avec acompte
+    due(sale: Sale) {
+        return sale.status === "ACTIVE" ? sale.total - sale.paid_amount : 0;
+    }
+
     isToday(date: string) {
         return new Date(date).toDateString() === new Date().toDateString();
     }

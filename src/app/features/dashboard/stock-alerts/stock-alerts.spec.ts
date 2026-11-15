@@ -17,7 +17,7 @@ describe("StockAlerts", () => {
         el = fixture.nativeElement;
     });
 
-    it("should flag an empty stock as Rupture and the others as Stock faible", async () => {
+    it("should flag an empty stock as Rupture and the others as Faible", async () => {
         fixture.componentRef.setInput("alerts", [
             {
                 id: 1,
@@ -74,14 +74,10 @@ describe("StockAlerts", () => {
         await fixture.whenStable();
 
         const badges = [...el.querySelectorAll(".badge")].map((b) => b.textContent?.trim());
-        expect(badges).toEqual(["Rupture", "Stock faible", "Stock faible"]);
+        expect(badges).toEqual(["Rupture", "Faible", "Faible"]);
 
         const details = [...el.querySelectorAll("small")].map((d) => d.textContent?.trim());
-        expect(details).toEqual([
-            "0 en stock · seuil 5",
-            "1 en stock · seuil 5",
-            "3 en stock · seuil 5",
-        ]);
+        expect(details).toEqual(["Seuil : 5", "Seuil : 5", "Seuil : 5"]);
     });
 
     it("should show at most 5 products", async () => {
