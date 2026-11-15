@@ -111,9 +111,14 @@
                         }}</span
                     >
                     <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
-                        (hasReturns() ? net() : sale.total) | fcfa
+                        (due() > 0 ? due() : hasReturns() ? net() : sale.total) | fcfa
                     }}</strong>
-                    @if (hasReturns()) {
+                    @if (due() > 0) {
+                        <small class="muted"
+                            >sur {{ sale.total | fcfa }} ·
+                            {{ sale.paid_amount | fcfa }} payés</small
+                        >
+                    } @else if (hasReturns()) {
                         <small class="muted"
                             >sur {{ sale.total | fcfa }} · {{ returned() | fcfa }} rendus</small
                         >
