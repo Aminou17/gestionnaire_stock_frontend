@@ -129,14 +129,18 @@
         <button
             type="button"
             class="filter-btn"
-            [class.active]="
-                filtersOpen() || categoryId() || status() !== 'active' || sort() !== 'default'
-            "
+            [class.active]="filtersOpen() || filterCount() > 0"
             [attr.aria-expanded]="filtersOpen()"
             (click)="filtersOpen.set(!filtersOpen())"
-            aria-label="Filtres"
         >
-            <app-icon name="filter" />
+            <app-icon name="filter" [size]="18" />
+            Filtre
+            @if (filterCount() > 0) {
+                <span class="filter-count" aria-hidden="true">{{ filterCount() }}</span>
+                <span class="sr-only"
+                    >, {{ filterCount() }} actif{{ filterCount() > 1 ? "s" : "" }}</span
+                >
+            }
         </button>
 
         <div class="filters" [class.open]="filtersOpen()">
@@ -327,7 +331,14 @@
                                     <div class="product-cell">
                                         <span class="avatar av-{{ tone(product.category_name) }}">
                                             @if (product.image) {
-                                                <img [src]="product.image" alt="" />
+                                                <img
+                                                    [src]="product.image"
+                                                    alt=""
+                                                    width="80"
+                                                    height="80"
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                />
                                             } @else {
                                                 {{ initials(product.name) }}
                                             }
@@ -388,7 +399,14 @@
                     >
                         <span class="gphoto av-{{ tone(product.category_name) }}">
                             @if (product.image) {
-                                <img [src]="product.image" alt="" />
+                                <img
+                                    [src]="product.image"
+                                    alt=""
+                                    width="80"
+                                    height="80"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
                             } @else {
                                 {{ initials(product.name) }}
                             }
@@ -426,7 +444,14 @@
                     >
                         <span class="avatar av-{{ tone(product.category_name) }}">
                             @if (product.image) {
-                                <img [src]="product.image" alt="" />
+                                <img
+                                    [src]="product.image"
+                                    alt=""
+                                    width="80"
+                                    height="80"
+                                    loading="lazy"
+                                    decoding="async"
+                                />
                             } @else {
                                 {{ initials(product.name) }}
                             }
@@ -537,6 +562,12 @@
 </ng-template>
 
 @if (auth.isAdmin()) {
+    <!-- téléphone : bouton flottant au-dessus de la barre du bas -->
+    <button type="button" class="fab" (click)="newProduct()">
+        <app-icon name="plus" [size]="20" />
+        Nouveau produit
+    </button>
+
     <app-product-form (saved)="refresh()" />
     <app-product-import (imported)="refresh()" />
     <app-adjust-dialog (saved)="onAdjusted($event)" />

@@ -1,8 +1,8 @@
 <app-page-header
     [title]="data() ? 'Inventaire #' + data()!.id : 'Inventaire'"
     section="Stock"
-    back="/inventories"
-    backLabel="Retour aux inventaires"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 @if (inventory.isLoading() && !data()) {

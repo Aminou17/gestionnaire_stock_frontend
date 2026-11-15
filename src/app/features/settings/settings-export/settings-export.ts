@@ -11,6 +11,7 @@ import { ExportMenu } from "../../../shared/export-menu/export-menu";
 import { Icon } from "../../../shared/icon/icon";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
 import { ExportService } from "./export.service";
+import { getBackLink } from "../../../core/back-link";
 
 type ExportKind = "products" | "sales" | "movements";
 
@@ -21,6 +22,7 @@ type ExportKind = "products" | "sales" | "movements";
     styleUrls: ["../settings-section.css", "./settings-export.css"],
 })
 export class SettingsExport {
+    protected back = getBackLink("/settings", "Retour aux paramètres");
     private exportService = inject(ExportService);
     private movementService = inject(StockMovementService);
     private destroyRef = inject(DestroyRef);

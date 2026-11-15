@@ -2,8 +2,8 @@
     title="Email des alertes"
     subtitle="Un résumé du stock envoyé chaque matin"
     section="Paramètres"
-    back="/settings"
-    backLabel="Retour aux paramètres"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 <form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>

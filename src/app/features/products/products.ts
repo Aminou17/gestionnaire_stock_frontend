@@ -133,6 +133,14 @@ export class Products {
     margin = (product: Product) => marginPercent(product.sale_price, product.purchase_price);
 
     filtersOpen = signal(false);
+
+    // nombre de filtres actifs, affiché sur le bouton Filtre
+    filterCount = computed(
+        () =>
+            (this.categoryId() ? 1 : 0) +
+            (this.status() !== "active" ? 1 : 0) +
+            (this.sort() !== "default" ? 1 : 0),
+    );
     menuFor = signal<number | null>(null);
 
     // vue tableau ou grille sur ordinateur, le choix est gardé d'une visite à l'autre

@@ -4,8 +4,8 @@ import {
     Component,
     DestroyRef,
     ElementRef,
-    afterNextRender,
     computed,
+    effect,
     inject,
     signal,
     viewChild,
@@ -26,6 +26,7 @@ import { CategoryService } from "../../../core/stock/category.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
+import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { CustomerForm } from "../../customers/customer-form/customer-form";
 import { categoryTone, productInitials } from "../../products/product-look";
@@ -44,6 +45,16 @@ interface CartLine {
     unitPrice: number;
 }
 
+const VIEW_KEY = "new-sale-view";
+
+const readView = (): "list" | "grid" => {
+    try {
+        return localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
+    } catch {
+        return "list";
+    }
+};
+
 // Prix minimum accepté pour un produit
 export const getMinPrice = (product: Product) =>
     product.pricing_mode === "NEGOTIABLE"
@@ -58,6 +69,7 @@ export const getMinPrice = (product: Product) =>
         PageHeader,
         Icon,
         FcfaPipe,
+        OpenCashDialog,
         ReopenCashDialog,
         CustomerForm,
         PhoneField,
@@ -69,6 +81,8 @@ export const getMinPrice = (product: Product) =>
     host: {
         "[class.has-cart]": "cart().length > 0",
         "(document:click)": "onDocumentClick($event)",
+        "(document:keydown)": "onKeydown($event)",
+        "(window:popstate)": "onPopState()",
     },
 })
 export class NewSale {
@@ -99,7 +113,15 @@ export class NewSale {
     photoBusyId = signal<number | null>(null);
     photoNotice = signal<{ kind: "success" | "error"; text: string } | null>(null);
 
+    // produits en lignes ou en carreaux, choix mémorisé
+    view = signal<"list" | "grid">(readView());
+    // téléphone : le panier est une feuille qui monte du bas
+    cartOpen = signal(false);
+    // produits dont le champ de prix négocié est déplié
+    priceOpenIds = signal<ReadonlySet<number>>(new Set());
+
     private photoInput = viewChild<ElementRef<HTMLInputElement>>("photoInput");
+    private searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
     private photoTarget: Product | null = null;
     private noticeTimer?: ReturnType<typeof setTimeout>;
     private searchTimer?: ReturnType<typeof setTimeout>;
@@ -241,13 +263,19 @@ export class NewSale {
         return received - this.toPay();
     });
 
-    // billets ronds au-dessus du montant à payer, comme sur les caisses : 7 300 donne 7 500, 10 000
+    // montants ronds au-dessus de la somme due, en billets courants : 7 300 donne 7 500, 8 000, 10 000
     cashSuggestions = computed(() => {
-        const total = this.toPay();
-        if (total <= 0) return [];
-        const rounded = [500, 5000, 10000].map((step) => Math.ceil(total / step) * step);
-        return [...new Set([total, ...rounded])].sort((a, b) => a - b).slice(0, 4);
+        const due = this.toPay();
+        if (due <= 0) return [];
+
+        const rounded = [500, 1000, 5000, 10000, 20000, 50000].map(
+            (step) => Math.ceil(due / step) * step,
+        );
+        return [...new Set([due, ...rounded])].sort((a, b) => a - b).slice(0, 4);
     });
+
+    // somme encaissée maintenant : le total, ou l'acompte
+    payNow = computed(() => (this.split() ? this.total() : this.toPay()));
 
     // acompte et paiement en deux modes s'excluent : l'un ou l'autre fixe la part payée maintenant
     showDeposit = signal(false);
@@ -382,19 +410,12 @@ export class NewSale {
             !this.saving(),
     );
 
-    // la barre du bas sert à rejoindre le panier : inutile quand il est déjà à l'écran
-    cartInView = signal(false);
-
     constructor() {
-        afterNextRender(() => {
-            const cart = document.getElementById("cart");
-            if (!cart || typeof IntersectionObserver === "undefined") return;
-            const observer = new IntersectionObserver(([entry]) =>
-                this.cartInView.set(entry.isIntersecting),
-            );
-            observer.observe(cart);
-            this.destroyRef.onDestroy(() => observer.disconnect());
+        // un panier vidé ferme la feuille
+        effect(() => {
+            if (this.cart().length === 0 && this.cartOpen()) this.closeCart();
         });
+
         this.destroyRef.onDestroy(() => {
             clearTimeout(this.searchTimer);
             clearTimeout(this.customerTimer);
@@ -445,6 +466,31 @@ export class NewSale {
             ...lines,
             { product, quantity: 1, unitPrice: product.sale_price },
         ]);
+    }
+
+    setView(view: "list" | "grid") {
+        this.view.set(view);
+        try {
+            localStorage.setItem(VIEW_KEY, view);
+        } catch {
+            // stockage indisponible : le choix ne sera pas retenu
+        }
+    }
+
+    // carreaux : un appui ajoute un exemplaire, jusqu'au stock disponible
+    tapTile(product: Product) {
+        const line = this.cart().find((l) => l.product.id === product.id);
+        if (!line) this.addProduct(product);
+        else if (line.quantity < product.theoretical_stock)
+            this.setQuantity(line, line.quantity + 1);
+    }
+
+    untapTile(product: Product) {
+        const line = this.cart().find((l) => l.product.id === product.id);
+        if (!line) return;
+
+        if (line.quantity > 1) this.setQuantity(line, line.quantity - 1);
+        else this.removeLine(line);
     }
 
     selectCategory(value: string) {
@@ -572,6 +618,18 @@ export class NewSale {
         this.updateLine(line, { unitPrice });
     }
 
+    togglePrice(line: CartLine) {
+        this.priceOpenIds.update((ids) => {
+            const next = new Set(ids);
+            if (!next.delete(line.product.id)) next.add(line.product.id);
+            return next;
+        });
+    }
+
+    isPriceOpen(line: CartLine) {
+        return this.priceOpenIds().has(line.product.id) || !!this.lineError(line);
+    }
+
     private updateLine(line: CartLine, changes: Partial<CartLine>) {
         this.error.set(null);
         this.cart.update((lines) => lines.map((l) => (l === line ? { ...l, ...changes } : l)));
@@ -635,7 +693,11 @@ export class NewSale {
                 next: (sale) => {
                     // saving reste à true : la page change juste après
                     this.stockAlerts.alerts.reload();
-                    this.router.navigate(["/sales", sale.id], { state: { created: true } });
+                    // feuille ouverte : on remplace son entrée d'historique, le retour revient à la liste
+                    this.router.navigate(["/sales", sale.id], {
+                        state: { created: true },
+                        replaceUrl: this.cartOpen(),
+                    });
                 },
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);
@@ -663,13 +725,85 @@ export class NewSale {
     }
 
     private reopenDialog = viewChild.required<ReopenCashDialog>("reopenCash");
+    private openDialog = viewChild.required<OpenCashDialog>("openCashDialog");
 
     reopen() {
         const cash = this.cash.value();
         if (cash) this.reopenDialog().open(cash.id);
     }
 
-    scrollToCart() {
-        document.getElementById("cart")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    openCash() {
+        this.openDialog().open();
+    }
+
+    // la feuille prend une entrée d'historique : le bouton retour du téléphone la ferme d'abord
+    openCart() {
+        if (this.cartOpen()) return;
+
+        history.pushState({ cartSheet: true }, "");
+        this.cartOpen.set(true);
+    }
+
+    closeCart() {
+        if (!this.cartOpen()) return;
+
+        if (history.state?.cartSheet) history.back();
+        else this.cartOpen.set(false);
+    }
+
+    onPopState() {
+        this.cartOpen.set(false);
+    }
+
+    // barre du bas : encaisse tout de suite si le panier est prêt, sinon ouvre le panier
+    quickPay() {
+        if (this.canSubmit()) this.submit();
+        else this.openCart();
+    }
+
+    // glisser l'en-tête vers le bas ferme la feuille
+    private swipeFrom = 0;
+
+    swipeStart(event: TouchEvent) {
+        this.swipeFrom = event.touches[0].clientY;
+    }
+
+    swipeEnd(event: TouchEvent) {
+        if (event.changedTouches[0].clientY - this.swipeFrom > 60) this.closeCart();
+    }
+
+    focusSearch() {
+        const input = this.searchInput()?.nativeElement;
+        input?.focus();
+        input?.select();
+    }
+
+    onKeydown(event: KeyboardEvent) {
+        const target = event.target as HTMLElement;
+        const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
+
+        if (event.key === "Escape") {
+            this.closeCart();
+            return;
+        }
+
+        // Ctrl+K ou / : aller à la recherche
+        if (
+            (event.key === "k" && (event.ctrlKey || event.metaKey)) ||
+            (event.key === "/" && !typing)
+        ) {
+            event.preventDefault();
+            this.focusSearch();
+            return;
+        }
+
+        // Entrée encaisse depuis le montant reçu ou hors d'un champ, jamais dans une fenêtre ouverte
+        const inReceived = target.id === "received";
+        if (event.key === "Enter" && (inReceived || target === document.body) && this.canSubmit()) {
+            if (document.querySelector("dialog[open]")) return;
+
+            event.preventDefault();
+            this.submit();
+        }
     }
 }

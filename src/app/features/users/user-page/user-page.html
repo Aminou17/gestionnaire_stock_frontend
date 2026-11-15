@@ -1,8 +1,8 @@
 <app-page-header
     [title]="data()?.name ?? 'Utilisateur'"
     section="Administration"
-    back="/users"
-    backLabel="Retour aux utilisateurs"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 <section class="card sheet">

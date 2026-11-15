@@ -23,7 +23,7 @@ import { SecretValues } from "../../../shared/secret/secret-values";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ProductForm } from "../../products/product-form/product-form";
-import { BackState } from "../../../core/back-link";
+import { BackState, getBackLink } from "../../../core/back-link";
 
 // nombre de produits montrés directement sur la fiche
 const PREVIEW_SIZE = 5;
@@ -52,6 +52,7 @@ const CHANGE_LABELS: Record<string, string> = {
     styleUrl: "./category-page.css",
 })
 export class CategoryPage {
+    protected back = getBackLink("/categories", "Retour aux catégories");
     protected secret = inject(SecretValues);
     private categoryService = inject(CategoryService);
     private productService = inject(ProductService);

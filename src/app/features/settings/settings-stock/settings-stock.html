@@ -2,8 +2,8 @@
     title="Stock"
     subtitle="Seuil d'alerte des produits"
     section="Paramètres"
-    back="/settings"
-    backLabel="Retour aux paramètres"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 <form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>

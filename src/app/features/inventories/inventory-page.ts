@@ -23,6 +23,7 @@ import { Icon } from "../../shared/icon/icon";
 import { PhotoZoom } from "../../shared/photo-zoom/photo-zoom";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { productInitials } from "../products/product-look";
+import { getBackLink } from "../../core/back-link";
 
 @Component({
     selector: "app-inventory-page",
@@ -41,6 +42,7 @@ import { productInitials } from "../products/product-look";
     styleUrl: "./inventory-page.css",
 })
 export class InventoryPage {
+    protected back = getBackLink("/inventories", "Retour aux inventaires");
     private inventoryService = inject(InventoryService);
     private destroyRef = inject(DestroyRef);
 

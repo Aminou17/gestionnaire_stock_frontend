@@ -25,6 +25,7 @@ import { LogoResizerService } from "../logo-resizer.service";
 import { SettingsHistory } from "../settings-history/settings-history";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
+import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-settings-receipt",
@@ -33,6 +34,7 @@ import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
     styleUrls: ["../settings-section.css", "./settings-receipt.css"],
 })
 export class SettingsReceipt implements HasUnsavedChanges {
+    protected back = getBackLink("/settings", "Retour aux paramètres");
     private shopService = inject(ShopSettingsService);
     private salesSettingsService = inject(SalesSettingsService);
     private logoResizer = inject(LogoResizerService);

@@ -376,7 +376,7 @@ export class ProductForm {
         try {
             const [image, thumb] = await Promise.all([
                 resizeAvatar(file, 320, 85000),
-                resizeAvatar(file, 80, 15000),
+                resizeAvatar(file, 120, 19000),
             ]);
             this.photo.set({ image, thumb });
         } catch (err) {

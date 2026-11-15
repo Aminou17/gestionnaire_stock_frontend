@@ -16,8 +16,13 @@
             }
         } @else {
             <span>Votre caisse est fermée : ouvrez-la pour enregistrer une vente.</span>
-            <a routerLink="/cash">Ouvrir la caisse</a>
+            <button type="button" class="link-btn" (click)="openCash()">Ouvrir la caisse</button>
         }
+    </div>
+} @else if (error() && cart().length === 0) {
+    <div class="alert alert-error banner" role="alert">
+        <app-icon name="alert" />
+        <span>{{ error() }}</span>
     </div>
 }
 
@@ -27,12 +32,15 @@
             <label class="search">
                 <app-icon name="search" [size]="18" />
                 <input
+                    #searchInput
                     class="input"
                     type="search"
                     placeholder="Rechercher…"
                     aria-label="Rechercher un produit"
+                    aria-keyshortcuts="/ Control+K"
                     (input)="onSearch($any($event.target).value)"
                 />
+                <kbd class="search-key" aria-hidden="true">/</kbd>
             </label>
 
             @if (categoryChips().length > 1) {
@@ -50,12 +58,45 @@
                     </select>
                 </label>
             }
+
+            <button
+                type="button"
+                class="view-single"
+                aria-label="Afficher en carreaux"
+                [attr.aria-pressed]="view() === 'grid'"
+                (click)="setView(view() === 'grid' ? 'list' : 'grid')"
+            >
+                <app-icon [name]="view() === 'grid' ? 'list' : 'grid'" [size]="18" />
+            </button>
+
+            <div class="view-toggle" role="group" aria-label="Affichage">
+                <button
+                    type="button"
+                    aria-label="Vue en lignes"
+                    [attr.aria-pressed]="view() === 'list'"
+                    (click)="setView('list')"
+                >
+                    <app-icon name="list" [size]="18" />
+                </button>
+                <button
+                    type="button"
+                    aria-label="Vue en carreaux"
+                    [attr.aria-pressed]="view() === 'grid'"
+                    (click)="setView('grid')"
+                >
+                    <app-icon name="grid" [size]="18" />
+                </button>
+            </div>
         </div>
 
         @if (products.isLoading() && results().length === 0) {
-            <div class="tiles">
+            <div [class.gtiles]="view() === 'grid'" [class.tiles]="view() === 'list'">
                 @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-                    <div class="skeleton tile-skeleton"></div>
+                    <div
+                        class="skeleton"
+                        [class.gtile-skeleton]="view() === 'grid'"
+                        [class.tile-skeleton]="view() === 'list'"
+                    ></div>
                 }
             </div>
         } @else if (products.error()) {
@@ -66,51 +107,137 @@
                 </button>
             </div>
         } @else {
-            <ul class="tiles" [class.reloading]="products.isLoading()">
-                @for (product of results(); track product.id) {
-                    <li class="tile" [class.in-cart]="inCart(product)">
-                        <ng-container *ngTemplateOutlet="thumb; context: { $implicit: product }" />
-                        <button
-                            type="button"
-                            class="result"
-                            [attr.aria-pressed]="inCart(product)"
-                            [disabled]="product.theoretical_stock <= 0"
-                            (click)="toggleProduct(product)"
-                        >
-                            <span class="result-text">
-                                <strong class="result-name">{{ product.name }}</strong>
-                                <span class="result-price">{{ product.sale_price | fcfa }}</span>
-                                @if (
-                                    product.theoretical_stock > 0 && product.stock_status !== "OK"
-                                ) {
-                                    <small class="stock"
-                                        >Plus que {{ product.theoretical_stock }}</small
-                                    >
-                                }
-                            </span>
-                            @if (product.theoretical_stock <= 0) {
-                                <span class="badge badge-danger">Rupture</span>
-                            } @else {
-                                <span class="add" aria-hidden="true">
-                                    @if (quantityOf(product); as qty) {
-                                        {{ qty }}
-                                    } @else {
-                                        <app-icon name="plus" [size]="18" />
+            @if (view() === "list") {
+                <ul class="tiles" [class.reloading]="products.isLoading()">
+                    @for (product of results(); track product.id) {
+                        <li class="tile" [class.in-cart]="inCart(product)">
+                            <ng-container
+                                *ngTemplateOutlet="thumb; context: { $implicit: product }"
+                            />
+                            <button
+                                type="button"
+                                class="result"
+                                [attr.aria-pressed]="inCart(product)"
+                                [disabled]="product.theoretical_stock <= 0"
+                                (click)="toggleProduct(product)"
+                            >
+                                <span class="result-text">
+                                    <strong class="result-name">{{ product.name }}</strong>
+                                    <span class="result-price">{{
+                                        product.sale_price | fcfa
+                                    }}</span>
+                                    @if (
+                                        product.theoretical_stock > 0 &&
+                                        product.stock_status !== "OK"
+                                    ) {
+                                        <small class="stock"
+                                            >Plus que {{ product.theoretical_stock }}</small
+                                        >
                                     }
                                 </span>
+                                @if (product.theoretical_stock <= 0) {
+                                    <span class="badge badge-danger">Rupture</span>
+                                } @else {
+                                    <span class="add" aria-hidden="true">
+                                        @if (quantityOf(product); as qty) {
+                                            {{ qty }}
+                                        } @else {
+                                            <app-icon name="plus" [size]="18" />
+                                        }
+                                    </span>
+                                }
+                            </button>
+                        </li>
+                    } @empty {
+                        <li class="empty">
+                            {{
+                                search()
+                                    ? "Aucun produit ne correspond à cette recherche."
+                                    : "Aucun produit en vente."
+                            }}
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <ul class="gtiles" [class.reloading]="products.isLoading()">
+                    @for (product of results(); track product.id) {
+                        <li class="gtile" [class.in-cart]="inCart(product)">
+                            <button
+                                type="button"
+                                class="gmain"
+                                [disabled]="product.theoretical_stock <= 0"
+                                [attr.aria-label]="'Ajouter ' + product.name"
+                                (click)="tapTile(product)"
+                            >
+                                <span class="gphoto av-{{ tone(product.category_name) }}">
+                                    @if (product.image) {
+                                        <img [src]="product.image" alt="" />
+                                    } @else {
+                                        {{ initials(product.name) }}
+                                    }
+                                </span>
+                                <span class="gbody">
+                                    <strong class="gname">{{ product.name }}</strong>
+                                    <span class="gfoot">
+                                        <strong class="gprice">{{
+                                            product.sale_price | fcfa
+                                        }}</strong>
+                                        @if (product.theoretical_stock <= 0) {
+                                            <span class="badge badge-danger">Rupture</span>
+                                        } @else if (product.stock_status !== "OK") {
+                                            <small class="stock"
+                                                >Plus que {{ product.theoretical_stock }}</small
+                                            >
+                                        }
+                                    </span>
+                                </span>
+                            </button>
+
+                            @if (quantityOf(product); as qty) {
+                                <span class="gqty">
+                                    <button
+                                        type="button"
+                                        [attr.aria-label]="'Retirer un ' + product.name"
+                                        (click)="untapTile(product)"
+                                    >
+                                        <app-icon name="minus" [size]="16" />
+                                    </button>
+                                    <span aria-live="polite">{{ qty }}</span>
+                                </span>
                             }
-                        </button>
-                    </li>
-                } @empty {
-                    <li class="empty">
-                        {{
-                            search()
-                                ? "Aucun produit ne correspond à cette recherche."
-                                : "Aucun produit en vente."
-                        }}
-                    </li>
-                }
-            </ul>
+
+                            @if (product.image) {
+                                <button
+                                    type="button"
+                                    class="gcorner"
+                                    [attr.aria-label]="'Agrandir la photo de ' + product.name"
+                                    (click)="zoomImage(product)"
+                                >
+                                    <app-icon name="search" [size]="16" />
+                                </button>
+                            } @else if (auth.isAdmin()) {
+                                <button
+                                    type="button"
+                                    class="gcorner"
+                                    [disabled]="photoBusyId() === product.id"
+                                    [attr.aria-label]="'Ajouter une photo pour ' + product.name"
+                                    (click)="askPhoto(product)"
+                                >
+                                    <app-icon name="camera" [size]="16" />
+                                </button>
+                            }
+                        </li>
+                    } @empty {
+                        <li class="empty">
+                            {{
+                                search()
+                                    ? "Aucun produit ne correspond à cette recherche."
+                                    : "Aucun produit en vente."
+                            }}
+                        </li>
+                    }
+                </ul>
+            }
             @if (moreResults()) {
                 <p class="more-hint muted">
                     Seuls les 24 premiers produits sont affichés : précisez la recherche.
@@ -119,8 +246,15 @@
         }
     </section>
 
-    <section class="card cart" id="cart" [class.cart-empty]="cart().length === 0">
-        <div class="cart-header">
+    <section
+        class="card cart"
+        id="cart"
+        aria-label="Panier"
+        [class.cart-empty]="cart().length === 0"
+        [class.open]="cartOpen()"
+    >
+        <div class="cart-header" (touchstart)="swipeStart($event)" (touchend)="swipeEnd($event)">
+            <span class="grip" aria-hidden="true"></span>
             <h2>Panier</h2>
             @if (cart().length > 0) {
                 <span class="muted count"
@@ -128,12 +262,17 @@
                 >
                 <button type="button" class="clear" (click)="clearCart()">Vider</button>
             }
+            <button
+                type="button"
+                class="sheet-close"
+                aria-label="Fermer le panier"
+                (click)="closeCart()"
+            >
+                <app-icon name="close" [size]="20" />
+            </button>
         </div>
 
         @if (cart().length === 0) {
-            @if (error()) {
-                <div class="alert alert-error" role="alert">{{ error() }}</div>
-            }
             <div class="empty-cart">
                 <span class="empty-icon"><app-icon name="cart" [size]="26" /></span>
                 <strong>Votre panier est vide</strong>
@@ -151,14 +290,31 @@
                                 <strong class="line-name">{{ line.product.name }}</strong>
                                 @if (lineError(line); as message) {
                                     <small class="field-error" role="alert">{{ message }}</small>
-                                } @else if (line.product.pricing_mode === "NEGOTIABLE") {
-                                    <small class="muted"
-                                        >Prix entre {{ minPrice(line.product) | fcfa }} et
-                                        {{ line.product.sale_price | fcfa }}</small
-                                    >
-                                } @else {
-                                    <small class="muted">{{ line.unitPrice | fcfa }} l'unité</small>
                                 }
+                                <span class="line-sub">
+                                    @if (!lineError(line)) {
+                                        <small class="muted">
+                                            {{ line.unitPrice | fcfa }} l'unité
+                                            @if (line.unitPrice !== line.product.sale_price) {
+                                                <s>{{ line.product.sale_price | fcfa }}</s>
+                                            }
+                                        </small>
+                                    }
+                                    @if (line.product.pricing_mode === "NEGOTIABLE") {
+                                        <button
+                                            type="button"
+                                            class="price-link"
+                                            [attr.aria-expanded]="isPriceOpen(line)"
+                                            (click)="togglePrice(line)"
+                                        >
+                                            {{
+                                                isPriceOpen(line)
+                                                    ? "Masquer le prix"
+                                                    : "Modifier le prix"
+                                            }}
+                                        </button>
+                                    }
+                                </span>
                             </div>
                             <strong class="line-total">{{
                                 line.quantity * line.unitPrice | fcfa
@@ -193,21 +349,6 @@
                                     </button>
                                 </div>
 
-                                @if (line.product.pricing_mode === "NEGOTIABLE") {
-                                    <input
-                                        class="input price-input"
-                                        type="number"
-                                        inputmode="numeric"
-                                        [min]="minPrice(line.product)"
-                                        [max]="line.product.sale_price"
-                                        [value]="line.unitPrice"
-                                        step="1"
-                                        [class.invalid]="!!lineError(line)"
-                                        [attr.aria-label]="'Prix unitaire de ' + line.product.name"
-                                        (change)="onPriceChange(line, $any($event.target))"
-                                    />
-                                }
-
                                 <button
                                     type="button"
                                     class="icon-btn"
@@ -217,13 +358,30 @@
                                     <app-icon name="trash" [size]="18" />
                                 </button>
                             </div>
+
+                            @if (line.product.pricing_mode === "NEGOTIABLE" && isPriceOpen(line)) {
+                                <label class="price-edit">
+                                    <span>Prix unitaire</span>
+                                    <input
+                                        class="input price-input"
+                                        type="number"
+                                        inputmode="numeric"
+                                        [min]="minPrice(line.product)"
+                                        [max]="line.product.sale_price"
+                                        [value]="line.unitPrice"
+                                        step="1"
+                                        [class.invalid]="!!lineError(line)"
+                                        (change)="onPriceChange(line, $any($event.target))"
+                                    />
+                                    <small class="muted"
+                                        >Entre {{ minPrice(line.product) | fcfa }} et
+                                        {{ line.product.sale_price | fcfa }}</small
+                                    >
+                                </label>
+                            }
                         </li>
                     }
                 </ul>
-
-                @if (error()) {
-                    <div class="alert alert-error" role="alert">{{ error() }}</div>
-                }
 
                 <!-- client facultatif -->
                 @if (showCustomer()) {
@@ -421,10 +579,31 @@
                         <small class="muted">Facultatif</small>
                     </button>
                 }
+            </div>
 
-                <div class="section" role="group" aria-labelledby="payment-title">
-                    <span id="payment-title" class="section-title">Paiement</span>
+            <div class="cart-footer">
+                @if (error()) {
+                    <div class="alert alert-error" role="alert">{{ error() }}</div>
+                }
 
+                @if (discount() > 0) {
+                    <dl class="recap">
+                        <div>
+                            <dt>Sous-total</dt>
+                            <dd>{{ subtotal() | fcfa }}</dd>
+                        </div>
+                        <div class="recap-discount">
+                            <dt>Remise</dt>
+                            <dd>− {{ discount() | fcfa }}</dd>
+                        </div>
+                    </dl>
+                }
+                <div class="total">
+                    <span>Total</span>
+                    <strong>{{ total() | fcfa }}</strong>
+                </div>
+
+                <div class="pay" role="group" aria-label="Paiement">
                     @if (!split()) {
                         <div class="methods">
                             <button
@@ -450,25 +629,30 @@
                         </div>
                     }
 
-                    <div class="options" role="group" aria-label="Autres façons de payer">
-                        <button
-                            type="button"
-                            class="option option-deposit"
-                            [class.on]="showDeposit()"
-                            [attr.aria-pressed]="showDeposit()"
-                            (click)="toggleDeposit()"
-                        >
-                            Acompte
-                        </button>
-                        <button
-                            type="button"
-                            class="option option-split"
-                            [class.on]="split()"
-                            [attr.aria-pressed]="split()"
-                            (click)="toggleSplit()"
-                        >
-                            Mixte
-                        </button>
+                    <div class="pay-row">
+                        <span class="pay-label">{{
+                            paymentMethod() === "CASH" ? "Montant reçu" : "Autre façon de payer"
+                        }}</span>
+                        <div class="options" role="group" aria-label="Autres façons de payer">
+                            <button
+                                type="button"
+                                class="option option-deposit"
+                                [class.on]="showDeposit()"
+                                [attr.aria-pressed]="showDeposit()"
+                                (click)="toggleDeposit()"
+                            >
+                                Acompte
+                            </button>
+                            <button
+                                type="button"
+                                class="option option-split"
+                                [class.on]="split()"
+                                [attr.aria-pressed]="split()"
+                                (click)="toggleSplit()"
+                            >
+                                Mixte
+                            </button>
+                        </div>
                     </div>
 
                     @if (showDeposit() || split()) {
@@ -500,21 +684,20 @@
                     }
 
                     @if (paymentMethod() === "CASH") {
-                        <label class="field">
-                            <span>Montant reçu</span>
-                            <input
-                                #received
-                                class="input"
-                                type="number"
-                                inputmode="numeric"
-                                min="0"
-                                step="1"
-                                placeholder="Ex. 10 000"
-                                [value]="amountReceived() ?? ''"
-                                [class.invalid]="missingAmount() > 0"
-                                (input)="onReceivedChange(received)"
-                            />
-                        </label>
+                        <input
+                            #received
+                            id="received"
+                            class="input"
+                            type="number"
+                            inputmode="numeric"
+                            min="0"
+                            step="1"
+                            placeholder="Ex. 10 000"
+                            aria-label="Montant reçu"
+                            [value]="amountReceived() ?? ''"
+                            [class.invalid]="missingAmount() > 0"
+                            (input)="onReceivedChange(received)"
+                        />
                         <div class="chips" role="group" aria-label="Montants rapides">
                             @for (amount of cashSuggestions(); track amount) {
                                 <button
@@ -535,10 +718,14 @@
                             <small class="field-error" role="alert"
                                 >Il manque {{ missingAmount() | fcfa }}.</small
                             >
-                        } @else if (change(); as amount) {
-                            <div class="change">
-                                <span>Monnaie à rendre</span>
-                                <strong>{{ amount | fcfa }}</strong>
+                        } @else if (change() !== null) {
+                            <div class="change" [class.exact]="change() === 0">
+                                @if (change() === 0) {
+                                    <span>Compte juste</span>
+                                } @else {
+                                    <span>Monnaie à rendre</span>
+                                    <strong>{{ change() | fcfa }}</strong>
+                                }
                             </div>
                         }
                     }
@@ -557,38 +744,21 @@
                     <p class="alert alert-warning closed-note" role="alert">
                         <app-icon name="alert" />
                         <span>
-                            La vente ne peut pas être validée : votre caisse est
+                            Caisse
                             {{ cashClosedToday() ? "clôturée pour aujourd'hui." : "fermée." }}
-                            @if (!cashClosedToday()) {
-                                <a routerLink="/cash">Ouvrir la caisse</a>
-                            }
                         </span>
-                        @if (cashClosedToday() && auth.isAdmin()) {
+                        @if (!cashClosedToday()) {
+                            <button type="button" class="link-btn" (click)="openCash()">
+                                Ouvrir la caisse
+                            </button>
+                        } @else if (auth.isAdmin()) {
                             <button type="button" class="link-btn" (click)="reopen()">
                                 Rouvrir la caisse
                             </button>
                         }
                     </p>
                 }
-            </div>
 
-            <div class="cart-footer">
-                @if (discount() > 0) {
-                    <dl class="recap">
-                        <div>
-                            <dt>Sous-total</dt>
-                            <dd>{{ subtotal() | fcfa }}</dd>
-                        </div>
-                        <div class="recap-discount">
-                            <dt>Remise</dt>
-                            <dd>− {{ discount() | fcfa }}</dd>
-                        </div>
-                    </dl>
-                }
-                <div class="total">
-                    <span>Total</span>
-                    <strong>{{ total() | fcfa }}</strong>
-                </div>
                 <button
                     type="button"
                     class="btn btn-primary btn-block submit"
@@ -599,22 +769,30 @@
                     @if (saving()) {
                         <span class="spinner"></span>
                     }
-                    Encaisser {{ total() | fcfa }}
+                    Encaisser {{ payNow() | fcfa }}
+                    <kbd class="btn-key" aria-hidden="true">Entrée</kbd>
                 </button>
             </div>
         }
     </section>
 </div>
 
+@if (cartOpen()) {
+    <div class="sheet-backdrop" aria-hidden="true" (click)="closeCart()"></div>
+}
+
 <!-- téléphone : rappel du panier au-dessus de la barre du bas -->
-@if (cart().length > 0 && !cartInView()) {
+@if (cart().length > 0 && !cartOpen()) {
     <div class="cart-bar">
-        <span>
+        <button type="button" class="bar-info" (click)="openCart()">
             <strong>{{ total() | fcfa }}</strong>
-            <small>{{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}</small>
-        </span>
-        <button type="button" class="btn btn-primary" (click)="scrollToCart()">
-            Voir le panier
+            <small>
+                {{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}
+                <app-icon name="chevron-down" [size]="14" />
+            </small>
+        </button>
+        <button type="button" class="btn btn-primary" (click)="quickPay()">
+            {{ canSubmit() ? "Encaisser" : "Voir le panier" }}
         </button>
     </div>
 }
@@ -671,5 +849,7 @@
 }
 
 <app-reopen-cash-dialog #reopenCash (reopened)="cash.reload()" />
+
+<app-open-cash-dialog #openCashDialog (opened)="cash.reload()" />
 
 <app-customer-form #customerForm (saved)="onCustomerCreated($event)" />

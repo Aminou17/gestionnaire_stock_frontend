@@ -13,6 +13,7 @@ import { errorText } from "../error-text";
 import { SettingsHistory } from "../settings-history/settings-history";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
+import { getBackLink } from "../../../core/back-link";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -23,6 +24,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     styleUrls: ["../settings-section.css", "./settings-alert-email.css"],
 })
 export class SettingsAlertEmail implements HasUnsavedChanges {
+    protected back = getBackLink("/settings", "Retour aux paramètres");
     private service = inject(AlertEmailService);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);

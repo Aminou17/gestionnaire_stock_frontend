@@ -1,8 +1,8 @@
 <app-page-header
     [title]="data()?.name ?? 'Fournisseur'"
     section="Stock"
-    back="/suppliers"
-    backLabel="Retour aux fournisseurs"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 <section class="card sheet">

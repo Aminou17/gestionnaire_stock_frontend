@@ -12,6 +12,7 @@ import { ShopAccount } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
 import { trialStateOf } from "../trial-state";
 import { copyText } from "../../../shared/copy-text";
+import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-shop-page",
@@ -20,6 +21,7 @@ import { copyText } from "../../../shared/copy-text";
     styleUrls: ["../../../shared/dialog/dialog.css", "./shop-page.css"],
 })
 export class ShopPage {
+    protected back = getBackLink("/owner", "Retour aux boutiques");
     private owner = inject(OwnerShopService);
     private id = Number(inject(ActivatedRoute).snapshot.paramMap.get("id"));
 
