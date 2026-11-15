@@ -21,6 +21,6 @@
 }
 
 .toggle-text small {
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }

@@ -1,9 +1,11 @@
 import { Component, DestroyRef, inject, signal, viewChild } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { RouterLink } from "@angular/router";
 import { filter } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { ThemeService } from "../../../core/theme/theme.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Avatar } from "../../../shared/avatar/avatar";
 import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
@@ -14,12 +16,13 @@ import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
 
 @Component({
     selector: "app-settings-account",
-    imports: [ReactiveFormsModule, PageHeader, Icon, Avatar, UnsavedDialog],
+    imports: [ReactiveFormsModule, RouterLink, PageHeader, Icon, Avatar, UnsavedDialog],
     templateUrl: "./settings-account.html",
     styleUrls: ["../settings-section.css", "./settings-account.css"],
 })
 export class SettingsAccount implements HasUnsavedChanges {
     protected auth = inject(AuthService);
+    protected theme = inject(ThemeService);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
 
@@ -38,6 +41,31 @@ export class SettingsAccount implements HasUnsavedChanges {
 
     savingProfile = signal(false);
     profileMessage = signal<{ ok: boolean; text: string } | null>(null);
+
+    sendingReset = signal(false);
+    resetMessage = signal<{ ok: boolean; text: string } | null>(null);
+
+    // même service que la page Mot de passe oublié, avec l'adresse du compte connecté
+    sendReset() {
+        const email = this.auth.user()?.email;
+        if (!email || this.sendingReset()) return;
+
+        this.sendingReset.set(true);
+        this.resetMessage.set(null);
+        this.auth.forgotPassword(email).subscribe({
+            next: () => {
+                this.sendingReset.set(false);
+                this.resetMessage.set({ ok: true, text: `Un lien a été envoyé à ${email}.` });
+            },
+            error: (err) => {
+                this.sendingReset.set(false);
+                this.resetMessage.set({
+                    ok: false,
+                    text: err.error?.message ?? "Impossible d'envoyer le lien, réessayez.",
+                });
+            },
+        });
+    }
 
     constructor() {
         // dirty est faux après un reset : seule une saisie de l'utilisateur efface le message

@@ -1,21 +1,12 @@
 <app-page-header
     title="Mon profil"
-    subtitle="Votre nom et votre adresse email"
     section="Paramètres"
     back="/settings"
     backLabel="Retour aux paramètres"
 />
 
 <form class="card section" [formGroup]="profileForm" (ngSubmit)="saveProfile()" novalidate>
-    <div class="section-head">
-        <span class="section-icon"><app-icon name="user" [size]="20" /></span>
-        <div>
-            <h2>Profil</h2>
-            <p class="muted">{{ auth.roleLabel() }}</p>
-        </div>
-    </div>
-
-    <div class="photo">
+    <div class="hero">
         <button
             type="button"
             class="photo-btn"
@@ -24,22 +15,20 @@
             aria-label="Changer la photo de profil"
         >
             <app-avatar [photo]="auth.user()?.avatar" />
-            <span class="photo-badge"><app-icon name="camera" [size]="14" /></span>
+            <span class="photo-badge"><app-icon name="camera" [size]="16" /></span>
         </button>
-        <div class="photo-text">
-            <strong>Photo de profil</strong>
-            <span class="muted">PNG ou JPEG, carrée de préférence</span>
-            @if (auth.user()?.avatar) {
-                <button
-                    type="button"
-                    class="photo-remove"
-                    (click)="removePhoto()"
-                    [disabled]="savingPhoto()"
-                >
-                    Retirer la photo
-                </button>
-            }
-        </div>
+        <strong class="hero-name">{{ auth.user()?.name }}</strong>
+        <span class="role-badge">{{ auth.roleLabel() }}</span>
+        @if (auth.user()?.avatar) {
+            <button
+                type="button"
+                class="photo-remove"
+                (click)="removePhoto()"
+                [disabled]="savingPhoto()"
+            >
+                Retirer la photo
+            </button>
+        }
         <input
             #fileInput
             type="file"
@@ -81,8 +70,6 @@
         />
         @if (invalidProfile("email")) {
             <small class="field-error" role="alert">Indiquez une adresse email valide.</small>
-        } @else {
-            <small class="muted">Elle sert à vous connecter.</small>
         }
     </label>
 
@@ -118,5 +105,48 @@
         </button>
     </div>
 </form>
+
+<section class="card section options" aria-label="Sécurité et préférences">
+    <a class="option" routerLink="/settings/password">
+        <span class="option-icon"><app-icon name="key" [size]="18" /></span>
+        <span class="option-text">Changer mon mot de passe</span>
+        <app-icon class="option-arrow" name="chevron-right" [size]="16" />
+    </a>
+
+    <button type="button" class="option" [disabled]="sendingReset()" (click)="sendReset()">
+        <span class="option-icon"><app-icon name="mail" [size]="18" /></span>
+        <span class="option-text">
+            Mot de passe oublié
+            <small class="muted">Recevoir un lien par e-mail</small>
+        </span>
+        @if (sendingReset()) {
+            <span class="spinner"></span>
+        }
+    </button>
+
+    @if (resetMessage(); as message) {
+        <div
+            class="alert"
+            [class.alert-success]="message.ok"
+            [class.alert-error]="!message.ok"
+            [attr.role]="message.ok ? 'status' : 'alert'"
+        >
+            {{ message.text }}
+        </div>
+    }
+
+    <button type="button" class="option" (click)="theme.toggle()">
+        <span class="option-icon">
+            <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" [size]="18" />
+        </span>
+        <span class="option-text">Mode sombre</span>
+        <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
+    </button>
+
+    <button type="button" class="option logout" (click)="auth.logoutAsked.set(true)">
+        <span class="option-icon"><app-icon name="logout" [size]="18" /></span>
+        <span class="option-text">Se déconnecter</span>
+    </button>
+</section>
 
 <app-unsaved-dialog />

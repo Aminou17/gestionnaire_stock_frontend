@@ -15,7 +15,8 @@ import { Supplier } from "../../core/stock/supplier.model";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
-import { formatPhone } from "./phone";
+import { ShopSettingsService } from "../../core/shop/shop-settings.service";
+import { formatPhone } from "../../shared/phone";
 import { SupplierForm } from "./supplier-form/supplier-form";
 
 type View = "active" | "deleted";
@@ -34,6 +35,7 @@ type View = "active" | "deleted";
 export class Suppliers {
     private supplierService = inject(SupplierService);
     private router = inject(Router);
+    private shop = inject(ShopSettingsService);
     private destroyRef = inject(DestroyRef);
 
     private supplierForm = viewChild.required(SupplierForm);
@@ -62,7 +64,7 @@ export class Suppliers {
         );
     });
 
-    protected formatPhone = formatPhone;
+    protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
     // suppression
     toDelete = signal<Supplier | null>(null);

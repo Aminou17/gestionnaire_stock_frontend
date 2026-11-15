@@ -10,6 +10,8 @@ export interface ShopSettings {
     receipt_footer: string | null;
     // image PNG ou JPEG en data URL, imprimée en haut du ticket
     logo: string | null;
+    // chiffres seuls, sans + (242, 226)
+    default_country_code: string;
     updated_at: string | null;
 }
 
@@ -20,4 +22,5 @@ export interface ShopSettingsInput {
     taxId: string;
     rccm: string;
     receiptFooter: string;
+    defaultCountryCode?: string;
 }

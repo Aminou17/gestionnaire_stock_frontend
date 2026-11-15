@@ -21,14 +21,7 @@
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
-}
-
-/* téléphone et email côte à côte sur grand écran */
-.pair {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+    font-size: var(--fs-heading);
 }
 
 textarea.input {
@@ -44,11 +37,6 @@ textarea.input {
 }
 
 @media (max-width: 767px) {
-    .pair {
-        grid-template-columns: 1fr;
-        gap: 16px;
-    }
-
     .confirm-actions {
         flex-direction: column-reverse;
     }

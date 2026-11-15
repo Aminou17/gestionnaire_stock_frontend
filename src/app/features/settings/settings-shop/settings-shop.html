@@ -67,6 +67,39 @@
             />
         </label>
 
+        <div class="field">
+            <label for="shop-country-code">Indicatif par défaut</label>
+            <div class="country-row">
+                <div class="code-box">
+                    <span class="plus" aria-hidden="true">+</span>
+                    <input
+                        id="shop-country-code"
+                        class="input"
+                        type="text"
+                        inputmode="numeric"
+                        maxlength="4"
+                        autocomplete="off"
+                        formControlName="defaultCountryCode"
+                        aria-describedby="shop-country-help"
+                        [class.invalid]="invalid('defaultCountryCode')"
+                        [attr.aria-invalid]="invalid('defaultCountryCode')"
+                        (input)="onCountryCodeInput($any($event.target))"
+                    />
+                </div>
+                @if (countryName(); as country) {
+                    <span class="country-name">{{ country }}</span>
+                }
+            </div>
+            @if (invalid("defaultCountryCode")) {
+                <small class="field-error" role="alert">
+                    1 à 4 chiffres, sans 0 au début (ex. 242).
+                </small>
+            }
+            <small id="shop-country-help" class="muted">
+                Utilisé pour WhatsApp et les appels quand un numéro n'a pas d'indicatif.
+            </small>
+        </div>
+
         <div class="pair">
             <label class="field">
                 <span>N° IFU <small class="muted">(facultatif)</small></span>
