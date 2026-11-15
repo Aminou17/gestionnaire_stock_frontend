@@ -115,13 +115,52 @@ describe("Rotation", () => {
         expect(rows[2].textContent).toContain("Pas de vente");
     });
 
-    it("colore la pastille de vitesse et affiche les onglets en tuiles", async () => {
+    it("colore la pastille de vitesse selon son sens", async () => {
         await load([bazin, pagne, savon]);
 
         const el = fixture.nativeElement as HTMLElement;
-        expect(el.querySelector(".tabs")!.classList).toContain("tiles");
-        expect(el.querySelector(".speed.fast")!.textContent).toContain("Sort vite");
-        expect(el.querySelector(".speed.slow")!.textContent).toContain("Sort lentement");
+        expect(el.querySelector(".row .speed.fast")!.textContent).toContain("Sort vite");
+        expect(el.querySelector(".row .speed.slow")!.textContent).toContain("Sort lentement");
+        expect(el.querySelector(".row .speed.dormant")!.textContent).toContain("Ne bouge pas");
+    });
+
+    it("explique la période de 30 jours et ouvre les règles de classement", async () => {
+        await load([bazin, pagne, savon]);
+        const el = fixture.nativeElement as HTMLElement;
+
+        expect(text()).toContain("30 derniers jours");
+        expect(text()).toContain("ne se règle pas");
+        expect(el.querySelector(".rules")).toBeNull();
+
+        el.querySelector<HTMLButtonElement>(".intro-toggle")!.click();
+        fixture.detectChanges();
+
+        expect(el.querySelector(".rules")!.textContent).toContain("60 jours");
+    });
+
+    it("affiche la photo du produit, sinon ses initiales", async () => {
+        await load([{ ...bazin, image: "data:image/png;base64,AAAA" }, pagne, savon]);
+
+        const thumbs = (fixture.nativeElement as HTMLElement).querySelectorAll(".row .thumb");
+        expect(thumbs[0].querySelector("img")).not.toBeNull();
+        expect(thumbs[1].textContent).toContain("PW");
+    });
+
+    it("ouvre la fenêtre de filtre et réinitialise la vue", async () => {
+        await load([bazin, pagne, savon]);
+        const el = fixture.nativeElement as HTMLElement;
+
+        el.querySelector<HTMLButtonElement>(".filter-btn")!.click();
+        fixture.detectChanges();
+        expect(el.querySelector(".filters")!.classList).toContain("open");
+
+        fixture.componentInstance.view.set("SLOW");
+        fixture.detectChanges();
+        expect(el.querySelector(".active-chip")!.textContent).toContain("Lent");
+
+        el.querySelector<HTMLButtonElement>(".active-chip")!.click();
+        fixture.detectChanges();
+        expect(el.querySelectorAll(".row").length).toBe(3);
     });
 
     it("liste les produits à solder et depuis quand ils ne se vendent plus", async () => {

@@ -37,6 +37,8 @@ export type RotationSpeed = "FAST" | "NORMAL" | "SLOW" | "DORMANT";
 export interface ProductRotation {
     id: number;
     name: string;
+    // miniature du produit, null sans photo
+    image?: string | null;
     category_name: string | null;
     theoretical_stock: number;
     sold_last_30_days: number;

@@ -12,8 +12,8 @@ import { LowStockAlertService } from "../../../core/stock/low-stock-alert.servic
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { toWhatsAppLink } from "../../../shared/phone";
 import { productInitials } from "../../products/product-look";
-import { whatsappLink } from "../whatsapp";
 
 interface Line {
     selected: boolean;
@@ -103,7 +103,7 @@ export class SupplierOrder {
     whatsappUrl = computed(() => {
         const phone = this.phone();
         if (!phone || this.chosen().length === 0) return null;
-        return `${whatsappLink(phone)}?text=${encodeURIComponent(this.message())}`;
+        return toWhatsAppLink(phone, this.shopService.defaultCountryCode(), this.message());
     });
 
     copied = signal(false);

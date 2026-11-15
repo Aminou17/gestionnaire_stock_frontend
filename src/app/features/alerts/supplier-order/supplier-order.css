@@ -34,7 +34,7 @@ app-page-header {
     border-radius: 12px;
     background: var(--primary-soft);
     color: var(--primary-text);
-    font-weight: 700;
+    font-weight: var(--fw-semibold);
 }
 
 .head-text {
@@ -54,7 +54,7 @@ app-page-header {
 
 h2 {
     margin: 0;
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 .lines {
@@ -103,17 +103,17 @@ h2 {
 }
 
 .line-sub {
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .state-OUT_OF_STOCK {
     color: var(--danger);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .state-LOW {
     color: var(--warning);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .stepper {
@@ -153,7 +153,7 @@ h2 {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-weight: 700;
+    font-weight: var(--fw-semibold);
     text-align: center;
     -moz-appearance: textfield;
     appearance: textfield;
@@ -179,7 +179,7 @@ textarea.input {
 
 .hint {
     margin: 8px 0 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .actions {
@@ -202,7 +202,7 @@ textarea.input {
     min-height: 44px;
     gap: 4px;
     padding-inline: 4px;
-    font-size: 14px;
+    font-size: var(--fs-body);
     white-space: nowrap;
 }
 
