@@ -154,3 +154,23 @@ h1 {
     background: linear-gradient(180deg, #3b82f6, #1d4ed8);
     box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
 }
+
+/* pastille d'état en haut des pages de mot de passe */
+.status {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    display: grid;
+    place-items: center;
+    border-radius: 18px;
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+.status.ok {
+    background: var(--success-soft);
+    color: var(--success);
+}
+.status.warn {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
