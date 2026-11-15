@@ -3,14 +3,15 @@ import { RouterOutlet } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { LayoutService } from "../layout.service";
+import { LogoutDialog } from "../../shared/logout-dialog/logout-dialog";
 import { BottomNav } from "../bottom-nav/bottom-nav";
-import { RevealDialog } from "../../shared/secret/reveal-dialog";
+import { InstallBanner } from "../install-banner/install-banner";
 import { Search } from "../search/search";
 import { Sidebar } from "../sidebar/sidebar";
 
 @Component({
     selector: "app-main-layout",
-    imports: [RouterOutlet, Sidebar, BottomNav, Search, RevealDialog],
+    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, InstallBanner],
     template: `
         <app-sidebar />
         <main [class.collapsed]="layout.collapsed()">
@@ -18,7 +19,8 @@ import { Sidebar } from "../sidebar/sidebar";
         </main>
         <app-bottom-nav />
         <app-search />
-        <app-reveal-dialog />
+        <app-logout-dialog />
+        <app-install-banner />
     `,
     styleUrl: "./main-layout.css",
 })
