@@ -129,6 +129,7 @@ export class Dashboard {
         this.dailySales.hasValue() ? this.dailySales.value().slice(-7) : [],
     );
     todaySales = computed(() => this.lastWeek().at(-1));
+    weekTrend = computed(() => this.lastWeek().map((d) => d.netTotal));
 
     cash = computed(() => this.summaryData()?.cash ?? null);
     cashOpen = computed(() => this.cash()?.status === "OPEN");
@@ -142,13 +143,21 @@ export class Dashboard {
 
         const today = comparison.todayTotal;
         const yesterday = comparison.yesterdayUntilNowTotal;
-        if (yesterday <= 0)
-            return { text: "Pas de vente à la même heure hier", tone: "muted" as const };
+        // rien à comparer : les grands logiciels n'affichent pas de variation, on montre le nombre de ventes
+        // aucune vente encore aujourd'hui : "moins 100 %" serait trompeur tôt le matin
+        if (yesterday <= 0 || today <= 0) {
+            const count = this.todaySales()?.salesCount ?? 0;
+            const text =
+                count === 0
+                    ? "Aucune vente"
+                    : `${count} vente${count > 1 ? "s" : ""} aujourd'hui`;
+            return { text, tone: "muted" as const };
+        }
 
         const change = Math.round(((today - yesterday) / yesterday) * 100);
         const sign = change > 0 ? "+" : change < 0 ? "−" : "";
         return {
-            text: `${sign}${Math.abs(change)} % vs hier à cette heure`,
+            text: `${sign}${Math.abs(change)} % vs hier`,
             tone: change >= 0 ? ("success" as const) : ("warning" as const),
         };
     });

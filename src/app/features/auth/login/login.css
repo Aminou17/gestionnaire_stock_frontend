@@ -31,26 +31,50 @@ h1 {
     text-decoration: underline;
 }
 
-.password {
+/* champ avec son icône à gauche */
+.control {
     position: relative;
+    display: block;
+}
+.control > app-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.15s;
+}
+.control:focus-within > app-icon {
+    color: var(--primary);
+}
+.control .input {
+    height: 48px;
+    padding-left: 44px;
+    border-radius: 12px;
+    background: var(--bg);
+}
+.control .input:focus {
+    background: var(--surface);
 }
 .password .input {
-    padding-right: 84px;
+    padding-right: 48px;
 }
 
 .toggle {
     position: absolute;
-    right: 6px;
+    right: 4px;
     top: 50%;
     transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
     border: 0;
     background: transparent;
-    color: var(--primary);
-    font-size: var(--fs-small);
-    font-weight: var(--fw-medium);
-    padding: 6px 8px;
+    color: var(--text-muted);
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 10px;
 }
 
 .toggle:hover {
@@ -92,7 +116,7 @@ h1 {
     text-decoration: underline;
 }
 
-/* téléphone : champs et bouton plus hauts, plus faciles à toucher */
+/* téléphone : cibles plus hautes, texte à 16 px pour éviter le zoom de iOS */
 @media (max-width: 767px) {
     form {
         gap: 20px;
@@ -100,17 +124,9 @@ h1 {
     h1 {
         font-size: 24px;
     }
-    .input {
+    .control .input {
         height: 52px;
-        border-radius: 12px;
         font-size: 16px;
-    }
-    .password .input {
-        padding-right: 96px;
-    }
-    .toggle {
-        min-height: 40px;
-        font-size: 14px;
     }
     .remember {
         min-height: 44px;

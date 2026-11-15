@@ -20,6 +20,13 @@
         <span class="icon"><app-icon [name]="icon()" [size]="18" /></span>
     }
 
+    @if (hero() && spark().length > 1 && !loading() && !error()) {
+        <svg class="spark" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true">
+            <polygon [attr.points]="sparkArea()" class="spark-area" />
+            <polyline [attr.points]="sparkLine()" class="spark-line" />
+        </svg>
+    }
+
     @if (loading()) {
         <div class="skeleton value-skeleton"></div>
         <div class="skeleton hint-skeleton"></div>
@@ -41,7 +48,14 @@
             </div>
         }
         @if (hint()) {
-            <div class="hint text-{{ hintTone() }}">{{ hint() }}</div>
+            <div class="hint text-{{ hintTone() }}">
+                @if (hero() && hintTone() === "success") {
+                    <app-icon name="arrow-up-right" [size]="14" />
+                } @else if (hero() && hintTone() === "warning") {
+                    <app-icon name="arrow-down" [size]="14" />
+                }
+                {{ hint() }}
+            </div>
         }
     }
 </div>

@@ -265,7 +265,7 @@ describe("Dashboard", () => {
 
     it("should compare today with yesterday", async () => {
         await render();
-        expect(text()).toContain("+7 % vs hier à cette heure");
+        expect(text()).toContain("+7 % vs hier");
     });
 
     it("should not compute a percentage when there was no sale yesterday", async () => {
@@ -273,7 +273,21 @@ describe("Dashboard", () => {
             days: [day("2026-11-10", 0, 0), day("2026-11-11", 5000)],
             yesterdayUntilNow: 0,
         });
-        expect(text()).toContain("Pas de vente à la même heure hier");
+        expect(text()).toContain("1 vente aujourd'hui");
+    });
+
+    it("should not show minus 100 percent when nothing was sold yet today", async () => {
+        await render({
+            days: [day("2026-11-10", 200000), day("2026-11-11", 0, 0)],
+            yesterdayUntilNow: 50000,
+        });
+        expect(text()).toContain("Aucune vente");
+        expect(text()).not.toContain("100 %");
+    });
+
+    it("should draw the week curve in the main card", async () => {
+        await render();
+        expect(el.querySelector(".hero .spark-line")).not.toBeNull();
     });
 
     it("should show the cash balance when the session is open", async () => {
@@ -344,7 +358,7 @@ describe("Dashboard", () => {
         const blocks = [...el.querySelectorAll(".manager > *")].map((b) => b.className);
         expect(blocks).toEqual(["m-cash", "m-today", "m-chart", "m-sales", "m-close"]);
         expect(text()).toContain("Mes ventes du jour");
-        expect(text()).toContain("+7 % vs hier à cette heure");
+        expect(text()).toContain("+7 % vs hier");
         expect(text()).toContain("Mes ventes sur 7 jours");
         expect(text()).toContain("Mes dernières ventes");
         expect(text()).not.toContain("Mon activité récente");

@@ -40,3 +40,16 @@
     overflow: hidden;
     clip: rect(0 0 0 0);
 }
+
+.trial {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
+}

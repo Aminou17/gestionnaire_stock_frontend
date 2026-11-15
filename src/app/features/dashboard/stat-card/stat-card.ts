@@ -1,4 +1,4 @@
-import { Component, input, output } from "@angular/core";
+import { Component, computed, input, output } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { Icon } from "../../../shared/icon/icon";
@@ -7,7 +7,7 @@ import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 type Tone = "primary" | "success" | "warning" | "danger" | "muted";
 // couleur de la carte : fond teinté et liseré
-type CardTone = "primary" | "success" | "warning" | "danger";
+type CardTone = "primary" | "success" | "warning" | "danger" | "violet";
 
 @Component({
     selector: "app-stat-card",
@@ -33,4 +33,23 @@ export class StatCard {
     toggled = output<void>();
     loading = input(false);
     error = input(false);
+    // petite courbe des derniers jours, pour la grande carte
+    spark = input<number[]>([]);
+
+    sparkLine = computed(() => this.sparkPoints().join(" "));
+
+    // même courbe refermée jusqu'en bas pour colorer la surface dessous
+    sparkArea = computed(() => {
+        const points = this.sparkPoints();
+        return points.length ? `0,40 ${points.join(" ")} 120,40` : "";
+    });
+
+    private sparkPoints() {
+        const values = this.spark();
+        if (values.length < 2) return [];
+
+        const max = Math.max(...values, 1);
+        const step = 120 / (values.length - 1);
+        return values.map((v, i) => `${(i * step).toFixed(1)},${(36 - (v / max) * 32).toFixed(1)}`);
+    }
 }
