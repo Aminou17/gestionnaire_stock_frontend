@@ -1,0 +1,32 @@
+:host {
+    display: block;
+}
+
+.phone-inputs {
+    display: grid;
+    grid-template-columns: 88px 1fr;
+    gap: 8px;
+}
+
+.code {
+    position: relative;
+}
+
+/* le + est dessiné, l'utilisateur ne tape que les chiffres */
+.plus {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    translate: 0 -50%;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.code .input {
+    padding-left: 24px;
+    font-variant-numeric: tabular-nums;
+}
+
+.country {
+    font-size: var(--fs-caption);
+}

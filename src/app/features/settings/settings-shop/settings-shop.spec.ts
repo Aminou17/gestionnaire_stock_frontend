@@ -16,6 +16,8 @@ const shop = {
     tax_id: null,
     rccm: null,
     receipt_footer: "Ni repris ni échangé.",
+    logo: null,
+    default_country_code: "242",
     updated_at: null,
 };
 
@@ -102,6 +104,35 @@ describe("SettingsShop", () => {
             }),
         );
         expect(el.textContent).toContain("Informations enregistrées.");
+    });
+
+    it("should show the default country code and its country", async () => {
+        await render();
+
+        expect(input("defaultCountryCode").value).toBe("242");
+        expect(el.textContent).toContain("Congo-Brazzaville");
+        expect(el.textContent).toContain("quand un numéro n'a pas d'indicatif");
+    });
+
+    it("should save a new country code with the digits only", async () => {
+        await render();
+
+        await type("defaultCountryCode", "+226");
+        await submit();
+
+        expect(updateSettings).toHaveBeenCalledWith(
+            expect.objectContaining({ defaultCountryCode: "226" }),
+        );
+    });
+
+    it("should not save without a country code", async () => {
+        await render();
+
+        await type("defaultCountryCode", "");
+        await submit();
+
+        expect(updateSettings).not.toHaveBeenCalled();
+        expect(el.textContent).toContain("1 à 4 chiffres");
     });
 
     it("should not save without a shop name", async () => {

@@ -23,7 +23,7 @@
 }
 
 .export-text small {
-    font-size: 13px;
+    font-size: var(--fs-small);
     line-height: 1.4;
 }
 

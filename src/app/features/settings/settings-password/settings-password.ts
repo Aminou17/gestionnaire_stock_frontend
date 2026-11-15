@@ -94,7 +94,8 @@ export class SettingsPassword implements HasUnsavedChanges {
                     this.passwordForm.enable({ emitEvent: false });
                     this.passwordForm.reset();
                     this.passwordMessage.set({ ok: true, text: "Mot de passe modifié." });
-                    if (forced) this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
+                    if (forced)
+                        this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
                 },
                 error: (err) => {
                     this.savingPassword.set(false);

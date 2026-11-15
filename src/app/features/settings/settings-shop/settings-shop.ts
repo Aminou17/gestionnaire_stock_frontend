@@ -9,6 +9,7 @@ import { getBackLink } from "../../../core/back-link";
 import { ShopSettings } from "../../../core/shop/shop-settings.model";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { countryName } from "../../../shared/country-codes";
 import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
 import { SettingsHistory } from "../settings-history/settings-history";
@@ -40,6 +41,7 @@ export class SettingsShop implements HasUnsavedChanges {
         phone: ["", Validators.maxLength(40)],
         taxId: ["", Validators.maxLength(50)],
         rccm: ["", Validators.maxLength(50)],
+        defaultCountryCode: ["", [Validators.required, Validators.pattern(/^[1-9][0-9]{0,3}$/)]],
     });
 
     saving = signal(false);
@@ -63,6 +65,19 @@ export class SettingsShop implements HasUnsavedChanges {
             const settings = this.settings.value();
             untracked(() => this.fill(settings));
         });
+    }
+
+    countryName() {
+        return countryName(this.form.controls.defaultCountryCode.value);
+    }
+
+    // chiffres seulement : le + est déjà affiché devant le champ
+    onCountryCodeInput(input: HTMLInputElement) {
+        const digits = input.value.replace(/\D/g, "").replace(/^0+/, "");
+        if (digits !== input.value) {
+            input.value = digits;
+            this.form.controls.defaultCountryCode.setValue(digits);
+        }
     }
 
     invalid(name: keyof typeof this.form.controls) {
@@ -128,6 +143,7 @@ export class SettingsShop implements HasUnsavedChanges {
             phone: settings.phone ?? "",
             taxId: settings.tax_id ?? "",
             rccm: settings.rccm ?? "",
+            defaultCountryCode: settings.default_country_code ?? "242",
         });
     }
 }

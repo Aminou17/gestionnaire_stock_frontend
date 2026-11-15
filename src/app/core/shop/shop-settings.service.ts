@@ -5,6 +5,7 @@ import { tap } from "rxjs";
 
 import { API_URL } from "../api.config";
 import { AuthService } from "../auth/auth.service";
+import { DEFAULT_COUNTRY_CODE } from "../../shared/phone";
 import { ShopSettings, ShopSettingsInput } from "./shop-settings.model";
 
 @Injectable({ providedIn: "root" })
@@ -24,6 +25,13 @@ export class ShopSettingsService {
 
     shopName = computed(() => (this.current.hasValue() ? this.current.value().name : ""));
     shopLogo = computed(() => (this.current.hasValue() ? this.current.value().logo : null));
+
+    // indicatif des numéros saisis sans "+" : une seule source pour WhatsApp, l'appel et l'affichage
+    defaultCountryCode = computed(() =>
+        this.current.hasValue()
+            ? (this.current.value().default_country_code ?? DEFAULT_COUNTRY_CODE)
+            : DEFAULT_COUNTRY_CODE,
+    );
 
     getSettings() {
         return this.http.get<ShopSettings>(`${API_URL}/shop-settings`);

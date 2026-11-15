@@ -9,3 +9,34 @@
         grid-template-columns: 1fr;
     }
 }
+
+.country-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.code-box {
+    position: relative;
+    width: 112px;
+}
+
+/* le + est dessiné, l'utilisateur ne tape que les chiffres */
+.plus {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    translate: 0 -50%;
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.code-box .input {
+    padding-left: 24px;
+    font-variant-numeric: tabular-nums;
+}
+
+.country-name {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}

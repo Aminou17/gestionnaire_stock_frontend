@@ -36,12 +36,12 @@ textarea.input {
 
 .counter {
     justify-self: end;
-    font-size: 12px;
+    font-size: var(--fs-caption);
 }
 
 .hint {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .hint a {
@@ -52,8 +52,8 @@ textarea.input {
 
 .preview-title {
     margin: 0 0 10px;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     color: var(--text-muted);
 }
 
@@ -66,7 +66,7 @@ textarea.input {
     background: #fff;
     color: #111;
     font-family: "Courier New", monospace;
-    font-size: 12px;
+    font-size: var(--fs-caption);
     line-height: 1.4;
     border: 1px solid var(--border);
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
@@ -88,7 +88,7 @@ textarea.input {
 
 .ticket-shop {
     margin-bottom: 4px;
-    font-size: 16px;
+    font-size: var(--fs-lead);
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
@@ -112,8 +112,8 @@ textarea.input {
 .ticket-total {
     padding-top: 8px;
     border-top: 1px solid #111;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
 }
 
 .ticket-foot {

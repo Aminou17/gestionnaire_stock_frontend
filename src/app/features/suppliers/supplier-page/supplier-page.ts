@@ -17,7 +17,8 @@ import { StockEntryService } from "../../../core/stock/stock-entry.service";
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
-import { formatPhone, toTelLink, toWhatsAppLink } from "../phone";
+import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
+import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
 import { SupplierForm } from "../supplier-form/supplier-form";
 import { BackState } from "../../../core/back-link";
 
@@ -34,6 +35,7 @@ export class SupplierPage {
     private supplierService = inject(SupplierService);
     private entryService = inject(StockEntryService);
     private router = inject(Router);
+    private shop = inject(ShopSettingsService);
 
     // la fiche produit ouverte sait ainsi revenir ici
     backState(): BackState {
@@ -107,9 +109,10 @@ export class SupplierPage {
     // absent tant que le backend ne le renvoie pas : on cache alors le bloc
     productCount = computed(() => this.data()?.product_count);
 
-    protected formatPhone = formatPhone;
-    protected telLink = toTelLink;
-    protected whatsAppLink = toWhatsAppLink;
+    protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
+    protected telLink = (phone: string) => toTelLink(phone, this.shop.defaultCountryCode());
+    protected whatsAppLink = (phone: string) =>
+        toWhatsAppLink(phone, this.shop.defaultCountryCode());
 
     restoring = signal(false);
     restoreError = signal<string | null>(null);

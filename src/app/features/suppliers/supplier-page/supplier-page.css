@@ -39,19 +39,19 @@ dl > div.block {
 }
 
 dt {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
 dd {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: right;
 }
 
 .strong {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
 }
 
 .actions {
@@ -125,7 +125,7 @@ dd {
     gap: 6px;
     min-height: 44px;
     color: var(--primary-text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-decoration: none;
 }
 
@@ -139,7 +139,7 @@ dd {
     background: none;
     color: var(--primary-text);
     font: inherit;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-decoration: none;
     cursor: pointer;
 }
@@ -150,7 +150,7 @@ dd {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .products-line p {
@@ -163,7 +163,7 @@ dd {
 
 .confirm p.linked-products {
     color: var(--text);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
 }
 
 /* totaux des livraisons */
@@ -183,23 +183,23 @@ dd {
 }
 
 .stats strong {
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .stats span {
-    font-size: 13px;
+    font-size: var(--fs-small);
     color: var(--text-muted);
 }
 
 .no-delivery {
     margin: 8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .section-title {
     margin: 20px 0 4px;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
 }
 
 /* dernières livraisons : produit, date, quantité reçue */
@@ -226,8 +226,8 @@ dd {
 
 .preview-name {
     overflow: hidden;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -238,7 +238,7 @@ dd {
 
 .preview strong {
     min-width: 28px;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: right;
 }
 
@@ -288,12 +288,12 @@ dd {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 

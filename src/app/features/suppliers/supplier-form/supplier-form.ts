@@ -13,10 +13,11 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 
 import { Supplier, SupplierInput } from "../../../core/stock/supplier.model";
 import { SupplierService } from "../../../core/stock/supplier.service";
+import { PhoneField } from "../../../shared/phone-field/phone-field";
 
 @Component({
     selector: "app-supplier-form",
-    imports: [ReactiveFormsModule],
+    imports: [ReactiveFormsModule, PhoneField],
     templateUrl: "./supplier-form.html",
     styleUrl: "./supplier-form.css",
 })

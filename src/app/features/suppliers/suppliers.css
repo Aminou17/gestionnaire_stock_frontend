@@ -56,13 +56,13 @@ app-page-header {
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
 .chip span {
-    font-weight: 500;
+    font-weight: var(--fw-medium);
     color: var(--text-muted);
 }
 
@@ -140,8 +140,8 @@ app-page-header {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     text-align: left;
     overflow-wrap: anywhere;
     cursor: pointer;
@@ -152,7 +152,7 @@ app-page-header {
 }
 
 .text small {
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 /* focus clavier bien visible, en clair comme en sombre */
@@ -219,7 +219,7 @@ app-page-header {
     border-radius: 8px;
     background: transparent;
     color: var(--text);
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: left;
     cursor: pointer;
 }
@@ -279,12 +279,12 @@ app-page-header {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 
@@ -331,7 +331,7 @@ app-page-header {
     }
 
     .name {
-        font-size: 16px;
+        font-size: var(--fs-lead);
     }
 
     .empty .btn-sm {
@@ -404,5 +404,5 @@ app-page-header {
 
 .confirm p.linked-products {
     color: var(--text);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
 }

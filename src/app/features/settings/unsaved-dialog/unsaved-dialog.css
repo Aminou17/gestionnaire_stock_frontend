@@ -20,12 +20,12 @@
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 

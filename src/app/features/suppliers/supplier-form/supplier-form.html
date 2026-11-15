@@ -40,36 +40,24 @@
             />
         </label>
 
-        <div class="pair">
-            <label class="field">
-                <span>Téléphone <small class="muted">(facultatif)</small></span>
-                <input
-                    class="input"
-                    type="tel"
-                    formControlName="telephone"
-                    placeholder="Ex. +242 06 123 45 67"
-                    maxlength="50"
-                    autocomplete="off"
-                />
-            </label>
+        <app-phone-field formControlName="telephone" label="Téléphone" [optional]="true" />
 
-            <label class="field">
-                <span>Email <small class="muted">(facultatif)</small></span>
-                <input
-                    class="input"
-                    type="email"
-                    formControlName="email"
-                    placeholder="Ex. contact@tissus.com"
-                    maxlength="100"
-                    autocomplete="off"
-                    [class.invalid]="form.controls.email.touched && form.controls.email.invalid"
-                    [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
-                />
-                @if (form.controls.email.touched && form.controls.email.invalid) {
-                    <small class="field-error" role="alert">Adresse email invalide.</small>
-                }
-            </label>
-        </div>
+        <label class="field">
+            <span>Email <small class="muted">(facultatif)</small></span>
+            <input
+                class="input"
+                type="email"
+                formControlName="email"
+                placeholder="Ex. contact@tissus.com"
+                maxlength="100"
+                autocomplete="off"
+                [class.invalid]="form.controls.email.touched && form.controls.email.invalid"
+                [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
+            />
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+                <small class="field-error" role="alert">Adresse email invalide.</small>
+            }
+        </label>
 
         <label class="field">
             <span>Adresse <small class="muted">(facultative)</small></span>
