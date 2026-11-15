@@ -327,6 +327,56 @@ tbody tr:hover {
     object-fit: cover;
 }
 
+.thumb-zoom {
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: none;
+    cursor: zoom-in;
+}
+
+.thumb-zoom:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* couleur de la pastille selon le produit, comme sur Rotation */
+.av-0 {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.av-1 {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+
+.av-2 {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+
+.av-3 {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.product-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.product-cell .thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: var(--fs-small);
+}
+
 .result-name {
     flex: 1;
     min-width: 0;
@@ -525,11 +575,19 @@ tbody tr:hover {
 
     .entry-card {
         display: grid;
-        gap: 4px;
-        padding: 12px 14px;
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 14px;
+        align-items: start;
+        padding: 16px;
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: var(--radius);
+    }
+
+    .entry-body {
+        display: grid;
+        gap: 4px;
+        min-width: 0;
     }
 
     .line {
@@ -541,8 +599,6 @@ tbody tr:hover {
 
     .entry-card .product-link {
         display: block;
-        min-height: 44px;
-        padding-top: 10px;
         font-size: var(--fs-lead);
         overflow-wrap: anywhere;
     }

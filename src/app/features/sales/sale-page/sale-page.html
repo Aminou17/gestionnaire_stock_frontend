@@ -147,14 +147,14 @@
                             }
                         </span>
                         @if (auth.isAdmin() && sale.user_name) {
-                            <span class="seller">
+                            <a class="seller" [routerLink]="['/users', sale.user_id]">
                                 <app-avatar
                                     class="seller-avatar"
                                     [photo]="sale.user_avatar"
                                     aria-hidden="true"
                                 />
                                 {{ sale.user_name }}
-                            </span>
+                            </a>
                         }
                     </div>
                 </div>

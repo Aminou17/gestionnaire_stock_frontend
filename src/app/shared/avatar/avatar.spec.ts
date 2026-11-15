@@ -1,3 +1,4 @@
+import { ApplicationRef } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { describe, expect, it } from "vitest";
 
@@ -19,5 +20,12 @@ describe("Avatar", () => {
     it("montre la photo quand elle existe", () => {
         const photo = "data:image/jpeg;base64,/9j/4AAQ";
         expect(render(photo).getAttribute("src")).toBe(photo);
+    });
+
+    it("retombe sur la silhouette quand la photo ne charge pas", () => {
+        const img = render("data:image/jpeg;base64,xx");
+        img.dispatchEvent(new Event("error"));
+        TestBed.inject(ApplicationRef).tick();
+        expect(img.getAttribute("src")).toBe("/avatar-default.png");
     });
 });

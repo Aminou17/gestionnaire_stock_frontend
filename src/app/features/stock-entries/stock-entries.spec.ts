@@ -46,7 +46,11 @@ describe("StockEntries", () => {
     let createEntry: ReturnType<typeof vi.fn>;
     let reloadAlerts: ReturnType<typeof vi.fn>;
 
-    async function render({ query = {} as Record<string, string>, createFails = false } = {}) {
+    async function render({
+        query = {} as Record<string, string>,
+        createFails = false,
+        image = null as string | null,
+    } = {}) {
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
         vi.stubGlobal(
@@ -58,7 +62,7 @@ describe("StockEntries", () => {
         );
         getEntries = vi.fn(() =>
             of({
-                data: [entry],
+                data: [{ ...entry, image }],
                 total: 1,
                 counters: { entries: 1, units: 5, products: 1, suppliers: 1 },
             }),
@@ -142,6 +146,25 @@ describe("StockEntries", () => {
         expect(text()).toContain("Tissus du Faso");
         expect(el.querySelector("tbody .quantity")?.textContent).toContain("+5");
         expect(el.querySelector("tbody a")?.getAttribute("href")).toBe("/products/3");
+    });
+
+    it("should show initials without a photo and zoom the photo without opening the product", async () => {
+        await render();
+
+        expect(el.querySelector("tbody .thumb")?.textContent).toContain("RI");
+        expect(el.querySelector(".thumb-zoom")).toBeNull();
+
+        TestBed.resetTestingModule();
+        await render({ image: "data:image/png;base64,MINI" });
+        const link = el.querySelector<HTMLAnchorElement>("tbody a")!;
+        const navigated = vi.fn((event: Event) => event.preventDefault());
+        link.addEventListener("click", navigated);
+
+        el.querySelector<HTMLButtonElement>("tbody .thumb-zoom")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelector("app-photo-zoom img")!.getAttribute("src")).toContain("MINI");
+        expect(navigated).not.toHaveBeenCalled();
     });
 
     it("should only offer active suppliers in the filter and filter from page 1", async () => {

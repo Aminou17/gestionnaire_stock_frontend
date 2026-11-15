@@ -132,12 +132,36 @@
                                 }}
                             </td>
                             <td>
-                                <a
-                                    [routerLink]="['/products', entry.product_id]"
-                                    [state]="backState()"
-                                    class="product-link"
-                                    >{{ entry.product_name }}</a
-                                >
+                                <div class="product-cell">
+                                    <span class="thumb av-{{ tone(entry.product_name) }}">
+                                        @if (entry.image) {
+                                            <button
+                                                type="button"
+                                                class="thumb-zoom"
+                                                [attr.aria-label]="
+                                                    'Agrandir la photo de ' + entry.product_name
+                                                "
+                                                (click)="
+                                                    zoomImage(
+                                                        $event,
+                                                        entry.image,
+                                                        entry.product_name
+                                                    )
+                                                "
+                                            >
+                                                <img [src]="entry.image" alt="" />
+                                            </button>
+                                        } @else {
+                                            {{ initials(entry.product_name) }}
+                                        }
+                                    </span>
+                                    <a
+                                        [routerLink]="['/products', entry.product_id]"
+                                        [state]="backState()"
+                                        class="product-link"
+                                        >{{ entry.product_name }}</a
+                                    >
+                                </div>
                             </td>
                             <td>{{ entry.supplier_name }}</td>
                             <td class="num quantity">+{{ entry.quantity }}</td>
@@ -157,26 +181,42 @@
         <ul class="cards">
             @for (entry of list(); track entry.id) {
                 <li class="entry-card">
-                    <div class="line">
-                        <a
-                            [routerLink]="['/products', entry.product_id]"
-                            [state]="backState()"
-                            class="product-link"
-                            >{{ entry.product_name }}</a
-                        >
-                        <strong class="quantity">+{{ entry.quantity }}</strong>
-                    </div>
-                    <span class="meta muted">
-                        {{
-                            isToday(entry.date_creation)
-                                ? "Aujourd'hui, " + (entry.date_creation | date: "HH:mm")
-                                : (entry.date_creation | date: "d MMM y, HH:mm")
-                        }}
-                        · {{ entry.supplier_name }}
+                    <span class="thumb av-{{ tone(entry.product_name) }}">
+                        @if (entry.image) {
+                            <button
+                                type="button"
+                                class="thumb-zoom"
+                                [attr.aria-label]="'Agrandir la photo de ' + entry.product_name"
+                                (click)="zoomImage($event, entry.image, entry.product_name)"
+                            >
+                                <img [src]="entry.image" alt="" />
+                            </button>
+                        } @else {
+                            {{ initials(entry.product_name) }}
+                        }
                     </span>
-                    <button type="button" class="correct-btn" (click)="correct(entry)">
-                        Corriger la quantité
-                    </button>
+                    <div class="entry-body">
+                        <div class="line">
+                            <a
+                                [routerLink]="['/products', entry.product_id]"
+                                [state]="backState()"
+                                class="product-link"
+                                >{{ entry.product_name }}</a
+                            >
+                            <strong class="quantity">+{{ entry.quantity }}</strong>
+                        </div>
+                        <span class="meta muted">
+                            {{
+                                isToday(entry.date_creation)
+                                    ? "Aujourd'hui, " + (entry.date_creation | date: "HH:mm")
+                                    : (entry.date_creation | date: "d MMM y, HH:mm")
+                            }}
+                            · {{ entry.supplier_name }}
+                        </span>
+                        <button type="button" class="correct-btn" (click)="correct(entry)">
+                            Corriger la quantité
+                        </button>
+                    </div>
                 </li>
             }
         </ul>
@@ -215,9 +255,16 @@
         <div class="field">
             @if (product(); as product) {
                 <div class="chosen">
-                    <span class="thumb">
+                    <span class="thumb av-{{ tone(product.name) }}">
                         @if (product.image) {
-                            <img [src]="product.image" alt="" />
+                            <button
+                                type="button"
+                                class="thumb-zoom"
+                                [attr.aria-label]="'Agrandir la photo de ' + product.name"
+                                (click)="zoomImage($event, product.image, product.name)"
+                            >
+                                <img [src]="product.image" alt="" />
+                            </button>
                         } @else {
                             {{ initials(product.name) }}
                         }
@@ -459,3 +506,7 @@
 </dialog>
 
 <app-adjust-dialog (saved)="onCorrected($event)" />
+
+@if (zoom(); as photo) {
+    <app-photo-zoom [src]="photo.src" [name]="photo.name" (closed)="zoom.set(null)" />
+}

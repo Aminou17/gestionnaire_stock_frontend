@@ -28,7 +28,8 @@ import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
 import { BackState } from "../../core/back-link";
-import { productInitials } from "../products/product-look";
+import { PhotoZoom } from "../../shared/photo-zoom/photo-zoom";
+import { categoryTone, productInitials } from "../products/product-look";
 
 const PAGE_SIZE = 20;
 // valeur de l'option "+ Créer un fournisseur"
@@ -52,6 +53,7 @@ const toId = (value: string | null) => {
         PeriodFilter,
         Icon,
         AdjustDialog,
+        PhotoZoom,
     ],
     templateUrl: "./stock-entries.html",
     styleUrl: "./stock-entries.css",
@@ -62,6 +64,13 @@ export class StockEntries implements AfterViewInit {
     private supplierService = inject(SupplierService);
     private stockAlerts = inject(LowStockAlertService);
     private router = inject(Router);
+
+    zoomImage(event: Event, src: string, name: string) {
+        // la photo ne doit pas ouvrir la fiche produit ni fermer la fenêtre
+        event.preventDefault();
+        event.stopPropagation();
+        this.zoom.set({ src, name });
+    }
 
     // la fiche produit ouverte sait ainsi revenir ici
     backState(): BackState {
@@ -77,6 +86,10 @@ export class StockEntries implements AfterViewInit {
 
     protected newId = NEW_ID;
     protected initials = productInitials;
+    protected tone = categoryTone;
+
+    // photo agrandie au centre de la page
+    protected zoom = signal<{ src: string; name: string } | null>(null);
     protected quickQuantities = [5, 10, 20, 50];
 
     // page d'où l'on vient (fiche produit, liste) : Annuler y ramène

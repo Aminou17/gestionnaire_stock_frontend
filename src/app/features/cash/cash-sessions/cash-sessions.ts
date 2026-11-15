@@ -1,7 +1,8 @@
 import { CashTabs } from "../cash-tabs/cash-tabs";
-import { DatePipe } from "@angular/common";
+import { DatePipe, formatDate } from "@angular/common";
 import {
     Component,
+    LOCALE_ID,
     ElementRef,
     computed,
     effect,
@@ -19,17 +20,20 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { ExportFormat } from "../../../core/export-format";
 import { ExportMenu } from "../../../shared/export-menu/export-menu";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
+import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 const PAGE_SIZE = 20;
 
 @Component({
     selector: "app-cash-sessions",
-    imports: [CashTabs, RouterLink, DatePipe, PageHeader, FcfaPipe, PeriodFilter, ExportMenu],
+    imports: [CashTabs, RouterLink, DatePipe, PageHeader, FcfaPipe, PeriodFilter, ExportMenu, Icon],
     templateUrl: "./cash-sessions.html",
     styleUrl: "./cash-sessions.css",
 })
 export class CashSessions {
+    private locale = inject(LOCALE_ID);
+    private fcfa = new FcfaPipe();
     private cashService = inject(CashSessionService);
     private router = inject(Router);
 
@@ -131,6 +135,31 @@ export class CashSessions {
             observer.observe(sentinel);
             onCleanup(() => observer.disconnect());
         });
+    }
+
+    // pastille d'état : écart de la clôture, ou caisse encore ouverte
+    state(session: CashSession) {
+        if (session.status === "OPEN") return { tone: "primary", label: "À clôturer" };
+        if (session.explanation_pending) return { tone: "warning", label: "Écart à expliquer" };
+
+        const gap = session.difference ?? 0;
+        if (gap === 0) return { tone: "success", label: "Équilibrée" };
+
+        const label = `Écart de ${this.fcfa.transform(gap, true)}`;
+        return { tone: gap < 0 ? "danger" : "warning", label };
+    }
+
+    // horaires et personnes : "08:00 - 18:30 · Awa" (prénoms, "Awa, puis Hortense" si deux personnes)
+    hours(session: CashSession) {
+        const start = formatDate(session.opened_at, "HH:mm", this.locale);
+        const end = session.closed_at ? formatDate(session.closed_at, "HH:mm", this.locale) : "";
+        const range = end ? `${start} - ${end}` : `Ouverte à ${start}`;
+
+        const opener = session.opened_by_name?.split(" ")[0];
+        const closer = session.closed_by_name?.split(" ")[0];
+        const people =
+            closer && opener && closer !== opener ? `${opener}, puis ${closer}` : (opener ?? "");
+        return people ? `${range} · ${people}` : range;
     }
 
     openSession(session: CashSession) {
