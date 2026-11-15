@@ -15,8 +15,8 @@
     background: none;
     color: var(--primary-text);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     text-align: left;
     cursor: pointer;
 }
@@ -49,11 +49,11 @@
     grid-template-columns: 72px 1fr 96px;
     align-items: center;
     gap: 10px;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .face {
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -65,7 +65,7 @@
 
 .sub {
     text-align: right;
-    font-size: 13px;
+    font-size: var(--fs-small);
     font-variant-numeric: tabular-nums;
 }
 
@@ -76,5 +76,5 @@
     gap: 12px;
     padding: 10px 12px;
     border-top: 1px solid var(--border);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }

@@ -14,10 +14,12 @@ import { CashMovementDialog } from "./cash-movement-dialog/cash-movement-dialog"
 import { CashMovementList } from "./cash-movement-list/cash-movement-list";
 import { CloseCashDialog } from "./close-cash-dialog/close-cash-dialog";
 import { OpenCashDialog } from "./open-cash-dialog/open-cash-dialog";
+import { MoneyToggle } from "../../shared/money/money-toggle";
 
 @Component({
     selector: "app-cash",
     imports: [
+        MoneyToggle,
         CashTabs,
         RouterLink,
         DatePipe,

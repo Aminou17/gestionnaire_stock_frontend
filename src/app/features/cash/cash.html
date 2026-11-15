@@ -101,7 +101,7 @@
                             <small>{{
                                 isOpen() ? "Solde dans le tiroir" : "Solde à la clôture"
                             }}</small>
-                            <strong>{{ cash.balance | fcfa }}</strong>
+                            <strong appMoney>{{ cash.balance | fcfa }}</strong>
                         </div>
                     }
 
@@ -289,46 +289,52 @@
                             <dl class="lines">
                                 <div>
                                     <dt>Fonds de départ</dt>
-                                    <dd>{{ cash.openingAmount | fcfa }}</dd>
+                                    <dd appMoney>{{ cash.openingAmount | fcfa }}</dd>
                                 </div>
                                 <div>
                                     <dt>Ventes</dt>
-                                    <dd class="in">{{ summary().sales | fcfa }}</dd>
+                                    <dd appMoney class="in">{{ summary().sales | fcfa }}</dd>
                                 </div>
                                 @if (summary().deposits > 0) {
                                     <div>
                                         <dt>Argent ajouté</dt>
-                                        <dd class="in">{{ summary().deposits | fcfa }}</dd>
+                                        <dd appMoney class="in">{{ summary().deposits | fcfa }}</dd>
                                     </div>
                                 }
                                 @if (summary().refunds > 0) {
                                     <div>
                                         <dt>Remboursements</dt>
-                                        <dd class="out">−{{ summary().refunds | fcfa }}</dd>
+                                        <dd appMoney class="out">
+                                            −{{ summary().refunds | fcfa }}
+                                        </dd>
                                     </div>
                                 }
                                 @if (summary().expenses > 0) {
                                     <div>
                                         <dt>Dépenses</dt>
-                                        <dd class="out">−{{ summary().expenses | fcfa }}</dd>
+                                        <dd appMoney class="out">
+                                            −{{ summary().expenses | fcfa }}
+                                        </dd>
                                     </div>
                                 }
                                 @if (summary().withdrawals > 0) {
                                     <div>
                                         <dt>Retraits</dt>
-                                        <dd class="out">−{{ summary().withdrawals | fcfa }}</dd>
+                                        <dd appMoney class="out">
+                                            −{{ summary().withdrawals | fcfa }}
+                                        </dd>
                                     </div>
                                 }
                                 <div class="total">
                                     <dt>Solde attendu</dt>
-                                    <dd>{{ cash.balance | fcfa }}</dd>
+                                    <dd appMoney>{{ cash.balance | fcfa }}</dd>
                                 </div>
                             </dl>
                             @if (session.value().status === "CLOSED") {
                                 <dl class="lines closing">
                                     <div>
                                         <dt>Montant compté</dt>
-                                        <dd>{{ session.value().actual_amount | fcfa }}</dd>
+                                        <dd appMoney>{{ session.value().actual_amount | fcfa }}</dd>
                                     </div>
                                     @if (session.value().difference === 0) {
                                         <div>

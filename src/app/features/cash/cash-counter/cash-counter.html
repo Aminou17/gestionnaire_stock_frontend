@@ -38,7 +38,7 @@
 
             <div class="foot">
                 <span
-                    >Total compté : <strong>{{ total() | fcfa }}</strong></span
+                    >Total compté : <strong appMoney>{{ total() | fcfa }}</strong></span
                 >
                 <button type="button" class="btn btn-outline btn-sm" (click)="open.set(false)">
                     Terminé

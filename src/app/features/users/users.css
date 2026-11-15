@@ -61,8 +61,8 @@ app-page-header {
     min-height: 40px;
     border-bottom: 1px solid var(--border);
     background: var(--surface-hover);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-muted);
@@ -132,8 +132,8 @@ app-page-header {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -151,19 +151,19 @@ app-page-header {
     border-radius: 999px;
     border: 1px solid var(--border-strong, var(--border));
     color: var(--text);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
 }
 
 .email {
-    font-size: 13px;
+    font-size: var(--fs-small);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .last-login {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text);
 }
 
@@ -240,7 +240,7 @@ app-page-header {
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: left;
     text-decoration: none;
     cursor: pointer;
@@ -312,12 +312,12 @@ app-page-header {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 
@@ -343,7 +343,7 @@ app-page-header {
         grid-column: 1;
         grid-row: 2;
         margin: -6px 0 0 52px;
-        font-size: 13px;
+        font-size: var(--fs-small);
     }
 
     .role {
@@ -434,7 +434,7 @@ app-page-header {
     }
 
     .name {
-        font-size: 16px;
+        font-size: var(--fs-lead);
     }
 
     .loading {
@@ -505,8 +505,8 @@ app-page-header {
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
@@ -515,7 +515,7 @@ app-page-header {
     padding: 1px 8px;
     border-radius: 999px;
     background: var(--neutral-soft);
-    font-size: 12px;
+    font-size: var(--fs-caption);
 }
 
 .tab:hover {
@@ -533,7 +533,7 @@ app-page-header {
     border-bottom: 1px solid var(--border);
     background: var(--neutral-soft);
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 @media (max-width: 640px) {

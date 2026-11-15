@@ -139,44 +139,44 @@
                     <dl class="lines">
                         <div>
                             <dt>Fonds de départ</dt>
-                            <dd>{{ cash.opening_amount | fcfa }}</dd>
+                            <dd appMoney>{{ cash.opening_amount | fcfa }}</dd>
                         </div>
                         <div>
                             <dt>Ventes</dt>
-                            <dd class="in">{{ summary().sales | fcfa }}</dd>
+                            <dd appMoney class="in">{{ summary().sales | fcfa }}</dd>
                         </div>
                         @if (summary().deposits > 0) {
                             <div>
                                 <dt>Argent ajouté</dt>
-                                <dd class="in">{{ summary().deposits | fcfa }}</dd>
+                                <dd appMoney class="in">{{ summary().deposits | fcfa }}</dd>
                             </div>
                         }
                         @if (summary().refunds > 0) {
                             <div>
                                 <dt>Remboursements</dt>
-                                <dd class="out">−{{ summary().refunds | fcfa }}</dd>
+                                <dd appMoney class="out">−{{ summary().refunds | fcfa }}</dd>
                             </div>
                         }
                         @if (summary().expenses > 0) {
                             <div>
                                 <dt>Dépenses</dt>
-                                <dd class="out">−{{ summary().expenses | fcfa }}</dd>
+                                <dd appMoney class="out">−{{ summary().expenses | fcfa }}</dd>
                             </div>
                         }
                         @if (summary().withdrawals > 0) {
                             <div>
                                 <dt>Retraits</dt>
-                                <dd class="out">−{{ summary().withdrawals | fcfa }}</dd>
+                                <dd appMoney class="out">−{{ summary().withdrawals | fcfa }}</dd>
                             </div>
                         }
                         @if (cash.status === "CLOSED") {
                             <div class="total">
                                 <dt>Montant attendu</dt>
-                                <dd>{{ cash.theoretical_amount | fcfa }}</dd>
+                                <dd appMoney>{{ cash.theoretical_amount | fcfa }}</dd>
                             </div>
                             <div class="total">
                                 <dt>Montant compté</dt>
-                                <dd>{{ cash.actual_amount | fcfa }}</dd>
+                                <dd appMoney>{{ cash.actual_amount | fcfa }}</dd>
                             </div>
                         }
                     </dl>

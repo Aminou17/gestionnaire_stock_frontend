@@ -23,7 +23,7 @@ app-page-header {
     border: 0;
     background: none;
     color: inherit;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     text-decoration: underline;
     cursor: pointer;
 }
@@ -96,12 +96,12 @@ app-page-header {
 
 .balance small {
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .balance strong {
-    font-size: 36px;
-    font-weight: 700;
+    font-size: var(--fs-kpi);
+    font-weight: var(--fw-bold);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
@@ -114,7 +114,7 @@ app-page-header {
 
 .note {
     margin: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .quick {
@@ -138,7 +138,7 @@ app-page-header {
     gap: 12px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .lines dt {
@@ -147,7 +147,7 @@ app-page-header {
 
 .lines dd {
     margin: 0;
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
 }
 
@@ -161,12 +161,12 @@ app-page-header {
 
 .lines .total {
     border-bottom: 0;
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 .lines .total dt {
     color: var(--text);
-    font-weight: 600;
+    font-weight: var(--fw-semibold);
 }
 
 .closing {
@@ -196,7 +196,7 @@ app-page-header {
     align-items: center;
     gap: 12px;
     padding: 12px 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .sk-title {
@@ -241,7 +241,7 @@ app-page-header {
     }
 
     .balance strong {
-        font-size: 30px;
+        font-size: var(--fs-kpi);
     }
 
     .actions .btn {

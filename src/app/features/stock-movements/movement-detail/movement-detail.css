@@ -33,7 +33,7 @@
 
 .detail h2 {
     margin: 0;
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 /* la variation en grand, et le stock avant puis après */
@@ -56,8 +56,8 @@
 
 .change-qty strong {
     color: var(--success);
-    font-size: 28px;
-    font-weight: 600;
+    font-size: var(--fs-title);
+    font-weight: var(--fw-semibold);
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
@@ -68,7 +68,7 @@
 
 .change small {
     color: var(--text-muted);
-    font-size: 12px;
+    font-size: var(--fs-caption);
 }
 
 .change-stock {
@@ -82,7 +82,7 @@
 
 .change-stock span {
     color: var(--text-muted);
-    font-size: 16px;
+    font-size: var(--fs-lead);
 }
 
 .change-stock app-icon {
@@ -90,8 +90,8 @@
 }
 
 .change-stock strong {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-semibold);
 }
 
 .change-stock small {
@@ -117,7 +117,7 @@
 .detail dt {
     flex-shrink: 0;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 /* un nom de produit long passe à la ligne au lieu de pousser le libellé */
@@ -126,7 +126,7 @@
     margin: 0;
     overflow-wrap: anywhere;
     text-align: right;
-    font-size: 14px;
+    font-size: var(--fs-body);
     font-variant-numeric: tabular-nums;
 }
 
@@ -137,7 +137,7 @@
 
 .sale-link {
     color: var(--primary-text);
-    font-weight: 500;
+    font-weight: var(--fw-medium);
     text-decoration: none;
 }
 

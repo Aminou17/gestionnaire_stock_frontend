@@ -19,8 +19,8 @@ a {
     padding: 0 14px;
     border-radius: 7px;
     color: var(--text-muted);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     text-align: center;
     text-decoration: none;
     white-space: nowrap;

@@ -118,16 +118,6 @@ describe("StockMovements", () => {
         expect(el.querySelector(".adjust-btn")).not.toBeNull();
     });
 
-    it("should open the adjustment window when arriving from the menu", async () => {
-        const open = vi.spyOn(StockMovements.prototype, "openAdjust").mockImplementation(() => {});
-        await render({ adjust: true });
-        // l'ouverture est différée d'un tour pour attendre l'affichage de la fenêtre
-        await new Promise((resolve) => setTimeout(resolve, 20));
-
-        expect(open).toHaveBeenCalled();
-        open.mockRestore();
-    });
-
     it("should hide the stock adjustment from the manager", async () => {
         await render({ isAdmin: false });
         expect(el.querySelector(".adjust-btn")).toBeNull();

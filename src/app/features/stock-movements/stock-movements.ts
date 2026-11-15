@@ -91,7 +91,6 @@ export class StockMovements {
     private stockAlerts = inject(LowStockAlertService);
 
     private periodFilter = viewChild.required<PeriodFilter>("period");
-    private adjustTimer?: ReturnType<typeof setTimeout>;
     private successTimer?: ReturnType<typeof setTimeout>;
     private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
     private detailDialog = viewChild.required<MovementDetail>("detail");
@@ -285,26 +284,7 @@ export class StockMovements {
 
     constructor() {
         this.destroyRef.onDestroy(() => {
-            clearTimeout(this.adjustTimer);
             clearTimeout(this.successTimer);
-        });
-
-        // le menu Stock > Ajuster le stock arrive ici avec ?adjust=1
-        this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-            if (params.get("adjust") !== "1") return;
-
-            // la fenêtre n'existe qu'après le premier affichage
-            clearTimeout(this.adjustTimer);
-            this.adjustTimer = setTimeout(() => {
-                if (this.auth.isAdmin()) this.openAdjust();
-                // sans ça, un rechargement rouvrirait la fenêtre
-                this.router.navigate([], {
-                    relativeTo: this.route,
-                    queryParams: { adjust: null },
-                    queryParamsHandling: "merge",
-                    replaceUrl: true,
-                });
-            });
         });
 
         // Charger la page suivante quand le bas de la liste devient visible

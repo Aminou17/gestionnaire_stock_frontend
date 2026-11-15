@@ -1,3 +1,4 @@
+import { Icon } from "../../../shared/icon/icon";
 import { CashTabs } from "../cash-tabs/cash-tabs";
 import {
     Component,
@@ -10,6 +11,7 @@ import {
     signal,
     viewChild,
 } from "@angular/core";
+import { formatDate } from "@angular/common";
 import { rxResource } from "@angular/core/rxjs-interop";
 
 import { CashMovementPage, CashMovementRow, CashMovementType } from "../../../core/cash/cash.model";
@@ -20,6 +22,7 @@ import { groupByDay } from "../../../shared/day-label";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementList } from "../cash-movement-list/cash-movement-list";
+import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 const PAGE_SIZE = 20;
 
@@ -33,8 +36,9 @@ const TYPES: { label: string; value: CashMovementType | null }[] = [
 
 // Journal de tous les mouvements de caisse (administrateur seulement, comme l'API)
 @Component({
+    host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
     selector: "app-cash-movements",
-    imports: [CashTabs, PageHeader, PeriodFilter, FcfaPipe, CashMovementList],
+    imports: [MoneyToggle, CashTabs, Icon, PageHeader, PeriodFilter, FcfaPipe, CashMovementList],
     templateUrl: "./cash-movements.html",
     styleUrl: "./cash-movements.css",
 })
@@ -49,6 +53,8 @@ export class CashMovements {
     type = signal<CashMovementType | null>(null);
     category = signal<string | null>(null);
     page = signal(1);
+    filtersOpen = signal(false);
+    private periodFilter = viewChild.required<PeriodFilter>("period");
 
     // le motif ne se choisit qu'après le type, car chaque type a sa liste
     reasons = computed(() => {
@@ -115,6 +121,52 @@ export class CashMovements {
             observer.observe(sentinel);
             onCleanup(() => observer.disconnect());
         });
+    }
+
+    // filtres choisis dans la fenêtre, affichés en puces à côté du bouton
+    activeFilters = computed(() => {
+        const filters: { key: "period" | "type" | "category"; label: string }[] = [];
+        const { period, from, to } = this.range();
+        const type = this.type();
+
+        if (period !== "all") {
+            filters.push({ key: "period", label: this.periodLabel(period, from, to) });
+        }
+        if (type) {
+            filters.push({
+                key: "type",
+                label: this.types.find((item) => item.value === type)?.label ?? "Type",
+            });
+        }
+        const category = this.category();
+        if (category) {
+            filters.push({
+                key: "category",
+                label: this.reasons().find((reason) => reason.value === category)?.label ?? "Motif",
+            });
+        }
+        return filters;
+    });
+
+    private periodLabel(period: string, from: string | null, to: string | null) {
+        if (period === "today") return "Aujourd'hui";
+        if (period === "week") return "7 derniers jours";
+        if (period === "month") return "30 derniers jours";
+        if (!from || !to) return "Période";
+
+        const day = (date: string) => formatDate(date, "d MMM", this.locale);
+        return `${day(from)} au ${day(to)}`;
+    }
+
+    clearFilter(key: "period" | "type" | "category") {
+        if (key === "period") this.periodFilter().selectPeriod("all");
+        else if (key === "type") this.selectType(null);
+        else this.selectCategory("");
+    }
+
+    resetFilters() {
+        this.periodFilter().selectPeriod("all");
+        this.selectType(null);
     }
 
     selectRange(range: PeriodRange) {

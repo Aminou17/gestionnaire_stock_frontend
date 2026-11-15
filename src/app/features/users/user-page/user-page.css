@@ -20,7 +20,7 @@
 
 .identity h2 {
     margin: 0 0 6px;
-    font-size: 18px;
+    font-size: var(--fs-heading);
     overflow-wrap: anywhere;
 }
 
@@ -50,8 +50,8 @@
     border-radius: 999px;
     border: 1px solid var(--border-strong, var(--border));
     color: var(--text);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
 }
 
 dl {
@@ -69,14 +69,14 @@ dl > div {
 }
 
 dt {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
 dd {
     margin: 0;
     min-width: 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     text-align: right;
 }
 
@@ -92,8 +92,8 @@ dd {
 
 .section-title {
     margin: 20px 0 4px;
-    font-size: 15px;
-    font-weight: 700;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
 }
 
 /* activité : une ligne par action, la plus récente en haut */
@@ -110,13 +110,13 @@ dd {
     gap: 12px;
     min-height: 44px;
     border-bottom: 1px solid var(--border);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .day {
     margin: 16px 0 0;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
     text-transform: uppercase;
     letter-spacing: 0.04em;
     color: var(--text-muted);
@@ -146,18 +146,18 @@ dd {
     padding: 1px 6px;
     border-radius: 999px;
     background: var(--warning-soft);
-    font-size: 12px;
-    font-weight: 600;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
 }
 
 .activity > li > small {
-    font-size: 13px;
+    font-size: var(--fs-small);
     white-space: nowrap;
 }
 
 .no-activity {
     margin: 8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .activity-error {
@@ -255,12 +255,12 @@ dd {
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 .confirm p {
     margin: -8px 0 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
     line-height: 1.5;
 }
 

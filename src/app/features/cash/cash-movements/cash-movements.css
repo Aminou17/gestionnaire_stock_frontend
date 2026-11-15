@@ -20,13 +20,13 @@ app-page-header {
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
 .stat-value {
-    font-size: 22px;
-    font-weight: 700;
+    font-size: var(--fs-figure);
+    font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
 }
@@ -52,19 +52,6 @@ app-page-header {
     box-shadow: none;
 }
 
-.chips {
-    display: flex;
-    gap: 6px;
-    margin: 8px 0 0;
-    padding: 4px 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-}
-
-.chips::-webkit-scrollbar {
-    display: none;
-}
-
 .chip {
     flex-shrink: 0;
     height: 44px;
@@ -73,12 +60,13 @@ app-page-header {
     border-radius: 999px;
     background: var(--surface);
     color: var(--text);
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
-.chip.selected {
+.chip.selected,
+.chip[aria-pressed="true"] {
     background: var(--primary);
     border-color: var(--primary);
     color: var(--on-primary);
@@ -87,7 +75,7 @@ app-page-header {
 .count {
     margin: 0;
     padding: 12px 4px 0;
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 app-cash-movement-list {
@@ -103,8 +91,8 @@ app-cash-movement-list {
 .day-title {
     margin: 0 4px 8px;
     color: var(--text-muted);
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .day-card {
@@ -129,7 +117,7 @@ app-cash-movement-list {
     gap: 8px;
     min-height: 56px;
     color: var(--text-muted);
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .more .spinner {
@@ -154,7 +142,180 @@ app-cash-movement-list {
     padding: 40px 16px;
 }
 
+.phone-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.filter-btn,
+.active-chip,
+.sheet-head,
+.sheet-foot,
+.sheet-backdrop,
+.sheet-only {
+    display: none;
+}
+
+/* sur ordinateur, les filtres restent sur une ligne dans la page */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+}
+
+.type-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.reason-group select {
+    height: 44px;
+}
+
+.filter-btn:focus-visible,
+.active-chip:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 @media (max-width: 767px) {
+    .filter-btn {
+        position: relative;
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        gap: 6px;
+        height: 44px;
+        padding: 0 12px;
+        font-size: var(--fs-body);
+        font-weight: var(--fw-medium);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text);
+        cursor: pointer;
+    }
+
+    .filter-btn.active {
+        border-color: var(--primary);
+        background: var(--primary-soft);
+        color: var(--primary-text);
+    }
+
+    .filter-count {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        display: grid;
+        place-items: center;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 4px;
+        border-radius: 9px;
+        background: var(--primary);
+        color: #fff;
+        font-size: var(--fs-micro);
+        font-weight: var(--fw-semibold);
+    }
+
+    .active-chip {
+        display: inline-flex;
+        flex: 0 1 auto;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+        height: 44px;
+        padding: 0 12px;
+        border: 1px solid var(--primary);
+        border-radius: 999px;
+        background: var(--primary-soft);
+        color: var(--primary-text);
+        font: inherit;
+        font-size: var(--fs-small);
+        font-weight: var(--fw-medium);
+        cursor: pointer;
+    }
+
+    .active-chip span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* la fenêtre des filtres monte du bas, comme sur la page Mouvements du stock */
+    .filters {
+        display: none;
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 41;
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 16px;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+        border-radius: 16px 16px 0 0;
+        background: var(--surface);
+        box-shadow: var(--shadow-dialog);
+    }
+
+    .filters.open {
+        display: flex;
+    }
+
+    .sheet-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: var(--overlay);
+    }
+
+    .sheet-only {
+        display: block;
+    }
+
+    .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sheet-head h2 {
+        margin: 0;
+        font-size: var(--fs-heading);
+    }
+
+    .sheet-close {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        margin-right: -10px;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .field-label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: var(--fs-small);
+        font-weight: var(--fw-medium);
+    }
+
+    .sheet-foot {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 8px;
+    }
+
     .stats {
         gap: 8px;
     }
@@ -165,7 +326,7 @@ app-cash-movement-list {
     }
 
     .stat-value {
-        font-size: 18px;
+        font-size: var(--fs-heading);
     }
 
     .btn-sm {

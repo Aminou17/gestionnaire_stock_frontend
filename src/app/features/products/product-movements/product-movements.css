@@ -19,7 +19,7 @@ li {
 .when {
     flex: 1;
     min-width: 0;
-    font-size: 13px;
+    font-size: var(--fs-small);
 }
 
 .when a {
@@ -78,7 +78,7 @@ li.empty {
 
 .after {
     min-width: 72px;
-    font-size: 13px;
+    font-size: var(--fs-small);
     text-align: right;
     font-variant-numeric: tabular-nums;
 }

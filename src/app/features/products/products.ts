@@ -9,6 +9,7 @@ import {
     inject,
     linkedSignal,
     signal,
+    untracked,
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -97,6 +98,9 @@ export class Products {
     private adjustDialog = viewChild(AdjustDialog);
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
     private sentinel = viewChild<ElementRef<HTMLElement>>("sentinel");
+
+    // le menu Stock > Ajuster le stock demande d'ouvrir la fenêtre dès que la page est affichée
+    private adjustAsked = signal(false);
 
     search = signal("");
     private route = inject(ActivatedRoute);
@@ -238,8 +242,29 @@ export class Products {
         const destroyRef = inject(DestroyRef);
         destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
 
+        // la fenêtre n'existe qu'après le premier affichage, et seulement pour l'admin
+        effect(() => {
+            const dialog = this.adjustDialog();
+            if (!this.adjustAsked() || !dialog) return;
+
+            untracked(() => {
+                this.adjustAsked.set(false);
+                dialog.show();
+                // sans ça, un rechargement rouvrirait la fenêtre
+                this.router.navigate([], {
+                    relativeTo: this.route,
+                    queryParams: { adjust: null },
+                    queryParamsHandling: "merge",
+                    replaceUrl: true,
+                });
+            });
+        });
+
         // Suivre la catégorie et l'état du stock de l'URL
         this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
+            // le menu Stock > Ajuster le stock arrive ici avec ?adjust=1
+            if (params.get("adjust") === "1") this.adjustAsked.set(true);
+
             const categoryId = toId(params.get("categoryId"));
             const supplierId = toId(params.get("supplierId"));
             const stockStatus = toStockStatus(params.get("stockStatus"));

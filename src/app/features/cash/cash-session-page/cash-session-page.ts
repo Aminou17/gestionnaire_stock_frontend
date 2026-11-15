@@ -15,10 +15,12 @@ import { CashMovementList } from "../cash-movement-list/cash-movement-list";
 import { ReopenCashDialog } from "../reopen-cash-dialog/reopen-cash-dialog";
 import { CloseCashDialog } from "../close-cash-dialog/close-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
+import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 @Component({
     selector: "app-cash-session-page",
     imports: [
+        MoneyToggle,
         RouterLink,
         DatePipe,
         PageHeader,

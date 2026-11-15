@@ -21,7 +21,7 @@
 
 .confirm h2 {
     margin: 0;
-    font-size: 18px;
+    font-size: var(--fs-heading);
 }
 
 /* rôle : deux cartes à cocher, avec ce que chaque rôle permet */
@@ -37,8 +37,8 @@
 .roles legend {
     margin-bottom: 6px;
     padding: 0;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
 }
 
 .role {
@@ -71,11 +71,11 @@
 }
 
 .role-text strong {
-    font-size: 14px;
+    font-size: var(--fs-body);
 }
 
 .role-text small {
-    font-size: 13px;
+    font-size: var(--fs-small);
     line-height: 1.4;
 }
 
@@ -146,8 +146,8 @@
     background: none;
     color: var(--primary-text);
     font: inherit;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
