@@ -38,31 +38,31 @@
         <kbd class="label">Ctrl K</kbd>
     </button>
 
-    <nav>
-        @for (section of sections(); track $index) {
-            @if (section.title) {
-                <p class="section-title">{{ section.title }}</p>
+    <div class="scroll">
+        <nav>
+            @for (section of sections(); track $index) {
+                @if (section.title) {
+                    <p class="section-title">{{ section.title }}</p>
+                }
+                @for (item of section.items; track item.label) {
+                    <a
+                        [routerLink]="item.path"
+                        [queryParams]="item.queryParams"
+                        routerLinkActive="active"
+                        [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                        [attr.title]="layout.collapsed() ? item.label : null"
+                        (click)="close()"
+                    >
+                        <app-icon [name]="item.icon" />
+                        <span class="label">{{ item.label }}</span>
+                        @if (item.path === "/alerts" && alerts.count() > 0) {
+                            <span class="count">{{ alerts.count() }}</span>
+                        }
+                    </a>
+                }
             }
-            @for (item of section.items; track item.label) {
-                <a
-                    [routerLink]="item.path"
-                    [queryParams]="item.queryParams"
-                    routerLinkActive="active"
-                    [routerLinkActiveOptions]="{ exact: !!item.exact }"
-                    [attr.title]="layout.collapsed() ? item.label : null"
-                    (click)="close()"
-                >
-                    <app-icon [name]="item.icon" />
-                    <span class="label">{{ item.label }}</span>
-                    @if (item.path === "/alerts" && alerts.count() > 0) {
-                        <span class="count">{{ alerts.count() }}</span>
-                    }
-                </a>
-            }
-        }
-    </nav>
+        </nav>
 
-    <div class="footer">
         <div class="secondary">
             @for (link of footerLinks(); track link.path) {
                 <a
@@ -84,7 +84,9 @@
                 }
             </p>
         </div>
+    </div>
 
+    <div class="footer">
         <button
             type="button"
             class="collapse"

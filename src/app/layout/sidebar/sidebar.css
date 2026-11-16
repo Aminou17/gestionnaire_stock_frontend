@@ -122,17 +122,22 @@
     opacity: 0.7;
 }
 
+/* liens, paramètres et aide défilent ensemble ; seul le profil reste fixe en bas */
+.scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
 nav {
     display: grid;
     gap: 2px;
     align-content: start;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
 }
 
 .section-title {
-    margin: 18px 12px 6px;
+    margin: 14px 12px 4px;
     font-size: var(--fs-micro);
     font-weight: var(--fw-semibold);
     letter-spacing: 0.08em;
@@ -146,7 +151,7 @@ nav .group {
     align-items: center;
     gap: 12px;
     min-width: 0;
-    height: 38px;
+    height: 36px;
     padding: 0 12px;
     border-radius: 8px;
     color: var(--sidebar-text);
@@ -249,12 +254,26 @@ nav a.active {
     display: flex;
     align-items: center;
     gap: 12px;
-    height: 38px;
+    height: 36px;
     padding: 0 12px;
     border-radius: 8px;
     color: var(--sidebar-text);
     font-size: var(--fs-body);
     text-decoration: none;
+}
+
+/* ordinateur : Paramètres reste visible en bas de la liste tant qu'on n'est pas arrivé à sa place */
+@media (min-width: 1024px) {
+    .secondary {
+        display: contents;
+    }
+
+    .secondary > a:first-child {
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        background: var(--sidebar-bg);
+    }
 }
 
 .secondary > a:hover {
@@ -536,6 +555,13 @@ nav a.active {
 
     .close {
         display: inline-flex;
+    }
+
+    .secondary {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--sidebar-hover);
+        border-bottom: 0;
     }
 
     /* le menu réduit n'existe que sur ordinateur */
