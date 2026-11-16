@@ -29,3 +29,14 @@
         flex-wrap: wrap;
     }
 }
+
+.switch {
+    margin: 8px 0 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.switch a {
+    font-weight: var(--fw-semibold);
+}

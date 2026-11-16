@@ -96,20 +96,14 @@ describe("Sidebar", () => {
         expect(adjust.getAttribute("href")).toBe("/products?adjust=1");
     });
 
-    it("should show Settings to everyone and Subscription and help links to the admin", async () => {
+    it("should show Settings to everyone and Subscription to the admin", async () => {
         const admin = await render(true);
         const links = (el: HTMLElement) =>
             [...el.querySelectorAll<HTMLAnchorElement>(".secondary a")].map((a) =>
                 a.getAttribute("href"),
             );
 
-        expect(links(admin)).toEqual([
-            "/settings",
-            "/subscription",
-            "/contact",
-            "/privacy",
-            "/terms",
-        ]);
+        expect(links(admin)).toEqual(["/settings", "/subscription"]);
     });
 
     it("should hide Subscription from the manager", async () => {

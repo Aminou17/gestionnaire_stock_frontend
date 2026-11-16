@@ -28,7 +28,7 @@ form {
 
 @media (min-width: 1024px) {
     .mark {
-        display: grid;
+        display: none;
     }
 }
 
@@ -81,6 +81,7 @@ form {
 }
 
 .float > app-icon {
+    display: none;
     position: absolute;
     left: 16px;
     top: 54px;
@@ -96,11 +97,11 @@ form {
 
 /* champ en creux : fond teinté, filet très léger, anneau bleu au focus */
 .float .input {
-    height: 52px;
-    padding: 0 16px 0 46px;
-    border-radius: 12px;
-    border-color: color-mix(in srgb, var(--border) 60%, transparent);
-    background: var(--surface-hover);
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border-color: var(--border);
+    background: var(--surface);
     font-size: var(--fs-lead);
     transition:
         background 0.15s,

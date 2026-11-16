@@ -78,12 +78,6 @@ export const FOOTER_LINKS: NavItem[] = [
     { label: "Abonnement", path: "/subscription", icon: "card", adminOnly: true },
 ];
 
-export const HELP_LINKS: NavItem[] = [
-    { label: "Contact", path: "/contact", icon: "message" },
-    { label: "Confidentialité", path: "/privacy", icon: "shield" },
-    { label: "Conditions", path: "/terms", icon: "file-text" },
-];
-
 // pages proposées par la recherche, selon le rôle
 export function searchablePages(
     isAdmin: boolean,

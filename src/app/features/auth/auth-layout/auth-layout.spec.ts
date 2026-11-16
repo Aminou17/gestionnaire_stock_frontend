@@ -24,7 +24,7 @@ describe("AuthLayout", () => {
         expect(page.textContent).not.toContain("Awa Bazin");
     });
 
-    it("should show the presentation under the form on small screens", async () => {
+    it("should show the presentation in the page footer on small screens", async () => {
         const page = await render();
         const pitch = page.querySelector(".mobile-pitch")!;
 
@@ -43,12 +43,13 @@ describe("AuthLayout", () => {
         expect(card.compareDocumentPosition(pitch) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
-    it("should link to the legal pages under the form", async () => {
+    it("should link to the legal pages in the page footer", async () => {
         const page = await render();
         const links = Array.from(page.querySelectorAll(".legal-links a")).map((link) =>
             link.getAttribute("href"),
         );
 
-        expect(links).toEqual(["/privacy", "/terms", "/contact"]);
+        // un pied de page sur ordinateur, un autre sous la présentation sur téléphone
+        expect(links).toEqual(["/privacy", "/terms", "/contact", "/privacy", "/terms", "/contact"]);
     });
 });

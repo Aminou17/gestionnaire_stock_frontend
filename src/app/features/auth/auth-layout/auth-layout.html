@@ -38,7 +38,14 @@
             <ng-container *ngTemplateOutlet="figures" />
         </dl>
 
-        <footer>© {{ year }} {{ productName }} · {{ companyName }}</footer>
+        <footer>
+            <span>© {{ year }} {{ productName }} · {{ companyName }}</span>
+            <nav class="legal-links" aria-label="Informations légales">
+                <a routerLink="/privacy">Confidentialité</a>
+                <a routerLink="/terms">Conditions</a>
+                <a routerLink="/contact">Contact</a>
+            </nav>
+        </footer>
     </aside>
 
     <main class="content">
@@ -71,12 +78,6 @@
             <router-outlet />
         </div>
 
-        <nav class="legal-links" aria-label="Informations légales">
-            <a routerLink="/privacy">Confidentialité</a>
-            <a routerLink="/terms">Conditions</a>
-            <a routerLink="/contact">Contact</a>
-        </nav>
-
         <section class="mobile-pitch">
             <div class="mobile-intro" aria-hidden="true">
                 <h2>Ventes, caisse et stock au même endroit.</h2>
@@ -106,7 +107,14 @@
                 <ng-container *ngTemplateOutlet="figures" />
             </dl>
 
-            <footer>© {{ year }} {{ productName }} · {{ companyName }}</footer>
+            <footer>
+                <span>© {{ year }} {{ productName }} · {{ companyName }}</span>
+                <nav class="legal-links" aria-label="Informations légales">
+                    <a routerLink="/privacy">Confidentialité</a>
+                    <a routerLink="/terms">Conditions</a>
+                    <a routerLink="/contact">Contact</a>
+                </nav>
+            </footer>
         </section>
     </main>
 </div>
