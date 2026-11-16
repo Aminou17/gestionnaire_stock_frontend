@@ -64,7 +64,7 @@ describe("Sidebar", () => {
             "Historique du stock",
             "Catégories",
             "Meilleures ventes",
-            "Stock bas",
+            "Stock faible",
         ]);
     });
 
@@ -83,9 +83,9 @@ describe("Sidebar", () => {
             "Inventaire",
             "Catégories",
             "Meilleures ventes",
-            "Réceptions",
+            "Entrées de stock",
             "Fournisseurs",
-            "Stock bas",
+            "Stock faible",
             "Utilisateurs",
             "Historique des actions",
         ]);
