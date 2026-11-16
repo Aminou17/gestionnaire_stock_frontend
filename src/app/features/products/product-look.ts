@@ -11,6 +11,13 @@ export const categoryTone = (category: string) => {
     return sum % 4;
 };
 
+// couleur stable d'un produit : le même nom donne toujours la même teinte (0 à 7)
+export const productTone = (name: string) => {
+    let hash = 0;
+    for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) % 997;
+    return hash % 8;
+};
+
 // marge en pourcentage du prix de vente, null si le prix d'achat est inconnu
 export const marginPercent = (sale: number, purchase: number | undefined) =>
     purchase === undefined || sale <= 0 ? null : Math.round(((sale - purchase) / sale) * 100);

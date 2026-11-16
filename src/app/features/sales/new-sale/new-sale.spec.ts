@@ -159,7 +159,7 @@ describe("NewSale", () => {
 
     const text = () => el.textContent!.replace(/\s/g, " ");
     const results = () => [...el.querySelectorAll<HTMLButtonElement>(".result")];
-    const submitBtn = () => el.querySelector<HTMLButtonElement>(".cart-footer .btn")!;
+    const submitBtn = () => el.querySelector<HTMLButtonElement>(".cart-footer .submit")!;
 
     async function add(index: number) {
         results()[index].click();
@@ -766,25 +766,48 @@ describe("NewSale", () => {
             expect(el.querySelector(".cart")!.classList).not.toContain("open");
         });
 
-        it("should open the payment screen from the bar without encashing", async () => {
+        it("should open the cart from the bar button without encashing", async () => {
             await render();
             await add(0);
 
-            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .btn")!;
-            expect(bar.textContent).toContain("Encaisser");
+            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .bar-btn")!;
+            expect(bar.textContent).toContain("Voir le panier");
+            expect(el.querySelector(".cart-bar")!.textContent).toContain("1 article");
             bar.click();
             await fixture.whenStable();
 
             expect(createSale).not.toHaveBeenCalled();
             expect(el.querySelector(".cart")!.classList).toContain("open");
+            expect(el.querySelector(".cart")!.classList).not.toContain("paying");
+            // pas de fond assombri pendant le panier : le catalogue reste utilisable
+            expect(el.querySelector(".sheet-backdrop")).toBeNull();
+        });
+
+        it("should go to the payment step, then come back to the cart", async () => {
+            await render();
+            await add(0);
+            el.querySelector<HTMLButtonElement>(".bar-btn")!.click();
+            await fixture.whenStable();
+
+            el.querySelector<HTMLButtonElement>(".to-pay")!.click();
+            await fixture.whenStable();
+            expect(el.querySelector(".cart")!.classList).toContain("paying");
+            expect(el.querySelector(".sheet-backdrop")).not.toBeNull();
+            expect(createSale).not.toHaveBeenCalled();
+
+            // le bouton retour du téléphone revient au panier sans le fermer
+            history.back();
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            await fixture.whenStable();
+            expect(el.querySelector(".cart")!.classList).toContain("open");
+            expect(el.querySelector(".cart")!.classList).not.toContain("paying");
         });
 
         it("should still open the cart when the sale is not ready", async () => {
             await render({ cash: null });
             await add(0);
 
-            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .btn")!;
-            expect(bar.textContent).toContain("Encaisser");
+            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .bar-btn")!;
             bar.click();
             await fixture.whenStable();
 

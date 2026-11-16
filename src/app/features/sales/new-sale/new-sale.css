@@ -43,8 +43,35 @@ app-page-header {
     align-items: start;
 }
 
+/* zone des produits : fond légèrement teinté, les carreaux restent blancs */
 .catalog {
     padding: 16px;
+    border-color: color-mix(in srgb, var(--primary) 14%, var(--border));
+    background: color-mix(in srgb, var(--primary) 5%, var(--bg));
+}
+
+/* en-tête de zone (ordinateur) : icône colorée, titre, nombre de produits */
+.zone-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.zone-head h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+}
+
+.head-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: var(--primary);
+    color: var(--on-primary);
 }
 
 @media (min-width: 1024px) {
@@ -246,6 +273,7 @@ kbd {
 
 .tile.in-cart {
     border-color: var(--primary);
+    box-shadow: 0 0 0 1px var(--primary);
     background: var(--primary-soft);
 }
 
@@ -350,6 +378,45 @@ kbd {
     outline-offset: 2px;
 }
 
+/* pastilles d'initiales : huit teintes douces, stables pour un même produit */
+.tone-0 {
+    --hue: 350;
+}
+.tone-1 {
+    --hue: 24;
+}
+.tone-2 {
+    --hue: 42;
+}
+.tone-3 {
+    --hue: 145;
+}
+.tone-4 {
+    --hue: 175;
+}
+.tone-5 {
+    --hue: 205;
+}
+.tone-6 {
+    --hue: 255;
+}
+.tone-7 {
+    --hue: 300;
+}
+
+.thumb,
+.gphoto {
+    background: hsl(var(--hue) 80% 90%);
+    color: hsl(var(--hue) 70% 25%);
+}
+
+:root[data-theme="dark"] .thumb,
+:root[data-theme="dark"] .gphoto {
+    background: hsl(var(--hue) 40% 24%);
+    color: hsl(var(--hue) 85% 85%);
+}
+
+/* avatars des clients */
 .av-0 {
     background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
@@ -412,9 +479,13 @@ kbd {
     font-size: var(--fs-small);
 }
 
+/* stock bas : pastille orange */
 .stock {
-    font-weight: var(--fw-semibold);
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--warning-soft);
     color: var(--warning);
+    font-weight: var(--fw-semibold);
 }
 
 .gstock {
@@ -485,7 +556,11 @@ kbd {
 
 .gtile.in-cart {
     border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.gtile.in-cart .gbody {
+    background: var(--primary-soft);
 }
 
 .gmain {
@@ -636,11 +711,21 @@ kbd {
 
     /* la barre du panier en bas d'écran demande de la place sous la page */
     :host(.has-cart) {
-        padding-bottom: 72px;
+        padding-bottom: 88px;
+    }
+
+    /* panier ouvert : le catalogue défile au-dessus de la feuille (60 % de l'écran) */
+    :host(.sheet-open) {
+        padding-bottom: 60dvh;
     }
 
     .chip {
         min-height: 44px;
+    }
+
+    /* l'en-tête de zone est inutile sur téléphone : le titre de la page suffit */
+    .zone-head {
+        display: none;
     }
 
     .gtile-skeleton {
@@ -649,11 +734,12 @@ kbd {
 }
 
 @media (max-width: 767px) {
-    /* le catalogue se pose sur le fond de la page, comme la liste des produits */
+    /* bande teintée sur toute la largeur, les carreaux blancs s'y détachent */
     .catalog {
-        padding: 0;
-        border: 0;
-        background: transparent;
+        margin-inline: -16px;
+        padding: 12px 16px 16px;
+        border-width: 1px 0;
+        border-radius: 0;
         box-shadow: none;
     }
 

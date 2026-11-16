@@ -5,7 +5,8 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto minmax(96px, 1fr) auto;
-    padding: 16px 16px 0;
+    padding: 0;
+    border-color: color-mix(in srgb, var(--primary) 14%, var(--border));
     overflow: hidden;
 }
 
@@ -14,17 +15,23 @@
     align-content: start;
 }
 
+/* en-tête de zone : bande teintée, icône colorée */
 .cart-header {
     position: relative;
     display: flex;
     align-items: center;
     gap: 8px;
-    padding-bottom: 12px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
 }
 
-/* poignée et croix : seulement sur la feuille du téléphone */
+/* poignée, croix, retour et titre du paiement : seulement sur la feuille du téléphone */
 .grip,
-.sheet-close {
+.sheet-close,
+.step-back,
+.title-pay,
+.cart-only {
     display: none;
 }
 
@@ -34,7 +41,12 @@
 }
 
 .count {
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-text, var(--primary));
     font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
 }
 
 .clear {
@@ -89,7 +101,7 @@
     display: grid;
     align-content: start;
     gap: 16px;
-    padding-bottom: 16px;
+    padding: 16px;
     overflow-y: auto;
     overscroll-behavior: contain;
 }
@@ -104,8 +116,8 @@
 
 .line {
     display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) auto;
-    align-items: start;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
     gap: 8px 12px;
     padding: 12px 0;
     border-top: 1px solid var(--border);
@@ -117,8 +129,8 @@
 }
 
 .line .thumb {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
 }
 
 .line-main {
@@ -157,21 +169,30 @@
     white-space: nowrap;
 }
 
-/* le prix négocié reste replié tant qu'on n'en a pas besoin */
+/* « Modifier le prix » : un vrai bouton, pour le rabais sur la ligne */
 .price-link {
-    min-height: 28px;
-    padding: 0;
-    border: 0;
-    background: none;
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+    border-radius: 10px;
+    background: var(--primary-soft);
     color: var(--primary-text, var(--primary));
     font: inherit;
     font-size: var(--fs-small);
-    font-weight: var(--fw-medium);
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
     cursor: pointer;
 }
 
-.price-link:hover {
-    text-decoration: underline;
+.price-link:hover,
+.price-link.on {
+    border-color: var(--primary);
 }
 
 .price-link:focus-visible {
@@ -180,7 +201,7 @@
 }
 
 .price-edit {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
     display: grid;
     gap: 4px;
     font-size: var(--fs-small);
@@ -191,7 +212,7 @@
 }
 
 .line-actions {
-    grid-column: 2 / -1;
+    grid-column: 1 / -1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -200,6 +221,7 @@
 
 .stepper {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     height: 44px;
     border: 1px solid var(--border);
@@ -208,7 +230,7 @@
 }
 
 .stepper button {
-    width: 44px;
+    width: 40px;
     height: 100%;
     display: grid;
     place-items: center;
@@ -229,7 +251,7 @@
 }
 
 .stepper input {
-    width: 48px;
+    width: 44px;
     height: 100%;
     border: 0;
     border-inline: 1px solid var(--border);
@@ -251,6 +273,7 @@
 .icon-btn {
     width: 44px;
     height: 44px;
+    margin-left: auto;
     flex-shrink: 0;
     display: grid;
     place-items: center;
@@ -259,6 +282,10 @@
     background: transparent;
     color: var(--text-muted);
     cursor: pointer;
+}
+
+.price-link ~ .icon-btn {
+    margin-left: 0;
 }
 
 .icon-btn:hover {
@@ -555,10 +582,9 @@
     display: grid;
     gap: 12px;
     max-height: 70dvh;
-    margin: 0 -16px;
     padding: 16px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
+    border-top: 2px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+    background: color-mix(in srgb, var(--primary) 6%, var(--surface));
     box-shadow: 0 -8px 16px -12px rgba(15, 23, 42, 0.18);
     overflow-y: auto;
 }
@@ -588,12 +614,14 @@
 }
 
 .total span {
-    font-size: var(--fs-body);
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
     color: var(--text-muted);
 }
 
 .total strong {
-    font-size: var(--fs-figure);
+    color: var(--primary-text, var(--primary));
+    font-size: var(--fs-kpi);
     font-weight: var(--fw-bold);
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
@@ -813,27 +841,35 @@
 }
 
 @media (max-width: 1023px) {
-    /* le panier devient une feuille qui monte du bas, ouverte par la barre */
+    /* le panier est une feuille qui monte du bas sur 60 % de l'écran, le catalogue reste visible */
     .cart {
         position: fixed;
         right: 0;
         bottom: 0;
         left: 0;
         z-index: 45;
-        height: calc(100dvh - 32px);
+        height: 60dvh;
         border-radius: 16px 16px 0 0;
         box-shadow: var(--shadow-drawer);
         transform: translateY(100%);
         visibility: hidden;
         transition:
             transform 0.25s ease,
+            height 0.25s ease,
             visibility 0s 0.25s;
     }
 
     .cart.open {
         transform: none;
         visibility: visible;
-        transition: transform 0.25s ease;
+        transition:
+            transform 0.25s ease,
+            height 0.25s ease;
+    }
+
+    /* seconde étape : le paiement prend presque tout l'écran */
+    .cart.paying {
+        height: calc(100dvh - 32px);
     }
 
     .cart.cart-empty {
@@ -841,22 +877,18 @@
     }
 
     .cart-header {
-        padding-top: 16px;
-    }
-
-    .cart-header h2 {
-        margin-right: auto;
+        padding-top: 20px;
     }
 
     .grip {
         position: absolute;
-        top: 0;
+        top: 8px;
         left: 50%;
         display: block;
-        width: 40px;
-        height: 4px;
-        border-radius: 2px;
-        background: var(--border);
+        width: 44px;
+        height: 5px;
+        border-radius: 3px;
+        background: color-mix(in srgb, var(--text-muted) 45%, var(--border));
         transform: translateX(-50%);
     }
 
@@ -878,9 +910,52 @@
         background: var(--surface-hover);
     }
 
-    .sheet-close:focus-visible {
+    .sheet-close:focus-visible,
+    .step-back:focus-visible {
         outline: 2px solid var(--primary);
         outline-offset: 2px;
+    }
+
+    /* étape panier : lignes et bouton « Continuer ». Étape paiement : options, paiement, Encaisser */
+    .cart:not(.paying) .pay-only {
+        display: none;
+    }
+
+    .cart.paying .lines,
+    .cart.paying .cart-only,
+    .cart.paying .head-icon,
+    .cart.paying .title-cart,
+    .cart.paying .count,
+    .cart.paying .clear {
+        display: none;
+    }
+
+    .cart.paying .title-pay {
+        display: block;
+        margin: 0 auto 0 0;
+    }
+
+    .cart.paying .step-back {
+        display: inline-flex;
+        align-items: center;
+        min-height: 44px;
+        margin-left: -8px;
+        padding: 0 8px 0 0;
+        border: 0;
+        background: none;
+        color: var(--primary-text, var(--primary));
+        font: inherit;
+        font-weight: var(--fw-semibold);
+        cursor: pointer;
+    }
+
+    .cart:not(.paying) .cart-only {
+        display: flex;
+    }
+
+    .to-pay {
+        min-height: 52px;
+        font-size: var(--fs-lead);
     }
 
     .cart-footer {
@@ -892,56 +967,84 @@
         inset: 0;
         z-index: 44;
         display: block;
-        background: rgba(15, 23, 42, 0.45);
+        background: rgba(15, 23, 42, 0.35);
     }
 
+    /* barre fixe : résumé du panier et bouton, aux couleurs de l'accent */
     .cart-bar {
         position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
         z-index: 25;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 12px;
-        padding: 12px 16px;
-        background: var(--surface);
-        border-top: 1px solid var(--border);
+        padding: 8px 8px 8px 12px;
+        border-radius: 16px;
+        background: var(--primary);
+        box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--primary) 60%, transparent);
+        color: var(--on-primary);
     }
 
     .bar-info {
-        display: grid;
+        display: flex;
+        align-items: center;
+        gap: 12px;
         min-width: 0;
+        min-height: 44px;
         padding: 0;
         border: 0;
         background: none;
-        color: var(--text);
+        color: inherit;
         font: inherit;
         text-align: left;
         cursor: pointer;
     }
 
-    .bar-info strong {
+    .bar-icon {
+        display: grid;
+        flex-shrink: 0;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.18);
+    }
+
+    .bar-text {
+        display: grid;
+        min-width: 0;
+    }
+
+    .bar-text small {
+        font-size: var(--fs-caption);
+        opacity: 0.85;
+    }
+
+    .bar-text strong {
         font-size: var(--fs-heading);
         font-variant-numeric: tabular-nums;
     }
 
-    .bar-info small {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: var(--fs-caption);
-        color: var(--text-muted);
-    }
-
-    .bar-info small app-icon {
-        transform: rotate(180deg);
-    }
-
-    .cart-bar .btn {
-        min-height: 44px;
+    .bar-btn {
         flex-shrink: 0;
+        min-height: 44px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 12px;
+        background: #fff;
+        color: var(--primary-text, var(--primary));
+        font: inherit;
+        font-weight: var(--fw-semibold);
+        cursor: pointer;
+    }
+
+    .bar-btn:focus-visible,
+    .bar-info:focus-visible {
+        outline: 2px solid #fff;
+        outline-offset: 2px;
     }
 
     .option {
@@ -950,9 +1053,9 @@
 }
 
 @media (max-width: 767px) {
-    /* sur téléphone la barre se pose au-dessus de la navigation du bas */
+    /* la barre se pose au-dessus de la navigation du bas */
     .cart-bar {
-        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 8px);
     }
 
     .change strong {
