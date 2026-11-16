@@ -47,10 +47,15 @@ export const SECTIONS: NavSection[] = [
     {
         title: "Achats",
         items: [
-            { label: "Réceptions", path: "/stock-entries", icon: "stock-entry", adminOnly: true },
+            {
+                label: "Entrées de stock",
+                path: "/stock-entries",
+                icon: "stock-entry",
+                adminOnly: true,
+            },
             { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
-            // la rotation a sa propre ligne dans Stock : Stock bas ne doit pas s'allumer dessus
-            { label: "Stock bas", path: "/alerts", icon: "alert", exact: true },
+            // la rotation a sa propre ligne dans Stock : Stock faible ne doit pas s'allumer dessus
+            { label: "Stock faible", path: "/alerts", icon: "alert", exact: true },
         ],
     },
     {
