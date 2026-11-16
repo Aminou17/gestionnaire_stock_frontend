@@ -30,7 +30,7 @@ import { ProductService } from "../../../core/stock/product.service";
 import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { CustomerForm } from "../../customers/customer-form/customer-form";
-import { categoryTone, productInitials } from "../../products/product-look";
+import { productInitials, productTone } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
@@ -83,6 +83,7 @@ export const getMinPrice = (product: Product) =>
     // la barre du panier en bas d'écran demande de la place sous la page
     host: {
         "[class.has-cart]": "cart().length > 0",
+        "[class.sheet-open]": "cartOpen() && !payStep()",
         "(document:click)": "onDocumentClick($event)",
         "(document:keydown)": "onKeydown($event)",
         "(window:popstate)": "onPopState()",
@@ -102,7 +103,7 @@ export class NewSale {
     protected back = getBackLink("/sales", "Ventes");
     protected initials = productInitials;
     protected resize = resizeAvatar;
-    protected tone = categoryTone;
+    protected tone = productTone;
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
     search = signal("");
@@ -120,6 +121,8 @@ export class NewSale {
     view = signal<"list" | "grid">(readView());
     // téléphone : le panier est une feuille qui monte du bas
     cartOpen = signal(false);
+    // téléphone : seconde étape de la feuille, le paiement
+    payStep = signal(false);
     // produits dont le champ de prix négocié est déplié
     priceOpenIds = signal<ReadonlySet<number>>(new Set());
 
@@ -776,18 +779,42 @@ export class NewSale {
         this.cartOpen.set(true);
     }
 
+    // le paiement prend une seconde entrée : retour revient au panier
+    goToPayment() {
+        if (this.payStep()) return;
+
+        history.pushState({ cartSheet: true, pay: true }, "");
+        this.payStep.set(true);
+    }
+
+    backToCart() {
+        if (!this.payStep()) return;
+
+        if (history.state?.pay) history.back();
+        else this.payStep.set(false);
+    }
+
     closeCart() {
         if (!this.cartOpen()) return;
 
-        if (history.state?.cartSheet) history.back();
-        else this.cartOpen.set(false);
+        // on remonte les entrées ajoutées : une pour le panier, une de plus pour le paiement
+        const steps = history.state?.pay ? 2 : 1;
+        if (history.state?.cartSheet) history.go(-steps);
+        else this.onPopState();
     }
 
     onPopState() {
+        // retour depuis le paiement : on reste sur le panier
+        if (this.payStep() && history.state?.cartSheet && !history.state.pay) {
+            this.payStep.set(false);
+            return;
+        }
+
         this.cartOpen.set(false);
+        this.payStep.set(false);
     }
 
-    // glisser l'en-tête vers le bas ferme la feuille
+    // glisser l'en-tête vers le bas : revient au panier depuis le paiement, sinon ferme la feuille
     private swipeFrom = 0;
 
     swipeStart(event: TouchEvent) {
@@ -795,7 +822,10 @@ export class NewSale {
     }
 
     swipeEnd(event: TouchEvent) {
-        if (event.changedTouches[0].clientY - this.swipeFrom > 60) this.closeCart();
+        if (event.changedTouches[0].clientY - this.swipeFrom <= 60) return;
+
+        if (this.payStep()) this.backToCart();
+        else this.closeCart();
     }
 
     focusSearch() {
@@ -809,7 +839,8 @@ export class NewSale {
         const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
 
         if (event.key === "Escape") {
-            this.closeCart();
+            if (this.payStep()) this.backToCart();
+            else this.closeCart();
             return;
         }
 

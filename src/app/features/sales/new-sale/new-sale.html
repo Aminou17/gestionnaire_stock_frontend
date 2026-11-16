@@ -28,6 +28,12 @@
 
 <div class="layout">
     <section class="card catalog">
+        <div class="zone-head">
+            <span class="head-icon"><app-icon name="package" [size]="18" /></span>
+            <h2>Produits</h2>
+            <span class="muted">{{ resultsTotal() }}</span>
+        </div>
+
         <div class="toolbar">
             <label class="search">
                 <app-icon name="search" [size]="18" />
@@ -169,7 +175,7 @@
                                 [attr.aria-label]="'Ajouter ' + product.name"
                                 (click)="tapTile(product)"
                             >
-                                <span class="gphoto av-{{ tone(product.category_name) }}">
+                                <span class="gphoto tone-{{ tone(product.name) }}">
                                     @if (product.image) {
                                         <img [src]="product.image" alt="" />
                                     } @else {
@@ -257,12 +263,19 @@
         aria-label="Panier"
         [class.cart-empty]="cart().length === 0"
         [class.open]="cartOpen()"
+        [class.paying]="payStep()"
     >
         <div class="cart-header" (touchstart)="swipeStart($event)" (touchend)="swipeEnd($event)">
             <span class="grip" aria-hidden="true"></span>
-            <h2>Panier</h2>
+            <button type="button" class="step-back" (click)="backToCart()">
+                <app-icon name="chevron-left" [size]="20" />
+                Panier
+            </button>
+            <span class="head-icon"><app-icon name="cart" [size]="18" /></span>
+            <h2 class="title-cart">Panier</h2>
+            <h2 class="title-pay">Paiement</h2>
             @if (cart().length > 0) {
-                <span class="muted count"
+                <span class="count"
                     >{{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}</span
                 >
                 <button type="button" class="clear" (click)="clearCart()">Vider</button>
@@ -305,20 +318,6 @@
                                             }
                                         </small>
                                     }
-                                    @if (line.product.pricing_mode === "NEGOTIABLE") {
-                                        <button
-                                            type="button"
-                                            class="price-link"
-                                            [attr.aria-expanded]="isPriceOpen(line)"
-                                            (click)="togglePrice(line)"
-                                        >
-                                            {{
-                                                isPriceOpen(line)
-                                                    ? "Masquer le prix"
-                                                    : "Modifier le prix"
-                                            }}
-                                        </button>
-                                    }
                                 </span>
                             </div>
                             <strong class="line-total">{{
@@ -353,6 +352,23 @@
                                         <app-icon name="plus" [size]="16" />
                                     </button>
                                 </div>
+
+                                @if (line.product.pricing_mode === "NEGOTIABLE") {
+                                    <button
+                                        type="button"
+                                        class="price-link"
+                                        [class.on]="isPriceOpen(line)"
+                                        [attr.aria-expanded]="isPriceOpen(line)"
+                                        (click)="togglePrice(line)"
+                                    >
+                                        <app-icon name="tag" [size]="16" />
+                                        {{
+                                            isPriceOpen(line)
+                                                ? "Masquer le prix"
+                                                : "Modifier le prix"
+                                        }}
+                                    </button>
+                                }
 
                                 <button
                                     type="button"
@@ -391,7 +407,7 @@
                 @if (!optionsOpen()) {
                     <button
                         type="button"
-                        class="more-toggle"
+                        class="more-toggle pay-only"
                         aria-expanded="false"
                         (click)="moreOpen.set(true)"
                     >
@@ -400,7 +416,7 @@
                         <app-icon name="chevron-down" [size]="16" />
                     </button>
                 } @else {
-                    <div class="more" role="group" aria-label="Options de la vente">
+                    <div class="more pay-only" role="group" aria-label="Options de la vente">
                         <div class="section-head">
                             <span class="section-title">Plus d'options</span>
                             @if (canFoldOptions()) {
@@ -725,7 +741,17 @@
                     <strong>{{ total() | fcfa }}</strong>
                 </div>
 
-                <div class="pay" role="group" aria-label="Paiement">
+                <button
+                    type="button"
+                    class="btn btn-primary btn-block to-pay cart-only"
+                    [disabled]="hasInvalidLine()"
+                    (click)="goToPayment()"
+                >
+                    Continuer vers le paiement
+                    <app-icon name="chevron-right" [size]="18" />
+                </button>
+
+                <div class="pay pay-only" role="group" aria-label="Paiement">
                     @if (!split()) {
                         <div class="methods">
                             <button
@@ -810,7 +836,7 @@
                 </div>
 
                 @if (cashClosed()) {
-                    <p class="alert alert-warning closed-note" role="alert">
+                    <p class="alert alert-warning closed-note pay-only" role="alert">
                         <app-icon name="alert" />
                         <span>
                             Caisse
@@ -830,7 +856,7 @@
 
                 <button
                     type="button"
-                    class="btn btn-primary btn-block submit"
+                    class="btn btn-primary btn-block submit pay-only"
                     [class.busy]="saving()"
                     [disabled]="!canSubmit()"
                     (click)="submit()"
@@ -846,27 +872,28 @@
     </section>
 </div>
 
-@if (cartOpen()) {
-    <div class="sheet-backdrop" aria-hidden="true" (click)="closeCart()"></div>
+<!-- le fond ne s'assombrit qu'à l'étape du paiement : pendant le panier, le catalogue reste utilisable -->
+@if (cartOpen() && payStep()) {
+    <div class="sheet-backdrop" aria-hidden="true" (click)="backToCart()"></div>
 }
 
-<!-- téléphone : rappel du panier au-dessus de la barre du bas -->
+<!-- téléphone : barre fixe en bas, le catalogue reste visible derrière -->
 @if (cart().length > 0 && !cartOpen()) {
     <div class="cart-bar">
         <button type="button" class="bar-info" (click)="openCart()">
-            <strong>{{ total() | fcfa }}</strong>
-            <small>
-                {{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}
-                <app-icon name="chevron-down" [size]="14" />
-            </small>
+            <span class="bar-icon"><app-icon name="cart" [size]="20" /></span>
+            <span class="bar-text">
+                <small>{{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}</small>
+                <strong>{{ total() | fcfa }}</strong>
+            </span>
         </button>
-        <button type="button" class="btn btn-primary" (click)="openCart()">Encaisser</button>
+        <button type="button" class="bar-btn" (click)="openCart()">Voir le panier</button>
     </div>
 }
 
 <!-- photo du produit : l'image s'agrandit au clic, les initiales proposent d'ajouter une photo (administrateur) -->
 <ng-template #thumb let-product>
-    <span class="thumb av-{{ tone(product.category_name) }}">
+    <span class="thumb tone-{{ tone(product.name) }}">
         @if (product.image) {
             <button
                 type="button"
