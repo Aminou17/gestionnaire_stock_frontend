@@ -287,28 +287,6 @@ nav a.active {
     font-weight: var(--fw-semibold);
 }
 
-/* aide : trois petits liens discrets sur une ligne */
-.help {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 12px;
-    margin: 4px 0 0;
-    padding: 0 12px;
-}
-
-.help a {
-    padding: 4px 0;
-    color: var(--sidebar-muted);
-    font-size: var(--fs-caption);
-    text-decoration: none;
-}
-
-.help a:hover,
-.help a.active {
-    color: var(--sidebar-text-strong);
-    text-decoration: underline;
-}
-
 .collapse {
     display: flex;
     align-items: center;
@@ -481,7 +459,6 @@ nav a.active {
 
     .collapsed .brand-text,
     .collapsed .label,
-    .collapsed .help,
     .collapsed .group,
     .collapsed .who,
     .collapsed .chevron {

@@ -132,15 +132,6 @@ describe("Register", () => {
         expect(el.querySelector("app-password-strength")?.textContent).toContain("Excellent");
     });
 
-    it("should preview the shop name and its initials while typing", async () => {
-        component.form.patchValue({ shopName: "Chez Fatou" });
-        await fixture.whenStable();
-
-        const card = el.querySelector(".shop-card")!;
-        expect(card.textContent).toContain("Chez Fatou");
-        expect(card.querySelector(".shop-logo")?.textContent).toContain("CF");
-    });
-
     it("should tick the email only when it looks complete", async () => {
         await goToAccountStep();
 

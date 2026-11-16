@@ -52,14 +52,6 @@ export class Register {
         initialValue: "",
     });
     previewName = computed(() => this.shopNameValue().trim());
-    initials = computed(() =>
-        this.previewName()
-            .split(/\s+/)
-            .filter(Boolean)
-            .slice(0, 2)
-            .map((word) => word[0].toUpperCase())
-            .join(""),
-    );
 
     // logo facultatif : réduit tout de suite, envoyé avec l'inscription
     logo = signal<string | null>(null);

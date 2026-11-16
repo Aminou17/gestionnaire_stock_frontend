@@ -9,33 +9,11 @@
     }
 </div>
 
-<ol class="stepper" aria-label="Progression de l'inscription">
-    <li class="step" [class.current]="step() === 1" [class.done]="step() > 1">
-        <span class="step-dot">
-            @if (step() > 1) {
-                <app-icon name="check" [size]="16" />
-            } @else {
-                <app-icon name="store" [size]="16" />
-            }
-        </span>
-        <span class="step-text">
-            <small>Étape 1</small>
-            <strong>Boutique</strong>
-        </span>
-    </li>
-
-    <li class="step-line" aria-hidden="true">
-        <span [class.on]="step() === 2"></span>
-    </li>
-
-    <li class="step" [class.current]="step() === 2">
-        <span class="step-dot"><app-icon name="user" [size]="16" /></span>
-        <span class="step-text">
-            <small>Étape 2</small>
-            <strong>Compte</strong>
-        </span>
-    </li>
-</ol>
+<div class="progress" role="img" [attr.aria-label]="'Étape ' + step() + ' sur 2'">
+    <span class="bar on"></span>
+    <span class="bar" [class.on]="step() === 2"></span>
+    <small>Étape {{ step() }} sur 2</small>
+</div>
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     @if (error()) {
@@ -44,30 +22,6 @@
 
     @if (step() === 1) {
         <div class="panel" [class.from-left]="direction() === 'back'">
-            <div class="shop-card" aria-hidden="true">
-                <div class="shop-head">
-                    <span class="shop-logo">
-                        @if (logo(); as logoUrl) {
-                            <img [src]="logoUrl" alt="" />
-                        } @else if (initials()) {
-                            {{ initials() }}
-                        } @else {
-                            <app-icon name="store" [size]="22" />
-                        }
-                    </span>
-                    <span class="shop-info">
-                        <strong [class.placeholder]="!previewName()">
-                            {{ previewName() || "Nom de votre boutique" }}
-                        </strong>
-                        <small>Aperçu sur vos tickets</small>
-                    </span>
-                </div>
-                <div class="shop-ticket">
-                    <span>Ticket n° 0001</span>
-                    <span>1 500 F</span>
-                </div>
-            </div>
-
             <div class="group">
                 <div class="float">
                     <app-icon name="store" [size]="18" />
@@ -282,11 +236,6 @@
         </button>
     }
 </form>
-
-<ul class="assurance">
-    <li><app-icon name="check" [size]="14" /> 30 jours gratuits</li>
-    <li><app-icon name="check" [size]="14" /> Sans carte bancaire</li>
-</ul>
 
 <p class="switch">Déjà un compte ? <a routerLink="/login">Se connecter</a></p>
 
