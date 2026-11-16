@@ -12,6 +12,12 @@ describe("contact", () => {
         expect(decodeURIComponent(link.split("text=")[1])).toBe(CONTACT.whatsappMessage);
     });
 
+    it("accepte un message personnalisé", () => {
+        const link = whatsappLink("Bonjour, boutique Chez Fatou");
+
+        expect(decodeURIComponent(link.split("text=")[1])).toBe("Bonjour, boutique Chez Fatou");
+    });
+
     it("garde uniquement des chiffres pour wa.me", () => {
         expect(CONTACT.whatsappDigits).toMatch(/^\d+$/);
     });

@@ -53,8 +53,8 @@ export class Shops {
             (shop) =>
                 (this.view() === "all" || shop.status === this.view()) &&
                 (!term ||
-                    [shop.name, shop.admin_name, shop.admin_email].some((value) =>
-                        value?.toLowerCase().includes(term),
+                    [shop.name, shop.admin_name, shop.admin_email, shop.phone, shop.city, shop.country].some(
+                        (value) => value?.toLowerCase().includes(term),
                     )),
         );
     });
@@ -69,6 +69,14 @@ export class Shops {
     pending = signal<OwnedShop | null>(null);
     updating = signal<number | null>(null);
     actionError = signal<string | null>(null);
+
+    phoneDigits(phone: string) {
+        return `+${phone.replace(/\D/g, "")}`;
+    }
+
+    place(shop: OwnedShop) {
+        return [shop.city, shop.country].filter(Boolean).join(", ");
+    }
 
     trialState(shop: OwnedShop) {
         return trialStateOf(shop.trial_ends_at);

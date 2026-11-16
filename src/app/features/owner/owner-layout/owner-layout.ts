@@ -1,8 +1,9 @@
-import { Component, inject } from "@angular/core";
+import { Component, DestroyRef, inject } from "@angular/core";
 import { RouterLink, RouterOutlet } from "@angular/router";
 
 import { PRODUCT_NAME } from "../../../core/brand";
 import { AuthService } from "../../../core/auth/auth.service";
+import { SupportService } from "../../../core/support/support.service";
 import { ThemeService } from "../../../core/theme/theme.service";
 import { Icon } from "../../../shared/icon/icon";
 import { LogoutDialog } from "../../../shared/logout-dialog/logout-dialog";
@@ -18,5 +19,15 @@ import { LogoutDialog } from "../../../shared/logout-dialog/logout-dialog";
 export class OwnerLayout {
     protected auth = inject(AuthService);
     protected theme = inject(ThemeService);
+    protected support = inject(SupportService);
     protected productName = PRODUCT_NAME;
+
+    constructor() {
+        // les nouveaux messages des boutiques apparaissent sans recharger la page
+        const refresh = () => this.support.refreshUnread("owner");
+        refresh();
+
+        const timer = setInterval(refresh, 60_000);
+        inject(DestroyRef).onDestroy(() => clearInterval(timer));
+    }
 }

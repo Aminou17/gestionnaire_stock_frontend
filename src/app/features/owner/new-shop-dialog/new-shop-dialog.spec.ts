@@ -37,7 +37,9 @@ describe("NewShopDialog", () => {
             shopName: " Chez Fatou ",
             firstName: "Fatou",
             lastName: " Diallo ",
-            phone: "06 123 45 67",
+            phone: "+226 70 12 34 56",
+            country: "Burkina Faso",
+            city: "Ouagadougou",
             address: "",
             email: "fatou@exemple.com",
             password: "Provisoire-2026",
@@ -66,7 +68,9 @@ describe("NewShopDialog", () => {
         expect(createShop).toHaveBeenCalledWith({
             shopName: "Chez Fatou",
             adminName: "Fatou Diallo",
-            phone: "06 123 45 67",
+            phone: "+226 70 12 34 56",
+            country: "Burkina Faso",
+            city: "Ouagadougou",
             email: "fatou@exemple.com",
             password: "Provisoire-2026",
         });

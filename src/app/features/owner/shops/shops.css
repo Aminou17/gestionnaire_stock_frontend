@@ -381,3 +381,13 @@ h1 {
 .shop-link:hover strong {
     text-decoration: underline;
 }
+
+.contact-line a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.contact-line a:hover {
+    color: var(--primary-text);
+    text-decoration: underline;
+}

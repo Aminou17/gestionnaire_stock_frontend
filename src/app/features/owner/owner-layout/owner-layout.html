@@ -9,6 +9,20 @@
 
     <div class="tools">
         <span class="who">{{ auth.user()?.name }}</span>
+        <a
+            routerLink="/owner/support"
+            class="icon-btn"
+            [attr.aria-label]="
+                support.unread() > 0
+                    ? 'Messages des boutiques, ' + support.unread() + ' non lus'
+                    : 'Messages des boutiques'
+            "
+        >
+            <app-icon name="message" [size]="18" />
+            @if (support.unread() > 0) {
+                <span class="badge-count">{{ support.unread() }}</span>
+            }
+        </a>
         <a routerLink="/owner/mail" class="icon-btn" aria-label="E-mails d'envoi">
             <app-icon name="mail" [size]="18" />
         </a>

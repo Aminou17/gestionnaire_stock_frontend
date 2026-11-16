@@ -59,7 +59,7 @@
             <input
                 class="input"
                 type="search"
-                placeholder="Boutique, administrateur ou email…"
+                placeholder="Boutique, administrateur, email, téléphone ou ville…"
                 aria-label="Rechercher une boutique"
                 [value]="search()"
                 (input)="search.set($any($event.target).value)"
@@ -119,6 +119,26 @@
                         } @else {
                             <small class="muted">Aucun administrateur actif</small>
                         }
+                        @if (shop.phone || shop.city || shop.country) {
+                            <small class="muted contact-line">
+                                @if (shop.phone) {
+                                    <a [href]="'tel:' + phoneDigits(shop.phone)">{{ shop.phone }}</a>
+                                }
+                                @if (shop.phone && (shop.city || shop.country)) {
+                                    ·
+                                }
+                                {{ place(shop) }}
+                            </small>
+                        }
+                        <small class="muted employees" [title]="shop.employees.join(', ')">
+                            @if (shop.employees_count === 0) {
+                                Aucun employé
+                            } @else {
+                                {{ shop.employees_count }}
+                                employé{{ shop.employees_count > 1 ? "s" : "" }} :
+                                {{ shop.employees.join(", ") }}
+                            }
+                        </small>
                         <!-- sur téléphone, l'activité tient sur une ligne -->
                         @if (trialState(shop); as trial) {
                             <small class="trial" [class.ended]="trial.ended">{{
@@ -127,15 +147,14 @@
                         }
                         <small class="shop-meta muted">
                             {{ shop.sales_last_30_days }}
-                            vente{{ shop.sales_last_30_days > 1 ? "s" : "" }} en 30 j ·
-                            {{ shop.users_count }} compte{{ shop.users_count > 1 ? "s" : "" }}
+                            vente{{ shop.sales_last_30_days > 1 ? "s" : "" }} en 30 j
                         </small>
                     </div>
 
                     <dl class="shop-stats">
                         <div>
-                            <dt>Comptes</dt>
-                            <dd>{{ shop.users_count }}</dd>
+                            <dt>Employés</dt>
+                            <dd>{{ shop.employees_count }}</dd>
                         </div>
                         <div>
                             <dt>Ventes 30 j</dt>

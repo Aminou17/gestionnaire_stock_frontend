@@ -14,7 +14,12 @@ const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
     trial_ends_at: null,
     admin_name: "Awa",
     admin_email: "awa@exemple.com",
-    users_count: 8,
+    phone: "+226 70 12 34 56",
+    country: "Burkina Faso",
+    city: "Bobo-Dioulasso",
+    users_count: 3,
+    employees_count: 2,
+    employees: ["Moussa Traoré", "Salif Ouédraogo"],
     sales_last_30_days: 28,
     last_sale_at: "2026-11-14T09:00:00.000Z",
     ...overrides,
@@ -247,5 +252,21 @@ describe("Shops", () => {
 
         expect(fixture.nativeElement.textContent).toContain("Impossible de charger les boutiques");
         expect(fixture.nativeElement.querySelector(".kpis")?.textContent).toContain("–");
+    });
+
+    it("should show the phone, the place and the employees of each shop", async () => {
+        const fixture = await render([shop()]);
+        const text = fixture.nativeElement.textContent;
+
+        expect(text).toContain("+226 70 12 34 56");
+        expect(text).toContain("Bobo-Dioulasso, Burkina Faso");
+        expect(text).toContain("2 employés");
+        expect(text).toContain("Moussa Traoré, Salif Ouédraogo");
+    });
+
+    it("should say when a shop has no employee", async () => {
+        const fixture = await render([shop({ employees_count: 0, employees: [] })]);
+
+        expect(fixture.nativeElement.textContent).toContain("Aucun employé");
     });
 });

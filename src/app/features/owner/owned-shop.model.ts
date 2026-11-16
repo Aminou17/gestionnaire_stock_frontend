@@ -9,7 +9,13 @@ export interface OwnedShop {
     trial_ends_at: string | null;
     admin_name: string | null;
     admin_email: string | null;
+    phone: string | null;
+    country: string | null;
+    city: string | null;
     users_count: number;
+    // les vendeurs créés par l'administrateur, sans lui
+    employees_count: number;
+    employees: string[];
     sales_last_30_days: number;
     last_sale_at: string | null;
 }
@@ -18,6 +24,8 @@ export interface NewShopInput {
     shopName: string;
     adminName: string;
     phone?: string;
+    country?: string;
+    city?: string;
     address?: string;
     email: string;
     password: string;
@@ -53,6 +61,8 @@ export interface OwnedShopDetail {
     trial_ends_at: string | null;
     phone: string | null;
     address: string | null;
+    country: string | null;
+    city: string | null;
     products_count: number;
     sales_last_30_days: number;
     last_sale_at: string | null;

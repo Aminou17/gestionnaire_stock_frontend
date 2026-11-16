@@ -97,8 +97,15 @@
                         <app-icon name="user" [size]="16" />
                         Mon profil
                     </a>
-                    <a routerLink="/contact" role="menuitem" (click)="close()">
+                    <a routerLink="/support" role="menuitem" (click)="close()">
                         <app-icon name="message" [size]="16" />
+                        Messages au support
+                        @if (support.unread() > 0) {
+                            <span class="count">{{ support.unread() }}</span>
+                        }
+                    </a>
+                    <a routerLink="/contact" role="menuitem" (click)="close()">
+                        <app-icon name="help" [size]="16" />
                         Aide et contact
                     </a>
                     <a routerLink="/settings/password" role="menuitem" (click)="close()">
