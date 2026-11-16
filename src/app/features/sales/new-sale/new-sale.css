@@ -99,8 +99,11 @@ app-page-header {
     pointer-events: none;
 }
 
+/* la recherche est le premier geste : grande et bien visible */
 .search .input {
+    min-height: 48px;
     padding-left: 40px;
+    font-size: var(--fs-body);
 }
 
 /* rappel du raccourci : seulement avec un clavier */
@@ -412,6 +415,11 @@ kbd {
 .stock {
     font-weight: var(--fw-semibold);
     color: var(--warning);
+}
+
+.gstock {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
 }
 
 .result-price {

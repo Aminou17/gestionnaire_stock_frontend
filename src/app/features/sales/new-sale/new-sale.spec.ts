@@ -147,6 +147,16 @@ describe("NewSale", () => {
         await fixture.whenStable();
     }
 
+    // les options avancées sont repliées : on les déplie avant de s'en servir
+    async function openMore() {
+        el.querySelector<HTMLButtonElement>(".more-toggle")?.click();
+        await fixture.whenStable();
+    }
+
+    // les tests d'ajout passent par la liste en lignes
+    beforeEach(() => localStorage.setItem("new-sale-view", "list"));
+    afterAll(() => localStorage.removeItem("new-sale-view"));
+
     const text = () => el.textContent!.replace(/\s/g, " ");
     const results = () => [...el.querySelectorAll<HTMLButtonElement>(".result")];
     const submitBtn = () => el.querySelector<HTMLButtonElement>(".cart-footer .btn")!;
@@ -456,6 +466,7 @@ describe("NewSale", () => {
     it("should require a customer for a deposit", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
         await fixture.whenStable();
         await type("input[placeholder^='Tout payer']", "500");
@@ -467,11 +478,13 @@ describe("NewSale", () => {
     it("should send a deposit with the customer and show the remaining amount", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
         el.querySelector<HTMLButtonElement>(".free-link")!.click();
         await fixture.whenStable();
         await type("input[placeholder='Nom du client']", " Fatou Ndiaye ");
+        await openMore();
         el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
         await fixture.whenStable();
         await type("input[placeholder^='Tout payer']", "500");
@@ -492,6 +505,7 @@ describe("NewSale", () => {
     it("should send the customer id and show what the customer already owes", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
         el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
@@ -512,6 +526,7 @@ describe("NewSale", () => {
     it("should list recent customers as soon as the customer block opens", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
 
@@ -522,6 +537,7 @@ describe("NewSale", () => {
     it("should offer the matching customer when a known phone is typed in free entry", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
         el.querySelector<HTMLButtonElement>(".free-link")!.click();
@@ -540,6 +556,7 @@ describe("NewSale", () => {
 
     async function openPicker() {
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
         el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
@@ -605,6 +622,7 @@ describe("NewSale", () => {
     it("should accept a deposit when a customer card is chosen", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
         await fixture.whenStable();
         el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
@@ -620,6 +638,7 @@ describe("NewSale", () => {
     it("should refuse a deposit above the total", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
         await fixture.whenStable();
         await type("input[placeholder^='Tout payer']", "999999");
@@ -631,8 +650,10 @@ describe("NewSale", () => {
     it("should send a second payment for a mixed payment", async () => {
         await render();
         await add(0);
+        await openMore();
         el.querySelector<HTMLButtonElement>(".add-customer")!.click();
         await fixture.whenStable();
+        await openMore();
         el.querySelector<HTMLButtonElement>(".option-split")!.click();
         await fixture.whenStable();
         await type("input[placeholder='Ex. 5000']", "1000");
@@ -652,6 +673,8 @@ describe("NewSale", () => {
             el.querySelector<HTMLButtonElement>(
                 ".view-toggle button[aria-label='Vue en carreaux']",
             )!;
+        const listButton = () =>
+            el.querySelector<HTMLButtonElement>(".view-toggle button[aria-label='Vue en lignes']")!;
         const tiles = () => [...el.querySelectorAll<HTMLElement>(".gtile")];
 
         beforeEach(() => localStorage.removeItem("new-sale-view"));
@@ -659,25 +682,23 @@ describe("NewSale", () => {
 
         it("should switch to tiles and remember the choice", async () => {
             await render();
-            expect(tiles().length).toBe(0);
-
-            gridButton().click();
-            await fixture.whenStable();
-
             expect(tiles().length).toBe(3);
             expect(el.querySelectorAll(".tile").length).toBe(0);
-            expect(localStorage.getItem("new-sale-view")).toBe("grid");
+
+            listButton().click();
+            await fixture.whenStable();
+
+            expect(tiles().length).toBe(0);
+            expect(localStorage.getItem("new-sale-view")).toBe("list");
 
             fixture.destroy();
             TestBed.resetTestingModule();
             await render();
-            expect(tiles().length).toBe(3);
+            expect(tiles().length).toBe(0);
         });
 
         it("should add one more at each tap and show the quantity, then take one off", async () => {
             await render();
-            gridButton().click();
-            await fixture.whenStable();
 
             const tap = async () => {
                 tiles()[0].querySelector<HTMLButtonElement>(".gmain")!.click();
@@ -745,23 +766,25 @@ describe("NewSale", () => {
             expect(el.querySelector(".cart")!.classList).not.toContain("open");
         });
 
-        it("should encash straight from the bar when the cart is ready", async () => {
+        it("should open the payment screen from the bar without encashing", async () => {
             await render();
             await add(0);
 
             const bar = el.querySelector<HTMLButtonElement>(".cart-bar .btn")!;
             expect(bar.textContent).toContain("Encaisser");
             bar.click();
+            await fixture.whenStable();
 
-            expect(createSale).toHaveBeenCalledTimes(1);
+            expect(createSale).not.toHaveBeenCalled();
+            expect(el.querySelector(".cart")!.classList).toContain("open");
         });
 
-        it("should open the cart instead when the sale is not ready", async () => {
+        it("should still open the cart when the sale is not ready", async () => {
             await render({ cash: null });
             await add(0);
 
             const bar = el.querySelector<HTMLButtonElement>(".cart-bar .btn")!;
-            expect(bar.textContent).toContain("Voir le panier");
+            expect(bar.textContent).toContain("Encaisser");
             bar.click();
             await fixture.whenStable();
 
