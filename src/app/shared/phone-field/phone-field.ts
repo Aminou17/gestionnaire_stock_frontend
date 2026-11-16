@@ -27,13 +27,15 @@ export class PhoneField implements ControlValueAccessor {
     invalid = input(false);
     showCountry = input(true);
     placeholder = input("Numéro");
+    // indicatif proposé tant que rien n'est choisi (inscription : la boutique n'existe pas encore)
+    initialCode = input<string | null>(null);
 
     protected labelId = `phone-field-${nextId++}`;
     protected disabled = signal(false);
 
     // null tant que l'utilisateur n'a pas touché à l'indicatif : on suit celui de la boutique
     private chosenCode = signal<string | null>(null);
-    protected code = computed(() => this.chosenCode() ?? this.shop.defaultCountryCode());
+    protected code = computed(() => this.chosenCode() ?? this.initialCode() ?? this.shop.defaultCountryCode());
     protected national = signal("");
     protected country = computed(() => countryName(this.code()));
 
@@ -101,7 +103,7 @@ export class PhoneField implements ControlValueAccessor {
     }
 
     private emit() {
-        const code = this.code() || this.shop.defaultCountryCode();
+        const code = this.code() || this.initialCode() || this.shop.defaultCountryCode();
         this.onChange(toInternational(code, this.national()));
     }
 }

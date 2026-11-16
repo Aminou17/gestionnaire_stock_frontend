@@ -46,6 +46,80 @@
             </div>
 
             <div class="group">
+                <app-phone-field
+                    formControlName="phone"
+                    label="Téléphone de la boutique"
+                    [initialCode]="defaultCode"
+                    [showCountry]="false"
+                    [invalid]="isInvalid('phone') || phoneStatus() === 'taken'"
+                />
+                @if (phoneStatus() === "taken") {
+                    <small class="field-error" role="alert">
+                        {{ phoneMessage() }}
+                        <a routerLink="/login">Vous avez déjà un compte ?</a>
+                    </small>
+                } @else if (hasError("phone", "required")) {
+                    <small class="field-error" role="alert">
+                        Le numéro de téléphone est obligatoire.
+                    </small>
+                } @else if (isInvalid("phone")) {
+                    <small class="field-error" role="alert">Le numéro n'est pas valide.</small>
+                } @else if (phoneStatus() === "checking") {
+                    <small class="hint">Vérification du numéro…</small>
+                } @else if (phoneStatus() === "free") {
+                    <small class="hint ok">Numéro disponible.</small>
+                } @else {
+                    <small class="hint">Avec l'indicatif du pays. Les clients et nous pourrons vous joindre.</small>
+                }
+            </div>
+
+            <div class="places">
+                <div class="group">
+                    <div class="float no-icon">
+                        <input
+                            id="register-country"
+                            class="input"
+                            type="text"
+                            formControlName="country"
+                            autocomplete="country-name"
+                            list="register-countries"
+                            maxlength="80"
+                            [class.invalid]="isInvalid('country')"
+                            [attr.aria-invalid]="isInvalid('country')"
+                        />
+                        <label for="register-country">Pays</label>
+                        <datalist id="register-countries">
+                            @for (name of countries; track name) {
+                                <option [value]="name"></option>
+                            }
+                        </datalist>
+                    </div>
+                    @if (isInvalid("country")) {
+                        <small class="field-error" role="alert">Obligatoire.</small>
+                    }
+                </div>
+
+                <div class="group">
+                    <div class="float no-icon">
+                        <input
+                            id="register-city"
+                            class="input"
+                            type="text"
+                            formControlName="city"
+                            autocomplete="address-level2"
+                            maxlength="80"
+                            [class.invalid]="isInvalid('city')"
+                            [attr.aria-invalid]="isInvalid('city')"
+                        />
+                        <label for="register-city">Ville</label>
+                    </div>
+                    @if (isInvalid("city")) {
+                        <small class="field-error" role="alert">Obligatoire.</small>
+                    }
+                </div>
+            </div>
+
+            <div class="group">
                 <input
                     #logoInput
                     class="visually-hidden"

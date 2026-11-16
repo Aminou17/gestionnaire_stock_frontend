@@ -1,0 +1,168 @@
+<app-page-header [title]="title()" [subtitle]="subtitle()" [section]="isOwner ? 'Espace propriétaire' : undefined" />
+
+<div class="inbox" [class.has-detail]="threadId() || composing">
+    <section class="card list-pane" aria-label="Conversations">
+        <div class="list-head">
+            <div class="tabs" role="tablist">
+                <button type="button" role="tab" [attr.aria-selected]="filter() === 'open'" [class.on]="filter() === 'open'" (click)="filter.set('open')">
+                    En cours
+                    @if (openCount() > 0) {
+                        <span class="pill">{{ openCount() }}</span>
+                    }
+                </button>
+                <button type="button" role="tab" [attr.aria-selected]="filter() === 'closed'" [class.on]="filter() === 'closed'" (click)="filter.set('closed')">
+                    Terminées
+                </button>
+            </div>
+            @if (!isOwner) {
+                <a class="btn btn-primary btn-sm" [routerLink]="base + '/new'">
+                    <app-icon name="plus" [size]="16" />
+                    Nouveau message
+                </a>
+            }
+        </div>
+
+        @if (threads.isLoading() && !threads.hasValue()) {
+            <div class="loading">
+                @for (i of [1, 2, 3]; track i) {
+                    <div class="skeleton row-skeleton"></div>
+                }
+            </div>
+        } @else if (threads.error() && !threads.hasValue()) {
+            <div class="empty" role="alert">
+                Impossible de charger les conversations.
+                <button type="button" class="btn btn-outline btn-sm" (click)="threads.reload()">Réessayer</button>
+            </div>
+        } @else if (list().length === 0) {
+            <app-empty-state
+                icon="message"
+                [title]="filter() === 'open' ? 'Aucune conversation en cours' : 'Aucune conversation terminée'"
+                [text]="isOwner ? 'Les messages des boutiques arriveront ici.' : 'Une question ? Écrivez-nous, le support répond vite.'"
+            />
+        } @else {
+            <ul class="threads">
+                @for (t of list(); track t.id) {
+                    <li>
+                        <button type="button" class="thread" [class.active]="t.id === threadId()" [class.unread]="isUnread(t)" (click)="open(t)">
+                            <span class="thread-top">
+                                <strong>{{ t.subject }}</strong>
+                                <small class="muted">{{ t.updated_at | date: "d MMM" }}</small>
+                            </span>
+                            @if (isOwner) {
+                                <small class="who">{{ t.shop_name }} · {{ t.user_name }}</small>
+                            }
+                            <small class="preview">{{ t.last_message }}</small>
+                            @if (isUnread(t)) {
+                                <span class="dot" aria-label="Non lu"></span>
+                            }
+                        </button>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="card detail-pane" aria-label="Conversation">
+        @if (composing) {
+            <div class="detail-head">
+                <a class="back" [routerLink]="base" aria-label="Retour aux conversations"><app-icon name="chevron-left" [size]="20" /></a>
+                <div>
+                    <h2>Nouveau message</h2>
+                    <small class="muted">Le support lit vos messages et vous répond ici.</small>
+                </div>
+            </div>
+
+            <form class="compose" (submit)="$event.preventDefault(); createThread()">
+                @if (error()) {
+                    <div class="alert alert-error" role="alert">{{ error() }}</div>
+                }
+                <p class="speed">
+                    <app-icon name="clock" [size]="16" />
+                    Le support répond en général plus vite que sur WhatsApp, et vous gardez tout l'historique ici.
+                </p>
+                <label class="field">
+                    <span>Sujet</span>
+                    <input class="input" name="subject" maxlength="120" placeholder="Ex. : Problème pour ouvrir la caisse" [ngModel]="subject()" (ngModelChange)="subject.set($event)" />
+                </label>
+                <label class="field">
+                    <span>Votre message</span>
+                    <textarea class="input" name="message" rows="7" [attr.maxlength]="maxMessage" placeholder="Expliquez ce qui se passe, nous vous aidons." [ngModel]="newMessage()" (ngModelChange)="newMessage.set($event)" (keydown)="onKeydown($event, 'create')"></textarea>
+                    <small class="muted counter">{{ newMessage().length }} / {{ maxMessage }}</small>
+                </label>
+                <div class="actions">
+                    <a class="btn btn-outline" [routerLink]="base">Annuler</a>
+                    <button type="submit" class="btn btn-primary" [disabled]="sending() || !subject().trim() || !newMessage().trim()">
+                        @if (sending()) {
+                            <span class="spinner"></span>
+                        }
+                        Envoyer
+                    </button>
+                </div>
+            </form>
+        } @else if (threadId()) {
+            @if (thread.hasValue()) {
+                @let t = thread.value();
+                <div class="detail-head">
+                    <a class="back" [routerLink]="base" aria-label="Retour aux conversations"><app-icon name="chevron-left" [size]="20" /></a>
+                    <div class="head-text">
+                        <h2>{{ t.subject }}</h2>
+                        @if (isOwner) {
+                            <small class="muted">{{ t.shop_name }} · {{ t.user_name }} · <a [href]="'mailto:' + t.user_email">{{ t.user_email }}</a></small>
+                        } @else if (t.status === "CLOSED") {
+                            <small class="muted">Conversation terminée. Répondez pour la rouvrir.</small>
+                        }
+                    </div>
+                    @if (isOwner) {
+                        <button type="button" class="btn btn-outline btn-sm" (click)="toggleStatus()">
+                            <app-icon [name]="t.status === 'OPEN' ? 'check' : 'undo'" [size]="16" />
+                            {{ t.status === "OPEN" ? "Terminer" : "Rouvrir" }}
+                        </button>
+                    }
+                </div>
+
+                <div class="messages" #scroller>
+                    @for (m of t.messages; track m.id) {
+                        <div class="bubble-row" [class.mine]="m.sender === side">
+                            <div class="bubble">
+                                @if (m.sender !== side) {
+                                    <small class="from">{{ m.sender === "owner" ? "Support" : t.user_name }}</small>
+                                }
+                                <p>{{ m.body }}</p>
+                                <small class="time">{{ m.created_at | date: "d MMM, HH:mm" }}</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <form class="composer" (submit)="$event.preventDefault(); sendReply()">
+                    @if (error()) {
+                        <div class="alert alert-error" role="alert">{{ error() }}</div>
+                    }
+                    <textarea class="input" name="reply" rows="2" aria-label="Votre réponse" [attr.maxlength]="maxMessage" placeholder="Écrire une réponse…" [ngModel]="reply()" (ngModelChange)="reply.set($event)" (keydown)="onKeydown($event, 'reply')"></textarea>
+                    <button type="submit" class="btn btn-primary" [disabled]="sending() || !reply().trim()">
+                        @if (sending()) {
+                            <span class="spinner"></span>
+                        }
+                        Envoyer
+                    </button>
+                </form>
+            } @else if (thread.error()) {
+                <div class="empty" role="alert">
+                    Conversation introuvable.
+                    <a class="btn btn-outline btn-sm" [routerLink]="base">Retour</a>
+                </div>
+            } @else {
+                <div class="loading">
+                    <div class="skeleton row-skeleton"></div>
+                    <div class="skeleton row-skeleton"></div>
+                </div>
+            }
+        } @else {
+            <app-empty-state
+                icon="message"
+                [title]="isOwner ? 'Choisissez une conversation' : 'Une question ? Écrivez au support'"
+                [text]="isOwner ? 'Elle s\'ouvre ici, avec la boutique concernée.' : 'Nous répondons ici et par e-mail, souvent plus vite que sur WhatsApp.'"
+            />
+        }
+    </section>
+</div>

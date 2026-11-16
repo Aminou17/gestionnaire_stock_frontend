@@ -34,6 +34,9 @@ export interface RegisterData {
     lastName: string;
     email: string;
     password: string;
+    phone: string;
+    country: string;
+    city: string;
     logo?: string;
 }
 
@@ -83,6 +86,14 @@ export class AuthService {
         return this.http
             .post<LoginResponse>(`${API_URL}/auth/register`, data)
             .pipe(tap((res) => this.openSession(res, true)));
+    }
+
+    // le numéro est-il déjà celui d'une autre boutique ?
+    isPhoneAvailable(phone: string) {
+        return this.http.get<{ available: boolean; message?: string }>(
+            `${API_URL}/auth/phone-available`,
+            { params: { phone } },
+        );
     }
 
     forgotPassword(email: string) {

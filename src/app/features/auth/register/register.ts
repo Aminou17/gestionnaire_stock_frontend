@@ -1,19 +1,34 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, computed, inject, signal } from "@angular/core";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
+import {
+    NonNullableFormBuilder,
+    ReactiveFormsModule,
+    ValidatorFn,
+    Validators,
+} from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
+import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
+import { COUNTRY_OPTIONS, countryForCode } from "../../../shared/country-codes";
 import { Icon } from "../../../shared/icon/icon";
+import { PhoneField } from "../../../shared/phone-field/phone-field";
+import { splitPhone } from "../../../shared/phone";
 import { LogoResizerService } from "../../settings/logo-resizer.service";
 import { PasswordStrength } from "../password-strength/password-strength";
 
-type Field = "shopName" | "firstName" | "lastName" | "email" | "password";
+// 8 à 15 chiffres avec l'indicatif, comme l'API
+const phoneLength: ValidatorFn = (control) => {
+    const digits = String(control.value ?? "").replace(/\D/g, "");
+    return !digits || (digits.length >= 8 && digits.length <= 15) ? null : { phone: true };
+};
+
+type Field = "shopName" | "phone" | "country" | "city" | "firstName" | "lastName" | "email" | "password";
 
 @Component({
     selector: "app-register",
-    imports: [ReactiveFormsModule, RouterLink, Icon, PasswordStrength],
+    imports: [ReactiveFormsModule, RouterLink, Icon, PasswordStrength, PhoneField],
     templateUrl: "./register.html",
     styleUrls: ["../auth-form.css", "./register.css"],
 })
@@ -27,6 +42,10 @@ export class Register {
     // mêmes limites que l'API
     form = this.fb.group({
         shopName: ["", [Validators.required, Validators.maxLength(80)]],
+        // +226 70 12 34 56 : au moins 8 chiffres avec l'indicatif
+        phone: ["", [Validators.required, phoneLength]],
+        country: ["", [Validators.required, Validators.maxLength(80)]],
+        city: ["", [Validators.required, Validators.maxLength(80)]],
         firstName: ["", [Validators.required, Validators.maxLength(50)]],
         lastName: ["", [Validators.required, Validators.maxLength(50)]],
         // Validators.email accepte "nom@domaine" : on exige aussi un point dans le domaine
@@ -44,6 +63,14 @@ export class Register {
     error = signal<string | null>(null);
     showPassword = signal(false);
 
+    // indicatif proposé au départ : celui du pays où Boutiki démarre
+    protected defaultCode = "226";
+    protected countries = COUNTRY_OPTIONS;
+
+    // le numéro est vérifié pendant la saisie, comme chez Shopify ou Stripe
+    phoneStatus = signal<"idle" | "checking" | "free" | "taken" | "unknown">("idle");
+    phoneMessage = signal("");
+
     // sens de la transition entre les deux étapes
     direction = signal<"forward" | "back">("forward");
 
@@ -52,6 +79,44 @@ export class Register {
         initialValue: "",
     });
     previewName = computed(() => this.shopNameValue().trim());
+
+    constructor() {
+        const phone = this.form.controls.phone;
+
+        phone.valueChanges
+            .pipe(
+                tap((value) => {
+                    this.phoneStatus.set(phone.valid ? "checking" : "idle");
+                    this.suggestCountry(value);
+                }),
+                debounceTime(500),
+                distinctUntilChanged(),
+                filter(() => phone.valid),
+                switchMap((value) =>
+                    this.auth.isPhoneAvailable(value).pipe(
+                        // un serveur injoignable ne doit pas bloquer l'inscription : l'API revérifie
+                        catchError(() => of(null)),
+                    ),
+                ),
+                takeUntilDestroyed(),
+            )
+            .subscribe((result) => {
+                if (!result) {
+                    this.phoneStatus.set("unknown");
+                    return;
+                }
+                this.phoneStatus.set(result.available ? "free" : "taken");
+                this.phoneMessage.set(result.message ?? "");
+            });
+    }
+
+    // le pays suit l'indicatif tant que la personne ne l'a pas choisi elle-même
+    private suggestCountry(phone: string) {
+        const country = this.form.controls.country;
+        if (country.dirty || !phone) return;
+
+        country.setValue(countryForCode(splitPhone(phone, this.defaultCode).code));
+    }
 
     // logo facultatif : réduit tout de suite, envoyé avec l'inscription
     logo = signal<string | null>(null);
@@ -106,13 +171,17 @@ export class Register {
 
     next() {
         // des espaces seuls passent Validators.required
-        const shopName = this.form.controls.shopName;
-        shopName.setValue(shopName.value.trim());
-
-        if (shopName.invalid) {
-            shopName.markAsTouched();
-            return;
+        for (const field of ["shopName", "country", "city"] as const) {
+            const control = this.form.controls[field];
+            control.setValue(control.value.trim(), { emitEvent: false });
+            control.markAsTouched();
         }
+        this.form.controls.phone.markAsTouched();
+
+        const { shopName, phone, country, city } = this.form.controls;
+        if (shopName.invalid || phone.invalid || country.invalid || city.invalid) return;
+
+        if (this.phoneStatus() === "taken") return;
 
         this.error.set(null);
         this.direction.set("forward");
@@ -150,7 +219,8 @@ export class Register {
         this.loading.set(true);
         this.error.set(null);
 
-        const { shopName, firstName, lastName, email, password } = this.form.getRawValue();
+        const { shopName, phone, country, city, firstName, lastName, email, password } =
+            this.form.getRawValue();
 
         const logo = this.logo();
 
@@ -158,6 +228,9 @@ export class Register {
         this.auth
             .register({
                 shopName,
+                phone,
+                country,
+                city,
                 firstName,
                 lastName,
                 email: email.trim().toLowerCase(),
@@ -175,6 +248,11 @@ export class Register {
                         this.error.set(
                             "Impossible de joindre le serveur. Vérifiez votre connexion.",
                         );
+                    } else if (err.status === 409 && err.error?.message?.includes("numéro")) {
+                        // le numéro a été pris entre-temps : retour à l'étape de la boutique
+                        this.phoneStatus.set("taken");
+                        this.phoneMessage.set(err.error.message);
+                        this.back();
                     } else {
                         this.error.set(err.error?.message ?? "Une erreur est survenue, réessayez.");
                     }

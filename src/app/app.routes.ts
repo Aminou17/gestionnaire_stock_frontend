@@ -283,6 +283,27 @@ export const routes: Routes = [
                     ),
             },
             {
+                path: "support",
+                title: "Assistance",
+                data: { side: "user" },
+                loadComponent: () =>
+                    import("./features/support/support-inbox").then((m) => m.SupportInbox),
+            },
+            {
+                path: "support/new",
+                title: "Nouveau message",
+                data: { side: "user", compose: true },
+                loadComponent: () =>
+                    import("./features/support/support-inbox").then((m) => m.SupportInbox),
+            },
+            {
+                path: "support/:id",
+                title: "Assistance",
+                data: { side: "user" },
+                loadComponent: () =>
+                    import("./features/support/support-inbox").then((m) => m.SupportInbox),
+            },
+            {
                 // le sommaire et les pages personnelles sont ouverts à l'employé, le reste à l'administrateur
                 path: "settings",
                 children: [
@@ -406,6 +427,20 @@ export const routes: Routes = [
                 title: "Boutique",
                 loadComponent: () =>
                     import("./features/owner/shop-page/shop-page").then((m) => m.ShopPage),
+            },
+            {
+                path: "support",
+                title: "Messages des boutiques",
+                data: { side: "owner" },
+                loadComponent: () =>
+                    import("./features/support/support-inbox").then((m) => m.SupportInbox),
+            },
+            {
+                path: "support/:id",
+                title: "Messages des boutiques",
+                data: { side: "owner" },
+                loadComponent: () =>
+                    import("./features/support/support-inbox").then((m) => m.SupportInbox),
             },
             {
                 path: "mail",

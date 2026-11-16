@@ -1,10 +1,11 @@
-import { Component, ElementRef, computed, inject, signal } from "@angular/core";
+import { Component, DestroyRef, ElementRef, computed, inject, signal } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
+import { SupportService } from "../../core/support/support.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { Icon } from "../../shared/icon/icon";
 import { Avatar } from "../../shared/avatar/avatar";
@@ -30,6 +31,16 @@ export class Sidebar {
     protected theme = inject(ThemeService);
     protected alerts = inject(LowStockAlertService);
     protected shop = inject(ShopSettingsService);
+    protected support = inject(SupportService);
+
+    constructor() {
+        // une réponse du support apparaît sans recharger la page
+        const refresh = () => this.support.refreshUnread("user");
+        refresh();
+
+        const timer = setInterval(refresh, 60_000);
+        inject(DestroyRef).onDestroy(() => clearInterval(timer));
+    }
 
     // menu à plat : le manager ne voit que les pages auxquelles il a accès
     sections = computed(() => {

@@ -12,7 +12,10 @@ import {
 } from "@angular/core";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 
+import { COUNTRY_OPTIONS, countryForCode } from "../../../shared/country-codes";
 import { Icon } from "../../../shared/icon/icon";
+import { PhoneField } from "../../../shared/phone-field/phone-field";
+import { splitPhone } from "../../../shared/phone";
 import { CreatedShop } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
 import { copyText } from "../../../shared/copy-text";
@@ -22,7 +25,7 @@ const PASSWORD_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
 
 @Component({
     selector: "app-new-shop-dialog",
-    imports: [ReactiveFormsModule, Icon],
+    imports: [ReactiveFormsModule, Icon, PhoneField],
     templateUrl: "./new-shop-dialog.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./new-shop-dialog.css"],
 })
@@ -41,12 +44,16 @@ export class NewShopDialog {
         firstName: ["", [Validators.required, Validators.maxLength(50)]],
         lastName: ["", [Validators.required, Validators.maxLength(50)]],
         phone: ["", [Validators.maxLength(40)]],
+        country: ["", [Validators.maxLength(80)]],
+        city: ["", [Validators.maxLength(80)]],
         address: ["", [Validators.maxLength(500)]],
         email: ["", [Validators.required, Validators.email]],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
         // vide : pas d'essai
         trialDays: [null as number | null, [Validators.min(1), Validators.max(365)]],
     });
+
+    protected countries = COUNTRY_OPTIONS;
 
     saving = signal(false);
     error = signal<string | null>(null);
@@ -66,6 +73,16 @@ export class NewShopDialog {
             "Pensez à changer le mot de passe à la première connexion (Paramètres, Mot de passe).",
         ].join("\n");
     });
+
+    constructor() {
+        // le pays suit l'indicatif tant qu'il n'a pas été saisi à la main
+        this.form.controls.phone.valueChanges.subscribe((phone) => {
+            const country = this.form.controls.country;
+            if (country.dirty || !phone) return;
+
+            country.setValue(countryForCode(splitPhone(phone, "226").code));
+        });
+    }
 
     open() {
         this.form.reset();
@@ -114,7 +131,7 @@ export class NewShopDialog {
             return;
         }
 
-        const { shopName, firstName, lastName, phone, address, email, password, trialDays } =
+        const { shopName, firstName, lastName, phone, country, city, address, email, password, trialDays } =
             this.form.getRawValue();
         this.saving.set(true);
         this.error.set(null);
@@ -124,6 +141,8 @@ export class NewShopDialog {
                 shopName: shopName.trim(),
                 adminName: `${firstName.trim()} ${lastName.trim()}`,
                 ...(phone.trim() ? { phone: phone.trim() } : {}),
+                ...(country.trim() ? { country: country.trim() } : {}),
+                ...(city.trim() ? { city: city.trim() } : {}),
                 ...(address.trim() ? { address: address.trim() } : {}),
                 email: email.trim(),
                 password,

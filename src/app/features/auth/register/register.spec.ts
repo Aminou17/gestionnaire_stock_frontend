@@ -10,11 +10,17 @@ describe("Register", () => {
     let fixture: ComponentFixture<Register>;
     let component: Register;
     let el: HTMLElement;
-    let auth: { register: ReturnType<typeof vi.fn> };
+    let auth: {
+        register: ReturnType<typeof vi.fn>;
+        isPhoneAvailable: ReturnType<typeof vi.fn>;
+    };
     let router: Router;
 
     beforeEach(async () => {
-        auth = { register: vi.fn(() => of({})) };
+        auth = {
+            register: vi.fn(() => of({})),
+            isPhoneAvailable: vi.fn(() => of({ available: true })),
+        };
 
         await TestBed.configureTestingModule({
             imports: [Register],
@@ -35,7 +41,12 @@ describe("Register", () => {
     }
 
     async function goToAccountStep() {
-        component.form.patchValue({ shopName: "Chez Fatou" });
+        component.form.patchValue({
+            shopName: "Chez Fatou",
+            phone: "+226 70 12 34 56",
+            country: "Burkina Faso",
+            city: "Ouagadougou",
+        });
         await submit();
     }
 
@@ -52,6 +63,40 @@ describe("Register", () => {
         expect(component.step()).toBe(1);
         expect(el.textContent).toContain("Nom de la boutique");
         expect(el.querySelector("#register-firstName")).toBeNull();
+    });
+
+    it("should warn while typing when the phone number is already used", async () => {
+        vi.useFakeTimers();
+        auth.isPhoneAvailable.mockReturnValue(
+            of({ available: false, message: "Ce numéro est déjà utilisé par une autre boutique." }),
+        );
+
+        component.form.controls.phone.setValue("+226 70 12 34 56");
+        vi.advanceTimersByTime(600);
+        fixture.detectChanges();
+        vi.useRealTimers();
+
+        expect(component.phoneStatus()).toBe("taken");
+        expect(el.textContent).toContain("déjà utilisé");
+    });
+
+    it("should stay on the shop step while the phone number is taken", async () => {
+        component.form.patchValue({
+            shopName: "Chez Fatou",
+            phone: "+226 70 12 34 56",
+            country: "Burkina Faso",
+            city: "Ouagadougou",
+        });
+        component.phoneStatus.set("taken");
+        await submit();
+
+        expect(component.step()).toBe(1);
+    });
+
+    it("should suggest the country from the phone code", () => {
+        component.form.controls.phone.setValue("+221 77 123 45 67");
+
+        expect(component.form.controls.country.value).toBe("Sénégal");
     });
 
     it("should not leave the shop step without a shop name", async () => {
@@ -95,6 +140,9 @@ describe("Register", () => {
 
         expect(auth.register).toHaveBeenCalledWith({
             shopName: "Chez Fatou",
+            phone: "+226 70 12 34 56",
+            country: "Burkina Faso",
+            city: "Ouagadougou",
             firstName: "Fatou",
             lastName: "Diallo",
             email: "fatou@exemple.com",

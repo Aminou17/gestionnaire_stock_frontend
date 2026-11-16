@@ -56,3 +56,11 @@ export const COUNTRY_NAMES: Record<string, string> = {
 };
 
 export const countryName = (code: string) => COUNTRY_NAMES[code] ?? null;
+
+// noms de pays proposés dans les formulaires, dans l'ordre alphabétique
+export const COUNTRY_OPTIONS = [
+    ...new Set(Object.values(COUNTRY_NAMES).flatMap((name) => name.split(", "))),
+].sort((a, b) => a.localeCompare(b, "fr"));
+
+// pays suggéré par un indicatif ; pour +1 on garde le premier de la liste
+export const countryForCode = (code: string) => COUNTRY_NAMES[code]?.split(", ")[0] ?? "";

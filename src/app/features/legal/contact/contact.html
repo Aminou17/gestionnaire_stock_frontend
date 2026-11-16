@@ -3,29 +3,66 @@
     intro="Une question, un blocage, une idée ? Nous sommes là pour vous aider."
 >
     <div class="ways">
-        <a class="card way" [href]="mailto">
-            <span class="way-icon mail"><app-icon name="mail" [size]="20" /></span>
-            <span class="way-text">
-                <strong>E-mail</strong>
-                <small class="muted">{{ contact.email }}</small>
-            </span>
-            <app-icon name="arrow-up-right" [size]="16" class="way-arrow" />
-        </a>
+        @if (canWriteSupport()) {
+            <a class="card way main" routerLink="/support/new">
+                <span class="way-icon support"><app-icon name="message" [size]="22" /></span>
+                <span class="way-text">
+                    <strong>Écrire au support</strong>
+                    <small class="muted">
+                        Votre message arrive directement chez nous, la réponse s'affiche ici et
+                        vous est envoyée par e-mail.
+                    </small>
+                </span>
+                <app-icon name="chevron-right" [size]="18" class="way-arrow" />
+            </a>
 
-        <a class="card way" [href]="whatsapp" target="_blank" rel="noopener">
-            <span class="way-icon wa"><app-whatsapp-icon [size]="20" /></span>
-            <span class="way-text">
-                <strong>WhatsApp</strong>
-                <small class="muted">{{ contact.whatsappDisplay }}</small>
-            </span>
-            <app-icon name="arrow-up-right" [size]="16" class="way-arrow" />
-        </a>
+            <a class="card way" routerLink="/support">
+                <span class="way-icon mail"><app-icon name="list" [size]="20" /></span>
+                <span class="way-text">
+                    <strong>
+                        Mes conversations
+                        @if (support.unread() > 0) {
+                            <span class="pill">{{ support.unread() }} nouvelle{{ support.unread() > 1 ? "s" : "" }}</span>
+                        }
+                    </strong>
+                    <small class="muted">Retrouvez vos questions et les réponses du support.</small>
+                </span>
+                <app-icon name="chevron-right" [size]="18" class="way-arrow" />
+            </a>
+        } @else {
+            <a class="card way main" [href]="mailto">
+                <span class="way-icon mail"><app-icon name="mail" [size]="22" /></span>
+                <span class="way-text">
+                    <strong>Écrire par e-mail</strong>
+                    <small class="muted">{{ contact.email }}</small>
+                </span>
+                <app-icon name="arrow-up-right" [size]="16" class="way-arrow" />
+            </a>
+
+            <a class="card way" routerLink="/login">
+                <span class="way-icon support"><app-icon name="message" [size]="20" /></span>
+                <span class="way-text">
+                    <strong>Déjà client ?</strong>
+                    <small class="muted">
+                        Connectez-vous pour écrire au support depuis l'application.
+                    </small>
+                </span>
+                <app-icon name="chevron-right" [size]="18" class="way-arrow" />
+            </a>
+        }
     </div>
 
     <p class="hours muted">
         <app-icon name="clock" [size]="14" />
-        Nous répondons en général sous un jour ouvré, souvent plus vite sur WhatsApp. Ces délais
-        sont indicatifs et sans engagement.
+        Le support répond en général plus vite que sur WhatsApp, et vous gardez tout l'historique
+        de vos échanges. Ces délais sont indicatifs et sans engagement.
+    </p>
+
+    <p class="wa-line muted">
+        Besoin d'un échange plus direct ?
+        <a class="wa-button" [href]="whatsapp()" target="_blank" rel="noopener" aria-label="Écrire sur WhatsApp, une nouvelle fenêtre s'ouvre" title="Écrire sur WhatsApp">
+            <app-whatsapp-icon [size]="22" />
+        </a>
     </p>
 
     <section class="faq" aria-labelledby="faq-title">

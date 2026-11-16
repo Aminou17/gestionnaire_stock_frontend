@@ -99,7 +99,7 @@ export const TERMS_SECTIONS: LegalSection[] = [
         id: "contact",
         title: "Contact",
         body: [
-            `Une question sur ces conditions ? Écrivez-nous à ${CONTACT.email} ou sur WhatsApp au ${CONTACT.whatsappDisplay}.`,
+            `Une question sur ces conditions ? Écrivez-nous à ${CONTACT.email} ou depuis la page Contact de l'application.`,
         ],
     },
 ];

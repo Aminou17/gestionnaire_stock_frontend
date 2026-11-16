@@ -15,6 +15,8 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
     trial_ends_at: null,
     phone: "0102030405",
     address: "Rue 12, Abidjan",
+    country: "Côte d'Ivoire",
+    city: "Abidjan",
     products_count: 42,
     sales_last_30_days: 28,
     last_sale_at: "2026-11-14T09:00:00.000Z",

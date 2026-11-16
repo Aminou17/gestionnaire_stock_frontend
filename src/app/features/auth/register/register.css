@@ -9,7 +9,8 @@
     animation-name: slide-back;
 }
 
-.names {
+.names,
+.places {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;

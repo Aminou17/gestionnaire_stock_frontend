@@ -2,14 +2,14 @@
 // (elles pourraient plus tard venir d'un réglage)
 export const CONTACT = {
     email: "aminouyabre01@gmail.com",
-    // format d'affichage
-    whatsappDisplay: "+226 64 72 54 64",
-    // chiffres seuls, sans + ni espaces, pour wa.me
+    // chiffres seuls, sans + ni espaces, pour wa.me ; le numéro lui-même n'est jamais affiché
     whatsappDigits: "22664725464",
-    whatsappMessage: "Bonjour, j'ai une question sur Boutiki",
+    whatsappMessage:
+        "Bonjour, je vous contacte depuis Boutiki. J'aurais besoin d'un renseignement, pourriez-vous m'aider ?",
 };
 
 export const mailtoLink = () => `mailto:${CONTACT.email}`;
 
-export const whatsappLink = () =>
-    `https://wa.me/${CONTACT.whatsappDigits}?text=${encodeURIComponent(CONTACT.whatsappMessage)}`;
+// message : texte déjà écrit dans la conversation, par défaut un message poli et court
+export const whatsappLink = (message = CONTACT.whatsappMessage) =>
+    `https://wa.me/${CONTACT.whatsappDigits}?text=${encodeURIComponent(message)}`;

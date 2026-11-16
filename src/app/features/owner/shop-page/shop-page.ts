@@ -31,6 +31,11 @@ export class ShopPage {
     shop = rxResource({ stream: () => this.owner.getShop(this.id) });
 
     roleLabel = getRoleLabel;
+    place = computed(() => {
+        const detail = this.shop.hasValue() ? this.shop.value() : null;
+        return [detail?.city, detail?.country].filter(Boolean).join(", ");
+    });
+
     trial = computed(() =>
         trialStateOf(this.shop.hasValue() ? this.shop.value().trial_ends_at : null),
     );

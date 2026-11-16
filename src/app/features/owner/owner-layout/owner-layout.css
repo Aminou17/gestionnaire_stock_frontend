@@ -57,6 +57,7 @@
 }
 
 .icon-btn {
+    position: relative;
     width: 40px;
     height: 40px;
     display: grid;
@@ -66,6 +67,22 @@
     background: transparent;
     color: var(--text-muted);
     cursor: pointer;
+}
+
+.badge-count {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--danger-strong);
+    color: var(--notification-text);
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
+    line-height: 18px;
+    text-align: center;
 }
 
 .icon-btn:hover {

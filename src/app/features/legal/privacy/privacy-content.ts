@@ -142,7 +142,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
         id: "contact",
         title: "Contact",
         body: [
-            `Une question sur vos données ? Écrivez à ${CONTACT.email} ou contactez-nous sur WhatsApp au ${CONTACT.whatsappDisplay}. Vous trouverez aussi tous les moyens de nous joindre sur la page Contact.`,
+            `Une question sur vos données ? Écrivez à ${CONTACT.email} ou depuis la page Contact de l'application, où vous trouverez tous les moyens de nous joindre.`,
         ],
     },
 ];

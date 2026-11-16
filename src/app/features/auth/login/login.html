@@ -78,6 +78,11 @@
     </button>
 </form>
 
-<p class="switch">
-    Nouveau sur {{ productName }} ? <a routerLink="/register">Créer ma boutique</a>
-</p>
+<div class="signup">
+    <p>Nouveau sur {{ productName }} ?</p>
+    <a routerLink="/register" class="btn btn-outline btn-block">
+        <app-icon name="store" [size]="18" />
+        Créer ma boutique
+    </a>
+    <small>Essai gratuit, sans carte bancaire.</small>
+</div>

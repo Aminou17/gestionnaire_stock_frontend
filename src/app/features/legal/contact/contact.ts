@@ -1,8 +1,11 @@
-import { Component } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+import { AuthService } from "../../../core/auth/auth.service";
 import { PRODUCT_NAME } from "../../../core/brand";
 import { CONTACT, mailtoLink, whatsappLink } from "../../../core/contact";
+import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
+import { SupportService } from "../../../core/support/support.service";
 import { Icon } from "../../../shared/icon/icon";
 import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { LegalPage } from "../legal-page/legal-page";
@@ -42,11 +45,36 @@ const QUESTIONS: Question[] = [
     styleUrl: "./contact.css",
 })
 export class Contact {
+    private auth = inject(AuthService);
+    private shop = inject(ShopSettingsService);
+    protected support = inject(SupportService);
+
     protected productName = PRODUCT_NAME;
     protected contact = CONTACT;
     protected mailto = mailtoLink();
-    protected whatsapp = whatsappLink();
+
+    // seuls l'administrateur et les employés écrivent au support dans l'application
+    protected canWriteSupport = computed(() => {
+        const user = this.auth.user();
+        return this.auth.isLoggedIn() && (user?.role === "admin" || user?.role === "manager");
+    });
+
+    // message prêt à envoyer, avec la boutique quand la personne est connectée
+    protected whatsapp = computed(() => {
+        const user = this.auth.user();
+        const shopName = this.shop.shopName();
+
+        if (!this.canWriteSupport() || !user) return whatsappLink();
+
+        return whatsappLink(
+            `Bonjour, je suis ${user.name}${shopName ? `, de la boutique ${shopName}` : ""}. J'utilise ${PRODUCT_NAME} et j'aurais besoin d'aide, pourriez-vous me répondre ?`,
+        );
+    });
     protected questions = QUESTIONS;
+    constructor() {
+        if (this.canWriteSupport()) this.support.refreshUnread("user");
+    }
+
     protected openIndex: number | null = null;
 
     protected toggle(index: number) {
