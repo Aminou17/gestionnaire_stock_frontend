@@ -35,7 +35,7 @@
                     #searchInput
                     class="input"
                     type="search"
-                    placeholder="Rechercher…"
+                    placeholder="Rechercher un produit…"
                     aria-label="Rechercher un produit"
                     aria-keyshortcuts="/ Control+K"
                     (input)="onSearch($any($event.target).value)"
@@ -187,6 +187,10 @@
                                         } @else if (product.stock_status !== "OK") {
                                             <small class="stock"
                                                 >Plus que {{ product.theoretical_stock }}</small
+                                            >
+                                        } @else {
+                                            <small class="gstock"
+                                                >Stock : {{ product.theoretical_stock }}</small
                                             >
                                         }
                                     </span>
@@ -384,201 +388,318 @@
                     }
                 </ul>
 
-                <!-- client facultatif -->
-                @if (showCustomer()) {
-                    <div class="section" role="group" aria-label="Client">
-                        <div class="section-head">
-                            <span class="section-title">Client</span>
-                            <button type="button" class="clear" (click)="toggleCustomer()">
-                                Retirer
-                            </button>
-                        </div>
-
-                        @if (customer(); as chosen) {
-                            <div class="picked">
-                                <span class="avatar av-{{ chosen.id % 4 }}" aria-hidden="true">{{
-                                    initials(chosen.name)
-                                }}</span>
-                                <span class="picked-text">
-                                    <strong>{{ chosen.name }}</strong>
-                                    <small class="muted">{{
-                                        chosen.phone ? formatPhone(chosen.phone) : "Sans téléphone"
-                                    }}</small>
-                                </span>
-                                <button
-                                    type="button"
-                                    class="picked-change"
-                                    aria-label="Changer de client"
-                                    (click)="changeCustomer()"
-                                >
-                                    <app-icon name="close" [size]="18" />
-                                </button>
-                            </div>
-                            @if (chosen.due_amount > 0) {
-                                <p class="picked-due" role="status">
-                                    <app-icon name="alert" [size]="16" />
-                                    Doit déjà {{ chosen.due_amount | fcfa }} sur ses achats
-                                </p>
-                            }
-                        } @else if (freeEntry()) {
-                            <div class="customer">
-                                <input
-                                    class="input"
-                                    type="text"
-                                    maxlength="100"
-                                    autocomplete="off"
-                                    placeholder="Nom du client"
-                                    aria-label="Nom du client"
-                                    [value]="customerName()"
-                                    (input)="customerName.set($any($event.target).value)"
-                                />
-                                <app-phone-field
-                                    ariaLabel="Téléphone du client"
-                                    placeholder="Téléphone"
-                                    [showCountry]="false"
-                                    [ngModel]="customerPhone()"
-                                    (ngModelChange)="onPhoneInput($event)"
-                                />
-                            </div>
-                            @if (phoneMatch(); as match) {
-                                <div class="match" role="status">
-                                    <span class="avatar av-{{ match.id % 4 }}" aria-hidden="true">{{
-                                        initials(match.name)
-                                    }}</span>
-                                    <span class="picked-text">
-                                        <strong>C'est {{ match.name }} ?</strong>
-                                        <small class="muted">{{ formatPhone(match.phone!) }}</small>
-                                    </span>
-                                    <button
-                                        type="button"
-                                        class="btn btn-primary btn-sm"
-                                        (click)="chooseCustomer(match)"
-                                    >
-                                        Choisir
-                                    </button>
-                                </div>
-                            }
-                            <button type="button" class="free-link" (click)="backToPicker()">
-                                Choisir une fiche
-                            </button>
-                        } @else {
-                            <div class="picker-zone" (keydown.escape)="closePicker(search)">
-                                <div class="picker">
-                                    <app-icon name="search" [size]="18" />
-                                    <input
-                                        #search
-                                        class="input"
-                                        type="search"
-                                        role="combobox"
-                                        maxlength="100"
-                                        autocomplete="off"
-                                        aria-autocomplete="list"
-                                        aria-controls="customer-list"
-                                        placeholder="Chercher un nom ou un téléphone"
-                                        aria-label="Chercher un client"
-                                        [attr.aria-expanded]="pickerOpen()"
-                                        (focus)="pickerOpen.set(true)"
-                                        (input)="onCustomerSearch($any($event.target).value)"
-                                    />
-                                </div>
-
-                                @if (pickerOpen()) {
-                                    <ul
-                                        id="customer-list"
-                                        class="picker-list"
-                                        role="listbox"
-                                        aria-label="Clients"
-                                    >
-                                        @for (found of customerList(); track found.id) {
-                                            <li role="presentation">
-                                                <button
-                                                    type="button"
-                                                    role="option"
-                                                    class="picker-row"
-                                                    (click)="chooseCustomer(found)"
-                                                >
-                                                    <span
-                                                        class="avatar av-{{ found.id % 4 }}"
-                                                        aria-hidden="true"
-                                                        >{{ initials(found.name) }}</span
-                                                    >
-                                                    <span class="picked-text">
-                                                        <strong>{{ found.name }}</strong>
-                                                        <small class="muted">{{
-                                                            found.phone
-                                                                ? formatPhone(found.phone)
-                                                                : "Sans téléphone"
-                                                        }}</small>
-                                                    </span>
-                                                    @if (found.due_amount > 0) {
-                                                        <span class="badge badge-warning"
-                                                            >Doit
-                                                            {{ found.due_amount | fcfa }}</span
-                                                        >
-                                                    }
-                                                </button>
-                                            </li>
-                                        } @empty {
-                                            @if (customerResults.error()) {
-                                                <li class="picker-empty picker-error" role="alert">
-                                                    <span>Impossible de charger les clients.</span>
-                                                    <button
-                                                        type="button"
-                                                        class="btn btn-outline btn-sm"
-                                                        (click)="customerResults.reload()"
-                                                    >
-                                                        Réessayer
-                                                    </button>
-                                                </li>
-                                            } @else if (customerResults.isLoading()) {
-                                                <li
-                                                    class="picker-empty picker-loading muted"
-                                                    role="status"
-                                                >
-                                                    <span class="spinner"></span>
-                                                    Recherche…
-                                                </li>
-                                            } @else {
-                                                <li class="picker-empty muted">
-                                                    Aucun client trouvé.
-                                                </li>
-                                            }
-                                        }
-                                        <li role="presentation">
-                                            <button
-                                                type="button"
-                                                role="option"
-                                                class="picker-row picker-new"
-                                                (click)="openNewCustomer(customerForm)"
-                                            >
-                                                <span class="avatar av-add" aria-hidden="true">
-                                                    <app-icon name="plus" [size]="18" />
-                                                </span>
-                                                <span class="picked-text">
-                                                    <strong>Nouveau client</strong>
-                                                </span>
-                                            </button>
-                                        </li>
-                                    </ul>
-                                }
-                            </div>
-
-                            <button type="button" class="free-link" (click)="useFreeEntry()">
-                                Saisir sans fiche
-                            </button>
-                        }
-                    </div>
-                } @else {
+                @if (!optionsOpen()) {
                     <button
                         type="button"
-                        class="add-customer"
-                        [attr.aria-pressed]="false"
-                        (click)="toggleCustomer()"
+                        class="more-toggle"
+                        aria-expanded="false"
+                        (click)="moreOpen.set(true)"
                     >
-                        <app-icon name="user" [size]="18" />
-                        <span>Ajouter un client</span>
-                        <small class="muted">Facultatif</small>
+                        <span>Plus d'options</span>
+                        <small class="muted">Client, acompte, paiement mixte</small>
+                        <app-icon name="chevron-down" [size]="16" />
                     </button>
+                } @else {
+                    <div class="more" role="group" aria-label="Options de la vente">
+                        <div class="section-head">
+                            <span class="section-title">Plus d'options</span>
+                            @if (canFoldOptions()) {
+                                <button type="button" class="clear" (click)="moreOpen.set(false)">
+                                    Replier
+                                </button>
+                            }
+                        </div>
+
+                        <!-- client facultatif -->
+                        @if (showCustomer()) {
+                            <div class="section" role="group" aria-label="Client">
+                                <div class="section-head">
+                                    <span class="section-title">Client</span>
+                                    <button type="button" class="clear" (click)="toggleCustomer()">
+                                        Retirer
+                                    </button>
+                                </div>
+
+                                @if (customer(); as chosen) {
+                                    <div class="picked">
+                                        <span
+                                            class="avatar av-{{ chosen.id % 4 }}"
+                                            aria-hidden="true"
+                                            >{{ initials(chosen.name) }}</span
+                                        >
+                                        <span class="picked-text">
+                                            <strong>{{ chosen.name }}</strong>
+                                            <small class="muted">{{
+                                                chosen.phone
+                                                    ? formatPhone(chosen.phone)
+                                                    : "Sans téléphone"
+                                            }}</small>
+                                        </span>
+                                        <button
+                                            type="button"
+                                            class="picked-change"
+                                            aria-label="Changer de client"
+                                            (click)="changeCustomer()"
+                                        >
+                                            <app-icon name="close" [size]="18" />
+                                        </button>
+                                    </div>
+                                    @if (chosen.due_amount > 0) {
+                                        <p class="picked-due" role="status">
+                                            <app-icon name="alert" [size]="16" />
+                                            Doit déjà {{ chosen.due_amount | fcfa }} sur ses achats
+                                        </p>
+                                    }
+                                } @else if (freeEntry()) {
+                                    <div class="customer">
+                                        <input
+                                            class="input"
+                                            type="text"
+                                            maxlength="100"
+                                            autocomplete="off"
+                                            placeholder="Nom du client"
+                                            aria-label="Nom du client"
+                                            [value]="customerName()"
+                                            (input)="customerName.set($any($event.target).value)"
+                                        />
+                                        <app-phone-field
+                                            ariaLabel="Téléphone du client"
+                                            placeholder="Téléphone"
+                                            [showCountry]="false"
+                                            [ngModel]="customerPhone()"
+                                            (ngModelChange)="onPhoneInput($event)"
+                                        />
+                                    </div>
+                                    @if (phoneMatch(); as match) {
+                                        <div class="match" role="status">
+                                            <span
+                                                class="avatar av-{{ match.id % 4 }}"
+                                                aria-hidden="true"
+                                                >{{ initials(match.name) }}</span
+                                            >
+                                            <span class="picked-text">
+                                                <strong>C'est {{ match.name }} ?</strong>
+                                                <small class="muted">{{
+                                                    formatPhone(match.phone!)
+                                                }}</small>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                class="btn btn-primary btn-sm"
+                                                (click)="chooseCustomer(match)"
+                                            >
+                                                Choisir
+                                            </button>
+                                        </div>
+                                    }
+                                    <button
+                                        type="button"
+                                        class="free-link"
+                                        (click)="backToPicker()"
+                                    >
+                                        Choisir une fiche
+                                    </button>
+                                } @else {
+                                    <div class="picker-zone" (keydown.escape)="closePicker(search)">
+                                        <div class="picker">
+                                            <app-icon name="search" [size]="18" />
+                                            <input
+                                                #search
+                                                class="input"
+                                                type="search"
+                                                role="combobox"
+                                                maxlength="100"
+                                                autocomplete="off"
+                                                aria-autocomplete="list"
+                                                aria-controls="customer-list"
+                                                placeholder="Chercher un nom ou un téléphone"
+                                                aria-label="Chercher un client"
+                                                [attr.aria-expanded]="pickerOpen()"
+                                                (focus)="pickerOpen.set(true)"
+                                                (input)="
+                                                    onCustomerSearch($any($event.target).value)
+                                                "
+                                            />
+                                        </div>
+
+                                        @if (pickerOpen()) {
+                                            <ul
+                                                id="customer-list"
+                                                class="picker-list"
+                                                role="listbox"
+                                                aria-label="Clients"
+                                            >
+                                                @for (found of customerList(); track found.id) {
+                                                    <li role="presentation">
+                                                        <button
+                                                            type="button"
+                                                            role="option"
+                                                            class="picker-row"
+                                                            (click)="chooseCustomer(found)"
+                                                        >
+                                                            <span
+                                                                class="avatar av-{{ found.id % 4 }}"
+                                                                aria-hidden="true"
+                                                                >{{ initials(found.name) }}</span
+                                                            >
+                                                            <span class="picked-text">
+                                                                <strong>{{ found.name }}</strong>
+                                                                <small class="muted">{{
+                                                                    found.phone
+                                                                        ? formatPhone(found.phone)
+                                                                        : "Sans téléphone"
+                                                                }}</small>
+                                                            </span>
+                                                            @if (found.due_amount > 0) {
+                                                                <span class="badge badge-warning"
+                                                                    >Doit
+                                                                    {{
+                                                                        found.due_amount | fcfa
+                                                                    }}</span
+                                                                >
+                                                            }
+                                                        </button>
+                                                    </li>
+                                                } @empty {
+                                                    @if (customerResults.error()) {
+                                                        <li
+                                                            class="picker-empty picker-error"
+                                                            role="alert"
+                                                        >
+                                                            <span
+                                                                >Impossible de charger les
+                                                                clients.</span
+                                                            >
+                                                            <button
+                                                                type="button"
+                                                                class="btn btn-outline btn-sm"
+                                                                (click)="customerResults.reload()"
+                                                            >
+                                                                Réessayer
+                                                            </button>
+                                                        </li>
+                                                    } @else if (customerResults.isLoading()) {
+                                                        <li
+                                                            class="picker-empty picker-loading muted"
+                                                            role="status"
+                                                        >
+                                                            <span class="spinner"></span>
+                                                            Recherche…
+                                                        </li>
+                                                    } @else {
+                                                        <li class="picker-empty muted">
+                                                            Aucun client trouvé.
+                                                        </li>
+                                                    }
+                                                }
+                                                <li role="presentation">
+                                                    <button
+                                                        type="button"
+                                                        role="option"
+                                                        class="picker-row picker-new"
+                                                        (click)="openNewCustomer(customerForm)"
+                                                    >
+                                                        <span
+                                                            class="avatar av-add"
+                                                            aria-hidden="true"
+                                                        >
+                                                            <app-icon name="plus" [size]="18" />
+                                                        </span>
+                                                        <span class="picked-text">
+                                                            <strong>Nouveau client</strong>
+                                                        </span>
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        }
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="free-link"
+                                        (click)="useFreeEntry()"
+                                    >
+                                        Saisir sans fiche
+                                    </button>
+                                }
+                            </div>
+                        } @else {
+                            <button
+                                type="button"
+                                class="add-customer"
+                                [attr.aria-pressed]="false"
+                                (click)="toggleCustomer()"
+                            >
+                                <app-icon name="user" [size]="18" />
+                                <span>Ajouter un client</span>
+                                <small class="muted">Facultatif</small>
+                            </button>
+                        }
+
+                        <div class="section" role="group" aria-label="Paiement en plusieurs fois">
+                            <div class="section-head">
+                                <span class="section-title">Paiement</span>
+                                <div
+                                    class="options"
+                                    role="group"
+                                    aria-label="Autres façons de payer"
+                                >
+                                    <button
+                                        type="button"
+                                        class="option option-deposit"
+                                        [class.on]="showDeposit()"
+                                        [attr.aria-pressed]="showDeposit()"
+                                        (click)="toggleDeposit()"
+                                    >
+                                        Acompte
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="option option-split"
+                                        [class.on]="split()"
+                                        [attr.aria-pressed]="split()"
+                                        (click)="toggleSplit()"
+                                    >
+                                        Mixte
+                                    </button>
+                                </div>
+                            </div>
+
+                            @if (showDeposit() || split()) {
+                                <label class="field">
+                                    <span>
+                                        {{
+                                            split()
+                                                ? "Part payée en espèces"
+                                                : "Montant payé maintenant"
+                                        }}
+                                    </span>
+                                    <input
+                                        #depositInput
+                                        class="input"
+                                        type="number"
+                                        inputmode="numeric"
+                                        min="1"
+                                        step="1"
+                                        [placeholder]="
+                                            split() ? 'Ex. 5000' : 'Tout payer : ' + total()
+                                        "
+                                        [value]="deposit() ?? ''"
+                                        [class.invalid]="depositError() !== null"
+                                        (input)="onDepositChange(depositInput)"
+                                    />
+                                </label>
+                                @if (depositError(); as message) {
+                                    <small class="field-error" role="alert">{{ message }}</small>
+                                } @else if (remaining() > 0 && !split()) {
+                                    <div class="remaining">
+                                        <span>Reste à payer</span>
+                                        <strong>{{ remaining() | fcfa }}</strong>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
                 }
             </div>
 
@@ -630,61 +751,8 @@
                         </div>
                     }
 
-                    <div class="pay-row">
-                        <span class="pay-label">{{
-                            paymentMethod() === "CASH" ? "Montant reçu" : "Autre façon de payer"
-                        }}</span>
-                        <div class="options" role="group" aria-label="Autres façons de payer">
-                            <button
-                                type="button"
-                                class="option option-deposit"
-                                [class.on]="showDeposit()"
-                                [attr.aria-pressed]="showDeposit()"
-                                (click)="toggleDeposit()"
-                            >
-                                Acompte
-                            </button>
-                            <button
-                                type="button"
-                                class="option option-split"
-                                [class.on]="split()"
-                                [attr.aria-pressed]="split()"
-                                (click)="toggleSplit()"
-                            >
-                                Mixte
-                            </button>
-                        </div>
-                    </div>
-
-                    @if (showDeposit() || split()) {
-                        <label class="field">
-                            <span>
-                                {{ split() ? "Part payée en espèces" : "Montant payé maintenant" }}
-                            </span>
-                            <input
-                                #depositInput
-                                class="input"
-                                type="number"
-                                inputmode="numeric"
-                                min="1"
-                                step="1"
-                                [placeholder]="split() ? 'Ex. 5000' : 'Tout payer : ' + total()"
-                                [value]="deposit() ?? ''"
-                                [class.invalid]="depositError() !== null"
-                                (input)="onDepositChange(depositInput)"
-                            />
-                        </label>
-                        @if (depositError(); as message) {
-                            <small class="field-error" role="alert">{{ message }}</small>
-                        } @else if (remaining() > 0 && !split()) {
-                            <div class="remaining">
-                                <span>Reste à payer</span>
-                                <strong>{{ remaining() | fcfa }}</strong>
-                            </div>
-                        }
-                    }
-
                     @if (paymentMethod() === "CASH") {
+                        <label class="pay-label" for="received">Montant reçu</label>
                         <input
                             #received
                             id="received"
@@ -792,9 +860,7 @@
                 <app-icon name="chevron-down" [size]="14" />
             </small>
         </button>
-        <button type="button" class="btn btn-primary" (click)="quickPay()">
-            {{ canSubmit() ? "Encaisser" : "Voir le panier" }}
-        </button>
+        <button type="button" class="btn btn-primary" (click)="openCart()">Encaisser</button>
     </div>
 }
 

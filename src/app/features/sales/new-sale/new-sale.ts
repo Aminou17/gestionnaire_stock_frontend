@@ -51,9 +51,9 @@ const VIEW_KEY = "new-sale-view";
 
 const readView = (): "list" | "grid" => {
     try {
-        return localStorage.getItem(VIEW_KEY) === "grid" ? "grid" : "list";
+        return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "grid";
     } catch {
-        return "list";
+        return "grid";
     }
 };
 
@@ -116,7 +116,7 @@ export class NewSale {
     photoBusyId = signal<number | null>(null);
     photoNotice = signal<{ kind: "success" | "error"; text: string } | null>(null);
 
-    // produits en lignes ou en carreaux, choix mémorisé
+    // produits en carreaux par défaut (photo bien visible), choix mémorisé
     view = signal<"list" | "grid">(readView());
     // téléphone : le panier est une feuille qui monte du bas
     cartOpen = signal(false);
@@ -296,6 +296,16 @@ export class NewSale {
 
     // acompte et paiement en deux modes s'excluent : l'un ou l'autre fixe la part payée maintenant
     showDeposit = signal(false);
+
+    // options avancées (client, acompte, mixte) repliées par défaut
+    moreOpen = signal(false);
+    optionsOpen = computed(
+        () => this.moreOpen() || this.showCustomer() || this.showDeposit() || this.split(),
+    );
+    // on ne replie pas un panneau qui contient un choix en cours
+    canFoldOptions = computed(
+        () => this.moreOpen() && !this.showCustomer() && !this.showDeposit() && !this.split(),
+    );
 
     toggleCustomer() {
         if (this.showCustomer()) this.clearCustomer();
@@ -775,12 +785,6 @@ export class NewSale {
 
     onPopState() {
         this.cartOpen.set(false);
-    }
-
-    // barre du bas : encaisse tout de suite si le panier est prêt, sinon ouvre le panier
-    quickPay() {
-        if (this.canSubmit()) this.submit();
-        else this.openCart();
     }
 
     // glisser l'en-tête vers le bas ferme la feuille
