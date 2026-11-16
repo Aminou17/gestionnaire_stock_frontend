@@ -48,7 +48,7 @@ describe("Sidebar", () => {
     it("should show every page to the admin with the alert count", async () => {
         const el = await render(true, 5);
 
-        expect(labels(el)).toContain("Comptes");
+        expect(labels(el)).toContain("Utilisateurs");
         expect(el.querySelector(".count")?.textContent).toBe("5");
     });
 
@@ -56,15 +56,15 @@ describe("Sidebar", () => {
         const el = await render(false);
 
         expect(labels(el)).toEqual([
-            "Tableau de bord",
+            "Accueil",
             "Ventes",
             "Clients",
             "Caisse",
             "Produits",
-            "Mouvements",
+            "Historique du stock",
             "Catégories",
-            "Rotation des produits",
-            "Alertes",
+            "Meilleures ventes",
+            "Stock bas",
         ]);
     });
 
@@ -73,25 +73,25 @@ describe("Sidebar", () => {
 
         expect(el.querySelector("button.group")).toBeNull();
         expect(labels(el)).toEqual([
-            "Tableau de bord",
+            "Accueil",
             "Ventes",
             "Clients",
             "Caisse",
             "Produits",
-            "Mouvements",
-            "Ajuster le stock",
-            "Inventaires",
+            "Historique du stock",
+            "Corriger le stock",
+            "Inventaire",
             "Catégories",
-            "Rotation des produits",
-            "Entrées de stock",
+            "Meilleures ventes",
+            "Réceptions",
             "Fournisseurs",
-            "Alertes",
-            "Comptes",
-            "Journal d'audit",
+            "Stock bas",
+            "Utilisateurs",
+            "Historique des actions",
         ]);
         // l'ajustement du stock passe par la page Produits
         const adjust = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
-            a.textContent?.includes("Ajuster le stock"),
+            a.textContent?.includes("Corriger le stock"),
         )!;
         expect(adjust.getAttribute("href")).toBe("/products?adjust=1");
     });
@@ -155,6 +155,6 @@ describe("Sidebar", () => {
 
         expect(aside.classList).toContain("collapsed");
         expect(localStorage.getItem("sidebarCollapsed")).toBe("true");
-        expect(el.querySelector("nav a")?.getAttribute("title")).toBe("Tableau de bord");
+        expect(el.querySelector("nav a")?.getAttribute("title")).toBe("Accueil");
     });
 });
