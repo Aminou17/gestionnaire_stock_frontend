@@ -110,7 +110,7 @@ describe("Settings", () => {
 
         const text = el.textContent!;
 
-        expect(text).toContain("Chez Awa");
+        expect(text).not.toContain("Chez Awa");
         expect(text).toContain("Seuil : 5");
         expect(text).toContain("Gmail connecté");
         expect(text).toContain("Essai gratuit");

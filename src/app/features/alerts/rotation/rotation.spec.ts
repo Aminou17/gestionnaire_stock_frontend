@@ -129,12 +129,12 @@ describe("Rotation", () => {
         const el = fixture.nativeElement as HTMLElement;
 
         expect(text()).toContain("30 derniers jours");
-        expect(text()).toContain("ne se règle pas");
         expect(el.querySelector(".rules")).toBeNull();
 
         el.querySelector<HTMLButtonElement>(".intro-toggle")!.click();
         fixture.detectChanges();
 
+        expect(text()).toContain("Cette période est fixe");
         expect(el.querySelector(".rules")!.textContent).toContain("60 jours");
     });
 

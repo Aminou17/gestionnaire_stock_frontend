@@ -41,7 +41,7 @@ describe("Subscription", () => {
         const text = el.textContent ?? "";
 
         expect(text).toContain("Essai gratuit");
-        expect(text).toContain("Les abonnements ne sont pas encore disponibles");
+        expect(text).toContain("Gratuit pendant le lancement");
         expect(text).not.toMatch(/\d+\s?(F|FCFA|€)/);
     });
 

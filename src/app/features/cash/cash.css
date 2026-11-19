@@ -244,6 +244,11 @@ app-page-header {
         font-size: var(--fs-kpi);
     }
 
+    /* sur téléphone, « Vendre » est déjà au milieu de la barre du bas */
+    .actions .new-sale {
+        display: none;
+    }
+
     .actions .btn {
         flex: 1;
         padding: 0 8px;

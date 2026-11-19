@@ -55,9 +55,6 @@
                         >
                             <app-icon [name]="item.icon" />
                             <span class="label">{{ item.label }}</span>
-                            @if (groupCount(item) > 0) {
-                                <span class="count">{{ groupCount(item) }}</span>
-                            }
                             <app-icon
                                 class="arrow"
                                 [class.turned]="isOpen(item)"

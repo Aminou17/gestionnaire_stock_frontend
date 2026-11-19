@@ -141,6 +141,12 @@ dd {
     color: var(--warning);
 }
 
+.times {
+    margin-left: 6px;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
 .failed-tag {
     margin-left: 6px;
     padding: 1px 6px;

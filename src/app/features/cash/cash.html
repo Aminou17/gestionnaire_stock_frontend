@@ -72,17 +72,11 @@
         </div>
     }
 
-    @if (closingTime() && closeDate(); as date) {
+    @if (closingTime() && closeDate()) {
         <div class="alert reminder banner" role="status">
             <app-icon name="clock" />
+            <!-- simple rappel : le bouton pour clôturer est sur la carte juste en dessous -->
             <span>Il se fait tard : pensez à clôturer la caisse.</span>
-            <button
-                type="button"
-                class="link-btn"
-                (click)="closeDialog.open(date, cash()?.balance ?? null)"
-            >
-                Clôturer
-            </button>
         </div>
     }
 
@@ -123,7 +117,7 @@
 
                     @if (isOpen()) {
                         <div class="actions">
-                            <a routerLink="/sales/new" class="btn btn-primary">
+                            <a routerLink="/sales/new" class="btn btn-primary new-sale">
                                 <app-icon name="plus" [size]="18" />
                                 Nouvelle vente
                             </a>

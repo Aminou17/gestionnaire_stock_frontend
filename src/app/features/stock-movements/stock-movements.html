@@ -285,13 +285,6 @@
             </div>
         }
 
-        <div class="summary-bar">
-            <p class="summary">
-                <strong>{{ total() | number }}</strong>
-                mouvement{{ total() > 1 ? "s" : "" }}
-            </p>
-        </div>
-
         <div class="table-wrap">
             <table [class.reloading]="movements.isLoading()">
                 <thead>

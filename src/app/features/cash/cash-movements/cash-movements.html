@@ -137,8 +137,6 @@
             </button>
         </div>
     } @else {
-        <p class="count muted">{{ total() }} mouvement{{ total() > 1 ? "s" : "" }}</p>
-
         @if (list().length === 0) {
             <app-cash-movement-list
                 [movements]="[]"

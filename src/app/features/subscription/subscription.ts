@@ -1,7 +1,6 @@
 import { Component } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
-import { PRODUCT_NAME } from "../../core/brand";
 import { whatsappLink } from "../../core/contact";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
@@ -50,7 +49,6 @@ const PAYMENTS: PaymentMethod[] = [
     styleUrl: "./subscription.css",
 })
 export class Subscription {
-    protected productName = PRODUCT_NAME;
     protected plans = PLANS;
     protected payments = PAYMENTS;
     protected whatsapp = whatsappLink();

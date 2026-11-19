@@ -227,6 +227,7 @@ app-page-header {
     }
     .m-previous,
     .m-chart,
+    .m-empty,
     .m-close {
         grid-column: 1 / -1;
     }

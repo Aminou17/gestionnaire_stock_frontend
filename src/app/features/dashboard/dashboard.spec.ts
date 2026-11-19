@@ -352,6 +352,14 @@ describe("Dashboard", () => {
         expect(el.querySelector("app-stock-alerts")).toBeNull();
     });
 
+    it("should show the manager a short empty state when there is no sale this week", async () => {
+        await render({ isAdmin: false, days: [day("2026-11-10", 0, 0), day("2026-11-11", 0, 0)] });
+
+        expect(el.querySelector(".m-empty")).not.toBeNull();
+        expect(el.querySelector(".m-chart")).toBeNull();
+        expect(text()).toContain("Pas encore de vente cette semaine");
+    });
+
     it("should show the manager's blocks in the requested order", async () => {
         await render({ isAdmin: false });
 

@@ -83,7 +83,6 @@ describe("CashSessions", () => {
         );
 
         expect(el.querySelectorAll("tbody tr").length).toBe(2);
-        expect(text()).toContain("2caisses");
         expect(text()).toContain("Ouverte");
         expect(text()).toContain("Clôturée");
         expect(text()).toContain("−500F");

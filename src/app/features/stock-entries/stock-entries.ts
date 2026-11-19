@@ -25,6 +25,7 @@ import { StockEntryService } from "../../core/stock/stock-entry.service";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
 import { BackState } from "../../core/back-link";
@@ -49,6 +50,7 @@ const toId = (value: string | null) => {
         PageHeader,
         PeriodFilter,
         Icon,
+        ActionMenu,
         AdjustDialog,
         PhotoZoom,
         Pagination,
@@ -84,6 +86,11 @@ export class StockEntries implements AfterViewInit {
     protected newId = NEW_ID;
     protected initials = productInitials;
     protected tone = categoryTone;
+
+    // sur téléphone, la correction passe par le menu « … » de la carte
+    protected cardActions: ActionItem[] = [
+        { id: "correct", label: "Corriger la quantité", icon: "edit" },
+    ];
 
     // photo agrandie au centre de la page
     protected zoom = signal<{ src: string; name: string } | null>(null);

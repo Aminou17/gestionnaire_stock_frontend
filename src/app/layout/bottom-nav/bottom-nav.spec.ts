@@ -39,9 +39,9 @@ describe("BottomNav", () => {
         expect(TestBed.inject(LayoutService).sidebarOpen()).toBe(true);
     });
 
-    it("should show the alert count on the Plus button", () => {
+    it("should not repeat the alert count on the Plus button (it is on the bell)", () => {
         const button = el.querySelector("button")!;
         expect(button.textContent).toContain("Plus");
-        expect(button.querySelector(".badge")?.textContent).toContain("3");
+        expect(button.querySelector(".badge")).toBeNull();
     });
 });

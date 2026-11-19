@@ -242,30 +242,46 @@
             }
         }
 
-        <app-stat-card
-            class="m-today"
-            [hero]="true"
-            tone="primary"
-            label="Mes ventes du jour"
-            [money]="true"
-            link="/sales"
-            icon="trending-up"
-            [spark]="weekTrend()"
-            [loading]="dailySales.isLoading()"
-            [error]="!!dailySales.error()"
-            [value]="todaySales()?.netTotal ?? 0 | fcfa"
-            [hint]="salesHint().text"
-            [hintTone]="salesHint().tone"
-        />
+        <!-- aucune vente sur 7 jours : un seul message court au lieu d'un 0 F et d'un graphique vide -->
+        @if (weekEmpty()) {
+            <section class="card m-empty">
+                <app-empty-state
+                    icon="trending-up"
+                    title="Pas encore de vente cette semaine"
+                    text="Vos ventes et leur évolution s'afficheront ici."
+                >
+                    <a routerLink="/sales/new" class="btn btn-primary btn-sm">
+                        <app-icon name="plus" [size]="16" />
+                        Nouvelle vente
+                    </a>
+                </app-empty-state>
+            </section>
+        } @else {
+            <app-stat-card
+                class="m-today"
+                [hero]="true"
+                tone="primary"
+                label="Mes ventes du jour"
+                [money]="true"
+                link="/sales"
+                icon="trending-up"
+                [spark]="weekTrend()"
+                [loading]="dailySales.isLoading()"
+                [error]="!!dailySales.error()"
+                [value]="todaySales()?.netTotal ?? 0 | fcfa"
+                [hint]="salesHint().text"
+                [hintTone]="salesHint().tone"
+            />
 
-        <app-sales-chart
-            class="m-chart"
-            title="Mes ventes sur 7 jours"
-            [days]="lastWeek()"
-            [loading]="dailySales.isLoading()"
-            [error]="!!dailySales.error()"
-            (retry)="dailySales.reload()"
-        />
+            <app-sales-chart
+                class="m-chart"
+                title="Mes ventes sur 7 jours"
+                [days]="lastWeek()"
+                [loading]="dailySales.isLoading()"
+                [error]="!!dailySales.error()"
+                (retry)="dailySales.reload()"
+            />
+        }
 
         <app-recent-sales
             class="m-sales"
