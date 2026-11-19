@@ -18,13 +18,14 @@ import { CategoryService } from "../../core/stock/category.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Icon } from "../../shared/icon/icon";
+import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 
 type View = "active" | "deleted";
 
 @Component({
     selector: "app-categories",
-    imports: [ReactiveFormsModule, PageHeader, Icon, ActionMenu, Pagination],
+    imports: [ReactiveFormsModule, PageHeader, Icon, ActionMenu, Pagination, EmptyState],
     templateUrl: "./categories.html",
     styleUrl: "./categories.css",
 })

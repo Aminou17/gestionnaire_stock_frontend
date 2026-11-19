@@ -16,6 +16,7 @@ import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Icon } from "../../shared/icon/icon";
+import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { formatPhone } from "../../shared/phone";
@@ -26,7 +27,7 @@ type View = "active" | "deleted";
 // Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
 @Component({
     selector: "app-suppliers",
-    imports: [PageHeader, Icon, ActionMenu, SupplierForm, Pagination],
+    imports: [PageHeader, Icon, ActionMenu, SupplierForm, Pagination, EmptyState],
     templateUrl: "./suppliers.html",
     styleUrl: "./suppliers.css",
 })

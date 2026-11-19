@@ -105,7 +105,7 @@ describe("SettingsAlertEmail", () => {
         await fixture.whenStable();
 
         expect(updateSettings).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("Adresse email non valide.");
+        expect(el.textContent).toContain("Adresse e-mail non valide.");
     });
 
     it("affiche l'erreur du serveur à l'enregistrement", async () => {
@@ -134,7 +134,7 @@ describe("SettingsAlertEmail", () => {
         await fixture.whenStable();
 
         expect(sendTest).toHaveBeenCalled();
-        expect(el.textContent).toContain("Email de test envoyé.");
+        expect(el.textContent).toContain("E-mail de test envoyé.");
     });
 
     it("bloque le test tant que les modifications ne sont pas enregistrées", async () => {

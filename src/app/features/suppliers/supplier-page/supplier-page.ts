@@ -17,6 +17,7 @@ import { StockEntryService } from "../../../core/stock/stock-entry.service";
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
 import { SupplierForm } from "../supplier-form/supplier-form";
@@ -27,7 +28,7 @@ const PREVIEW_SIZE = 5;
 
 @Component({
     selector: "app-supplier-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, SupplierForm],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, WhatsappIcon, SupplierForm],
     templateUrl: "./supplier-page.html",
     styleUrl: "./supplier-page.css",
 })

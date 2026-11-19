@@ -136,12 +136,12 @@
         <div class="actions">
             @if (whatsappUrl(); as url) {
                 <a class="btn btn-primary whatsapp" [href]="url" target="_blank" rel="noopener">
-                    <app-icon name="message" [size]="18" />
+                    <app-whatsapp-icon [size]="18" />
                     Envoyer sur WhatsApp
                 </a>
             } @else {
                 <button type="button" class="btn btn-primary whatsapp" disabled>
-                    <app-icon name="message" [size]="18" />
+                    <app-whatsapp-icon [size]="18" />
                     Envoyer sur WhatsApp
                 </button>
                 <p class="hint muted">

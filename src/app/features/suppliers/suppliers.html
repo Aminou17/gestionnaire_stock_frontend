@@ -55,21 +55,24 @@
             </button>
         </div>
     } @else if (list().length === 0) {
-        <div class="empty">
-            @if (search()) {
-                Aucun fournisseur ne correspond à « {{ search() }} ».
+        @if (search()) {
+            <app-empty-state
+                icon="search"
+                title="Aucun fournisseur ne correspond à « {{ search() }} »"
+            >
                 <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
                     Effacer la recherche
                 </button>
-            } @else if (view() === "deleted") {
-                Aucun fournisseur supprimé.
-            } @else {
-                Aucun fournisseur pour le moment.
+            </app-empty-state>
+        } @else if (view() === "deleted") {
+            <app-empty-state icon="trash" title="Aucun fournisseur supprimé" />
+        } @else {
+            <app-empty-state icon="truck" title="Aucun fournisseur pour le moment">
                 <button type="button" class="btn btn-outline btn-sm" (click)="newSupplier()">
                     Nouveau fournisseur
                 </button>
-            }
-        </div>
+            </app-empty-state>
+        }
     } @else {
         <!-- erreur au rechargement : la liste déjà affichée reste visible -->
         @if (suppliers.error()) {

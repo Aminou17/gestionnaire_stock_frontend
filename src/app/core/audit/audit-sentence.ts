@@ -38,7 +38,7 @@ const objectName = (log: AuditLog) => {
     return log.entity_type === "sale" ? name?.replace(/^n° /, "#") : name;
 };
 
-const PAYMENT: Record<string, string> = { CASH: "en espèces", MOBILE_MONEY: "par mobile money" };
+const PAYMENT: Record<string, string> = { CASH: "en espèces", MOBILE_MONEY: "par Mobile Money" };
 
 // les pages de l'API, au singulier et au pluriel
 const RESOURCES: Record<string, [string, string]> = {
@@ -95,7 +95,7 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
         case "AUTH_LOGIN_SUCCEEDED":
             return { verb: "s'est connecté" };
         case "AUTH_LOGIN_FAILED":
-            return { verb: "n'a pas pu se connecter", note: "email ou mot de passe incorrect" };
+            return { verb: "n'a pas pu se connecter", note: "e-mail ou mot de passe incorrect" };
         case "ACCESS_DENIED":
             return {
                 verb: "a essayé de",
@@ -319,7 +319,7 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
 const FIELDS: Record<string, string> = {
     name: "Nom",
     description: "Description",
-    email: "Email",
+    email: "E-mail",
     role: "Rôle",
     contact: "Contact",
     telephone: "Téléphone",

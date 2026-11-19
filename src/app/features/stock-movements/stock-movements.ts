@@ -340,7 +340,7 @@ export class StockMovements {
 
     // la fiche ouverte sait ainsi revenir ici, avec les mêmes filtres
     backState(): BackState {
-        return { backTo: this.router.url, backLabel: "Mouvements" };
+        return { backTo: this.router.url, backLabel: "Historique du stock" };
     }
 
     // une vente ou un inventaire ouvre directement sa page ; les autres mouvements (entrée, ajustement)

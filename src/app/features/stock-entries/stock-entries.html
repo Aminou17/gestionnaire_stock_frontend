@@ -74,16 +74,15 @@
             </button>
         </div>
     } @else if (list().length === 0) {
-        <div class="empty">
-            @if (filtered()) {
-                Aucune entrée pour ces filtres.
-            } @else {
-                Aucune entrée de stock pour le moment.
+        @if (filtered()) {
+            <app-empty-state icon="search" title="Aucune entrée pour ces filtres" />
+        } @else {
+            <app-empty-state icon="stock-entry" title="Aucune entrée de stock pour le moment">
                 <button type="button" class="btn btn-outline btn-sm" (click)="openNew()">
                     Nouvelle entrée
                 </button>
-            }
-        </div>
+            </app-empty-state>
+        }
     } @else {
         @if (entries.error()) {
             <div class="alert alert-error list-error" role="alert">

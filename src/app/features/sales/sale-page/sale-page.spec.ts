@@ -442,8 +442,8 @@ describe("SalePage", () => {
             }),
         });
 
-        expect(el.querySelector(".payment")!.textContent).toContain("Mobile money");
-        expect(el.querySelector(".receipt")!.textContent).toContain("Payé par mobile money");
+        expect(el.querySelector(".payment")!.textContent).toContain("Mobile Money");
+        expect(el.querySelector(".receipt")!.textContent).toContain("Payé par Mobile Money");
         expect(el.querySelector(".confirm")!.textContent).toContain("hors");
     });
 

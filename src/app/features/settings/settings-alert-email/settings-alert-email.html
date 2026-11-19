@@ -1,5 +1,5 @@
 <app-page-header
-    title="Email des alertes"
+    title="E-mail des alertes"
     subtitle="Un résumé du stock envoyé chaque matin"
     section="Paramètres"
     [back]="back.link"
@@ -12,7 +12,7 @@
             ><app-icon name="mail" [size]="18"
         /></span>
         <div>
-            <h2>Résumé quotidien par email</h2>
+            <h2>Résumé quotidien par e-mail</h2>
             <p class="muted">
                 Les produits à réapprovisionner, envoyés depuis votre compte Gmail. Vous décidez de
                 tout : l'activation, l'heure, le destinataire et le compte utilisé.
@@ -34,7 +34,7 @@
             <input type="checkbox" formControlName="enabled" />
             <span class="toggle-text">
                 <strong>Envoyer le résumé chaque jour</strong>
-                <small class="muted">Désactivé, aucun email ne part tout seul.</small>
+                <small class="muted">Désactivé, aucun e-mail ne part tout seul.</small>
             </span>
         </label>
 
@@ -60,7 +60,7 @@
                     [attr.aria-invalid]="invalid('recipient')"
                 />
                 @if (invalid("recipient")) {
-                    <small class="field-error" role="alert">Adresse email non valide.</small>
+                    <small class="field-error" role="alert">Adresse e-mail non valide.</small>
                 }
             </label>
         </div>
@@ -89,7 +89,7 @@
                     [attr.aria-invalid]="invalid('gmailUser')"
                 />
                 @if (invalid("gmailUser")) {
-                    <small class="field-error" role="alert">Adresse email non valide.</small>
+                    <small class="field-error" role="alert">Adresse e-mail non valide.</small>
                 }
             </label>
 

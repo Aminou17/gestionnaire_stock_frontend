@@ -37,7 +37,7 @@ export class PeriodFilter {
     private locale = inject(LOCALE_ID);
 
     changed = output<PeriodRange>();
-    // affichage en pastilles, sans libellé visible (Journal d'audit)
+    // affichage en pastilles, sans libellé visible (Historique des actions)
     chips = input(false);
     // sur téléphone, les filtres s'empilent en pleine largeur (panneau Filtres des Ventes)
     stacked = input(false);

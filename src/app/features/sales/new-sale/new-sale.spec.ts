@@ -658,7 +658,7 @@ describe("NewSale", () => {
         await fixture.whenStable();
         await type("input[placeholder='Ex. 5000']", "1000");
 
-        expect(text()).toContain("Reste en mobile money");
+        expect(text()).toContain("Reste en Mobile Money");
         submitBtn().click();
         const payment = createSale.mock.calls[0][1];
         expect(payment.amountPaid).toBe(1000);

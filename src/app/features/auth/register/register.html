@@ -229,7 +229,7 @@
                         [class.invalid]="isInvalid('email')"
                         [attr.aria-invalid]="isInvalid('email')"
                     />
-                    <label for="register-email">Adresse email</label>
+                    <label for="register-email">Adresse e-mail</label>
                     @if (form.controls.email.valid) {
                         <span class="valid-mark" aria-hidden="true">
                             <app-icon name="check" [size]="12" />
@@ -237,10 +237,10 @@
                     }
                 </div>
                 @if (hasError("email", "required")) {
-                    <small class="field-error" role="alert">L'adresse email est obligatoire.</small>
+                    <small class="field-error" role="alert">L'adresse e-mail est obligatoire.</small>
                 } @else if (hasError("email", "email") || hasError("email", "pattern")) {
                     <small class="field-error" role="alert"
-                        >L'adresse email n'est pas valide.</small
+                        >L'adresse e-mail n'est pas valide.</small
                     >
                 } @else if (form.controls.email.valid) {
                     <small class="hint ok">Adresse valide. Elle servira à vous connecter.</small>

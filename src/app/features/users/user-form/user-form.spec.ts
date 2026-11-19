@@ -76,7 +76,7 @@ describe("UserForm", () => {
 
         expect(createUser).not.toHaveBeenCalled();
         expect(text()).toContain("Le prénom est obligatoire.");
-        expect(text()).toContain("Indiquez une adresse email valide.");
+        expect(text()).toContain("Indiquez une adresse e-mail valide.");
         expect(text()).toContain("au moins 8 caractères");
     });
 

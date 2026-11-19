@@ -43,7 +43,7 @@
         <app-phone-field formControlName="telephone" label="Téléphone" [optional]="true" />
 
         <label class="field">
-            <span>Email <small class="muted">(facultatif)</small></span>
+            <span>E-mail <small class="muted">(facultatif)</small></span>
             <input
                 class="input"
                 type="email"
@@ -55,7 +55,7 @@
                 [attr.aria-invalid]="form.controls.email.touched && form.controls.email.invalid"
             />
             @if (form.controls.email.touched && form.controls.email.invalid) {
-                <small class="field-error" role="alert">Adresse email invalide.</small>
+                <small class="field-error" role="alert">Adresse e-mail invalide.</small>
             }
         </label>
 

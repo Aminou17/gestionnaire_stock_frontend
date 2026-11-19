@@ -33,7 +33,7 @@ export const SECTIONS: NavSection[] = [
                     { label: "Produits", path: "/products", icon: "package" },
                     { label: "Catégories", path: "/categories", icon: "tag" },
                     {
-                        label: "Inventaire",
+                        label: "Inventaires",
                         path: "/inventories",
                         icon: "clipboard",
                         adminOnly: true,
@@ -47,9 +47,9 @@ export const SECTIONS: NavSection[] = [
                         adminOnly: true,
                     },
                     { label: "Historique du stock", path: "/stock-movements", icon: "movements" },
-                    // la rotation a sa propre ligne : Stock faible ne doit pas s'allumer dessus
-                    { label: "Stock faible", path: "/alerts", icon: "alert", exact: true },
-                    { label: "Meilleures ventes", path: "/alerts/rotation", icon: "trending-up" },
+                    // la rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
+                    { label: "Alertes de stock", path: "/alerts", icon: "alert", exact: true },
+                    { label: "Rotation des produits", path: "/alerts/rotation", icon: "trending-up" },
                 ],
             },
             {

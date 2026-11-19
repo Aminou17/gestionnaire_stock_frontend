@@ -91,7 +91,7 @@ export const routes: Routes = [
         children: [
             {
                 path: "dashboard",
-                title: "Tableau de bord",
+                title: "Accueil",
                 loadComponent: () =>
                     import("./features/dashboard/dashboard").then((m) => m.Dashboard),
             },
@@ -131,7 +131,7 @@ export const routes: Routes = [
             },
             {
                 path: "stock-movements",
-                title: "Mouvements de stock",
+                title: "Historique du stock",
                 loadComponent: () =>
                     import("./features/stock-movements/stock-movements").then(
                         (m) => m.StockMovements,
@@ -168,7 +168,7 @@ export const routes: Routes = [
             },
             {
                 path: "audit-logs",
-                title: "Journal d'audit",
+                title: "Historique des actions",
                 canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/audit-logs/audit-logs").then((m) => m.AuditLogs),
@@ -345,7 +345,7 @@ export const routes: Routes = [
                     },
                     {
                         path: "alert-email",
-                        title: "Email des alertes",
+                        title: "E-mail des alertes",
                         canActivate: [adminGuard],
                         canDeactivate: [unsavedChangesGuard],
                         loadComponent: () =>

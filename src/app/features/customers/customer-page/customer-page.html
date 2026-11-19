@@ -70,7 +70,7 @@
                             rel="noopener"
                             [attr.aria-label]="'Écrire sur WhatsApp à ' + customer.name"
                         >
-                            <app-icon name="message" [size]="18" />
+                            <app-whatsapp-icon [size]="18" />
                             WhatsApp
                         </a>
                     </div>
@@ -95,7 +95,7 @@
                             target="_blank"
                             rel="noopener"
                         >
-                            <app-icon name="message" [size]="18" />
+                            <app-whatsapp-icon [size]="18" />
                             Relancer sur WhatsApp
                         </a>
                     } @else if (canManage()) {

@@ -6,11 +6,15 @@
         [disabled]="!inventories.hasValue() || inventories.value().length === 0"
         (picked)="exportFile($event)"
     />
-    <a routerLink="/inventories/new" class="btn btn-primary" aria-label="Nouvel inventaire">
+    <a routerLink="/inventories/new" class="btn btn-primary new-inventory">
         <app-icon name="plus" [size]="18" />
-        <span class="wide">Nouvel inventaire</span>
+        Nouvel inventaire
     </a>
 </app-page-header>
+
+<a routerLink="/inventories/new" class="fab" aria-label="Nouvel inventaire">
+    <app-icon name="plus" [size]="24" />
+</a>
 
 @if (exportError()) {
     <div class="alert alert-error" role="alert">Impossible d'exporter les inventaires.</div>
@@ -64,7 +68,7 @@
                                     >Inventaire #{{ inventory.id }}</a
                                 >
                                 <span class="muted date">{{
-                                    inventory.created_at | date: "d MMM y à HH:mm"
+                                    inventory.created_at | date: "d MMM y, HH:mm"
                                 }}</span>
                             </td>
                             <td>{{ inventory.user_name ?? "—" }}</td>

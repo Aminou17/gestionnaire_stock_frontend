@@ -22,6 +22,7 @@ import { CustomerService } from "../../../core/customers/customer.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
@@ -33,7 +34,7 @@ type LoadedSales = Paged<CustomerSale> & { customerId: number };
 
 @Component({
     selector: "app-customer-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, CustomerForm, FcfaPipe, Pagination],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, WhatsappIcon, CustomerForm, FcfaPipe, Pagination],
     templateUrl: "./customer-page.html",
     styleUrl: "./customer-page.css",
 })

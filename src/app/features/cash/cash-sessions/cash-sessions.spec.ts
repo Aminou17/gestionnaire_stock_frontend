@@ -104,7 +104,7 @@ describe("CashSessions", () => {
             of({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } }),
         );
 
-        expect(text()).toContain("Aucunecaissen'aencoreétéouverte.");
+        expect(text()).toContain("Aucunecaissen'aencoreétéouverte");
     });
 
     it("should show an error with a retry button", async () => {

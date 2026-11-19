@@ -42,14 +42,14 @@ describe("ForgotPassword", () => {
         await submit("");
 
         expect(auth.forgotPassword).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("L'adresse email est obligatoire.");
+        expect(el.textContent).toContain("L'adresse e-mail est obligatoire.");
     });
 
     it("should refuse an invalid email without calling the API", async () => {
         await submit("pas-un-email");
 
         expect(auth.forgotPassword).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("L'adresse email n'est pas valide.");
+        expect(el.textContent).toContain("L'adresse e-mail n'est pas valide.");
     });
 
     it("should send the email in lowercase", async () => {

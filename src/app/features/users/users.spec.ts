@@ -163,7 +163,7 @@ describe("Users", () => {
 
     it("should restore a deleted user", async () => {
         await render();
-        await click(el.querySelectorAll(".tab")[1]);
+        await click(el.querySelectorAll(".chip")[1]);
 
         expect(text()).toContain("Ancien employé");
         await click(el.querySelector(".restore-btn"));

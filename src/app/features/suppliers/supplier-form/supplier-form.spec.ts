@@ -74,7 +74,7 @@ describe("SupplierForm", () => {
         await submit();
 
         expect(createSupplier).not.toHaveBeenCalled();
-        expect(text()).toContain("Adresse email invalide.");
+        expect(text()).toContain("Adresse e-mail invalide.");
     });
 
     it("should send empty fields as null and emit the saved supplier", async () => {
