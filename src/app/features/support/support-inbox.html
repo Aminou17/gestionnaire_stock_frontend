@@ -15,9 +15,13 @@
                 </button>
             </div>
             @if (!isOwner) {
-                <a class="btn btn-primary btn-sm" [routerLink]="base + '/new'">
+                <a
+                    class="btn btn-primary btn-sm new-thread"
+                    [routerLink]="base + '/new'"
+                    aria-label="Nouveau message"
+                >
                     <app-icon name="plus" [size]="16" />
-                    Nouveau message
+                    <span class="new-label">Nouveau message</span>
                 </a>
             }
         </div>

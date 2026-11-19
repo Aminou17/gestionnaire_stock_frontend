@@ -161,9 +161,11 @@ export class Rotation {
         return Math.min(product.days_left ?? 0, 90) / 0.9;
     }
 
+    // la jauge parle du stock, pas de la vitesse : elle reste neutre pour ne pas contredire
+    // le badge (vert, bleu, orange, rouge) et ne rougit que si le stock va bientôt manquer
     gaugeTone(product: ProductRotation) {
         const days = product.days_left ?? 0;
-        return days < URGENT_DAYS ? "danger" : days < 30 ? "warning" : "success";
+        return days < URGENT_DAYS ? "danger" : "neutral";
     }
 
     isUrgent(product: ProductRotation) {

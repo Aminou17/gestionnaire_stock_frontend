@@ -60,13 +60,15 @@
         flex: 1 1 100%;
     }
 
-    .period > span {
-        min-width: 72px;
+    .period > span:not(.sr-only) {
+        flex: none;
+        width: 88px;
     }
 
     .period .input {
         flex: 1;
         width: auto;
+        min-width: 0;
     }
 
     /* les deux dates côte à côte, sous le sélecteur */

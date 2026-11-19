@@ -179,9 +179,8 @@ dd {
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 4px;
-    margin-top: 16px;
+    /* pas de trait en haut : la dernière ligne de la liste au-dessus en a déjà un */
     padding: 12px 0;
-    border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
 }
 

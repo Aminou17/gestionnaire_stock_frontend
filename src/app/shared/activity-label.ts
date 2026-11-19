@@ -20,12 +20,16 @@ export const LABELS: Record<string, string> = {
     CASH_SESSION_OPENED: "Caisse ouverte",
     CASH_SESSION_CLOSED: "Caisse clôturée",
     CASH_SESSION_GAP_EXPLAINED: "Écart de caisse expliqué",
+    CASH_SESSION_REOPENED: "Caisse rouverte",
     CASH_MOVEMENT_CREATED: "Mouvement de caisse",
     STOCK_ENTRY_CREATED: "Entrée de stock",
     STOCK_ADJUSTED: "Ajustement de stock",
     INVENTORY_CREATED: "Inventaire enregistré",
+    INVENTORY_APPLIED: "Inventaire appliqué au stock",
     PRODUCT_CREATED: "Produit créé",
     PRODUCT_UPDATED: "Produit modifié",
+    PRODUCT_IMAGE_UPDATED: "Photo du produit modifiée",
+    PRODUCTS_IMPORTED: "Produits importés",
     PRODUCT_DEACTIVATED: "Produit supprimé",
     PRODUCTS_EXPORTED: "Produits exportés",
     CATEGORY_CREATED: "Catégorie créée",
@@ -51,6 +55,8 @@ export const LABELS: Record<string, string> = {
     SALES_SETTINGS_UPDATED: "Paramètres des ventes modifiés",
     STOCK_SETTINGS_UPDATED: "Paramètres du stock modifiés",
     CASH_SETTINGS_UPDATED: "Paramètres de la caisse modifiés",
+    ALERT_EMAIL_SETTINGS_UPDATED: "E-mail des alertes modifié",
+    ALERT_EMAIL_TEST_SENT: "E-mail d'essai des alertes envoyé",
 };
 
 // une action ajoutée plus tard au backend reste affichée, sans libellé inventé
