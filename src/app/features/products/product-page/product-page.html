@@ -83,7 +83,7 @@
                     product.theoretical_stock
                 }}</strong>
                 @if (product.effective_min_stock !== null) {
-                    <span class="kpi-note">Seuil d'alerte {{ product.effective_min_stock }}</span>
+                    <span class="kpi-note">Seuil d'alerte : {{ product.effective_min_stock }}</span>
                 }
                 @if (product.stock_status === "OUT_OF_STOCK") {
                     <span class="badge badge-danger">Rupture</span>

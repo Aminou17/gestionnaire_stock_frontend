@@ -121,6 +121,13 @@
         mask-image: linear-gradient(to right, #000 85%, transparent);
     }
 
+    /* peu de pastilles : elles passent à la ligne plutôt que d'être coupées */
+    :host(.chips.wrap) .toolbar {
+        flex-wrap: wrap;
+        padding: 12px;
+        mask-image: none;
+    }
+
     :host(.chips) .custom-range {
         margin: 0;
         border-width: 0 0 1px;

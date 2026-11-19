@@ -72,10 +72,15 @@ app-page-header {
     color: var(--on-primary);
 }
 
-.count {
-    margin: 0;
-    padding: 12px 4px 0;
-    font-size: var(--fs-body);
+/* « Tous 21 », comme les pastilles des autres listes */
+.chip-count {
+    margin-left: 4px;
+    font-weight: var(--fw-medium);
+    color: var(--text-muted);
+}
+
+.chip[aria-pressed="true"] .chip-count {
+    color: inherit;
 }
 
 app-cash-movement-list {

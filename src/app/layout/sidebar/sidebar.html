@@ -3,7 +3,7 @@
         <a
             class="brand-link"
             [routerLink]="auth.isAdmin() ? '/settings/shop' : '/dashboard'"
-            [attr.aria-label]="auth.isAdmin() ? 'Paramètres de la boutique' : 'Tableau de bord'"
+            [attr.aria-label]="auth.isAdmin() ? 'Paramètres de la boutique' : 'Accueil'"
             (click)="close()"
         >
             @if (shop.shopLogo(); as logo) {

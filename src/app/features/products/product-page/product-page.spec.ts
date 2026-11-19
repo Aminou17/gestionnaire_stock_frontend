@@ -99,7 +99,7 @@ describe("ProductPage", () => {
         expect(text()).toContain("Hygiène");
         expect(text()).toContain("Minimum 900 F");
         expect(text()).toContain("900 F");
-        expect(text()).toContain("Seuil d'alerte 10");
+        expect(text()).toContain("Seuil d'alerte : 10");
         expect(text()).toContain("600 F");
     });
 

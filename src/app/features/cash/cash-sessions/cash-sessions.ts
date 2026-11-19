@@ -11,6 +11,7 @@ import { ExportFormat } from "../../../core/export-format";
 import { ExportMenu } from "../../../shared/export-menu/export-menu";
 import { PeriodFilter, PeriodRange } from "../../../shared/period-filter/period-filter";
 import { Icon } from "../../../shared/icon/icon";
+import { EmptyState } from "../../../shared/empty-state/empty-state";
 import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
@@ -26,6 +27,7 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
         ExportMenu,
         Icon,
         Pagination,
+        EmptyState,
     ],
     templateUrl: "./cash-sessions.html",
     styleUrl: "./cash-sessions.css",

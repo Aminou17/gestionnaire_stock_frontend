@@ -30,6 +30,9 @@
             (click)="selectType(null)"
         >
             Tous
+            @if (type() === null && !movements.error()) {
+                <span class="chip-count">{{ total() }}</span>
+            }
         </button>
 
         <button

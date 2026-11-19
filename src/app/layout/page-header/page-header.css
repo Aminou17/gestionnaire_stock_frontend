@@ -95,6 +95,13 @@ h1 {
     outline-offset: 0;
 }
 
+/* sur ordinateur, le profil est déjà en bas du menu : pas de deuxième avatar en haut */
+@media (min-width: 1024px) {
+    .me {
+        display: none;
+    }
+}
+
 .menu-btn {
     width: 44px;
     height: 44px;

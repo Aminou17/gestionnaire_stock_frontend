@@ -102,7 +102,7 @@
     </div>
 
     <label class="field">
-        <span>Adresse email</span>
+        <span>Adresse e-mail</span>
         <input
             class="input"
             type="email"
@@ -113,7 +113,7 @@
             [attr.aria-invalid]="invalidProfile('email')"
         />
         @if (invalidProfile("email")) {
-            <small class="field-error" role="alert">Indiquez une adresse email valide.</small>
+            <small class="field-error" role="alert">Indiquez une adresse e-mail valide.</small>
         } @else {
             <small class="muted">Elle sert à vous connecter.</small>
         }

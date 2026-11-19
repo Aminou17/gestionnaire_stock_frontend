@@ -1,8 +1,4 @@
-<app-page-header
-    title="Utilisateurs"
-    subtitle="Les personnes qui ont accès au logiciel"
-    section="Équipe"
->
+<app-page-header title="Utilisateurs" section="Équipe">
     <button type="button" class="btn btn-primary new-user" (click)="newUser()">
         <app-icon name="plus" [size]="18" />
         <span>Nouvel utilisateur</span>
@@ -10,10 +6,10 @@
 </app-page-header>
 
 <section class="card list-card">
-    <div class="tabs" role="group" aria-label="Afficher">
+    <div class="chips" role="group" aria-label="Afficher">
         <button
             type="button"
-            class="tab"
+            class="chip"
             [class.selected]="view() === 'active'"
             [attr.aria-pressed]="view() === 'active'"
             (click)="selectView('active')"
@@ -22,7 +18,7 @@
         </button>
         <button
             type="button"
-            class="tab"
+            class="chip"
             [class.selected]="view() === 'deleted'"
             [attr.aria-pressed]="view() === 'deleted'"
             (click)="selectView('deleted')"
@@ -44,7 +40,7 @@
             <input
                 class="input"
                 type="search"
-                placeholder="Rechercher par nom ou email…"
+                placeholder="Rechercher par nom ou e-mail…"
                 aria-label="Rechercher un utilisateur"
                 [value]="search()"
                 (input)="search.set($any($event.target).value)"
@@ -66,18 +62,21 @@
             </button>
         </div>
     } @else if (list().length === 0) {
-        <div class="empty">
-            @if (search()) {
-                Aucun utilisateur ne correspond à « {{ search() }} ».
+        @if (search()) {
+            <app-empty-state
+                icon="search"
+                title="Aucun utilisateur ne correspond à « {{ search() }} »"
+            >
                 <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
                     Effacer la recherche
                 </button>
-            } @else if (view() === "deleted") {
-                Aucun utilisateur supprimé.
-            } @else {
-                Aucun utilisateur pour le moment.
-            }
-        </div>
+            </app-empty-state>
+        } @else if (view() === "deleted") {
+            <app-empty-state icon="trash" title="Aucun utilisateur supprimé" />
+        } @else {
+            <app-empty-state icon="users" title="Aucun utilisateur pour le moment">
+            </app-empty-state>
+        }
     } @else {
         @if (restoreError()) {
             <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>

@@ -175,7 +175,7 @@ export class Sales {
             });
         const method = this.paymentMethod();
         if (method)
-            filters.push({ key: "payment", label: method === "CASH" ? "Espèces" : "Mobile money" });
+            filters.push({ key: "payment", label: method === "CASH" ? "Espèces" : "Mobile Money" });
         const seller = this.sellers().find((user) => user.id === this.sellerId());
         if (this.sellerId() !== null)
             filters.push({ key: "seller", label: seller?.name ?? "Vendeur" });
@@ -306,7 +306,7 @@ export class Sales {
     }
 
     paymentLabel(method: Sale["payment_method"]) {
-        return method === "MOBILE_MONEY" ? "Mobile money" : method === "CASH" ? "Espèces" : "";
+        return method === "MOBILE_MONEY" ? "Mobile Money" : method === "CASH" ? "Espèces" : "";
     }
 
     selectStatus(value: SaleStatus | "UNPAID" | null) {

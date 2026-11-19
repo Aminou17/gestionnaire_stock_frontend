@@ -63,8 +63,6 @@ app-page-header {
     background: var(--surface-hover);
     font-size: var(--fs-caption);
     font-weight: var(--fw-semibold);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
     color: var(--text-muted);
 }
 
@@ -181,7 +179,7 @@ app-page-header {
 }
 
 .name:focus-visible,
-.tab:focus-visible {
+.chip:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
 }
@@ -411,42 +409,43 @@ app-page-header {
     border: 1px solid var(--border);
 }
 
-.tabs {
+/* mêmes pastilles que Fournisseurs, Catégories et Clients */
+.chips {
     display: flex;
-    gap: 4px;
-    padding: 0 16px;
+    gap: 8px;
+    padding: 16px;
     border-bottom: 1px solid var(--border);
 }
 
-.tab {
-    min-height: 48px;
-    padding: 0 12px;
-    border: 0;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -1px;
-    background: none;
-    color: var(--text-muted);
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
     font: inherit;
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     cursor: pointer;
 }
 
-.tab span {
-    margin-left: 4px;
-    padding: 1px 8px;
-    border-radius: 999px;
-    background: var(--neutral-soft);
-    font-size: var(--fs-caption);
+.chip span {
+    font-weight: var(--fw-medium);
+    color: var(--text-muted);
 }
 
-.tab:hover {
-    color: var(--text);
+.chip.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--on-primary);
 }
 
-.tab.selected {
-    border-bottom-color: var(--primary);
-    color: var(--text);
+.chip.selected span {
+    color: var(--on-primary);
 }
 
 .deleted-note {
@@ -459,12 +458,8 @@ app-page-header {
 }
 
 @media (max-width: 640px) {
-    .tabs {
-        padding: 0;
-    }
-
-    .tab {
-        flex: 1;
+    .chips {
+        padding: 0 0 12px;
     }
 
     .deleted-note {

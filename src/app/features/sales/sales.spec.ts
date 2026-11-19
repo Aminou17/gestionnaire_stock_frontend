@@ -181,7 +181,7 @@ describe("Sales", () => {
     it("should send the payment method chosen in the filter", async () => {
         await render();
         await open();
-        await pick("Mobile money");
+        await pick("Mobile Money");
 
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.paymentMethod).toBe("MOBILE_MONEY");

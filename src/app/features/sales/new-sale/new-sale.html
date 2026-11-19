@@ -1,4 +1,4 @@
-<app-page-header title="Nouvelle vente" [back]="back.link" [backLabel]="back.label" />
+<app-page-header title="Nouvelle vente" section="Ventes" [back]="back.link" [backLabel]="back.label" />
 
 @if (cash.error()) {
     <div class="alert alert-error banner" role="alert">
@@ -772,7 +772,7 @@
                                 (click)="selectPayment('MOBILE_MONEY')"
                             >
                                 <app-icon name="phone" [size]="18" />
-                                Mobile money
+                                Mobile Money
                             </button>
                         </div>
                     }
@@ -828,7 +828,7 @@
                     @if (split()) {
                         @if (deposit() !== null && deposit()! < total()) {
                             <div class="remaining second">
-                                <span>Reste en mobile money</span>
+                                <span>Reste en Mobile Money</span>
                                 <strong>{{ secondAmount() | fcfa }}</strong>
                             </div>
                         }

@@ -26,6 +26,7 @@ import { PageHeader } from "../../layout/page-header/page-header";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
+import { WhatsappIcon } from "../../shared/icon/whatsapp-icon";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { productInitials } from "../products/product-look";
 import { CustomerForm } from "./customer-form/customer-form";
@@ -43,6 +44,7 @@ const SORTS: { value: CustomerSort; label: string }[] = [
     imports: [
         PageHeader,
         Icon,
+        WhatsappIcon,
         EmptyState,
         CustomerForm,
         FcfaPipe,

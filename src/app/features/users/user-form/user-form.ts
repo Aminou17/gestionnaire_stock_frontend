@@ -46,7 +46,7 @@ export class UserForm {
         {
             value: "manager",
             label: "Employé",
-            hint: "Vend, encaisse et clôture la caisse. Ne voit ni les prix d'achat ni les réglages.",
+            hint: "Vend, encaisse et clôture la caisse. Ne voit ni les prix d'achat ni les paramètres.",
         },
         {
             value: "admin",

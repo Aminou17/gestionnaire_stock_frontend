@@ -63,7 +63,7 @@
                                 rel="noopener"
                                 [attr.aria-label]="'Écrire sur WhatsApp à ' + supplier.name"
                             >
-                                <app-icon name="message" [size]="16" />
+                                <app-whatsapp-icon [size]="16" />
                                 WhatsApp
                             </a>
                         </span>
@@ -78,7 +78,7 @@
                 </dd>
             </div>
             <div>
-                <dt>Email</dt>
+                <dt>E-mail</dt>
                 <dd>
                     @if (supplier.email) {
                         <a class="contact-link" [href]="'mailto:' + supplier.email">

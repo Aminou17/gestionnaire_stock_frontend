@@ -1,5 +1,6 @@
 <app-page-header
     [title]="data() ? 'Vente #' + data()!.number : 'Vente'"
+    section="Ventes"
     [back]="back.link"
     [backLabel]="back.label"
 />
@@ -253,7 +254,7 @@
                                         rel="noopener"
                                         (click)="menuOpen.set(false)"
                                     >
-                                        <app-icon name="message" [size]="16" />
+                                        <app-whatsapp-icon [size]="16" />
                                         Envoyer en texte
                                     </a>
                                 }
@@ -445,7 +446,7 @@
                                     ·
                                     {{
                                         payment.payment_method === "MOBILE_MONEY"
-                                            ? "Mobile money"
+                                            ? "Mobile Money"
                                             : "Espèces"
                                     }}
                                 </dt>
@@ -466,7 +467,7 @@
                         <div>
                             <dt>
                                 <app-icon name="phone" [size]="16" />
-                                Mobile money
+                                Mobile Money
                             </dt>
                             <dd>{{ sale.total | fcfa }}</dd>
                         </div>
@@ -503,7 +504,7 @@
                                             >{{ event.payment!.amount | fcfa }} en
                                             {{
                                                 event.payment!.payment_method === "MOBILE_MONEY"
-                                                    ? "mobile money"
+                                                    ? "Mobile Money"
                                                     : "espèces"
                                             }}</strong
                                         >
@@ -634,7 +635,7 @@
                 {{ cashPaid() | fcfa }} seront retirés de la caisse.
             }
             @if (otherPaid() > 0) {
-                {{ otherPaid() | fcfa }} payés par mobile money sont à rendre au client hors caisse.
+                {{ otherPaid() | fcfa }} payés par Mobile Money sont à rendre au client hors caisse.
             }
             Les produits sont remis en stock. Cette action est définitive.
         </p>
@@ -706,7 +707,7 @@
                 (click)="payMethod.set('MOBILE_MONEY')"
             >
                 <app-icon name="phone" [size]="18" />
-                Mobile money
+                Mobile Money
             </button>
         </div>
 

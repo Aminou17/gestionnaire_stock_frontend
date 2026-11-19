@@ -50,7 +50,7 @@ describe("Login", () => {
         await submit();
 
         expect(auth.login).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("L'adresse email est obligatoire.");
+        expect(el.textContent).toContain("L'adresse e-mail est obligatoire.");
         expect(el.textContent).toContain("Le mot de passe est obligatoire.");
     });
 
@@ -59,7 +59,7 @@ describe("Login", () => {
         await submit();
 
         expect(auth.login).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("L'adresse email n'est pas valide.");
+        expect(el.textContent).toContain("L'adresse e-mail n'est pas valide.");
     });
 
     it("should login and redirect to the dashboard", async () => {

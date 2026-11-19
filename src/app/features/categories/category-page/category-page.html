@@ -123,7 +123,7 @@
                 <div>
                     <dt>{{ changeLabel() }} le</dt>
                     <dd>
-                        {{ change.at | date: "d MMM y 'à' HH:mm" }}
+                        {{ change.at | date: "d MMM y, HH:mm" }}
                         @if (change.user_name) {
                             <small class="muted">par {{ change.user_name }}</small>
                         }

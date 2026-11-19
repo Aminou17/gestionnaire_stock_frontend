@@ -486,7 +486,7 @@ describe("StockMovements", () => {
 
     it("should have the title Mouvements", async () => {
         await render({});
-        expect(el.querySelector("app-page-header")?.getAttribute("title")).toBe("Mouvements");
+        expect(el.querySelector("app-page-header")?.getAttribute("title")).toBe("Historique du stock");
     });
 
     it("should offer all dates when a period gives no result and reload without period", async () => {

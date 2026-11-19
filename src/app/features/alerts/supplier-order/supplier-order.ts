@@ -12,6 +12,7 @@ import { LowStockAlertService } from "../../../core/stock/low-stock-alert.servic
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { toWhatsAppLink } from "../../../shared/phone";
 import { productInitials } from "../../products/product-look";
 
@@ -24,7 +25,7 @@ const MAX_QUANTITY = 9999;
 
 @Component({
     selector: "app-supplier-order",
-    imports: [RouterLink, PageHeader, Icon],
+    imports: [RouterLink, PageHeader, Icon, WhatsappIcon],
     templateUrl: "./supplier-order.html",
     styleUrl: "./supplier-order.css",
 })

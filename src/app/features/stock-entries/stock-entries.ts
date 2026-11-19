@@ -25,6 +25,7 @@ import { StockEntryService } from "../../core/stock/stock-entry.service";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { EmptyState } from "../../shared/empty-state/empty-state";
 import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
@@ -54,6 +55,7 @@ const toId = (value: string | null) => {
         AdjustDialog,
         PhotoZoom,
         Pagination,
+        EmptyState,
     ],
     templateUrl: "./stock-entries.html",
     styleUrl: "./stock-entries.css",

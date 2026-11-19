@@ -92,10 +92,6 @@
     padding: 0 12px;
 }
 
-.filter-label {
-    display: none;
-}
-
 .filter-count {
     display: inline-grid;
     place-items: center;

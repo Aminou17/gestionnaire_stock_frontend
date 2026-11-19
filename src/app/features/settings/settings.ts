@@ -75,7 +75,7 @@ const GROUPS: SettingsGroup[] = [
                 tone: "#0ea5e9",
                 adminOnly: true,
                 icon: "mail",
-                label: "Email des alertes",
+                label: "E-mail des alertes",
                 description: "Résumé chaque matin",
             },
             {

@@ -139,14 +139,14 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
             .subscribe({
                 next: () => {
                     this.testing.set(false);
-                    this.message.set({ ok: true, text: "Email de test envoyé." });
+                    this.message.set({ ok: true, text: "E-mail de test envoyé." });
                     this.settings.reload();
                 },
                 error: (err) => {
                     this.testing.set(false);
                     this.message.set({
                         ok: false,
-                        text: errorText(err, "Impossible d'envoyer l'email de test."),
+                        text: errorText(err, "Impossible d'envoyer l'e-mail de test."),
                     });
                     this.settings.reload();
                 },
