@@ -61,6 +61,22 @@ describe("UserPage", () => {
                                 ? throwError(() => new HttpErrorResponse({ status: 500 }))
                                 : of([
                                       {
+                                          id: 11,
+                                          action: "AUTH_LOGIN_SUCCEEDED",
+                                          entity_type: "user",
+                                          entity_id: 2,
+                                          result: "SUCCESS",
+                                          created_at: "2026-11-10T17:00:00Z",
+                                      },
+                                      {
+                                          id: 10,
+                                          action: "AUTH_LOGIN_SUCCEEDED",
+                                          entity_type: "user",
+                                          entity_id: 2,
+                                          result: "SUCCESS",
+                                          created_at: "2026-11-10T12:00:00Z",
+                                      },
+                                      {
                                           id: 9,
                                           action: "SALE_CREATED",
                                           entity_type: "sale",
@@ -106,6 +122,14 @@ describe("UserPage", () => {
         expect(text()).toContain("moussa@test.com");
         expect(text()).toContain("Jamais connecté");
         expect(text()).toContain("Vente enregistrée");
+    });
+
+    it("should merge the same actions that follow each other in a day", async () => {
+        await render();
+
+        const rows = [...el.querySelectorAll(".activity li")].map((li) => li.textContent ?? "");
+        expect(rows).toHaveLength(2);
+        expect(rows[0]).toContain("2 fois");
     });
 
     it("should say when the user does not exist", async () => {

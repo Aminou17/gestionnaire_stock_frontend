@@ -15,13 +15,10 @@
             <span>{{ link.label }}</span>
         </a>
     }
-    <!-- "Plus" ouvre le menu complet, avec le nombre d'alertes en pastille -->
+    <!-- "Plus" ouvre le menu complet. Le nombre d'alertes est déjà sur la cloche, on ne le répète pas -->
     <button type="button" (click)="layout.sidebarOpen.set(true)">
         <span class="icon">
             <app-icon name="more" [size]="22" />
-            @if (alerts.count() > 0) {
-                <span class="badge">{{ alerts.count() }}</span>
-            }
         </span>
         <span>Plus</span>
     </button>

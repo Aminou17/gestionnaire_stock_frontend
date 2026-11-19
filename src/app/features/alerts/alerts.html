@@ -178,7 +178,7 @@
                             </div>
                             @if (group.key !== "none") {
                                 <a
-                                    class="btn btn-primary btn-sm order-btn"
+                                    class="btn btn-outline btn-sm order-btn"
                                     [routerLink]="['/alerts/supplier', group.key]"
                                     [state]="backState()"
                                     [attr.aria-label]="'Commander chez ' + group.name"

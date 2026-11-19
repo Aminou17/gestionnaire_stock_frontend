@@ -142,11 +142,19 @@
                                 </span>
                                 <span class="label">
                                     {{ getActivityLabel(item.action) }}
+                                    @if (item.times > 1) {
+                                        <small class="times">{{ item.times }} fois</small>
+                                    }
                                     @if (item.result === "FAILURE") {
                                         <small class="failed-tag">Échec</small>
                                     }
                                 </span>
-                                <small class="muted">{{ item.created_at | date: "HH:mm" }}</small>
+                                <small class="muted">
+                                    @if (item.times > 1) {
+                                        {{ item.first_at | date: "HH:mm" }} –
+                                    }
+                                    {{ item.created_at | date: "HH:mm" }}
+                                </small>
                             </li>
                         }
                     </ul>

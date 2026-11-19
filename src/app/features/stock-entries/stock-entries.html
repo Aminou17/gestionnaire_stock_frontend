@@ -213,10 +213,13 @@
                             }}
                             · {{ entry.supplier_name }}
                         </span>
-                        <button type="button" class="correct-btn" (click)="correct(entry)">
-                            Corriger la quantité
-                        </button>
                     </div>
+                    <app-action-menu
+                        [items]="cardActions"
+                        [label]="'Actions pour ' + entry.product_name"
+                        [title]="entry.product_name"
+                        (picked)="correct(entry)"
+                    />
                 </li>
             }
         </ul>

@@ -115,10 +115,10 @@ describe("Sidebar", () => {
         expect(group.getAttribute("aria-expanded")).toBe("false");
     });
 
-    it("should keep the alert count on the Stock group while it is closed", async () => {
+    it("should not repeat the alert count on the closed Stock group", async () => {
         const el = await render(true, 4);
 
-        expect(el.querySelector("button.group .count")?.textContent).toBe("4");
+        expect(el.querySelector("button.group .count")).toBeNull();
     });
 
     it("should not show Achats and Équipe to the manager", async () => {

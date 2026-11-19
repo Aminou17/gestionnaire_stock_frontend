@@ -88,11 +88,6 @@ export class Sidebar {
     }
 
     // pastille d'alertes sur le groupe quand il est fermé, pour ne pas la perdre
-    groupCount(group: NavItem) {
-        const hasAlerts = (group.children ?? []).some((child) => child.path === "/alerts");
-        return hasAlerts && !this.isOpen(group) ? this.alerts.count() : 0;
-    }
-
     // le manager ne voit que les pages auxquelles il a accès ; un groupe sans page disparaît
     sections = computed(() => {
         const isAdmin = this.auth.isAdmin();

@@ -9,6 +9,7 @@ import { SaleService } from "../../core/sales/sale.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { EmptyState } from "../../shared/empty-state/empty-state";
 import { RevealToggle } from "../../shared/secret/reveal-toggle";
 import { SecretValues } from "../../shared/secret/secret-values";
 import type { IconName } from "../../shared/icon/icons";
@@ -40,6 +41,7 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
         OpenCashDialog,
         ReopenCashDialog,
         ManagerCashBanner,
+        EmptyState,
     ],
     templateUrl: "./dashboard.html",
     styleUrl: "./dashboard.css",
@@ -130,6 +132,9 @@ export class Dashboard {
     );
     todaySales = computed(() => this.lastWeek().at(-1));
     weekTrend = computed(() => this.lastWeek().map((d) => d.netTotal));
+    weekEmpty = computed(
+        () => this.dailySales.hasValue() && this.lastWeek().every((d) => d.netTotal === 0),
+    );
 
     cash = computed(() => this.summaryData()?.cash ?? null);
     cashOpen = computed(() => this.cash()?.status === "OPEN");

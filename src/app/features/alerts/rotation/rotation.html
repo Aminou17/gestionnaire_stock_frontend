@@ -6,30 +6,27 @@
     [backLabel]="back.label"
 />
 
+<!-- l'explication reste repliée : une seule ligne tant qu'on ne la demande pas -->
 <section class="card intro">
-    <span class="intro-icon" aria-hidden="true"><app-icon name="trending-up" [size]="20" /></span>
+    <button
+        type="button"
+        class="intro-toggle"
+        [attr.aria-expanded]="explainOpen()"
+        aria-controls="rotation-rules"
+        (click)="explainOpen.set(!explainOpen())"
+    >
+        <span class="intro-icon" aria-hidden="true"><app-icon name="help" [size]="18" /></span>
+        Comment lire cette page
+        <app-icon name="chevron-down" [size]="16" [class.turned]="explainOpen()" />
+    </button>
 
-    <div class="intro-body">
-        <h2>Comment lire cette page</h2>
-        <p>
-            La rotation mesure la vitesse à laquelle chaque produit se vend. Elle est calculée sur
-            les 30 derniers jours (ventes moins retours) : cette période est fixe et ne se règle
-            pas.
-        </p>
-
-        <button
-            type="button"
-            class="intro-toggle"
-            [attr.aria-expanded]="explainOpen()"
-            aria-controls="rotation-rules"
-            (click)="explainOpen.set(!explainOpen())"
-        >
-            Comment sont classés les produits ?
-            <app-icon name="chevron-down" [size]="16" [class.turned]="explainOpen()" />
-        </button>
-
-        @if (explainOpen()) {
-            <dl id="rotation-rules" class="rules">
+    @if (explainOpen()) {
+        <div id="rotation-rules" class="intro-body">
+            <p>
+                La rotation mesure la vitesse à laquelle chaque produit se vend, sur les 30 derniers
+                jours (ventes moins retours). Cette période est fixe.
+            </p>
+            <dl class="rules">
                 <div>
                     <dt><span class="speed fast">Sort vite</span></dt>
                     <dd>Le tiers des produits vendus en plus grande quantité.</dd>
@@ -56,8 +53,8 @@
                 classement compare vos produits entre eux : il n'y a pas de quantité fixe. En rouge,
                 un produit qui sort vite avec moins de 14 jours de stock.
             </p>
-        }
-    </div>
+        </div>
+    }
 </section>
 
 @if (!rotation.error() && all().length > 0) {

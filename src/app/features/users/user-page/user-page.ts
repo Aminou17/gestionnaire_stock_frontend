@@ -90,8 +90,14 @@ export class UserPage {
 
     lastLogin = computed(() => formatLastLogin(this.data()?.last_login_at ?? null, this.locale));
 
+    // dans une journée, les mêmes actions qui se suivent tiennent sur une ligne (« 4 fois »)
     activityDays = computed(() =>
-        this.activity.hasValue() ? groupByDay(this.activity.value(), this.locale) : [],
+        this.activity.hasValue()
+            ? groupByDay(this.activity.value(), this.locale).map((day) => ({
+                  ...day,
+                  items: mergeRepeats(day.items),
+              }))
+            : [],
     );
 
     protected getActivityIcon = getActivityIcon;
@@ -178,3 +184,20 @@ export class UserPage {
             });
     }
 }
+
+// regroupe les actions identiques qui se suivent ; la liste va de la plus récente à la plus ancienne
+const mergeRepeats = <T extends { action: string; result: string; created_at: string }>(
+    items: T[],
+) => {
+    const rows: (T & { times: number; first_at: string })[] = [];
+    for (const item of items) {
+        const last = rows.at(-1);
+        if (last && last.action === item.action && last.result === item.result) {
+            last.times++;
+            last.first_at = item.created_at;
+        } else {
+            rows.push({ ...item, times: 1, first_at: item.created_at });
+        }
+    }
+    return rows;
+};

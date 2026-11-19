@@ -47,7 +47,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "store",
                 label: "Ma boutique",
-                description: "Logo, nom, adresse, IFU et RCCM",
+                description: "Nom, logo et coordonnées",
             },
             {
                 path: "receipt",
@@ -55,7 +55,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "receipt",
                 label: "Ticket de caisse",
-                description: "Message en bas de chaque ticket",
+                description: "Logo et message",
             },
         ],
     },
@@ -76,7 +76,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "mail",
                 label: "Email des alertes",
-                description: "Résumé du stock chaque matin",
+                description: "Résumé chaque matin",
             },
             {
                 path: "cash",
@@ -84,7 +84,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "banknote",
                 label: "Caisse",
-                description: "Règles de clôture de la caisse",
+                description: "Règles de clôture",
             },
             {
                 path: "sales",
@@ -92,7 +92,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "cart",
                 label: "Ventes",
-                description: "Numéro des tickets et remise",
+                description: "Numéros et remise",
             },
         ],
     },
@@ -137,7 +137,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "card",
                 label: "Abonnement",
-                description: "Votre formule et la facturation",
+                description: "Votre formule",
             },
             {
                 path: "/contact",
@@ -151,7 +151,7 @@ const GROUPS: SettingsGroup[] = [
                 tone: "#10b981",
                 icon: "shield",
                 label: "Confidentialité",
-                description: "Comment vos données sont protégées",
+                description: "Protection de vos données",
             },
             {
                 path: "/terms",
@@ -212,7 +212,6 @@ export class Settings {
 
         if (this.shop.hasValue()) {
             const shop = this.shop.value();
-            statuses["shop"] = { text: shop.name };
             statuses["receipt"] = {
                 text: shop.logo ? "Logo ajouté" : "Sans logo",
                 state: shop.logo ? "ok" : "off",
