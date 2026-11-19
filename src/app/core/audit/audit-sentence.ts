@@ -169,6 +169,8 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                 verb: "a expliqué un écart de caisse",
                 note: text(d["closingNote"]) ?? undefined,
             };
+        case "CASH_SESSION_REOPENED":
+            return { verb: "a rouvert la caisse", note: text(d["reason"]) ?? undefined };
         case "CASH_MOVEMENT_CREATED": {
             const amount = money(d["amount"]) ?? undefined;
             const reason = text(d["reason"]) ?? undefined;
@@ -201,7 +203,27 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                     : undefined,
             };
         }
+        case "INVENTORY_APPLIED": {
+            const count = Array.isArray(d["adjustments"]) ? d["adjustments"].length : 0;
+            return {
+                verb: "a appliqué un inventaire au stock",
+                note: count
+                    ? `${count} produit${count > 1 ? "s" : ""} corrigé${count > 1 ? "s" : ""}`
+                    : undefined,
+            };
+        }
 
+        case "PRODUCTS_IMPORTED": {
+            const count = Number(d["count"] ?? 0);
+            return {
+                verb: count ? `a importé ${count} produit${count > 1 ? "s" : ""}` : "a importé des produits",
+            };
+        }
+        case "PRODUCT_IMAGE_UPDATED":
+            return {
+                verb: d["removed"] ? "a retiré la photo du produit" : "a changé la photo du produit",
+                object: name,
+            };
         case "PRODUCT_CREATED":
             return { verb: "a créé le produit", object: name };
         case "PRODUCT_UPDATED":
@@ -259,10 +281,38 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
             return { verb: "a modifié le seuil de stock bas" };
         case "CASH_SETTINGS_UPDATED":
             return { verb: "a modifié les paramètres de la caisse" };
+        case "ALERT_EMAIL_SETTINGS_UPDATED": {
+            const enabled = after["enabled"];
+            return {
+                verb: "a modifié l'e-mail des alertes",
+                note: enabled === true ? "activé" : enabled === false ? "désactivé" : undefined,
+            };
+        }
+        case "ALERT_EMAIL_TEST_SENT":
+            return { verb: "a envoyé un e-mail d'essai des alertes" };
+
+        // actions du propriétaire de Boutiki, visibles dans son propre journal
+        case "SHOP_REGISTERED":
+            return { verb: "a créé sa boutique", object: text(d["name"]) ?? name };
+        case "SHOP_CREATED":
+            return { verb: "a créé la boutique", object: text(d["name"]) ?? name };
+        case "SHOP_TRIAL_CHANGED":
+            return {
+                verb: "a changé l'essai gratuit de",
+                object: text(d["name"]) ?? name,
+                note: d["trialDays"] ? `${d["trialDays"]} jours` : undefined,
+            };
+        case "MAIL_SETTINGS_UPDATED":
+            return { verb: "a réglé l'adresse d'envoi des e-mails" };
+        case "MAIL_SETTINGS_REMOVED":
+            return { verb: "a retiré l'adresse d'envoi des e-mails" };
+        case "MAIL_TEST_SENT":
+            return { verb: "a envoyé un e-mail d'essai" };
     }
 
     // une action ajoutée plus tard au backend reste affichée, sans phrase inventée
-    return { verb: "a fait une action", note: log.action };
+    // ni code technique en majuscules
+    return { verb: "a fait une action" };
 };
 
 // champs suivis dans le détail d'une modification ; les autres (dates, id) sont ignorés

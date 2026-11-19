@@ -433,11 +433,10 @@
                                     @if (sale.status === "CANCELLED") {
                                         <span class="badge badge-danger">Remboursée</span>
                                     } @else if (due(sale) > 0) {
+                                        <!-- comme sur ordinateur : seules les exceptions ont un badge -->
                                         <span class="badge badge-warning"
                                             >Reste {{ due(sale) | fcfa }}</span
                                         >
-                                    } @else {
-                                        <span class="badge badge-success">Payée</span>
                                     }
                                 </div>
                             </li>

@@ -422,12 +422,9 @@
     background: var(--danger);
 }
 
-.tone-warning {
-    background: var(--warning);
-}
-
-.tone-success {
-    background: var(--success);
+.tone-neutral {
+    background: var(--text-muted);
+    opacity: 0.55;
 }
 
 .mobile-label {

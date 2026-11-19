@@ -167,24 +167,21 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-/* bouton flottant, téléphone seulement */
+/* bouton flottant, téléphone seulement : carré "+" comme sur les autres listes,
+   assez petit pour ne pas cacher la colonne des prix */
 .fab {
     display: none;
     position: fixed;
     right: 16px;
     bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 16px);
     z-index: 30;
-    align-items: center;
-    gap: 8px;
-    height: 48px;
-    padding: 0 20px 0 16px;
+    place-items: center;
+    width: 56px;
+    height: 56px;
     border: 0;
-    border-radius: 999px;
+    border-radius: 16px;
     background: var(--primary);
     color: var(--on-primary);
-    font: inherit;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
     box-shadow: var(--shadow-menu);
     cursor: pointer;
 }
@@ -579,7 +576,7 @@ td.num small {
     }
 
     .fab {
-        display: inline-flex;
+        display: grid;
     }
 
     /* l'import de fichier se fait sur ordinateur */
@@ -1061,7 +1058,7 @@ td.num small {
 
     /* la liste se termine au-dessus du bouton flottant */
     .list-card {
-        padding-bottom: 56px;
+        padding-bottom: 88px;
     }
 }
 

@@ -32,9 +32,17 @@
     border-bottom: 1px solid var(--border);
 }
 
+/* la classe globale .tabs ajoute un trait et des marges : on les annule ici */
 .tabs {
     display: flex;
     gap: 4px;
+    padding: 0;
+    border-bottom: 0;
+}
+
+.tabs button,
+.list-head .btn {
+    white-space: nowrap;
 }
 
 .tabs button {
@@ -319,5 +327,18 @@ textarea.input {
 
     .messages {
         max-height: 60vh;
+    }
+}
+
+/* petit écran : le bouton se réduit au "+" pour laisser la place aux deux onglets */
+@media (max-width: 479px) {
+    .new-thread {
+        width: 36px;
+        padding: 0;
+        justify-content: center;
+    }
+
+    .new-label {
+        display: none;
     }
 }

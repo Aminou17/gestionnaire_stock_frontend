@@ -67,11 +67,31 @@ describe("audit sentence", () => {
         expect(sentence.note).toBe("en espèces");
     });
 
-    it("should keep an unknown action without inventing a sentence", () => {
+    it("should keep an unknown action without inventing a sentence or showing its code", () => {
         expect(getAuditSentence(log({ action: "NEW_THING" }))).toEqual({
             verb: "a fait une action",
-            note: "NEW_THING",
         });
+    });
+
+    it("should describe a reopened cash register with its reason", () => {
+        expect(
+            getAuditSentence(log({ action: "CASH_SESSION_REOPENED", details: { reason: "Oubli" } })),
+        ).toEqual({ verb: "a rouvert la caisse", note: "Oubli" });
+    });
+
+    it("should count the products of an applied inventory", () => {
+        const sentence = getAuditSentence(
+            log({ action: "INVENTORY_APPLIED", details: { adjustments: [{}, {}] } }),
+        );
+
+        expect(sentence.verb).toBe("a appliqué un inventaire au stock");
+        expect(sentence.note).toBe("2 produits corrigés");
+    });
+
+    it("should tell an imported batch of products", () => {
+        expect(
+            getAuditSentence(log({ action: "PRODUCTS_IMPORTED", details: { count: 12 } })).verb,
+        ).toBe("a importé 12 produits");
     });
 
     it("should list only the known fields that changed", () => {

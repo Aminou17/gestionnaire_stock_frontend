@@ -552,9 +552,8 @@
 
 @if (auth.isAdmin()) {
     <!-- téléphone : bouton flottant au-dessus de la barre du bas -->
-    <button type="button" class="fab" (click)="newProduct()">
-        <app-icon name="plus" [size]="20" />
-        Nouveau produit
+    <button type="button" class="fab" (click)="newProduct()" aria-label="Nouveau produit">
+        <app-icon name="plus" [size]="24" />
     </button>
 
     <app-product-form (saved)="refresh()" />

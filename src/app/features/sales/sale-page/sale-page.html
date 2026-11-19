@@ -299,13 +299,15 @@
             <section class="card sheet">
                 <h2 class="section-title">
                     Produits vendus
+                    <!-- tout sur une seule interpolation : sinon un espace s'invite avant la parenthèse -->
                     <span class="muted"
                         >({{ sale.items.length }}
-                        {{ sale.items.length > 1 ? "produits" : "produit" }}
-                        @if (itemsCount() !== sale.items.length) {
-                            · {{ itemsCount() }} pièces
-                        }
-                        )</span
+                        {{ sale.items.length > 1 ? "produits" : "produit"
+                        }}{{
+                            itemsCount() !== sale.items.length
+                                ? " · " + itemsCount() + " pièces"
+                                : ""
+                        }})</span
                     >
                 </h2>
                 <ul class="items">

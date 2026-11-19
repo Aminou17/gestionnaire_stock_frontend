@@ -196,7 +196,7 @@ describe("Products", () => {
         await render(true, [product({ purchase_price: 1100 })]);
 
         expect(el.querySelector(".new-product")).not.toBeNull();
-        expect(el.querySelector(".fab")?.textContent).toContain("Nouveau produit");
+        expect(el.querySelector(".fab")?.getAttribute("aria-label")).toBe("Nouveau produit");
         expect(el.querySelector(".product-card .more-btn")).not.toBeNull();
         expect(text()).toContain("Prix d'achat");
     });
