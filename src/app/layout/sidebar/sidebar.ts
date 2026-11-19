@@ -1,5 +1,16 @@
-import { Component, DestroyRef, ElementRef, computed, inject, signal } from "@angular/core";
-import { RouterLink, RouterLinkActive } from "@angular/router";
+import {
+    Component,
+    DestroyRef,
+    ElementRef,
+    computed,
+    effect,
+    inject,
+    signal,
+    untracked,
+} from "@angular/core";
+import { toSignal } from "@angular/core/rxjs-interop";
+import { NavigationEnd, Router, RouterLink, RouterLinkActive } from "@angular/router";
+import { filter, map } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
@@ -10,7 +21,7 @@ import { ThemeService } from "../../core/theme/theme.service";
 import { Icon } from "../../shared/icon/icon";
 import { Avatar } from "../../shared/avatar/avatar";
 import { LayoutService } from "../layout.service";
-import { FOOTER_LINKS, SECTIONS } from "../nav-items";
+import { FOOTER_LINKS, NavItem, SECTIONS } from "../nav-items";
 
 @Component({
     selector: "app-sidebar",
@@ -40,18 +51,75 @@ export class Sidebar {
 
         const timer = setInterval(refresh, 60_000);
         inject(DestroyRef).onDestroy(() => clearInterval(timer));
+
+        effect(() => {
+            const group = this.sections()
+                .flatMap((section) => section.items)
+                .find((item) => this.holdsUrl(item));
+
+            if (group) {
+                untracked(() =>
+                    this.openGroups.update((list) =>
+                        list.includes(group.label) ? list : [...list, group.label],
+                    ),
+                );
+            }
+        });
     }
 
-    // menu à plat : le manager ne voit que les pages auxquelles il a accès
+    // la page affichée est dans ce groupe
+    holdsUrl(group: NavItem) {
+        const path = this.url().split("?")[0];
+        return (group.children ?? []).some(
+            (child) => path === child.path || path.startsWith(child.path + "/"),
+        );
+    }
+
+    isOpen(group: NavItem) {
+        return this.openGroups().includes(group.label);
+    }
+
+    toggle(group: NavItem) {
+        this.openGroups.update((list) =>
+            list.includes(group.label)
+                ? list.filter((label) => label !== group.label)
+                : [...list, group.label],
+        );
+    }
+
+    // pastille d'alertes sur le groupe quand il est fermé, pour ne pas la perdre
+    groupCount(group: NavItem) {
+        const hasAlerts = (group.children ?? []).some((child) => child.path === "/alerts");
+        return hasAlerts && !this.isOpen(group) ? this.alerts.count() : 0;
+    }
+
+    // le manager ne voit que les pages auxquelles il a accès ; un groupe sans page disparaît
     sections = computed(() => {
         const isAdmin = this.auth.isAdmin();
+        const allowed = (item: NavItem) => isAdmin || !item.adminOnly;
+
         return SECTIONS.map((section) => ({
             ...section,
             items: section.items
-                .flatMap((item) => item.children ?? [item])
-                .filter((item) => isAdmin || !item.adminOnly),
+                .filter(allowed)
+                .map((item) =>
+                    item.children ? { ...item, children: item.children.filter(allowed) } : item,
+                )
+                .filter((item) => !item.children || item.children.length > 0),
         })).filter((section) => section.items.length > 0);
     });
+
+    // groupes ouverts : celui de la page affichée s'ouvre seul, le reste se plie à la main
+    openGroups = signal<string[]>([]);
+
+    private router = inject(Router);
+    private url = toSignal(
+        this.router.events.pipe(
+            filter((event) => event instanceof NavigationEnd),
+            map(() => this.router.url),
+        ),
+        { initialValue: this.router.url },
+    );
 
     footerLinks = computed(() =>
         FOOTER_LINKS.filter((link) => this.auth.isAdmin() || !link.adminOnly),

@@ -47,6 +47,14 @@ describe("OpenCashDialog", () => {
         await fixture.whenStable();
     }
 
+    it("should fill the amount from a quick choice", async () => {
+        const chips = el.querySelectorAll<HTMLButtonElement>(".amounts .chip");
+        chips[1].click();
+        await fixture.whenStable();
+
+        expect(fixture.componentInstance.form.getRawValue().openingAmount).toBe(10000);
+    });
+
     it("should open the cash register with the typed amount, then close and notify", async () => {
         const opened = vi.fn();
         fixture.componentInstance.opened.subscribe(opened);

@@ -61,31 +61,33 @@ describe("Sidebar", () => {
             "Clients",
             "Caisse",
             "Produits",
-            "Historique du stock",
             "Catégories",
-            "Meilleures ventes",
+            "Historique du stock",
             "Stock faible",
+            "Meilleures ventes",
         ]);
     });
 
-    it("should list every page flat, with no foldable group", async () => {
+    it("should group the pages under Stock, Achats and Équipe", async () => {
         const el = await render(true, 2);
 
-        expect(el.querySelector("button.group")).toBeNull();
+        const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
+
+        expect(groups).toEqual(["Stock", "Achats", "Équipe"]);
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
             "Clients",
             "Caisse",
             "Produits",
-            "Historique du stock",
-            "Corriger le stock",
-            "Inventaire",
             "Catégories",
+            "Inventaire",
+            "Corriger le stock",
+            "Historique du stock",
+            "Stock faible",
             "Meilleures ventes",
             "Entrées de stock",
             "Fournisseurs",
-            "Stock faible",
             "Utilisateurs",
             "Historique des actions",
         ]);
@@ -96,21 +98,44 @@ describe("Sidebar", () => {
         expect(adjust.getAttribute("href")).toBe("/products?adjust=1");
     });
 
-    it("should show Settings to everyone and Subscription to the admin", async () => {
-        const admin = await render(true);
-        const links = (el: HTMLElement) =>
-            [...el.querySelectorAll<HTMLAnchorElement>(".secondary a")].map((a) =>
-                a.getAttribute("href"),
-            );
+    it("should open and close a group by hand", async () => {
+        const el = await render(true);
+        const group = el.querySelector<HTMLButtonElement>("button.group")!;
 
-        expect(links(admin)).toEqual(["/settings", "/subscription"]);
+        expect(group.getAttribute("aria-expanded")).toBe("false");
+
+        group.click();
+        await stable();
+
+        expect(group.getAttribute("aria-expanded")).toBe("true");
+
+        group.click();
+        await stable();
+
+        expect(group.getAttribute("aria-expanded")).toBe("false");
     });
 
-    it("should hide Subscription from the manager", async () => {
+    it("should keep the alert count on the Stock group while it is closed", async () => {
+        const el = await render(true, 4);
+
+        expect(el.querySelector("button.group .count")?.textContent).toBe("4");
+    });
+
+    it("should not show Achats and Équipe to the manager", async () => {
         const el = await render(false);
 
-        expect(el.querySelector(".secondary a[href='/subscription']")).toBeNull();
-        expect(el.querySelector(".secondary a[href='/settings']")).not.toBeNull();
+        const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
+
+        expect(groups).toEqual(["Stock"]);
+    });
+
+    it("should show only Settings at the bottom, for everyone", async () => {
+        const admin = await render(true);
+        const links = [...admin.querySelectorAll<HTMLAnchorElement>(".secondary a")].map((a) =>
+            a.getAttribute("href"),
+        );
+
+        expect(links).toEqual(["/settings"]);
     });
 
     it("should show the default picture, the name and the role in the profile", async () => {

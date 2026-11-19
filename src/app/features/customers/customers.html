@@ -206,6 +206,13 @@
             </div>
         }
 
+        <div class="rows-head" aria-hidden="true">
+            <span class="head-client">Client</span>
+            <span class="head-last">Dernier achat</span>
+            <span class="head-due">Reste à payer</span>
+            <span class="head-spent">Total dépensé</span>
+        </div>
+
         <ul class="rows" [class.reloading]="customers.isLoading()">
             @for (customer of list(); track customer.id) {
                 <li [class.with-remind]="unpaid()">
@@ -221,23 +228,25 @@
                         <span class="name">{{ customer.name }}</span>
 
                         <small class="meta muted">
-                            @if (customer.phone) {
-                                <span class="phone-number">{{ formatPhone(customer.phone) }}</span>
-                            } @else {
-                                Sans téléphone
-                            }
-                            <span class="meta-count">
-                                · {{ customer.purchases_count }} achat{{
+                            @if (customer.purchases_count > 0) {
+                                {{ customer.purchases_count }} achat{{
                                     customer.purchases_count > 1 ? "s" : ""
                                 }}
-                            </span>
+                                @if (customer.last_purchase_at) {
+                                    <span class="meta-last">
+                                        · {{ customer.last_purchase_at | date: "d MMM" }}
+                                    </span>
+                                }
+                            } @else {
+                                Aucun achat
+                            }
                         </small>
 
                         <small class="last muted">
                             @if (customer.last_purchase_at) {
-                                Dernier achat le {{ customer.last_purchase_at | date: "d MMM y" }}
+                                {{ customer.last_purchase_at | date: "d MMM y" }}
                             } @else {
-                                Aucun achat
+                                —
                             }
                         </small>
 
@@ -245,7 +254,7 @@
                             <span class="badge badge-neutral due">Supprimé</span>
                         } @else if (customer.due_amount > 0) {
                             <span class="badge badge-warning due">
-                                Reste à payer {{ customer.due_amount | fcfa }}
+                                Reste {{ customer.due_amount | fcfa }}
                             </span>
                         }
 

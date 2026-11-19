@@ -19,6 +19,7 @@ const session = (id: number, overrides: Partial<CashSession> = {}): CashSession 
     difference: -500,
     opened_at: "2026-11-10T08:00:00",
     closed_at: "2026-11-10T19:00:00",
+    opened_by: 1,
     opened_by_name: "Yabre M.",
     closed_by_name: "Awa K.",
     closing_note: null,

@@ -246,6 +246,8 @@ app-page-header {
 
     .actions .btn {
         flex: 1;
+        padding: 0 8px;
+        white-space: nowrap;
     }
 
     .quick .btn {
@@ -311,4 +313,63 @@ app-page-header {
 
 .gap.out {
     color: var(--danger);
+}
+
+.last-closed {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-hover);
+    color: inherit;
+    text-decoration: none;
+}
+
+.last-closed:hover {
+    border-color: var(--primary);
+}
+
+.last-text,
+.last-end {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.last-end {
+    align-items: flex-end;
+    font-variant-numeric: tabular-nums;
+}
+
+.last-end .in {
+    color: var(--success);
+}
+
+.last-end .out {
+    color: var(--danger);
+}
+
+.reminder {
+    border: 1px solid var(--primary);
+    background: var(--surface);
+    color: var(--text);
+}
+
+/* le rappel du soir tient sur une ligne, le bouton à droite */
+@media (max-width: 767px) {
+    .reminder {
+        flex-wrap: nowrap;
+    }
+
+    .reminder > span {
+        flex: 1 1 0;
+    }
+
+    .reminder .link-btn {
+        margin-left: auto;
+        padding: 0 4px;
+    }
 }

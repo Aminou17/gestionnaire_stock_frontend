@@ -691,3 +691,15 @@ tbody tr:hover {
         height: 84px;
     }
 }
+
+/* très petit téléphone : les trois pastilles doivent tenir sur la ligne sans défiler */
+@media (max-width: 400px) {
+    .status-chips {
+        gap: 4px;
+    }
+
+    .status-chips .chip {
+        padding: 0 9px;
+        font-size: 13px;
+    }
+}

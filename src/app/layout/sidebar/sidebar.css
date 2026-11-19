@@ -105,9 +105,10 @@
     border: 0;
     border-radius: 8px;
     background: var(--sidebar-hover);
-    color: var(--sidebar-text);
+    color: var(--sidebar-text-soft);
     font: inherit;
     font-size: var(--fs-body);
+    font-weight: 550;
     cursor: pointer;
 }
 
@@ -128,6 +129,11 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
+
+    /* une ombre en bas indique qu'il reste des liens plus bas ; elle disparaît en fin de liste */
+    background:
+        linear-gradient(var(--sidebar-bg), var(--sidebar-bg)) bottom / 100% 20px no-repeat local,
+        linear-gradient(transparent, rgb(0 0 0 / 0.35)) bottom / 100% 20px no-repeat scroll;
 }
 
 nav {
@@ -137,7 +143,7 @@ nav {
 }
 
 .section-title {
-    margin: 14px 12px 4px;
+    margin: 12px 12px 4px;
     font-size: var(--fs-micro);
     font-weight: var(--fw-semibold);
     letter-spacing: 0.08em;
@@ -154,8 +160,9 @@ nav .group {
     height: 36px;
     padding: 0 12px;
     border-radius: 8px;
-    color: var(--sidebar-text);
+    color: var(--sidebar-text-soft);
     font-size: var(--fs-body);
+    font-weight: 550;
     text-decoration: none;
     transition:
         background 0.15s,
@@ -168,6 +175,7 @@ nav .group {
     background: transparent;
     font: inherit;
     font-size: var(--fs-body);
+    font-weight: 550;
     cursor: pointer;
 }
 
@@ -203,11 +211,28 @@ nav .group .label + .arrow {
 .children {
     display: none;
     gap: 2px;
-    padding-left: 14px;
+    margin-left: 23px;
+    padding-left: 8px;
+    border-left: 1px solid var(--sidebar-hover);
 }
 
 .children.shown {
     display: grid;
+}
+
+/* les pages d'un groupe n'ont pas d'icône : le trait à gauche suffit à les rattacher */
+.children a {
+    height: 34px;
+}
+
+.children a app-icon {
+    display: none;
+}
+
+/* groupe fermé qui contient la page affichée */
+nav .group.has-active {
+    color: var(--sidebar-text-strong);
+    font-weight: var(--fw-semibold);
 }
 
 nav a:hover,
@@ -257,21 +282,22 @@ nav a.active {
     height: 36px;
     padding: 0 12px;
     border-radius: 8px;
-    color: var(--sidebar-text);
+    color: var(--sidebar-text-soft);
     font-size: var(--fs-body);
+    font-weight: 550;
     text-decoration: none;
 }
 
-/* ordinateur : Paramètres reste visible en bas de la liste tant qu'on n'est pas arrivé à sa place */
+/* ordinateur : Paramètres et Abonnement restent visibles en bas de la liste */
 @media (min-width: 1024px) {
     .secondary {
-        display: contents;
-    }
-
-    .secondary > a:first-child {
         position: sticky;
         bottom: 0;
         z-index: 1;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--sidebar-hover);
+        border-bottom: 0;
         background: var(--sidebar-bg);
     }
 }
@@ -468,7 +494,17 @@ nav a.active {
     /* barre étroite : les pages du groupe s'affichent à plat */
     .collapsed .children {
         display: grid;
+        margin-left: 0;
         padding-left: 0;
+        border-left: 0;
+    }
+
+    .collapsed .children a {
+        height: 36px;
+    }
+
+    .collapsed .children a app-icon {
+        display: inline-flex;
     }
 
     .collapsed .section-title {

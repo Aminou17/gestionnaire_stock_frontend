@@ -45,20 +45,57 @@
                     <p class="section-title">{{ section.title }}</p>
                 }
                 @for (item of section.items; track item.label) {
-                    <a
-                        [routerLink]="item.path"
-                        [queryParams]="item.queryParams"
-                        routerLinkActive="active"
-                        [routerLinkActiveOptions]="{ exact: !!item.exact }"
-                        [attr.title]="layout.collapsed() ? item.label : null"
-                        (click)="close()"
-                    >
-                        <app-icon [name]="item.icon" />
-                        <span class="label">{{ item.label }}</span>
-                        @if (item.path === "/alerts" && alerts.count() > 0) {
-                            <span class="count">{{ alerts.count() }}</span>
-                        }
-                    </a>
+                    @if (item.children; as children) {
+                        <button
+                            type="button"
+                            class="group"
+                            [class.has-active]="holdsUrl(item) && !isOpen(item)"
+                            [attr.aria-expanded]="isOpen(item)"
+                            (click)="toggle(item)"
+                        >
+                            <app-icon [name]="item.icon" />
+                            <span class="label">{{ item.label }}</span>
+                            @if (groupCount(item) > 0) {
+                                <span class="count">{{ groupCount(item) }}</span>
+                            }
+                            <app-icon
+                                class="arrow"
+                                [class.turned]="isOpen(item)"
+                                name="chevron-down"
+                                [size]="16"
+                            />
+                        </button>
+                        <div class="children" [class.shown]="isOpen(item)">
+                            @for (child of children; track child.label) {
+                                <a
+                                    [routerLink]="child.path"
+                                    [queryParams]="child.queryParams"
+                                    routerLinkActive="active"
+                                    [routerLinkActiveOptions]="{ exact: !!child.exact }"
+                                    [attr.title]="layout.collapsed() ? child.label : null"
+                                    (click)="close()"
+                                >
+                                    <app-icon [name]="child.icon" />
+                                    <span class="label">{{ child.label }}</span>
+                                    @if (child.path === "/alerts" && alerts.count() > 0) {
+                                        <span class="count">{{ alerts.count() }}</span>
+                                    }
+                                </a>
+                            }
+                        </div>
+                    } @else {
+                        <a
+                            [routerLink]="item.path"
+                            [queryParams]="item.queryParams"
+                            routerLinkActive="active"
+                            [routerLinkActiveOptions]="{ exact: !!item.exact }"
+                            [attr.title]="layout.collapsed() ? item.label : null"
+                            (click)="close()"
+                        >
+                            <app-icon [name]="item.icon" />
+                            <span class="label">{{ item.label }}</span>
+                        </a>
+                    }
                 }
             }
         </nav>

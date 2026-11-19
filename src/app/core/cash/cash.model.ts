@@ -34,6 +34,7 @@ export interface CashSession {
     difference: number | null;
     opened_at: string;
     closed_at: string | null;
+    opened_by: number;
     opened_by_name: string | null;
     closed_by_name: string | null;
     // explication de l'écart donnée à la clôture
@@ -46,6 +47,8 @@ export interface CashSession {
 }
 
 export interface CashSessionDetail extends CashSession {
+    // ventes payées en Mobile Money : elles ne passent pas par le tiroir
+    mobile_money_total?: number;
     movements: CashMovement[];
 }
 

@@ -109,7 +109,7 @@ export class Dashboard {
             ? (this.salesPage.value().counters?.unpaid ?? 0)
             : 0;
         if (count === 0) return "Tout est encaissé";
-        return `${count} vente${count > 1 ? "s" : ""} à solder`;
+        return `${count} vente${count > 1 ? "s" : ""} non réglée${count > 1 ? "s" : ""}`;
     });
 
     profitHint = computed(() => {
@@ -166,7 +166,7 @@ export class Dashboard {
         const cash = this.cash();
         if (!cash) return "";
         if (cash.status === "OPEN")
-            return `Ouverte à ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
+            return `Ouverte depuis ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
         return `Clôturée à ${formatDate(cash.closedAt!, "HH:mm", this.locale)}`;
     });
 
@@ -177,14 +177,14 @@ export class Dashboard {
         if (this.canOpenCash())
             items.push({
                 icon: "banknote",
-                text: "La caisse n'est pas ouverte : impossible d'enregistrer une vente.",
+                text: "La caisse n'est pas ouverte. Ouvrez-la pour vendre.",
                 label: "Ouvrir la caisse",
             });
         const cash = this.cash();
         if (this.auth.isAdmin() && cash?.status === "CLOSED")
             items.push({
                 icon: "banknote",
-                text: "La caisse est clôturée : impossible d'enregistrer une vente.",
+                text: "La caisse est clôturée. Rouvrez-la pour continuer à vendre.",
                 label: "Rouvrir la caisse",
                 reopenId: cash.id,
             });

@@ -82,8 +82,9 @@ describe("Customers", () => {
         expect(text()).toContain("Awa Kouba");
         expect(text()).toContain("3 achats");
         expect(text()).toContain("45 000 F");
-        expect(text()).toContain("Reste à payer 6 500 F");
-        expect(text()).toContain("Sans téléphone");
+        expect(text()).toContain("Reste 6 500 F");
+        // le numéro reste dans la fiche, pas sur les lignes de la liste
+        expect(text()).not.toContain("123 45 67");
     });
 
     it("should ask only the customers who owe when the chip is pressed", async () => {

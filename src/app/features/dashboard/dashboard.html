@@ -83,7 +83,6 @@
 
     @if (todo().length > 0) {
         <section class="todo" aria-label="À faire maintenant">
-            <h2>À faire maintenant</h2>
             @for (item of todo(); track item.label) {
                 <div class="todo-item">
                     <app-icon [name]="item.icon" />

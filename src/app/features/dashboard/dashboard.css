@@ -33,15 +33,11 @@ app-page-header {
 .todo {
     display: grid;
     gap: 8px;
-    padding: 16px;
+    padding: 10px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
+    border-left: 4px solid var(--warning, #d97706);
     border-radius: var(--radius, 12px);
-}
-
-.todo h2 {
-    margin: 0;
-    font-size: 16px;
 }
 
 .start {
@@ -120,6 +116,7 @@ app-page-header {
     align-items: center;
     gap: 10px;
     margin: 0;
+    color: var(--text);
 }
 
 .todo-item span {
@@ -128,13 +125,9 @@ app-page-header {
 }
 
 @media (max-width: 767px) {
-    .todo-item {
-        flex-wrap: wrap;
-    }
-
     .todo-item .btn {
         min-height: 44px;
-        width: 100%;
+        flex: none;
     }
 }
 
