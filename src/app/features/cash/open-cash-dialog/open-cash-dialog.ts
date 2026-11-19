@@ -9,7 +9,7 @@ import { CashSessionService } from "../../../core/cash/cash-session.service";
     selector: "app-open-cash-dialog",
     imports: [ReactiveFormsModule, FcfaPipe],
     templateUrl: "./open-cash-dialog.html",
-    styleUrl: "../../../shared/dialog/dialog.css",
+    styleUrls: ["../../../shared/dialog/dialog.css", "./open-cash-dialog.css"],
 })
 export class OpenCashDialog {
     private cash = inject(CashSessionService);
@@ -23,6 +23,9 @@ export class OpenCashDialog {
         openingAmount: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
     });
 
+    // fonds de départ les plus courants
+    amounts = [5000, 10000, 20000];
+
     saving = signal(false);
     error = signal<string | null>(null);
 
@@ -31,6 +34,10 @@ export class OpenCashDialog {
         this.error.set(null);
         this.dialog().nativeElement.showModal();
         this.dialog().nativeElement.querySelector("input")?.select();
+    }
+
+    pick(amount: number) {
+        this.form.controls.openingAmount.setValue(amount);
     }
 
     close() {

@@ -20,6 +20,7 @@ const closed: CashSessionDetail = {
     difference: -500,
     opened_at: "2026-11-10T08:00:00",
     closed_at: "2026-11-10T19:00:00",
+    opened_by: 1,
     opened_by_name: "Yabre M.",
     closed_by_name: "Awa K.",
     closing_note: null,
@@ -91,6 +92,22 @@ describe("CashSessionPage", () => {
         expect(text()).toContain("Montantcompté11500F");
         expect(text()).toContain("ClôtureHeure19:00ParAwaK.");
         expect(text()).toContain("Vente#108");
+    });
+
+    it("should offer a closing ticket only for a closed session", async () => {
+        await render(() => of(closed));
+
+        const ticket = el.querySelector(".ticket");
+
+        expect(text()).toContain("Ticket");
+        expect(ticket?.textContent?.replace(/\s+/g, "")).toContain("Compté11500F");
+        expect(ticket?.textContent?.replace(/\s+/g, "")).toContain("Écart");
+    });
+
+    it("should not offer a closing ticket while the session is open", async () => {
+        await render(() => of({ ...closed, status: "OPEN", closed_at: null }));
+
+        expect(el.querySelector(".ticket")).toBeNull();
     });
 
     it("should not show a gap for a session that is still open", async () => {

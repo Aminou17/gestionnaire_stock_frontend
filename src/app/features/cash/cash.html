@@ -72,18 +72,34 @@
         </div>
     }
 
+    @if (closingTime() && closeDate(); as date) {
+        <div class="alert reminder banner" role="status">
+            <app-icon name="clock" />
+            <span>Il se fait tard : pensez à clôturer la caisse.</span>
+            <button
+                type="button"
+                class="link-btn"
+                (click)="closeDialog.open(date, cash()?.balance ?? null)"
+            >
+                Clôturer
+            </button>
+        </div>
+    }
+
     <div class="layout">
         <div class="main">
             <section class="card status" [class.open]="isOpen()" aria-live="polite">
                 @if (cash(); as cash) {
                     <div class="status-head">
                         <span class="badge" [class]="isOpen() ? 'badge-success' : 'badge-neutral'">
-                            {{ isOpen() ? "Ma caisse ouverte" : "Ma caisse clôturée" }}
+                            {{ isOpen() ? "Ouverte" : "Clôturée" }}
                         </span>
                         <small class="muted">
-                            Ouverte à {{ cash.openedAt | date: "HH:mm" }}
                             @if (cash.closedAt) {
-                                · clôturée à {{ cash.closedAt | date: "HH:mm" }}
+                                de {{ cash.openedAt | date: "HH:mm" }} à
+                                {{ cash.closedAt | date: "HH:mm" }}
+                            } @else {
+                                depuis {{ cash.openedAt | date: "HH:mm" }}
                             }
                         </small>
                     </div>
@@ -142,14 +158,47 @@
                     <div class="status-head">
                         <span class="badge badge-neutral">Caisse non ouverte</span>
                     </div>
-                    <div class="balance">
-                        <small>Vous n'avez pas ouvert votre caisse aujourd'hui</small>
-                    </div>
+                    <p class="muted note">
+                        Comptez l'argent du tiroir, puis ouvrez la caisse pour vendre.
+                    </p>
                     <div class="actions">
-                        <button type="button" class="btn btn-primary" (click)="openDialog.open()">
+                        <button
+                            type="button"
+                            class="btn btn-primary"
+                            [disabled]="blocker() !== null"
+                            (click)="openDialog.open()"
+                        >
                             Ouvrir la caisse
                         </button>
                     </div>
+                    @if (blocker(); as reason) {
+                        <p class="muted note">{{ reason }}</p>
+                    }
+                    @if (lastClosed.value(); as last) {
+                        <a
+                            [routerLink]="['/cash/sessions', last.id]"
+                            [state]="backState"
+                            class="last-closed"
+                        >
+                            <span class="last-text">
+                                <small class="muted">Dernière clôture</small>
+                                <strong>{{ last.session_date | date: "EEEE d MMMM" }}</strong>
+                            </span>
+                            <span class="last-end">
+                                <strong appMoney>{{ last.actual_amount | fcfa }}</strong>
+                                <small
+                                    [class.in]="last.difference! > 0"
+                                    [class.out]="last.difference! < 0"
+                                >
+                                    {{
+                                        last.difference === 0
+                                            ? "Aucun écart"
+                                            : "Écart " + (last.difference | fcfa: true)
+                                    }}
+                                </small>
+                            </span>
+                        </a>
+                    }
                 }
             </section>
 
@@ -216,7 +265,7 @@
                         (click)="movementDialog.open('DEPOSIT')"
                     >
                         <app-icon name="arrow-down" [size]="18" />
-                        Ajouter
+                        Ajout
                     </button>
                     @if (auth.isAdmin()) {
                         <button
@@ -252,6 +301,9 @@
                                       : "Mouvements du jour"
                             }}
                         </h2>
+                        @if (auth.isAdmin()) {
+                            <a routerLink="/cash/movements">Tout voir</a>
+                        }
                     </div>
                     @if (session.error() && !session.hasValue()) {
                         <div class="inline-error">
@@ -330,6 +382,16 @@
                                     <dd appMoney>{{ cash.balance | fcfa }}</dd>
                                 </div>
                             </dl>
+                            @if (session.value().mobile_money_total) {
+                                <dl class="lines closing">
+                                    <div>
+                                        <dt>Mobile Money, hors tiroir</dt>
+                                        <dd appMoney>
+                                            {{ session.value().mobile_money_total | fcfa }}
+                                        </dd>
+                                    </div>
+                                </dl>
+                            }
                             @if (session.value().status === "CLOSED") {
                                 <dl class="lines closing">
                                     <div>

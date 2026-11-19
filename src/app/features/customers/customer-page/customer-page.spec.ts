@@ -121,6 +121,19 @@ describe("CustomerPage", () => {
         expect(text()).not.toContain("Supprimer ce client");
     });
 
+    it("should not offer to delete a customer who still owes money", async () => {
+        await render();
+
+        expect(el.querySelector("button.danger")).toBeNull();
+        expect(el.textContent!.replace(/\s+/g, " ")).toContain("il ne peut pas être supprimé");
+    });
+
+    it("should offer to delete a customer who owes nothing", async () => {
+        await render({ customer: { ...awa, due_amount: 0 } });
+
+        expect(el.querySelector("button.danger")?.textContent).toContain("Supprimer ce client");
+    });
+
     it("should mark a refunded sale", async () => {
         await render({ sales: [sale(30, { status: "CANCELLED" })] });
         expect(text()).toContain("Remboursée");

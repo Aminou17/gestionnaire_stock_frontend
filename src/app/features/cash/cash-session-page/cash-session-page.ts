@@ -1,6 +1,6 @@
 import { DatePipe, formatDate } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, LOCALE_ID, computed, inject } from "@angular/core";
+import { Component, LOCALE_ID, computed, inject, signal } from "@angular/core";
 import { rxResource, toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { map } from "rxjs";
@@ -15,6 +15,7 @@ import { CashMovementList } from "../cash-movement-list/cash-movement-list";
 import { ReopenCashDialog } from "../reopen-cash-dialog/reopen-cash-dialog";
 import { CloseCashDialog } from "../close-cash-dialog/close-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
+import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 @Component({
@@ -32,10 +33,12 @@ import { MoneyToggle } from "../../../shared/money/money-toggle";
     ],
     templateUrl: "./cash-session-page.html",
     styleUrl: "./cash-session-page.css",
+    host: { "[class.ticket-mode]": "ticketMode()" },
 })
 export class CashSessionPage {
     private cashService = inject(CashSessionService);
     protected auth = inject(AuthService);
+    protected shopName = inject(ShopSettingsService).shopName;
 
     // retour vers la page d'où l'on vient (Caisse ou Historique), sinon l'historique
     private back = getBackLink("/cash/sessions", "Retour à l'historique");
@@ -69,6 +72,18 @@ export class CashSessionPage {
         const err = this.session.error();
         return err instanceof HttpErrorResponse && (err.status === 404 || err.status === 400);
     });
+
+    // le ticket étroit remplace la page le temps de l'impression
+    ticketMode = signal(false);
+
+    printTicket() {
+        this.ticketMode.set(true);
+
+        setTimeout(() => {
+            window.print();
+            this.ticketMode.set(false);
+        });
+    }
 
     print() {
         const title = document.title;

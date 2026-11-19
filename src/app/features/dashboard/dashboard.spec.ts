@@ -260,7 +260,7 @@ describe("Dashboard", () => {
 
         expect(text()).toContain("À encaisser");
         expect(text()).toContain("12 000 F");
-        expect(text()).toContain("2 ventes à solder");
+        expect(text()).toContain("2 ventes non réglées");
     });
 
     it("should compare today with yesterday", async () => {
@@ -294,7 +294,7 @@ describe("Dashboard", () => {
         await render();
 
         expect(text()).toContain("312 000 F");
-        expect(text()).toContain("Ouverte à 08:05");
+        expect(text()).toContain("Ouverte depuis 08:05");
     });
 
     it("should offer to open the cash register when it is closed", async () => {

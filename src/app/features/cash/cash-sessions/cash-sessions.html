@@ -120,9 +120,6 @@
                             >{{ session.session_date | date: "EEEE d MMMM" }}</a
                         >
                         <p class="session-sub">{{ hours(session) }}</p>
-                        @if (session.opening_amount !== null) {
-                            <p class="session-sub">Ouverture {{ session.opening_amount | fcfa }}</p>
-                        }
                     </div>
                     <div class="session-end">
                         @if (session.actual_amount !== null) {

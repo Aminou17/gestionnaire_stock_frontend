@@ -226,3 +226,86 @@ app-page-header {
         border-left: 1px solid var(--border);
     }
 }
+
+.apart {
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+}
+
+/* sur petit écran, les montants passent avant la liste des mouvements */
+@media (max-width: 1023px) {
+    .main,
+    .side {
+        display: contents;
+    }
+
+    .summary {
+        order: 1;
+    }
+
+    .amounts {
+        order: 2;
+    }
+
+    .movements {
+        order: 3;
+    }
+
+    .steps-card {
+        order: 4;
+    }
+}
+
+/* ticket de clôture : invisible à l'écran, imprimé en 80 mm */
+.ticket {
+    display: none;
+}
+
+@media print {
+    :host(.ticket-mode) .layout,
+    :host(.ticket-mode) .print-title {
+        display: none;
+    }
+
+    :host(.ticket-mode) .ticket {
+        display: block;
+        width: 72mm;
+        color: #000;
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    .ticket h2 {
+        margin: 0 0 4px;
+        font-size: 15px;
+        text-align: center;
+    }
+
+    .ticket p {
+        margin: 0;
+    }
+
+    .ticket hr {
+        margin: 6px 0;
+        border: 0;
+        border-top: 1px dashed #000;
+    }
+
+    .ticket .center {
+        text-align: center;
+    }
+
+    .ticket .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .ticket .strong {
+        font-weight: 700;
+    }
+
+    .ticket .signature {
+        margin-top: 24px;
+    }
+}

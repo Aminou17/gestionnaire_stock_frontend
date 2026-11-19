@@ -29,6 +29,7 @@ const detail = (overrides: Partial<CashSessionDetail> = {}): CashSessionDetail =
     difference: null,
     opened_at: "2026-11-10T08:00:00",
     closed_at: null,
+    opened_by: 1,
     opened_by_name: "Yabre M.",
     closed_by_name: null,
     closing_note: null,
@@ -62,6 +63,7 @@ describe("Cash", () => {
         today = {} as Partial<CashToday>,
         session = detail(),
         failToday = false,
+        lastClosed = null as CashSessionDetail | null,
     } = {}) {
         const fullToday: CashToday = {
             cash: openCash,
@@ -82,6 +84,8 @@ describe("Cash", () => {
                         getToday: () =>
                             failToday ? throwError(() => new Error("fail")) : of(fullToday),
                         getSession: () => of(session),
+                        getSessions: () =>
+                            of({ data: lastClosed ? [lastClosed] : [], pagination: {} }),
                     },
                 },
                 {
@@ -128,7 +132,7 @@ describe("Cash", () => {
     it("should show the balance and the day's movements when the cash is open", async () => {
         await render();
 
-        expect(text()).toContain("Macaisseouverte");
+        expect(text()).toContain("Ouvertedepuis08:00");
         expect(text()).toContain("9500F");
         expect(text()).toContain("Vente#112");
         expect(text()).toContain("Fondsdedépart5000F");
@@ -137,16 +141,48 @@ describe("Cash", () => {
         expect(buttons()).toContain("Clôturer la caisse");
     });
 
+    it("should show the Mobile Money total apart from the drawer", async () => {
+        await render({ session: detail({ mobile_money_total: 42000 }) });
+
+        expect(text()).toContain("MobileMoney,horstiroir42000F");
+    });
+
+    it("should not show a Mobile Money line without Mobile Money sales", async () => {
+        await render();
+
+        expect(text()).not.toContain("MobileMoney");
+    });
+
+    it("should remind to close the cash register in the evening", async () => {
+        vi.useFakeTimers({ toFake: ["Date"] });
+        vi.setSystemTime(new Date(2026, 10, 10, 20, 0));
+
+        await render();
+
+        expect(el.querySelector(".reminder")?.textContent).toContain("pensez à clôturer");
+        vi.useRealTimers();
+    });
+
+    it("should not remind to close the cash register during the day", async () => {
+        vi.useFakeTimers({ toFake: ["Date"] });
+        vi.setSystemTime(new Date(2026, 10, 10, 11, 0));
+
+        await render();
+
+        expect(el.querySelector(".reminder")).toBeNull();
+        vi.useRealTimers();
+    });
+
     it("should let the owner add, spend and withdraw money", async () => {
         await render();
 
-        expect(buttons()).toEqual(expect.arrayContaining(["Ajouter", "Dépense", "Retrait"]));
+        expect(buttons()).toEqual(expect.arrayContaining(["Ajout", "Dépense", "Retrait"]));
     });
 
     it("should let the manager add money but not take it out", async () => {
         await render({ isAdmin: false });
 
-        expect(buttons()).toContain("Ajouter");
+        expect(buttons()).toContain("Ajout");
         expect(buttons()).not.toContain("Dépense");
         expect(buttons()).not.toContain("Retrait");
         expect(buttons()).toContain("Clôturer la caisse");
@@ -198,6 +234,45 @@ describe("Cash", () => {
         expect(buttons()).not.toContain("Nouvelle vente");
     });
 
+    it("should block the opening while the previous cash register is still open", async () => {
+        await render({
+            today: {
+                cash: null,
+                previousOpenSession: {
+                    id: 3,
+                    sessionDate: "2026-11-09",
+                    openedAt: "2026-11-09T08:00:00",
+                    openedBy: 1,
+                    openedByName: "Awa",
+                    balance: 12000,
+                },
+            },
+        });
+
+        const open = [...el.querySelectorAll("button")].find((b) =>
+            b.textContent?.includes("Ouvrir la caisse"),
+        );
+
+        expect(open?.disabled).toBe(true);
+        expect(text()).toContain("Clôturezd'abordvotrecaissedu9novembre");
+    });
+
+    it("should show the last closed cash register when none is open", async () => {
+        await render({
+            today: { cash: null },
+            lastClosed: detail({
+                id: 2,
+                status: "CLOSED",
+                session_date: "2026-11-08",
+                actual_amount: 291000,
+                difference: -500,
+            }),
+        });
+
+        expect(text()).toContain("Dernièreclôture");
+        expect(text()).toContain("291000F");
+    });
+
     it("should let the manager open the cash when it is closed", async () => {
         await render({ isAdmin: false, today: { cash: null } });
 
@@ -218,7 +293,7 @@ describe("Cash", () => {
             }),
         });
 
-        expect(text()).toContain("Macaisseclôturée");
+        expect(text()).toContain("Clôturéede08:00à19:00");
         expect(text()).toContain("Montantcompté9000F");
         expect(text()).toContain("Écart−500F");
         expect(text()).toContain("Explication:Erreurdemonnaie");

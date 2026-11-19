@@ -74,13 +74,19 @@
                         Rouvrir la caisse
                     </button>
                 }
+                @if (cash.status === "CLOSED" && !cash.blind) {
+                    <button type="button" class="btn btn-outline print" (click)="printTicket()">
+                        <app-icon name="receipt" [size]="18" />
+                        Ticket
+                    </button>
+                }
                 <button type="button" class="btn btn-outline print" (click)="print()">
                     <app-icon name="printer" [size]="18" />
                     Imprimer
                 </button>
             </section>
 
-            <section class="card panel">
+            <section class="card panel movements">
                 <div class="card-header">
                     <h2>Mouvements ({{ cash.movements.length }})</h2>
                 </div>
@@ -93,7 +99,7 @@
         </div>
 
         <aside class="side">
-            <section class="card panel">
+            <section class="card panel steps-card">
                 <div class="card-header">
                     <h2>Déroulement</h2>
                 </div>
@@ -127,7 +133,7 @@
                 </div>
             </section>
 
-            <section class="card panel">
+            <section class="card panel amounts">
                 <div class="card-header">
                     <h2>Montants</h2>
                 </div>
@@ -180,10 +186,80 @@
                             </div>
                         }
                     </dl>
+                    @if (cash.mobile_money_total) {
+                        <dl class="lines apart">
+                            <div>
+                                <dt>Mobile Money, hors tiroir</dt>
+                                <dd appMoney>{{ cash.mobile_money_total | fcfa }}</dd>
+                            </div>
+                        </dl>
+                    }
                 }
             </section>
         </aside>
     </div>
+
+    @if (cash.status === "CLOSED" && !cash.blind) {
+        <section class="ticket" aria-hidden="true">
+            <h2>{{ shopName() }}</h2>
+            <p class="center">Clôture de caisse</p>
+            <p class="center">{{ cash.session_date | date: "EEEE d MMMM y" }}</p>
+            <hr />
+            <p class="row"><span>Caisse de</span><span>{{ cash.opened_by_name ?? "—" }}</span></p>
+            <p class="row">
+                <span>Ouverte à</span><span>{{ cash.opened_at | date: "HH:mm" }}</span>
+            </p>
+            <p class="row">
+                <span>Clôturée à</span><span>{{ cash.closed_at | date: "HH:mm" }}</span>
+            </p>
+            <hr />
+            <p class="row">
+                <span>Fonds de départ</span><span>{{ cash.opening_amount | fcfa }}</span>
+            </p>
+            <p class="row"><span>Ventes</span><span>{{ summary().sales | fcfa }}</span></p>
+            @if (summary().deposits > 0) {
+                <p class="row">
+                    <span>Argent ajouté</span><span>{{ summary().deposits | fcfa }}</span>
+                </p>
+            }
+            @if (summary().refunds > 0) {
+                <p class="row">
+                    <span>Remboursements</span><span>-{{ summary().refunds | fcfa }}</span>
+                </p>
+            }
+            @if (summary().expenses > 0) {
+                <p class="row">
+                    <span>Dépenses</span><span>-{{ summary().expenses | fcfa }}</span>
+                </p>
+            }
+            @if (summary().withdrawals > 0) {
+                <p class="row">
+                    <span>Retraits</span><span>-{{ summary().withdrawals | fcfa }}</span>
+                </p>
+            }
+            <hr />
+            <p class="row strong">
+                <span>Attendu</span><span>{{ cash.theoretical_amount | fcfa }}</span>
+            </p>
+            <p class="row strong">
+                <span>Compté</span><span>{{ cash.actual_amount | fcfa }}</span>
+            </p>
+            <p class="row strong">
+                <span>Écart</span><span>{{ cash.difference | fcfa: true }}</span>
+            </p>
+            @if (cash.closing_note) {
+                <p>Explication : {{ cash.closing_note }}</p>
+            }
+            @if (cash.mobile_money_total) {
+                <hr />
+                <p class="row">
+                    <span>Mobile Money (hors tiroir)</span
+                    ><span>{{ cash.mobile_money_total | fcfa }}</span>
+                </p>
+            }
+            <p class="signature">Signature :</p>
+        </section>
+    }
 }
 
 <app-close-cash-dialog #closeDialog (closed)="session.reload()" />

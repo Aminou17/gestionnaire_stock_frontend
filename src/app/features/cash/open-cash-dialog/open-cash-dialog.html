@@ -39,6 +39,19 @@
             }
         </label>
 
+        <div class="amounts" role="group" aria-label="Montants courants">
+            @for (amount of amounts; track amount) {
+                <button
+                    type="button"
+                    class="chip"
+                    [attr.aria-pressed]="form.controls.openingAmount.value === amount"
+                    (click)="pick(amount)"
+                >
+                    {{ amount | fcfa }}
+                </button>
+            }
+        </div>
+
         <div class="actions">
             <button type="button" class="btn btn-outline" [disabled]="saving()" (click)="close()">
                 Annuler

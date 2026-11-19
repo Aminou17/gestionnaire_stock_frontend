@@ -17,6 +17,8 @@ export interface NavSection {
     items: NavItem[];
 }
 
+// Accueil, Ventes, Clients et Caisse en direct ; le reste est rangé en trois groupes qui
+// s'ouvrent seuls quand on est dans leurs pages, comme Shopify : peu de lignes à lire
 export const SECTIONS: NavSection[] = [
     {
         items: [
@@ -24,66 +26,78 @@ export const SECTIONS: NavSection[] = [
             { label: "Ventes", path: "/sales", icon: "cart" },
             { label: "Clients", path: "/customers", icon: "user" },
             { label: "Caisse", path: "/cash", icon: "banknote" },
-        ],
-    },
-    {
-        title: "Stock",
-        items: [
-            { label: "Produits", path: "/products", icon: "package" },
-            { label: "Historique du stock", path: "/stock-movements", icon: "movements" },
             {
-                label: "Corriger le stock",
-                path: "/products",
-                queryParams: { adjust: "1" },
-                icon: "edit",
-                exact: true,
-                adminOnly: true,
+                label: "Stock",
+                icon: "package",
+                children: [
+                    { label: "Produits", path: "/products", icon: "package" },
+                    { label: "Catégories", path: "/categories", icon: "tag" },
+                    {
+                        label: "Inventaire",
+                        path: "/inventories",
+                        icon: "clipboard",
+                        adminOnly: true,
+                    },
+                    {
+                        label: "Corriger le stock",
+                        path: "/products",
+                        queryParams: { adjust: "1" },
+                        icon: "edit",
+                        exact: true,
+                        adminOnly: true,
+                    },
+                    { label: "Historique du stock", path: "/stock-movements", icon: "movements" },
+                    // la rotation a sa propre ligne : Stock faible ne doit pas s'allumer dessus
+                    { label: "Stock faible", path: "/alerts", icon: "alert", exact: true },
+                    { label: "Meilleures ventes", path: "/alerts/rotation", icon: "trending-up" },
+                ],
             },
-            { label: "Inventaire", path: "/inventories", icon: "clipboard", adminOnly: true },
-            { label: "Catégories", path: "/categories", icon: "tag" },
-            { label: "Meilleures ventes", path: "/alerts/rotation", icon: "trending-up" },
-        ],
-    },
-    {
-        title: "Achats",
-        items: [
             {
-                label: "Entrées de stock",
-                path: "/stock-entries",
+                label: "Achats",
                 icon: "stock-entry",
                 adminOnly: true,
+                children: [
+                    {
+                        label: "Entrées de stock",
+                        path: "/stock-entries",
+                        icon: "stock-entry",
+                        adminOnly: true,
+                    },
+                    { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
+                ],
             },
-            { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
-            // la rotation a sa propre ligne dans Stock : Stock faible ne doit pas s'allumer dessus
-            { label: "Stock faible", path: "/alerts", icon: "alert", exact: true },
-        ],
-    },
-    {
-        title: "Équipe",
-        items: [
-            { label: "Utilisateurs", path: "/users", icon: "users", adminOnly: true },
             {
-                label: "Historique des actions",
-                path: "/audit-logs",
-                icon: "audit",
+                label: "Équipe",
+                icon: "users",
                 adminOnly: true,
+                children: [
+                    { label: "Utilisateurs", path: "/users", icon: "users", adminOnly: true },
+                    {
+                        label: "Historique des actions",
+                        path: "/audit-logs",
+                        icon: "audit",
+                        adminOnly: true,
+                    },
+                ],
             },
         ],
     },
 ];
 
-// liens secondaires en bas du menu : compte et boutique, puis aide
-export const FOOTER_LINKS: NavItem[] = [
-    { label: "Paramètres", path: "/settings", icon: "settings" },
-    { label: "Abonnement", path: "/subscription", icon: "card", adminOnly: true },
-];
+// lien fixe en bas du menu ; l'abonnement se trouve dans les paramètres
+export const FOOTER_LINKS: NavItem[] = [{ label: "Paramètres", path: "/settings", icon: "settings" }];
 
 // pages proposées par la recherche, selon le rôle
 export function searchablePages(
     isAdmin: boolean,
 ): { label: string; hint: string; path: string; icon: IconName }[] {
     const pages = SECTIONS.flatMap((section) =>
-        section.items.map((page) => ({ ...page, hint: section.title ?? "Menu" })),
+        section.items.flatMap((item) =>
+            (item.children ?? [item]).map((page) => ({
+                ...page,
+                hint: item.children ? item.label : (section.title ?? "Menu"),
+            })),
+        ),
     )
         .filter((page) => isAdmin || !page.adminOnly)
         .map((page) => ({ label: page.label, hint: page.hint, path: page.path!, icon: page.icon }));

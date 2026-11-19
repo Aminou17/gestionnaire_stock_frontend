@@ -4,6 +4,50 @@
     max-width: 720px;
 }
 
+.layout {
+    display: grid;
+    gap: 16px;
+}
+
+.side,
+.history {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    min-width: 0;
+}
+
+.admin-zone {
+    grid-column: 1 / -1;
+}
+
+.note-due {
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
+/* ordinateur : la fiche à gauche, l'historique des achats à droite */
+@media (min-width: 1100px) {
+    :host {
+        max-width: 1100px;
+    }
+
+    .layout {
+        grid-template-columns: 360px minmax(0, 1fr);
+        align-items: start;
+        column-gap: 24px;
+    }
+
+    .side {
+        position: sticky;
+        top: 16px;
+    }
+
+    .history .section-title {
+        margin-top: 0;
+    }
+}
+
 /* l'en-tête garde toute la largeur, seul le contenu est limité */
 app-page-header {
     margin-bottom: -4px;

@@ -27,7 +27,6 @@ import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
-import { formatPhone } from "../../shared/phone";
 import { productInitials } from "../products/product-look";
 import { CustomerForm } from "./customer-form/customer-form";
 import { reminderLink } from "./customer-reminder";
@@ -65,7 +64,6 @@ export class Customers {
     private customerForm = viewChild.required(CustomerForm);
 
     protected sorts = SORTS;
-    protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
     protected initials = productInitials;
 
     search = signal("");
