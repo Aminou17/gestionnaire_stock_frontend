@@ -210,14 +210,6 @@ nav .group .label + .arrow {
 
 .children {
     display: none;
-    gap: 2px;
-    margin-left: 23px;
-    padding-left: 8px;
-    border-left: 1px solid var(--sidebar-hover);
-}
-
-.children.shown {
-    display: grid;
 }
 
 /* les pages d'un groupe n'ont pas d'icône : le trait à gauche suffit à les rattacher */
@@ -592,5 +584,281 @@ nav a.active {
         inset: 0;
         z-index: 30;
         background: var(--overlay);
+    }
+}
+
+/* rubrique : nom et, dessous, la page affichée */
+nav .group {
+    height: auto;
+    min-height: 36px;
+    text-align: left;
+}
+
+.group-text {
+    display: grid;
+    min-width: 0;
+    padding: 4px 0;
+    line-height: 1.25;
+}
+
+.group-current {
+    overflow: hidden;
+    color: var(--sidebar-muted);
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-medium);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+nav .group .group-text + .arrow {
+    margin-left: auto;
+    opacity: 0.6;
+}
+
+/* fenêtre des carreaux, au-dessus de la page */
+.launcher-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: rgb(15 23 42 / 0.45);
+    backdrop-filter: blur(6px);
+    animation: fade-in 0.18s ease-out both;
+}
+
+.launcher {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 71;
+    display: grid;
+    gap: 20px;
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 22px;
+    background:
+        radial-gradient(
+            120% 60% at 0% 0%,
+            color-mix(in srgb, var(--primary) 9%, transparent),
+            transparent 60%
+        ),
+        var(--surface);
+    color: var(--text);
+    box-shadow:
+        0 24px 60px rgb(15 23 42 / 0.28),
+        0 2px 6px rgb(15 23 42 / 0.08);
+    transform: translate(-50%, -50%);
+    animation: launcher-in 0.22s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.launcher-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.launcher-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(
+        145deg,
+        var(--primary),
+        color-mix(in srgb, var(--primary) 65%, #000)
+    );
+    color: var(--on-primary);
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.launcher-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.launcher-text h2 {
+    margin: 0;
+    font-size: var(--fs-title, 1.25rem);
+    font-weight: var(--fw-bold);
+    line-height: 1.2;
+}
+
+.launcher-text p {
+    margin: 2px 0 0;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.launcher-close {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.launcher-close:hover {
+    color: var(--text);
+}
+
+.launcher-close:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tile {
+    --tone: var(--primary);
+    position: relative;
+    display: grid;
+    align-content: space-between;
+    gap: 12px;
+    height: 100%;
+    min-height: 112px;
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, var(--tone) 16%, var(--border));
+    border-radius: 16px;
+    background: linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--tone) 9%, var(--surface)),
+        var(--surface) 70%
+    );
+    color: var(--text);
+    text-decoration: none;
+    transition:
+        box-shadow 0.15s,
+        border-color 0.15s,
+        transform 0.15s;
+}
+
+.tile:hover {
+    border-color: color-mix(in srgb, var(--tone) 50%, var(--border));
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--tone) 16%, transparent);
+    transform: translateY(-2px);
+}
+
+.tile:active {
+    transform: scale(0.97);
+}
+
+.tile:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* la page affichée : bord coloré */
+.tile.active {
+    border-color: var(--tone);
+    box-shadow: inset 0 0 0 1px var(--tone);
+}
+
+/* une couleur par carreau, toujours la même place */
+.tiles li:nth-child(6n + 2) .tile {
+    --tone: var(--violet);
+}
+.tiles li:nth-child(6n + 3) .tile {
+    --tone: var(--success);
+}
+.tiles li:nth-child(6n + 4) .tile {
+    --tone: var(--warning);
+}
+.tiles li:nth-child(6n + 5) .tile {
+    --tone: var(--danger);
+}
+.tiles li:nth-child(6n + 6) .tile {
+    --tone: #14b8a6;
+}
+
+.tile-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(
+        145deg,
+        var(--tone),
+        color-mix(in srgb, var(--tone) 70%, #000)
+    );
+    color: #fff;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--tone) 35%, transparent);
+}
+
+.tile-label {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.tile-count {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+@keyframes launcher-in {
+    from {
+        opacity: 0;
+        transform: translate(-50%, calc(-50% + 16px)) scale(0.97);
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes sheet-in {
+    from {
+        transform: translate(-50%, 100%);
+    }
+}
+
+/* téléphone : deux carreaux par ligne, fenêtre posée en bas de l'écran */
+@media (max-width: 599px) {
+    .launcher {
+        top: auto;
+        bottom: 0;
+        width: 100%;
+        max-height: 88dvh;
+        padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+        border-radius: 24px 24px 0 0;
+        transform: translateX(-50%);
+        animation-name: sheet-in;
+    }
+
+    .tiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .tile {
+        min-height: 104px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .launcher,
+    .launcher-backdrop {
+        animation: none;
     }
 }

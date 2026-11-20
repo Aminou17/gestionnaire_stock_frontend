@@ -100,21 +100,45 @@ describe("Sidebar", () => {
         expect(adjust.getAttribute("href")).toBe("/products?adjust=1");
     });
 
-    it("should open and close a group by hand", async () => {
-        const el = await render(true);
+    it("should show the pages of a group as tiles in a window, and close it", async () => {
+        const el = await render(true, 3);
         const group = el.querySelector<HTMLButtonElement>("button.group")!;
-
-        expect(group.getAttribute("aria-expanded")).toBe("false");
-
-        group.click();
-        await stable();
-
-        expect(group.getAttribute("aria-expanded")).toBe("true");
+        expect(el.querySelector(".tiles")).toBeNull();
 
         group.click();
         await stable();
 
-        expect(group.getAttribute("aria-expanded")).toBe("false");
+        const tiles = [...el.querySelectorAll(".tile .tile-label")].map((t) => t.textContent);
+        expect(tiles).toEqual([
+            "Produits",
+            "Catégories",
+            "Inventaires",
+            "Corriger le stock",
+            "Historique du stock",
+            "Alertes de stock",
+            "Rotation des produits",
+        ]);
+        expect(el.querySelector(".launcher h2")?.textContent).toContain("Stock");
+        expect(el.querySelector(".tile .count")?.textContent).toBe("3");
+
+        el.querySelector<HTMLButtonElement>(".launcher-close")!.click();
+        await stable();
+
+        expect(el.querySelector(".tiles")).toBeNull();
+    });
+
+    it("should go back to the menu after choosing a tile", async () => {
+        const el = await render(true);
+        el.querySelector<HTMLButtonElement>("button.group")!.click();
+        await stable();
+
+        // clic avec Ctrl : le lien ne navigue pas, le menu doit quand même se refermer
+        el.querySelector(".tile")!.dispatchEvent(
+            new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }),
+        );
+        await stable();
+
+        expect(el.querySelector(".tiles")).toBeNull();
     });
 
     it("should not repeat the alert count on the closed Stock group", async () => {
