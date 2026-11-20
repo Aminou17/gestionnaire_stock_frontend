@@ -33,19 +33,11 @@ describe("RecentSales", () => {
         el = fixture.nativeElement;
     });
 
-    const sellers = () =>
-        [...el.querySelectorAll(".seller")].map((span) =>
-            span.textContent?.replace(/\s+/g, " ").trim().replace(/^· /, ""),
-        );
-
-    it("should show the seller name only", async () => {
-        fixture.componentRef.setInput("sales", [
-            sale({ id: 1, user_name: "Yabre M.", user_role: "admin" }),
-            sale({ id: 2, user_name: "Awa", user_role: "manager" }),
-        ]);
+    it("should not show the seller name, to keep the card light", async () => {
+        fixture.componentRef.setInput("sales", [sale({ id: 1, user_name: "Yabre M." })]);
         await fixture.whenStable();
 
-        expect(sellers()).toEqual(["Yabre M.", "Awa"]);
+        expect(el.textContent).not.toContain("Yabre M.");
     });
 
     it("should link each sale to its detail page and pluralise the articles", async () => {
@@ -60,14 +52,6 @@ describe("RecentSales", () => {
         expect(rows[0].textContent).toContain("1 article");
         expect(rows[0].textContent).not.toContain("1 articles");
         expect(rows[1].textContent).toContain("3 articles");
-    });
-
-    it("should hide the seller when showSeller is false", async () => {
-        fixture.componentRef.setInput("showSeller", false);
-        fixture.componentRef.setInput("sales", [sale({})]);
-        await fixture.whenStable();
-
-        expect(el.querySelector(".seller")).toBeNull();
     });
 
     it("should label cancelled sales as refunded", async () => {

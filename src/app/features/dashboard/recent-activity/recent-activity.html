@@ -28,7 +28,7 @@
                             @case ("SALE") {
                                 <strong>Vente #{{ item.saleNumber }}</strong>
                                 <small
-                                    >{{ item.userName }} · {{ item.itemsCount }} article{{
+                                    >{{ item.itemsCount }} article{{
                                         (item.itemsCount ?? 0) > 1 ? "s" : ""
                                     }}
                                     · {{ when(item) }}</small
@@ -55,7 +55,7 @@
                             }
                             @case ("CASH_OPENING") {
                                 <strong>Ouverture de caisse</strong>
-                                <small>{{ item.userName }} · {{ when(item) }}</small>
+                                <small>{{ when(item) }}</small>
                             }
                         }
                     </div>
