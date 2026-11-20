@@ -84,7 +84,9 @@ app-page-header {
     border-bottom: 0;
 }
 
-.row:hover {
+/* au clavier, la ligne entière s'éclaire comme au survol */
+.row:hover,
+.row:has(.name:focus-visible) {
     background: var(--surface-hover);
 }
 

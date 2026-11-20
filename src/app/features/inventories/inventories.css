@@ -51,7 +51,9 @@ tbody tr:last-child td {
     border-bottom: 0;
 }
 
-tbody tr:hover {
+/* au clavier, la ligne entière s'éclaire comme au survol */
+tbody tr:hover,
+tbody tr:has(a:focus-visible) {
     background: var(--surface-hover);
 }
 
