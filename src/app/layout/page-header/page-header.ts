@@ -3,13 +3,14 @@ import { RouterLink, UrlTree } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { Avatar } from "../../shared/avatar/avatar";
+import { BackLink } from "../../shared/back-link/back-link";
 import { Icon } from "../../shared/icon/icon";
 import { LayoutService } from "../layout.service";
 import { Notifications } from "../notifications/notifications";
 
 @Component({
     selector: "app-page-header",
-    imports: [RouterLink, Avatar, Icon, Notifications],
+    imports: [RouterLink, BackLink, Avatar, Icon, Notifications],
     templateUrl: "./page-header.html",
     styleUrl: "./page-header.css",
 })

@@ -122,7 +122,7 @@ describe("NewInventory", () => {
         component.save();
 
         expect(createInventory).toHaveBeenCalledWith([{ productId: 3, actualStock: 26 }]);
-        expect(navigate).toHaveBeenCalledWith(["/inventories", 11]);
+        expect(navigate).toHaveBeenCalledWith(["/inventories", 11], { replaceUrl: true });
     });
 
     it("should not send anything when no product is counted", async () => {

@@ -19,9 +19,10 @@ export const MAX_MESSAGE = 2000;
 // La messagerie d'assistance : liste des conversations à gauche, conversation à droite.
 // Les utilisateurs d'une boutique écrivent au support ; le propriétaire lit et répond.
 // Sur téléphone on voit l'un ou l'autre.
+import { BackLink } from "../../shared/back-link/back-link";
 @Component({
     selector: "app-support-inbox",
-    imports: [DatePipe, FormsModule, RouterLink, PageHeader, Icon, EmptyState],
+    imports: [DatePipe, FormsModule, RouterLink, BackLink, PageHeader, Icon, EmptyState],
     templateUrl: "./support-inbox.html",
     styleUrl: "./support-inbox.css",
 })
@@ -148,7 +149,8 @@ export class SupportInbox {
                 this.subject.set("");
                 this.newMessage.set("");
                 this.threads.reload();
-                this.router.navigate([this.base, thread.id]);
+                // la conversation créée prend la place du formulaire dans l'historique
+                this.router.navigate([this.base, thread.id], { replaceUrl: true });
             },
             error: (err: HttpErrorResponse) => this.fail(err),
         });

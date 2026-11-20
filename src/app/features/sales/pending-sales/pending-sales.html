@@ -2,8 +2,8 @@
     title="Ventes en attente"
     subtitle="Faites sans internet, envoyées dès le retour du réseau"
     section="Ventes"
-    back="/sales"
-    backLabel="Ventes"
+    [back]="back.link"
+    [backLabel]="back.label"
 />
 
 @if (outbox.count() === 0) {

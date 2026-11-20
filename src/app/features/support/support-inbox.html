@@ -101,7 +101,7 @@
     <section class="card detail-pane" aria-label="Conversation">
         @if (composing) {
             <div class="detail-head">
-                <a class="back" [routerLink]="base" aria-label="Retour aux conversations"
+                <a class="back" [appBackLink]="base" aria-label="Retour aux conversations"
                     ><app-icon name="chevron-left" [size]="20"
                 /></a>
                 <div>
@@ -147,7 +147,7 @@
                     >
                 </label>
                 <div class="actions">
-                    <a class="btn btn-outline" [routerLink]="base">Annuler</a>
+                    <a class="btn btn-outline" [appBackLink]="base">Annuler</a>
                     <button
                         type="submit"
                         class="btn btn-primary"
@@ -164,7 +164,7 @@
             @if (thread.hasValue()) {
                 @let t = thread.value();
                 <div class="detail-head">
-                    <a class="back" [routerLink]="base" aria-label="Retour aux conversations"
+                    <a class="back" [appBackLink]="base" aria-label="Retour aux conversations"
                         ><app-icon name="chevron-left" [size]="20"
                     /></a>
                     <div class="head-text">
@@ -239,7 +239,7 @@
             } @else if (thread.error()) {
                 <div class="empty" role="alert">
                     Conversation introuvable.
-                    <a class="btn btn-outline btn-sm" [routerLink]="base">Retour</a>
+                    <a class="btn btn-outline btn-sm" [appBackLink]="base">Retour</a>
                 </div>
             } @else {
                 <div class="loading">

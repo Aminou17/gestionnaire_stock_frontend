@@ -27,6 +27,7 @@ import { formatDeletion, formatLastLogin } from "../user-display";
 import { UserService } from "../user.service";
 import { getBackLink } from "../../../core/back-link";
 
+import { injectGoBack } from "../../../shared/back-link/back-link";
 @Component({
     selector: "app-user-page",
     imports: [RouterLink, DatePipe, PageHeader, Icon, Avatar, UserForm, PasswordDialog],
@@ -34,6 +35,7 @@ import { getBackLink } from "../../../core/back-link";
     styleUrl: "./user-page.css",
 })
 export class UserPage {
+    private goBack = injectGoBack();
     protected back = getBackLink("/users", "Retour aux utilisateurs");
     private userService = inject(UserService);
     private auth = inject(AuthService);
@@ -149,7 +151,8 @@ export class UserPage {
                 next: () => {
                     this.deleting.set(false);
                     this.closeConfirm();
-                    this.router.navigate(["/users"]);
+                    // la fiche supprimée quitte l'historique
+                    this.goBack("/users");
                 },
                 error: (err: HttpErrorResponse) => {
                     this.deleting.set(false);

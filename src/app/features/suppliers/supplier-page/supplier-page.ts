@@ -26,6 +26,7 @@ import { BackState, getBackLink } from "../../../core/back-link";
 // nombre de livraisons montrées directement sur la fiche
 const PREVIEW_SIZE = 5;
 
+import { injectGoBack } from "../../../shared/back-link/back-link";
 @Component({
     selector: "app-supplier-page",
     imports: [RouterLink, DatePipe, PageHeader, Icon, WhatsappIcon, SupplierForm],
@@ -33,6 +34,7 @@ const PREVIEW_SIZE = 5;
     styleUrl: "./supplier-page.css",
 })
 export class SupplierPage {
+    private goBack = injectGoBack();
     protected back = getBackLink("/suppliers", "Retour aux fournisseurs");
     private supplierService = inject(SupplierService);
     private entryService = inject(StockEntryService);
@@ -167,7 +169,8 @@ export class SupplierPage {
                 next: () => {
                     this.deleting.set(false);
                     this.closeConfirm();
-                    this.router.navigate(["/suppliers"]);
+                    // la fiche supprimée quitte l'historique
+                    this.goBack("/suppliers");
                 },
                 error: (err: HttpErrorResponse) => {
                     this.deleting.set(false);

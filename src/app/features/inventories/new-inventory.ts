@@ -133,7 +133,8 @@ export class NewInventory {
             .createInventory(items)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
-                next: (inventory) => this.router.navigate(["/inventories", inventory.id]),
+                next: (inventory) =>
+                    this.router.navigate(["/inventories", inventory.id], { replaceUrl: true }),
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);
                     this.error.set(

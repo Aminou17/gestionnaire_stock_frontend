@@ -9,7 +9,7 @@ import {
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ActivatedRoute, Router, RouterLink } from "@angular/router";
+import { ActivatedRoute } from "@angular/router";
 import { concatMap, from, tap, toArray } from "rxjs";
 
 import { getBackLink } from "../../../core/back-link";
@@ -36,9 +36,10 @@ const toId = (value: string | null) => {
     return Number.isInteger(id) && id > 0 ? id : null;
 };
 
+import { BackLink, injectGoBack } from "../../../shared/back-link/back-link";
 @Component({
     selector: "app-new-stock-entry",
-    imports: [RouterLink, PageHeader, Icon, ScanButton, ProductForm],
+    imports: [BackLink, PageHeader, Icon, ScanButton, ProductForm],
     templateUrl: "./new-stock-entry.html",
     styleUrl: "./new-stock-entry.css",
 })
@@ -48,13 +49,13 @@ export class NewStockEntry implements AfterViewInit {
     private supplierService = inject(SupplierService);
     private stockAlerts = inject(LowStockAlertService);
     private toast = inject(ToastService);
-    private router = inject(Router);
     private route = inject(ActivatedRoute);
     private destroyRef = inject(DestroyRef);
 
     private productForm = viewChild.required(ProductForm);
 
     protected back = getBackLink("/stock-entries", "Entrées de stock");
+    private goBack = injectGoBack();
     protected initials = productInitials;
     protected tone = categoryTone;
 
@@ -331,7 +332,8 @@ export class NewStockEntry implements AfterViewInit {
                     this.toast.show(
                         `Entrée enregistrée : ${units} unité${units > 1 ? "s" : ""} reçue${units > 1 ? "s" : ""}`,
                     );
-                    this.router.navigateByUrl(this.back.link);
+                    // le formulaire quitte l'historique : la touche retour ne le rouvre pas
+                    this.goBack(this.back.link);
                 },
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);

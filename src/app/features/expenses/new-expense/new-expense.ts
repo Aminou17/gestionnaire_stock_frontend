@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { Router, RouterLink } from "@angular/router";
+import { RouterLink } from "@angular/router";
 
 import { getBackLink } from "../../../core/back-link";
 import { CashMovementService } from "../../../core/cash/cash-movement.service";
@@ -23,9 +23,10 @@ const PLACEHOLDERS: Record<string, string> = {
     OTHER: "Ex. Dépense exceptionnelle",
 };
 
+import { BackLink, injectGoBack } from "../../../shared/back-link/back-link";
 @Component({
     selector: "app-new-expense",
-    imports: [RouterLink, PageHeader, Icon, FcfaPipe],
+    imports: [RouterLink, BackLink, PageHeader, Icon, FcfaPipe],
     templateUrl: "./new-expense.html",
     styleUrl: "./new-expense.css",
 })
@@ -33,10 +34,10 @@ export class NewExpense {
     private movements = inject(CashMovementService);
     private cashService = inject(CashSessionService);
     private toast = inject(ToastService);
-    private router = inject(Router);
     private destroyRef = inject(DestroyRef);
 
     protected back = getBackLink("/expenses", "Dépenses");
+    private goBack = injectGoBack();
     protected categories = EXPENSE_CATEGORIES;
     protected quickAmounts = [500, 1000, 2000, 5000];
 
@@ -93,7 +94,8 @@ export class NewExpense {
                 next: () => {
                     this.saving.set(false);
                     this.toast.show("Dépense enregistrée");
-                    this.router.navigateByUrl(this.back.link);
+                    // le formulaire quitte l'historique : la touche retour ne le rouvre pas
+                    this.goBack(this.back.link);
                 },
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);

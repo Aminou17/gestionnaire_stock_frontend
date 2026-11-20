@@ -44,6 +44,7 @@ const PAYMENTS: PaymentMethod[] = [
     { label: "Carte bancaire", icon: "wallet" },
 ];
 
+import { getBackLink } from "../../core/back-link";
 @Component({
     selector: "app-subscription",
     imports: [PageHeader, Icon, WhatsappIcon, RouterLink, DatePipe],
@@ -51,6 +52,8 @@ const PAYMENTS: PaymentMethod[] = [
     styleUrl: "./subscription.css",
 })
 export class Subscription {
+    // ouverte depuis les Paramètres ou le bandeau de fin d'essai
+    protected back = getBackLink("/settings", "Paramètres");
     protected plans = PLANS;
     protected payments = PAYMENTS;
     protected whatsapp = whatsappLink();
