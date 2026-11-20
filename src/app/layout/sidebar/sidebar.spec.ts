@@ -193,27 +193,16 @@ describe("Sidebar", () => {
         expect(logoutAsked()).toBe(true);
     });
 
-    it("should offer to install the app from the profile menu", async () => {
-        const install = vi.fn();
-        const el = await render(true, 0, { available: true, canInstall: () => true, install });
-
+    it("should keep the profile menu short", async () => {
+        const el = await render(true, 0, { available: true, canInstall: () => true });
         el.querySelector<HTMLButtonElement>(".profile-btn")!.click();
         await stable();
-        const item = [...el.querySelectorAll<HTMLButtonElement>(".popup button")].find((b) =>
-            b.textContent?.includes("Installer"),
+
+        const items = [...el.querySelectorAll(".popup [role=menuitem]")].map((i) =>
+            i.textContent?.trim(),
         );
-        item!.click();
-        await stable();
-
-        expect(install).toHaveBeenCalled();
-        expect(el.querySelector(".popup")).toBeNull();
-    });
-
-    it("should not offer to install when the app is already installed", async () => {
-        const el = await render(true, 0, { available: false, canInstall: () => false });
-        el.querySelector<HTMLButtonElement>(".profile-btn")!.click();
-        await stable();
-        expect(el.querySelector(".popup")?.textContent).not.toContain("Installer");
+        expect(items.some((i) => i?.startsWith("Mon profil"))).toBe(true);
+        expect(items.join(" ")).not.toMatch(/Aide et contact|Mot de passe|Installer/);
     });
 
     it("should collapse the menu and remember the choice", async () => {

@@ -66,6 +66,21 @@
                     aria-hidden="true"
                 ></span>
             </button>
+
+            <!-- caché quand l'application est déjà installée sur cet appareil -->
+            @if (pwa.available) {
+                <button type="button" class="item" (click)="installApp()">
+                    <span class="item-icon" [style.--tone]="'#2563eb'">
+                        <app-icon name="download" [size]="18" />
+                    </span>
+                    <span class="item-text">
+                        <strong>Installer {{ productName }}</strong>
+                        <small class="muted"
+                            >Une icône sur l'écran d'accueil, comme une appli</small
+                        >
+                    </span>
+                </button>
+            }
         </div>
     </section>
 
