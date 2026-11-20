@@ -52,7 +52,9 @@ tbody tr {
     cursor: pointer;
 }
 
-tbody tr:hover {
+/* au clavier, la ligne entière s'éclaire comme au survol */
+tbody tr:hover,
+tbody tr:has(a:focus-visible) {
     background: var(--surface-hover);
 }
 

@@ -695,3 +695,37 @@ select.chip {
         font-size: var(--fs-kpi);
     }
 }
+
+/* fenêtre de filtres qui monte du bas sur téléphone (Produits, Clients, Mouvements, Journal...) :
+   l'en-tête, la croix et les boutons du bas sont les mêmes partout */
+@media (max-width: 767px) {
+    .filters.open .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filters.open .sheet-head h2 {
+        margin: 0;
+        font-size: var(--fs-heading);
+    }
+
+    .filters.open .sheet-close {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        margin-right: -10px;
+        border: 0;
+        border-radius: 8px;
+        background: none;
+        color: var(--text-muted);
+        cursor: pointer;
+    }
+
+    .filters.open .sheet-foot {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 8px;
+    }
+}

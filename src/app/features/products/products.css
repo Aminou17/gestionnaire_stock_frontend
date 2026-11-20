@@ -569,30 +569,6 @@ td.num small {
         background: var(--overlay);
     }
 
-    .sheet-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .sheet-head h2 {
-        margin: 0;
-        font-size: var(--fs-heading);
-    }
-
-    .sheet-close {
-        display: grid;
-        place-items: center;
-        width: 44px;
-        height: 44px;
-        margin-right: -10px;
-        border: 0;
-        border-radius: 8px;
-        background: none;
-        color: var(--text-muted);
-        cursor: pointer;
-    }
-
     .field-label {
         display: block;
         font-size: var(--fs-small);
@@ -604,12 +580,6 @@ td.num small {
         gap: 6px;
         flex: none;
         width: auto;
-    }
-
-    .sheet-foot {
-        display: grid;
-        grid-template-columns: 1fr 1.5fr;
-        gap: 8px;
     }
 
     /* compteurs : une rangée fine de pastilles qui servent de filtres */

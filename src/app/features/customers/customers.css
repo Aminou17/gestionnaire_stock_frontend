@@ -484,29 +484,6 @@ li:last-child > .row {
         background: var(--overlay);
     }
 
-    .sheet-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .sheet-head h2 {
-        margin: 0;
-        font-size: var(--fs-heading);
-    }
-
-    .sheet-close {
-        display: grid;
-        place-items: center;
-        width: 44px;
-        height: 44px;
-        margin-right: -10px;
-        border: 0;
-        border-radius: 8px;
-        background: none;
-        color: var(--text-muted);
-        cursor: pointer;
-    }
 }
 
 /* total des restes à payer, au-dessus de la liste filtrée */

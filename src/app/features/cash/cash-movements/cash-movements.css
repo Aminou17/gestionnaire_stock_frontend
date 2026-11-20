@@ -269,41 +269,11 @@ app-cash-movement-list {
         display: block;
     }
 
-    .sheet-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-
-    .sheet-head h2 {
-        margin: 0;
-        font-size: var(--fs-heading);
-    }
-
-    .sheet-close {
-        display: grid;
-        place-items: center;
-        width: 44px;
-        height: 44px;
-        margin-right: -10px;
-        border: 0;
-        border-radius: 8px;
-        background: none;
-        color: var(--text-muted);
-        cursor: pointer;
-    }
-
     .field-label {
         display: block;
         margin-bottom: 6px;
         font-size: var(--fs-small);
         font-weight: var(--fw-medium);
-    }
-
-    .sheet-foot {
-        display: grid;
-        grid-template-columns: 1fr 1.5fr;
-        gap: 8px;
     }
 
     .stats {
