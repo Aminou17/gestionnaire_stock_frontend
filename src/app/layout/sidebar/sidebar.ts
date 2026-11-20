@@ -3,10 +3,8 @@ import {
     DestroyRef,
     ElementRef,
     computed,
-    effect,
     inject,
     signal,
-    untracked,
 } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from "@angular/router";
@@ -32,7 +30,7 @@ import { FOOTER_LINKS, NavItem, SECTIONS } from "../nav-items";
     styleUrl: "./sidebar.css",
     host: {
         "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "profileOpen.set(false)",
+        "(document:keydown.escape)": "profileOpen.set(false); panel.set(null)",
     },
 })
 export class Sidebar {
@@ -56,19 +54,6 @@ export class Sidebar {
         const timer = setInterval(refresh, 60_000);
         inject(DestroyRef).onDestroy(() => clearInterval(timer));
 
-        effect(() => {
-            const group = this.sections()
-                .flatMap((section) => section.items)
-                .find((item) => this.holdsUrl(item));
-
-            if (group) {
-                untracked(() =>
-                    this.openGroups.update((list) =>
-                        list.includes(group.label) ? list : [...list, group.label],
-                    ),
-                );
-            }
-        });
     }
 
     // la page affichée est dans ce groupe
@@ -79,16 +64,41 @@ export class Sidebar {
         );
     }
 
-    isOpen(group: NavItem) {
-        return this.openGroups().includes(group.label);
+    // nom de la page affichée dans ce groupe, montré sous le nom du groupe
+    activeChild(group: NavItem) {
+        const path = this.url().split("?")[0];
+        return (
+            (group.children ?? [])
+                .filter((child) => !child.queryParams)
+                .find((child) =>
+                    child.exact
+                        ? path === child.path
+                        : path === child.path || path.startsWith(child.path + "/"),
+                )?.label ?? null
+        );
     }
 
-    toggle(group: NavItem) {
-        this.openGroups.update((list) =>
-            list.includes(group.label)
-                ? list.filter((label) => label !== group.label)
-                : [...list, group.label],
+    // rubrique ouverte en carreaux ; le menu réduit garde ses icônes à plat
+    panel = signal<string | null>(null);
+    panelGroup = computed(() => {
+        const label = this.panel();
+        if (!label || this.layout.collapsed()) return null;
+        return (
+            this.sections()
+                .flatMap((section) => section.items)
+                .find((item) => item.label === label && item.children) ?? null
         );
+    });
+
+    // sur téléphone, le tiroir se range : la fenêtre des carreaux prend toute la place
+    openPanel(group: NavItem) {
+        this.profileOpen.set(false);
+        this.layout.sidebarOpen.set(false);
+        this.panel.set(group.label);
+    }
+
+    closePanel() {
+        this.panel.set(null);
     }
 
     // pastille d'alertes sur le groupe quand il est fermé, pour ne pas la perdre
@@ -108,9 +118,6 @@ export class Sidebar {
         })).filter((section) => section.items.length > 0);
     });
 
-    // groupes ouverts : celui de la page affichée s'ouvre seul, le reste se plie à la main
-    openGroups = signal<string[]>([]);
-
     private router = inject(Router);
     private url = toSignal(
         this.router.events.pipe(
@@ -126,7 +133,9 @@ export class Sidebar {
 
     profileOpen = signal(false);
 
+    // après un choix, on revient à la liste : le groupe montre la page choisie
     close() {
+        this.panel.set(null);
         this.profileOpen.set(false);
         this.layout.sidebarOpen.set(false);
     }
