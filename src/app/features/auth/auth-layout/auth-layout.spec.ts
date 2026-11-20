@@ -24,14 +24,12 @@ describe("AuthLayout", () => {
         expect(page.textContent).not.toContain("Awa Bazin");
     });
 
-    it("should show the presentation in the page footer on small screens", async () => {
+    it("should show no invented figures, only the footer on small screens", async () => {
         const page = await render();
         const pitch = page.querySelector(".mobile-pitch")!;
 
-        expect(pitch).not.toBeNull();
-        expect(pitch.querySelector(".main-card")).not.toBeNull();
-        expect(pitch.querySelectorAll(".mini").length).toBe(2);
-        expect(pitch.querySelectorAll(".figures > div").length).toBe(3);
+        expect(page.querySelector(".main-card")).toBeNull();
+        expect(page.textContent).not.toContain("284 500");
         expect(pitch.querySelector("footer")?.textContent).toContain("Boutiki · YABRE TECH");
     });
 

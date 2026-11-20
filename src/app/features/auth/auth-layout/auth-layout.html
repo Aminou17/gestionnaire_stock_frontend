@@ -28,15 +28,7 @@
         <div class="pitch">
             <h2>Votre boutique, sous contrôle.</h2>
             <p>Ventes, caisse et stock au même endroit, avec des alertes avant la rupture.</p>
-
-            <div class="showcase" aria-hidden="true">
-                <ng-container *ngTemplateOutlet="showcase" />
-            </div>
         </div>
-
-        <dl class="figures">
-            <ng-container *ngTemplateOutlet="figures" />
-        </dl>
 
         <footer>
             <span>© {{ year }} {{ productName }} · {{ companyName }}</span>
@@ -79,34 +71,6 @@
         </div>
 
         <section class="mobile-pitch">
-            <div class="mobile-intro" aria-hidden="true">
-                <h2>Ventes, caisse et stock au même endroit.</h2>
-                <p>Des alertes avant la rupture, sur téléphone comme sur ordinateur.</p>
-            </div>
-
-            <div class="showcase" aria-hidden="true">
-                <ng-container *ngTemplateOutlet="showcase" />
-            </div>
-
-            <ul class="benefits" aria-hidden="true">
-                <li>
-                    <span class="benefit-icon"><app-icon name="cart" [size]="18" /></span>
-                    Ventes et caisse
-                </li>
-                <li>
-                    <span class="benefit-icon"><app-icon name="bell" [size]="18" /></span>
-                    Alertes de stock
-                </li>
-                <li>
-                    <span class="benefit-icon"><app-icon name="users" [size]="18" /></span>
-                    Suivi des clients
-                </li>
-            </ul>
-
-            <dl class="figures">
-                <ng-container *ngTemplateOutlet="figures" />
-            </dl>
-
             <footer>
                 <span>© {{ year }} {{ productName }} · {{ companyName }}</span>
                 <nav class="legal-links" aria-label="Informations légales">
@@ -118,59 +82,3 @@
         </section>
     </main>
 </div>
-
-<ng-template #showcase>
-    <div class="mini mini-sale">
-        <span class="mini-icon ok"><app-icon name="check" [size]="14" /></span>
-        <span class="mini-text">
-            <strong>Vente encaissée</strong>
-            <small>15 000 F · à l'instant</small>
-        </span>
-    </div>
-
-    <div class="main-card">
-        <div class="main-top">
-            <span>Ventes de la semaine</span>
-            <span class="chip-up">+12 %</span>
-        </div>
-        <strong class="main-figure">284 500 F</strong>
-        <div class="bars">
-            @for (height of bars; track $index) {
-                <span
-                    class="bar"
-                    [class.last]="$last"
-                    [style.height.%]="height"
-                    [style.animation-delay.ms]="$index * 70"
-                ></span>
-            }
-        </div>
-        <div class="days">
-            @for (day of days; track $index) {
-                <span>{{ day }}</span>
-            }
-        </div>
-    </div>
-
-    <div class="mini mini-alert">
-        <span class="mini-icon warn"><app-icon name="alert" [size]="14" /></span>
-        <span class="mini-text">
-            <strong>Stock faible</strong>
-            <small>Riz parfumé · 2 restants</small>
-        </span>
-    </div>
-</ng-template>
-
-<ng-template #figures>
-    <div>
-        <dt>30 jours</dt>
-        <dd>d'essai gratuit</dd>
-    </div>
-    <div>
-        <dt>2 minutes</dt>
-        <dd>pour démarrer</dd>
-    </div>
-    <div>
-        <dt>Sur téléphone</dt>
-        <dd>et ordinateur</dd>
-    </div>
-</ng-template>

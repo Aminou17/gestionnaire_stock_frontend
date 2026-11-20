@@ -30,7 +30,12 @@
     </div>
 
     @if (error()) {
-        <div class="alert alert-error" role="alert">{{ error() }}</div>
+        <div class="alert alert-error" role="alert">
+            {{ error() }}
+            @if (emailTaken()) {
+                <a routerLink="/login">Se connecter</a>
+            }
+        </div>
     }
 
     @if (step() === 1) {
@@ -82,9 +87,7 @@
                 } @else if (phoneStatus() === "free") {
                     <small class="hint ok">Numéro disponible.</small>
                 } @else {
-                    <small class="hint"
-                        >Avec l'indicatif du pays. Les clients et nous pourrons vous joindre.</small
-                    >
+                    <small class="hint">Avec l'indicatif du pays.</small>
                 }
             </div>
 
@@ -166,10 +169,7 @@
                                 <small>Touchez pour le changer</small>
                             } @else {
                                 <strong>Ajouter un logo</strong>
-                                <small>
-                                    <span class="drag-hint">Glissez-déposez ou </span>PNG ou JPEG,
-                                    facultatif
-                                </small>
+                                <small> PNG ou JPEG, facultatif </small>
                             }
                         </span>
                     </button>

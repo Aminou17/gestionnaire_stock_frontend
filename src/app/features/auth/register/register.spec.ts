@@ -173,7 +173,7 @@ describe("Register", () => {
         await submit();
 
         expect(el.querySelector('[role="alert"]')?.textContent).toContain(
-            "Cet email est déjà utilisé.",
+            "Aucune boutique n'a été créée.",
         );
         expect(router.navigate).not.toHaveBeenCalled();
     });

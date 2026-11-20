@@ -90,6 +90,8 @@ export class Register {
     done = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
+    // l'adresse e-mail a déjà un compte : rien n'a été créé
+    emailTaken = signal(false);
 
     // indicatif proposé au départ : celui du pays où Boutiki démarre
     protected defaultCode = "226";
@@ -246,6 +248,7 @@ export class Register {
 
         this.loading.set(true);
         this.error.set(null);
+        this.emailTaken.set(false);
 
         const { shopName, phone, country, city, firstName, lastName, email, password } =
             this.form.getRawValue();
@@ -285,6 +288,11 @@ export class Register {
                         this.phoneStatus.set("taken");
                         this.phoneMessage.set(err.error.message);
                         this.back();
+                    } else if (err.status === 409) {
+                        this.emailTaken.set(true);
+                        this.error.set(
+                            "Cette adresse e-mail a déjà un compte. Aucune boutique n'a été créée.",
+                        );
                     } else {
                         this.error.set(err.error?.message ?? "Une erreur est survenue, réessayez.");
                     }
