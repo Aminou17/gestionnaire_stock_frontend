@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, computed, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
-import { tap } from "rxjs";
+import { Observable, finalize, map, shareReplay, tap } from "rxjs";
 
 import { API_URL } from "../api.config";
 import { SecretValues } from "../../shared/secret/secret-values";
@@ -22,10 +22,31 @@ export interface User {
     mustChangePassword?: boolean;
 }
 
+// accès de la boutique : essai, payé, délai de grâce, terminé ; null pour le propriétaire
+export type AccessState = "unlimited" | "trial" | "paid" | "grace" | "ended" | "suspended";
+
+export interface Access {
+    state: AccessState;
+    endsAt: string | null;
+    // jours avant la fin (pendant la grâce : avant la coupure)
+    daysLeft: number | null;
+    blocked: boolean;
+    // accès terminé : c'était un essai ou une période payée
+    lastPeriod?: "trial" | "paid";
+}
+
 interface LoginResponse {
     message: string;
     token: string;
+    // session de 30 jours de cet appareil, pour obtenir un nouveau jeton sans se reconnecter
+    refreshToken: string;
     user: User;
+    access: Access | null;
+}
+
+export interface RegisterResult {
+    verificationRequired: true;
+    email: string;
 }
 
 export interface RegisterData {
@@ -50,9 +71,12 @@ export class AuthService {
     private storage = localStorage.getItem("token") ? localStorage : sessionStorage;
 
     private _token = signal(this.storage.getItem("token"));
-    private _user = signal<User | null>(readUser(this.storage));
+    private _user = signal<User | null>(readJson<User>(this.storage, "user"));
+    private _access = signal<Access | null>(readJson<Access>(this.storage, "access"));
+    private refreshing: Observable<string> | null = null;
 
     user = this._user.asReadonly();
+    access = this._access.asReadonly();
     isAdmin = computed(() => this._user()?.role === "admin");
     // propriétaire du logiciel : il gère les boutiques, pas une boutique
     isOwner = computed(() => this._user()?.role === "owner");
@@ -62,17 +86,68 @@ export class AuthService {
         return this._token();
     }
 
+    get refreshToken() {
+        return this.storage.getItem("refreshToken");
+    }
+
+    // le jeton court expire après 1 h ; tant que la session de l'appareil existe, il se renouvelle tout seul
     isLoggedIn() {
         const token = this._token();
         if (!token) return false;
 
-        // le token expire après 1h côté backend ; un token illisible est traité comme expiré
-        const exp = tokenExpiry(token);
-        if (!exp || exp * 1000 < Date.now()) {
-            this.clearSession();
-            return false;
+        if (!this.tokenExpired() || this.refreshToken) return true;
+
+        this.clearSession();
+        return false;
+    }
+
+    // expiré ou sur le point de l'être : on le renouvelle avant d'envoyer la requête
+    tokenExpired(marginSeconds = 30) {
+        const token = this._token();
+        const exp = token ? tokenExpiry(token) : null;
+        return !exp || exp * 1000 < Date.now() + marginSeconds * 1000;
+    }
+
+    // un seul renouvellement à la fois, partagé par les requêtes qui l'attendent
+    refresh(): Observable<string> {
+        if (this.refreshing) return this.refreshing;
+
+        this.refreshing = this.http
+            .post<{ token: string; access: Access | null }>(`${API_URL}/auth/refresh`, {
+                refreshToken: this.refreshToken,
+            })
+            .pipe(
+                tap((res) => {
+                    this.storage.setItem("token", res.token);
+                    this._token.set(res.token);
+                    this.saveAccess(res.access);
+                }),
+                map((res) => res.token),
+                finalize(() => (this.refreshing = null)),
+                shareReplay(1),
+            );
+
+        return this.refreshing;
+    }
+
+    saveAccess(access: Access | null) {
+        if (access) this.storage.setItem("access", JSON.stringify(access));
+        else this.storage.removeItem("access");
+        this._access.set(access);
+    }
+
+    // l'API a refusé une requête car l'essai ou l'abonnement est terminé
+    markAccessEnded() {
+        const access = this._access();
+        if (!access?.blocked) {
+            this.saveAccess({
+                state: "ended",
+                endsAt: access?.endsAt ?? null,
+                daysLeft: 0,
+                blocked: true,
+            });
         }
-        return true;
+        this.router.navigate(["/access-ended"]);
     }
 
     login(email: string, password: string, remember = true) {
@@ -81,11 +156,21 @@ export class AuthService {
             .pipe(tap((res) => this.openSession(res, remember)));
     }
 
-    // la boutique est créée et le commerçant est connecté tout de suite
-    register(data: RegisterData) {
+    // la boutique est créée ; le commerçant confirme ensuite son e-mail avec le code reçu
+    // website et elapsedMs servent de piège à robots
+    register(data: RegisterData & { website: string; elapsedMs: number }) {
+        return this.http.post<RegisterResult>(`${API_URL}/auth/register`, data);
+    }
+
+    // code à 6 chiffres reçu par e-mail : l'adresse est confirmée et la personne est connectée
+    verifyEmail(email: string, code: string) {
         return this.http
-            .post<LoginResponse>(`${API_URL}/auth/register`, data)
+            .post<LoginResponse>(`${API_URL}/auth/verify-email`, { email, code })
             .pipe(tap((res) => this.openSession(res, true)));
+    }
+
+    resendCode(email: string) {
+        return this.http.post<{ message: string }>(`${API_URL}/auth/resend-code`, { email });
     }
 
     // le numéro est-il déjà celui d'une autre boutique ?
@@ -118,17 +203,20 @@ export class AuthService {
         this.clearSession();
         this.storage = remember ? localStorage : sessionStorage;
         this.storage.setItem("token", res.token);
+        if (res.refreshToken) this.storage.setItem("refreshToken", res.refreshToken);
         this.storage.setItem("user", JSON.stringify(res.user));
         this._token.set(res.token);
         this._user.set(res.user);
+        this.saveAccess(res.access ?? null);
     }
 
-    // le nom ou le rôle a pu changer depuis la connexion
+    // le nom, le rôle ou l'accès de la boutique ont pu changer depuis la connexion
     refreshUser() {
-        return this.http.get<User>(`${API_URL}/auth/me`).pipe(
-            tap((user) => {
+        return this.http.get<User & { access?: Access | null }>(`${API_URL}/auth/me`).pipe(
+            tap(({ access, ...user }) => {
                 this.storage.setItem("user", JSON.stringify(user));
                 this._user.set(user);
+                if (access !== undefined) this.saveAccess(access);
             }),
         );
     }
@@ -161,14 +249,18 @@ export class AuthService {
 
     changePassword(currentPassword: string, newPassword: string) {
         return this.http
-            .put<{ message: string; token: string }>(`${API_URL}/auth/password`, {
-                currentPassword,
-                newPassword,
-            })
+            .put<{ message: string; token: string; refreshToken?: string }>(
+                `${API_URL}/auth/password`,
+                {
+                    currentPassword,
+                    newPassword,
+                },
+            )
             .pipe(
                 tap((res) => {
-                    // les anciens tokens sont refusés par le backend : celui-ci garde la session ouverte
+                    // les anciennes sessions sont refusées par le backend : celle-ci garde l'appareil connecté
                     this.storage.setItem("token", res.token);
+                    if (res.refreshToken) this.storage.setItem("refreshToken", res.refreshToken);
                     this._token.set(res.token);
                     const user = this._user();
                     if (user?.mustChangePassword)
@@ -182,6 +274,15 @@ export class AuthService {
 
     logout() {
         this.logoutAsked.set(false);
+
+        // la session de l'appareil est fermée côté serveur ; sans réseau, elle expirera seule
+        const refreshToken = this.refreshToken;
+        if (refreshToken) {
+            this.http
+                .post(`${API_URL}/auth/logout`, { refreshToken })
+                .subscribe({ error: () => {} });
+        }
+
         this.clearSession();
         this.router.navigate(["/login"]);
     }
@@ -194,19 +295,22 @@ export class AuthService {
     private clearSession() {
         for (const store of [localStorage, sessionStorage]) {
             store.removeItem("token");
+            store.removeItem("refreshToken");
             store.removeItem("user");
+            store.removeItem("access");
         }
         this._token.set(null);
         this._user.set(null);
+        this._access.set(null);
         // la valeur du stock ne reste pas visible pour le prochain connecté
         this.secret.revealed.set(false);
     }
 }
 
 // valeur corrompue dans le stockage : on repart d'une session vide au lieu de planter
-function readUser(storage: Storage): User | null {
+function readJson<T>(storage: Storage, key: string): T | null {
     try {
-        return JSON.parse(storage.getItem("user") ?? "null");
+        return JSON.parse(storage.getItem(key) ?? "null");
     } catch {
         return null;
     }

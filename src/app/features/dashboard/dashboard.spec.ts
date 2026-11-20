@@ -313,7 +313,12 @@ describe("Dashboard", () => {
                 openedAt: "2026-11-10T08:00:00",
                 balance: null,
             },
-            pendingExplanation: { id: 4, sessionDate: "2026-11-09", difference: -500, closedBy: 999 },
+            pendingExplanation: {
+                id: 4,
+                sessionDate: "2026-11-09",
+                difference: -500,
+                closedBy: 999,
+            },
         });
 
         expect(text()).not.toContain("n'a pas été clôturée");

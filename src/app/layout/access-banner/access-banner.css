@@ -1,0 +1,77 @@
+.banner {
+    --tone: var(--warning);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 8px 8px 8px 14px;
+    border: 1px solid color-mix(in srgb, var(--tone) 30%, var(--border));
+    border-radius: 12px;
+    background: linear-gradient(
+        100deg,
+        color-mix(in srgb, var(--tone) 12%, var(--surface)) 0%,
+        color-mix(in srgb, var(--tone) 4%, var(--surface)) 100%
+    );
+    color: var(--text);
+    font-size: var(--fs-body);
+}
+
+.banner[data-tone="danger"] {
+    --tone: var(--danger);
+}
+
+.banner > app-icon {
+    flex: none;
+    color: var(--tone);
+}
+
+.text {
+    flex: 1;
+    min-width: 0;
+}
+
+.go {
+    display: inline-flex;
+    align-items: center;
+    flex: none;
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: var(--tone);
+    color: #fff;
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+}
+
+.close {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.close:hover {
+    background: color-mix(in srgb, var(--tone) 12%, transparent);
+    color: var(--text);
+}
+
+@media (max-width: 767px) {
+    .banner {
+        flex-wrap: wrap;
+        padding: 10px 12px;
+    }
+
+    .text {
+        flex-basis: calc(100% - 64px);
+    }
+
+    .go {
+        margin-left: 28px;
+    }
+}

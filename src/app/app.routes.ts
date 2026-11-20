@@ -1,5 +1,6 @@
 import { Routes } from "@angular/router";
 
+import { accessGuard } from "./core/auth/access.guard";
 import { adminGuard } from "./core/auth/admin.guard";
 import { authGuard } from "./core/auth/auth.guard";
 import { guestGuard } from "./core/auth/guest.guard";
@@ -74,6 +75,12 @@ export const routes: Routes = [
                     import("./features/auth/register/register").then((m) => m.Register),
             },
             {
+                path: "verify-email",
+                title: "Confirmez votre adresse",
+                loadComponent: () =>
+                    import("./features/auth/verify-email/verify-email").then((m) => m.VerifyEmail),
+            },
+            {
                 path: "forgot-password",
                 title: "Mot de passe oublié",
                 loadComponent: () =>
@@ -84,9 +91,23 @@ export const routes: Routes = [
         ],
     },
     {
+        // essai ou abonnement terminé : une page à part, sans le menu dont les pages sont fermées
+        path: "access-ended",
+        component: AuthLayout,
+        canActivate: [authGuard, shopGuard],
+        children: [
+            {
+                path: "",
+                title: "Accès terminé",
+                loadComponent: () =>
+                    import("./features/access-ended/access-ended").then((m) => m.AccessEnded),
+            },
+        ],
+    },
+    {
         path: "",
         component: MainLayout,
-        canActivate: [authGuard, shopGuard],
+        canActivate: [authGuard, shopGuard, accessGuard],
         canActivateChild: [passwordChangeGuard],
         children: [
             {

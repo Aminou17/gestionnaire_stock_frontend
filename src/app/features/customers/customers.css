@@ -483,7 +483,6 @@ li:last-child > .row {
         z-index: 40;
         background: var(--overlay);
     }
-
 }
 
 /* total des restes à payer, au-dessus de la liste filtrée */

@@ -25,8 +25,18 @@ const thread = (overrides: Partial<SupportThread> = {}): SupportThread => ({
 const detail: SupportThreadDetail = {
     ...thread(),
     messages: [
-        { id: 1, sender: "user", body: "Bonjour, la caisse ne s'ouvre pas", created_at: "2026-11-16T09:00:00.000Z" },
-        { id: 2, sender: "owner", body: "Essayez de recharger la page", created_at: "2026-11-16T09:05:00.000Z" },
+        {
+            id: 1,
+            sender: "user",
+            body: "Bonjour, la caisse ne s'ouvre pas",
+            created_at: "2026-11-16T09:00:00.000Z",
+        },
+        {
+            id: 2,
+            sender: "owner",
+            body: "Essayez de recharger la page",
+            created_at: "2026-11-16T09:05:00.000Z",
+        },
     ],
 };
 
@@ -35,7 +45,9 @@ describe("SupportInbox", () => {
 
     const render = async (data: Record<string, unknown>, id: string | null = null) => {
         service = {
-            getThreads: vi.fn(() => of([thread(), thread({ id: 2, status: "CLOSED", subject: "Ancienne question" })])),
+            getThreads: vi.fn(() =>
+                of([thread(), thread({ id: 2, status: "CLOSED", subject: "Ancienne question" })]),
+            ),
             getThread: vi.fn(() => of(detail)),
             createThread: vi.fn(() => of(thread({ id: 9 }))),
             sendMessage: vi.fn(() => of({})),
@@ -143,8 +155,8 @@ describe("SupportInbox", () => {
 
     it("le propriétaire peut terminer une conversation", async () => {
         const fixture = await render({ side: "owner" }, "1");
-        const button = Array.from(fixture.nativeElement.querySelectorAll("button")).find(
-            (b) => (b as HTMLElement).textContent?.includes("Terminer"),
+        const button = Array.from(fixture.nativeElement.querySelectorAll("button")).find((b) =>
+            (b as HTMLElement).textContent?.includes("Terminer"),
         ) as HTMLButtonElement;
 
         button.click();

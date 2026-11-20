@@ -1,31 +1,76 @@
-import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
+import {
+    HttpErrorResponse,
+    HttpEvent,
+    HttpHandlerFn,
+    HttpInterceptorFn,
+    HttpRequest,
+} from "@angular/common/http";
 import { inject } from "@angular/core";
-import { catchError, throwError } from "rxjs";
+import { Observable, catchError, switchMap, throwError } from "rxjs";
 
 import { API_URL } from "../api.config";
 import { AuthService } from "./auth.service";
 
+// routes qui n'ont pas besoin du jeton, ou qui servent à l'obtenir
+const PUBLIC_AUTH =
+    /\/auth\/(login|register|refresh|logout|verify-email|resend-code|forgot-password|reset-password|phone-available)$/;
+
+const withToken = (req: HttpRequest<unknown>, token: string | null) =>
+    token ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const auth = inject(AuthService);
-    const token = auth.token;
     // le token ne part que vers notre API, jamais vers un autre domaine
     const isApi = req.url.startsWith(API_URL);
-    const isLogin = req.url.endsWith("/auth/login");
 
-    const request =
-        token && isApi && !isLogin
-            ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-            : req;
+    if (!isApi || PUBLIC_AUTH.test(req.url.split("?")[0])) return next(req);
 
-    return next(request).pipe(
+    const canRefresh = !!auth.refreshToken;
+
+    // jeton expiré : on le renouvelle d'abord avec la session de 30 jours de l'appareil
+    if (auth.token && auth.tokenExpired() && canRefresh) {
+        return renewed(auth, (token) => send(req, next, auth, token, false));
+    }
+
+    return send(req, next, auth, auth.token, canRefresh);
+};
+
+// renouvelle le jeton puis relance la requête ; une session refusée déconnecte, une coupure réseau non
+function renewed<T>(auth: AuthService, then: (token: string) => Observable<T>) {
+    return auth.refresh().pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.status === 401 && isApi && !isLogin) {
-                auth.logout();
+            if (error.status !== 0) auth.logout();
+            return throwError(() => error);
+        }),
+        switchMap(then),
+    );
+}
+
+function send(
+    req: HttpRequest<unknown>,
+    next: HttpHandlerFn,
+    auth: AuthService,
+    token: string | null,
+    retryOn401: boolean,
+): Observable<HttpEvent<unknown>> {
+    return next(withToken(req, token)).pipe(
+        catchError((error: HttpErrorResponse) => {
+            // jeton refusé (horloge décalée, jeton ancien) : un seul renouvellement puis on réessaie
+            if (error.status === 401 && retryOn401) {
+                return renewed(auth, (fresh) => send(req, next, auth, fresh, false));
             }
-            if (error.status === 403 && isApi && error.error?.code === "PASSWORD_CHANGE_REQUIRED") {
+
+            if (error.status === 401) auth.logout();
+
+            if (error.status === 403 && error.error?.code === "PASSWORD_CHANGE_REQUIRED") {
                 auth.requirePasswordChange();
             }
+
+            if (error.status === 402 && error.error?.code === "ACCESS_ENDED") {
+                auth.markAccessEnded();
+            }
+
             return throwError(() => error);
         }),
     );
-};
+}

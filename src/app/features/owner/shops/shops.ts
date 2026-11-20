@@ -11,7 +11,7 @@ import { Pagination, clientPaging } from "../../../shared/pagination/pagination"
 import { NewShopDialog } from "../new-shop-dialog/new-shop-dialog";
 import { OwnedShop, ShopStatus } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
-import { trialStateOf } from "../trial-state";
+import { accessStateOf } from "../trial-state";
 
 type View = "all" | ShopStatus;
 
@@ -53,9 +53,14 @@ export class Shops {
             (shop) =>
                 (this.view() === "all" || shop.status === this.view()) &&
                 (!term ||
-                    [shop.name, shop.admin_name, shop.admin_email, shop.phone, shop.city, shop.country].some(
-                        (value) => value?.toLowerCase().includes(term),
-                    )),
+                    [
+                        shop.name,
+                        shop.admin_name,
+                        shop.admin_email,
+                        shop.phone,
+                        shop.city,
+                        shop.country,
+                    ].some((value) => value?.toLowerCase().includes(term))),
         );
     });
 
@@ -79,7 +84,7 @@ export class Shops {
     }
 
     trialState(shop: OwnedShop) {
-        return trialStateOf(shop.trial_ends_at);
+        return accessStateOf(shop);
     }
 
     // boutique dont on change l'essai, et la durée saisie (vide : retirer l'essai)

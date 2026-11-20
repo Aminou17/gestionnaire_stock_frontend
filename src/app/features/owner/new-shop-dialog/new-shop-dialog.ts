@@ -131,8 +131,18 @@ export class NewShopDialog {
             return;
         }
 
-        const { shopName, firstName, lastName, phone, country, city, address, email, password, trialDays } =
-            this.form.getRawValue();
+        const {
+            shopName,
+            firstName,
+            lastName,
+            phone,
+            country,
+            city,
+            address,
+            email,
+            password,
+            trialDays,
+        } = this.form.getRawValue();
         this.saving.set(true);
         this.error.set(null);
 

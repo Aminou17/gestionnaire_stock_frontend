@@ -18,7 +18,7 @@ describe("Register", () => {
 
     beforeEach(async () => {
         auth = {
-            register: vi.fn(() => of({})),
+            register: vi.fn(() => of({ verificationRequired: true, email: "fatou@exemple.com" })),
             isPhoneAvailable: vi.fn(() => of({ available: true })),
         };
 
@@ -147,8 +147,13 @@ describe("Register", () => {
             lastName: "Diallo",
             email: "fatou@exemple.com",
             password: "Boutique-2026!",
+            website: "",
+            elapsedMs: expect.any(Number),
         });
-        expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+        // l'adresse se confirme avec le code reçu avant d'entrer dans la boutique
+        expect(router.navigate).toHaveBeenCalledWith(["/verify-email"], {
+            queryParams: { email: "fatou@exemple.com" },
+        });
     });
 
     it("should show the API message and stay on the page", async () => {

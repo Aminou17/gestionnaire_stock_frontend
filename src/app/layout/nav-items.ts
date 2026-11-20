@@ -49,7 +49,11 @@ export const SECTIONS: NavSection[] = [
                     { label: "Historique du stock", path: "/stock-movements", icon: "movements" },
                     // la rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
                     { label: "Alertes de stock", path: "/alerts", icon: "alert", exact: true },
-                    { label: "Rotation des produits", path: "/alerts/rotation", icon: "trending-up" },
+                    {
+                        label: "Rotation des produits",
+                        path: "/alerts/rotation",
+                        icon: "trending-up",
+                    },
                 ],
             },
             {
@@ -85,7 +89,9 @@ export const SECTIONS: NavSection[] = [
 ];
 
 // lien fixe en bas du menu ; l'abonnement se trouve dans les paramètres
-export const FOOTER_LINKS: NavItem[] = [{ label: "Paramètres", path: "/settings", icon: "settings" }];
+export const FOOTER_LINKS: NavItem[] = [
+    { label: "Paramètres", path: "/settings", icon: "settings" },
+];
 
 // pages proposées par la recherche, selon le rôle
 export function searchablePages(

@@ -391,3 +391,15 @@ h1 {
     color: var(--primary-text);
     text-decoration: underline;
 }
+
+.trial[data-tone="ok"] {
+    color: var(--success);
+}
+
+.trial[data-tone="warn"] {
+    color: var(--warning);
+}
+
+.trial[data-tone="ended"] {
+    color: var(--danger);
+}

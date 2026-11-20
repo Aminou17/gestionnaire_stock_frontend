@@ -10,7 +10,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { ShopAccount } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
-import { trialStateOf } from "../trial-state";
+import { accessStateOf } from "../trial-state";
 import { copyText } from "../../../shared/copy-text";
 import { getBackLink } from "../../../core/back-link";
 
@@ -36,9 +36,7 @@ export class ShopPage {
         return [detail?.city, detail?.country].filter(Boolean).join(", ");
     });
 
-    trial = computed(() =>
-        trialStateOf(this.shop.hasValue() ? this.shop.value().trial_ends_at : null),
-    );
+    trial = computed(() => (this.shop.hasValue() ? accessStateOf(this.shop.value()) : null));
 
     // résultat des actions de la page (lien envoyé, essai modifié...)
     message = signal<{ ok: boolean; text: string } | null>(null);
@@ -160,6 +158,52 @@ export class ShopPage {
                 this.shop.reload();
             },
             error: (err: HttpErrorResponse) => this.fail(err, "Impossible de changer l'essai."),
+        });
+    }
+
+    // payé jusqu'au : date choisie, ou prolongation à partir de la dernière date payée (ou d'aujourd'hui)
+    paidUntil = signal("");
+
+    extendPaid(months: number) {
+        const current = this.shop.hasValue() ? this.shop.value().paid_until : null;
+        const today = new Date().toISOString().slice(0, 10);
+        const base = current && current >= today ? current : today;
+
+        const [year, month, day] = base.split("-").map(Number);
+        // même jour le mois suivant, ramené au dernier jour du mois si besoin (31 janvier → 28 février)
+        const target = new Date(Date.UTC(year, month - 1 + months, 1));
+        const lastDay = new Date(
+            Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+        ).getUTCDate();
+        target.setUTCDate(Math.min(day, lastDay));
+
+        this.paidUntil.set(target.toISOString().slice(0, 10));
+    }
+
+    savePaidUntil(remove = false) {
+        const value = remove ? null : this.paidUntil();
+        if (!remove && !/^\d{4}-\d{2}-\d{2}$/.test(value ?? "")) {
+            this.message.set({ ok: false, text: "Choisissez une date ou une durée." });
+            return;
+        }
+
+        this.busy.set(true);
+        this.message.set(null);
+
+        this.owner.setPaidUntil(this.id, value).subscribe({
+            next: () => {
+                this.busy.set(false);
+                this.paidUntil.set("");
+                this.message.set({
+                    ok: true,
+                    text: value
+                        ? `Accès payé jusqu'au ${new Date(`${value}T12:00:00`).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} inclus.`
+                        : "Date de paiement retirée.",
+                });
+                this.shop.reload();
+            },
+            error: (err: HttpErrorResponse) =>
+                this.fail(err, "Impossible d'enregistrer le paiement."),
         });
     }
 

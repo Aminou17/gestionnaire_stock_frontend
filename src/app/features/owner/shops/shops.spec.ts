@@ -12,6 +12,8 @@ const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
     status: "ACTIVE",
     created_at: "2026-11-01T10:00:00.000Z",
     trial_ends_at: null,
+    paid_until: null,
+    access_ends_at: null,
     admin_name: "Awa",
     admin_email: "awa@exemple.com",
     phone: "+226 70 12 34 56",

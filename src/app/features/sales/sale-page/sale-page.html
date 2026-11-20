@@ -147,9 +147,11 @@
                                 }
                                 @if (sale.customer_phone) {
                                     <span class="phone-line">
-                                        <a class="phone-link" [href]="'tel:' + sale.customer_phone">{{
-                                            customerPhone()
-                                        }}</a>
+                                        <a
+                                            class="phone-link"
+                                            [href]="'tel:' + sale.customer_phone"
+                                            >{{ customerPhone() }}</a
+                                        >
                                         @if (customerWhatsApp(); as link) {
                                             <a
                                                 class="wa-chip"
@@ -259,8 +261,7 @@
                     Produits vendus
                     <!-- tout sur une seule interpolation : sinon un espace s'invite avant la parenthèse -->
                     <span class="muted"
-                        >({{ sale.items.length }}
-                        {{ sale.items.length > 1 ? "produits" : "produit"
+                        >({{ sale.items.length }} {{ sale.items.length > 1 ? "produits" : "produit"
                         }}{{
                             itemsCount() !== sale.items.length
                                 ? " · " + itemsCount() + " pièces"

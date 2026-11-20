@@ -24,7 +24,8 @@ const phoneLength: ValidatorFn = (control) => {
     return !digits || (digits.length >= 8 && digits.length <= 15) ? null : { phone: true };
 };
 
-type Field = "shopName" | "phone" | "country" | "city" | "firstName" | "lastName" | "email" | "password";
+type Field =
+    "shopName" | "phone" | "country" | "city" | "firstName" | "lastName" | "email" | "password";
 
 @Component({
     selector: "app-register",
@@ -55,6 +56,10 @@ export class Register {
         ],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
     });
+
+    // piège à robots : champ invisible pour une personne, et durée de remplissage
+    website = signal("");
+    private startedAt = Date.now();
 
     // 1 : la boutique, 2 : le compte de l'administrateur
     step = signal<1 | 2>(1);
@@ -236,11 +241,15 @@ export class Register {
                 email: email.trim().toLowerCase(),
                 password,
                 ...(logo ? { logo } : {}),
+                website: this.website(),
+                elapsedMs: Date.now() - this.startedAt,
             })
             .subscribe({
-                next: () => {
+                next: (result) => {
                     this.done.set(true);
-                    this.router.navigate(["/dashboard"]);
+                    this.router.navigate(["/verify-email"], {
+                        queryParams: { email: result.email },
+                    });
                 },
                 error: (err: HttpErrorResponse) => {
                     this.loading.set(false);

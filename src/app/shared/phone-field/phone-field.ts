@@ -35,7 +35,9 @@ export class PhoneField implements ControlValueAccessor {
 
     // null tant que l'utilisateur n'a pas touché à l'indicatif : on suit celui de la boutique
     private chosenCode = signal<string | null>(null);
-    protected code = computed(() => this.chosenCode() ?? this.initialCode() ?? this.shop.defaultCountryCode());
+    protected code = computed(
+        () => this.chosenCode() ?? this.initialCode() ?? this.shop.defaultCountryCode(),
+    );
     protected national = signal("");
     protected country = computed(() => countryName(this.code()));
 
