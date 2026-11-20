@@ -142,13 +142,13 @@ export class Sidebar {
         }
     }
 
-    // Android et ordinateur : la fenêtre du navigateur ; iPhone : on explique le geste
+    // Chrome et Edge : leur fenêtre d'installation ; ailleurs, on explique le geste
     protected installApp() {
         this.profileOpen.set(false);
         if (this.pwa.canInstall()) {
             this.pwa.install();
         } else {
-            this.toast.show("Touchez Partager, puis « Sur l'écran d'accueil »", 6000);
+            this.toast.show(this.pwa.hint, 6000);
         }
     }
 }

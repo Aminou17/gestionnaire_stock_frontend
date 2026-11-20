@@ -214,7 +214,7 @@
                 @if (pwa.canInstall()) {
                     <small class="muted">Une icône sur l'écran d'accueil, accès en un geste</small>
                 } @else {
-                    <small class="muted">Touchez Partager, puis « Sur l'écran d'accueil »</small>
+                    <small class="muted">{{ pwa.hint }}</small>
                 }
             </span>
         </button>
