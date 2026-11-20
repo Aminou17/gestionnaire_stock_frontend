@@ -216,12 +216,16 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
         case "PRODUCTS_IMPORTED": {
             const count = Number(d["count"] ?? 0);
             return {
-                verb: count ? `a importé ${count} produit${count > 1 ? "s" : ""}` : "a importé des produits",
+                verb: count
+                    ? `a importé ${count} produit${count > 1 ? "s" : ""}`
+                    : "a importé des produits",
             };
         }
         case "PRODUCT_IMAGE_UPDATED":
             return {
-                verb: d["removed"] ? "a retiré la photo du produit" : "a changé la photo du produit",
+                verb: d["removed"]
+                    ? "a retiré la photo du produit"
+                    : "a changé la photo du produit",
                 object: name,
             };
         case "PRODUCT_CREATED":

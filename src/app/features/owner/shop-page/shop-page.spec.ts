@@ -13,6 +13,8 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
     status: "ACTIVE",
     created_at: "2026-11-01T10:00:00.000Z",
     trial_ends_at: null,
+    paid_until: null,
+    access_ends_at: null,
     phone: "0102030405",
     address: "Rue 12, Abidjan",
     country: "Côte d'Ivoire",
@@ -46,12 +48,19 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
 const httpError = (status: number, message: string) =>
     throwError(() => new HttpErrorResponse({ status, error: { message } }));
 
+// le dernier formulaire de la carte est celui de l'essai (le premier règle le paiement)
+const trialSave = (el: HTMLElement) =>
+    Array.from(el.querySelectorAll<HTMLFormElement>(".trial-form"))
+        .at(-1)!
+        .querySelector<HTMLButtonElement>("button[type=submit]")!;
+
 describe("ShopPage", () => {
     let service: {
         getShop: ReturnType<typeof vi.fn>;
         sendResetLink: ReturnType<typeof vi.fn>;
         setTemporaryPassword: ReturnType<typeof vi.fn>;
         setTrial: ReturnType<typeof vi.fn>;
+        setPaidUntil: ReturnType<typeof vi.fn>;
         setStatus: ReturnType<typeof vi.fn>;
     };
 
@@ -68,6 +77,7 @@ describe("ShopPage", () => {
                 }),
             ),
             setTrial: vi.fn(() => of({})),
+            setPaidUntil: vi.fn(() => of({})),
             setStatus: vi.fn(() => of({})),
         };
         await TestBed.configureTestingModule({
@@ -206,7 +216,7 @@ describe("ShopPage", () => {
         const el = fixture.nativeElement as HTMLElement;
 
         fixture.componentInstance.trialDays.set(null);
-        button(el, "Enregistrer").click();
+        trialSave(el).click();
         await fixture.whenStable();
 
         expect(service.setTrial).toHaveBeenCalledWith(5, null);
@@ -219,7 +229,7 @@ describe("ShopPage", () => {
 
         for (const days of [1, 365]) {
             fixture.componentInstance.trialDays.set(days);
-            button(el, "Enregistrer").click();
+            trialSave(el).click();
             await fixture.whenStable();
 
             expect(service.setTrial).toHaveBeenLastCalledWith(5, days);
@@ -232,7 +242,7 @@ describe("ShopPage", () => {
 
         for (const days of [0, -5, 366, 2.5]) {
             fixture.componentInstance.trialDays.set(days);
-            button(el, "Enregistrer").click();
+            trialSave(el).click();
             await fixture.whenStable();
         }
 
@@ -258,5 +268,29 @@ describe("ShopPage", () => {
         await fixture.whenStable();
 
         expect(service.setStatus).toHaveBeenCalledWith(5, "SUSPENDED");
+    });
+
+    it("should extend the paid date by one month from today", async () => {
+        const fixture = await render();
+        const el = fixture.nativeElement as HTMLElement;
+
+        const chip = Array.from(el.querySelectorAll<HTMLButtonElement>(".chip")).find((b) =>
+            b.textContent?.includes("1 mois"),
+        )!;
+        chip.click();
+        await fixture.whenStable();
+
+        const expected = new Date();
+        expected.setMonth(expected.getMonth() + 1);
+        expect(fixture.componentInstance.paidUntil().slice(0, 7)).toBe(
+            expected.toISOString().slice(0, 7),
+        );
+
+        const chosen = fixture.componentInstance.paidUntil();
+        el.querySelector<HTMLButtonElement>(".paid button[type=submit]")!.click();
+        await fixture.whenStable();
+
+        expect(service.setPaidUntil).toHaveBeenCalledWith(5, chosen);
+        expect(el.textContent).toContain("Accès payé jusqu'au");
     });
 });

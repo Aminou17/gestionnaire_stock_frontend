@@ -224,3 +224,12 @@
     color: var(--text-muted);
     font-size: var(--fs-small);
 }
+
+/* hors de l'écran plutôt que display: none, que certains robots savent ignorer */
+.trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}

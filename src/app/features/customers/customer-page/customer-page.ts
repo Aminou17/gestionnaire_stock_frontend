@@ -34,7 +34,16 @@ type LoadedSales = Paged<CustomerSale> & { customerId: number };
 
 @Component({
     selector: "app-customer-page",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, WhatsappIcon, CustomerForm, FcfaPipe, Pagination],
+    imports: [
+        RouterLink,
+        DatePipe,
+        PageHeader,
+        Icon,
+        WhatsappIcon,
+        CustomerForm,
+        FcfaPipe,
+        Pagination,
+    ],
     templateUrl: "./customer-page.html",
     styleUrl: "./customer-page.css",
 })

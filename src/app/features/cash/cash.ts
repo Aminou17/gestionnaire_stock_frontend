@@ -56,15 +56,18 @@ export class Cash {
     // dernière caisse clôturée de la personne, pour l'écran sans caisse ouverte
     lastClosed = rxResource({
         stream: () =>
-            this.cashService.getSessions(1, 10).pipe(
-                map(
-                    (res) =>
-                        res.data.find(
-                            (item) =>
-                                item.status === "CLOSED" && item.opened_by === this.auth.user()?.id,
-                        ) ?? null,
+            this.cashService
+                .getSessions(1, 10)
+                .pipe(
+                    map(
+                        (res) =>
+                            res.data.find(
+                                (item) =>
+                                    item.status === "CLOSED" &&
+                                    item.opened_by === this.auth.user()?.id,
+                            ) ?? null,
+                    ),
                 ),
-            ),
     });
 
     cash = computed(() => (this.today.hasValue() ? this.today.value().cash : null));

@@ -8,13 +8,15 @@ import { BottomNav } from "../bottom-nav/bottom-nav";
 import { Search } from "../search/search";
 import { Sidebar } from "../sidebar/sidebar";
 import { Toast } from "../../shared/toast/toast";
+import { AccessBanner } from "../access-banner/access-banner";
 
 @Component({
     selector: "app-main-layout",
-    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, Toast],
+    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, Toast, AccessBanner],
     template: `
         <app-sidebar />
         <main [class.collapsed]="layout.collapsed()">
+            <app-access-banner />
             <router-outlet />
         </main>
         <app-bottom-nav />

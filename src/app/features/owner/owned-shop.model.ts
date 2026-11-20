@@ -7,6 +7,10 @@ export interface OwnedShop {
     status: ShopStatus;
     created_at: string;
     trial_ends_at: string | null;
+    // dernier jour payé inclus (AAAA-MM-JJ)
+    paid_until: string | null;
+    // premier instant sans accès, calculé par l'API
+    access_ends_at: string | null;
     admin_name: string | null;
     admin_email: string | null;
     phone: string | null;
@@ -59,6 +63,8 @@ export interface OwnedShopDetail {
     status: ShopStatus;
     created_at: string;
     trial_ends_at: string | null;
+    paid_until: string | null;
+    access_ends_at: string | null;
     phone: string | null;
     address: string | null;
     country: string | null;

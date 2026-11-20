@@ -57,11 +57,15 @@ export class SupportInbox {
 
     protected list = computed(() => {
         const all = this.threads.hasValue() ? this.threads.value() : [];
-        return all.filter((t) => (this.filter() === "open" ? t.status === "OPEN" : t.status === "CLOSED"));
+        return all.filter((t) =>
+            this.filter() === "open" ? t.status === "OPEN" : t.status === "CLOSED",
+        );
     });
 
     protected openCount = computed(
-        () => (this.threads.hasValue() ? this.threads.value() : []).filter((t) => t.status === "OPEN").length,
+        () =>
+            (this.threads.hasValue() ? this.threads.value() : []).filter((t) => t.status === "OPEN")
+                .length,
     );
 
     protected reply = signal("");

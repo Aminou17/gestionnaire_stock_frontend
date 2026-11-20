@@ -89,7 +89,10 @@ export class Dashboard {
 
     // une boutique neuve n'a pas encore fixé son seuil : le backend répond 409, ce n'est pas une panne
     alertsNotConfigured = computed(() => {
-        const error = this.stockAlerts.alerts.error() as { status?: number; cause?: { status?: number } };
+        const error = this.stockAlerts.alerts.error() as {
+            status?: number;
+            cause?: { status?: number };
+        };
         return (error?.status ?? error?.cause?.status) === 409;
     });
 
@@ -149,9 +152,7 @@ export class Dashboard {
         if (yesterday <= 0 || today <= 0) {
             const count = this.todaySales()?.salesCount ?? 0;
             const text =
-                count === 0
-                    ? "Aucune vente"
-                    : `${count} vente${count > 1 ? "s" : ""} aujourd'hui`;
+                count === 0 ? "Aucune vente" : `${count} vente${count > 1 ? "s" : ""} aujourd'hui`;
             return { text, tone: "muted" as const };
         }
 

@@ -205,7 +205,9 @@
             <p class="center">Clôture de caisse</p>
             <p class="center">{{ cash.session_date | date: "EEEE d MMMM y" }}</p>
             <hr />
-            <p class="row"><span>Caisse de</span><span>{{ cash.opened_by_name ?? "—" }}</span></p>
+            <p class="row">
+                <span>Caisse de</span><span>{{ cash.opened_by_name ?? "—" }}</span>
+            </p>
             <p class="row">
                 <span>Ouverte à</span><span>{{ cash.opened_at | date: "HH:mm" }}</span>
             </p>
@@ -216,7 +218,9 @@
             <p class="row">
                 <span>Fonds de départ</span><span>{{ cash.opening_amount | fcfa }}</span>
             </p>
-            <p class="row"><span>Ventes</span><span>{{ summary().sales | fcfa }}</span></p>
+            <p class="row">
+                <span>Ventes</span><span>{{ summary().sales | fcfa }}</span>
+            </p>
             @if (summary().deposits > 0) {
                 <p class="row">
                     <span>Argent ajouté</span><span>{{ summary().deposits | fcfa }}</span>

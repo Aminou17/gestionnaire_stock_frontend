@@ -75,7 +75,9 @@ describe("audit sentence", () => {
 
     it("should describe a reopened cash register with its reason", () => {
         expect(
-            getAuditSentence(log({ action: "CASH_SESSION_REOPENED", details: { reason: "Oubli" } })),
+            getAuditSentence(
+                log({ action: "CASH_SESSION_REOPENED", details: { reason: "Oubli" } }),
+            ),
         ).toEqual({ verb: "a rouvert la caisse", note: "Oubli" });
     });
 

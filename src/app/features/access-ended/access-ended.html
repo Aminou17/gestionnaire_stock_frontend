@@ -1,0 +1,102 @@
+<div class="heading">
+    <span class="status warn"><app-icon name="clock" [size]="26" /></span>
+
+    @if (suspended()) {
+        <h1>Accès suspendu</h1>
+        <p>L'accès à cette boutique est en pause. Contactez-nous pour le rouvrir.</p>
+    } @else {
+        <h1>
+            {{
+                wasPaid()
+                    ? "Votre abonnement est arrivé à échéance"
+                    : "Votre essai gratuit est terminé"
+            }}
+        </h1>
+        <p>
+            @if (access()?.endsAt; as endsAt) {
+                Votre accès a pris fin le {{ endsAt | date: "d MMMM" }}.
+            }
+            Vos données sont conservées : rien n'est perdu.
+        </p>
+    }
+</div>
+
+@if (auth.isAdmin()) {
+    <section class="card next" aria-labelledby="next-title">
+        <h2 id="next-title">Continuer avec {{ productName }}</h2>
+        <p class="muted">Écrivez-nous : nous rouvrons votre boutique dès le règlement.</p>
+
+        <div class="actions">
+            <a class="btn btn-whatsapp" [href]="whatsapp" target="_blank" rel="noopener">
+                <app-icon name="message" [size]="18" />
+                WhatsApp
+            </a>
+            <a class="btn btn-outline" [href]="mail">
+                <app-icon name="mail" [size]="18" />
+                E-mail
+            </a>
+        </div>
+    </section>
+
+    <section class="card data" aria-labelledby="data-title">
+        <div>
+            <h2 id="data-title">Vos données</h2>
+            <p class="muted">Téléchargez-les à tout moment, au format tableur.</p>
+        </div>
+
+        <div class="files">
+            <button
+                type="button"
+                class="file"
+                [disabled]="downloading() !== null"
+                (click)="download('products')"
+            >
+                <span class="file-icon"><app-icon name="package" [size]="18" /></span>
+                <span>Produits</span>
+                @if (downloading() === "products") {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="18" class="file-go" />
+                }
+            </button>
+            <button
+                type="button"
+                class="file"
+                [disabled]="downloading() !== null"
+                (click)="download('sales')"
+            >
+                <span class="file-icon sales"><app-icon name="receipt" [size]="18" /></span>
+                <span>Ventes</span>
+                @if (downloading() === "sales") {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="18" class="file-go" />
+                }
+            </button>
+        </div>
+    </section>
+} @else {
+    <p class="employee">
+        Demandez à l'administrateur de la boutique de nous contacter. Vous pourrez vendre à nouveau
+        dès la réouverture.
+    </p>
+}
+
+@if (notice()) {
+    <div class="alert alert-warning" role="status">{{ notice() }}</div>
+}
+
+<div class="footer">
+    <button
+        type="button"
+        class="btn btn-primary btn-block"
+        [disabled]="checking()"
+        (click)="check()"
+    >
+        @if (checking()) {
+            <span class="spinner"></span>
+        }
+        J'ai réglé, vérifier
+    </button>
+    <button type="button" class="logout" (click)="auth.logout()">Se déconnecter</button>
+</div>

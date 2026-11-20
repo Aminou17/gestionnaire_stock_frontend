@@ -39,6 +39,11 @@ export class OwnerShopService {
         return this.http.post<CreatedShop>(`${API_URL}/shops`, input);
     }
 
+    // dernier jour payé inclus (AAAA-MM-JJ), ou null pour retirer la date
+    setPaidUntil(id: number, paidUntil: string | null) {
+        return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/paid-until`, { paidUntil });
+    }
+
     // jours d'essai à partir d'aujourd'hui, ou null pour retirer l'essai
     setTrial(id: number, trialDays: number | null) {
         return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/trial`, { trialDays });

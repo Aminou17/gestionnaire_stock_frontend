@@ -8,32 +8,42 @@
                 <h2 id="current-title">Votre formule</h2>
                 <p class="muted">Toutes les fonctionnalités sont incluses.</p>
             </div>
-            @if (trial()?.days === 0) {
-                <span class="badge badge-warning">Essai terminé</span>
+            @if (status(); as status) {
+                <span
+                    class="badge"
+                    [class.badge-success]="status.state === 'paid'"
+                    [class.badge-primary]="status.state === 'trial'"
+                    [class.badge-danger]="status.state === 'grace'"
+                    >{{ status.label }}</span
+                >
             } @else {
-                <span class="badge badge-success">Essai gratuit</span>
+                <span class="badge badge-success">Sans limite</span>
             }
         </div>
 
-        @if (trial(); as trial) {
-            <div class="trial" [class.ended]="trial.days === 0">
-                @if (trial.days > 0) {
-                    <strong class="days">{{ trial.days }}</strong>
+        @if (status(); as status) {
+            <div class="trial" [class.ended]="status.state === 'grace'">
+                @if (status.state === "grace") {
                     <span>
-                        jour{{ trial.days > 1 ? "s" : "" }} d'essai restant{{ trial.days > 1 ? "s" : "" }}
-                        <small class="muted">jusqu'au {{ trial.endsAt | date: "d MMMM y" }}</small>
+                        Votre accès est arrivé à échéance le
+                        {{ status.lastDay | date: "d MMMM y" }}. L'accès sera coupé dans
+                        {{ status.graceDays }} jour{{ status.graceDays > 1 ? "s" : "" }}.
                     </span>
                 } @else {
+                    <strong class="days">{{ status.days }}</strong>
                     <span>
-                        Votre essai s'est terminé le {{ trial.endsAt | date: "d MMMM y" }}.
-                        Écrivez-nous pour continuer.
+                        jour{{ status.days > 1 ? "s" : "" }} restant{{ status.days > 1 ? "s" : "" }}
+                        <small class="muted"
+                            >jusqu'au {{ status.lastDay | date: "d MMMM y" }} inclus</small
+                        >
                     </span>
                 }
             </div>
         }
 
         <p class="reassure" role="status">
-            Gratuit pendant le lancement. Nous vous préviendrons bien avant la fin de l'essai.
+            Nous vous prévenons 7 jours avant la fin, par e-mail et dans l'application. Vos données
+            restent à vous dans tous les cas.
         </p>
     </section>
 

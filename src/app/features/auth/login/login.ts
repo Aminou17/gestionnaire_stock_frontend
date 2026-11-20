@@ -56,6 +56,13 @@ export class Login {
             },
             error: (err: HttpErrorResponse) => {
                 this.loading.set(false);
+                // inscription jamais confirmée : un nouveau code vient de partir
+                if (err.error?.code === "EMAIL_NOT_VERIFIED") {
+                    this.router.navigate(["/verify-email"], {
+                        queryParams: { email: err.error.email ?? email.trim() },
+                    });
+                    return;
+                }
                 if (err.status === 0 || err.status >= 502) {
                     this.error.set("Impossible de joindre le serveur. Vérifiez votre connexion.");
                 } else {

@@ -1,0 +1,56 @@
+<a routerLink="/login" class="back">
+    <app-icon name="chevron-left" [size]="16" />
+    Connexion
+</a>
+
+<div class="heading">
+    <span class="status"><app-icon name="mail" [size]="26" /></span>
+    <h1>Confirmez votre adresse</h1>
+    <p>
+        Saisissez le code à 6 chiffres envoyé à <strong class="email">{{ email }}</strong>
+    </p>
+</div>
+
+<form (submit)="$event.preventDefault(); submit()" novalidate>
+    <div class="code" role="group" aria-label="Code à 6 chiffres" (paste)="onPaste($event)">
+        @for (digit of digits(); track $index) {
+            <input
+                #box
+                class="digit"
+                type="text"
+                inputmode="numeric"
+                maxlength="6"
+                [attr.autocomplete]="$index === 0 ? 'one-time-code' : 'off'"
+                [attr.aria-label]="'Chiffre ' + ($index + 1)"
+                [class.filled]="digit"
+                [class.invalid]="error()"
+                [disabled]="loading()"
+                (input)="onInput($index, $any($event.target))"
+                (keydown)="onKeydown($index, $event)"
+            />
+        }
+    </div>
+
+    @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+    } @else if (notice()) {
+        <div class="alert alert-success" role="status">{{ notice() }}</div>
+    }
+
+    <button type="submit" class="btn btn-primary btn-block" [disabled]="!complete() || loading()">
+        @if (loading()) {
+            <span class="spinner"></span> Vérification…
+        } @else {
+            Confirmer
+        }
+    </button>
+</form>
+
+<p class="resend">
+    Rien reçu ? Regardez dans les courriers indésirables.
+    @if (wait() > 0) {
+        <span class="muted">Nouveau code dans {{ wait() }} s</span>
+    } @else {
+        <button type="button" class="link" (click)="resend()">Renvoyer le code</button>
+    }
+</p>

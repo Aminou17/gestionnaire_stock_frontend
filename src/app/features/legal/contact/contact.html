@@ -9,8 +9,8 @@
                 <span class="way-text">
                     <strong>Écrire au support</strong>
                     <small class="muted">
-                        Votre message arrive directement chez nous, la réponse s'affiche ici et
-                        vous est envoyée par e-mail.
+                        Votre message arrive directement chez nous, la réponse s'affiche ici et vous
+                        est envoyée par e-mail.
                     </small>
                 </span>
                 <app-icon name="chevron-right" [size]="18" class="way-arrow" />
@@ -22,7 +22,11 @@
                     <strong>
                         Mes conversations
                         @if (support.unread() > 0) {
-                            <span class="pill">{{ support.unread() }} nouvelle{{ support.unread() > 1 ? "s" : "" }}</span>
+                            <span class="pill"
+                                >{{ support.unread() }} nouvelle{{
+                                    support.unread() > 1 ? "s" : ""
+                                }}</span
+                            >
                         }
                     </strong>
                     <small class="muted">Retrouvez vos questions et les réponses du support.</small>
@@ -54,13 +58,20 @@
 
     <p class="hours muted">
         <app-icon name="clock" [size]="14" />
-        Le support répond en général plus vite que sur WhatsApp, et vous gardez tout l'historique
-        de vos échanges. Ces délais sont indicatifs et sans engagement.
+        Le support répond en général plus vite que sur WhatsApp, et vous gardez tout l'historique de
+        vos échanges. Ces délais sont indicatifs et sans engagement.
     </p>
 
     <p class="wa-line muted">
         Besoin d'un échange plus direct ?
-        <a class="wa-button" [href]="whatsapp()" target="_blank" rel="noopener" aria-label="Écrire sur WhatsApp, une nouvelle fenêtre s'ouvre" title="Écrire sur WhatsApp">
+        <a
+            class="wa-button"
+            [href]="whatsapp()"
+            target="_blank"
+            rel="noopener"
+            aria-label="Écrire sur WhatsApp, une nouvelle fenêtre s'ouvre"
+            title="Écrire sur WhatsApp"
+        >
             <app-whatsapp-icon [size]="22" />
         </a>
     </p>

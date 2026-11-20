@@ -3,7 +3,7 @@ import { Component, computed, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { whatsappLink } from "../../core/contact";
-import { ShopSettingsService } from "../../core/shop/shop-settings.service";
+import { AuthService } from "../../core/auth/auth.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { IconName } from "../../shared/icon/icons";
@@ -55,13 +55,28 @@ export class Subscription {
     protected payments = PAYMENTS;
     protected whatsapp = whatsappLink();
 
-    private shop = inject(ShopSettingsService);
+    private auth = inject(AuthService);
 
-    // jours d'essai restants ; null quand la boutique n'a pas de date de fin
-    protected trial = computed(() => {
-        const endsAt = this.shop.trialEndsAt();
-        if (!endsAt) return null;
-        const days = Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86_400_000);
-        return { endsAt, days: Math.max(days, 0) };
+    // état de l'accès donné par le serveur : essai, payé, délai de grâce ; null sans date de fin
+    protected status = computed(() => {
+        const access = this.auth.access();
+        if (!access?.endsAt) return null;
+
+        // endsAt est le premier instant sans accès : on affiche le dernier jour inclus
+        const lastDay = new Date(new Date(access.endsAt).getTime() - 1000).toISOString();
+        const days = access.state === "grace" ? 0 : Math.max(access.daysLeft ?? 0, 0);
+
+        return {
+            state: access.state,
+            lastDay,
+            days,
+            graceDays: access.state === "grace" ? (access.daysLeft ?? 0) : 0,
+            label:
+                access.state === "paid"
+                    ? "Abonnement actif"
+                    : access.state === "grace"
+                      ? "Échéance passée"
+                      : "Essai gratuit",
+        };
     });
 }

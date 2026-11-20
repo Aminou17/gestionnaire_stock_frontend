@@ -1,7 +1,4 @@
-<app-page-header
-    title="Alertes de stock"
-    section="Stock"
-/>
+<app-page-header title="Alertes de stock" section="Stock" />
 
 <section class="list-card" [class.readonly]="!auth.isAdmin()">
     @if (snoozedNotice(); as notice) {

@@ -1,0 +1,17 @@
+@if (banner(); as banner) {
+    <div class="banner" [attr.data-tone]="banner.tone" role="status">
+        <app-icon name="clock" [size]="18" />
+        <span class="text">{{ banner.text }}</span>
+        <a routerLink="/subscription" class="go">Continuer</a>
+        @if (banner.dismissible) {
+            <button
+                type="button"
+                class="close"
+                aria-label="Masquer pour aujourd'hui"
+                (click)="hide()"
+            >
+                <app-icon name="close" [size]="16" />
+            </button>
+        }
+    </div>
+}

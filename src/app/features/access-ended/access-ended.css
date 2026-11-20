@@ -1,0 +1,125 @@
+.card {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+    border-radius: 16px;
+}
+
+.card h2 {
+    margin: 0;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+}
+
+.card p {
+    margin: 0;
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+/* l'étape suivante, en teinte douce comme les cartes de l'accueil */
+.next {
+    border-color: color-mix(in srgb, var(--success) 25%, var(--border));
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--success) 10%, var(--surface)) 0%,
+        var(--surface) 70%
+    );
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.btn-whatsapp {
+    border: 0;
+    background: #16a34a;
+    color: #fff;
+}
+
+.btn-whatsapp:hover {
+    background: #15803d;
+}
+
+.files {
+    display: grid;
+    gap: 8px;
+}
+
+.file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-weight: var(--fw-medium);
+    text-align: left;
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background 0.15s;
+}
+
+.file:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+    background: var(--surface-hover);
+}
+
+.file > span:nth-child(2) {
+    flex: 1;
+}
+
+.file-icon {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: color-mix(in srgb, var(--violet) 14%, var(--surface));
+    color: var(--violet);
+}
+
+.file-icon.sales {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    color: var(--primary);
+}
+
+.file-go {
+    color: var(--text-muted);
+}
+
+.employee {
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+.footer {
+    display: grid;
+    gap: 4px;
+}
+
+.logout {
+    min-height: 44px;
+    border: 0;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.logout:hover {
+    color: var(--text);
+}

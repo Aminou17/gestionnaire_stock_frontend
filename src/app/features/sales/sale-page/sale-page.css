@@ -44,7 +44,11 @@
     padding: 20px;
     border: 1px solid color-mix(in srgb, var(--tone) 22%, var(--border));
     background:
-        radial-gradient(90% 70% at 100% 0%, color-mix(in srgb, var(--tone) 14%, transparent), transparent 70%),
+        radial-gradient(
+            90% 70% at 100% 0%,
+            color-mix(in srgb, var(--tone) 14%, transparent),
+            transparent 70%
+        ),
         var(--surface);
     box-shadow: 0 8px 24px color-mix(in srgb, var(--tone) 10%, transparent);
     overflow: visible;

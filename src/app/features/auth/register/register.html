@@ -16,6 +16,19 @@
 </div>
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <!-- piège à robots : invisible et ignoré par les lecteurs d'écran, seul un robot le remplit -->
+    <div class="trap" aria-hidden="true">
+        <label for="register-website">Site web</label>
+        <input
+            id="register-website"
+            type="text"
+            tabindex="-1"
+            autocomplete="off"
+            [value]="website()"
+            (input)="website.set($any($event.target).value)"
+        />
+    </div>
+
     @if (error()) {
         <div class="alert alert-error" role="alert">{{ error() }}</div>
     }
@@ -69,7 +82,9 @@
                 } @else if (phoneStatus() === "free") {
                     <small class="hint ok">Numéro disponible.</small>
                 } @else {
-                    <small class="hint">Avec l'indicatif du pays. Les clients et nous pourrons vous joindre.</small>
+                    <small class="hint"
+                        >Avec l'indicatif du pays. Les clients et nous pourrons vous joindre.</small
+                    >
                 }
             </div>
 
@@ -237,7 +252,9 @@
                     }
                 </div>
                 @if (hasError("email", "required")) {
-                    <small class="field-error" role="alert">L'adresse e-mail est obligatoire.</small>
+                    <small class="field-error" role="alert"
+                        >L'adresse e-mail est obligatoire.</small
+                    >
                 } @else if (hasError("email", "email") || hasError("email", "pattern")) {
                     <small class="field-error" role="alert"
                         >L'adresse e-mail n'est pas valide.</small
