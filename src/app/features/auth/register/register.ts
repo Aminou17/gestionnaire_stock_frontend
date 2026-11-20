@@ -2,8 +2,10 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, computed, inject, signal } from "@angular/core";
 import { takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import {
+    AbstractControl,
     NonNullableFormBuilder,
     ReactiveFormsModule,
+    ValidationErrors,
     ValidatorFn,
     Validators,
 } from "@angular/forms";
@@ -24,8 +26,22 @@ const phoneLength: ValidatorFn = (control) => {
     return !digits || (digits.length >= 8 && digits.length <= 15) ? null : { phone: true };
 };
 
+// la même saisie deux fois, pour éviter une faute de frappe
+const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
+    const { password, confirmPassword } = group.getRawValue();
+    return password === confirmPassword ? null : { mismatch: true };
+};
+
 type Field =
-    "shopName" | "phone" | "country" | "city" | "firstName" | "lastName" | "email" | "password";
+    | "shopName"
+    | "phone"
+    | "country"
+    | "city"
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "password"
+    | "confirmPassword";
 
 @Component({
     selector: "app-register",
@@ -41,21 +57,28 @@ export class Register {
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
 
     // mêmes limites que l'API
-    form = this.fb.group({
-        shopName: ["", [Validators.required, Validators.maxLength(80)]],
-        // +226 70 12 34 56 : au moins 8 chiffres avec l'indicatif
-        phone: ["", [Validators.required, phoneLength]],
-        country: ["", [Validators.required, Validators.maxLength(80)]],
-        city: ["", [Validators.required, Validators.maxLength(80)]],
-        firstName: ["", [Validators.required, Validators.maxLength(50)]],
-        lastName: ["", [Validators.required, Validators.maxLength(50)]],
-        // Validators.email accepte "nom@domaine" : on exige aussi un point dans le domaine
-        email: [
-            "",
-            [Validators.required, Validators.email, Validators.pattern(/^\S+@\S+\.\S{2,}$/)],
-        ],
-        password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
-    });
+    form = this.fb.group(
+        {
+            shopName: ["", [Validators.required, Validators.maxLength(80)]],
+            // +226 70 12 34 56 : au moins 8 chiffres avec l'indicatif
+            phone: ["", [Validators.required, phoneLength]],
+            country: ["", [Validators.required, Validators.maxLength(80)]],
+            city: ["", [Validators.required, Validators.maxLength(80)]],
+            firstName: ["", [Validators.required, Validators.maxLength(50)]],
+            lastName: ["", [Validators.required, Validators.maxLength(50)]],
+            // Validators.email accepte "nom@domaine" : on exige aussi un point dans le domaine
+            email: [
+                "",
+                [Validators.required, Validators.email, Validators.pattern(/^\S+@\S+\.\S{2,}$/)],
+            ],
+            password: [
+                "",
+                [Validators.required, Validators.minLength(8), Validators.maxLength(72)],
+            ],
+            confirmPassword: ["", Validators.required],
+        },
+        { validators: passwordsMatch },
+    );
 
     // piège à robots : champ invisible pour une personne, et durée de remplissage
     website = signal("");

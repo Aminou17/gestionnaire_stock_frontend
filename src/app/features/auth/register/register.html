@@ -300,6 +300,29 @@
                 }
                 <app-password-strength [password]="form.controls.password.value" />
             </div>
+
+            <div class="group">
+                <div class="float">
+                    <app-icon name="check" [size]="18" />
+                    <input
+                        id="register-confirm"
+                        class="input"
+                        [type]="showPassword() ? 'text' : 'password'"
+                        formControlName="confirmPassword"
+                        autocomplete="new-password"
+                        [class.invalid]="
+                            isInvalid('confirmPassword') ||
+                            (form.controls.confirmPassword.touched && form.hasError('mismatch'))
+                        "
+                    />
+                    <label for="register-confirm">Confirmer le mot de passe</label>
+                </div>
+                @if (form.controls.confirmPassword.touched && form.hasError("mismatch")) {
+                    <small class="field-error" role="alert">
+                        Les deux mots de passe ne sont pas identiques.
+                    </small>
+                }
+            </div>
         </div>
 
         <button
