@@ -113,6 +113,7 @@ export class Sales {
                 value: null,
                 count: counters?.all,
                 tone: "primary",
+                icon: "receipt",
             },
             {
                 label: "À solder",
@@ -120,6 +121,7 @@ export class Sales {
                 value: "UNPAID",
                 count: counters?.unpaid,
                 tone: "warning",
+                icon: "wallet",
             },
             {
                 label: "Remboursées",
@@ -127,6 +129,7 @@ export class Sales {
                 value: "CANCELLED",
                 count: counters?.cancelled,
                 tone: "danger",
+                icon: "undo",
             },
         ] as const;
     });
@@ -193,6 +196,7 @@ export class Sales {
                 label: "Remboursé",
                 amount: counters?.cancelled_total,
                 tone: "danger",
+                icon: "undo" as const,
                 note: plural(counters?.cancelled, "remboursement"),
             };
         }
@@ -201,6 +205,7 @@ export class Sales {
                 label: "Reste à encaisser",
                 amount: counters?.due_total,
                 tone: "warning",
+                icon: "wallet" as const,
                 note: plural(counters?.unpaid, "vente"),
             };
         }
@@ -208,6 +213,7 @@ export class Sales {
             label: "Encaissé",
             amount: counters?.active_total,
             tone: "success",
+            icon: "banknote" as const,
             note: plural(counters?.active, "vente"),
         };
     });

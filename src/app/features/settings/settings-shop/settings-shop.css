@@ -28,20 +28,10 @@
     font-weight: var(--fw-semibold);
 }
 
-.block-head p {
-    margin: 4px 0 0;
-    font-size: var(--fs-small);
-    line-height: 1.5;
-}
-
 .block-card {
     display: grid;
     gap: 24px;
     padding: 24px;
-}
-
-.field small {
-    font-size: var(--fs-caption);
 }
 
 @media (min-width: 1024px) {

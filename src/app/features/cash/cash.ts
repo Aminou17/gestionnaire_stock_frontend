@@ -94,6 +94,17 @@ export class Cash {
         return null;
     });
     isOwn = (userId: number) => userId === this.auth.user()?.id;
+
+    // caisse du jour pas encore ouverte : ce qui bloque SA propre caisse se règle dans la carte,
+    // avec un seul bouton, au lieu d'un bandeau en plus
+    ownPrevious = computed(() => {
+        const previous = this.previous();
+        return !this.cash() && previous && this.isOwn(previous.openedBy) ? previous : null;
+    });
+    ownPending = computed(() => {
+        const pending = this.pending();
+        return !this.cash() && pending && this.isOwn(pending.closedBy) ? pending : null;
+    });
     isOpen = computed(() => this.cash()?.status === "OPEN");
 
     // le soir, on rappelle de compter le tiroir pour ne pas oublier la clôture
@@ -109,7 +120,7 @@ export class Cash {
         this.session.hasValue() ? this.session.value().session_date : null,
     );
 
-    private shortDate(date: string) {
+    protected shortDate(date: string) {
         return new Date(date.slice(0, 10) + "T12:00:00").toLocaleDateString("fr-FR", {
             day: "numeric",
             month: "long",

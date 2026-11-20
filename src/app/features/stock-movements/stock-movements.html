@@ -62,7 +62,8 @@
     @for (tab of tabs(); track tab.label) {
         <button
             type="button"
-            class="card stat"
+            class="card stat tinted"
+            [attr.data-tone]="tab.tone"
             [class.selected]="type() === tab.value"
             [attr.aria-pressed]="type() === tab.value"
             (click)="selectType(tab.value)"

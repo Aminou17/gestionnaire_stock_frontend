@@ -137,6 +137,22 @@ export class StockEntries implements AfterViewInit {
 
     total = computed(() => this.last()?.total ?? 0);
     counters = computed(() => this.last()?.counters);
+
+    // cartes du haut : une couleur et une icône par chiffre, comme les cartes de l'Accueil
+    stats = computed(() => {
+        const counters = this.counters();
+        return [
+            { label: "Entrées", value: counters?.entries, tone: "primary", icon: "stock-entry" },
+            { label: "Unités reçues", value: counters?.units, tone: "success", icon: "package" },
+            {
+                label: "Produits approvisionnés",
+                value: counters?.products,
+                tone: "violet",
+                icon: "tag",
+            },
+            { label: "Fournisseurs", value: counters?.suppliers, tone: "neutral", icon: "truck" },
+        ] as const;
+    });
     firstLoad = computed(() => this.entries.isLoading() && !this.last());
     filtered = computed(() => this.range().period !== "all" || this.supplierId() !== null);
 

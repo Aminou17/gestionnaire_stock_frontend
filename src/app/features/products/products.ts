@@ -206,6 +206,7 @@ export class Products {
                 value: null,
                 count: counters?.total_products,
                 tone: "primary",
+                icon: "package",
             },
             {
                 label: "En stock",
@@ -213,6 +214,7 @@ export class Products {
                 value: "OK",
                 count: counters?.in_stock,
                 tone: "success",
+                icon: "check",
             },
             {
                 label: "Stock faible",
@@ -220,6 +222,7 @@ export class Products {
                 value: "LOW",
                 count: counters?.low_stock,
                 tone: "warning",
+                icon: "alert",
             },
             {
                 label: "Rupture",
@@ -227,6 +230,7 @@ export class Products {
                 value: "OUT_OF_STOCK",
                 count: counters?.out_of_stock,
                 tone: "danger",
+                icon: "ban",
             },
         ] as const;
     });

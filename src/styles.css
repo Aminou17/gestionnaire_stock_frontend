@@ -222,6 +222,66 @@ app-sale-page {
     max-width: var(--page-width);
 }
 
+/*
+ * Cartes de résumé teintées, de la même famille que celles de l'Accueil :
+ * un léger dégradé de la couleur vers le blanc et une pastille d'icône pleine.
+ * La couleur garde son sens : vert = argent reçu, rouge = sorti, orange = à surveiller.
+ */
+.tinted {
+    --tone: var(--primary);
+}
+
+.tinted[data-tone="success"],
+.tone-icon[data-tone="success"] {
+    --tone: var(--success);
+}
+
+.tinted[data-tone="warning"],
+.tone-icon[data-tone="warning"] {
+    --tone: var(--warning);
+}
+
+.tinted[data-tone="danger"],
+.tone-icon[data-tone="danger"] {
+    --tone: var(--danger);
+}
+
+.tinted[data-tone="violet"],
+.tone-icon[data-tone="violet"] {
+    --tone: var(--violet);
+}
+
+.tinted[data-tone="neutral"],
+.tone-icon[data-tone="neutral"] {
+    --tone: var(--text-muted);
+}
+
+.tinted {
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--tone) 12%, var(--surface)) 0%,
+        var(--surface) 72%
+    );
+    border-color: color-mix(in srgb, var(--tone) 22%, var(--border));
+}
+
+.tone-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    /* sans couleur reçue de la carte, la pastille prend le bleu de la marque */
+    background: linear-gradient(
+        145deg,
+        var(--tone, var(--primary)),
+        color-mix(in srgb, var(--tone, var(--primary)) 70%, #000)
+    );
+    color: #fff;
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--tone, var(--primary)) 32%, transparent);
+}
+
 img {
     max-width: 100%;
     display: block;

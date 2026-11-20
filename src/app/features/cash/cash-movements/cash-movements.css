@@ -13,18 +13,34 @@ app-page-header {
     gap: 16px;
 }
 
+/* libellé et pastille en haut, montant en dessous, comme les cartes de l'Accueil */
 .stat {
     display: grid;
-    gap: 4px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "label icon"
+        "value value";
+    align-items: center;
+    gap: 10px 12px;
     padding: 16px;
 }
 
+.stat .tone-icon {
+    grid-area: icon;
+}
+
 .stat-label {
+    grid-area: label;
     font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
+.stat-skeleton {
+    grid-area: value;
+}
+
 .stat-value {
+    grid-area: value;
     font-size: var(--fs-figure);
     font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;

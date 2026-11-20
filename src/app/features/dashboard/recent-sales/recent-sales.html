@@ -28,7 +28,7 @@
                                 {{
                                     isToday(sale.created_at)
                                         ? (sale.created_at | date: "HH:mm")
-                                        : (sale.created_at | date: "d MMM, HH:mm")
+                                        : (sale.created_at | date: "d MMMM 'à' HH:mm")
                                 }}
                                 · {{ sale.items_count }} article{{
                                     sale.items_count > 1 ? "s" : ""

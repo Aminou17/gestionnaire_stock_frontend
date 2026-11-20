@@ -22,54 +22,60 @@
         </button>
     </section>
 } @else {
+    <!-- sa propre caisse se règle dans la carte plus bas tant que celle du jour n'est pas ouverte -->
     @if (previous(); as previous) {
-        <div class="alert alert-warning banner" role="alert">
-            <app-icon name="alert" />
-            <span>
-                @if (isOwn(previous.openedBy)) {
-                    Votre caisse du
-                } @else {
-                    La caisse de {{ previous.openedByName ?? "un collègue" }} du
-                }
-                <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas été clôturée.
-            </span>
-            <button
-                type="button"
-                class="link-btn"
-                (click)="
-                    closeDialog.open(
-                        previous.sessionDate,
-                        previous.balance,
-                        isOwn(previous.openedBy) ? undefined : previous.id
-                    )
-                "
-            >
-                La clôturer
-            </button>
-        </div>
-    }
-
-    @if (pending(); as pending) {
-        <div class="alert alert-warning banner" role="alert">
-            <app-icon name="alert" />
-            <span>
-                L'écart de la caisse du
-                <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong>
-                ({{ pending.difference | fcfa: true }}) n'est pas expliqué.
-                @if (!canExplain()) {
-                    La personne qui a clôturé doit l'expliquer.
-                }
-            </span>
-            @if (canExplain()) {
+        @if (!ownPrevious()) {
+            <div class="alert alert-warning banner" role="alert">
+                <app-icon name="alert" />
+                <span>
+                    @if (isOwn(previous.openedBy)) {
+                        Votre caisse du
+                    } @else {
+                        La caisse de {{ previous.openedByName ?? "un collègue" }} du
+                    }
+                    <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas été
+                    clôturée.
+                </span>
                 <button
                     type="button"
                     class="link-btn"
-                    (click)="closeDialog.openExplain(pending.id, pending.difference)"
+                    (click)="
+                        closeDialog.open(
+                            previous.sessionDate,
+                            previous.balance,
+                            isOwn(previous.openedBy) ? undefined : previous.id
+                        )
+                    "
                 >
-                    Expliquer l'écart
+                    La clôturer
                 </button>
-            }
-        </div>
+            </div>
+        }
+    }
+
+    @if (pending(); as pending) {
+        @if (!ownPending()) {
+            <div class="alert alert-warning banner" role="alert">
+                <app-icon name="alert" />
+                <span>
+                    L'écart de la caisse du
+                    <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong>
+                    ({{ pending.difference | fcfa: true }}) n'est pas expliqué.
+                    @if (!canExplain()) {
+                        La personne qui a clôturé doit l'expliquer.
+                    }
+                </span>
+                @if (canExplain()) {
+                    <button
+                        type="button"
+                        class="link-btn"
+                        (click)="closeDialog.openExplain(pending.id, pending.difference)"
+                    >
+                        Expliquer l'écart
+                    </button>
+                }
+            </div>
+        }
     }
 
     @if (closingTime() && closeDate()) {
@@ -82,20 +88,31 @@
 
     <div class="layout">
         <div class="main">
-            <section class="card status" [class.open]="isOpen()" aria-live="polite">
+            <!-- la couleur suit l'état : vert ouverte, gris clôturée, bleu à ouvrir -->
+            <section
+                class="card status tinted"
+                [attr.data-tone]="
+                    isOpen() ? 'success' : cash() ? 'neutral' : blocker() ? 'warning' : 'primary'
+                "
+                aria-live="polite"
+            >
                 @if (cash(); as cash) {
                     <div class="status-head">
+                        <span class="tone-icon"><app-icon name="banknote" [size]="18" /></span>
+                        <div class="status-title">
+                            <strong>Caisse du jour</strong>
+                            <small class="muted">
+                                @if (cash.closedAt) {
+                                    De {{ cash.openedAt | date: "HH:mm" }} à
+                                    {{ cash.closedAt | date: "HH:mm" }}
+                                } @else {
+                                    Depuis {{ cash.openedAt | date: "HH:mm" }}
+                                }
+                            </small>
+                        </div>
                         <span class="badge" [class]="isOpen() ? 'badge-success' : 'badge-neutral'">
                             {{ isOpen() ? "Ouverte" : "Clôturée" }}
                         </span>
-                        <small class="muted">
-                            @if (cash.closedAt) {
-                                de {{ cash.openedAt | date: "HH:mm" }} à
-                                {{ cash.closedAt | date: "HH:mm" }}
-                            } @else {
-                                depuis {{ cash.openedAt | date: "HH:mm" }}
-                            }
-                        </small>
                     </div>
 
                     @if (cash.balance === null) {
@@ -150,24 +167,42 @@
                     }
                 } @else {
                     <div class="status-head">
-                        <span class="badge badge-neutral">Caisse non ouverte</span>
+                        <span class="tone-icon"><app-icon name="banknote" [size]="18" /></span>
+                        <div class="status-title">
+                            <strong>Caisse non ouverte</strong>
+                            <small class="muted">{{
+                                blocker() ?? "Comptez le tiroir, puis ouvrez la caisse."
+                            }}</small>
+                        </div>
                     </div>
-                    <p class="muted note">
-                        Comptez l'argent du tiroir, puis ouvrez la caisse pour vendre.
-                    </p>
+                    <!-- un seul bouton : l'action qui débloque, sinon l'ouverture -->
                     <div class="actions">
-                        <button
-                            type="button"
-                            class="btn btn-primary"
-                            [disabled]="blocker() !== null"
-                            (click)="openDialog.open()"
-                        >
-                            Ouvrir la caisse
-                        </button>
+                        @if (ownPrevious(); as previous) {
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                (click)="closeDialog.open(previous.sessionDate, previous.balance)"
+                            >
+                                Clôturer la caisse du {{ shortDate(previous.sessionDate) }}
+                            </button>
+                        } @else if (ownPending(); as pending) {
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                (click)="closeDialog.openExplain(pending.id, pending.difference)"
+                            >
+                                Expliquer l'écart
+                            </button>
+                        } @else {
+                            <button
+                                type="button"
+                                class="btn btn-primary"
+                                (click)="openDialog.open()"
+                            >
+                                Ouvrir la caisse
+                            </button>
+                        }
                     </div>
-                    @if (blocker(); as reason) {
-                        <p class="muted note">{{ reason }}</p>
-                    }
                     @if (lastClosed.value(); as last) {
                         <a
                             [routerLink]="['/cash/sessions', last.id]"

@@ -19,12 +19,14 @@
     @for (tab of tabs(); track tab.label) {
         <button
             type="button"
-            class="card stat"
+            class="card stat tinted"
+            [attr.data-tone]="tab.tone"
             [class.selected]="isSelected(tab.value)"
             [attr.aria-pressed]="isSelected(tab.value)"
             (click)="selectStatus(tab.value)"
         >
             <span class="stat-label">{{ tab.label }}</span>
+            <span class="tone-icon"><app-icon [name]="tab.icon" [size]="18" /></span>
             @if (firstLoad()) {
                 <span class="skeleton stat-skeleton"></span>
             } @else {
@@ -33,8 +35,9 @@
         </button>
     }
 
-    <div class="card stat stat-static">
+    <div class="card stat stat-static tinted" [attr.data-tone]="summary().tone">
         <span class="stat-label">{{ summary().label }}</span>
+        <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton wide"></span>
         } @else {
@@ -324,7 +327,8 @@
         }
 
         <!-- téléphone : la carte suit la puce choisie (encaissé, reste à encaisser, remboursé) -->
-        <section class="summary" [attr.data-tone]="summary().tone" aria-label="Résumé">
+        <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
+            <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
             <div class="summary-main">
                 <span class="summary-label">{{ summary().label }}</span>
                 <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>

@@ -16,7 +16,6 @@ import type { IconName } from "../../shared/icon/icons";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { DashboardService } from "./dashboard.service";
 import { OpenCashDialog } from "../cash/open-cash-dialog/open-cash-dialog";
-import { ReopenCashDialog } from "../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { RecentActivity } from "./recent-activity/recent-activity";
 import { RecentSales } from "./recent-sales/recent-sales";
 import { SalesChart } from "./sales-chart/sales-chart";
@@ -39,7 +38,6 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
         RecentSales,
         RecentActivity,
         OpenCashDialog,
-        ReopenCashDialog,
         ManagerCashBanner,
         EmptyState,
     ],
@@ -138,8 +136,6 @@ export class Dashboard {
 
     cash = computed(() => this.summaryData()?.cash ?? null);
     cashOpen = computed(() => this.cash()?.status === "OPEN");
-    // on ne propose d'ouvrir la caisse que si on SAIT qu'elle est fermée
-    canOpenCash = computed(() => this.auth.isAdmin() && this.summary.hasValue() && !this.cash());
 
     // on compare à hier jusqu'à la même heure : une journée en cours contre une journée complète serait toujours en baisse
     salesHint = computed(() => {
@@ -173,27 +169,6 @@ export class Dashboard {
         if (cash.status === "OPEN")
             return `Ouverte depuis ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
         return `Clôturée à ${formatDate(cash.closedAt!, "HH:mm", this.locale)}`;
-    });
-
-    // ce que l'administrateur doit faire maintenant : les alertes de stock ont déjà leur carte et leur liste
-    todo = computed(() => {
-        if (!this.summary.hasValue() || this.firstSteps()) return [];
-        const items: { icon: IconName; text: string; label: string; reopenId?: number }[] = [];
-        if (this.canOpenCash())
-            items.push({
-                icon: "banknote",
-                text: "La caisse n'est pas ouverte. Ouvrez-la pour vendre.",
-                label: "Ouvrir la caisse",
-            });
-        const cash = this.cash();
-        if (this.auth.isAdmin() && cash?.status === "CLOSED")
-            items.push({
-                icon: "banknote",
-                text: "La caisse est clôturée. Rouvrez-la pour continuer à vendre.",
-                label: "Rouvrir la caisse",
-                reopenId: cash.id,
-            });
-        return items;
     });
 
     // aucune vente enregistrée : on guide l'administrateur pas à pas, comme Shopify ou Square
