@@ -2,7 +2,7 @@ import { CONTACT } from "../../../core/contact";
 import { COMPANY_NAME, PRODUCT_NAME } from "../../../core/brand";
 import { LegalSection } from "../legal-page/legal-section";
 
-export const PRIVACY_UPDATED = "Dernière mise à jour : 15 novembre 2026";
+export const PRIVACY_UPDATED = "Dernière mise à jour : 20 novembre 2026";
 
 export const PRIVACY_INTRO = `Vos données sont celles de votre commerce. Cette page explique simplement lesquelles nous conservons, pourquoi, et comment vous gardez la main dessus.`;
 
@@ -24,6 +24,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
                 "Votre boutique : nom, logo, coordonnées et informations légales (adresse, téléphone, numéro IFU, RCCM).",
                 "Les données que vous saisissez : produits, stocks, ventes, caisse, fournisseurs, ainsi que vos clients et leurs numéros de téléphone.",
                 "Des données techniques : journaux de connexion, adresse IP et type d'appareil ou de navigateur.",
+                "Votre abonnement : dates d'essai et de paiement.",
             ],
         ],
     },
@@ -64,7 +65,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
                 "Render, pour héberger l'application.",
                 "Neon, pour la base de données.",
                 "Cloudflare, pour la sécurité et la diffusion du site.",
-                "Gmail, pour envoyer les e-mails du service (réinitialisation de mot de passe, alertes).",
+                "Brevo, pour envoyer les e-mails du service (code de confirmation, mot de passe oublié, alertes de stock, rappels d'abonnement).",
             ],
             "Ces prestataires n'accèdent à vos données que pour rendre ce service. Nous pouvons aussi communiquer des données si une autorité compétente l'exige légalement.",
         ],
@@ -81,6 +82,8 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
         title: "Durée de conservation",
         body: [
             "Nous conservons vos données tant que votre compte est actif, afin que votre historique de ventes et de stock reste disponible.",
+            "Après la fin de l'essai ou de l'abonnement, elles sont gardées au moins 90 jours pour que vous puissiez revenir ou les exporter, puis elles peuvent être supprimées après un e-mail de prévenance.",
+            "Les codes de confirmation expirent après 15 minutes et les sessions après 30 jours sans utilisation.",
             "Si vous fermez votre boutique ou demandez la suppression de vos données, nous les supprimons ou les anonymisons dans un délai raisonnable. Certaines informations peuvent être gardées plus longtemps lorsque la loi l'impose ou pour nous protéger en cas de litige. Les sauvegardes sont renouvelées régulièrement et s'effacent de façon progressive.",
         ],
     },
@@ -91,6 +94,8 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
             [
                 "Connexion chiffrée (HTTPS) entre votre appareil et nos serveurs.",
                 "Mots de passe hachés : personne, pas même nous, ne peut les lire.",
+                "Adresse e-mail confirmée par un code à l'inscription, et compte bloqué 15 minutes après 5 mots de passe faux.",
+                "Limites sur le nombre de tentatives, pour freiner les robots.",
                 "Isolation des données par boutique : une boutique ne voit jamais les données d'une autre.",
                 "Sauvegardes régulières de la base de données.",
                 "Rôles et droits d'accès : un employé ne voit que ce que l'administrateur lui autorise.",
@@ -118,9 +123,11 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
         title: "Stockage local et cookies",
         body: [
             [
-                "Un jeton de session, gardé dans votre navigateur, vous maintient connecté.",
+                "Un jeton de session, gardé dans votre navigateur, vous maintient connecté jusqu'à 30 jours.",
                 "Vos préférences (thème clair ou sombre, affichage des listes) sont mémorisées sur votre appareil.",
+                "Pour vendre sans internet, le catalogue (produits, prix, stock), l'état de votre caisse et les ventes pas encore envoyées sont gardés sur l'appareil. Ils s'effacent avec les données du navigateur.",
             ],
+            "La caméra ne sert qu'à lire les codes-barres, quand vous la lancez : aucune image n'est enregistrée ni envoyée.",
             "Nous n'utilisons aucun cookie publicitaire ni outil de suivi à but commercial.",
         ],
     },
