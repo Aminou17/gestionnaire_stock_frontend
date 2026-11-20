@@ -368,7 +368,7 @@
                                             movement.type === "SALE"
                                                 ? "#" + movement.sale_number
                                                 : (movement.type === "ADJUSTMENT"
-                                                      ? "Remboursement #"
+                                                      ? "Retour #"
                                                       : "Vente #") + movement.sale_number
                                         }}</a
                                     >
@@ -454,7 +454,7 @@
                                                 (click)="$event.stopPropagation()"
                                                 >{{
                                                     (movement.type === "ADJUSTMENT"
-                                                        ? "Remboursement #"
+                                                        ? "Retour #"
                                                         : "Vente #") + movement.sale_number
                                                 }}</a
                                             >

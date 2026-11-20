@@ -1,4 +1,4 @@
-// ENTRY : entrée de stock, SALE : vente, ADJUSTMENT : remise en stock après un remboursement
+// ENTRY : entrée de stock, SALE : vente, ADJUSTMENT : retour en stock après un remboursement ou un article rendu
 // INVENTORY_GAIN et INVENTORY_LOSS : écart d'un inventaire appliqué au stock
 // MANUAL_GAIN et MANUAL_LOSS : ajustement saisi à la main (casse, perte, produit retrouvé)
 export type StockMovementType =
@@ -69,7 +69,7 @@ export interface StockAdjustmentInput {
 export const MOVEMENT_TYPES = {
     ENTRY: { label: "Entrée", sign: "+", tone: "primary" },
     SALE: { label: "Vente", sign: "−", tone: "success" },
-    ADJUSTMENT: { label: "Remboursement", sign: "+", tone: "danger" },
+    ADJUSTMENT: { label: "Retour", sign: "+", tone: "danger" },
     INVENTORY_GAIN: { label: "Inventaire", sign: "+", tone: "warning" },
     INVENTORY_LOSS: { label: "Inventaire", sign: "−", tone: "warning" },
     MANUAL_GAIN: { label: "Ajustement", sign: "+", tone: "violet" },

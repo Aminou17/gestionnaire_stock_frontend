@@ -16,6 +16,8 @@ import { filter, map, startWith } from "rxjs";
 import { Router } from "@angular/router";
 
 import { getBackLink } from "../../../core/back-link";
+import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
+import { formatTicketNumber } from "../../../core/sales/ticket-number";
 import { ShopSettings } from "../../../core/shop/shop-settings.model";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -39,8 +41,8 @@ export class SettingsShop implements HasUnsavedChanges {
     private fb = inject(NonNullableFormBuilder);
     private router = inject(Router);
     private logoResizer = inject(LogoResizerService);
+    private salesSettingsService = inject(SalesSettingsService);
 
-    // on peut arriver ici depuis le ticket de caisse : Retour y ramène
     back = getBackLink("/settings", "Retour aux paramètres");
     backUrl = this.router.serializeUrl(this.back.link);
 
@@ -54,7 +56,17 @@ export class SettingsShop implements HasUnsavedChanges {
         taxId: ["", Validators.maxLength(50)],
         rccm: ["", Validators.maxLength(50)],
         defaultCountryCode: ["", [Validators.required, Validators.pattern(/^[1-9][0-9]{0,3}$/)]],
+        receiptFooter: ["", Validators.maxLength(300)],
     });
+
+    // le préfixe se règle dans la page Ventes : sans lui, l'aperçu montre le numéro simple
+    private salesSettings = rxResource({ stream: () => this.salesSettingsService.getSettings() });
+    ticketNumber = computed(() =>
+        formatTicketNumber(
+            12,
+            this.salesSettings.hasValue() ? this.salesSettings.value().ticket_prefix : "",
+        ),
+    );
 
     // l'aperçu du ticket et l'en-tête suivent la saisie
     values = toSignal(
@@ -168,15 +180,8 @@ export class SettingsShop implements HasUnsavedChanges {
         // une saisie pendant l'envoi serait effacée par la réponse du serveur
         this.form.disable({ emitEvent: false });
 
-        // le backend remplace toute la fiche : on renvoie le message du ticket lu au chargement
-        // (un seul administrateur modifie ces réglages, le risque de conflit est accepté)
-        const input = {
-            ...this.form.getRawValue(),
-            receiptFooter: this.settings.value().receipt_footer ?? "",
-        };
-
         this.shopService
-            .updateSettings(input)
+            .updateSettings(this.form.getRawValue())
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (settings) => {
@@ -264,6 +269,7 @@ export class SettingsShop implements HasUnsavedChanges {
             taxId: settings.tax_id ?? "",
             rccm: settings.rccm ?? "",
             defaultCountryCode: settings.default_country_code ?? "242",
+            receiptFooter: settings.receipt_footer ?? "",
         });
     }
 }

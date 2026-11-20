@@ -5,6 +5,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 
 import { filter } from "rxjs";
 
+import { AuthService } from "../../../core/auth/auth.service";
 import { AlertEmailSettings } from "../../../core/stock/alert-email.model";
 import { AlertEmailService } from "../../../core/stock/alert-email.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -28,6 +29,7 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
     private service = inject(AlertEmailService);
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
+    private auth = inject(AuthService);
 
     settings = rxResource({ stream: () => this.service.getSettings() });
 
@@ -38,8 +40,6 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
         recipient: this.fb.control("", [Validators.pattern(EMAIL)]),
         sendHour: this.fb.control(8),
         onlyIfAlerts: this.fb.control(true),
-        gmailUser: this.fb.control("", [Validators.pattern(EMAIL)]),
-        gmailPassword: this.fb.control(""),
     });
 
     saving = signal(false);
@@ -70,21 +70,25 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
     private fill(settings: AlertEmailSettings) {
         this.form.reset({
             enabled: settings.enabled,
-            recipient: settings.recipient ?? "",
+            // par défaut, le résumé va à l'adresse de connexion de l'administrateur
+            recipient: settings.recipient ?? this.auth.user()?.email ?? "",
             sendHour: settings.sendHour,
             onlyIfAlerts: settings.onlyIfAlerts,
-            gmailUser: settings.gmailUser ?? "",
-            gmailPassword: "",
         });
     }
 
-    invalid(name: "recipient" | "gmailUser") {
-        const control = this.form.controls[name];
+    hourLabel(hour: number) {
+        return `${String(hour).padStart(2, "0")}:00`;
+    }
+
+    invalid() {
+        const control = this.form.controls.recipient;
         return control.touched && control.invalid;
     }
 
-    hasPassword() {
-        return this.settings.hasValue() && this.settings.value().hasPassword;
+    // le test part avec les réglages enregistrés : il faut une adresse enregistrée et rien en attente
+    canTest() {
+        return this.settings.hasValue() && !!this.settings.value().recipient && !this.form.dirty;
     }
 
     canLeave() {
@@ -101,6 +105,12 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
     save() {
         this.form.markAllAsTouched();
         if (this.form.invalid) return;
+
+        const value = this.form.getRawValue();
+        if (value.enabled && !value.recipient.trim()) {
+            this.message.set({ ok: false, text: "Indiquez l'adresse qui recevra le résumé." });
+            return;
+        }
 
         this.saving.set(true);
         this.message.set(null);
@@ -139,7 +149,10 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
             .subscribe({
                 next: () => {
                     this.testing.set(false);
-                    this.message.set({ ok: true, text: "E-mail de test envoyé." });
+                    this.message.set({
+                        ok: true,
+                        text: "E-mail envoyé. Regardez votre boîte de réception.",
+                    });
                     this.settings.reload();
                 },
                 error: (err) => {

@@ -47,15 +47,7 @@ const GROUPS: SettingsGroup[] = [
                 adminOnly: true,
                 icon: "store",
                 label: "Ma boutique",
-                description: "Nom, logo et coordonnées",
-            },
-            {
-                path: "receipt",
-                tone: "#8b5cf6",
-                adminOnly: true,
-                icon: "receipt",
-                label: "Ticket de caisse",
-                description: "Logo et message",
+                description: "Nom, logo, coordonnées et ticket",
             },
         ],
     },
@@ -212,7 +204,7 @@ export class Settings {
 
         if (this.shop.hasValue()) {
             const shop = this.shop.value();
-            statuses["receipt"] = {
+            statuses["shop"] = {
                 text: shop.logo ? "Logo ajouté" : "Sans logo",
                 state: shop.logo ? "ok" : "off",
             };
@@ -227,9 +219,8 @@ export class Settings {
 
         if (this.alertEmail.hasValue()) {
             const email = this.alertEmail.value();
-            const connected = email.enabled && email.hasPassword;
-            statuses["alert-email"] = connected
-                ? { text: "Gmail connecté", state: "ok" }
+            statuses["alert-email"] = email.enabled
+                ? { text: `Activé à ${String(email.sendHour).padStart(2, "0")}:00`, state: "ok" }
                 : { text: "Désactivé", state: "off" };
         }
 

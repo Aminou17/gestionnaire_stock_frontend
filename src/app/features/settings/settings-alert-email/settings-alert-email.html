@@ -1,118 +1,66 @@
 <app-page-header
     title="E-mail des alertes"
-    subtitle="Un résumé du stock envoyé chaque matin"
+    subtitle="Les produits à racheter, chaque jour par e-mail"
     section="Paramètres"
     [back]="back.link"
     [backLabel]="back.label"
 />
 
 <form class="card section" [formGroup]="form" (ngSubmit)="save()" novalidate>
-    <div class="section-head">
-        <span class="section-icon" style="--tone: #0ea5e9"
-            ><app-icon name="mail" [size]="18"
-        /></span>
-        <div>
-            <h2>Résumé quotidien par e-mail</h2>
-            <p class="muted">
-                Les produits à réapprovisionner, envoyés depuis votre compte Gmail. Vous décidez de
-                tout : l'activation, l'heure, le destinataire et le compte utilisé.
-            </p>
-        </div>
-    </div>
-
     @if (settings.isLoading() && !settings.hasValue()) {
         <div class="skeleton field-skeleton"></div>
     } @else if (settings.error() && !settings.hasValue()) {
         <div class="alert alert-error load-error" role="alert">
-            Impossible de charger les réglages de l'email.
+            Impossible de charger les réglages.
             <button type="button" class="btn btn-outline btn-sm" (click)="settings.reload()">
                 Réessayer
             </button>
         </div>
     } @else {
-        <label class="toggle">
-            <input type="checkbox" formControlName="enabled" />
-            <span class="toggle-text">
-                <strong>Envoyer le résumé chaque jour</strong>
-                <small class="muted">Désactivé, aucun e-mail ne part tout seul.</small>
+        <label class="switch-row">
+            <span class="section-icon" style="--tone: #0ea5e9"
+                ><app-icon name="mail" [size]="18"
+            /></span>
+            <span class="switch-text">
+                <strong>Résumé quotidien</strong>
+                <small class="muted">{{
+                    form.controls.enabled.value ? "Activé" : "Désactivé"
+                }}</small>
             </span>
+            <input class="switch" type="checkbox" role="switch" formControlName="enabled" />
         </label>
 
         <div class="grid">
             <label class="field">
-                <span>Heure d'envoi</span>
-                <select class="input" formControlName="sendHour">
-                    @for (hour of hours; track hour) {
-                        <option [ngValue]="hour">{{ hour }} h 00</option>
-                    }
-                </select>
-            </label>
-
-            <label class="field">
-                <span>Destinataire</span>
+                <span>Envoyer à</span>
                 <input
                     class="input"
                     type="email"
                     formControlName="recipient"
-                    autocomplete="off"
-                    placeholder="admin@gmail.com"
-                    [class.invalid]="invalid('recipient')"
-                    [attr.aria-invalid]="invalid('recipient')"
+                    autocomplete="email"
+                    placeholder="vous@exemple.com"
+                    [class.invalid]="invalid()"
+                    [attr.aria-invalid]="invalid()"
                 />
-                @if (invalid("recipient")) {
+                @if (invalid()) {
                     <small class="field-error" role="alert">Adresse e-mail non valide.</small>
                 }
             </label>
+
+            <label class="field">
+                <span>Heure</span>
+                <select class="input" formControlName="sendHour">
+                    @for (hour of hours; track hour) {
+                        <option [ngValue]="hour">{{ hourLabel(hour) }}</option>
+                    }
+                </select>
+            </label>
         </div>
 
-        <label class="toggle">
+        <label class="check">
             <input type="checkbox" formControlName="onlyIfAlerts" />
-            <span class="toggle-text">
-                <strong>Seulement s'il y a des alertes</strong>
-                <small class="muted">
-                    Pas d'email les jours où tous les produits sont au-dessus de leur seuil.
-                </small>
-            </span>
+            <span>Seulement s'il y a des produits à racheter</span>
         </label>
-
-        <h3 class="subtitle">Compte Gmail d'envoi</h3>
-        <div class="grid">
-            <label class="field">
-                <span>Adresse Gmail</span>
-                <input
-                    class="input"
-                    type="email"
-                    formControlName="gmailUser"
-                    autocomplete="off"
-                    placeholder="boutique@gmail.com"
-                    [class.invalid]="invalid('gmailUser')"
-                    [attr.aria-invalid]="invalid('gmailUser')"
-                />
-                @if (invalid("gmailUser")) {
-                    <small class="field-error" role="alert">Adresse e-mail non valide.</small>
-                }
-            </label>
-
-            <label class="field">
-                <span>Mot de passe d'application</span>
-                <input
-                    class="input"
-                    type="password"
-                    formControlName="gmailPassword"
-                    autocomplete="new-password"
-                    [placeholder]="
-                        hasPassword()
-                            ? 'Enregistré : laissez vide pour le garder'
-                            : 'xxxx xxxx xxxx xxxx'
-                    "
-                />
-            </label>
-        </div>
-        <p class="muted help">
-            Ce n'est pas le mot de passe de votre Gmail. Dans votre compte Google, activez la
-            validation en deux étapes, puis créez un « mot de passe d'application ». Il est
-            enregistré chiffré et ne s'affiche plus jamais.
-        </p>
 
         @if (settings.value(); as current) {
             @if (current.lastError) {
@@ -120,9 +68,7 @@
                     Dernier envoi en échec : {{ current.lastError }}
                 </div>
             } @else if (current.lastSentOn) {
-                <p class="muted help">
-                    Dernier envoi : {{ current.lastSentOn | date: "dd/MM/yyyy" }}
-                </p>
+                <p class="muted last">Dernier envoi le {{ current.lastSentOn | date: "d MMMM" }}</p>
             }
         }
 
@@ -137,27 +83,20 @@
             </div>
         }
 
-        @if (form.dirty) {
-            <p class="muted help">Enregistrez vos modifications avant d'envoyer un test.</p>
-        } @else if (!hasPassword()) {
-            <p class="muted help">
-                Enregistrez le mot de passe d'application pour envoyer un test.
-            </p>
-        }
-
         <div class="actions">
-            <button
-                type="button"
-                class="btn btn-outline test"
-                [disabled]="saving() || testing() || form.dirty || !hasPassword()"
-                [title]="form.dirty ? 'Enregistrez d\'abord vos modifications' : ''"
-                (click)="sendTest()"
-            >
-                @if (testing()) {
-                    <span class="spinner"></span>
-                }
-                Envoyer un test maintenant
-            </button>
+            @if (canTest()) {
+                <button
+                    type="button"
+                    class="btn btn-outline test"
+                    [disabled]="saving() || testing()"
+                    (click)="sendTest()"
+                >
+                    @if (testing()) {
+                        <span class="spinner"></span>
+                    }
+                    Envoyer un essai
+                </button>
+            }
             <button
                 type="button"
                 class="btn btn-outline"
