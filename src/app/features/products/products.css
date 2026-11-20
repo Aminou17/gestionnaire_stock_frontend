@@ -441,7 +441,8 @@ td.num small {
     gap: 10px;
 }
 
-@media (max-width: 1023px) {
+/* petit ordinateur et tablette : la barre ne tient pas sur une ligne */
+@media (max-width: 1365px) {
     .toolbar {
         flex-wrap: wrap;
     }
@@ -449,6 +450,10 @@ td.num small {
     /* ligne 1 : recherche et bascule, ligne 2 : les trois filtres */
     .search {
         order: 1;
+    }
+
+    .view-toggle {
+        order: 2;
     }
 
     .filters {
@@ -459,7 +464,9 @@ td.num small {
     .filters .field {
         flex: 1;
     }
+}
 
+@media (max-width: 1023px) {
     .stats {
         gap: 12px;
     }

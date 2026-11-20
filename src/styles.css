@@ -76,6 +76,7 @@
 
     --radius: 12px;
     --bottom-nav-height: 64px;
+    --page-width: 1100px;
 
     /* Échelle typographique (modèle : Tableau de bord) */
     --fs-title: 28px;
@@ -198,6 +199,27 @@ b {
 
 small {
     font-size: var(--fs-caption);
+}
+
+/*
+ * Largeur des pages sur ordinateur, comme Shopify : les grands tableaux (produits, ventes, stock)
+ * prennent toute la place, les listes à peu de colonnes s'arrêtent à une largeur confortable
+ * pour ne pas étirer leurs cartes sur les grands écrans.
+ */
+app-customers,
+app-users,
+app-categories,
+app-suppliers,
+app-inventories,
+app-cash,
+app-cash-sessions,
+app-cash-movements,
+app-alerts,
+app-rotation,
+app-support-inbox,
+app-audit-logs,
+app-sale-page {
+    max-width: var(--page-width);
 }
 
 img {
