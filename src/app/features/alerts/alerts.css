@@ -318,7 +318,7 @@ a.group-name:hover {
 
 .order strong {
     color: var(--primary-text);
-    font-size: var(--fs-figure);
+    font-size: var(--fs-heading);
 }
 
 .order span {

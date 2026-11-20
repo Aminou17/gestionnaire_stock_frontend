@@ -573,6 +573,7 @@ tbody tr:hover {
 
     .summary-amount {
         font-size: var(--fs-kpi);
+        font-weight: var(--fw-bold);
         line-height: 1.1;
         font-variant-numeric: tabular-nums;
     }
