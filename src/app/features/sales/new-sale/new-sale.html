@@ -68,21 +68,19 @@
             <span class="muted">{{ resultsTotal() }}</span>
         </div>
 
-        <div class="toolbar">
-            <label class="search">
-                <app-icon name="search" [size]="18" />
-                <input
-                    #searchInput
-                    class="input"
-                    type="search"
-                    placeholder="Chercher…"
-                    aria-label="Rechercher un produit"
-                    aria-keyshortcuts="/ Control+K"
-                    (input)="onSearch($any($event.target).value)"
-                />
-                <kbd class="search-key" aria-hidden="true">/</kbd>
-            </label>
-
+        <!-- une seule barre : chercher ou scanner, comme sur les caisses du commerce -->
+        <div class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                #searchInput
+                class="input"
+                type="search"
+                placeholder="Chercher ou scanner…"
+                aria-label="Rechercher un produit"
+                aria-keyshortcuts="/ Control+K"
+                (input)="onSearch($any($event.target).value)"
+            />
+            <kbd class="search-key" aria-hidden="true">/</kbd>
             <button
                 type="button"
                 class="scan-btn"
@@ -93,27 +91,37 @@
             >
                 <app-icon name="scan" [size]="20" />
             </button>
+        </div>
 
-            @if (categoryChips().length > 1) {
-                <label class="category">
-                    <span class="sr-only">Catégorie</span>
-                    <select
-                        class="chip"
-                        [class.active]="categoryId() !== null"
-                        (change)="selectCategory($any($event.target).value)"
+        <!-- catégories en pastilles qui défilent, affichage au bout -->
+        <div class="toolbar">
+            <div class="cats" role="group" aria-label="Catégorie">
+                @if (categoryChips().length > 1) {
+                    <button
+                        type="button"
+                        class="cat"
+                        [attr.aria-pressed]="categoryId() === null"
+                        (click)="selectCategory('')"
                     >
-                        <option value="">Catégorie</option>
-                        @for (category of categoryChips(); track category.id) {
-                            <option [value]="category.id">{{ category.name }}</option>
-                        }
-                    </select>
-                </label>
-            }
+                        Tout
+                    </button>
+                    @for (category of categoryChips(); track category.id) {
+                        <button
+                            type="button"
+                            class="cat"
+                            [attr.aria-pressed]="categoryId() === category.id"
+                            (click)="selectCategory('' + category.id)"
+                        >
+                            {{ category.name }}
+                        </button>
+                    }
+                }
+            </div>
 
             <button
                 type="button"
                 class="view-single"
-                aria-label="Afficher en carreaux"
+                [attr.aria-label]="view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'"
                 [attr.aria-pressed]="view() === 'grid'"
                 (click)="setView(view() === 'grid' ? 'list' : 'grid')"
             >
