@@ -872,3 +872,23 @@ li:hover > .gcorner-add,
     border-color: var(--primary);
     background: color-mix(in srgb, var(--primary) 14%, var(--surface));
 }
+
+/* téléphone : recherche et scan sur la première ligne, catégorie et affichage dessous */
+@media (max-width: 767px) {
+    .toolbar {
+        flex-wrap: wrap;
+    }
+
+    .toolbar .search {
+        flex: 1 1 calc(100% - 56px);
+    }
+
+    .toolbar .category {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .toolbar .category .chip {
+        width: 100%;
+    }
+}
