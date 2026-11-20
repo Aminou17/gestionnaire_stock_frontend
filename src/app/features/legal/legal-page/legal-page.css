@@ -378,3 +378,9 @@ h2 {
         text-transform: uppercase;
     }
 }
+
+.brand-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+}
