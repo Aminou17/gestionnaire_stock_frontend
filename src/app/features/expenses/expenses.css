@@ -189,6 +189,23 @@ app-page-header {
     border-bottom: 1px solid var(--border);
 }
 
+/* historique masqué : pas de trait sous le titre */
+.list-head:only-child {
+    border-bottom: 0;
+}
+
+.list-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.history-toggle {
+    gap: 6px;
+    white-space: nowrap;
+}
+
 .cats {
     display: flex;
     gap: 8px;
