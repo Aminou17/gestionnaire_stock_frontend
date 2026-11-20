@@ -3,6 +3,7 @@ import { Component, inject } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
 import { guardNumberInputs } from "./core/number-inputs";
+import { AppUpdateService } from "./core/pwa/app-update.service";
 import { ThemeService } from "./core/theme/theme.service";
 
 @Component({
@@ -17,5 +18,7 @@ export class App {
 
     constructor() {
         guardNumberInputs(inject(DOCUMENT));
+        // une nouvelle version mise en ligne s'affiche sans avoir à vider le cache
+        inject(AppUpdateService).start();
     }
 }
