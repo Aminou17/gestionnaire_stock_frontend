@@ -208,15 +208,6 @@ kbd {
     outline-offset: -2px;
 }
 
-/* même forme que la recherche à côté : coins de 8 px, même hauteur, même texte */
-.category select {
-    max-width: 160px;
-    height: 48px;
-    border-radius: 8px;
-    font-size: var(--fs-body);
-    text-overflow: ellipsis;
-}
-
 .chip {
     padding: 0 12px;
     border: 1px solid var(--border);
@@ -787,10 +778,6 @@ li:hover > .gcorner-add,
     .view-single {
         display: grid;
     }
-
-    .category select {
-        max-width: 120px;
-    }
 }
 
 /* confirmation d'une vente gardée sur l'appareil, sans internet */
@@ -873,22 +860,99 @@ li:hover > .gcorner-add,
     background: color-mix(in srgb, var(--primary) 14%, var(--surface));
 }
 
-/* téléphone : recherche et scan sur la première ligne, catégorie et affichage dessous */
+/* recherche : le scan est un bouton dans le champ, à droite */
+.catalog > .search {
+    flex: none;
+    margin-bottom: 12px;
+}
+
+.search .input {
+    padding-right: 52px;
+}
+
+.search .scan-btn {
+    position: absolute;
+    top: 50%;
+    right: 5px;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    transform: translateY(-50%);
+}
+
+@media (min-width: 1024px) and (hover: hover) {
+    .search .input {
+        padding-right: 84px;
+    }
+
+    .search-key {
+        right: 54px;
+    }
+}
+
+/* catégories : pastilles qui défilent sur une ligne */
+.toolbar {
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.cats {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* fondu à droite : on voit qu'il y a d'autres catégories */
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+
+.cats::-webkit-scrollbar {
+    display: none;
+}
+
+.cat {
+    flex: none;
+    height: 36px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.cat:hover {
+    border-color: var(--primary);
+}
+
+.cat[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: var(--on-primary);
+}
+
+.cat:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 @media (max-width: 767px) {
     .toolbar {
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
 
-    .toolbar .search {
-        flex: 1 1 calc(100% - 56px);
-    }
-
-    .toolbar .category {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .toolbar .category .chip {
-        width: 100%;
+    /* bascule d'affichage : discrète, au bout des pastilles */
+    .view-single {
+        width: 36px;
+        height: 36px;
+        border: 0;
+        background: transparent;
     }
 }
