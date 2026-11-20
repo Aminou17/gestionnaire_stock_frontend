@@ -814,7 +814,6 @@ tbody tr:focus-visible,
         flex-wrap: wrap;
         gap: 8px;
     }
-
 }
 
 .more-btn:focus-visible,

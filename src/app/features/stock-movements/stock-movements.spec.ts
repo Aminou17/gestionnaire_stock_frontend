@@ -150,7 +150,7 @@ describe("StockMovements", () => {
         expect(rows.length).toBe(3);
         expect(rows[0].textContent).toContain("Vente");
         expect(rows[0].textContent).toContain("−4");
-        expect(rows[1].textContent).toContain("Remboursement");
+        expect(rows[1].textContent).toContain("Retour #108");
         expect(rows[1].textContent).toContain("+4");
         expect(rows[2].textContent).toContain("Entrée de stock");
 
@@ -486,7 +486,9 @@ describe("StockMovements", () => {
 
     it("should have the title Mouvements", async () => {
         await render({});
-        expect(el.querySelector("app-page-header")?.getAttribute("title")).toBe("Historique du stock");
+        expect(el.querySelector("app-page-header")?.getAttribute("title")).toBe(
+            "Historique du stock",
+        );
     });
 
     it("should offer all dates when a period gives no result and reload without period", async () => {

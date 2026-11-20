@@ -64,7 +64,7 @@ describe("ProductMovements", () => {
         expect(text).toContain("Vente");
         expect(text).toContain("−2");
         expect(text).toContain("Entrée");
-        expect(text).toContain("Remboursement");
+        expect(text).toContain("Retour");
         expect(text).toContain("Vente #108");
 
         const all = el.querySelector<HTMLAnchorElement>(".card-header a")!;

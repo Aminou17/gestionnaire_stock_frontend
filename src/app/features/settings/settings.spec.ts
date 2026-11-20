@@ -33,7 +33,7 @@ describe("Settings", () => {
                 },
                 {
                     provide: AlertEmailService,
-                    useValue: { getSettings: () => of({ enabled: true, hasPassword: true }) },
+                    useValue: { getSettings: () => of({ enabled: true, sendHour: 8 }) },
                 },
                 {
                     provide: CashSettingsService,
@@ -84,7 +84,6 @@ describe("Settings", () => {
 
         expect(hrefs()).toEqual([
             "/shop",
-            "/receipt",
             "/stock",
             "/alert-email",
             "/cash",
@@ -112,7 +111,7 @@ describe("Settings", () => {
 
         expect(text).not.toContain("Chez Awa");
         expect(text).toContain("Seuil : 5");
-        expect(text).toContain("Gmail connecté");
+        expect(text).toContain("Activé à 08:00");
         expect(text).toContain("Essai gratuit");
     });
 

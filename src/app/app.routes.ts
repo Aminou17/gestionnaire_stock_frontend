@@ -323,16 +323,8 @@ export const routes: Routes = [
                                 (m) => m.SettingsShop,
                             ),
                     },
-                    {
-                        path: "receipt",
-                        title: "Ticket de caisse",
-                        canActivate: [adminGuard],
-                        canDeactivate: [unsavedChangesGuard],
-                        loadComponent: () =>
-                            import("./features/settings/settings-receipt/settings-receipt").then(
-                                (m) => m.SettingsReceipt,
-                            ),
-                    },
+                    // le ticket de caisse se règle maintenant dans Ma boutique
+                    { path: "receipt", redirectTo: "shop" },
                     {
                         path: "stock",
                         title: "Paramètres du stock",

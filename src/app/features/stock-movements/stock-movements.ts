@@ -192,7 +192,7 @@ export class StockMovements {
                 tone: "success",
             },
             {
-                label: "Remboursements",
+                label: "Retours",
                 short: "Retours",
                 value: "ADJUSTMENT",
                 count: counters?.adjustments,

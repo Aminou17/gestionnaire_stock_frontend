@@ -1,6 +1,6 @@
 <app-page-header
     title="Ma boutique"
-    subtitle="Nom, logo et coordonnées"
+    subtitle="Nom, logo, coordonnées et ticket de caisse"
     section="Paramètres"
     [back]="backUrl"
     [backLabel]="back.label"
@@ -222,6 +222,31 @@
                 </div>
             </section>
 
+            <section class="block" aria-labelledby="shop-receipt">
+                <div class="block-head">
+                    <h2 id="shop-receipt">Ticket de caisse</h2>
+                </div>
+
+                <div class="card block-card">
+                    <label class="field">
+                        <span
+                            >Message en bas du ticket
+                            <small class="muted">(facultatif)</small></span
+                        >
+                        <textarea
+                            class="input"
+                            rows="3"
+                            formControlName="receiptFooter"
+                            maxlength="300"
+                            placeholder="Ex. Échange possible sous 7 jours avec ce ticket."
+                        ></textarea>
+                        <small class="muted counter"
+                            >{{ values().receiptFooter.length }} / 300</small
+                        >
+                    </label>
+                </div>
+            </section>
+
             @if (message(); as message) {
                 <div
                     class="alert"
@@ -239,7 +264,7 @@
                 <h2 id="shop-preview">Aperçu du ticket</h2>
             </div>
 
-            <div class="ticket" role="img" aria-label="Aperçu de l'en-tête du ticket de caisse">
+            <div class="ticket" role="img" aria-label="Aperçu du ticket de caisse">
                 <div class="ticket-head">
                     @if (logo(); as logo) {
                         <img class="ticket-logo" [src]="logo" alt="" width="160" height="80" />
@@ -257,13 +282,30 @@
                     @if (values().rccm.trim()) {
                         <span>RCCM {{ values().rccm }}</span>
                     }
+                    <span class="ticket-gap">Ticket n° {{ ticketNumber() }}</span>
+                    <span>11/11/2026 à 15:40</span>
+                </div>
+
+                <div class="ticket-body">
+                    <strong>Bazin riche</strong>
+                    <p><span>2 × 7 500 F</span><span>15 000 F</span></p>
+                </div>
+
+                <p class="ticket-total"><span>TOTAL</span><span>15 000 F</span></p>
+
+                <div class="ticket-foot">
+                    <!-- même texte que sales/sale-receipt/sale-receipt.html -->
+                    <span>Merci de votre visite !</span>
+                    @if (values().receiptFooter.trim()) {
+                        <span>{{ values().receiptFooter }}</span>
+                    }
                 </div>
             </div>
         </aside>
 
         <app-settings-history
             class="history"
-            [actions]="['SHOP_SETTINGS_UPDATED']"
+            [actions]="['SHOP_SETTINGS_UPDATED', 'SHOP_LOGO_UPDATED', 'SHOP_LOGO_REMOVED']"
             [version]="saveCount()"
         />
 

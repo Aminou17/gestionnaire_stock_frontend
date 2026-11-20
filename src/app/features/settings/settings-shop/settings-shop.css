@@ -229,3 +229,14 @@
         animation: none;
     }
 }
+
+textarea.input {
+    height: auto;
+    padding: 10px 12px;
+    resize: vertical;
+}
+
+.counter {
+    justify-self: end;
+    font-size: var(--fs-caption);
+}
