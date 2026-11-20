@@ -846,13 +846,28 @@ nav .group .group-text + .arrow {
         animation-name: sheet-in;
     }
 
+    /* trois par ligne, icône au-dessus du nom, comme une grille d'applications */
     .tiles {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+        gap: 8px;
     }
 
     .tile {
-        min-height: 104px;
+        justify-items: center;
+        align-content: center;
+        gap: 8px;
+        min-height: 100px;
+        padding: 12px 6px;
+        border-radius: 14px;
+        text-align: center;
+    }
+
+    .tile-label {
+        font-size: var(--fs-small);
+    }
+
+    .tile-count {
+        top: 6px;
+        right: 6px;
     }
 }
 

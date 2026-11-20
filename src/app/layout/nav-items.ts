@@ -17,7 +17,7 @@ export interface NavSection {
     items: NavItem[];
 }
 
-// Accueil, Ventes, Clients et Caisse en direct ; le reste est rangé en trois groupes qui
+// Accueil, Ventes, Clients et Caisse en direct ; le reste est rangé en deux groupes qui
 // s'ouvrent seuls quand on est dans leurs pages, comme Shopify : peu de lignes à lire
 export const SECTIONS: NavSection[] = [
     {
@@ -54,13 +54,7 @@ export const SECTIONS: NavSection[] = [
                         path: "/alerts/rotation",
                         icon: "trending-up",
                     },
-                ],
-            },
-            {
-                label: "Achats",
-                icon: "stock-entry",
-                adminOnly: true,
-                children: [
+                    // les achats sont rangés ici : entrées de marchandise et fournisseurs
                     {
                         label: "Entrées de stock",
                         path: "/stock-entries",
