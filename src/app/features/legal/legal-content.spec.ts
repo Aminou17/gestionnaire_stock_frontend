@@ -12,6 +12,6 @@ describe("contenu légal", () => {
     });
 
     it("indique la date de mise à jour", () => {
-        expect(PRIVACY_UPDATED).toContain("15 novembre 2026");
+        expect(PRIVACY_UPDATED).toContain("20 novembre 2026");
     });
 });
