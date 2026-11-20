@@ -5,7 +5,36 @@
     [backLabel]="back.label"
 />
 
-@if (cash.error()) {
+@if (queued(); as done) {
+    <div class="queued" role="status">
+        <span class="queued-icon"><app-icon name="check" [size]="20" /></span>
+        <div class="queued-text">
+            <strong>Vente enregistrée sur cet appareil</strong>
+            <span>{{ done.total | fcfa }} · elle partira dès le retour d'internet.</span>
+        </div>
+        <button type="button" class="btn btn-sm queued-ok" (click)="queued.set(null)">OK</button>
+    </div>
+}
+
+@if (offline()) {
+    @if (!catalog.savedAt()) {
+        <div class="alert alert-warning banner" role="alert">
+            <app-icon name="alert" />
+            <span
+                >Hors ligne, et aucun catalogue n'est encore gardé sur cet appareil. Ouvrez la vente
+                une fois avec internet pour pouvoir vendre sans réseau.</span
+            >
+        </div>
+    } @else if (cashClosed()) {
+        <div class="alert alert-warning banner" role="alert">
+            <app-icon name="alert" />
+            <span
+                >Hors ligne, et votre caisse n'était pas ouverte : ouvrez-la dès le retour
+                d'internet.</span
+            >
+        </div>
+    }
+} @else if (cash.error()) {
     <div class="alert alert-error banner" role="alert">
         <app-icon name="alert" />
         <span>Impossible de vérifier l'état de la caisse.</span>
@@ -100,7 +129,7 @@
             </div>
         </div>
 
-        @if (products.isLoading() && results().length === 0) {
+        @if (!offline() && products.isLoading() && results().length === 0) {
             <div [class.gtiles]="view() === 'grid'" [class.tiles]="view() === 'list'">
                 @for (i of [1, 2, 3, 4, 5, 6]; track i) {
                     <div
@@ -110,7 +139,7 @@
                     ></div>
                 }
             </div>
-        } @else if (products.error()) {
+        } @else if (!offline() && products.error()) {
             <div class="empty">
                 Impossible de charger les produits.
                 <button type="button" class="btn btn-outline btn-sm" (click)="products.reload()">

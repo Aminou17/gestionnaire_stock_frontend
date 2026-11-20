@@ -1,6 +1,7 @@
 import { Component, ElementRef, effect, inject, viewChild } from "@angular/core";
 
 import { AuthService } from "../../core/auth/auth.service";
+import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
 
 // Demande confirmation avant de se déconnecter ; placée une fois dans chaque mise en page
 @Component({
@@ -10,6 +11,8 @@ import { AuthService } from "../../core/auth/auth.service";
 })
 export class LogoutDialog {
     protected auth = inject(AuthService);
+    // les ventes faites sans internet restent sur l'appareil et partiront à la prochaine connexion du même compte
+    protected outbox = inject(SaleOutboxService);
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("box");
 

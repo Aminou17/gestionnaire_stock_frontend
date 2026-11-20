@@ -9,6 +9,7 @@ import {
     inject,
     linkedSignal,
     signal,
+    untracked,
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
@@ -17,6 +18,9 @@ import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { getBackLink } from "../../../core/back-link";
+import { NetworkService } from "../../../core/offline/network.service";
+import { OfflineCatalogService } from "../../../core/offline/offline-catalog.service";
+import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
 import { CashSessionService } from "../../../core/cash/cash-session.service";
 import { Customer } from "../../../core/customers/customer.model";
 import { CustomerService } from "../../../core/customers/customer.service";
@@ -100,6 +104,14 @@ export class NewSale {
     private shop = inject(ShopSettingsService);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
+    private network = inject(NetworkService);
+    protected catalog = inject(OfflineCatalogService);
+    protected outbox = inject(SaleOutboxService);
+
+    // sans internet, la vente continue avec le catalogue gardé sur l'appareil
+    offline = computed(() => !this.network.online());
+    // vente gardée sur l'appareil, affichée en confirmation
+    queued = signal<{ total: number; count: number } | null>(null);
     protected back = getBackLink("/sales", "Ventes");
     protected initials = productInitials;
     protected resize = resizeAvatar;
@@ -135,7 +147,13 @@ export class NewSale {
 
     cash = rxResource({ stream: () => this.cashService.getTodayCash() });
     // on ne bloque la vente que si on SAIT que la caisse est fermée
-    cashClosed = computed(() => this.cash.hasValue() && this.cash.value()?.status !== "OPEN");
+    // hors ligne : on se fie au dernier état connu de la caisse
+    cashClosed = computed(() =>
+        this.offline()
+            ? this.catalog.cash()?.status !== "OPEN"
+            : this.cash.hasValue() && this.cash.value()?.status !== "OPEN",
+    );
+    cashKnown = computed(() => (this.offline() ? !!this.catalog.cash() : this.cash.hasValue()));
 
     cashClosedToday = computed(
         () => this.cash.hasValue() && this.cash.value()?.status === "CLOSED",
@@ -168,14 +186,49 @@ export class NewSale {
     // les puces ne montrent que les catégories qui ont des produits
     categories = rxResource({ stream: () => this.categoryService.getCategories() });
     categoryChips = computed(() =>
-        this.categories.hasValue()
-            ? this.categories.value().filter((category) => category.product_count > 0)
-            : [],
+        (this.offline()
+            ? this.catalog.categories()
+            : this.categories.hasValue()
+              ? this.categories.value()
+              : []
+        ).filter((category) => category.product_count > 0),
     );
-    results = computed(() => (this.products.hasValue() ? this.products.value().data : []));
+
+    // recherche et pages faites sur l'appareil quand le serveur ne répond pas
+    private localPage = computed(() => {
+        const search = this.search().trim().toLowerCase();
+        const categoryId = this.categoryId();
+        const category = this.catalog.categories().find((c) => c.id === categoryId)?.name;
+
+        const found = this.catalog
+            .products()
+            .filter(
+                (product) =>
+                    (!category || product.category_name === category) &&
+                    (!search ||
+                        product.name.toLowerCase().includes(search) ||
+                        product.barcode === this.search().trim()),
+            );
+        const size = this.pageSize();
+        const start = (this.page() - 1) * size;
+        return { data: found.slice(start, start + size), total: found.length };
+    });
+
+    results = computed(() =>
+        this.offline()
+            ? this.localPage().data
+            : this.products.hasValue()
+              ? this.products.value().data
+              : [],
+    );
     // le dernier total est gardé pendant le chargement d'une autre page
     resultsTotal = linkedSignal<number | undefined, number>({
-        source: () => (this.products.hasValue() ? this.products.value().total : undefined),
+        source: () =>
+            this.offline()
+                ? this.localPage().total
+                : this.products.hasValue()
+                  ? this.products.value().total
+                  : undefined,
         computation: (total, previous) => total ?? previous?.value ?? 0,
     });
 
@@ -431,7 +484,7 @@ export class NewSale {
         () =>
             this.cart().length > 0 &&
             !this.hasInvalidLine() &&
-            this.cash.hasValue() &&
+            this.cashKnown() &&
             !this.cashClosed() &&
             this.missingAmount() === 0 &&
             this.depositError() === null &&
@@ -444,6 +497,24 @@ export class NewSale {
         // un panier vidé ferme la feuille
         effect(() => {
             if (this.cart().length === 0 && this.cartOpen()) this.closeCart();
+        });
+
+        // catalogue de l'appareil : lu tout de suite, puis remis à jour quand le réseau est là
+        void this.catalog.load().then(() => {
+            if (!this.offline()) this.catalog.refresh().catch(() => {});
+        });
+
+        // dernier état connu de la caisse, pour vendre sans internet
+        effect(() => {
+            if (!this.cash.hasValue()) return;
+            const cash = this.cash.value();
+            untracked(() =>
+                this.catalog.saveCash(
+                    cash
+                        ? { status: cash.status, sessionDate: cash.openedAt?.slice(0, 10) ?? null }
+                        : null,
+                ),
+            );
         });
 
         this.destroyRef.onDestroy(() => {
@@ -629,6 +700,77 @@ export class NewSale {
         this.error.set(null);
     }
 
+    // Vente sans internet : gardée sur l'appareil avec un identifiant unique, envoyée au retour du réseau.
+    // Le prix envoyé est celui affiché au client.
+    async queueSale() {
+        this.saving.set(true);
+        this.error.set(null);
+
+        const lines = this.cart();
+        const customer = this.customer();
+        const items = lines.map((line) => ({
+            productId: line.product.id,
+            quantity: line.quantity,
+            ...(line.product.pricing_mode === "NEGOTIABLE" ? { unitPrice: line.unitPrice } : {}),
+        }));
+        const method = this.paymentMethod();
+        const deposit = this.deposit();
+        const payment = {
+            paymentMethod: method,
+            ...(method === "CASH" ? { amountReceived: this.amountReceived() ?? this.toPay() } : {}),
+            ...(deposit !== null && deposit < this.total() ? { amountPaid: deposit } : {}),
+            ...(this.split()
+                ? {
+                      secondPayment: {
+                          paymentMethod: this.secondMethod(),
+                          amountPaid: this.secondAmount(),
+                      },
+                  }
+                : {}),
+            ...(customer ? { customerId: customer.id } : {}),
+            ...(!customer && this.customerName().trim()
+                ? { customerName: this.customerName().trim() }
+                : {}),
+            ...(!customer && this.customerPhone().trim()
+                ? { customerPhone: this.customerPhone().trim() }
+                : {}),
+        };
+
+        try {
+            await this.outbox.add(items, payment, {
+                total: this.total(),
+                lines: lines.map((line) => ({
+                    name: line.product.name,
+                    quantity: line.quantity,
+                    unitPrice: line.unitPrice,
+                })),
+                customer: customer?.name ?? (this.customerName().trim() || null),
+                method,
+            });
+
+            this.queued.set({ total: this.total(), count: this.itemsCount() });
+            this.resetSale();
+        } catch {
+            this.error.set("Impossible de garder la vente sur cet appareil.");
+        } finally {
+            this.saving.set(false);
+        }
+    }
+
+    // panier et paiement remis à zéro pour la vente suivante
+    private resetSale() {
+        this.closeCart();
+        this.cart.set([]);
+        this.paymentMethod.set("CASH");
+        this.amountReceived.set(null);
+        this.deposit.set(null);
+        this.split.set(false);
+        this.customer.set(null);
+        this.customerName.set("");
+        this.customerPhone.set("");
+        this.showCustomer.set(false);
+    }
+
     removeLine(line: CartLine) {
         this.cart.update((lines) => lines.filter((l) => l !== line));
     }
@@ -686,6 +828,11 @@ export class NewSale {
 
     submit() {
         if (!this.canSubmit()) return;
+
+        if (this.offline()) {
+            void this.queueSale();
+            return;
+        }
 
         this.saving.set(true);
         this.error.set(null);
@@ -748,6 +895,12 @@ export class NewSale {
                         this.error.set(
                             "Ce client n'existe plus ou a été désactivé. Choisissez-en un autre.",
                         );
+                        return;
+                    }
+
+                    // le serveur ne répond pas : la vente est gardée sur l'appareil
+                    if (err.status === 0) {
+                        void this.queueSale();
                         return;
                     }
 

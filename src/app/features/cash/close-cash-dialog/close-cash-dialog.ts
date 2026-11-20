@@ -5,6 +5,7 @@ import { toSignal } from "@angular/core/rxjs-interop";
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 
 import { CashSessionService } from "../../../core/cash/cash-session.service";
+import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 // count : saisie du montant compté ; explain : écart révélé après une clôture à l'aveugle
@@ -18,6 +19,8 @@ type Step = "count" | "explain";
 })
 export class CloseCashDialog {
     private cash = inject(CashSessionService);
+    // des ventes faites sans internet et pas encore envoyées fausseraient le solde de la clôture
+    protected outbox = inject(SaleOutboxService);
     private fb = inject(NonNullableFormBuilder);
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
@@ -128,6 +131,8 @@ export class CloseCashDialog {
             this.explain();
             return;
         }
+
+        if (this.outbox.count() > 0) return;
 
         const { actualAmount, closingNote } = this.form.getRawValue();
 

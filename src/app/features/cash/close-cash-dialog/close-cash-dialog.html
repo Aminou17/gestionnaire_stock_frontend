@@ -24,6 +24,17 @@
                 </div>
             }
 
+            @if (outbox.count() > 0) {
+                <div class="alert alert-warning" role="alert">
+                    {{ outbox.count() }} vente{{ outbox.count() > 1 ? "s" : "" }} faite{{
+                        outbox.count() > 1 ? "s" : ""
+                    }}
+                    sans internet n'{{ outbox.count() > 1 ? "ont" : "a" }} pas encore été envoyée{{
+                        outbox.count() > 1 ? "s" : ""
+                    }}. Envoyez-les avant de clôturer.
+                </div>
+            }
+
             @if (error()) {
                 <div class="alert alert-error" role="alert">{{ error() }}</div>
             }

@@ -792,3 +792,61 @@ li:hover > .gcorner-add,
         max-width: 120px;
     }
 }
+
+/* confirmation d'une vente gardée sur l'appareil, sans internet */
+.queued {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 12px 12px 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--success) 30%, var(--border));
+    border-radius: 14px;
+    background: linear-gradient(
+        110deg,
+        color-mix(in srgb, var(--success) 13%, var(--surface)) 0%,
+        color-mix(in srgb, var(--success) 4%, var(--surface)) 100%
+    );
+    animation: queued-in 0.25s ease-out both;
+}
+
+.queued-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 11px;
+    background: linear-gradient(
+        145deg,
+        var(--success),
+        color-mix(in srgb, var(--success) 70%, #000)
+    );
+    color: #fff;
+}
+
+.queued-text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+    font-size: var(--fs-small);
+}
+
+.queued-text strong {
+    font-size: var(--fs-body);
+}
+
+.queued-ok {
+    flex: none;
+    border: 1px solid color-mix(in srgb, var(--success) 35%, var(--border));
+    background: var(--surface);
+    color: var(--text);
+}
+
+@keyframes queued-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+}

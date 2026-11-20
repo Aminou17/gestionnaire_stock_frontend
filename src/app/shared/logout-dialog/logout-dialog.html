@@ -9,6 +9,15 @@
     <div class="confirm-body">
         <h2 id="logout-title">Se déconnecter ?</h2>
         <p class="muted">Vous devrez saisir votre mot de passe pour revenir.</p>
+        @if (outbox.count() > 0) {
+            <p class="alert alert-warning">
+                {{ outbox.count() }} vente{{ outbox.count() > 1 ? "s" : "" }} faite{{
+                    outbox.count() > 1 ? "s" : ""
+                }}
+                sans internet attend{{ outbox.count() > 1 ? "ent" : "" }} encore sur cet appareil.
+                Elles partiront quand vous vous reconnecterez ici.
+            </p>
+        }
 
         <div class="confirm-actions">
             <button type="button" class="btn btn-outline" (click)="stay()">Rester connecté</button>

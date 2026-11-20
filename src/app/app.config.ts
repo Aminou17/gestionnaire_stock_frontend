@@ -11,6 +11,7 @@ import localeFr from "@angular/common/locales/fr";
 
 import { routes } from "./app.routes";
 import { authInterceptor } from "./core/auth/auth.interceptor";
+import { networkInterceptor } from "./core/offline/network.interceptor";
 import { ShopTitleStrategy } from "./core/shop/shop-title-strategy";
 import { provideServiceWorker } from "@angular/service-worker";
 
@@ -20,7 +21,7 @@ export const appConfig: ApplicationConfig = {
     providers: [
         provideBrowserGlobalErrorListeners(),
         provideRouter(routes),
-        provideHttpClient(withInterceptors([authInterceptor])),
+        provideHttpClient(withInterceptors([authInterceptor, networkInterceptor])),
         { provide: LOCALE_ID, useValue: "fr" },
         { provide: TitleStrategy, useClass: ShopTitleStrategy },
         provideServiceWorker("ngsw-worker.js", {
