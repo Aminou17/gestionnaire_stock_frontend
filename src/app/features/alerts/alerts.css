@@ -581,10 +581,6 @@ a.group-name:hover {
         flex: 1;
     }
 
-    .list-card {
-        max-width: 960px;
-    }
-
     .row {
         padding-right: 16px;
     }
