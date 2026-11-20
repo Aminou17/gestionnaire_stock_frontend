@@ -821,3 +821,12 @@ select.chip {
         gap: 8px;
     }
 }
+
+/* champ de recherche avec le bouton de scan au bout (app-scan-button) */
+.has-scan {
+    position: relative;
+}
+
+.has-scan .input {
+    padding-right: 48px;
+}

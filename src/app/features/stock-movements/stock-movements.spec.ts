@@ -217,12 +217,12 @@ describe("StockMovements", () => {
     it("should say when there is no movement yet", async () => {
         await render({ movements: [] });
         expect(el.textContent).toContain("Aucun mouvement pour le moment.");
-        expect(el.querySelector("a[href='/stock-entries']")).not.toBeNull();
+        expect(el.querySelector("a[href='/stock-entries/new']")).not.toBeNull();
     });
 
     it("should not offer the stock entry to the manager when empty", async () => {
         await render({ isAdmin: false, movements: [] });
-        expect(el.querySelector("a[href='/stock-entries']")).toBeNull();
+        expect(el.querySelector("a[href='/stock-entries/new']")).toBeNull();
     });
 
     it("should hide the export from the manager", async () => {

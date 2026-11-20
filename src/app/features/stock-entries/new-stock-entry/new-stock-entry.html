@@ -1,0 +1,310 @@
+<app-page-header title="Nouvelle entrée de stock" [back]="back.link" [backLabel]="back.label" />
+
+<div class="layout">
+    <div class="main">
+        <!-- 1. Produits reçus : chercher, scanner ou créer -->
+        <section class="card block products-block">
+            <div class="block-head">
+                <span class="step" data-tone="primary">1</span>
+                <h2>Produits reçus</h2>
+                <button
+                    type="button"
+                    class="btn btn-outline btn-sm new-product"
+                    (click)="newProduct()"
+                >
+                    <app-icon name="plus" [size]="16" />
+                    <span>Nouveau produit</span>
+                </button>
+            </div>
+
+            <div class="picker">
+                <div class="search has-scan">
+                    <app-icon name="search" [size]="18" />
+                    <input
+                        id="entry-search"
+                        class="input"
+                        type="search"
+                        autocomplete="off"
+                        placeholder="Chercher ou scanner…"
+                        aria-label="Chercher le produit reçu"
+                        (input)="onSearch($any($event.target).value)"
+                        (focus)="searchFocused.set(true)"
+                        (keydown.escape)="$any($event.target).value = ''; onSearch('')"
+                    />
+                    <app-scan-button (scanned)="onScanned($event)" />
+                </div>
+
+                @if (showResults()) {
+                    <ul class="results" [class.reloading]="products.isLoading()">
+                        @for (result of results(); track result.id) {
+                            <li>
+                                <button type="button" class="result" (click)="addProduct(result)">
+                                    <span class="thumb av-{{ tone(result.category_name) }}">
+                                        @if (result.image) {
+                                            <img [src]="result.image" alt="" />
+                                        } @else {
+                                            {{ initials(result.name) }}
+                                        }
+                                    </span>
+                                    <span class="result-text">
+                                        <strong>{{ result.name }}</strong>
+                                        <small class="muted">{{ result.category_name }}</small>
+                                    </span>
+                                    <span class="result-stock muted"
+                                        >{{ result.theoretical_stock }} en stock</span
+                                    >
+                                    <span class="result-add" aria-hidden="true">
+                                        <app-icon name="plus" [size]="16" />
+                                    </span>
+                                </button>
+                            </li>
+                        } @empty {
+                            @if (products.isLoading()) {
+                                <li class="no-result muted">Recherche…</li>
+                            } @else if (products.error()) {
+                                <li class="no-result">
+                                    Impossible de chercher les produits.
+                                    <button
+                                        type="button"
+                                        class="link-btn"
+                                        (click)="products.reload()"
+                                    >
+                                        Réessayer
+                                    </button>
+                                </li>
+                            } @else {
+                                <li class="no-result">
+                                    <span class="muted">Aucun produit ne correspond.</span>
+                                    <button type="button" class="link-btn" (click)="newProduct()">
+                                        Créer ce produit
+                                    </button>
+                                </li>
+                            }
+                        }
+                    </ul>
+                }
+            </div>
+
+            @if (unknownCode(); as code) {
+                <div class="unknown" role="status">
+                    <app-icon name="scan" [size]="18" />
+                    <span
+                        >Aucun produit ne porte le code <strong>{{ code }}</strong
+                        >.</span
+                    >
+                    <button type="button" class="btn btn-primary btn-sm" (click)="newProduct(code)">
+                        Créer le produit
+                    </button>
+                </div>
+            }
+
+            @if (lines().length === 0) {
+                <div class="empty-lines">
+                    <span class="empty-icon"><app-icon name="stock-entry" [size]="24" /></span>
+                    <strong>Aucun produit pour l'instant</strong>
+                    <span class="muted">Cherchez ou scannez chaque produit de la livraison.</span>
+                </div>
+            } @else {
+                <ul class="lines">
+                    @for (line of lines(); track line.product.id) {
+                        <li class="line">
+                            <span class="thumb av-{{ tone(line.product.category_name) }}">
+                                @if (line.product.image) {
+                                    <img [src]="line.product.image" alt="" />
+                                } @else {
+                                    {{ initials(line.product.name) }}
+                                }
+                            </span>
+                            <span class="line-text">
+                                <strong>{{ line.product.name }}</strong>
+                                <!-- stock actuel et stock après l'entrée -->
+                                <small class="line-stock">
+                                    <span class="muted">{{ line.product.theoretical_stock }}</span>
+                                    <app-icon name="chevron-right" [size]="14" />
+                                    <span class="after"
+                                        >{{ line.product.theoretical_stock + line.quantity }} en
+                                        stock</span
+                                    >
+                                </small>
+                            </span>
+                            <div
+                                class="stepper"
+                                role="group"
+                                [attr.aria-label]="'Quantité de ' + line.product.name"
+                            >
+                                <button
+                                    type="button"
+                                    class="step-btn"
+                                    aria-label="Une de moins"
+                                    [disabled]="line.quantity <= 1"
+                                    (click)="setQuantity(line, line.quantity - 1)"
+                                >
+                                    <app-icon name="minus" [size]="16" />
+                                </button>
+                                <input
+                                    class="qty"
+                                    type="number"
+                                    inputmode="numeric"
+                                    min="1"
+                                    step="1"
+                                    aria-label="Quantité reçue"
+                                    [value]="line.quantity"
+                                    (change)="setQuantity(line, $any($event.target).value)"
+                                />
+                                <button
+                                    type="button"
+                                    class="step-btn"
+                                    aria-label="Une de plus"
+                                    (click)="setQuantity(line, line.quantity + 1)"
+                                >
+                                    <app-icon name="plus" [size]="16" />
+                                </button>
+                            </div>
+                            <button
+                                type="button"
+                                class="remove"
+                                [attr.aria-label]="'Retirer ' + line.product.name"
+                                (click)="removeLine(line)"
+                            >
+                                <app-icon name="trash" [size]="18" />
+                            </button>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+
+        <!-- 2. Fournisseur -->
+        <section class="card block">
+            <div class="block-head">
+                <span class="step" data-tone="violet">2</span>
+                <h2>Fournisseur</h2>
+            </div>
+
+            @if (addingSupplier()) {
+                <div class="new-supplier" (keydown.enter)="$event.preventDefault(); addSupplier()">
+                    <label class="field">
+                        <span class="field-label">Nom du fournisseur</span>
+                        <input
+                            class="input"
+                            type="text"
+                            maxlength="100"
+                            placeholder="Ex. Tissus du Faso"
+                            [value]="newSupplierName()"
+                            (input)="newSupplierName.set($any($event.target).value)"
+                        />
+                    </label>
+                    <label class="field">
+                        <span class="field-label">Téléphone (facultatif)</span>
+                        <input
+                            class="input"
+                            type="tel"
+                            maxlength="50"
+                            [value]="newSupplierPhone()"
+                            (input)="newSupplierPhone.set($any($event.target).value)"
+                        />
+                    </label>
+                    @if (supplierError()) {
+                        <small class="field-error" role="alert">{{ supplierError() }}</small>
+                    }
+                    <div class="inline-actions">
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            [disabled]="savingSupplier()"
+                            (click)="addingSupplier.set(false)"
+                        >
+                            Annuler
+                        </button>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            [disabled]="savingSupplier()"
+                            (click)="addSupplier()"
+                        >
+                            @if (savingSupplier()) {
+                                <span class="spinner"></span>
+                            }
+                            Créer
+                        </button>
+                    </div>
+                </div>
+            } @else {
+                <div class="supplier-row">
+                    <span class="supplier-icon"><app-icon name="truck" [size]="18" /></span>
+                    <select
+                        class="input"
+                        aria-label="Fournisseur"
+                        [class.invalid]="tried() && supplierId() === null"
+                        (change)="selectSupplier($any($event.target).value)"
+                    >
+                        <option value="" [selected]="supplierId() === null" disabled>
+                            Choisir le fournisseur…
+                        </option>
+                        @for (supplier of supplierList(); track supplier.id) {
+                            <option [value]="supplier.id" [selected]="supplier.id === supplierId()">
+                                {{ supplier.name }}
+                            </option>
+                        }
+                        <option value="new">+ Nouveau fournisseur</option>
+                    </select>
+                </div>
+                @if (suppliers.error()) {
+                    <small class="field-error" role="alert">
+                        Impossible de charger les fournisseurs.
+                        <button type="button" class="link-btn" (click)="suppliers.reload()">
+                            Réessayer
+                        </button>
+                    </small>
+                } @else if (tried() && supplierId() === null) {
+                    <small class="field-error">Choisissez le fournisseur de la livraison.</small>
+                }
+            }
+        </section>
+    </div>
+
+    <!-- 3. Résumé et validation -->
+    <aside class="side">
+        <section class="card summary tinted" data-tone="success">
+            <div class="block-head">
+                <span class="step" data-tone="success">3</span>
+                <h2>Résumé</h2>
+            </div>
+
+            <div class="figures">
+                <div class="figure">
+                    <strong>{{ lines().length }}</strong>
+                    <span class="muted">produit{{ lines().length > 1 ? "s" : "" }}</span>
+                </div>
+                <div class="figure">
+                    <strong class="units">+{{ units() }}</strong>
+                    <span class="muted">unité{{ units() > 1 ? "s" : "" }}</span>
+                </div>
+            </div>
+
+            <p class="supplier-line">
+                <app-icon name="truck" [size]="16" />
+                <span>{{ supplierName() ?? "Fournisseur à choisir" }}</span>
+            </p>
+
+            @if (error()) {
+                <div class="alert alert-error" role="alert">{{ error() }}</div>
+            }
+
+            <button
+                type="button"
+                class="btn btn-primary btn-block"
+                [disabled]="saving() || lines().length === 0"
+                (click)="submit()"
+            >
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer l'entrée
+            </button>
+            <a [routerLink]="back.link" class="btn btn-outline btn-block cancel">Annuler</a>
+        </section>
+    </aside>
+</div>
+
+<app-product-form (saved)="onProductCreated($event)" />

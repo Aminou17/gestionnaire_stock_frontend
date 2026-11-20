@@ -6,6 +6,7 @@ import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap } fr
 import { AuthService } from "../../core/auth/auth.service";
 import { ProductService } from "../../core/stock/product.service";
 import { Icon } from "../../shared/icon/icon";
+import { ScanButton } from "../../shared/scan-button/scan-button";
 import { IconName } from "../../shared/icon/icons";
 import { LayoutService } from "../layout.service";
 import { searchablePages } from "../nav-items";
@@ -26,7 +27,7 @@ const plain = (text: string) =>
 // Recherche rapide (Ctrl+K) : pages du menu et produits
 @Component({
     selector: "app-search",
-    imports: [Icon],
+    imports: [Icon, ScanButton],
     templateUrl: "./search.html",
     styleUrl: "./search.css",
     host: { "(document:keydown)": "onKey($event)" },

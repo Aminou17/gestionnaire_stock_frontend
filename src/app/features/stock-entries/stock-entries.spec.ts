@@ -1,8 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { signal } from "@angular/core";
-import { HttpErrorResponse } from "@angular/common/http";
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from "@angular/router";
-import { of, throwError } from "rxjs";
+import { of } from "rxjs";
 
 import { StockEntries } from "./stock-entries";
 import { AuthService } from "../../core/auth/auth.service";
@@ -43,12 +42,10 @@ describe("StockEntries", () => {
     let fixture: ComponentFixture<StockEntries>;
     let el: HTMLElement;
     let getEntries: ReturnType<typeof vi.fn>;
-    let createEntry: ReturnType<typeof vi.fn>;
     let reloadAlerts: ReturnType<typeof vi.fn>;
 
     async function render({
         query = {} as Record<string, string>,
-        createFails = false,
         image = null as string | null,
     } = {}) {
         HTMLDialogElement.prototype.showModal = vi.fn();
@@ -67,17 +64,6 @@ describe("StockEntries", () => {
                 counters: { entries: 1, units: 5, products: 1, suppliers: 1 },
             }),
         );
-        createEntry = vi.fn(() =>
-            createFails
-                ? throwError(
-                      () =>
-                          new HttpErrorResponse({
-                              status: 404,
-                              error: { message: "Fournisseur introuvable ou désactivé." },
-                          }),
-                  )
-                : of({ id: 12 }),
-        );
         reloadAlerts = vi.fn();
 
         await TestBed.configureTestingModule({
@@ -88,7 +74,7 @@ describe("StockEntries", () => {
                     provide: ActivatedRoute,
                     useValue: { snapshot: { queryParamMap: convertToParamMap(query) } },
                 },
-                { provide: StockEntryService, useValue: { getEntries, createEntry } },
+                { provide: StockEntryService, useValue: { getEntries } },
                 {
                     provide: ProductService,
                     useValue: {
@@ -137,14 +123,13 @@ describe("StockEntries", () => {
     }
 
     const text = () => el.textContent!.replace(/\s/g, " ");
-    const component = () => fixture.componentInstance;
 
     it("should show the totals and the entries with their names", async () => {
         await render();
 
         expect(text()).toContain("Unités reçues");
         expect(text()).toContain("Tissus du Faso");
-        expect(el.querySelector("tbody .quantity")?.textContent).toContain("+5");
+        expect(el.querySelector("tbody .qty-pill")?.textContent).toContain("+5");
         expect(el.querySelector("tbody a")?.getAttribute("href")).toBe("/products/3");
     });
 
@@ -188,11 +173,15 @@ describe("StockEntries", () => {
         expect(el.querySelector<HTMLSelectElement>(".supplier-filter select")!.value).toBe("1");
     });
 
-    it("should open the new entry window with the supplier of the address", async () => {
-        await render({ query: { supplierId: "1", new: "1" } });
+    it("should send old links with a product to the new entry page", async () => {
+        const navigate = vi.spyOn(Router.prototype, "navigate").mockResolvedValue(true);
+        await render({ query: { productId: "3", quantity: "12" } });
 
-        expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
-        expect(component().form.controls.supplierId.value).toBe(1);
+        expect(navigate).toHaveBeenCalledWith(["/stock-entries/new"], {
+            queryParams: { productId: "3", quantity: "12", supplierId: null },
+            replaceUrl: true,
+        });
+        navigate.mockRestore();
     });
 
     it("should show every entry when the supplier of the address is deleted", async () => {
@@ -200,89 +189,5 @@ describe("StockEntries", () => {
 
         const filters = getEntries.mock.lastCall![0] as StockEntryFilters;
         expect(filters.supplierId).toBeNull();
-    });
-
-    it("should prefill the product and its usual supplier, then save and reload", async () => {
-        await render();
-        component().openNew();
-        await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".result")!.click();
-        await fixture.whenStable();
-
-        expect(component().form.controls.supplierId.value).toBe(1);
-        component().form.controls.quantity.setValue(12);
-        await fixture.whenStable();
-        expect(text()).toMatch(/Nouveau stock\s*57/);
-
-        component().submit();
-        await fixture.whenStable();
-
-        expect(createEntry).toHaveBeenCalledWith({ productId: 3, supplierId: 1, quantity: 12 });
-        expect(text()).toContain("Entrée enregistrée : +12 « Riz ».");
-        expect(reloadAlerts).toHaveBeenCalled();
-    });
-
-    it("should refuse to save without a product or with a bad quantity", async () => {
-        await render();
-        component().openNew();
-        component().submit();
-        expect(component().formError()).toBe("Choisissez le produit reçu.");
-
-        component().chooseProduct(riz);
-        component().form.controls.quantity.setValue(0);
-        component().submit();
-
-        expect(createEntry).not.toHaveBeenCalled();
-    });
-
-    it("should show the backend message when the entry is refused", async () => {
-        await render({ createFails: true });
-        component().openNew();
-        component().chooseProduct(riz);
-        await fixture.whenStable();
-        component().form.controls.quantity.setValue(3);
-        component().submit();
-        await fixture.whenStable();
-
-        expect(text()).toContain("Fournisseur introuvable ou désactivé.");
-    });
-
-    it("should open the form with the product from the product page", async () => {
-        await render({ query: { productId: "3" } });
-        await fixture.whenStable();
-
-        expect(component().product()?.name).toBe("Riz");
-        expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
-    });
-
-    it("should prefill the quantity suggested by the alerts page", async () => {
-        await render({ query: { productId: "3", quantity: "12" } });
-        await fixture.whenStable();
-
-        expect(component().form.controls.quantity.value).toBe(12);
-    });
-
-    it("should add quickly with the plus buttons and never go below 1", async () => {
-        await render({ query: { productId: "3" } });
-        await fixture.whenStable();
-
-        component().addQuantity(10);
-        component().addQuantity(5);
-        expect(component().form.controls.quantity.value).toBe(15);
-
-        component().addQuantity(-100);
-        expect(component().form.controls.quantity.value).toBe(1);
-    });
-
-    it("should go back to the page we came from when the window is cancelled", async () => {
-        history.replaceState({ backTo: "/products/3", backLabel: "Produit" }, "");
-        await render({ query: { productId: "3" } });
-        await fixture.whenStable();
-
-        const navigate = vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
-        component().onClosed();
-
-        expect(navigate).toHaveBeenCalledWith("/products/3", { replaceUrl: true });
-        history.replaceState(null, "");
     });
 });

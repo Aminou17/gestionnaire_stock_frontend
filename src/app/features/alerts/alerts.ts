@@ -20,6 +20,7 @@ import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { ProductService } from "../../core/stock/product.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { ScanButton } from "../../shared/scan-button/scan-button";
 import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { DaysLeftPipe } from "../../shared/pipes/days-left.pipe";
 import { categoryTone, productInitials } from "../products/product-look";
@@ -43,7 +44,7 @@ interface AlertGroup {
 
 @Component({
     selector: "app-alerts",
-    imports: [RouterLink, DatePipe, PageHeader, Icon, DaysLeftPipe, Pagination],
+    imports: [RouterLink, DatePipe, PageHeader, Icon, DaysLeftPipe, Pagination, ScanButton],
     templateUrl: "./alerts.html",
     styleUrl: "./alerts.css",
     host: {
@@ -288,6 +289,24 @@ export class Alerts {
                     this.busyId.set(null);
                     this.rowError.set(err.error?.message ?? "Impossible de modifier le seuil.");
                 },
+            });
+    }
+
+    // la liste des alertes n'a pas les codes-barres : on demande à l'API quel produit le porte
+    onScanned(code: string) {
+        this.productService
+            .getProducts({
+                search: code,
+                categoryId: null,
+                stockStatus: null,
+                status: "active",
+                page: 1,
+                limit: 1,
+            })
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: (page) => this.search.set(page.data[0]?.name ?? code),
+                error: () => this.search.set(code),
             });
     }
 

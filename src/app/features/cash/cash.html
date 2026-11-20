@@ -235,6 +235,7 @@
                 <section class="card panel team" aria-label="Caisses de l'équipe">
                     <div class="card-header">
                         <h2>Suivi des caisses</h2>
+                        <span class="badge badge-neutral">{{ team().length }}</span>
                     </div>
                     <ul class="team-list">
                         @for (member of team(); track member.id) {
@@ -244,6 +245,7 @@
                                     [state]="backState"
                                     class="team-row"
                                 >
+                                    <app-avatar class="team-avatar" aria-hidden="true" />
                                     <span class="team-name">
                                         <strong>{{ member.openedByName ?? "—" }}</strong>
                                         <small class="muted"
@@ -283,6 +285,7 @@
 
             <!-- l'employé peut seulement ajouter de l'argent -->
             @if (isOpen()) {
+                <!-- carreaux colorés : vert l'argent qui entre, rouge et violet celui qui sort -->
                 <section
                     class="quick"
                     [class.single]="!auth.isAdmin()"
@@ -290,28 +293,42 @@
                 >
                     <button
                         type="button"
-                        class="btn btn-outline"
+                        class="quick-tile"
+                        data-tone="success"
                         (click)="movementDialog.open('DEPOSIT')"
                     >
-                        <app-icon name="arrow-down" [size]="18" />
-                        Ajout
+                        <span class="quick-icon"><app-icon name="arrow-down" [size]="18" /></span>
+                        <span class="quick-text">
+                            <strong>Ajout</strong>
+                            <small>Monnaie, apport</small>
+                        </span>
                     </button>
                     @if (auth.isAdmin()) {
-                        <button
-                            type="button"
-                            class="btn btn-outline"
-                            (click)="movementDialog.open('EXPENSE')"
+                        <a
+                            routerLink="/expenses/new"
+                            [state]="backState"
+                            class="quick-tile"
+                            data-tone="danger"
                         >
-                            <app-icon name="receipt" [size]="18" />
-                            Dépense
-                        </button>
+                            <span class="quick-icon"><app-icon name="receipt" [size]="18" /></span>
+                            <span class="quick-text">
+                                <strong>Dépense</strong>
+                                <small>Payer un achat</small>
+                            </span>
+                        </a>
                         <button
                             type="button"
-                            class="btn btn-outline"
+                            class="quick-tile"
+                            data-tone="violet"
                             (click)="movementDialog.open('WITHDRAWAL')"
                         >
-                            <app-icon name="arrow-up-right" [size]="18" />
-                            Retrait
+                            <span class="quick-icon"
+                                ><app-icon name="arrow-up-right" [size]="18"
+                            /></span>
+                            <span class="quick-text">
+                                <strong>Retrait</strong>
+                                <small>Banque, coffre</small>
+                            </span>
                         </button>
                     }
                 </section>

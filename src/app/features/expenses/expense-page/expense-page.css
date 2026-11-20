@@ -1,0 +1,129 @@
+:host {
+    display: grid;
+    gap: 16px;
+    max-width: 640px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+/* en-tête de la fiche : la couleur du motif, le montant en grand */
+.hero {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 28px 20px;
+    border-color: color-mix(in srgb, var(--cat) 28%, var(--border));
+    background: linear-gradient(
+        170deg,
+        color-mix(in srgb, var(--cat) 12%, var(--surface)) 0%,
+        var(--surface) 75%
+    );
+    text-align: center;
+}
+
+.hero-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin-bottom: 4px;
+    border-radius: 18px;
+    background: linear-gradient(145deg, var(--cat), color-mix(in srgb, var(--cat) 70%, #000));
+    color: #fff;
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--cat) 32%, transparent);
+}
+
+.hero-category {
+    color: var(--text-muted);
+    font-weight: var(--fw-semibold);
+}
+
+.hero-amount {
+    color: var(--danger);
+    font-size: 36px;
+    font-weight: var(--fw-bold);
+    font-variant-numeric: tabular-nums;
+}
+
+.hero-reason {
+    max-width: 44ch;
+    margin: 0;
+    font-size: var(--fs-lead);
+}
+
+.details {
+    padding: 4px 20px;
+}
+
+.details dl {
+    margin: 0;
+}
+
+.details div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 52px;
+}
+
+.details div + div {
+    border-top: 1px solid var(--border);
+}
+
+.details dt {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+}
+
+.details dd {
+    margin: 0;
+    font-weight: var(--fw-semibold);
+    text-align: right;
+}
+
+.details dd::first-letter {
+    text-transform: uppercase;
+}
+
+.empty {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 40px 16px;
+}
+
+.sk-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 18px;
+}
+
+.sk-amount {
+    width: 160px;
+    height: 36px;
+}
+
+.sk-line {
+    width: 220px;
+    height: 18px;
+}
+
+@media (max-width: 767px) {
+    .hero {
+        padding: 24px 16px;
+    }
+
+    .details {
+        padding: 4px 16px;
+    }
+
+    .details div {
+        flex-wrap: wrap;
+        padding: 10px 0;
+    }
+}

@@ -687,12 +687,8 @@ describe("NewSale", () => {
     });
 
     describe("carreaux", () => {
-        const gridButton = () =>
-            el.querySelector<HTMLButtonElement>(
-                ".view-toggle button[aria-label='Vue en carreaux']",
-            )!;
-        const listButton = () =>
-            el.querySelector<HTMLButtonElement>(".view-toggle button[aria-label='Vue en lignes']")!;
+        // un seul bouton bascule entre lignes et carreaux
+        const listButton = () => el.querySelector<HTMLButtonElement>(".view-single")!;
         const tiles = () => [...el.querySelectorAll<HTMLElement>(".gtile")];
 
         beforeEach(() => localStorage.removeItem("new-sale-view"));
@@ -740,8 +736,6 @@ describe("NewSale", () => {
 
         it("should disable an out of stock tile and keep the photo zoom apart", async () => {
             await render();
-            gridButton().click();
-            await fixture.whenStable();
 
             expect(tiles()[2].querySelector<HTMLButtonElement>(".gmain")!.disabled).toBe(true);
             expect(tiles()[2].textContent).toContain("Rupture");

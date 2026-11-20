@@ -161,9 +161,9 @@
                 @if (supplier.is_active) {
                     <div class="actions">
                         <a
-                            routerLink="/stock-entries"
+                            routerLink="/stock-entries/new"
                             [state]="backState()"
-                            [queryParams]="{ supplierId: supplier.id, new: 1 }"
+                            [queryParams]="{ supplierId: supplier.id }"
                             class="btn btn-outline"
                         >
                             <app-icon name="plus" [size]="18" />

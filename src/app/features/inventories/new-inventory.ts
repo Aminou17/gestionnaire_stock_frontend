@@ -8,6 +8,7 @@ import { InventoryService } from "../../core/stock/inventory.service";
 import { ProductService } from "../../core/stock/product.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
+import { ScanButton } from "../../shared/scan-button/scan-button";
 import { categoryTone, productInitials } from "../products/product-look";
 import { getBackLink } from "../../core/back-link";
 
@@ -16,7 +17,7 @@ const MAX_STOCK = 1000000;
 
 @Component({
     selector: "app-new-inventory",
-    imports: [PageHeader, Icon],
+    imports: [PageHeader, Icon, ScanButton],
     templateUrl: "./new-inventory.html",
     styleUrl: "./new-inventory.css",
 })
@@ -57,7 +58,10 @@ export class NewInventory {
     visible = computed(() => {
         if (!this.products.hasValue()) return [];
         const term = this.search().trim().toLowerCase();
-        return this.products.value().data.filter((p) => p.name.toLowerCase().includes(term));
+        // un code scanné retrouve le produit qui le porte
+        return this.products
+            .value()
+            .data.filter((p) => p.name.toLowerCase().includes(term) || p.barcode === term);
     });
 
     // l'API est interrogée avec une limite : on prévient si des produits n'ont pas été chargés

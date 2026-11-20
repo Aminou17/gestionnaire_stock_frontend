@@ -40,7 +40,6 @@ import { ExportService } from "../settings/settings-export/export.service";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { AdjustDialog } from "../stock-movements/adjust-dialog/adjust-dialog";
 import { ProductForm } from "./product-form/product-form";
-import { ProductImport } from "./product-import/product-import";
 import { categoryTone, marginPercent, productInitials } from "./product-look";
 import { ToastService } from "../../shared/toast/toast.service";
 
@@ -73,7 +72,6 @@ const toStockStatus = (value: string | null): StockStatus | null =>
         Icon,
         FcfaPipe,
         ProductForm,
-        ProductImport,
         ExportMenu,
         AdjustDialog,
         Pagination,
@@ -96,7 +94,6 @@ export class Products {
 
     // le formulaire n'existe que pour l'admin
     private form = viewChild(ProductForm);
-    private importDialog = viewChild(ProductImport);
     private adjustDialog = viewChild(AdjustDialog);
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
 
@@ -358,21 +355,6 @@ export class Products {
         }
     }
 
-    // menu de l'en-tête (tablette et téléphone) : import et export
-    headItems = computed<ActionItem[]>(() => {
-        const disabled = this.exporting() || this.list().length === 0;
-        return [
-            { id: "import", label: "Importer", icon: "upload" },
-            { id: "pdf", label: "Exporter en PDF", icon: "download", disabled },
-            { id: "csv", label: "Exporter en CSV", icon: "download", disabled },
-        ];
-    });
-
-    onHeadPick(id: string) {
-        if (id === "import") this.openImport();
-        else this.exportFile(id as ExportFormat);
-    }
-
     // menu « ... » d'un produit : vendre seulement s'il en reste, le reste pour l'admin
     rowItems(product: Product): ActionItem[] {
         const items: ActionItem[] = [];
@@ -403,7 +385,7 @@ export class Products {
     }
 
     addStock(product: Product) {
-        this.router.navigate(["/stock-entries"], {
+        this.router.navigate(["/stock-entries/new"], {
             queryParams: { productId: product.id },
             state: { backTo: "/products", backLabel: "Produits" },
         });
@@ -496,9 +478,5 @@ export class Products {
                 );
             },
         });
-    }
-
-    openImport() {
-        this.importDialog()?.open();
     }
 }

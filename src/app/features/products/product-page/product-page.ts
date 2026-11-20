@@ -177,7 +177,7 @@ export class ProductPage {
     }
 
     addStock() {
-        this.router.navigate(["/stock-entries"], {
+        this.router.navigate(["/stock-entries/new"], {
             queryParams: { productId: this.id() },
             state: { backTo: this.router.url, backLabel: "Produit" },
         });

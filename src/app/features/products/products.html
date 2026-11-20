@@ -1,26 +1,13 @@
 <app-page-header title="Produits" section="Stock">
     @if (auth.isAdmin()) {
+        <!-- télécharger la liste : une icône, le format se choisit ensuite -->
         <app-export-menu
-            class="icon-phone desktop-only"
-            ariaLabel="Exporter les produits"
+            class="icon-only"
+            ariaLabel="Télécharger la liste des produits"
+            title="Télécharger"
             [busy]="exporting()"
             [disabled]="list().length === 0"
             (picked)="exportFile($event)"
-        />
-        <button
-            type="button"
-            class="btn btn-outline import-products desktop-only"
-            (click)="openImport()"
-        >
-            <app-icon name="upload" [size]="18" />
-            <span>Importer</span>
-        </button>
-        <!-- sur téléphone, import et export se rangent dans un seul menu -->
-        <app-action-menu
-            class="head-menu framed compact"
-            label="Importer ou exporter"
-            [items]="headItems()"
-            (picked)="onHeadPick($event)"
         />
         <button
             type="button"
@@ -172,29 +159,6 @@
                 </select>
             </label>
 
-            <!-- téléphone : l'affichage se choisit ici, pas dans la barre -->
-            <div class="field view-field">
-                <span class="field-label">Affichage</span>
-                <div class="segmented" role="group" aria-label="Affichage">
-                    <button
-                        type="button"
-                        [attr.aria-pressed]="view() === 'list'"
-                        (click)="setView('list')"
-                    >
-                        <app-icon name="list" [size]="18" />
-                        Liste
-                    </button>
-                    <button
-                        type="button"
-                        [attr.aria-pressed]="view() === 'grid'"
-                        (click)="setView('grid')"
-                    >
-                        <app-icon name="grid" [size]="18" />
-                        Carreaux
-                    </button>
-                </div>
-            </div>
-
             <div class="sheet-foot">
                 <button type="button" class="btn btn-outline" (click)="resetFilters()">
                     Réinitialiser
@@ -205,24 +169,17 @@
             </div>
         </div>
 
-        <div class="view-toggle" role="group" aria-label="Affichage">
-            <button
-                type="button"
-                aria-label="Vue en liste"
-                [attr.aria-pressed]="view() === 'list'"
-                (click)="setView('list')"
-            >
-                <app-icon name="list" [size]="18" />
-            </button>
-            <button
-                type="button"
-                aria-label="Vue en grille"
-                [attr.aria-pressed]="view() === 'grid'"
-                (click)="setView('grid')"
-            >
-                <app-icon name="grid" [size]="18" />
-            </button>
-        </div>
+        <!-- un seul bouton qui active ou coupe les carreaux -->
+        <button
+            type="button"
+            class="view-single"
+            [attr.aria-label]="view() === 'grid' ? 'Afficher en liste' : 'Afficher en carreaux'"
+            [title]="view() === 'grid' ? 'Afficher en liste' : 'Afficher en carreaux'"
+            [attr.aria-pressed]="view() === 'grid'"
+            (click)="setView(view() === 'grid' ? 'list' : 'grid')"
+        >
+            <app-icon [name]="view() === 'grid' ? 'list' : 'grid'" [size]="18" />
+        </button>
 
         @if (filtersOpen()) {
             <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
@@ -530,7 +487,6 @@
     </button>
 
     <app-product-form (saved)="refresh()" />
-    <app-product-import (imported)="refresh()" />
     <app-adjust-dialog (saved)="onAdjusted($event)" />
 }
 

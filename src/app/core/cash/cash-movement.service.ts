@@ -3,7 +3,13 @@ import { Injectable, inject } from "@angular/core";
 import { map } from "rxjs";
 
 import { API_URL } from "../api.config";
-import { CashMovementFilters, CashMovementPage, ManualMovementType } from "./cash.model";
+import {
+    CashMovementDetail,
+    CashMovementFilters,
+    CashMovementPage,
+    ExpenseSummary,
+    ManualMovementType,
+} from "./cash.model";
 
 @Injectable({ providedIn: "root" })
 export class CashMovementService {
@@ -40,5 +46,22 @@ export class CashMovementService {
                 })),
             })),
         );
+    }
+
+    // dépenses d'une période, au total et par motif
+    getExpenseSummary(from: string | null, to: string | null) {
+        const params: Record<string, string> = {};
+        if (from) params["from"] = from;
+        if (to) params["to"] = to;
+
+        return this.http.get<ExpenseSummary>(`${API_URL}/cash_movements/expenses/summary`, {
+            params,
+        });
+    }
+
+    getMovement(id: number) {
+        return this.http
+            .get<CashMovementDetail>(`${API_URL}/cash_movements/${id}`)
+            .pipe(map((movement) => ({ ...movement, amount: Number(movement.amount) })));
     }
 }

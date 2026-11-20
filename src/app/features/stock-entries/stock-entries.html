@@ -1,16 +1,9 @@
 <app-page-header title="Entrées de stock" section="Stock">
-    <button type="button" class="btn btn-primary new-entry" (click)="openNew()">
+    <a routerLink="/stock-entries/new" [state]="backState()" class="btn btn-primary new-entry">
         <app-icon name="plus" [size]="18" />
         <span>Nouvelle entrée</span>
-    </button>
+    </a>
 </app-page-header>
-
-@if (success()) {
-    <div class="alert alert-success banner" role="status">
-        <span>{{ success() }}</span>
-        <button type="button" class="link-btn" (click)="success.set(null)">Fermer</button>
-    </div>
-}
 
 <!-- Totaux de la période et du fournisseur choisis -->
 <div class="stats">
@@ -71,9 +64,13 @@
             <app-empty-state icon="search" title="Aucune entrée pour ces filtres" />
         } @else {
             <app-empty-state icon="stock-entry" title="Aucune entrée de stock pour le moment">
-                <button type="button" class="btn btn-outline btn-sm" (click)="openNew()">
+                <a
+                    routerLink="/stock-entries/new"
+                    [state]="backState()"
+                    class="btn btn-outline btn-sm"
+                >
                     Nouvelle entrée
-                </button>
+                </a>
             </app-empty-state>
         }
     } @else {
@@ -107,18 +104,21 @@
                         <th>Fournisseur</th>
                         <th class="num">Quantité</th>
                         <th>Par</th>
-                        <th></th>
+                        <th class="actions-col"><span class="sr-only">Actions</span></th>
                     </tr>
                 </thead>
                 <tbody>
                     @for (entry of list(); track entry.id) {
                         <tr>
-                            <td>
-                                {{
+                            <td class="date-cell">
+                                <strong>{{
                                     isToday(entry.date_creation)
-                                        ? "Aujourd'hui, " + (entry.date_creation | date: "HH:mm")
-                                        : (entry.date_creation | date: "d MMM y, HH:mm")
-                                }}
+                                        ? "Aujourd'hui"
+                                        : (entry.date_creation | date: "d MMMM")
+                                }}</strong>
+                                <small class="muted">{{
+                                    entry.date_creation | date: "HH:mm"
+                                }}</small>
                             </td>
                             <td>
                                 <div class="product-cell">
@@ -152,13 +152,23 @@
                                     >
                                 </div>
                             </td>
-                            <td>{{ entry.supplier_name }}</td>
-                            <td class="num quantity">+{{ entry.quantity }}</td>
+                            <td>
+                                <span class="supplier-chip">
+                                    <app-icon name="truck" [size]="14" />
+                                    {{ entry.supplier_name }}
+                                </span>
+                            </td>
+                            <td class="num">
+                                <span class="qty-pill">+{{ entry.quantity }}</span>
+                            </td>
                             <td class="muted">{{ entry.user_name }}</td>
-                            <td class="correct-cell">
-                                <button type="button" class="correct-btn" (click)="correct(entry)">
-                                    Corriger
-                                </button>
+                            <td class="actions-col">
+                                <app-action-menu
+                                    [items]="rowActions"
+                                    [label]="'Actions pour ' + entry.product_name"
+                                    [title]="entry.product_name"
+                                    (picked)="onRowPick(entry, $event)"
+                                />
                             </td>
                         </tr>
                     }
@@ -192,22 +202,22 @@
                                 class="product-link"
                                 >{{ entry.product_name }}</a
                             >
-                            <strong class="quantity">+{{ entry.quantity }}</strong>
+                            <span class="qty-pill">+{{ entry.quantity }}</span>
                         </div>
                         <span class="meta muted">
                             {{
                                 isToday(entry.date_creation)
                                     ? "Aujourd'hui, " + (entry.date_creation | date: "HH:mm")
-                                    : (entry.date_creation | date: "d MMM y, HH:mm")
+                                    : (entry.date_creation | date: "d MMMM 'à' HH:mm")
                             }}
                             · {{ entry.supplier_name }}
                         </span>
                     </div>
                     <app-action-menu
-                        [items]="cardActions"
+                        [items]="rowActions"
                         [label]="'Actions pour ' + entry.product_name"
                         [title]="entry.product_name"
-                        (picked)="correct(entry)"
+                        (picked)="onRowPick(entry, $event)"
                     />
                 </li>
             }
@@ -222,274 +232,14 @@
     }
 </section>
 
-<button type="button" class="fab" (click)="openNew()" aria-label="Nouvelle entrée de stock">
-    <app-icon name="plus" [size]="24" />
-</button>
-
-<dialog
-    #entryBox
-    class="confirm"
-    aria-labelledby="entry-title"
-    (click)="onBackdrop($event)"
-    (cancel)="onDialogCancel($event)"
-    (close)="onClosed()"
+<a
+    routerLink="/stock-entries/new"
+    [state]="backState()"
+    class="fab"
+    aria-label="Nouvelle entrée de stock"
 >
-    <form class="confirm-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        <h2 id="entry-title">{{ product() ? "Ajouter du stock" : "Nouvelle entrée de stock" }}</h2>
-
-        <!-- 1. Produit reçu -->
-        <div class="field">
-            @if (product(); as product) {
-                <div class="chosen">
-                    <span class="thumb av-{{ tone(product.name) }}">
-                        @if (product.image) {
-                            <button
-                                type="button"
-                                class="thumb-zoom"
-                                [attr.aria-label]="'Agrandir la photo de ' + product.name"
-                                (click)="zoomImage($event, product.image, product.name)"
-                            >
-                                <img [src]="product.image" alt="" />
-                            </button>
-                        } @else {
-                            {{ initials(product.name) }}
-                        }
-                    </span>
-                    <span class="chosen-text">
-                        <strong>{{ product.name }}</strong>
-                        <small class="muted">{{ product.category_name }}</small>
-                    </span>
-                    <button type="button" class="link-btn" (click)="changeProduct()">
-                        Changer
-                    </button>
-                </div>
-
-                <!-- stock actuel, entrée et nouveau stock d'un coup d'œil -->
-                <div class="sum" aria-live="polite">
-                    <div>
-                        <span class="sum-label">Actuel</span>
-                        <strong>{{ product.theoretical_stock }}</strong>
-                    </div>
-                    <span class="sum-op" aria-hidden="true">+</span>
-                    <div>
-                        <span class="sum-label">Entrée</span>
-                        <strong>{{ quantity() ?? 0 }}</strong>
-                    </div>
-                    <span class="sum-op" aria-hidden="true">=</span>
-                    <div class="sum-result">
-                        <span class="sum-label">Nouveau stock</span>
-                        <strong>{{ stockAfter() ?? product.theoretical_stock }}</strong>
-                    </div>
-                </div>
-            } @else {
-                <span class="field-label">Produit reçu</span>
-                <label class="search">
-                    <app-icon name="search" [size]="18" />
-                    <input
-                        class="input"
-                        type="search"
-                        placeholder="Rechercher un produit…"
-                        aria-label="Rechercher le produit reçu"
-                        (input)="onSearch($any($event.target).value)"
-                    />
-                </label>
-                <ul class="results" [class.reloading]="products.isLoading()">
-                    @for (result of results(); track result.id) {
-                        <li>
-                            <button type="button" class="result" (click)="chooseProduct(result)">
-                                <span class="thumb small">
-                                    @if (result.image) {
-                                        <img [src]="result.image" alt="" />
-                                    } @else {
-                                        {{ initials(result.name) }}
-                                    }
-                                </span>
-                                <strong class="result-name">{{ result.name }}</strong>
-                                <small class="muted">Stock {{ result.theoretical_stock }}</small>
-                            </button>
-                        </li>
-                    } @empty {
-                        @if (products.error()) {
-                            <li class="no-result">
-                                <span class="field-error"
-                                    >Impossible de chercher les produits.</span
-                                >
-                                <button
-                                    type="button"
-                                    class="link-btn inline"
-                                    (click)="products.reload()"
-                                >
-                                    Réessayer
-                                </button>
-                            </li>
-                        } @else if (products.isLoading()) {
-                            <li class="no-result muted">Recherche…</li>
-                        } @else {
-                            <li class="no-result muted">Aucun produit ne correspond.</li>
-                        }
-                    }
-                </ul>
-            }
-        </div>
-
-        <!-- 2. Fournisseur -->
-        <label class="field">
-            <span class="field-label">Fournisseur</span>
-            <select
-                class="input"
-                formControlName="supplierId"
-                [class.invalid]="
-                    form.controls.supplierId.touched && form.controls.supplierId.invalid
-                "
-            >
-                <option [ngValue]="0" disabled>Choisir…</option>
-                @for (supplier of supplierList(); track supplier.id) {
-                    <option [ngValue]="supplier.id">{{ supplier.name }}</option>
-                }
-                <option [ngValue]="newId">+ Créer un fournisseur…</option>
-            </select>
-            @if (suppliers.error()) {
-                <!-- sinon la liste paraît vide et pousse à créer un doublon -->
-                <small class="field-error" role="alert">
-                    Impossible de charger les fournisseurs.
-                    <button type="button" class="link-btn inline" (click)="suppliers.reload()">
-                        Réessayer
-                    </button>
-                </small>
-            } @else if (form.controls.supplierId.touched && form.controls.supplierId.invalid) {
-                <small class="field-error">Choisissez un fournisseur.</small>
-            }
-        </label>
-
-        @if (addingSupplier()) {
-            <div
-                class="inline-form"
-                [formGroup]="supplierForm"
-                (keydown.enter)="$event.preventDefault(); addSupplier()"
-            >
-                <strong>Nouveau fournisseur</strong>
-                @if (supplierError()) {
-                    <div class="alert alert-error" role="alert">{{ supplierError() }}</div>
-                }
-                <label class="field">
-                    <span class="field-label">Nom</span>
-                    <input
-                        class="input"
-                        type="text"
-                        formControlName="name"
-                        maxlength="100"
-                        placeholder="Ex. Tissus du Faso"
-                        [class.invalid]="
-                            supplierForm.controls.name.touched && supplierForm.controls.name.invalid
-                        "
-                    />
-                    @if (supplierForm.controls.name.touched && supplierForm.controls.name.invalid) {
-                        <small class="field-error">Le nom est obligatoire.</small>
-                    }
-                </label>
-                <label class="field">
-                    <span class="field-label">Téléphone</span>
-                    <input
-                        class="input"
-                        type="tel"
-                        formControlName="telephone"
-                        maxlength="50"
-                        placeholder="Facultatif"
-                    />
-                </label>
-                <div class="inline-actions">
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        [disabled]="savingSupplier()"
-                        (click)="cancelSupplier()"
-                    >
-                        Annuler
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        [disabled]="savingSupplier()"
-                        (click)="addSupplier()"
-                    >
-                        @if (savingSupplier()) {
-                            <span class="spinner"></span>
-                        }
-                        Créer
-                    </button>
-                </div>
-            </div>
-        }
-
-        <!-- 3. Quantité -->
-        <div class="field">
-            <label class="field-label" for="entry-quantity">Quantité reçue</label>
-            <div class="stepper">
-                <button
-                    type="button"
-                    class="step-btn"
-                    aria-label="Une de moins"
-                    [disabled]="(quantity() ?? 0) <= 1"
-                    (click)="addQuantity(-1)"
-                >
-                    <app-icon name="minus" [size]="20" />
-                </button>
-                <input
-                    id="entry-quantity"
-                    class="input"
-                    type="number"
-                    inputmode="numeric"
-                    min="1"
-                    step="1"
-                    formControlName="quantity"
-                    placeholder="0"
-                    [class.invalid]="
-                        form.controls.quantity.touched && form.controls.quantity.invalid
-                    "
-                />
-                <button
-                    type="button"
-                    class="step-btn"
-                    aria-label="Une de plus"
-                    (click)="addQuantity(1)"
-                >
-                    <app-icon name="plus" [size]="20" />
-                </button>
-            </div>
-            <div class="quick">
-                @for (amount of quickQuantities; track amount) {
-                    <button type="button" class="chip" (click)="addQuantity(amount)">
-                        +{{ amount }}
-                    </button>
-                }
-            </div>
-            @if (form.controls.quantity.touched && form.controls.quantity.invalid) {
-                <small class="field-error">Entrez un nombre entier d'au moins 1.</small>
-            }
-        </div>
-
-        @if (formError()) {
-            <div class="alert alert-error" role="alert">{{ formError() }}</div>
-        }
-
-        <div class="confirm-actions">
-            <button
-                type="button"
-                class="btn btn-outline"
-                [disabled]="saving()"
-                (click)="closeNew()"
-            >
-                Annuler
-            </button>
-            <button type="submit" class="btn btn-primary" [disabled]="saving()">
-                @if (saving()) {
-                    <span class="spinner"></span>
-                }
-                {{ quantity() ? "Ajouter " + quantity() + " au stock" : "Enregistrer l'entrée" }}
-            </button>
-        </div>
-    </form>
-</dialog>
+    <app-icon name="plus" [size]="24" />
+</a>
 
 <app-adjust-dialog (saved)="onCorrected($event)" />
 

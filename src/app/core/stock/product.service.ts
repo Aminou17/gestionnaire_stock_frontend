@@ -64,8 +64,4 @@ export class ProductService {
             { image, thumb },
         );
     }
-
-    importCsv(csv: string) {
-        return this.http.post<{ imported: number }>(`${API_URL}/products/import`, { csv });
-    }
 }

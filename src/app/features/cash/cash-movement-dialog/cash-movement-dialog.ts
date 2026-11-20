@@ -80,8 +80,8 @@ export class CashMovementDialog {
         }
     }
 
-    // seul le retrait peut se passer de précision
-    reasonRequired = computed(() => this.type() !== "WITHDRAWAL");
+    // seul l'ajout d'argent exige une précision
+    reasonRequired = computed(() => this.type() === "DEPOSIT");
 
     reasonMissing() {
         const control = this.form.controls.reason;

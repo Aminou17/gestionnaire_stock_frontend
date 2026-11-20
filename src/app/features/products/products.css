@@ -193,8 +193,7 @@ app-page-header {
 
 .chips,
 .mobile-count,
-.cards,
-.head-menu {
+.cards {
     display: none;
 }
 
@@ -446,7 +445,7 @@ td.num small {
         order: 1;
     }
 
-    .view-toggle {
+    .view-single {
         order: 2;
     }
 
@@ -506,15 +505,6 @@ td.num small {
 
     .fab {
         display: grid;
-    }
-
-    /* l'import de fichier se fait sur ordinateur */
-    .desktop-only {
-        display: none;
-    }
-
-    .head-menu {
-        display: block;
     }
 
     .list-error {
@@ -689,41 +679,9 @@ td.num small {
     }
 }
 
-/* sur très petit écran, l'en-tête n'a pas la place pour le menu d'import et d'export */
-@media (max-width: 374px) {
-    .head-menu {
-        display: none;
-    }
-}
-
-/* bascule liste ou grille, sur ordinateur seulement */
-.view-toggle {
-    display: flex;
-    flex-shrink: 0;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.view-toggle button {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    background: var(--surface);
-    color: var(--text-muted);
-    cursor: pointer;
-}
-
-.view-toggle button[aria-pressed="true"] {
-    background: var(--primary-soft);
-    color: var(--primary-text);
-}
-
-/* téléphone : un seul bouton qui active ou coupe les carreaux */
+/* un seul bouton qui active ou coupe les carreaux */
 .view-single {
-    display: none;
+    display: grid;
     width: 44px;
     height: 44px;
     flex-shrink: 0;
@@ -807,38 +765,13 @@ td.num small {
     opacity: 0.5;
 }
 
-@media (max-width: 1023px) {
-    .view-toggle {
-        order: 2;
-    }
-}
-
-@media (min-width: 1024px) {
-    .head-menu {
-        display: none;
-    }
-}
-
-/* sur tablette comme sur téléphone, import et export se rangent dans le menu */
-@media (max-width: 1023px) {
-    .desktop-only {
-        display: none;
-    }
-}
-
-@media (min-width: 375px) and (max-width: 1023px) {
-    .head-menu {
-        display: block;
-    }
-}
-
 .new-product {
     white-space: nowrap;
 }
 
 .name-link:focus-visible,
 .filter-btn:focus-visible,
-.view-toggle button:focus-visible,
+.view-single:focus-visible,
 .stat:focus-visible,
 .clear-filter:focus-visible {
     outline: 2px solid var(--primary);
@@ -893,12 +826,7 @@ td.num small {
         order: 2;
     }
 
-    .view-toggle {
-        display: none;
-    }
-
     .view-single {
-        display: grid;
         order: 3;
     }
 
@@ -1037,7 +965,6 @@ td.num small {
     background: var(--primary-soft);
 }
 
-.view-field,
 .summary-line {
     display: none;
 }
@@ -1073,11 +1000,17 @@ td.num small {
     box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
 }
 
-/* téléphone : une seule barre (recherche + filtre), puis les pastilles */
+/* téléphone : une seule barre (recherche, filtre, affichage), puis les pastilles */
 @media (max-width: 767px) {
-    .value-card,
-    .view-single {
+    .value-card {
         display: none;
+    }
+
+    .view-single {
+        order: 3;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
     }
 
     .toolbar {
@@ -1106,10 +1039,6 @@ td.num small {
         overflow: hidden;
         clip: rect(0 0 0 0);
         white-space: nowrap;
-    }
-
-    .view-field {
-        display: grid;
     }
 
     .chips {
