@@ -20,6 +20,7 @@
 
 .switch-text small {
     font-size: var(--fs-small);
+    line-height: 1.5;
 }
 
 /* case à cocher dessinée en interrupteur, comme le mode sombre */
