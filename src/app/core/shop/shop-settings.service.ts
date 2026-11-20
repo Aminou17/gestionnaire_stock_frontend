@@ -24,6 +24,10 @@ export class ShopSettingsService {
     });
 
     shopName = computed(() => (this.current.hasValue() ? this.current.value().name : ""));
+    // fin de l'essai gratuit, pour la page Abonnement
+    trialEndsAt = computed(() =>
+        this.current.hasValue() ? (this.current.value().trial_ends_at ?? null) : null,
+    );
     shopLogo = computed(() => (this.current.hasValue() ? this.current.value().logo : null));
 
     // indicatif des numéros saisis sans "+" : une seule source pour WhatsApp, l'appel et l'affichage

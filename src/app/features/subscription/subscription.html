@@ -8,8 +8,29 @@
                 <h2 id="current-title">Votre formule</h2>
                 <p class="muted">Toutes les fonctionnalités sont incluses.</p>
             </div>
-            <span class="badge badge-success">Essai gratuit</span>
+            @if (trial()?.days === 0) {
+                <span class="badge badge-warning">Essai terminé</span>
+            } @else {
+                <span class="badge badge-success">Essai gratuit</span>
+            }
         </div>
+
+        @if (trial(); as trial) {
+            <div class="trial" [class.ended]="trial.days === 0">
+                @if (trial.days > 0) {
+                    <strong class="days">{{ trial.days }}</strong>
+                    <span>
+                        jour{{ trial.days > 1 ? "s" : "" }} d'essai restant{{ trial.days > 1 ? "s" : "" }}
+                        <small class="muted">jusqu'au {{ trial.endsAt | date: "d MMMM y" }}</small>
+                    </span>
+                } @else {
+                    <span>
+                        Votre essai s'est terminé le {{ trial.endsAt | date: "d MMMM y" }}.
+                        Écrivez-nous pour continuer.
+                    </span>
+                }
+            </div>
+        }
 
         <p class="reassure" role="status">
             Gratuit pendant le lancement. Nous vous préviendrons bien avant la fin de l'essai.

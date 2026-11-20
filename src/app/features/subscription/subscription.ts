@@ -1,7 +1,9 @@
-import { Component } from "@angular/core";
+import { DatePipe } from "@angular/common";
+import { Component, computed, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { whatsappLink } from "../../core/contact";
+import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { IconName } from "../../shared/icon/icons";
@@ -44,7 +46,7 @@ const PAYMENTS: PaymentMethod[] = [
 
 @Component({
     selector: "app-subscription",
-    imports: [PageHeader, Icon, WhatsappIcon, RouterLink],
+    imports: [PageHeader, Icon, WhatsappIcon, RouterLink, DatePipe],
     templateUrl: "./subscription.html",
     styleUrl: "./subscription.css",
 })
@@ -52,4 +54,14 @@ export class Subscription {
     protected plans = PLANS;
     protected payments = PAYMENTS;
     protected whatsapp = whatsappLink();
+
+    private shop = inject(ShopSettingsService);
+
+    // jours d'essai restants ; null quand la boutique n'a pas de date de fin
+    protected trial = computed(() => {
+        const endsAt = this.shop.trialEndsAt();
+        if (!endsAt) return null;
+        const days = Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86_400_000);
+        return { endsAt, days: Math.max(days, 0) };
+    });
 }

@@ -6,6 +6,8 @@ import { filter } from "rxjs";
 
 import { AuthService, User } from "../../../core/auth/auth.service";
 import { joinName, splitName } from "../../../core/auth/person-name";
+import { PRODUCT_NAME } from "../../../core/brand";
+import { InstallService } from "../../../core/pwa/install.service";
 import { ThemeService } from "../../../core/theme/theme.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Avatar } from "../../../shared/avatar/avatar";
@@ -35,6 +37,8 @@ export class SettingsAccount implements HasUnsavedChanges {
     protected back = getBackLink("/settings", "Retour aux paramètres");
     protected auth = inject(AuthService);
     protected theme = inject(ThemeService);
+    protected pwa = inject(InstallService);
+    protected productName = PRODUCT_NAME;
     private destroyRef = inject(DestroyRef);
     private fb = inject(NonNullableFormBuilder);
 

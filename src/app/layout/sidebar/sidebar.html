@@ -146,6 +146,12 @@
                         <app-icon name="key" [size]="16" />
                         Mot de passe
                     </a>
+                    @if (pwa.available) {
+                        <button type="button" role="menuitem" (click)="installApp()">
+                            <app-icon name="download" [size]="16" />
+                            Installer {{ productName }}
+                        </button>
+                    }
                     <button type="button" role="menuitem" (click)="theme.toggle()">
                         <app-icon [name]="theme.theme() === 'dark' ? 'moon' : 'sun'" [size]="16" />
                         Mode sombre

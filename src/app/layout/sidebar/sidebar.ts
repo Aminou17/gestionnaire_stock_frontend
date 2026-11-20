@@ -14,11 +14,13 @@ import { filter, map } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
+import { InstallService } from "../../core/pwa/install.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { SupportService } from "../../core/support/support.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { Icon } from "../../shared/icon/icon";
+import { ToastService } from "../../shared/toast/toast.service";
 import { Avatar } from "../../shared/avatar/avatar";
 import { LayoutService } from "../layout.service";
 import { FOOTER_LINKS, NavItem, SECTIONS } from "../nav-items";
@@ -43,6 +45,8 @@ export class Sidebar {
     protected alerts = inject(LowStockAlertService);
     protected shop = inject(ShopSettingsService);
     protected support = inject(SupportService);
+    protected pwa = inject(InstallService);
+    private toast = inject(ToastService);
 
     constructor() {
         // une réponse du support apparaît sans recharger la page
@@ -135,6 +139,16 @@ export class Sidebar {
     onDocumentClick(event: Event) {
         if (!this.el.nativeElement.querySelector(".profile")?.contains(event.target)) {
             this.profileOpen.set(false);
+        }
+    }
+
+    // Android et ordinateur : la fenêtre du navigateur ; iPhone : on explique le geste
+    protected installApp() {
+        this.profileOpen.set(false);
+        if (this.pwa.canInstall()) {
+            this.pwa.install();
+        } else {
+            this.toast.show("Touchez Partager, puis « Sur l'écran d'accueil »", 6000);
         }
     }
 }

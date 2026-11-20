@@ -1,12 +1,10 @@
 import { Injectable, signal } from "@angular/core";
 
-const DISMISSED_KEY = "install-banner-dismissed";
-
-// Le navigateur propose l'installation de l'application (Android, Chrome) ou on explique comment faire (iPhone)
+// Le navigateur propose l'installation de l'application (Android, Chrome) ou on explique comment faire (iPhone).
+// Proposée dans le menu du profil et sur la page Mon profil, plus dans une bannière qui cachait le bas des pages.
 @Injectable({ providedIn: "root" })
 export class InstallService {
     private prompt: any = null;
-    private dismissed = signal(this.readDismissed());
 
     readonly canInstall = signal(false);
     readonly showIosHint = signal(false);
@@ -32,8 +30,9 @@ export class InstallService {
         this.showIosHint.set(isIos && isSafari);
     }
 
-    get visible() {
-        return !this.dismissed() && (this.canInstall() || this.showIosHint());
+    // vrai quand l'application n'est pas encore installée et que le navigateur le permet
+    get available() {
+        return this.canInstall() || this.showIosHint();
     }
 
     async install() {
@@ -44,27 +43,10 @@ export class InstallService {
         this.canInstall.set(false);
     }
 
-    dismiss() {
-        this.dismissed.set(true);
-        try {
-            localStorage.setItem(DISMISSED_KEY, "1");
-        } catch {
-            // stockage bloqué : la bannière reviendra à la prochaine visite
-        }
-    }
-
     private isInstalled() {
         return (
-            window.matchMedia("(display-mode: standalone)").matches ||
+            window.matchMedia?.("(display-mode: standalone)").matches ||
             (window.navigator as any).standalone === true
         );
-    }
-
-    private readDismissed() {
-        try {
-            return localStorage.getItem(DISMISSED_KEY) === "1";
-        } catch {
-            return false;
-        }
     }
 }

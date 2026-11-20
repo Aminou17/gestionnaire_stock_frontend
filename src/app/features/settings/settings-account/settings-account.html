@@ -205,6 +205,20 @@
         <span class="option-text">Mode sombre</span>
         <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
     </button>
+
+    @if (pwa.available) {
+        <button type="button" class="option" (click)="pwa.install()">
+            <span class="option-icon"><app-icon name="download" [size]="18" /></span>
+            <span class="option-text">
+                Installer {{ productName }}
+                @if (pwa.canInstall()) {
+                    <small class="muted">Une icône sur l'écran d'accueil, accès en un geste</small>
+                } @else {
+                    <small class="muted">Touchez Partager, puis « Sur l'écran d'accueil »</small>
+                }
+            </span>
+        </button>
+    }
 </section>
 
 <section class="card options" aria-label="Session">
