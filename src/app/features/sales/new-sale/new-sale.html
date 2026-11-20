@@ -83,6 +83,17 @@
                 <kbd class="search-key" aria-hidden="true">/</kbd>
             </label>
 
+            <button
+                type="button"
+                class="scan-btn"
+                aria-label="Scanner un code-barres"
+                title="Scanner un code-barres"
+                [disabled]="scanning()"
+                (click)="scanner.start()"
+            >
+                <app-icon name="scan" [size]="20" />
+            </button>
+
             @if (categoryChips().length > 1) {
                 <label class="category">
                     <span class="sr-only">Catégorie</span>
@@ -981,3 +992,5 @@
 <app-open-cash-dialog #openCashDialog (opened)="cash.reload()" />
 
 <app-customer-form #customerForm (saved)="onCustomerCreated($event)" />
+
+<app-barcode-scanner #scanner (scanned)="onScanned($event)" />

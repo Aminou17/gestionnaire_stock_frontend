@@ -62,6 +62,39 @@
                         }
                     </label>
 
+                    <div class="field">
+                        <label for="product-barcode"
+                            >Code-barres <small class="hint">facultatif</small></label
+                        >
+                        <div class="barcode-row">
+                            <input
+                                id="product-barcode"
+                                class="input"
+                                type="text"
+                                inputmode="numeric"
+                                autocomplete="off"
+                                formControlName="barcode"
+                                placeholder="Ex. 6111245781234"
+                                [class.invalid]="
+                                    form.controls.barcode.touched && form.controls.barcode.invalid
+                                "
+                            />
+                            <button
+                                type="button"
+                                class="btn btn-outline scan"
+                                (click)="scanner.start()"
+                            >
+                                <app-icon name="scan" [size]="18" />
+                                Scanner
+                            </button>
+                        </div>
+                        @if (form.controls.barcode.touched && form.controls.barcode.invalid) {
+                            <small class="field-error" role="alert"
+                                >Chiffres, lettres et - . _ / seulement (64 au plus).</small
+                            >
+                        }
+                    </div>
+
                     <label class="field">
                         <span>Catégorie</span>
                         <select
@@ -513,3 +546,8 @@
         </footer>
     </form>
 </dialog>
+
+<app-barcode-scanner
+    #scanner
+    (scanned)="form.controls.barcode.setValue($event); form.controls.barcode.markAsDirty()"
+/>

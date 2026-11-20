@@ -1,0 +1,59 @@
+<dialog
+    #box
+    class="bs-scanner"
+    aria-labelledby="scanner-title"
+    (cancel)="close()"
+    (close)="close()"
+>
+    <div class="bs-top">
+        <h2 id="scanner-title">Scanner un code-barres</h2>
+        <button type="button" class="bs-round" aria-label="Fermer" (click)="close()">
+            <app-icon name="close" [size]="20" />
+        </button>
+    </div>
+
+    <div class="bs-view">
+        <video #video playsinline muted></video>
+
+        @if (status() !== "error") {
+            <div class="bs-frame" [class.bs-live]="status() === 'scanning'" aria-hidden="true">
+                <span class="bs-line"></span>
+            </div>
+        }
+
+        @if (status() === "starting") {
+            <p class="bs-hint"><span class="spinner"></span> Ouverture de la caméra…</p>
+        } @else if (status() === "scanning") {
+            <p class="bs-hint">Placez le code-barres dans le cadre</p>
+        } @else {
+            <p class="bs-hint bs-error">{{ message() }}</p>
+        }
+
+        @if (torch() !== null) {
+            <button
+                type="button"
+                class="bs-round bs-torch"
+                [class.bs-on]="torch()"
+                [attr.aria-pressed]="torch()"
+                aria-label="Lampe"
+                (click)="toggleTorch()"
+            >
+                <app-icon name="sun" [size]="20" />
+            </button>
+        }
+    </div>
+
+    <form class="bs-manual" (submit)="$event.preventDefault(); submitManual()">
+        <input
+            class="input"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Ou saisissez le code"
+            aria-label="Code-barres"
+            [value]="manual()"
+            (input)="manual.set($any($event.target).value)"
+        />
+        <button type="submit" class="btn btn-primary" [disabled]="!manual().trim()">OK</button>
+    </form>
+</dialog>

@@ -991,3 +991,27 @@ td.num small {
         gap: 8px;
     }
 }
+
+/* scan d'un code-barres, à côté de la recherche */
+.scan-btn {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.scan-btn:hover {
+    border-color: var(--primary);
+}
+
+@media (max-width: 1365px) {
+    .scan-btn {
+        order: 1;
+    }
+}

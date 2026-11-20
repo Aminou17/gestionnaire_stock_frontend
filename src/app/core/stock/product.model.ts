@@ -78,4 +78,6 @@ export interface ProductInput {
     pricingMode: PricingMode;
     maxDiscount: number;
     minStock: number | null;
+    // vide : aucun code-barres
+    barcode?: string | null;
 }

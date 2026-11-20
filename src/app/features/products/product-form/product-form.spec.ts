@@ -99,6 +99,7 @@ describe("ProductForm", () => {
             pricingMode,
             maxDiscount,
             minStock,
+            barcode: " 6111245781234 ",
         });
 
     it("should send the photo and its thumbnail once the product is created", () => {
@@ -192,6 +193,10 @@ describe("ProductForm", () => {
         component.submit();
 
         expect(createProduct).toHaveBeenCalledWith(expect.objectContaining({ minStock: null }));
+        // le code-barres part sans espaces autour
+        expect(createProduct).toHaveBeenCalledWith(
+            expect.objectContaining({ barcode: "6111245781234" }),
+        );
     });
 
     async function pick(control: "categoryId" | "supplierId", value: number) {

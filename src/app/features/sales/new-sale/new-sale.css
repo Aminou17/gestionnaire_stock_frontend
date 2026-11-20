@@ -850,3 +850,25 @@ li:hover > .gcorner-add,
         transform: translateY(-6px);
     }
 }
+
+/* scan d'un code-barres : à côté de la recherche, même hauteur */
+.scan-btn {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 48px;
+    height: 48px;
+    border: 1px solid color-mix(in srgb, var(--primary) 30%, var(--border));
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    color: var(--primary);
+    cursor: pointer;
+    transition:
+        background 0.15s,
+        border-color 0.15s;
+}
+
+.scan-btn:hover:not(:disabled) {
+    border-color: var(--primary);
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+}

@@ -1,4 +1,10 @@
 <app-page-header title="Ventes">
+    @if (outbox.count() > 0) {
+        <a routerLink="/sales/pending" class="btn btn-outline pending-link">
+            <app-icon name="upload" [size]="18" />
+            <span>{{ outbox.count() }} en attente</span>
+        </a>
+    }
     @if (auth.isAdmin()) {
         <app-export-menu
             class="icon-phone"

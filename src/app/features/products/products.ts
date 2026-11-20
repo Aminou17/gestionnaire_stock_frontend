@@ -30,6 +30,7 @@ import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { ExportFormat } from "../../core/export-format";
 import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
+import { BarcodeScanner } from "../../shared/barcode-scanner/barcode-scanner";
 import { Icon } from "../../shared/icon/icon";
 import { RevealToggle } from "../../shared/secret/reveal-toggle";
 import { SecretValues } from "../../shared/secret/secret-values";
@@ -64,6 +65,7 @@ const toStockStatus = (value: string | null): StockStatus | null =>
 @Component({
     selector: "app-products",
     imports: [
+        BarcodeScanner,
         NgTemplateOutlet,
         RouterLink,
         RevealToggle,
