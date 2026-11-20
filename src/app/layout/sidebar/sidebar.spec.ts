@@ -70,12 +70,12 @@ describe("Sidebar", () => {
         ]);
     });
 
-    it("should group the pages under Stock, Achats and Équipe", async () => {
+    it("should group the pages under Stock and Équipe", async () => {
         const el = await render(true, 2);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Stock", "Achats", "Équipe"]);
+        expect(groups).toEqual(["Stock", "Équipe"]);
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
@@ -117,6 +117,8 @@ describe("Sidebar", () => {
             "Historique du stock",
             "Alertes de stock",
             "Rotation des produits",
+            "Entrées de stock",
+            "Fournisseurs",
         ]);
         expect(el.querySelector(".launcher h2")?.textContent).toContain("Stock");
         expect(el.querySelector(".tile .count")?.textContent).toBe("3");
@@ -147,7 +149,7 @@ describe("Sidebar", () => {
         expect(el.querySelector("button.group .count")).toBeNull();
     });
 
-    it("should not show Achats and Équipe to the manager", async () => {
+    it("should not show Équipe to the manager", async () => {
         const el = await render(false);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
