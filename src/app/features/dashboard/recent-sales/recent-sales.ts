@@ -17,8 +17,6 @@ export class RecentSales {
     sales = input<Sale[]>([]);
     loading = input(false);
     error = input(false);
-    // le manager ne voit que ses propres ventes : la colonne vendeur ne sert à rien
-    showSeller = input(true);
     retry = output();
 
     // reste à payer d'une vente validée avec acompte

@@ -33,9 +33,6 @@
                                 · {{ sale.items_count }} article{{
                                     sale.items_count > 1 ? "s" : ""
                                 }}
-                                @if (showSeller() && sale.user_name) {
-                                    <span class="seller"> · {{ sale.user_name }} </span>
-                                }
                             </small>
                         </div>
                         <div class="side">

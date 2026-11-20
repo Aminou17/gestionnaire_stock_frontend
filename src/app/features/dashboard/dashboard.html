@@ -293,7 +293,6 @@
             [sales]="salesList()"
             [loading]="sales.isLoading()"
             [error]="!!sales.error()"
-            [showSeller]="false"
             (retry)="sales.reload()"
         />
 
