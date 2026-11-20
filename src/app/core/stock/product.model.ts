@@ -13,6 +13,8 @@ export interface Product {
     max_discount: number;
     theoretical_stock: number;
     is_active: boolean;
+    // code EAN, UPC ou interne, null sans code
+    barcode?: string | null;
     // petite image en data URL, null sans photo
     image?: string | null;
     // seuil propre au produit, null = seuil général

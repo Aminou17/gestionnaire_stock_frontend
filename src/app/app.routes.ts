@@ -254,6 +254,14 @@ export const routes: Routes = [
                     import("./features/sales/new-sale/new-sale").then((m) => m.NewSale),
             },
             {
+                path: "sales/pending",
+                title: "Ventes en attente",
+                loadComponent: () =>
+                    import("./features/sales/pending-sales/pending-sales").then(
+                        (m) => m.PendingSales,
+                    ),
+            },
+            {
                 path: "sales/:id",
                 title: "Vente",
                 loadComponent: () =>

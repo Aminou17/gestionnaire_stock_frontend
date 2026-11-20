@@ -2,11 +2,13 @@ import { TestBed } from "@angular/core/testing";
 import { signal } from "@angular/core";
 
 import { AuthService } from "../../core/auth/auth.service";
+import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
 import { LogoutDialog } from "./logout-dialog";
 
 describe("LogoutDialog", () => {
     const logout = vi.fn();
     const logoutAsked = signal(false);
+    const pending = signal(0);
 
     // jsdom ne connaît pas showModal : on imite l'ouverture et l'évènement close
     beforeEach(() => {
@@ -22,9 +24,13 @@ describe("LogoutDialog", () => {
     async function render() {
         logout.mockClear();
         logoutAsked.set(false);
+        pending.set(0);
         await TestBed.configureTestingModule({
             imports: [LogoutDialog],
-            providers: [{ provide: AuthService, useValue: { logout, logoutAsked } }],
+            providers: [
+                { provide: AuthService, useValue: { logout, logoutAsked } },
+                { provide: SaleOutboxService, useValue: { count: pending } },
+            ],
         }).compileComponents();
 
         const fixture = TestBed.createComponent(LogoutDialog);
@@ -60,5 +66,14 @@ describe("LogoutDialog", () => {
         expect(logoutAsked()).toBe(false);
         expect(el.querySelector("dialog")!.open).toBe(false);
         expect(logout).not.toHaveBeenCalled();
+    });
+
+    it("prévient quand des ventes faites sans internet attendent encore", async () => {
+        const el = await render();
+        pending.set(2);
+        logoutAsked.set(true);
+        TestBed.tick();
+
+        expect(el.textContent).toContain("2 ventes faites sans internet attendent");
     });
 });
