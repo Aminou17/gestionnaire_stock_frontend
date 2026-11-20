@@ -1,6 +1,9 @@
 <div class="screen">
     <header>
-        <span class="brand">{{ productName }}</span>
+        <span class="brand">
+            <img src="/icons/icon-192.png" alt="" width="32" height="32" />
+            {{ productName }}
+        </span>
         @if (!isLast()) {
             <button type="button" class="skip" (click)="finish('/login')">Passer</button>
         }
