@@ -76,105 +76,134 @@
 
 <section class="card list-card">
     <div class="list-head">
-        <h2>Historique</h2>
-        <!-- filtre par motif : pastilles colorées qui défilent -->
-        <div class="cats" role="group" aria-label="Motif">
+        <div class="list-title">
+            <h2>Historique</h2>
             <button
                 type="button"
-                class="cat"
-                [attr.aria-pressed]="category() === null"
-                (click)="category.set(null); page.set(1)"
+                class="btn btn-outline btn-sm history-toggle"
+                aria-controls="expense-history"
+                [attr.aria-expanded]="historyOpen()"
+                (click)="toggleHistory()"
             >
-                Tous
+                <app-icon [name]="historyOpen() ? 'eye-off' : 'eye'" [size]="16" />
+                {{ historyOpen() ? "Masquer l'historique" : "Afficher l'historique" }}
             </button>
-            @for (item of categories; track item.value) {
+        </div>
+
+        @if (historyOpen()) {
+            <!-- filtre par motif : pastilles colorées qui défilent -->
+            <div class="cats" role="group" aria-label="Motif">
                 <button
                     type="button"
                     class="cat"
-                    [style.--cat]="item.color"
-                    [attr.aria-pressed]="category() === item.value"
-                    (click)="selectCategory(item.value)"
+                    [attr.aria-pressed]="category() === null"
+                    (click)="category.set(null); page.set(1)"
                 >
-                    <span class="cat-dot" aria-hidden="true"></span>
-                    {{ item.short }}
+                    Tous
                 </button>
-            }
-        </div>
+                @for (item of categories; track item.value) {
+                    <button
+                        type="button"
+                        class="cat"
+                        [style.--cat]="item.color"
+                        [attr.aria-pressed]="category() === item.value"
+                        (click)="selectCategory(item.value)"
+                    >
+                        <span class="cat-dot" aria-hidden="true"></span>
+                        {{ item.short }}
+                    </button>
+                }
+            </div>
+        }
     </div>
 
-    @if (firstLoad()) {
-        <div class="loading">
-            @for (i of [1, 2, 3, 4]; track i) {
-                <div class="skeleton row-skeleton"></div>
-            }
-        </div>
-    } @else if (expenses.error() && list().length === 0) {
-        <div class="empty">
-            Impossible de charger les dépenses.
-            <button type="button" class="btn btn-outline btn-sm" (click)="expenses.reload()">
-                Réessayer
-            </button>
-        </div>
-    } @else if (list().length === 0) {
-        <app-empty-state
-            icon="receipt"
-            title="Aucune dépense"
-            [text]="category() || period() !== 'all' ? 'Rien pour ces filtres.' : undefined"
-        >
-            <a routerLink="/expenses/new" [state]="backState" class="btn btn-outline btn-sm">
-                Nouvelle dépense
-            </a>
-        </app-empty-state>
-    } @else {
-        <div class="days" [class.reloading]="expenses.isLoading()">
-            @for (group of groups(); track group.day) {
-                <div class="day">
-                    <div class="day-head">
-                        <span class="day-name">{{ dayLabel(group.day) }}</span>
-                        <span class="day-total">−{{ group.total | fcfa }}</span>
-                    </div>
-                    <ul class="rows">
-                        @for (item of group.items; track item.id) {
-                            <li>
-                                <button
-                                    type="button"
-                                    class="row"
-                                    [style.--cat]="look(item.reason_category).color"
-                                    (click)="openExpense(item)"
-                                >
-                                    <span class="cat-icon">
-                                        <app-icon
-                                            [name]="look(item.reason_category).icon"
-                                            [size]="18"
-                                        />
-                                    </span>
-                                    <span class="row-text">
-                                        <strong class="row-title">{{
-                                            item.reason || look(item.reason_category).short
-                                        }}</strong>
-                                        <small class="muted">
-                                            {{ look(item.reason_category).short }} ·
-                                            {{ item.created_at | date: "HH:mm" }}
-                                            @if (item.user_name) {
-                                                · {{ item.user_name }}
-                                            }
-                                        </small>
-                                    </span>
-                                    <strong class="row-amount">−{{ item.amount | fcfa }}</strong>
-                                    <app-icon
-                                        class="row-chevron"
-                                        name="chevron-right"
-                                        [size]="18"
-                                    />
-                                </button>
-                            </li>
-                        }
-                    </ul>
+    @if (historyOpen()) {
+        <div id="expense-history">
+            @if (firstLoad()) {
+                <div class="loading">
+                    @for (i of [1, 2, 3, 4]; track i) {
+                        <div class="skeleton row-skeleton"></div>
+                    }
                 </div>
+            } @else if (expenses.error() && list().length === 0) {
+                <div class="empty">
+                    Impossible de charger les dépenses.
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="expenses.reload()"
+                    >
+                        Réessayer
+                    </button>
+                </div>
+            } @else if (list().length === 0) {
+                <app-empty-state
+                    icon="receipt"
+                    title="Aucune dépense"
+                    [text]="category() || period() !== 'all' ? 'Rien pour ces filtres.' : undefined"
+                >
+                    <a
+                        routerLink="/expenses/new"
+                        [state]="backState"
+                        class="btn btn-outline btn-sm"
+                    >
+                        Nouvelle dépense
+                    </a>
+                </app-empty-state>
+            } @else {
+                <div class="days" [class.reloading]="expenses.isLoading()">
+                    @for (group of groups(); track group.day) {
+                        <div class="day">
+                            <div class="day-head">
+                                <span class="day-name">{{ dayLabel(group.day) }}</span>
+                                <span class="day-total">−{{ group.total | fcfa }}</span>
+                            </div>
+                            <ul class="rows">
+                                @for (item of group.items; track item.id) {
+                                    <li>
+                                        <button
+                                            type="button"
+                                            class="row"
+                                            [style.--cat]="look(item.reason_category).color"
+                                            (click)="openExpense(item)"
+                                        >
+                                            <span class="cat-icon">
+                                                <app-icon
+                                                    [name]="look(item.reason_category).icon"
+                                                    [size]="18"
+                                                />
+                                            </span>
+                                            <span class="row-text">
+                                                <strong class="row-title">{{
+                                                    item.reason || look(item.reason_category).short
+                                                }}</strong>
+                                                <small class="muted">
+                                                    {{ look(item.reason_category).short }} ·
+                                                    {{ item.created_at | date: "HH:mm" }}
+                                                    @if (item.user_name) {
+                                                        · {{ item.user_name }}
+                                                    }
+                                                </small>
+                                            </span>
+                                            <strong class="row-amount"
+                                                >−{{ item.amount | fcfa }}</strong
+                                            >
+                                            <app-icon
+                                                class="row-chevron"
+                                                name="chevron-right"
+                                                [size]="18"
+                                            />
+                                        </button>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
+                </div>
+
+                <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
             }
         </div>
-
-        <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
     }
 </section>
 

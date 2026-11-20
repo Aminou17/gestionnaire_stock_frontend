@@ -66,6 +66,8 @@ describe("Expenses", () => {
             }),
         );
 
+        localStorage.setItem("expenses-history", "1");
+
         await TestBed.configureTestingModule({
             imports: [Expenses],
             providers: [
@@ -105,6 +107,23 @@ describe("Expenses", () => {
         row.click();
         await fixture.whenStable();
         expect(getMovements.mock.lastCall![0].category).toBeNull();
+    });
+
+    it("should hide the history, stop loading it, and show it again", async () => {
+        const toggle = () => el.querySelector<HTMLButtonElement>(".history-toggle")!;
+        const calls = getMovements.mock.calls.length;
+
+        toggle().click();
+        await fixture.whenStable();
+        expect(el.querySelector("#expense-history")).toBeNull();
+        expect(toggle().textContent).toContain("Afficher l'historique");
+        expect(localStorage.getItem("expenses-history")).toBe("0");
+
+        toggle().click();
+        await fixture.whenStable();
+        expect(el.querySelector("#expense-history")).not.toBeNull();
+        expect(toggle().textContent).toContain("Masquer l'historique");
+        expect(getMovements.mock.calls.length).toBeGreaterThan(calls);
     });
 
     it("should take the whole history with the Tout period", async () => {

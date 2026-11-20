@@ -13,6 +13,16 @@ import { MoneyToggle } from "../../shared/money/money-toggle";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 
+const HISTORY_KEY = "expenses-history";
+
+const readHistoryOpen = () => {
+    try {
+        return localStorage.getItem(HISTORY_KEY) === "1";
+    } catch {
+        return false;
+    }
+};
+
 type PeriodKey = "month" | "last-month" | "week" | "all";
 
 interface DayGroup {
@@ -90,15 +100,32 @@ export class Expenses {
         stream: ({ params }) => this.movements.getExpenseSummary(params.from, params.to),
     });
 
+    // l'historique se déplie à la demande ; le choix est gardé d'une visite à l'autre
+    historyOpen = signal(readHistoryOpen());
+
+    toggleHistory() {
+        const open = !this.historyOpen();
+        this.historyOpen.set(open);
+        try {
+            localStorage.setItem(HISTORY_KEY, open ? "1" : "0");
+        } catch {
+            // navigation privée : le choix ne sera pas gardé
+        }
+    }
+
+    // la liste n'est chargée que lorsque l'historique est affiché
     expenses = rxResource({
-        params: () => ({
-            type: "EXPENSE" as const,
-            from: this.range().from,
-            to: this.range().to,
-            category: this.category(),
-            page: this.page(),
-            limit: this.pageSize(),
-        }),
+        params: () =>
+            !this.historyOpen()
+                ? undefined
+                : {
+                      type: "EXPENSE" as const,
+                      from: this.range().from,
+                      to: this.range().to,
+                      category: this.category(),
+                      page: this.page(),
+                      limit: this.pageSize(),
+                  },
         stream: ({ params }) => this.movements.getMovements(params),
     });
 
@@ -156,6 +183,8 @@ export class Expenses {
     // un second clic sur le motif choisi le retire
     selectCategory(value: string | null) {
         this.category.set(this.category() === value ? null : value);
+        // filtrer sur un motif montre le résultat
+        if (this.category() !== null && !this.historyOpen()) this.toggleHistory();
         this.page.set(1);
     }
 
