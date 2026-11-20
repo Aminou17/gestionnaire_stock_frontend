@@ -20,6 +20,20 @@
     <div class="alert alert-error" role="alert">Impossible d'exporter les inventaires.</div>
 }
 
+@if (pending(); as pending) {
+    <div class="alert alert-warning pending" role="status">
+        <app-icon name="clipboard" [size]="18" />
+        <span>
+            {{ pending.count }}
+            {{ pending.count > 1 ? "inventaires attendent" : "inventaire attend" }} d'être
+            appliqué{{ pending.count > 1 ? "s" : "" }} : le stock n'est pas encore corrigé.
+        </span>
+        <a class="pending-link" [routerLink]="['/inventories', pending.oldest]">
+            {{ pending.count > 1 ? "Voir le plus ancien" : "Ouvrir" }}
+        </a>
+    </div>
+}
+
 @if (inventories.isLoading()) {
     <div class="card loading" aria-busy="true">
         @for (i of [1, 2, 3, 4]; track i) {

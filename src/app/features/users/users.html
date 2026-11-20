@@ -124,7 +124,10 @@
 
                     @if (user.is_active) {
                         <small class="last-login" [class.never]="!user.last_login_at">
-                            <span class="mobile-label">Dernière connexion : </span>
+                            <!-- « Jamais connecté » se lit seul, sans « Dernière connexion : » devant -->
+                            @if (user.last_login_at) {
+                                <span class="mobile-label">Dernière connexion : </span>
+                            }
                             {{ lastLogin(user) }}
                         </small>
                     } @else {

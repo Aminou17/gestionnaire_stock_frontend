@@ -234,71 +234,10 @@
     box-shadow: 0 8px 18px rgba(18, 140, 74, 0.28);
 }
 
+/* même hauteur et même arrondi que Ticket et Envoyer en image */
 .act-more {
-    width: 48px;
-    padding: 0;
-}
-
-.action-menu {
-    position: relative;
-}
-
-.action-menu .more-btn {
-    width: 44px;
-    padding: 0;
-    flex: none;
-}
-
-.action-menu .menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    z-index: 10;
-    display: grid;
-    width: 220px;
-    padding: 6px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface);
-    box-shadow: var(--shadow-menu);
-}
-
-.action-menu .menu > * {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    min-height: 44px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font: inherit;
-    font-size: var(--fs-body);
-    text-align: left;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.action-menu .menu > *:hover:not(:disabled) {
-    background: var(--surface-hover);
-}
-
-.action-menu .menu > *:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
-
-.action-menu .menu .refund-btn {
-    margin-top: 4px;
-    border-top: 1px solid var(--border);
-    border-radius: 0 0 8px 8px;
-    color: var(--danger);
-}
-
-.action-menu .menu .refund-btn:hover:not(:disabled) {
-    background: var(--danger-soft);
+    --menu-btn-size: 48px;
+    --menu-btn-radius: 14px;
 }
 
 .subtotals {
@@ -645,6 +584,45 @@ dd::first-letter {
     border-bottom: 1px solid var(--border);
 }
 
+.items .thumb {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 10px;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
+}
+
+.items .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* couleur de la pastille, comme dans les Entrées de stock */
+.av-0 {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.av-1 {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+
+.av-2 {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+
+.av-3 {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
 .item-text {
     flex: 1;
     display: grid;
@@ -726,38 +704,6 @@ dd::first-letter {
 .refund-info > div {
     display: grid;
     gap: 2px;
-}
-
-/* action rare : un simple texte rouge, sans cadre */
-.refund-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    min-height: 44px;
-    padding: 0 12px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--danger);
-    font: inherit;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-    cursor: pointer;
-}
-
-.refund-btn:hover:not(:disabled) {
-    background: var(--danger-soft);
-}
-
-.refund-btn:focus-visible {
-    outline: 2px solid var(--danger);
-    outline-offset: 2px;
-}
-
-.refund-btn:disabled {
-    opacity: 0.5;
-    cursor: default;
 }
 
 .row-skeleton {

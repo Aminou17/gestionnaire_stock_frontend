@@ -21,6 +21,37 @@
     color: var(--text);
 }
 
+/* à côté de grands boutons : même hauteur et même bordure qu'eux */
+:host(.framed) .more-btn {
+    width: var(--menu-btn-size, 44px);
+    height: var(--menu-btn-size, 44px);
+    margin-right: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--menu-btn-radius, 8px);
+    background: var(--surface);
+    color: var(--text);
+}
+
+:host(.framed) .more-btn:hover,
+:host(.framed) .more-btn[aria-expanded="true"] {
+    background: var(--surface-hover);
+}
+
+/* petit bouton encadré de l'en-tête sur téléphone, à la taille de la cloche */
+@media (max-width: 767px) {
+    :host(.framed.compact) .more-btn {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+/* bouton rond posé dans le coin d'une vignette */
+:host(.round) .more-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
 .more-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -92,6 +123,12 @@
 
 .item.danger:hover {
     background: var(--danger-soft);
+}
+
+.item.separated {
+    margin-top: 4px;
+    border-top: 1px solid var(--border);
+    border-radius: 0 0 8px 8px;
 }
 
 @media (max-width: 767px) {

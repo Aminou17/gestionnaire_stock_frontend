@@ -17,6 +17,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { generatePassword } from "../user-display";
 import { UserAccount, UserInput } from "../user.model";
 import { UserService } from "../user.service";
+import { ToastService } from "../../../shared/toast/toast.service";
 
 @Component({
     selector: "app-user-form",
@@ -25,6 +26,7 @@ import { UserService } from "../user.service";
     styleUrl: "./user-form.css",
 })
 export class UserForm {
+    private toast = inject(ToastService);
     private userService = inject(UserService);
     private auth = inject(AuthService);
     private destroyRef = inject(DestroyRef);
@@ -175,6 +177,7 @@ export class UserForm {
                 if (this.isSelf()) this.auth.refreshUser().subscribe({ error: () => {} });
                 this.close();
                 this.saved.emit(res.user);
+                this.toast.show(editing ? "Utilisateur enregistré" : "Utilisateur ajouté");
             },
             error: (err: HttpErrorResponse) => {
                 this.saving.set(false);

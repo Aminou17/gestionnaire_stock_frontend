@@ -177,19 +177,19 @@ describe("SalePage", () => {
     it("should let only the owner refund an active sale", async () => {
         await render();
         await openMenu();
-        expect(el.querySelector(".refund-btn")).not.toBeNull();
+        expect(el.querySelector(".item.danger")).not.toBeNull();
 
         TestBed.resetTestingModule();
         await render({ isAdmin: false });
         await openMenu();
-        expect(el.querySelector(".refund-btn")).toBeNull();
+        expect(el.querySelector(".item.danger")).toBeNull();
         expect(text()).not.toContain("Vendeur");
     });
 
     it("should require a reason before refunding", async () => {
         await render();
         await openMenu();
-        el.querySelector<HTMLButtonElement>(".refund-btn")!.click();
+        el.querySelector<HTMLButtonElement>(".item.danger")!.click();
         el.querySelector<HTMLButtonElement>("dialog button[type='submit']")!.click();
         await fixture.whenStable();
 
@@ -289,7 +289,7 @@ describe("SalePage", () => {
         expect(text()).toContain("par Yabre M.");
         expect(text()).toContain("Motif : Erreur de saisie");
         await openMenu();
-        expect(el.querySelector(".refund-btn")).toBeNull();
+        expect(el.querySelector(".item.danger")).toBeNull();
     });
 
     it("should say when the sale does not exist", async () => {

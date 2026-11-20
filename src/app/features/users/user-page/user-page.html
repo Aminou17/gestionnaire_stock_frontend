@@ -57,7 +57,9 @@
             </div>
             <div>
                 <dt>Dernière connexion</dt>
-                <dd [class.muted]="!user.last_login_at">{{ lastLogin() }}</dd>
+                <dd [class.muted]="!user.last_login_at">
+                    {{ user.last_login_at ? lastLogin() : "Jamais" }}
+                </dd>
             </div>
             @if (!user.is_active) {
                 <div>

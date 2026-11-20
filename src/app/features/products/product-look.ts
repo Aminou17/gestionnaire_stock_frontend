@@ -1,7 +1,15 @@
+// petits mots ignorés : « Savon de Marseille » donne SM et non SD
+const SMALL_WORDS = new Set(["de", "du", "des", "la", "le", "les", "l", "d", "et", "à", "au", "aux", "en"]);
+
 // pastille du produit : deux initiales et une couleur qui dépend de la catégorie
 export const productInitials = (name: string) => {
-    const words = name.split(/\s+/).filter((word) => /^\p{L}/u.test(word));
-    const letters = words.length > 1 ? words[0][0] + words[1][0] : name.slice(0, 2);
+    const words = name
+        .split(/[\s'’]+/)
+        .filter((word) => /^\p{L}/u.test(word) && !SMALL_WORDS.has(word.toLowerCase()));
+    const letters =
+        words.length > 1
+            ? words[0][0] + words[1][0]
+            : (words[0] ?? name.trim()).slice(0, 2);
     return letters.toUpperCase();
 };
 

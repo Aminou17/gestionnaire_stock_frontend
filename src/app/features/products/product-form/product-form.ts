@@ -19,6 +19,7 @@ import { SupplierService } from "../../../core/stock/supplier.service";
 import { resizeAvatar, resizeThumb } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
+import { ToastService } from "../../../shared/toast/toast.service";
 
 const discountValidator = (group: AbstractControl): ValidationErrors | null => {
     const { pricingMode, salePrice, maxDiscount } = group.getRawValue();
@@ -38,6 +39,7 @@ const NEW_ID = -1;
     styleUrl: "./product-form.css",
 })
 export class ProductForm {
+    private toast = inject(ToastService);
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);
     private supplierService = inject(SupplierService);
@@ -454,6 +456,7 @@ export class ProductForm {
                 next: () => {
                     this.saving.set(false);
                     this.saved.emit();
+                    this.toast.show(id ? "Produit enregistré" : "Produit ajouté");
 
                     if (photoFailed) {
                         this.error.set(

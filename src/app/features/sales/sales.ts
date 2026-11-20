@@ -1,7 +1,7 @@
 import { DatePipe, formatDate } from "@angular/common";
 import { Component, computed, LOCALE_ID, inject, linkedSignal, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
-import { Router, RouterLink } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
@@ -313,6 +313,16 @@ export class Sales {
         this.unpaid.set(value === "UNPAID");
         this.status.set(value === "UNPAID" ? null : value);
         this.page.set(1);
+    }
+
+    // filtre demandé par le lien qui a ouvert la page (cartes du tableau de bord)
+    constructor() {
+        const params = inject(ActivatedRoute).snapshot.queryParamMap;
+        if (params.get("filter") === "unpaid") this.selectStatus("UNPAID");
+        const period = params.get("period");
+        if (period === "today" || period === "week" || period === "month") {
+            this.selectPeriod(period);
+        }
     }
 
     openSale(sale: Sale) {

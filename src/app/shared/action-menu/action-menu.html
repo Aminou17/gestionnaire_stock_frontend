@@ -24,15 +24,29 @@
     }
 
     @for (item of items(); track item.id) {
-        @if (item.link) {
+        @if (item.href) {
+            <a
+                role="menuitem"
+                class="item"
+                [class.separated]="item.separated"
+                [href]="item.href"
+                target="_blank"
+                rel="noopener"
+                (click)="pick(item)"
+            >
+                <ng-container *ngTemplateOutlet="itemIcon; context: { $implicit: item }" />
+                {{ item.label }}
+            </a>
+        } @else if (item.link) {
             <a
                 role="menuitem"
                 class="item"
                 [class.danger]="item.danger"
+                [class.separated]="item.separated"
                 [routerLink]="item.link"
                 (click)="pick(item)"
             >
-                <app-icon [name]="item.icon" [size]="18" />
+                <ng-container *ngTemplateOutlet="itemIcon; context: { $implicit: item }" />
                 {{ item.label }}
             </a>
         } @else {
@@ -41,12 +55,21 @@
                 role="menuitem"
                 class="item"
                 [class.danger]="item.danger"
+                [class.separated]="item.separated"
                 [disabled]="item.disabled"
                 (click)="pick(item)"
             >
-                <app-icon [name]="item.icon" [size]="18" />
+                <ng-container *ngTemplateOutlet="itemIcon; context: { $implicit: item }" />
                 {{ item.label }}
             </button>
         }
     }
 </div>
+
+<ng-template #itemIcon let-item>
+    @if (item.icon === "whatsapp") {
+        <app-whatsapp-icon [size]="18" />
+    } @else {
+        <app-icon [name]="item.icon" [size]="18" />
+    }
+</ng-template>

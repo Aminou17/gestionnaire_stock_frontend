@@ -120,7 +120,7 @@ describe("UserPage", () => {
         expect(text()).toContain("Moussa Traoré");
         expect(text()).toContain("Employé");
         expect(text()).toContain("moussa@test.com");
-        expect(text()).toContain("Jamais connecté");
+        expect(text()).toContain("Dernière connexion Jamais");
         expect(text()).toContain("Vente enregistrée");
     });
 

@@ -80,13 +80,13 @@
                                 [routerLink]="['/sales', id]"
                                 [state]="navState()"
                                 (click)="justCreated.set(false)"
-                                aria-label="Vente précédente"
-                                title="Vente précédente"
+                                aria-label="Vente précédente, plus ancienne"
+                                title="Vente précédente (plus ancienne)"
                             >
                                 <app-icon name="chevron-left" [size]="18" />
                             </a>
                         } @else {
-                            <span class="pager-btn disabled" aria-hidden="true">
+                            <span class="pager-btn disabled" title="Pas de vente plus ancienne">
                                 <app-icon name="chevron-left" [size]="18" />
                             </span>
                         }
@@ -96,13 +96,13 @@
                                 [routerLink]="['/sales', id]"
                                 [state]="navState()"
                                 (click)="justCreated.set(false)"
-                                aria-label="Vente suivante"
-                                title="Vente suivante"
+                                aria-label="Vente suivante, plus récente"
+                                title="Vente suivante (plus récente)"
                             >
                                 <app-icon name="chevron-right" [size]="18" />
                             </a>
                         } @else {
-                            <span class="pager-btn disabled" aria-hidden="true">
+                            <span class="pager-btn disabled" title="C'est la vente la plus récente">
                                 <app-icon name="chevron-right" [size]="18" />
                             </span>
                         }
@@ -233,55 +233,12 @@
                         <app-whatsapp-icon [size]="18" />
                         Envoyer en image
                     </button>
-                    <div class="action-menu">
-                        <button
-                            type="button"
-                            class="act act-more more-btn"
-                            aria-haspopup="menu"
-                            aria-label="Autres actions"
-                            [attr.aria-expanded]="menuOpen()"
-                            (click)="menuOpen.set(!menuOpen())"
-                        >
-                            <app-icon name="more" [size]="18" />
-                        </button>
-                        @if (menuOpen()) {
-                            <div class="menu" role="menu">
-                                @if (whatsAppReceipt(); as link) {
-                                    <a
-                                        role="menuitem"
-                                        [href]="link"
-                                        target="_blank"
-                                        rel="noopener"
-                                        (click)="menuOpen.set(false)"
-                                    >
-                                        <app-whatsapp-icon [size]="16" />
-                                        Envoyer en texte
-                                    </a>
-                                }
-                                <button
-                                    type="button"
-                                    role="menuitem"
-                                    [disabled]="!settingsReady()"
-                                    (click)="menuOpen.set(false); print()"
-                                >
-                                    <app-icon name="printer" [size]="16" />
-                                    Imprimer
-                                </button>
-                                @if (canRefund()) {
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        class="refund-btn"
-                                        [disabled]="reloading()"
-                                        (click)="menuOpen.set(false); askRefund()"
-                                    >
-                                        <app-icon name="undo" [size]="16" />
-                                        Rembourser
-                                    </button>
-                                }
-                            </div>
-                        }
-                    </div>
+                    <app-action-menu
+                        class="framed act-more"
+                        label="Autres actions"
+                        [items]="menuItems()"
+                        (picked)="onPick($event)"
+                    />
                 </div>
             </section>
 
@@ -314,6 +271,13 @@
                 <ul class="items">
                     @for (item of sale.items; track item.id) {
                         <li>
+                            <span class="thumb av-{{ tone(item.product_name) }}" aria-hidden="true">
+                                @if (item.product_image) {
+                                    <img [src]="item.product_image" alt="" loading="lazy" />
+                                } @else {
+                                    {{ initials(item.product_name) }}
+                                }
+                            </span>
                             <div class="item-text">
                                 <a
                                     [routerLink]="['/products', item.product_id]"
@@ -648,7 +612,7 @@
                 required
                 [class.invalid]="!!refundError()"
                 [attr.aria-invalid]="!!refundError()"
-                placeholder="Ex. : article défectueux, erreur de saisie…"
+                placeholder="Ex. article défectueux, erreur de saisie…"
                 [value]="reason()"
                 (input)="reason.set($any($event.target).value)"
             ></textarea>

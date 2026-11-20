@@ -1,17 +1,24 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { Component, ElementRef, input, output, signal, viewChild } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
 import { Icon } from "../icon/icon";
+import { WhatsappIcon } from "../icon/whatsapp-icon";
 import { IconName } from "../icon/icons";
 
 export interface ActionItem {
     id: string;
     label: string;
-    icon: IconName;
+    // "whatsapp" affiche le logo de la marque au lieu d'une icône en traits
+    icon: IconName | "whatsapp";
     danger?: boolean;
     disabled?: boolean;
     // lien interne : l'entrée devient un lien au lieu d'un bouton
     link?: string;
+    // adresse externe : s'ouvre dans un nouvel onglet (WhatsApp, par exemple)
+    href?: string;
+    // l'entrée est séparée des autres par un trait (action à part, comme rembourser)
+    separated?: boolean;
 }
 
 // Menu « ... » d'une ligne ou d'une carte. Le panneau est un popover (couche supérieure du
@@ -19,7 +26,7 @@ export interface ActionItem {
 // jusqu'à la ligne située derrière. Sur téléphone il monte du bas de l'écran.
 @Component({
     selector: "app-action-menu",
-    imports: [Icon, RouterLink],
+    imports: [Icon, RouterLink, WhatsappIcon, NgTemplateOutlet],
     templateUrl: "./action-menu.html",
     styleUrl: "./action-menu.css",
     host: {

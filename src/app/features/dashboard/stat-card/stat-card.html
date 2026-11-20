@@ -1,6 +1,11 @@
 <div class="card stat" [class.hero]="hero()" [class.clickable]="!!link()" [attr.data-tone]="tone()">
     @if (link()) {
-        <a class="cover" [routerLink]="link()" [attr.aria-label]="label()"></a>
+        <a
+            class="cover"
+            [routerLink]="link()"
+            [queryParams]="linkParams()"
+            [attr.aria-label]="label()"
+        ></a>
     }
 
     @if (!link() && toggles()) {

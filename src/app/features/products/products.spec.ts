@@ -298,7 +298,7 @@ describe("Products", () => {
         await fixture.whenStable();
 
         expect(navigate).not.toHaveBeenCalled();
-        expect(text(el.querySelector(".product-card .menu"))).toContain("Supprimer");
+        expect(text(el.querySelector(".product-card .panel"))).toContain("Supprimer");
     });
 
     it("should load 25 products per page and go to the next page with Suivant", async () => {

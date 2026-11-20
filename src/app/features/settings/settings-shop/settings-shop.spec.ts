@@ -125,6 +125,20 @@ describe("SettingsShop", () => {
         );
     });
 
+    it("should offer the country code of the shop phone when it differs", async () => {
+        await render();
+        expect(el.querySelector(".code-hint")).toBeNull();
+
+        await type("phone", "+226 66 09 90 60");
+        expect(el.querySelector(".code-hint")?.textContent).toContain("+226");
+
+        el.querySelector<HTMLButtonElement>(".code-hint button")!.click();
+        await fixture.whenStable();
+
+        expect(input("defaultCountryCode").value).toBe("226");
+        expect(el.querySelector(".code-hint")).toBeNull();
+    });
+
     it("should not save without a country code", async () => {
         await render();
 

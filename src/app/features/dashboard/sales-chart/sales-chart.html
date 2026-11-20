@@ -38,7 +38,7 @@
                     >
                         <div class="plot">
                             @if (bar.netTotal !== 0) {
-                                <span class="bar-value" [class.best]="bar.best">{{
+                                <span class="bar-value" [class.today]="bar.isToday">{{
                                     bar.short
                                 }}</span>
                             }

@@ -1,8 +1,5 @@
-<app-page-header title="Produit" section="Stock" [back]="back.link" [backLabel]="back.label" />
+<app-page-header [title]="data()?.name ?? 'Produit'" section="Stock" [back]="back.link" [backLabel]="back.label" />
 
-@if (notice()) {
-    <div class="alert alert-success" role="status">{{ notice() }}</div>
-}
 
 <section class="card sheet">
     @if (product.isLoading() && !data()) {
@@ -129,45 +126,13 @@
                     Ajouter du stock
                 </button>
 
-                <div class="row-menu">
-                    <button
-                        type="button"
-                        class="more-btn"
-                        aria-haspopup="menu"
-                        [attr.aria-expanded]="menuOpen()"
-                        aria-label="Autres actions"
-                        (click)="menuOpen.set(!menuOpen())"
-                    >
-                        <app-icon name="more" />
-                    </button>
-                    @if (menuOpen()) {
-                        <div class="menu" role="menu">
-                            <button type="button" role="menuitem" (click)="adjust()">
-                                <app-icon name="stock-entry" [size]="16" />
-                                Ajuster le stock
-                            </button>
-                            <button type="button" role="menuitem" (click)="edit()">
-                                <app-icon name="edit" [size]="16" />
-                                Modifier
-                            </button>
-                            @if (product.image) {
-                                <button type="button" role="menuitem" (click)="removePhoto()">
-                                    <app-icon name="image" [size]="16" />
-                                    Retirer la photo
-                                </button>
-                            }
-                            <button
-                                type="button"
-                                role="menuitem"
-                                class="danger"
-                                (click)="askDelete()"
-                            >
-                                <app-icon name="ban" [size]="16" />
-                                Supprimer
-                            </button>
-                        </div>
-                    }
-                </div>
+                <app-action-menu
+                    class="framed"
+                    [items]="menuItems()"
+                    label="Autres actions"
+                    [title]="product.name"
+                    (picked)="onPick($event)"
+                />
             }
         </div>
     }

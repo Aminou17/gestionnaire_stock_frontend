@@ -8,10 +8,11 @@ import { BottomNav } from "../bottom-nav/bottom-nav";
 import { InstallBanner } from "../install-banner/install-banner";
 import { Search } from "../search/search";
 import { Sidebar } from "../sidebar/sidebar";
+import { Toast } from "../../shared/toast/toast";
 
 @Component({
     selector: "app-main-layout",
-    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, InstallBanner],
+    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, InstallBanner, Toast],
     template: `
         <app-sidebar />
         <main [class.collapsed]="layout.collapsed()">
@@ -21,6 +22,7 @@ import { Sidebar } from "../sidebar/sidebar";
         <app-search />
         <app-logout-dialog />
         <app-install-banner />
+        <app-toast />
     `,
     styleUrl: "./main-layout.css",
 })

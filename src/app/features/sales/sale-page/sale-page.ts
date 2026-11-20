@@ -27,11 +27,13 @@ import { receiptLink } from "../sale-receipt/receipt-message";
 import { SaleReceipt } from "../sale-receipt/sale-receipt";
 import { MovementDetail } from "../../stock-movements/movement-detail/movement-detail";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Avatar } from "../../../shared/avatar/avatar";
 import { Icon } from "../../../shared/icon/icon";
 import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { formatInternational, toWhatsAppLink } from "../../../shared/phone";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
+import { categoryTone, productInitials } from "../../products/product-look";
 
 interface TimelineEvent {
     key: string;
@@ -56,15 +58,16 @@ interface TimelineEvent {
         FcfaPipe,
         MovementDetail,
         SaleReceipt,
+        ActionMenu,
     ],
     templateUrl: "./sale-page.html",
     styleUrls: ["./sale-page.css", "./sale-page-dialogs.css"],
-    host: {
-        "(document:click)": "closeMenuOutside($event)",
-        "(document:keydown.escape)": "closeMenuWithKey()",
-    },
 })
 export class SalePage {
+    // pastille de l'article quand le produit n'a pas de photo
+    protected initials = productInitials;
+    protected tone = categoryTone;
+
     private saleService = inject(SaleService);
     private stockAlerts = inject(LowStockAlertService);
     private destroyRef = inject(DestroyRef);
@@ -241,18 +244,35 @@ export class SalePage {
         return phone ? toWhatsAppLink(phone, this.shopService.defaultCountryCode()) : null;
     });
 
-    menuOpen = signal(false);
+    // menu « ... » : envoyer en texte, imprimer, et rembourser pour le propriétaire
+    menuItems = computed<ActionItem[]>(() => {
+        const items: ActionItem[] = [];
+        const link = this.whatsAppReceipt();
+        if (link) {
+            items.push({ id: "text", label: "Envoyer en texte", icon: "whatsapp", href: link });
+        }
+        items.push({
+            id: "print",
+            label: "Imprimer",
+            icon: "printer",
+            disabled: !this.settingsReady(),
+        });
+        if (this.canRefund()) {
+            items.push({
+                id: "refund",
+                label: "Rembourser",
+                icon: "undo",
+                danger: true,
+                separated: true,
+                disabled: this.reloading(),
+            });
+        }
+        return items;
+    });
 
-    // Échap ramène le focus sur le bouton, sinon il tombe sur la page
-    closeMenuWithKey() {
-        if (!this.menuOpen()) return;
-
-        this.menuOpen.set(false);
-        document.querySelector<HTMLElement>('.action-menu [aria-label="Autres actions"]')?.focus();
-    }
-
-    closeMenuOutside(event: Event) {
-        if (!(event.target as HTMLElement).closest(".action-menu")) this.menuOpen.set(false);
+    onPick(id: string) {
+        if (id === "print") this.print();
+        else if (id === "refund") this.askRefund();
     }
 
     private captureBox = viewChild<ElementRef<HTMLElement>>("captureBox");

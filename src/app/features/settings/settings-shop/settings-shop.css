@@ -155,6 +155,31 @@
     font-size: var(--fs-small);
 }
 
+.code-hint {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
+.code-hint .link-btn {
+    min-height: 32px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+}
+
+.code-hint .link-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 /* barre d'enregistrement : n'existe que lorsqu'il y a des changements */
 .savebar {
     position: sticky;

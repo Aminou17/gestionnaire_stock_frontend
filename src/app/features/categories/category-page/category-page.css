@@ -146,13 +146,51 @@ dd {
 
 .preview a {
     display: grid;
-    grid-template-columns: 1fr auto auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
     align-items: center;
     gap: 12px;
     min-height: 52px;
     border-bottom: 1px solid var(--border);
     color: var(--text);
     text-decoration: none;
+}
+
+.thumb {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    overflow: hidden;
+    border-radius: 8px;
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
+}
+
+.thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* couleur de la pastille selon la catégorie, comme dans la liste Produits */
+.av-0 {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.av-1 {
+    background: var(--violet-soft);
+    color: var(--violet);
+}
+
+.av-2 {
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+}
+
+.av-3 {
+    background: var(--success-soft);
+    color: var(--success);
 }
 
 .preview a:hover .preview-name {

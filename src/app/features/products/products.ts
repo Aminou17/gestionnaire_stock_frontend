@@ -29,6 +29,7 @@ import { ProductService } from "../../core/stock/product.service";
 import { SupplierService } from "../../core/stock/supplier.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { ExportFormat } from "../../core/export-format";
+import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { Icon } from "../../shared/icon/icon";
 import { RevealToggle } from "../../shared/secret/reveal-toggle";
 import { SecretValues } from "../../shared/secret/secret-values";
@@ -40,6 +41,7 @@ import { AdjustDialog } from "../stock-movements/adjust-dialog/adjust-dialog";
 import { ProductForm } from "./product-form/product-form";
 import { ProductImport } from "./product-import/product-import";
 import { categoryTone, marginPercent, productInitials } from "./product-look";
+import { ToastService } from "../../shared/toast/toast.service";
 
 const VIEW_KEY = "products-view";
 
@@ -73,12 +75,12 @@ const toStockStatus = (value: string | null): StockStatus | null =>
         ExportMenu,
         AdjustDialog,
         Pagination,
+        ActionMenu,
     ],
     templateUrl: "./products.html",
     styleUrl: "./products.css",
     host: {
-        "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuFor.set(null); filtersOpen.set(false)",
+        "(document:keydown.escape)": "filtersOpen.set(false)",
     },
 })
 export class Products {
@@ -139,7 +141,6 @@ export class Products {
             (this.status() !== "active" ? 1 : 0) +
             (this.sort() !== "default" ? 1 : 0),
     );
-    menuFor = signal<number | null>(null);
 
     // vue tableau ou grille sur ordinateur, le choix est gardé d'une visite à l'autre
     protected secret = inject(SecretValues);
@@ -339,7 +340,6 @@ export class Products {
     }
 
     openProduct(product: Product) {
-        this.menuFor.set(null);
         this.router.navigate(["/products", product.id]);
     }
 
@@ -352,24 +352,51 @@ export class Products {
         }
     }
 
-    toggleMenu(id: number) {
-        this.menuFor.set(this.menuFor() === id ? null : id);
+    // menu de l'en-tête (tablette et téléphone) : import et export
+    headItems = computed<ActionItem[]>(() => {
+        const disabled = this.exporting() || this.list().length === 0;
+        return [
+            { id: "import", label: "Importer", icon: "upload" },
+            { id: "pdf", label: "Exporter en PDF", icon: "download", disabled },
+            { id: "csv", label: "Exporter en CSV", icon: "download", disabled },
+        ];
+    });
+
+    onHeadPick(id: string) {
+        if (id === "import") this.openImport();
+        else this.exportFile(id as ExportFormat);
     }
 
-    onDocumentClick(event: Event) {
-        const target = event.target as HTMLElement;
-        if (!target.closest(".row-menu")) {
-            this.menuFor.set(null);
+    // menu « ... » d'un produit : vendre seulement s'il en reste, le reste pour l'admin
+    rowItems(product: Product): ActionItem[] {
+        const items: ActionItem[] = [];
+        if (product.theoretical_stock > 0) {
+            items.push({ id: "sell", label: "Vendre", icon: "cart" });
         }
+        if (this.auth.isAdmin()) {
+            items.push(
+                { id: "stock", label: "Ajouter du stock", icon: "stock-entry" },
+                { id: "adjust", label: "Ajuster le stock", icon: "edit" },
+                { id: "edit", label: "Modifier", icon: "edit" },
+                { id: "delete", label: "Supprimer", icon: "ban", danger: true },
+            );
+        }
+        return items;
+    }
+
+    onRowPick(product: Product, id: string) {
+        if (id === "sell") this.sellProduct(product);
+        else if (id === "stock") this.addStock(product);
+        else if (id === "adjust") this.adjustProduct(product);
+        else if (id === "edit") this.editProduct(product);
+        else if (id === "delete") this.askDelete(product);
     }
 
     sellProduct(product: Product) {
-        this.menuFor.set(null);
         this.router.navigate(["/sales/new"], { queryParams: { productId: product.id } });
     }
 
     addStock(product: Product) {
-        this.menuFor.set(null);
         this.router.navigate(["/stock-entries"], {
             queryParams: { productId: product.id },
             state: { backTo: "/products", backLabel: "Produits" },
@@ -377,16 +404,14 @@ export class Products {
     }
 
     // message de confirmation après un ajustement du stock
-    notice = signal<string | null>(null);
+    private toast = inject(ToastService);
 
     adjustProduct(product: Product) {
-        this.menuFor.set(null);
-        this.notice.set(null);
         this.adjustDialog()?.show(product);
     }
 
     onAdjusted(message: string) {
-        this.notice.set(message);
+        this.toast.show(message);
         this.refresh();
     }
 
@@ -395,12 +420,10 @@ export class Products {
     }
 
     editProduct(product: Product) {
-        this.menuFor.set(null);
         this.form()?.openEdit(product.id);
     }
 
     askDelete(product: Product) {
-        this.menuFor.set(null);
         this.toDelete.set(product);
         this.deleteError.set(null);
         this.confirmDialog().nativeElement.showModal();

@@ -315,7 +315,7 @@ export const routes: Routes = [
                     },
                     {
                         path: "shop",
-                        title: "Informations de la boutique",
+                        title: "Ma boutique",
                         canActivate: [adminGuard],
                         canDeactivate: [unsavedChangesGuard],
                         loadComponent: () =>

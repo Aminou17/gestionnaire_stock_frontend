@@ -19,7 +19,7 @@ import { getBackLink } from "../../../core/back-link";
 import { ShopSettings } from "../../../core/shop/shop-settings.model";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
-import { countryName } from "../../../shared/country-codes";
+import { COUNTRY_NAMES, countryName } from "../../../shared/country-codes";
 import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
 import { LogoResizerService } from "../logo-resizer.service";
@@ -110,6 +110,26 @@ export class SettingsShop implements HasUnsavedChanges {
 
     countryName() {
         return countryName(this.form.controls.defaultCountryCode.value);
+    }
+
+    // le téléphone de la boutique commence par un autre indicatif (+226...) : on propose de le prendre
+    suggestedCode = computed(() => {
+        const { phone, defaultCountryCode } = this.values();
+        const digits = /^\s*(\+|00)/.test(phone)
+            ? phone.replace(/^\s*(\+|00)/, "").replace(/\D/g, "")
+            : "";
+        for (let length = 4; length >= 1; length--) {
+            const code = digits.slice(0, length);
+            if (code.length === length && COUNTRY_NAMES[code]) {
+                return code === defaultCountryCode ? null : code;
+            }
+        }
+        return null;
+    });
+
+    useSuggestedCode(code: string) {
+        this.form.controls.defaultCountryCode.setValue(code);
+        this.form.controls.defaultCountryCode.markAsDirty();
     }
 
     // chiffres seulement : le + est déjà affiché devant le champ

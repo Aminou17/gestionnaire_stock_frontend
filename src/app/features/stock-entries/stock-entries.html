@@ -101,9 +101,6 @@
             reçue{{ (counters()?.units ?? 0) > 1 ? "s" : "" }}
         </p>
 
-        @if (notice()) {
-            <div class="alert alert-success" role="status">{{ notice() }}</div>
-        }
         @if (correctError()) {
             <div class="alert alert-error" role="alert">{{ correctError() }}</div>
         }

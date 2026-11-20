@@ -89,7 +89,7 @@
                             type="number"
                             inputmode="numeric"
                             min="0"
-                            placeholder="—"
+                            placeholder="?"
                             [attr.aria-label]="'Stock compté de ' + product.name"
                             [value]="counts()[product.id] ?? ''"
                             (input)="setCount(product.id, $any($event.target).value)"
