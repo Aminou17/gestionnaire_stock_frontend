@@ -56,6 +56,7 @@ describe("Register", () => {
             lastName: "Diallo",
             email: "Fatou@Exemple.com",
             password: "Boutique-2026!",
+            confirmPassword: "Boutique-2026!",
         });
     }
 
@@ -175,6 +176,16 @@ describe("Register", () => {
             "Cet email est déjà utilisé.",
         );
         expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it("should refuse the account when the two passwords differ", async () => {
+        await goToAccountStep();
+        fillAccount();
+        component.form.patchValue({ confirmPassword: "Autre-mot-2026" });
+        await submit();
+
+        expect(auth.register).not.toHaveBeenCalled();
+        expect(el.textContent).toContain("Les deux mots de passe ne sont pas identiques.");
     });
 
     it("should show the password strength while typing", async () => {
