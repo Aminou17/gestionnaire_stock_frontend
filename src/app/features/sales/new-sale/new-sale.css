@@ -163,34 +163,9 @@ kbd {
     font-size: var(--fs-caption);
 }
 
-/* bascule lignes / carreaux, comme sur la page Produits */
-.view-toggle {
-    display: flex;
-    flex-shrink: 0;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.view-toggle button {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    background: var(--surface);
-    color: var(--text-muted);
-    cursor: pointer;
-}
-
-.view-toggle button[aria-pressed="true"] {
-    background: var(--primary-soft);
-    color: var(--primary-text);
-}
-
-/* téléphone : un seul bouton qui bascule */
+/* un seul bouton qui bascule lignes ou carreaux, sur ordinateur comme sur téléphone */
 .view-single {
-    display: none;
+    display: grid;
     width: 48px;
     height: 48px;
     flex-shrink: 0;
@@ -202,7 +177,12 @@ kbd {
     cursor: pointer;
 }
 
-.view-toggle button:focus-visible,
+.view-single[aria-pressed="true"] {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
 .view-single:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: -2px;
@@ -769,14 +749,6 @@ li:hover > .gcorner-add,
     .gtiles {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
-    }
-
-    .view-toggle {
-        display: none;
-    }
-
-    .view-single {
-        display: grid;
     }
 }
 

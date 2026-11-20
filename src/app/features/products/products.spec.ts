@@ -171,7 +171,7 @@ describe("Products", () => {
         expect(el.querySelector("table")).not.toBeNull();
         expect(el.querySelector(".grid")).toBeNull();
 
-        (el.querySelector("[aria-label='Vue en grille']") as HTMLButtonElement).click();
+        (el.querySelector(".view-single") as HTMLButtonElement).click();
         fixture.detectChanges();
 
         expect(el.querySelector("table")).toBeNull();
@@ -180,16 +180,11 @@ describe("Products", () => {
         localStorage.removeItem("products-view");
     });
 
-    it("should give the admin a menu for import and export on phone", async () => {
+    it("should give the admin a single download icon, without import", async () => {
         await render(true, [product({})]);
 
-        (el.querySelector(".head-menu .more-btn") as HTMLButtonElement).click();
-        fixture.detectChanges();
-
-        const items = [...el.querySelectorAll(".head-menu [role=menuitem]")].map((i) =>
-            i.textContent?.trim(),
-        );
-        expect(items).toEqual(["Importer", "Exporter en PDF", "Exporter en CSV"]);
+        expect(el.querySelector("app-export-menu.icon-only")).not.toBeNull();
+        expect(el.textContent).not.toContain("Importer");
     });
 
     it("should give the admin the + button and the actions menu", async () => {

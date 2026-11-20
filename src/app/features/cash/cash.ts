@@ -16,6 +16,7 @@ import { CashMovementList } from "./cash-movement-list/cash-movement-list";
 import { CloseCashDialog } from "./close-cash-dialog/close-cash-dialog";
 import { OpenCashDialog } from "./open-cash-dialog/open-cash-dialog";
 import { MoneyToggle } from "../../shared/money/money-toggle";
+import { Avatar } from "../../shared/avatar/avatar";
 
 // heure à partir de laquelle on rappelle de clôturer la caisse
 const CLOSING_REMINDER_HOUR = 19;
@@ -24,6 +25,7 @@ const CLOSING_REMINDER_HOUR = 19;
     selector: "app-cash",
     imports: [
         MoneyToggle,
+        Avatar,
         CashTabs,
         RouterLink,
         DatePipe,

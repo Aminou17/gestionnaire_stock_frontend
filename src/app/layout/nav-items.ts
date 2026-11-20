@@ -17,7 +17,7 @@ export interface NavSection {
     items: NavItem[];
 }
 
-// Accueil, Ventes, Clients et Caisse en direct ; le reste est rangé en deux groupes qui
+// Accueil, Ventes, Clients, Caisse et Dépenses en direct ; le reste est rangé en deux groupes qui
 // s'ouvrent seuls quand on est dans leurs pages, comme Shopify : peu de lignes à lire
 export const SECTIONS: NavSection[] = [
     {
@@ -26,6 +26,7 @@ export const SECTIONS: NavSection[] = [
             { label: "Ventes", path: "/sales", icon: "cart" },
             { label: "Clients", path: "/customers", icon: "user" },
             { label: "Caisse", path: "/cash", icon: "banknote" },
+            { label: "Dépenses", path: "/expenses", icon: "receipt", adminOnly: true },
             {
                 label: "Stock",
                 icon: "package",
@@ -104,6 +105,16 @@ export function searchablePages(
 
     return [
         { label: "Nouvelle vente", hint: "Action", path: "/sales/new", icon: "plus" },
+        ...(isAdmin
+            ? [
+                  {
+                      label: "Nouvelle dépense",
+                      hint: "Action",
+                      path: "/expenses/new",
+                      icon: "receipt" as const,
+                  },
+              ]
+            : []),
         ...pages,
         { label: "Paramètres", hint: "Compte", path: "/settings", icon: "settings" },
         ...(isAdmin

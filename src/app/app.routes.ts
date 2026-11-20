@@ -144,6 +144,15 @@ export const routes: Routes = [
                     ),
             },
             {
+                path: "stock-entries/new",
+                title: "Nouvelle entrée de stock",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/stock-entries/new-stock-entry/new-stock-entry").then(
+                        (m) => m.NewStockEntry,
+                    ),
+            },
+            {
                 path: "stock-entries",
                 title: "Entrées de stock",
                 canActivate: [adminGuard],
@@ -301,6 +310,28 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import("./features/cash/cash-movements/cash-movements").then(
                         (m) => m.CashMovements,
+                    ),
+            },
+            {
+                path: "expenses",
+                title: "Dépenses",
+                canActivate: [adminGuard],
+                loadComponent: () => import("./features/expenses/expenses").then((m) => m.Expenses),
+            },
+            {
+                path: "expenses/new",
+                title: "Nouvelle dépense",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/expenses/new-expense/new-expense").then((m) => m.NewExpense),
+            },
+            {
+                path: "expenses/:id",
+                title: "Dépense",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/expenses/expense-page/expense-page").then(
+                        (m) => m.ExpensePage,
                     ),
             },
             {

@@ -17,6 +17,7 @@ import { ProductService } from "../../../core/stock/product.service";
 import { ADJUSTMENT_REASONS, AdjustmentDirection } from "../../../core/stock/stock-movement.model";
 import { StockMovementService } from "../../../core/stock/stock-movement.service";
 import { Icon } from "../../../shared/icon/icon";
+import { ScanButton } from "../../../shared/scan-button/scan-button";
 import { productInitials } from "../../products/product-look";
 
 // couleur de la pastille de chaque motif
@@ -32,7 +33,7 @@ const REASON_TONES: Record<string, string> = {
 
 @Component({
     selector: "app-adjust-dialog",
-    imports: [Icon],
+    imports: [Icon, ScanButton],
     templateUrl: "./adjust-dialog.html",
     styleUrl: "./adjust-dialog.css",
 })

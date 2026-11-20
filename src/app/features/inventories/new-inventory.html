@@ -10,17 +10,18 @@
     <p class="muted intro">Comptez le rayon, le stock reste caché.</p>
 
     <div class="filters">
-        <label class="search">
+        <div class="search has-scan">
             <app-icon name="search" [size]="18" />
             <input
                 class="input"
                 type="search"
-                placeholder="Rechercher un produit"
+                placeholder="Chercher ou scanner…"
                 aria-label="Rechercher un produit"
                 [value]="search()"
                 (input)="search.set($any($event.target).value)"
             />
-        </label>
+            <app-scan-button (scanned)="search.set($event)" />
+        </div>
         <select
             class="input select"
             aria-label="Catégorie"

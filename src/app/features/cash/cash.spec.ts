@@ -177,15 +177,17 @@ describe("Cash", () => {
     it("should let the owner add, spend and withdraw money", async () => {
         await render();
 
-        expect(buttons()).toEqual(expect.arrayContaining(["Ajout", "Dépense", "Retrait"]));
+        const tiles = [...el.querySelectorAll(".quick-tile strong")].map((t) => t.textContent);
+        expect(tiles).toEqual(["Ajout", "Dépense", "Retrait"]);
+        // la dépense se saisit sur sa propre page
+        expect(el.querySelector(".quick-tile[href='/expenses/new']")).not.toBeNull();
     });
 
     it("should let the manager add money but not take it out", async () => {
         await render({ isAdmin: false });
 
-        expect(buttons()).toContain("Ajout");
-        expect(buttons()).not.toContain("Dépense");
-        expect(buttons()).not.toContain("Retrait");
+        const tiles = [...el.querySelectorAll(".quick-tile strong")].map((t) => t.textContent);
+        expect(tiles).toEqual(["Ajout"]);
         expect(buttons()).toContain("Clôturer la caisse");
     });
 

@@ -1,0 +1,317 @@
+:host {
+    display: grid;
+    gap: 16px;
+    max-width: var(--page-width);
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+.cash-closed {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+.cash-closed-text {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    gap: 2px;
+}
+
+.cash-closed-text span {
+    font-size: var(--fs-small);
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 340px;
+    align-items: start;
+    gap: 16px;
+}
+
+.main {
+    display: grid;
+    gap: 16px;
+}
+
+.block {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+}
+
+.block-title {
+    font-size: var(--fs-heading);
+    font-weight: var(--fw-semibold);
+}
+
+/* montant : grand chiffre centré, comme sur les applis de paiement */
+.amount {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface-hover);
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+.amount:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.amount.invalid {
+    border-color: var(--danger);
+}
+
+.amount-input {
+    /* le champ suit la longueur du chiffre : le F reste collé au montant */
+    field-sizing: content;
+    width: auto;
+    min-width: 1ch;
+    max-width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 40px;
+    font-weight: var(--fw-bold);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+.amount-input::placeholder {
+    color: var(--text-muted);
+    opacity: 0.5;
+}
+
+.amount-unit {
+    color: var(--text-muted);
+    font-size: 24px;
+    font-weight: var(--fw-semibold);
+}
+
+.quick {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+.quick .chip {
+    height: 36px;
+    padding: 0 14px;
+    font-variant-numeric: tabular-nums;
+}
+
+/* motifs : carreaux à la couleur de chacun */
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.tile {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    padding: 14px 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        background 0.15s,
+        transform 0.1s;
+}
+
+.tile:hover {
+    border-color: color-mix(in srgb, var(--cat) 45%, var(--border));
+}
+
+.tile:active {
+    transform: scale(0.97);
+}
+
+.tile[aria-checked="true"] {
+    border-color: var(--cat);
+    background: color-mix(in srgb, var(--cat) 9%, var(--surface));
+    box-shadow: 0 0 0 1px var(--cat);
+}
+
+.tile-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: color-mix(in srgb, var(--cat) 14%, var(--surface));
+    color: var(--cat);
+}
+
+.tile[aria-checked="true"] .tile-icon {
+    background: linear-gradient(145deg, var(--cat), color-mix(in srgb, var(--cat) 70%, #000));
+    color: #fff;
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--cat) 32%, transparent);
+}
+
+.tile-label {
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+}
+
+.tile-check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--cat);
+    color: #fff;
+}
+
+.tile:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* résumé : la carte prend la couleur du motif choisi */
+.side {
+    position: sticky;
+    top: 16px;
+}
+
+.summary {
+    display: grid;
+    gap: 14px;
+    padding: 20px;
+    border-color: color-mix(in srgb, var(--cat) 30%, var(--border));
+    background: linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--cat) 10%, var(--surface)) 0%,
+        var(--surface) 65%
+    );
+}
+
+.summary-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.summary-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, var(--cat), color-mix(in srgb, var(--cat) 70%, #000));
+    color: #fff;
+}
+
+.summary-title {
+    display: grid;
+    min-width: 0;
+}
+
+.summary-title small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.summary-amount {
+    color: var(--danger);
+    font-size: var(--fs-kpi);
+    font-weight: var(--fw-bold);
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-lines {
+    display: grid;
+    gap: 8px;
+    margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+}
+
+.summary-lines div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.summary-lines dt {
+    color: var(--text-muted);
+}
+
+.summary-lines dd {
+    margin: 0;
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+.summary-lines .out {
+    color: var(--danger);
+}
+
+.actions {
+    display: grid;
+    gap: 8px;
+}
+
+@media (max-width: 1023px) {
+    .layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .side {
+        position: static;
+    }
+}
+
+@media (max-width: 767px) {
+    .cash-closed {
+        flex-wrap: wrap;
+    }
+
+    .block,
+    .summary {
+        padding: 16px;
+    }
+
+    .amount-input {
+        font-size: 34px;
+    }
+
+    .tiles {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .tile {
+        padding: 12px 4px 10px;
+    }
+
+    .cancel {
+        display: none;
+    }
+}

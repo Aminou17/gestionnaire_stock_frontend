@@ -1,0 +1,52 @@
+<app-page-header title="Dépense" [back]="back.link" [backLabel]="back.label" />
+
+@if (expense.isLoading()) {
+    <section class="card hero" aria-busy="true">
+        <div class="skeleton sk-icon"></div>
+        <div class="skeleton sk-amount"></div>
+        <div class="skeleton sk-line"></div>
+    </section>
+} @else if (expense.error() || !expense.hasValue() || notExpense()) {
+    <section class="card empty">
+        <p>Cette dépense est introuvable.</p>
+        <a routerLink="/expenses" class="btn btn-outline btn-sm">Voir les dépenses</a>
+    </section>
+} @else {
+    @let item = expense.value();
+
+    <section class="card hero" [style.--cat]="look().color">
+        <span class="hero-icon"><app-icon [name]="look().icon" [size]="24" /></span>
+        <span class="hero-category">{{ look().label }}</span>
+        <strong class="hero-amount">−{{ item.amount | fcfa }}</strong>
+        @if (item.reason) {
+            <p class="hero-reason">{{ item.reason }}</p>
+        }
+    </section>
+
+    <section class="card details">
+        <dl>
+            <div>
+                <dt><app-icon name="clock" [size]="16" /> Date</dt>
+                <dd>{{ item.created_at | date: "EEEE d MMMM y 'à' HH:mm" }}</dd>
+            </div>
+            <div>
+                <dt><app-icon name="user" [size]="16" /> Enregistrée par</dt>
+                <dd>{{ item.user_name ?? "—" }}</dd>
+            </div>
+            <div>
+                <dt><app-icon name="tag" [size]="16" /> Motif</dt>
+                <dd>{{ look().label }}</dd>
+            </div>
+            @if (item.session_id) {
+                <div>
+                    <dt><app-icon name="banknote" [size]="16" /> Payée avec</dt>
+                    <dd>
+                        <a [routerLink]="['/cash/sessions', item.session_id]" [state]="backState">
+                            La caisse du jour
+                        </a>
+                    </dd>
+                </div>
+            }
+        </dl>
+    </section>
+}

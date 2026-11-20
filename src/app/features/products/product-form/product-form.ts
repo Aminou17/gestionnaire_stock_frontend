@@ -50,7 +50,8 @@ export class ProductForm {
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
 
-    saved = output();
+    // identifiant du produit enregistré : la page qui a ouvert le formulaire peut le reprendre
+    saved = output<number>();
 
     form = this.fb.group(
         {
@@ -220,9 +221,11 @@ export class ProductForm {
 
     // Ouvrir le formulaire vide pour un nouveau produit
     // categoryId : catégorie déjà choisie (ex. depuis la fiche d'une catégorie)
-    openNew(categoryId: number | null = null) {
+    // barcode : code déjà scanné qui ne correspond à aucun produit
+    openNew(categoryId: number | null = null, barcode = "") {
         this.prepare(null);
         if (categoryId) this.form.controls.categoryId.setValue(categoryId);
+        if (barcode) this.form.controls.barcode.setValue(barcode);
         this.dialog().nativeElement.showModal();
     }
 
@@ -460,7 +463,7 @@ export class ProductForm {
             .subscribe({
                 next: () => {
                     this.saving.set(false);
-                    this.saved.emit();
+                    this.saved.emit(this.productId()!);
                     this.toast.show(id ? "Produit enregistré" : "Produit ajouté");
 
                     if (photoFailed) {

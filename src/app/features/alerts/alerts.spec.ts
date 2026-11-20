@@ -530,7 +530,7 @@ describe("Alerts", () => {
         await render({ value: [pagne] });
 
         const link = el.querySelector<HTMLAnchorElement>(".restock")!;
-        expect(link.getAttribute("href")).toBe("/stock-entries?productId=2&quantity=7");
+        expect(link.getAttribute("href")).toBe("/stock-entries/new?productId=2&quantity=7");
     });
 
     it("should say all is fine when nothing is under its threshold", async () => {

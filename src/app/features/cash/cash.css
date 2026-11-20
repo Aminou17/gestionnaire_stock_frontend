@@ -126,7 +126,84 @@ app-page-header {
 .quick {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
+    gap: 12px;
+}
+
+/* un carreau par mouvement, teinté de sa couleur */
+.quick-tile {
+    --tone: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 68px;
+    padding: 12px 14px;
+    border: 1px solid color-mix(in srgb, var(--tone) 22%, var(--border));
+    border-radius: var(--radius);
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--tone) 10%, var(--surface)) 0%,
+        var(--surface) 80%
+    );
+    box-shadow: var(--shadow-card);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        border-color 0.15s,
+        transform 0.1s;
+}
+
+.quick-tile[data-tone="success"] {
+    --tone: var(--success);
+}
+
+.quick-tile[data-tone="danger"] {
+    --tone: var(--danger);
+}
+
+.quick-tile[data-tone="violet"] {
+    --tone: var(--violet);
+}
+
+.quick-tile:hover {
+    border-color: var(--tone);
+}
+
+.quick-tile:active {
+    transform: scale(0.98);
+}
+
+.quick-tile:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.quick-icon {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(145deg, var(--tone), color-mix(in srgb, var(--tone) 70%, #000));
+    color: #fff;
+    box-shadow: 0 4px 10px color-mix(in srgb, var(--tone) 30%, transparent);
+}
+
+.quick-text {
+    display: grid;
+    min-width: 0;
+    gap: 1px;
+}
+
+.quick-text small {
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .panel {
@@ -261,8 +338,22 @@ app-page-header {
         white-space: nowrap;
     }
 
-    .quick .btn {
-        padding: 0 8px;
+    /* téléphone : icône au-dessus du nom, trois carreaux côte à côte */
+    .quick {
+        gap: 8px;
+    }
+
+    .quick-tile {
+        flex-direction: column;
+        justify-content: center;
+        gap: 6px;
+        min-height: 84px;
+        padding: 10px 6px;
+        text-align: center;
+    }
+
+    .quick-text small {
+        display: none;
     }
 }
 
@@ -291,7 +382,6 @@ app-page-header {
 .team-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 12px;
     padding: 12px 0;
     border-top: 1px solid var(--border);
@@ -303,11 +393,22 @@ app-page-header {
     border-top: 0;
 }
 
+.team-avatar {
+    flex: none;
+    width: 36px;
+    height: 36px;
+}
+
 .team-name {
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
+}
+
+.team-row:hover strong {
+    color: var(--primary);
 }
 
 .team-state {

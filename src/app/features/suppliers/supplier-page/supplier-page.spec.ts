@@ -166,7 +166,7 @@ describe("SupplierPage", () => {
 
         expect(text()).toContain("Aucune livraison enregistrée pour ce fournisseur.");
         expect(el.querySelector(".sheet .actions a")?.getAttribute("href")).toBe(
-            "/stock-entries?supplierId=4&new=1",
+            "/stock-entries/new?supplierId=4",
         );
     });
 

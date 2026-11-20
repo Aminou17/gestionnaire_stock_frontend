@@ -126,3 +126,15 @@ export interface CashMovementPage {
     summary: { totalIn: number; totalOut: number };
     pagination: { page: number; limit: number; total: number; totalPages: number };
 }
+
+// GET /cash_movements/expenses/summary
+export interface ExpenseSummary {
+    total: number;
+    count: number;
+    categories: { category: string; count: number; total: number }[];
+}
+
+// GET /cash_movements/:id
+export interface CashMovementDetail extends CashMovementRow {
+    user_name: string | null;
+}

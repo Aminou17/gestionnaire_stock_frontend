@@ -1,0 +1,34 @@
+:host {
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    display: grid;
+    transform: translateY(-50%);
+}
+
+.scan {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.scan:hover {
+    background: color-mix(in srgb, var(--primary) 18%, var(--surface));
+}
+
+.scan:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
+}
+
+:host(.inline) {
+    position: static;
+    transform: none;
+}

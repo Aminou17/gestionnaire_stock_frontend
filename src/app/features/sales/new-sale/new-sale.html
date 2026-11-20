@@ -121,31 +121,15 @@
             <button
                 type="button"
                 class="view-single"
-                [attr.aria-label]="view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'"
+                [attr.aria-label]="
+                    view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'
+                "
+                [title]="view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'"
                 [attr.aria-pressed]="view() === 'grid'"
                 (click)="setView(view() === 'grid' ? 'list' : 'grid')"
             >
                 <app-icon [name]="view() === 'grid' ? 'list' : 'grid'" [size]="18" />
             </button>
-
-            <div class="view-toggle" role="group" aria-label="Affichage">
-                <button
-                    type="button"
-                    aria-label="Vue en lignes"
-                    [attr.aria-pressed]="view() === 'list'"
-                    (click)="setView('list')"
-                >
-                    <app-icon name="list" [size]="18" />
-                </button>
-                <button
-                    type="button"
-                    aria-label="Vue en carreaux"
-                    [attr.aria-pressed]="view() === 'grid'"
-                    (click)="setView('grid')"
-                >
-                    <app-icon name="grid" [size]="18" />
-                </button>
-            </div>
         </div>
 
         @if (!offline() && products.isLoading() && results().length === 0) {

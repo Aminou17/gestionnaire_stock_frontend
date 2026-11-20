@@ -12,6 +12,24 @@
     gap: 6px;
 }
 
+/* réduit à son icône sur tous les écrans, le nom reste lu par les lecteurs d'écran */
+:host(.icon-only) .trigger {
+    width: 40px;
+    min-height: 40px;
+    height: 40px;
+    padding: 0;
+    justify-content: center;
+}
+
+:host(.icon-only) .label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
 .trigger:disabled {
     opacity: 0.5;
     cursor: not-allowed;
