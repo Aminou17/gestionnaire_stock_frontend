@@ -5,6 +5,7 @@ import { signal } from "@angular/core";
 import { Sidebar } from "./sidebar";
 import { AuthService } from "../../core/auth/auth.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
+import { InstallService } from "../../core/pwa/install.service";
 
 describe("Sidebar", () => {
     const logoutAsked = signal(false);
@@ -16,7 +17,7 @@ describe("Sidebar", () => {
     let el: HTMLElement;
     let stable: () => Promise<unknown>;
 
-    async function render(isAdmin: boolean, alertCount = 0) {
+    async function render(isAdmin: boolean, alertCount = 0, pwa?: object) {
         await TestBed.configureTestingModule({
             imports: [Sidebar],
             providers: [
@@ -32,6 +33,7 @@ describe("Sidebar", () => {
                     },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(alertCount) } },
+                ...(pwa ? [{ provide: InstallService, useValue: pwa }] : []),
             ],
         }).compileComponents();
 
@@ -162,6 +164,29 @@ describe("Sidebar", () => {
         el.querySelector<HTMLButtonElement>(".popup .logout")!.click();
         // un seul clic ne déconnecte pas : il ouvre la confirmation
         expect(logoutAsked()).toBe(true);
+    });
+
+    it("should offer to install the app from the profile menu", async () => {
+        const install = vi.fn();
+        const el = await render(true, 0, { available: true, canInstall: () => true, install });
+
+        el.querySelector<HTMLButtonElement>(".profile-btn")!.click();
+        await stable();
+        const item = [...el.querySelectorAll<HTMLButtonElement>(".popup button")].find((b) =>
+            b.textContent?.includes("Installer"),
+        );
+        item!.click();
+        await stable();
+
+        expect(install).toHaveBeenCalled();
+        expect(el.querySelector(".popup")).toBeNull();
+    });
+
+    it("should not offer to install when the app is already installed", async () => {
+        const el = await render(true, 0, { available: false, canInstall: () => false });
+        el.querySelector<HTMLButtonElement>(".profile-btn")!.click();
+        await stable();
+        expect(el.querySelector(".popup")?.textContent).not.toContain("Installer");
     });
 
     it("should collapse the menu and remember the choice", async () => {

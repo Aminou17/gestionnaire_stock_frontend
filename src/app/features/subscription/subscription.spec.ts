@@ -3,6 +3,7 @@ import { TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
+import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Subscription } from "./subscription";
 
@@ -13,11 +14,12 @@ class HeaderStub {
 }
 
 describe("Subscription", () => {
-    async function render() {
+    async function render(trialEndsAt: string | null = null) {
         await TestBed.configureTestingModule({
             imports: [Subscription],
             providers: [
                 provideRouter([]),
+                { provide: ShopSettingsService, useValue: { trialEndsAt: () => trialEndsAt } },
                 {
                     provide: AuthService,
                     useValue: { user: () => null, isAdmin: () => true, roleLabel: () => "Admin" },
@@ -58,5 +60,23 @@ describe("Subscription", () => {
 
         expect(el.querySelector(".help a[href='/contact']")).not.toBeNull();
         expect(el.querySelector(".wa")?.getAttribute("href")).toContain("wa.me");
+    });
+
+    it("affiche les jours d'essai restants", async () => {
+        const inTenDays = new Date(Date.now() + 9.5 * 86_400_000).toISOString();
+        const el = await render(inTenDays);
+        expect(el.querySelector(".trial .days")?.textContent?.trim()).toBe("10");
+        expect(el.querySelector(".trial")?.textContent).toContain("jours d'essai restants");
+    });
+
+    it("signale un essai terminé", async () => {
+        const el = await render(new Date(Date.now() - 86_400_000).toISOString());
+        expect(el.querySelector(".trial.ended")?.textContent).toContain("s'est terminé");
+        expect(el.querySelector(".badge-warning")?.textContent).toContain("Essai terminé");
+    });
+
+    it("n'affiche rien sans date de fin", async () => {
+        const el = await render(null);
+        expect(el.querySelector(".trial")).toBeNull();
     });
 });

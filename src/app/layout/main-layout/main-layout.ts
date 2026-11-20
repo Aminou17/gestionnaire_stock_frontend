@@ -5,14 +5,13 @@ import { AuthService } from "../../core/auth/auth.service";
 import { LayoutService } from "../layout.service";
 import { LogoutDialog } from "../../shared/logout-dialog/logout-dialog";
 import { BottomNav } from "../bottom-nav/bottom-nav";
-import { InstallBanner } from "../install-banner/install-banner";
 import { Search } from "../search/search";
 import { Sidebar } from "../sidebar/sidebar";
 import { Toast } from "../../shared/toast/toast";
 
 @Component({
     selector: "app-main-layout",
-    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, InstallBanner, Toast],
+    imports: [RouterOutlet, Sidebar, BottomNav, Search, LogoutDialog, Toast],
     template: `
         <app-sidebar />
         <main [class.collapsed]="layout.collapsed()">
@@ -21,7 +20,6 @@ import { Toast } from "../../shared/toast/toast";
         <app-bottom-nav />
         <app-search />
         <app-logout-dialog />
-        <app-install-banner />
         <app-toast />
     `,
     styleUrl: "./main-layout.css",

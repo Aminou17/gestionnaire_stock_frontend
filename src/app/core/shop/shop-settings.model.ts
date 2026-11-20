@@ -13,6 +13,8 @@ export interface ShopSettings {
     // chiffres seuls, sans + (242, 226)
     default_country_code: string;
     updated_at: string | null;
+    // fin de l'essai gratuit ; absent ou null : pas d'essai en cours
+    trial_ends_at?: string | null;
 }
 
 export interface ShopSettingsInput {
