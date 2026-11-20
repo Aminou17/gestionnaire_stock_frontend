@@ -19,7 +19,7 @@ describe("AuthLayout", () => {
     it("should show the software brand, never the name of a shop", async () => {
         const page = await render();
 
-        expect(page.querySelector(".brand-icon")).not.toBeNull();
+        expect(page.querySelector(".brand-logo")).not.toBeNull();
         expect(page.textContent).toContain("Boutiki");
         expect(page.textContent).not.toContain("Awa Bazin");
     });
