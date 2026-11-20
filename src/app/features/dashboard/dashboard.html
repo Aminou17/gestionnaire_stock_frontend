@@ -24,29 +24,7 @@
         </div>
     }
 
-    @if (summaryData()?.previousOpenSession; as previous) {
-        <div class="alert alert-warning banner" role="alert">
-            <app-icon name="alert" />
-            <span>
-                La caisse du <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas
-                été clôturée.
-            </span>
-            <a routerLink="/cash">Clôturer</a>
-        </div>
-    }
-
-    @if (summaryData()?.pendingExplanation; as pending) {
-        <div class="alert alert-warning banner" role="alert">
-            <app-icon name="alert" />
-            <span>
-                L'écart de la caisse du
-                <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong> n'est pas expliqué : la
-                caisse ne pourra pas être ouverte avant.
-            </span>
-            <a routerLink="/cash">Expliquer</a>
-        </div>
-    }
-
+    <!-- l'état de la caisse est dans la carte « En caisse » : les messages et les actions sont sur la page Caisse -->
     @if (firstSteps(); as start) {
         <section class="start" aria-labelledby="start-title">
             <div class="start-head">
@@ -78,24 +56,6 @@
                     </li>
                 }
             </ol>
-        </section>
-    }
-
-    @if (todo().length > 0) {
-        <section class="todo" aria-label="À faire maintenant">
-            @for (item of todo(); track item.label) {
-                <div class="todo-item">
-                    <app-icon [name]="item.icon" />
-                    <span>{{ item.text }}</span>
-                    <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        (click)="item.reopenId ? reopenCash.open(item.reopenId) : openCash.open()"
-                    >
-                        {{ item.label }}
-                    </button>
-                </div>
-            }
         </section>
     }
 
@@ -207,7 +167,6 @@
     </section>
 
     <app-open-cash-dialog #openCash (opened)="onCashOpened()" />
-    <app-reopen-cash-dialog #reopenCash (reopened)="onCashOpened()" />
 } @else {
     <!-- même ordre sur téléphone et sur ordinateur : la grille ne fait que placer les blocs -->
     <div class="manager">

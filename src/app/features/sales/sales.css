@@ -13,10 +13,16 @@ app-page-header {
     gap: 16px;
 }
 
+/* libellé et pastille en haut, chiffre en dessous, comme les cartes de l'Accueil */
 .stat {
     position: relative;
     display: grid;
-    gap: 4px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "label icon"
+        "value value";
+    align-items: center;
+    gap: 10px 12px;
     padding: 16px;
     text-align: left;
     color: var(--text);
@@ -34,14 +40,26 @@ app-page-header {
     box-shadow: inset 0 0 0 1px var(--primary);
 }
 
-/* le montant encaissé n'est pas un filtre */
-.stat-static,
-.stat-static:hover {
+/* le montant encaissé n'est pas un filtre : il garde sa bordure teintée au survol */
+.stat-static {
     cursor: default;
-    border-color: var(--border);
+}
+
+.stat-static:hover {
+    border-color: color-mix(in srgb, var(--tone) 22%, var(--border));
+}
+
+.stat .tone-icon {
+    grid-area: icon;
+}
+
+.stat-skeleton,
+.stat-value {
+    grid-area: value;
 }
 
 .stat-label {
+    grid-area: label;
     font-size: var(--fs-body);
     color: var(--text-muted);
 }
@@ -540,30 +558,26 @@ tbody tr:hover {
     .summary {
         order: 0;
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         justify-content: space-between;
         gap: 12px;
         margin-top: 12px;
         padding: 16px;
-        border: 1px solid var(--border);
-        border-left: 3px solid var(--success);
+        /* la couleur du contour vient de la carte teintée */
+        border-width: 1px;
+        border-style: solid;
         border-radius: var(--radius);
-        background: linear-gradient(135deg, var(--success-soft) 0%, var(--surface) 65%);
     }
 
-    .summary[data-tone="warning"] {
-        border-left-color: var(--warning);
-        background: linear-gradient(135deg, var(--warning-soft) 0%, var(--surface) 65%);
-    }
-
-    .summary[data-tone="danger"] {
-        border-left-color: var(--danger);
-        background: linear-gradient(135deg, var(--danger-soft) 0%, var(--surface) 65%);
+    .summary .tone-icon {
+        align-self: center;
     }
 
     .summary-main {
         display: grid;
+        flex: 1;
         gap: 2px;
+        min-width: 0;
     }
 
     .summary-label {

@@ -495,8 +495,8 @@ describe("SalePage", () => {
         expect(receipt).toContain("14/11 Payé");
 
         const page = el.querySelector(".payment")!.textContent!.replace(/\s+/g, " ");
-        expect(page).toContain("12 Nov, 12:05 · Espèces");
-        expect(page).toContain("14 Nov, 09:00 · Espèces");
+        expect(page).toContain("12 November à 12:05 · Espèces");
+        expect(page).toContain("14 November à 09:00 · Espèces");
     });
 
     it("should count an old cash sale without amount as exact change", async () => {

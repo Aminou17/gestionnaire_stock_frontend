@@ -14,17 +14,10 @@
 
 <!-- Totaux de la période et du fournisseur choisis -->
 <div class="stats">
-    @for (
-        stat of [
-            { label: "Entrées", value: counters()?.entries },
-            { label: "Unités reçues", value: counters()?.units },
-            { label: "Produits approvisionnés", value: counters()?.products },
-            { label: "Fournisseurs", value: counters()?.suppliers },
-        ];
-        track stat.label
-    ) {
-        <div class="card stat">
+    @for (stat of stats(); track stat.label) {
+        <div class="card stat tinted" [attr.data-tone]="stat.tone">
             <span class="stat-label">{{ stat.label }}</span>
+            <span class="tone-icon"><app-icon [name]="stat.icon" [size]="18" /></span>
             @if (firstLoad()) {
                 <span class="skeleton stat-skeleton"></span>
             } @else {

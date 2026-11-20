@@ -30,16 +30,6 @@ app-page-header {
     font-weight: 600;
 }
 
-.todo {
-    display: grid;
-    gap: 8px;
-    padding: 10px 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--warning, #d97706);
-    border-radius: var(--radius, 12px);
-}
-
 .start {
     display: grid;
     gap: 12px;
@@ -109,26 +99,6 @@ app-page-header {
 .start .btn {
     min-height: 44px;
     min-width: 104px;
-}
-
-.todo-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 0;
-    color: var(--text);
-}
-
-.todo-item span {
-    flex: 1;
-    font-size: 14px;
-}
-
-@media (max-width: 767px) {
-    .todo-item .btn {
-        min-height: 44px;
-        flex: none;
-    }
 }
 
 .stats {

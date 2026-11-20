@@ -37,13 +37,29 @@ app-page-header {
     gap: 16px;
 }
 
+/* libellé et pastille en haut, chiffre en dessous, comme les cartes de l'Accueil */
 .stat {
     display: grid;
-    gap: 4px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+        "label icon"
+        "value value";
+    align-items: center;
+    gap: 10px 12px;
     padding: 16px 18px;
 }
 
+.stat .tone-icon {
+    grid-area: icon;
+}
+
+.stat-skeleton,
+.stat-value {
+    grid-area: value;
+}
+
 .stat-label {
+    grid-area: label;
     font-size: var(--fs-body);
     color: var(--text-muted);
 }

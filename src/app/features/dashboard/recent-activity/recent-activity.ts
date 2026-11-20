@@ -37,6 +37,6 @@ export class RecentActivity {
     // "14:32" aujourd'hui, "10 nov., 14:32" les jours précédents
     when(item: Activity) {
         const isToday = new Date(item.occurredAt).toDateString() === new Date().toDateString();
-        return formatDate(item.occurredAt, isToday ? "HH:mm" : "d MMM, HH:mm", this.locale);
+        return formatDate(item.occurredAt, isToday ? "HH:mm" : "d MMMM 'à' HH:mm", this.locale);
     }
 }

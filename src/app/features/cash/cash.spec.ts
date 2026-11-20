@@ -132,7 +132,8 @@ describe("Cash", () => {
     it("should show the balance and the day's movements when the cash is open", async () => {
         await render();
 
-        expect(text()).toContain("Ouvertedepuis08:00");
+        expect(text()).toContain("Caissedujour");
+        expect(text()).toContain("Depuis08:00Ouverte");
         expect(text()).toContain("9500F");
         expect(text()).toContain("Vente#112");
         expect(text()).toContain("Fondsdedépart5000F");
@@ -249,12 +250,11 @@ describe("Cash", () => {
             },
         });
 
-        const open = [...el.querySelectorAll("button")].find((b) =>
-            b.textContent?.includes("Ouvrir la caisse"),
-        );
-
-        expect(open?.disabled).toBe(true);
+        // un seul message dans la carte, avec le bouton qui débloque, et pas de bandeau en plus
         expect(text()).toContain("Clôturezd'abordvotrecaissedu9novembre");
+        expect(buttons()).toContain("Clôturer la caisse du 9 novembre");
+        expect(buttons()).not.toContain("Ouvrir la caisse");
+        expect(el.querySelector(".alert-warning")).toBeNull();
     });
 
     it("should show the last closed cash register when none is open", async () => {
@@ -293,7 +293,7 @@ describe("Cash", () => {
             }),
         });
 
-        expect(text()).toContain("Clôturéede08:00à19:00");
+        expect(text()).toContain("De08:00à19:00Clôturée");
         expect(text()).toContain("Montantcompté9000F");
         expect(text()).toContain("Écart−500F");
         expect(text()).toContain("Explication:Erreurdemonnaie");

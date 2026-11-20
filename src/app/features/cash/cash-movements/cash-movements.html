@@ -2,16 +2,18 @@
 <app-cash-tabs />
 
 <div class="stats">
-    <div class="card stat">
+    <div class="card stat tinted" data-tone="success">
         <span class="stat-label">Entrées d'argent</span>
+        <span class="tone-icon"><app-icon name="arrow-down" [size]="18" /></span>
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton"></span>
         } @else {
             <strong appMoney class="stat-value in">{{ summary()?.totalIn | fcfa }}</strong>
         }
     </div>
-    <div class="card stat">
+    <div class="card stat tinted" data-tone="danger">
         <span class="stat-label">Sorties d'argent</span>
+        <span class="tone-icon"><app-icon name="arrow-up-right" [size]="18" /></span>
         @if (firstLoad()) {
             <span class="skeleton stat-skeleton"></span>
         } @else {

@@ -82,19 +82,19 @@
             </dl>
 
             <div class="stats">
-                <div class="stat">
+                <div class="stat tinted" data-tone="danger">
                     <span class="stat-label"><i class="dot dot-out"></i>Manquants</span>
                     <strong class="stat-value" [class.out]="missing() > 0">{{ missing() }}</strong>
                     <span class="stat-sub"
                         >{{ shortCount() }} produit{{ shortCount() > 1 ? "s" : "" }}</span
                     >
                 </div>
-                <div class="stat">
+                <div class="stat tinted" data-tone="neutral">
                     <span class="stat-label"><i class="dot dot-ok"></i>Conformes</span>
                     <strong class="stat-value">{{ conformCount() }}</strong>
                     <span class="stat-sub">sur {{ inv.items.length }}</span>
                 </div>
-                <div class="stat">
+                <div class="stat tinted" data-tone="success">
                     <span class="stat-label"><i class="dot dot-in"></i>En trop</span>
                     <strong class="stat-value" [class.in]="surplus() > 0">{{ surplus() }}</strong>
                     <span class="stat-sub"

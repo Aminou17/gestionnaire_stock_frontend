@@ -111,7 +111,7 @@ describe("SettingsShop", () => {
 
         expect(input("defaultCountryCode").value).toBe("242");
         expect(el.textContent).toContain("Congo-Brazzaville");
-        expect(el.textContent).toContain("quand un numéro n'a pas d'indicatif");
+        expect(el.textContent).toContain("numéros saisis sans indicatif");
     });
 
     it("should save a new country code with the digits only", async () => {

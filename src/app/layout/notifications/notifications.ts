@@ -79,7 +79,7 @@ export class Notifications {
         if (minutes < 1) return "à l'instant";
         if (minutes < 60) return `il y a ${minutes} min`;
         const hours = Math.floor(minutes / 60);
-        return hours < 24 ? `il y a ${hours} h` : formatDate(time, "d MMM, HH:mm", this.locale);
+        return hours < 24 ? `il y a ${hours} h` : formatDate(time, "d MMMM 'à' HH:mm", this.locale);
     }
 
     toggle() {

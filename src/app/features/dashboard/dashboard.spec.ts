@@ -297,28 +297,27 @@ describe("Dashboard", () => {
         expect(text()).toContain("Ouverte depuis 08:05");
     });
 
-    it("should offer to open the cash register when it is closed", async () => {
+    it("should show a closed cash register only in its card, without a banner", async () => {
         await render({ cash: null });
 
-        expect(el.querySelector(".todo")?.textContent).toContain("Ouvrir la caisse");
-        expect(el.querySelector(".todo")?.textContent).toContain("La caisse n'est pas ouverte");
+        expect(text()).toContain("Caisse fermée");
+        expect(text()).not.toContain("La caisse n'est pas ouverte");
+        expect(el.querySelector(".alert")).toBeNull();
     });
 
-    it("should let the owner reopen a closed cash register", async () => {
+    it("should leave the cash reminders to the cash page for the owner", async () => {
         await render({
-            cash: { ...openCash!, status: "CLOSED", closedAt: "2026-11-11T18:00:00" },
+            previousOpenSession: {
+                id: 3,
+                sessionDate: "2026-11-10",
+                openedAt: "2026-11-10T08:00:00",
+                balance: null,
+            },
+            pendingExplanation: { id: 4, sessionDate: "2026-11-09", difference: -500, closedBy: 999 },
         });
 
-        const todo = el.querySelector(".todo");
-        expect(todo?.textContent).toContain("La caisse est clôturée");
-        expect(todo?.textContent).toContain("Rouvrir la caisse");
-        expect(el.querySelector("app-reopen-cash-dialog")).not.toBeNull();
-    });
-
-    it("should hide the to-do block when nothing is left to do", async () => {
-        await render();
-
-        expect(el.querySelector(".todo")).toBeNull();
+        expect(text()).not.toContain("n'a pas été clôturée");
+        expect(text()).not.toContain("n'est pas expliqué");
     });
 
     it("should keep only the last 7 days for the chart", async () => {
@@ -448,18 +447,5 @@ describe("Dashboard", () => {
         });
 
         expect(text()).not.toContain("Expliquez l'écart");
-    });
-
-    it("should tell the owner that a gap blocks the next opening", async () => {
-        await render({
-            pendingExplanation: {
-                id: 3,
-                sessionDate: "2026-11-10",
-                difference: -500,
-                closedBy: 999,
-            },
-        });
-
-        expect(text()).toContain("n'est pas expliqué");
     });
 });

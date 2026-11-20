@@ -78,15 +78,21 @@ app-page-header {
     padding: 20px;
 }
 
-.status.open {
-    border-color: var(--primary);
-}
-
 .status-head {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 6px 12px;
+    gap: 12px;
+}
+
+.status-title {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
+
+.status-title strong {
+    font-size: var(--fs-lead);
 }
 
 .balance {

@@ -1,6 +1,6 @@
 <app-page-header
     title="Ma boutique"
-    subtitle="Identité et coordonnées de votre boutique"
+    subtitle="Nom, logo et coordonnées"
     section="Paramètres"
     [back]="backUrl"
     [backLabel]="back.label"
@@ -27,7 +27,6 @@
             <section class="block" aria-labelledby="shop-identity">
                 <div class="block-head">
                     <h2 id="shop-identity">Identité</h2>
-                    <p class="muted">Le nom et le logo affichés dans le menu et sur les tickets.</p>
                 </div>
 
                 <div class="card block-card">
@@ -47,7 +46,7 @@
 
                         <div class="logo-text">
                             <strong>Logo</strong>
-                            <small class="muted">PNG ou JPEG, imprimé en haut des tickets.</small>
+                            <small class="muted">PNG ou JPEG</small>
 
                             <div class="logo-actions">
                                 <input
@@ -117,12 +116,11 @@
             <section class="block" aria-labelledby="shop-contact">
                 <div class="block-head">
                     <h2 id="shop-contact">Coordonnées</h2>
-                    <p class="muted">Pour que vos clients puissent vous joindre.</p>
                 </div>
 
                 <div class="card block-card">
                     <label class="field">
-                        <span>Adresse</span>
+                        <span>Adresse <small class="muted">(facultatif)</small></span>
                         <input
                             class="input"
                             type="text"
@@ -131,11 +129,10 @@
                             placeholder="Ex. Marché Total, Brazzaville"
                             autocomplete="street-address"
                         />
-                        <small class="muted">Facultative. Imprimée sur le ticket.</small>
                     </label>
 
                     <label class="field">
-                        <span>Téléphone</span>
+                        <span>Téléphone <small class="muted">(facultatif)</small></span>
                         <input
                             class="input"
                             type="tel"
@@ -144,7 +141,6 @@
                             placeholder="Ex. +242 06 123 45 67"
                             autocomplete="tel"
                         />
-                        <small class="muted">Facultatif. Imprimé sur le ticket.</small>
                     </label>
 
                     <div class="field">
@@ -177,7 +173,7 @@
                         }
                         @if (suggestedCode(); as code) {
                             <p class="code-hint">
-                                Le téléphone de la boutique commence par +{{ code }}.
+                                Votre numéro commence par +{{ code }}.
                                 <button
                                     type="button"
                                     class="link-btn"
@@ -188,7 +184,7 @@
                             </p>
                         }
                         <small id="shop-country-help" class="muted">
-                            Utilisé pour WhatsApp et les appels quand un numéro n'a pas d'indicatif.
+                            Ajouté aux numéros saisis sans indicatif.
                         </small>
                     </div>
                 </div>
@@ -197,12 +193,11 @@
             <section class="block" aria-labelledby="shop-legal">
                 <div class="block-head">
                     <h2 id="shop-legal">Informations légales</h2>
-                    <p class="muted">Imprimées sur les tickets si vous les renseignez.</p>
                 </div>
 
                 <div class="card block-card">
                     <label class="field">
-                        <span>N° IFU</span>
+                        <span>N° IFU <small class="muted">(facultatif)</small></span>
                         <input
                             class="input"
                             type="text"
@@ -210,11 +205,11 @@
                             maxlength="50"
                             autocomplete="off"
                         />
-                        <small class="muted">Facultatif. Identifiant fiscal unique.</small>
+                        <small class="muted">Identifiant fiscal unique</small>
                     </label>
 
                     <label class="field">
-                        <span>N° RCCM</span>
+                        <span>N° RCCM <small class="muted">(facultatif)</small></span>
                         <input
                             class="input"
                             type="text"
@@ -222,7 +217,7 @@
                             maxlength="50"
                             autocomplete="off"
                         />
-                        <small class="muted">Facultatif. Registre du commerce.</small>
+                        <small class="muted">Registre du commerce</small>
                     </label>
                 </div>
             </section>
@@ -242,7 +237,6 @@
         <aside class="block preview-col" aria-labelledby="shop-preview">
             <div class="block-head">
                 <h2 id="shop-preview">Aperçu du ticket</h2>
-                <p class="muted">L'en-tête tel qu'il sera imprimé.</p>
             </div>
 
             <div class="ticket" role="img" aria-label="Aperçu de l'en-tête du ticket de caisse">

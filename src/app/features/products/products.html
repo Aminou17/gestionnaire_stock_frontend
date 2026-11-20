@@ -34,10 +34,9 @@
     }
 </app-page-header>
 
-
 @if (stockValue() !== undefined) {
-    <div class="card value-card">
-        <span class="value-icon"><app-icon name="wallet" [size]="20" /></span>
+    <div class="card value-card tinted" data-tone="violet">
+        <span class="value-icon tone-icon"><app-icon name="wallet" [size]="18" /></span>
         <div class="value-text">
             <span class="value-label">Valeur du stock</span>
             <strong class="value-amount">
@@ -58,7 +57,8 @@
     @for (tab of tabs(); track tab.label) {
         <button
             type="button"
-            class="card stat"
+            class="card stat tinted"
+            [attr.data-tone]="tab.tone"
             [class.selected]="stockStatus() === tab.value"
             [attr.aria-pressed]="stockStatus() === tab.value"
             (click)="selectStock(tab.value)"
@@ -69,7 +69,7 @@
             } @else {
                 <strong class="stat-value tone-{{ tab.tone }}">{{ tab.count ?? "—" }}</strong>
             }
-            <span class="dot dot-{{ tab.tone }}"></span>
+            <span class="tone-icon"><app-icon [name]="tab.icon" [size]="18" /></span>
         </button>
     }
 </div>
