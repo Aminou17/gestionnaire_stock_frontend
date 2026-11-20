@@ -1,5 +1,5 @@
 import { Component, ElementRef, inject, signal, viewChild } from "@angular/core";
-import { Router, RouterLink } from "@angular/router";
+import { Router } from "@angular/router";
 
 import { PRODUCT_NAME } from "../../../core/brand";
 import { Icon } from "../../../shared/icon/icon";
@@ -14,7 +14,7 @@ interface Slide {
 
 @Component({
     selector: "app-welcome",
-    imports: [RouterLink, Icon],
+    imports: [Icon],
     templateUrl: "./welcome.html",
     styleUrl: "./welcome.css",
 })

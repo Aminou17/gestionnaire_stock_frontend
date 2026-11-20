@@ -2,6 +2,7 @@ import { DatePipe } from "@angular/common";
 import { Component, inject, signal } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+import { getBackLink } from "../../../core/back-link";
 import { NetworkService } from "../../../core/offline/network.service";
 import { PendingSale, SaleOutboxService } from "../../../core/offline/sale-outbox.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -16,6 +17,8 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
     styleUrl: "./pending-sales.css",
 })
 export class PendingSales {
+    // ouverte depuis les Ventes, la Caisse ou le bandeau hors ligne
+    protected back = getBackLink("/sales", "Ventes");
     protected outbox = inject(SaleOutboxService);
     protected network = inject(NetworkService);
 

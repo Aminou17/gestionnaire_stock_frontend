@@ -17,7 +17,7 @@
         }
         <div class="title-row">
             @if (back()) {
-                <a [routerLink]="back()" class="back-btn" [attr.aria-label]="backLabel()">
+                <a [appBackLink]="back()!" class="back-btn" [attr.aria-label]="backLabel()">
                     <app-icon name="chevron-left" [size]="22" />
                 </a>
             }

@@ -10,6 +10,8 @@ import { Subscription } from "./subscription";
 class HeaderStub {
     title = input<string>();
     subtitle = input<string>();
+    back = input<unknown>();
+    backLabel = input<string>();
 }
 
 describe("Subscription", () => {

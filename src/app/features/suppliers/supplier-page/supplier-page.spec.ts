@@ -195,7 +195,8 @@ describe("SupplierPage", () => {
 
     it("should go back to the list after deleting", async () => {
         await render();
-        const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+        // la fiche est quittée sans rester dans l'historique
+        const navigate = vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
 
         el.querySelector<HTMLButtonElement>(".manage .danger")!.click();
         await fixture.whenStable();
@@ -203,7 +204,7 @@ describe("SupplierPage", () => {
         await fixture.whenStable();
 
         expect(deleteSupplier).toHaveBeenCalledWith(4);
-        expect(navigate).toHaveBeenCalledWith(["/suppliers"]);
+        expect(navigate).toHaveBeenCalledWith("/suppliers", { replaceUrl: true });
     });
 
     it("should say the supplier does not exist on a 404", async () => {

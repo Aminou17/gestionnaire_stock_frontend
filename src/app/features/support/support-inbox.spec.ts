@@ -150,7 +150,7 @@ describe("SupportInbox", () => {
         inbox.createThread();
 
         expect(service["createThread"]).toHaveBeenCalledWith("Question", "Bonjour");
-        expect(navigate).toHaveBeenCalledWith(["/support", 9]);
+        expect(navigate).toHaveBeenCalledWith(["/support", 9], { replaceUrl: true });
     });
 
     it("le propriétaire peut terminer une conversation", async () => {

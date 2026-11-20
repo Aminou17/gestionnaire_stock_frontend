@@ -154,7 +154,8 @@ describe("UserPage", () => {
 
     it("should delete then go back to the list", async () => {
         await render();
-        const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+        // la fiche est quittée sans rester dans l'historique
+        const navigate = vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
 
         button("Supprimer")!.click();
         await fixture.whenStable();
@@ -162,7 +163,7 @@ describe("UserPage", () => {
         await fixture.whenStable();
 
         expect(deleteUser).toHaveBeenCalledWith(2);
-        expect(navigate).toHaveBeenCalledWith(["/users"]);
+        expect(navigate).toHaveBeenCalledWith("/users", { replaceUrl: true });
     });
 
     it("should not offer delete or password reset on its own page", async () => {

@@ -1,3 +1,4 @@
+import { Location } from "@angular/common";
 import {
     Component,
     DestroyRef,
@@ -45,10 +46,12 @@ export class LegalPage {
         afterNextRender(() => this.watchSections());
     }
 
+    private location = inject(Location);
+
     protected back() {
-        // sans historique (lien ouvert directement), retour à l'accueil
-        if (history.length > 1) history.back();
-        else this.router.navigateByUrl("/");
+        // ouverte depuis l'application : on recule ; lien ouvert directement : accueil à la place
+        if (this.router.lastSuccessfulNavigation()?.previousNavigation) this.location.back();
+        else this.router.navigateByUrl("/", { replaceUrl: true });
     }
 
     protected isList(block: LegalBlock): block is string[] {
