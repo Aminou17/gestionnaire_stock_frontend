@@ -99,7 +99,7 @@
 .hint {
     grid-area: hint;
     margin-top: 4px;
-    font-size: 12.5px;
+    font-size: var(--fs-caption);
 }
 
 /* la grande carte : bleu marque plein, un seul chiffre fort en tête de page */
@@ -249,7 +249,7 @@
         padding: 14px;
     }
     .label {
-        font-size: 12.5px;
+        font-size: var(--fs-caption);
     }
     .value {
         margin-top: 10px;

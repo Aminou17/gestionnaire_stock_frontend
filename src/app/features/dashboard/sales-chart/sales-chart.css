@@ -156,7 +156,7 @@
         min-height: 150px;
     }
     .bar-value {
-        font-size: 10px;
+        font-size: var(--fs-micro);
     }
     .day {
         font-size: 12px;

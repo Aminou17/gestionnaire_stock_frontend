@@ -194,7 +194,7 @@
     border-radius: 14px;
     background: var(--surface);
     color: var(--text);
-    font-size: 13.5px;
+    font-size: var(--fs-small);
     font-weight: var(--fw-semibold);
     cursor: pointer;
     transition:

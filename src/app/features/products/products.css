@@ -881,6 +881,7 @@ td.num small {
 
 .value-amount {
     font-size: var(--fs-kpi);
+    font-weight: var(--fw-bold);
     line-height: 1.2;
     font-variant-numeric: tabular-nums;
 }

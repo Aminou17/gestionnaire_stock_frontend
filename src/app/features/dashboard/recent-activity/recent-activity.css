@@ -64,7 +64,7 @@ li.empty {
 }
 
 .value {
-    font-weight: 700;
+    font-weight: var(--fw-semibold);
     font-size: 14px;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
