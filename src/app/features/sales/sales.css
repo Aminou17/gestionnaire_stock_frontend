@@ -718,3 +718,8 @@ tbody tr:hover {
         font-size: 13px;
     }
 }
+
+.pending-link {
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    color: var(--primary-text);
+}

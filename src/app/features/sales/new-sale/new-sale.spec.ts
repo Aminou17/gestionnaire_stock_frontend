@@ -12,6 +12,9 @@ import { SaleService } from "../../../core/sales/sale.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
+import { NetworkService } from "../../../core/offline/network.service";
+import { OfflineCatalogService } from "../../../core/offline/offline-catalog.service";
+import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
 
 const product = (id: number, name: string, overrides: Partial<Product> = {}): Product => ({
     id,
@@ -92,6 +95,21 @@ describe("NewSale", () => {
             imports: [NewSale],
             providers: [
                 provideRouter([]),
+                // le catalogue de l'appareil et la file hors ligne ont leurs propres tests
+                { provide: NetworkService, useValue: { online: signal(true) } },
+                {
+                    provide: OfflineCatalogService,
+                    useValue: {
+                        products: signal([]),
+                        categories: signal([]),
+                        cash: signal(null),
+                        savedAt: signal(null),
+                        load: async () => {},
+                        refresh: async () => {},
+                        saveCash: async () => {},
+                    },
+                },
+                { provide: SaleOutboxService, useValue: { add: vi.fn(), count: signal(0) } },
                 {
                     provide: ActivatedRoute,
                     useValue: {

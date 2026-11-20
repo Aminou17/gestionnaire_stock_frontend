@@ -415,3 +415,18 @@ h2:focus {
     border: 0;
     border-top: 1px solid var(--border);
 }
+
+.barcode-row {
+    display: flex;
+    gap: 8px;
+}
+
+.barcode-row .input {
+    flex: 1;
+    min-width: 0;
+}
+
+.barcode-row .scan {
+    flex: none;
+    gap: 6px;
+}

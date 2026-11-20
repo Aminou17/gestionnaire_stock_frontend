@@ -6,6 +6,7 @@ import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { PaymentMethod, Sale, SalePage, SaleStatus } from "../../core/sales/sale.model";
+import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
 import { SaleService } from "../../core/sales/sale.service";
 import { ExportService } from "../settings/settings-export/export.service";
 import { UserService } from "../users/user.service";
@@ -53,6 +54,8 @@ type FilterKey = "period" | "payment" | "seller";
 export class Sales {
     private locale = inject(LOCALE_ID);
     private saleService = inject(SaleService);
+    // ventes faites sans internet, pas encore envoyées
+    protected outbox = inject(SaleOutboxService);
     private router = inject(Router);
     private userService = inject(UserService);
     private exportService = inject(ExportService);

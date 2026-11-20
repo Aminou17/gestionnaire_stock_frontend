@@ -17,6 +17,7 @@ import { SalesSettingsService } from "../../../core/sales/sales-settings.service
 import { StockSettingsService } from "../../../core/stock/stock-settings.service";
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { resizeAvatar, resizeThumb } from "../../../shared/avatar/avatar-resizer";
+import { BarcodeScanner } from "../../../shared/barcode-scanner/barcode-scanner";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ToastService } from "../../../shared/toast/toast.service";
@@ -34,7 +35,7 @@ const NEW_ID = -1;
 
 @Component({
     selector: "app-product-form",
-    imports: [ReactiveFormsModule, Icon, FcfaPipe],
+    imports: [ReactiveFormsModule, Icon, FcfaPipe, BarcodeScanner],
     templateUrl: "./product-form.html",
     styleUrl: "./product-form.css",
 })
@@ -63,6 +64,8 @@ export class ProductForm {
             maxDiscount: [null as number | null, Validators.min(0)],
             // vide = le produit suit le seuil par défaut
             minStock: [null as number | null, [Validators.min(0), Validators.pattern(/^\d+$/)]],
+            // mêmes caractères que l'API : chiffres, lettres et - . _ /
+            barcode: ["", [Validators.maxLength(64), Validators.pattern(/^[A-Za-z0-9._\-/ ]*$/)]],
         },
         { validators: discountValidator },
     );
@@ -243,6 +246,7 @@ export class ProductForm {
                     maxDiscount:
                         product.pricing_mode === "NEGOTIABLE" ? product.max_discount : null,
                     minStock: product.min_stock,
+                    barcode: product.barcode ?? "",
                 });
             },
             error: (err: HttpErrorResponse) => {
@@ -423,6 +427,7 @@ export class ProductForm {
             pricingMode: value.pricingMode,
             maxDiscount: value.pricingMode === "NEGOTIABLE" ? value.maxDiscount! : 0,
             minStock: value.minStock,
+            barcode: value.barcode.trim() || null,
         };
 
         this.saving.set(true);

@@ -14,6 +14,7 @@ import {
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
+import { firstValueFrom } from "rxjs";
 import { ActivatedRoute, Router } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
@@ -42,6 +43,7 @@ import { Pagination, storedPageSize } from "../../../shared/pagination/paginatio
 import { formatPhone, phoneKey, splitPhone } from "../../../shared/phone";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
 import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
+import { BarcodeScanner } from "../../../shared/barcode-scanner/barcode-scanner";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
 interface CartLine {
@@ -70,6 +72,7 @@ export const getMinPrice = (product: Product) =>
 @Component({
     selector: "app-new-sale",
     imports: [
+        BarcodeScanner,
         FormsModule,
         NgTemplateOutlet,
         PageHeader,
@@ -557,6 +560,52 @@ export class NewSale {
 
     quantityOf(product: Product) {
         return this.cart().find((line) => line.product.id === product.id)?.quantity ?? 0;
+    }
+
+    // code-barres scanné : le produit va dans le panier, ou une unité de plus s'il y est déjà
+    scanning = signal(false);
+
+    async onScanned(code: string) {
+        this.scanning.set(true);
+        const product = await this.findByBarcode(code);
+        this.scanning.set(false);
+
+        if (!product) {
+            this.notify("error", `Aucun produit avec le code ${code}.`);
+            return;
+        }
+
+        const line = this.cart().find((l) => l.product.id === product.id);
+        if (line) {
+            this.setQuantity(line, line.quantity + 1);
+        } else if (product.theoretical_stock <= 0 && !this.offline()) {
+            this.notify("error", `${product.name} est en rupture de stock.`);
+            return;
+        } else {
+            this.addProduct(product);
+        }
+        this.notify("success", `${product.name} ajouté au panier.`);
+    }
+
+    private async findByBarcode(code: string): Promise<Product | null> {
+        const local = () => this.catalog.products().find((p) => p.barcode === code) ?? null;
+        if (this.offline()) return local();
+
+        try {
+            const page = await firstValueFrom(
+                this.productService.getProducts({
+                    search: code,
+                    categoryId: null,
+                    stockStatus: null,
+                    status: "active",
+                    page: 1,
+                    limit: 5,
+                }),
+            );
+            return page.data.find((p) => p.barcode === code) ?? null;
+        } catch {
+            return local();
+        }
     }
 
     addProduct(product: Product) {
