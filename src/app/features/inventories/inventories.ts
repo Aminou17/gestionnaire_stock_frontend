@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, DestroyRef, inject, signal } from "@angular/core";
+import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { Router, RouterLink } from "@angular/router";
 
@@ -31,6 +31,15 @@ export class Inventories {
         () => (this.inventories.hasValue() ? this.inventories.value() : []),
         "inventories",
     );
+
+    // rappel des inventaires comptés mais pas encore appliqués au stock
+    pending = computed(() => {
+        const list = this.inventories.hasValue() ? this.inventories.value() : [];
+        const waiting = list.filter((inventory) => !inventory.applied_at);
+        if (waiting.length === 0) return null;
+        const oldest = waiting.reduce((a, b) => (a.created_at < b.created_at ? a : b));
+        return { count: waiting.length, oldest: oldest.id };
+    });
 
     private destroyRef = inject(DestroyRef);
 

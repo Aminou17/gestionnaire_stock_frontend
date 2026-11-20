@@ -90,7 +90,8 @@
     font-variant-numeric: tabular-nums;
 }
 
-.bar-value.best {
+/* le montant en gras est celui d'aujourd'hui, comme sa barre et son jour */
+.bar-value.today {
     color: var(--text);
     font-weight: 600;
 }

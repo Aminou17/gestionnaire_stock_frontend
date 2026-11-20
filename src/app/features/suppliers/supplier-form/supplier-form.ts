@@ -14,6 +14,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angula
 import { Supplier, SupplierInput } from "../../../core/stock/supplier.model";
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
+import { ToastService } from "../../../shared/toast/toast.service";
 
 @Component({
     selector: "app-supplier-form",
@@ -22,6 +23,7 @@ import { PhoneField } from "../../../shared/phone-field/phone-field";
     styleUrl: "./supplier-form.css",
 })
 export class SupplierForm {
+    private toast = inject(ToastService);
     private supplierService = inject(SupplierService);
     private destroyRef = inject(DestroyRef);
 
@@ -130,6 +132,7 @@ export class SupplierForm {
                 this.saving.set(false);
                 this.close();
                 this.saved.emit(supplier);
+                this.toast.show(editing ? "Fournisseur enregistré" : "Fournisseur ajouté");
             },
             error: (err: HttpErrorResponse) => {
                 this.saving.set(false);

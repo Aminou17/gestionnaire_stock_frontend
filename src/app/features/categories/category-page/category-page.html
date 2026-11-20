@@ -155,6 +155,13 @@
                     @for (product of preview(); track product.id) {
                         <li>
                             <a [routerLink]="['/products', product.id]" [state]="backState()">
+                                <span class="thumb av-{{ tone(category.name) }}" aria-hidden="true">
+                                    @if (product.image) {
+                                        <img [src]="product.image" alt="" loading="lazy" />
+                                    } @else {
+                                        {{ initials(product.name) }}
+                                    }
+                                </span>
                                 <span class="preview-name">{{ product.name }}</span>
                                 <small class="muted">{{ product.sale_price | fcfa }}</small>
                                 <strong class="stock-{{ product.stock_status }}">

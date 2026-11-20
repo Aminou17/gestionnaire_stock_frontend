@@ -145,7 +145,7 @@ describe("ProductPage", () => {
         await fixture.whenStable();
         expect(text()).toContain("Modifier");
 
-        el.querySelector<HTMLButtonElement>(".menu .danger")!.click();
+        el.querySelector<HTMLButtonElement>(".panel .danger")!.click();
         el.querySelector<HTMLButtonElement>(".confirm .btn-danger")!.click();
 
         expect(deleteProduct).toHaveBeenCalledWith(3);

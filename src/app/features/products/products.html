@@ -16,44 +16,12 @@
             <span>Importer</span>
         </button>
         <!-- sur téléphone, import et export se rangent dans un seul menu -->
-        <div class="row-menu head-menu" (click)="$event.stopPropagation()">
-            <button
-                type="button"
-                class="more-btn"
-                aria-haspopup="menu"
-                [attr.aria-expanded]="menuFor() === 0"
-                aria-label="Importer ou exporter"
-                (click)="toggleMenu(0)"
-            >
-                <app-icon name="more" />
-            </button>
-            @if (menuFor() === 0) {
-                <div class="menu" role="menu">
-                    <button type="button" role="menuitem" (click)="menuFor.set(null); openImport()">
-                        <app-icon name="upload" [size]="16" />
-                        Importer
-                    </button>
-                    <button
-                        type="button"
-                        role="menuitem"
-                        [disabled]="exporting() || list().length === 0"
-                        (click)="menuFor.set(null); exportFile('pdf')"
-                    >
-                        <app-icon name="download" [size]="16" />
-                        Exporter en PDF
-                    </button>
-                    <button
-                        type="button"
-                        role="menuitem"
-                        [disabled]="exporting() || list().length === 0"
-                        (click)="menuFor.set(null); exportFile('csv')"
-                    >
-                        <app-icon name="download" [size]="16" />
-                        Exporter en CSV
-                    </button>
-                </div>
-            }
-        </div>
+        <app-action-menu
+            class="head-menu framed compact"
+            label="Importer ou exporter"
+            [items]="headItems()"
+            (picked)="onHeadPick($event)"
+        />
         <button
             type="button"
             class="btn btn-primary new-product"
@@ -66,9 +34,6 @@
     }
 </app-page-header>
 
-@if (notice()) {
-    <div class="alert alert-success" role="status">{{ notice() }}</div>
-}
 
 @if (stockValue() !== undefined) {
     <div class="card value-card">
@@ -414,7 +379,10 @@
                         @if (product.is_active) {
                             <span class="gmenu">
                                 <ng-container
-                                    *ngTemplateOutlet="rowMenu; context: { $implicit: product }"
+                                    *ngTemplateOutlet="
+                                        rowMenu;
+                                        context: { $implicit: product, round: true }
+                                    "
                                 />
                             </span>
                         }
@@ -500,53 +468,16 @@
     }
 </ng-template>
 
-<ng-template #rowMenu let-product>
+<ng-template #rowMenu let-product let-round="round">
     @if (auth.isAdmin() || product.theoretical_stock > 0) {
-        <div class="row-menu" (click)="$event.stopPropagation()">
-            <button
-                type="button"
-                class="more-btn"
-                aria-haspopup="menu"
-                [attr.aria-expanded]="menuFor() === product.id"
-                [attr.aria-label]="'Actions pour ' + product.name"
-                (click)="toggleMenu(product.id)"
-            >
-                <app-icon name="more" />
-            </button>
-            @if (menuFor() === product.id) {
-                <div class="menu" role="menu">
-                    @if (product.theoretical_stock > 0) {
-                        <button type="button" role="menuitem" (click)="sellProduct(product)">
-                            <app-icon name="cart" [size]="16" />
-                            Vendre
-                        </button>
-                    }
-                    @if (auth.isAdmin()) {
-                        <button type="button" role="menuitem" (click)="addStock(product)">
-                            <app-icon name="stock-entry" [size]="16" />
-                            Ajouter du stock
-                        </button>
-                        <button type="button" role="menuitem" (click)="adjustProduct(product)">
-                            <app-icon name="edit" [size]="16" />
-                            Ajuster le stock
-                        </button>
-                        <button type="button" role="menuitem" (click)="editProduct(product)">
-                            <app-icon name="edit" [size]="16" />
-                            Modifier
-                        </button>
-                        <button
-                            type="button"
-                            role="menuitem"
-                            class="danger"
-                            (click)="askDelete(product)"
-                        >
-                            <app-icon name="ban" [size]="16" />
-                            Supprimer
-                        </button>
-                    }
-                </div>
-            }
-        </div>
+        <app-action-menu
+            class="row-menu"
+            [class.round]="round"
+            [items]="rowItems(product)"
+            [label]="'Actions pour ' + product.name"
+            [title]="product.name"
+            (picked)="onRowPick(product, $event)"
+        />
     }
 </ng-template>
 

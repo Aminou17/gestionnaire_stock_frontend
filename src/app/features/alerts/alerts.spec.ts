@@ -561,13 +561,14 @@ describe("Alerts", () => {
         expect(reload).toHaveBeenCalled();
     });
 
-    it("should show the photo of the product when there is one", async () => {
+    it("should show the photo of the product, or its initials without one", async () => {
         await render({
             value: [{ ...tissu, image: "data:image/png;base64,AAAA" }, pagne],
         });
         const rows = el.querySelectorAll(".row");
 
         expect(rows[0].querySelector(".thumb img")).not.toBeNull();
-        expect(rows[1].querySelector(".thumb")).toBeNull();
+        expect(rows[1].querySelector(".thumb img")).toBeNull();
+        expect(rows[1].querySelector(".thumb")!.textContent!.trim()).toMatch(/^[A-Z]{2}$/);
     });
 });

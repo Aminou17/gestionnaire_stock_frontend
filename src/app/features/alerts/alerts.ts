@@ -22,6 +22,7 @@ import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { Pagination, clientPaging } from "../../shared/pagination/pagination";
 import { DaysLeftPipe } from "../../shared/pipes/days-left.pipe";
+import { categoryTone, productInitials } from "../products/product-look";
 
 type View = "all" | "out" | "low";
 
@@ -51,6 +52,10 @@ interface AlertGroup {
     },
 })
 export class Alerts {
+    // pastille du produit sans photo, comme dans la liste Produits
+    protected initials = productInitials;
+    protected tone = categoryTone;
+
     private alertService = inject(LowStockAlertService);
     private productService = inject(ProductService);
     private destroyRef = inject(DestroyRef);

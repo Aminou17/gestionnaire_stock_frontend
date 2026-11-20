@@ -6,6 +6,7 @@ import { ManualMovementType } from "../../../core/cash/cash.model";
 import { CASH_REASONS } from "../../../core/cash/cash-reasons";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementService } from "../../../core/cash/cash-movement.service";
+import { ToastService } from "../../../shared/toast/toast.service";
 
 const TEXTS: Record<ManualMovementType, { title: string; hint: string; button: string }> = {
     DEPOSIT: {
@@ -32,6 +33,7 @@ const TEXTS: Record<ManualMovementType, { title: string; hint: string; button: s
     styleUrl: "../../../shared/dialog/dialog.css",
 })
 export class CashMovementDialog {
+    private toast = inject(ToastService);
     private movements = inject(CashMovementService);
     private fb = inject(NonNullableFormBuilder);
 
@@ -102,6 +104,7 @@ export class CashMovementDialog {
                 this.saving.set(false);
                 this.close();
                 this.saved.emit();
+                this.toast.show("Mouvement enregistré");
             },
             error: (err: HttpErrorResponse) => {
                 this.saving.set(false);

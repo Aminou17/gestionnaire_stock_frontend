@@ -50,6 +50,8 @@ export interface SaleItem {
     id: number;
     product_id: number;
     product_name: string;
+    // miniature du produit, null sans photo
+    product_image?: string | null;
     quantity: number;
     unit_price: number;
     reference_price: number;

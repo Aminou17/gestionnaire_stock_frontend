@@ -260,3 +260,27 @@ tbody tr:hover {
         color: var(--text-muted);
     }
 }
+
+/* rappel : inventaires pas encore appliqués */
+.pending {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.pending app-icon {
+    flex-shrink: 0;
+}
+
+.pending span {
+    flex: 1;
+    min-width: 0;
+}
+
+.pending-link {
+    flex-shrink: 0;
+    color: inherit;
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
+}

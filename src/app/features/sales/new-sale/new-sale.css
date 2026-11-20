@@ -191,8 +191,8 @@ kbd {
 /* téléphone : un seul bouton qui bascule */
 .view-single {
     display: none;
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     flex-shrink: 0;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -208,10 +208,12 @@ kbd {
     outline-offset: -2px;
 }
 
+/* même forme que la recherche à côté : coins de 8 px, même hauteur, même texte */
 .category select {
     max-width: 160px;
-    height: 100%;
-    min-height: 40px;
+    height: 48px;
+    border-radius: 8px;
+    font-size: var(--fs-body);
     text-overflow: ellipsis;
 }
 
@@ -349,15 +351,40 @@ kbd {
     color: #fff;
 }
 
-/* la loupe ne se montre qu'au survol sur ordinateur, l'appareil photo reste visible */
-.thumb-zoom .thumb-hint {
+/* la loupe et l'appareil photo ne se montrent qu'au survol sur ordinateur :
+   pendant une vente, la carte reste propre */
+.thumb-zoom .thumb-hint,
+.thumb-add .thumb-hint {
     opacity: 0;
     transition: opacity 0.15s;
 }
 
 .thumb-zoom:hover .thumb-hint,
-.thumb-zoom:focus-visible .thumb-hint {
+.thumb-zoom:focus-visible .thumb-hint,
+.thumb-add:hover .thumb-hint,
+.thumb-add:focus-visible .thumb-hint {
     opacity: 1;
+}
+
+.gcorner-add {
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+li:hover > .gcorner-add,
+.gcorner-add:focus-visible {
+    opacity: 1;
+}
+
+/* écran tactile : pas de survol, la photo s'ajoute depuis la fiche produit */
+@media (hover: none) {
+    .gcorner-add {
+        display: none;
+    }
+
+    .thumb-add {
+        pointer-events: none;
+    }
 }
 
 .photo-notice {

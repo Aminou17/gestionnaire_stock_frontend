@@ -41,7 +41,7 @@
                     #searchInput
                     class="input"
                     type="search"
-                    placeholder="Rechercher un produit…"
+                    placeholder="Chercher…"
                     aria-label="Rechercher un produit"
                     aria-keyshortcuts="/ Control+K"
                     (input)="onSearch($any($event.target).value)"
@@ -228,7 +228,7 @@
                             } @else if (auth.isAdmin()) {
                                 <button
                                     type="button"
-                                    class="gcorner"
+                                    class="gcorner gcorner-add"
                                     [disabled]="photoBusyId() === product.id"
                                     [attr.aria-label]="'Ajouter une photo pour ' + product.name"
                                     (click)="askPhoto(product)"

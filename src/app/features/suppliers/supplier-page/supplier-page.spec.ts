@@ -147,7 +147,7 @@ describe("SupplierPage", () => {
         const stats = [...el.querySelectorAll(".stats div")].map((stat) =>
             stat.textContent!.replace(/\s+/g, " ").trim(),
         );
-        expect(stats).toEqual(["7 livraisons", "61 unités reçues", "3 produits"]);
+        expect(stats).toEqual(["7 livraisons", "61 unités reçues", "3 produits livrés"]);
         const product = el.querySelector(".preview a");
         expect(product?.getAttribute("href")).toBe("/products/3");
         expect(product?.textContent).toContain("+5");

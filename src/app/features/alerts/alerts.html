@@ -191,11 +191,16 @@
                     <ul class="rows">
                         @for (alert of group.items; track alert.id) {
                             <li class="row" [class.out]="alert.status === 'OUT_OF_STOCK'">
-                                @if (alert.image) {
-                                    <span class="thumb" aria-hidden="true">
+                                <span
+                                    class="thumb av-{{ tone(alert.category_name ?? alert.name) }}"
+                                    aria-hidden="true"
+                                >
+                                    @if (alert.image) {
                                         <img [src]="alert.image" alt="" />
-                                    </span>
-                                }
+                                    } @else {
+                                        {{ initials(alert.name) }}
+                                    }
+                                </span>
 
                                 <div class="info">
                                     <a

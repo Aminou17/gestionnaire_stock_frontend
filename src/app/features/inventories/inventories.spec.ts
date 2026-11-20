@@ -81,6 +81,27 @@ describe("Inventories", () => {
         expect(el.querySelector("tbody .badge-warning")?.textContent).toContain("À appliquer");
     });
 
+    it("should remind the inventories still to apply and open the oldest", async () => {
+        await render(() =>
+            of([
+                inventory,
+                { ...inventory, id: 7, created_at: "2026-11-10T09:00:00" },
+                { ...inventory, id: 9, applied_at: "2026-11-12T16:00:00" },
+            ]),
+        );
+
+        const reminder = el.querySelector(".pending")!;
+        expect(reminder.textContent?.replace(/\s+/g, " ")).toContain(
+            "2 inventaires attendent d'être appliqués",
+        );
+        expect(reminder.querySelector("a")?.getAttribute("href")).toBe("/inventories/7");
+    });
+
+    it("should not remind anything when every inventory is applied", async () => {
+        await render(() => of([{ ...inventory, applied_at: "2026-11-12T16:00:00" }]));
+        expect(el.querySelector(".pending")).toBeNull();
+    });
+
     it("should say when there is no inventory yet", async () => {
         await render(() => of([]));
 

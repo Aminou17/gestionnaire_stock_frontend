@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { signal } from "@angular/core";
-import { provideRouter } from "@angular/router";
+import { Router, provideRouter } from "@angular/router";
 import { of } from "rxjs";
 
 import { Sales } from "./sales";
@@ -32,6 +32,7 @@ describe("Sales", () => {
         isAdmin = true,
         sales = [sale(6), sale(5, "CANCELLED")],
         total = sales.length,
+        url = "/",
     ) {
         getSalesPage = vi.fn((filters: SaleFilters) =>
             of({
@@ -77,6 +78,8 @@ describe("Sales", () => {
             ],
         }).compileComponents();
 
+        // filtre passé dans l'adresse (lien d'une carte du tableau de bord)
+        await TestBed.inject(Router).navigateByUrl(url);
         fixture = TestBed.createComponent(Sales);
         el = fixture.nativeElement;
         await fixture.whenStable();
@@ -138,6 +141,17 @@ describe("Sales", () => {
         expect(getSalesPage).toHaveBeenLastCalledWith(
             expect.objectContaining({ unpaid: true, status: null, page: 1 }),
         );
+    });
+
+    it("should open on the unpaid sales of today when the link asks for it", async () => {
+        await render(true, undefined, undefined, "/?filter=unpaid&period=today");
+
+        expect(getSalesPage).toHaveBeenLastCalledWith(
+            expect.objectContaining({ unpaid: true, status: null }),
+        );
+        const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
+        expect(filters.from).not.toBeNull();
+        expect(filters.from).toBe(filters.to);
     });
 
     it("should show the remaining amount of a sale with a deposit", async () => {

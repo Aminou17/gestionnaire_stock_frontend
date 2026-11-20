@@ -109,7 +109,7 @@ export class AdjustDialog {
     });
 
     notePlaceholder = computed(() =>
-        this.direction() === "gain" ? "Ex. : 5 bazins retrouvés au dépôt" : "Ex. : 2 bazins tachés",
+        this.direction() === "gain" ? "Ex. 5 bazins retrouvés au dépôt" : "Ex. 2 bazins tachés",
     );
 
     canSubmit = computed(

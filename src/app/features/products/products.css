@@ -379,69 +379,6 @@ td.num small {
     text-align: right;
 }
 
-.row-menu {
-    position: relative;
-    display: inline-block;
-}
-
-.more-btn {
-    width: 34px;
-    height: 34px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text-muted);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-}
-
-.more-btn:hover,
-.more-btn[aria-expanded="true"] {
-    background: var(--neutral-soft);
-    color: var(--text);
-}
-
-.menu {
-    position: absolute;
-    right: 0;
-    top: calc(100% + 4px);
-    z-index: 10;
-    width: 190px;
-    padding: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    box-shadow: var(--shadow-menu);
-}
-
-.menu button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--text);
-    font-size: var(--fs-body);
-    text-align: left;
-    cursor: pointer;
-}
-
-.menu button:hover {
-    background: var(--surface-hover);
-}
-
-.menu button.danger {
-    color: var(--danger);
-}
-
-.menu button.danger:hover {
-    background: var(--danger-soft);
-}
-
 .stock-LOW {
     color: var(--warning);
 }
@@ -533,11 +470,6 @@ td.num small {
 
     .dot {
         right: 12px;
-    }
-
-    .more-btn {
-        width: 44px;
-        height: 44px;
     }
 
     .actions-col {
@@ -781,16 +713,6 @@ td.num small {
         height: 72px;
     }
 
-    /* cibles tactiles de 44 px minimum */
-    .more-btn {
-        min-width: 44px;
-        height: 44px;
-    }
-
-    .menu button {
-        min-height: 44px;
-    }
-
     .confirm-actions {
         flex-direction: column-reverse;
     }
@@ -805,11 +727,6 @@ td.num small {
     .head-menu {
         display: none;
     }
-}
-
-.menu button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
 }
 
 /* bascule liste ou grille, sur ordinateur seulement */
@@ -890,13 +807,6 @@ td.num small {
     right: 4px;
 }
 
-/* bouton rond dans le coin, hors de la vignette */
-.gmenu .more-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-}
-
 .gbody {
     display: grid;
     align-content: start;
@@ -960,10 +870,8 @@ td.num small {
 }
 
 .name-link:focus-visible,
-.more-btn:focus-visible,
 .filter-btn:focus-visible,
 .view-toggle button:focus-visible,
-.menu button:focus-visible,
 .stat:focus-visible,
 .clear-filter:focus-visible {
     outline: 2px solid var(--primary);
@@ -1037,13 +945,6 @@ td.num small {
         order: 3;
     }
 
-    .head-menu .more-btn {
-        width: 36px;
-        min-width: 36px;
-        height: 36px;
-        padding: 0;
-    }
-
     /* carreaux compacts : vignette nette et texte dessous */
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1060,13 +961,6 @@ td.num small {
     .list-card {
         padding-bottom: 88px;
     }
-}
-
-/* le bouton de l'en-tête a le même cadre que la cloche et les autres boutons */
-.head-menu .more-btn {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
 }
 
 /* petit écran : la carte laisse plus de place au nom */

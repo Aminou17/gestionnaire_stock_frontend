@@ -18,6 +18,7 @@ import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { Icon } from "../../../shared/icon/icon";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
 import { normalizePhone } from "../../../shared/phone";
+import { ToastService } from "../../../shared/toast/toast.service";
 
 @Component({
     selector: "app-customer-form",
@@ -26,6 +27,7 @@ import { normalizePhone } from "../../../shared/phone";
     styleUrl: "./customer-form.css",
 })
 export class CustomerForm {
+    private toast = inject(ToastService);
     private customerService = inject(CustomerService);
     private router = inject(Router);
     private shop = inject(ShopSettingsService);
@@ -140,6 +142,7 @@ export class CustomerForm {
                 this.saving.set(false);
                 this.close();
                 this.saved.emit(customer);
+                this.toast.show(editing ? "Client enregistré" : "Client ajouté");
             },
             error: (err: HttpErrorResponse) => {
                 this.saving.set(false);

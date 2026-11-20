@@ -40,7 +40,6 @@ export class SalesChart {
                 label: isToday ? "Auj." : DAY_LABELS[new Date(y, m - 1, d).getDay()],
                 fullDate: new Date(y, m - 1, d),
                 isToday,
-                best: max > 1 && day.netTotal === max,
                 height: Math.max((Math.max(day.netTotal, 0) / max) * 100, day.netTotal > 0 ? 2 : 0),
                 short: shortAmount(day.netTotal),
             };
@@ -48,7 +47,8 @@ export class SalesChart {
     });
 }
 
-// 198500 -> "198,5k", 246000 -> "246k" : on garde une décimale pour ne pas arrondir de façon trompeuse
+// trois chiffres au plus, pour que les barres se lisent pareil :
+// 12500 -> "12,5k", 198500 -> "199k", 246000 -> "246k", 1250000 -> "1,3M"
 function shortAmount(value: number) {
     const abs = Math.abs(value);
     if (abs >= 1_000_000) return `${compact(value / 1_000_000)}M`;
@@ -57,5 +57,6 @@ function shortAmount(value: number) {
 }
 
 function compact(value: number) {
-    return value.toFixed(1).replace(/\.0$/, "").replace(".", ",");
+    const digits = Math.abs(value) >= 100 ? 0 : 1;
+    return value.toFixed(digits).replace(/\.0$/, "").replace(".", ",");
 }

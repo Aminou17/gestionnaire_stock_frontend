@@ -32,6 +32,7 @@ import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-fil
 import { BackState } from "../../core/back-link";
 import { PhotoZoom } from "../../shared/photo-zoom/photo-zoom";
 import { categoryTone, productInitials } from "../products/product-look";
+import { ToastService } from "../../shared/toast/toast.service";
 
 // valeur de l'option "+ Créer un fournisseur"
 const NEW_ID = -1;
@@ -466,12 +467,13 @@ export class StockEntries implements AfterViewInit {
             });
     }
 
+    // message de confirmation après un ajustement du stock
+    private toast = inject(ToastService);
+
     // erreur de saisie : la fenêtre d'ajustement s'ouvre déjà réglée pour retirer cette quantité
-    notice = signal<string | null>(null);
     correctError = signal<string | null>(null);
 
     correct(entry: StockEntry) {
-        this.notice.set(null);
         this.correctError.set(null);
 
         this.productService
@@ -489,7 +491,7 @@ export class StockEntries implements AfterViewInit {
     }
 
     onCorrected(message: string) {
-        this.notice.set(message);
+        this.toast.show(message);
         this.stockAlerts.alerts.reload();
     }
 

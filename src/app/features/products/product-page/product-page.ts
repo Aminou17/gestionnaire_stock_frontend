@@ -11,12 +11,14 @@ import { LowStockAlertService } from "../../../core/stock/low-stock-alert.servic
 import { ProductService } from "../../../core/stock/product.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { resizeAvatar, resizeThumb } from "../../../shared/avatar/avatar-resizer";
+import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ProductForm } from "../product-form/product-form";
 import { AdjustDialog } from "../../stock-movements/adjust-dialog/adjust-dialog";
 import { ProductMovements } from "../product-movements/product-movements";
 import { marginPercent, productInitials } from "../product-look";
+import { ToastService } from "../../../shared/toast/toast.service";
 
 @Component({
     selector: "app-product-page",
@@ -28,13 +30,10 @@ import { marginPercent, productInitials } from "../product-look";
         ProductForm,
         ProductMovements,
         AdjustDialog,
+        ActionMenu,
     ],
     templateUrl: "./product-page.html",
     styleUrl: "./product-page.css",
-    host: {
-        "(document:click)": "onDocumentClick($event)",
-        "(document:keydown.escape)": "menuOpen.set(false)",
-    },
 })
 export class ProductPage {
     private productService = inject(ProductService);
@@ -105,7 +104,6 @@ export class ProductPage {
     }
 
     removePhoto() {
-        this.menuOpen.set(false);
         this.photoError.set(null);
         this.sendPhoto(null);
     }
@@ -139,7 +137,6 @@ export class ProductPage {
         }
     }
 
-    menuOpen = signal(false);
     deleting = signal(false);
     deleteError = signal<string | null>(null);
 
@@ -147,30 +144,39 @@ export class ProductPage {
         this.router.navigate(["/sales/new"], { queryParams: { productId: this.id() } });
     }
 
-    onDocumentClick(event: Event) {
-        if (!(event.target as HTMLElement).closest(".row-menu")) {
-            this.menuOpen.set(false);
-        }
+    // menu « ... » : la photo ne peut être retirée que si elle existe
+    menuItems = computed<ActionItem[]>(() => [
+        { id: "adjust", label: "Ajuster le stock", icon: "stock-entry" },
+        { id: "edit", label: "Modifier", icon: "edit" },
+        ...(this.data()?.image
+            ? [{ id: "photo", label: "Retirer la photo", icon: "image" } as ActionItem]
+            : []),
+        { id: "delete", label: "Supprimer", icon: "ban", danger: true },
+    ]);
+
+    onPick(id: string) {
+        if (id === "adjust") this.adjust();
+        else if (id === "edit") this.edit();
+        else if (id === "photo") this.removePhoto();
+        else if (id === "delete") this.askDelete();
     }
 
     // message de confirmation après un ajustement du stock
-    notice = signal<string | null>(null);
+    private toast = inject(ToastService);
 
     adjust() {
-        this.menuOpen.set(false);
         const product = this.data();
         if (product) this.adjustDialog()?.show(product);
     }
 
     onAdjusted(message: string) {
-        this.notice.set(message);
+        this.toast.show(message);
         this.product.reload();
         this.history()?.reload();
         this.stockAlerts.alerts.reload();
     }
 
     addStock() {
-        this.menuOpen.set(false);
         this.router.navigate(["/stock-entries"], {
             queryParams: { productId: this.id() },
             state: { backTo: this.router.url, backLabel: "Produit" },
@@ -178,7 +184,6 @@ export class ProductPage {
     }
 
     edit() {
-        this.menuOpen.set(false);
         this.form()?.openEdit(this.id()!);
     }
 
@@ -188,7 +193,6 @@ export class ProductPage {
     }
 
     askDelete() {
-        this.menuOpen.set(false);
         this.deleteError.set(null);
         this.confirmDialog().nativeElement.showModal();
     }

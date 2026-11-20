@@ -26,6 +26,8 @@ export class StatCard {
     valueTone = input<Tone>();
     hintTone = input<Tone>("muted");
     link = input<string>();
+    // filtre à ouvrir directement sur la page (ex. { filter: "unpaid" })
+    linkParams = input<Record<string, string>>();
     // montant important : un clic le masque en points
     money = input(false);
     // la carte sert d'interrupteur (valeur masquée) au lieu de mener à une page

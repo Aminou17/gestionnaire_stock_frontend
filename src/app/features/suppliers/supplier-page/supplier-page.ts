@@ -94,7 +94,10 @@ export class SupplierPage {
                 value: counters.units,
                 label: `unité${plural(counters.units)} reçue${plural(counters.units)}`,
             },
-            { value: counters.products, label: `produit${plural(counters.products)}` },
+            {
+                value: counters.products,
+                label: `produit${plural(counters.products)} livré${plural(counters.products)}`,
+            },
         ];
     });
 
