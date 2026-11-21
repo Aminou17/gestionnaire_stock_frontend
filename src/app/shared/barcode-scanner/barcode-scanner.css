@@ -111,6 +111,63 @@ video {
     }
 }
 
+/* lecture réussie : les coins se resserrent et passent au vert, un flash traverse l'image */
+.bs-frame {
+    transition:
+        width 0.25s ease,
+        filter 0.25s;
+}
+
+.bs-frame.bs-found {
+    width: min(64%, 280px);
+    filter: drop-shadow(0 0 10px #22c55e) hue-rotate(0deg);
+    background:
+        linear-gradient(#22c55e, #22c55e) top left / 28px 4px,
+        linear-gradient(#22c55e, #22c55e) top left / 4px 28px,
+        linear-gradient(#22c55e, #22c55e) top right / 28px 4px,
+        linear-gradient(#22c55e, #22c55e) top right / 4px 28px,
+        linear-gradient(#22c55e, #22c55e) bottom left / 28px 4px,
+        linear-gradient(#22c55e, #22c55e) bottom left / 4px 28px,
+        linear-gradient(#22c55e, #22c55e) bottom right / 28px 4px,
+        linear-gradient(#22c55e, #22c55e) bottom right / 4px 28px;
+    background-repeat: no-repeat;
+}
+
+.bs-frame.bs-found .bs-line {
+    opacity: 0;
+    animation: none;
+}
+
+.bs-flash {
+    position: absolute;
+    inset: 0;
+    background: #22c55e;
+    opacity: 0;
+    animation: flash 0.5s ease-out;
+    pointer-events: none;
+}
+
+@keyframes flash {
+    0% {
+        opacity: 0.55;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.bs-hint.bs-ok {
+    background: rgba(22, 163, 74, 0.85);
+    font-weight: var(--fw-semibold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bs-flash,
+    .bs-frame.bs-live .bs-line {
+        animation: none;
+    }
+}
+
 .bs-hint {
     position: absolute;
     left: 16px;

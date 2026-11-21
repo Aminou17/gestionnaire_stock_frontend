@@ -32,4 +32,26 @@ describe("BarcodeScanner", () => {
         expect(scanned).toEqual(["6111245781234"]);
         expect(el.querySelector("dialog")!.open).toBe(false);
     });
+
+    it("à la lecture, montre le flash vert puis rend le code", async () => {
+        vi.useFakeTimers();
+        await TestBed.configureTestingModule({ imports: [BarcodeScanner] }).compileComponents();
+        const fixture = TestBed.createComponent(BarcodeScanner);
+        const el = fixture.nativeElement as HTMLElement;
+        const scanned: string[] = [];
+        fixture.componentInstance.scanned.subscribe((code) => scanned.push(code));
+        el.querySelector("dialog")!.setAttribute("open", "");
+
+        (fixture.componentInstance as unknown as { found(code: string): void }).found(" 611 ");
+        fixture.detectChanges();
+
+        expect(el.querySelector(".bs-flash")).not.toBeNull();
+        expect(el.querySelector(".bs-ok")?.textContent).toContain("611");
+        // pas encore rendu : le flash se voit d'abord
+        expect(scanned).toEqual([]);
+
+        vi.advanceTimersByTime(700);
+        expect(scanned).toEqual(["611"]);
+        vi.useRealTimers();
+    });
 });
