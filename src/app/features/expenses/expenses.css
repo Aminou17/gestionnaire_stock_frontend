@@ -46,20 +46,6 @@ app-page-header {
     color: var(--primary-text);
 }
 
-/* total à gauche, répartition à droite */
-.overview {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: 16px;
-}
-
-.total-card {
-    display: grid;
-    align-content: start;
-    gap: 10px;
-    padding: 20px;
-}
-
 .total-head {
     display: flex;
     align-items: center;
@@ -78,30 +64,43 @@ app-page-header {
     white-space: nowrap;
 }
 
-.total-facts {
-    display: grid;
-    gap: 4px;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-}
-
-.total-facts strong {
-    color: var(--text);
-}
-
 .total-skeleton {
     width: 160px;
     height: 32px;
 }
 
-.split-card {
+.summary-card {
     display: grid;
-    align-content: start;
-    gap: 14px;
+    gap: 12px;
     padding: 20px;
 }
 
-.split-card h2,
+.total-line {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+}
+
+.total-count {
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+/* une barre de couleurs : la part de chaque motif dans le total */
+.share-bar {
+    display: flex;
+    gap: 2px;
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+}
+
+.share-bar span {
+    flex-basis: 0;
+    min-width: 4px;
+}
+
 .list-head h2 {
     margin: 0;
     font-size: var(--fs-heading);
@@ -183,46 +182,47 @@ app-page-header {
 }
 
 .list-head {
-    display: grid;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
     padding: 16px 16px 12px;
     border-bottom: 1px solid var(--border);
 }
 
-/* historique masqué : pas de trait sous le titre */
-.list-head:only-child {
-    border-bottom: 0;
+.search {
+    position: relative;
+    flex: 1;
+    max-width: 320px;
 }
 
-.list-title {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+.search app-icon {
+    position: absolute;
+    top: 50%;
+    left: 12px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
 }
 
-.history-toggle {
-    gap: 6px;
-    white-space: nowrap;
+.search .input {
+    width: 100%;
+    padding-left: 38px;
 }
 
-.cats {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    scrollbar-width: none;
+.active-filters {
+    padding: 10px 16px 0;
 }
 
-.cat {
+.active-chip {
     display: inline-flex;
-    flex: none;
     align-items: center;
     gap: 6px;
     height: 34px;
     padding: 0 12px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--cat, var(--primary));
     border-radius: 999px;
-    background: var(--surface);
+    background: color-mix(in srgb, var(--cat, var(--primary)) 10%, var(--surface));
     color: var(--text);
     font: inherit;
     font-size: var(--fs-small);
@@ -230,17 +230,30 @@ app-page-header {
     cursor: pointer;
 }
 
-.cat-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--cat);
+.custom-range {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 12px;
 }
 
-.cat[aria-pressed="true"] {
-    border-color: var(--cat, var(--primary));
-    background: color-mix(in srgb, var(--cat, var(--primary)) 10%, var(--surface));
-    color: var(--text);
+.date-field {
+    display: grid;
+    gap: 4px;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+}
+
+/* dépense annulée : barrée et grisée, elle ne compte plus */
+.row.cancelled .row-title,
+.row.cancelled .row-amount {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.cancelled-tag {
+    color: var(--danger);
+    font-weight: var(--fw-semibold);
 }
 
 .days {
@@ -330,7 +343,7 @@ app-page-header {
 
 .period:focus-visible,
 .split-row:focus-visible,
-.cat:focus-visible,
+.active-chip:focus-visible,
 .row:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: -2px;
@@ -362,12 +375,6 @@ app-page-header {
     display: none;
 }
 
-@media (max-width: 1023px) {
-    .overview {
-        grid-template-columns: minmax(0, 1fr);
-    }
-}
-
 @media (max-width: 767px) {
     .new-expense {
         display: none;
@@ -389,6 +396,15 @@ app-page-header {
 
     .row-chevron {
         display: none;
+    }
+
+    .list-head {
+        flex-wrap: wrap;
+    }
+
+    .search {
+        flex: 1 1 100%;
+        max-width: none;
     }
 
     .fab {

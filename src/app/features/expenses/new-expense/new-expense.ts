@@ -6,6 +6,7 @@ import { CashClosedNotice } from "../../cash/cash-closed-notice/cash-closed-noti
 import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
+import { resizeReceipt } from "../../../shared/receipt-resizer";
 import { getBackLink } from "../../../core/back-link";
 import { CashMovementService } from "../../../core/cash/cash-movement.service";
 import { CashSessionService } from "../../../core/cash/cash-session.service";
@@ -54,7 +55,10 @@ export class NewExpense {
     protected quickAmounts = [500, 1000, 2000, 5000];
 
     amount = signal<number | null>(null);
-    category = signal("SUPPLIES");
+    // pas de motif choisi d'office : une dépense mal classée fausserait le relevé
+    category = signal<string | null>(null);
+    receipt = signal<string | null>(null);
+    receiptError = signal<string | null>(null);
     reason = signal("");
     saving = signal(false);
     error = signal<string | null>(null);
@@ -75,7 +79,7 @@ export class NewExpense {
     );
 
     chosen = computed(() => expenseCategory(this.category()));
-    placeholder = computed(() => PLACEHOLDERS[this.category()] ?? "");
+    placeholder = computed(() => PLACEHOLDERS[this.category() ?? ""] ?? "");
 
     amountValid = computed(() => {
         const amount = this.amount();
@@ -90,6 +94,20 @@ export class NewExpense {
         return balance - amount!;
     });
 
+    async onReceipt(event: Event) {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        input.value = "";
+        if (!file) return;
+
+        this.receiptError.set(null);
+        try {
+            this.receipt.set(await resizeReceipt(file));
+        } catch (err) {
+            this.receiptError.set((err as Error).message);
+        }
+    }
+
     onAmount(value: string) {
         const digits = value.replace(/\D/g, "");
         this.amount.set(digits ? Number(digits) : null);
@@ -102,13 +120,19 @@ export class NewExpense {
     submit() {
         if (this.saving()) return;
         this.tried.set(true);
-        if (!this.amountValid()) return;
+        if (!this.amountValid() || !this.category()) return;
 
         this.saving.set(true);
         this.error.set(null);
 
         this.movements
-            .create("EXPENSE", this.amount()!, this.category(), this.reason().trim())
+            .create(
+                "EXPENSE",
+                this.amount()!,
+                this.category()!,
+                this.reason().trim(),
+                this.receipt(),
+            )
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: () => {

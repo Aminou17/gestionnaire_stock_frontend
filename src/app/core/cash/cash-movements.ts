@@ -8,7 +8,12 @@ export const isRefund = (movement: CashMovement) =>
 export const isIncome = (movement: CashMovement) =>
     movement.type === "SALE" || movement.type === "DEPOSIT";
 
+// l'argent d'une dépense annulée revient dans le tiroir
+export const isExpenseCancellation = (movement: CashMovement) =>
+    movement.reference_type === "EXPENSE_CANCELLATION";
+
 export const getMovementLabel = (movement: CashMovement) => {
+    if (isExpenseCancellation(movement)) return "Dépense annulée";
     if (movement.type === "SALE") return `Vente #${movement.sale_number}`;
     if (isRefund(movement)) return `Remboursement de la vente #${movement.sale_number}`;
     const base =
@@ -29,9 +34,10 @@ export const summarizeMovements = (movements: CashMovement[]) => {
 
     return {
         sales: total((m) => m.type === "SALE"),
-        deposits: total((m) => m.type === "DEPOSIT"),
+        deposits: total((m) => m.type === "DEPOSIT" && !isExpenseCancellation(m)),
         refunds: total(isRefund),
-        expenses: total((m) => m.type === "EXPENSE"),
+        // une dépense annulée ne compte plus
+        expenses: total((m) => m.type === "EXPENSE") - total(isExpenseCancellation),
         withdrawals: total((m) => m.type === "WITHDRAWAL" && !isRefund(m)),
     };
 };

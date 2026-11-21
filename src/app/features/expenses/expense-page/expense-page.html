@@ -17,7 +17,12 @@
     <section class="card hero" [style.--cat]="look().color">
         <span class="hero-icon"><app-icon [name]="look().icon" [size]="24" /></span>
         <span class="hero-category">{{ look().label }}</span>
-        <strong class="hero-amount">−{{ item.amount | fcfa }}</strong>
+        <strong class="hero-amount" [class.cancelled]="item.cancelled"
+            >−{{ item.amount | fcfa }}</strong
+        >
+        @if (item.cancelled) {
+            <span class="badge badge-danger">Annulée : l'argent est revenu dans la caisse</span>
+        }
         @if (item.reason) {
             <p class="hero-reason">{{ item.reason }}</p>
         }
@@ -33,10 +38,6 @@
                 <dt><app-icon name="user" [size]="16" /> Enregistrée par</dt>
                 <dd>{{ item.user_name ?? "—" }}</dd>
             </div>
-            <div>
-                <dt><app-icon name="tag" [size]="16" /> Motif</dt>
-                <dd>{{ look().label }}</dd>
-            </div>
             @if (item.session_id) {
                 <div>
                     <dt><app-icon name="banknote" [size]="16" /> Payée avec</dt>
@@ -49,4 +50,43 @@
             }
         </dl>
     </section>
+
+    @if (item.receipt) {
+        <section class="card receipt-card">
+            <h2>Reçu</h2>
+            <img [src]="item.receipt" alt="Photo du reçu" />
+        </section>
+    }
+
+    @if (!item.cancelled) {
+        <section class="card cancel-card">
+            @if (cancelError()) {
+                <div class="alert alert-error" role="alert">{{ cancelError() }}</div>
+            }
+            @if (confirming()) {
+                <p>
+                    Annuler cette dépense ? Les {{ item.amount | fcfa }} reviennent dans la caisse
+                    du jour. La ligne reste dans l'historique, marquée annulée.
+                </p>
+                <div class="cancel-actions">
+                    <button
+                        type="button"
+                        class="btn btn-danger"
+                        [disabled]="cancelling()"
+                        (click)="cancel()"
+                    >
+                        Oui, annuler la dépense
+                    </button>
+                    <button type="button" class="btn btn-outline" (click)="confirming.set(false)">
+                        Non, la garder
+                    </button>
+                </div>
+            } @else {
+                <button type="button" class="btn btn-outline" (click)="confirming.set(true)">
+                    <app-icon name="undo" [size]="18" />
+                    Annuler cette dépense
+                </button>
+            }
+        </section>
+    }
 }

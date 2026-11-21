@@ -127,3 +127,37 @@ app-page-header {
         padding: 10px 0;
     }
 }
+
+.hero-amount.cancelled {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.receipt-card,
+.cancel-card {
+    display: grid;
+    gap: 12px;
+    padding: 20px;
+}
+
+.receipt-card h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+}
+
+.receipt-card img {
+    width: 100%;
+    max-width: 480px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.cancel-card p {
+    margin: 0;
+}
+
+.cancel-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
