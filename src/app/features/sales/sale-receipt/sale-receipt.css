@@ -13,11 +13,12 @@
     color: #000;
     -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
-    /* police de caisse, comme les tickets de supermarché */
-    font-family: "Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace;
+    /* Inter : même rendu sur tous les appareils et dans l'image partagée, chiffres alignés */
+    font-family: "Inter", system-ui, sans-serif;
     font-size: 14px;
-    font-weight: 700;
-    line-height: 1.45;
+    font-weight: 500;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
 }
 
 .receipt header,
@@ -44,15 +45,16 @@
 
 .receipt-shop {
     margin-bottom: 8px;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
 }
 
 .receipt-meta {
-    color: #111827;
-    font-size: 13px;
+    color: #374151;
+    font-size: 12.5px;
+    font-weight: 400;
 }
 
 .receipt-client {
@@ -83,8 +85,9 @@
 
 .receipt-note {
     padding-left: 12px;
-    color: #111827;
-    font-size: 13px;
+    color: #374151;
+    font-size: 12.5px;
+    font-weight: 400;
 }
 
 .receipt-line {
@@ -97,7 +100,8 @@
 
 .receipt-item .receipt-line {
     padding-left: 12px;
-    color: #111827;
+    color: #374151;
+    font-weight: 500;
 }
 
 .receipt-sums {
@@ -113,12 +117,13 @@
     margin: 4px 0 8px;
     font-size: 26px;
     font-weight: 700;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
 }
 
 .receipt-total span:first-child {
     font-size: 13px;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    letter-spacing: 0.08em;
 }
 
 .receipt-due {
@@ -130,15 +135,17 @@
     white-space: pre-line;
     overflow-wrap: anywhere;
     border-top: 1px dashed #d1d5db;
-    color: #111827;
-    font-size: 13px;
+    color: #374151;
+    font-size: 12.5px;
+    font-weight: 400;
 }
 
 /* détail d'un paiement en espèces : même alignement que les autres montants, en retrait */
 .receipt-sub {
     padding-left: 12px;
-    color: #111827;
-    font-size: 13px;
+    color: #374151;
+    font-size: 12.5px;
+    font-weight: 400;
 }
 
 /* coordonnées et mentions légales : papier seulement */
@@ -151,6 +158,7 @@
         width: 72mm;
         color: #000;
         font-size: 12px;
+        font-weight: 500;
     }
 
     .on-paper {
@@ -167,6 +175,7 @@
     .receipt-thanks,
     .receipt-item .receipt-line {
         color: #000;
+        font-weight: 500;
     }
 
     .receipt header,
