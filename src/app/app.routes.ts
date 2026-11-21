@@ -469,6 +469,14 @@ export const routes: Routes = [
         children: [
             {
                 path: "",
+                title: "Accueil",
+                loadComponent: () =>
+                    import("./features/owner/dashboard/owner-dashboard").then(
+                        (m) => m.OwnerDashboard,
+                    ),
+            },
+            {
+                path: "shops",
                 title: "Boutiques",
                 loadComponent: () => import("./features/owner/shops/shops").then((m) => m.Shops),
             },
@@ -538,7 +546,13 @@ export const routes: Routes = [
                 ],
             },
             {
-                path: "mail",
+                path: "settings",
+                title: "Réglages",
+                loadComponent: () =>
+                    import("./features/owner/settings/settings-hub").then((m) => m.OwnerSettings),
+            },
+            {
+                path: "settings/mail",
                 title: "E-mails d'envoi",
                 loadComponent: () =>
                     import("./features/owner/mail-settings/mail-settings").then(
@@ -546,7 +560,7 @@ export const routes: Routes = [
                     ),
             },
             {
-                path: "password",
+                path: "settings/account",
                 title: "Mot de passe",
                 canDeactivate: [unsavedChangesGuard],
                 loadComponent: () =>
@@ -554,6 +568,9 @@ export const routes: Routes = [
                         (m) => m.SettingsPassword,
                     ),
             },
+            // anciennes adresses
+            { path: "mail", redirectTo: "settings/mail" },
+            { path: "password", redirectTo: "settings/account" },
         ],
     },
     { path: "**", redirectTo: "dashboard" },

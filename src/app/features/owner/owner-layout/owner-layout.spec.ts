@@ -25,9 +25,10 @@ describe("OwnerLayout", () => {
 
         expect(el.textContent).toContain("Espace propriétaire");
         expect(el.textContent).toContain("Yabré");
-        const password = el.querySelector('a[aria-label="Mot de passe"]');
-        expect(password?.getAttribute("href")).toBe("/owner/password");
-        (el.querySelector(".tools .btn") as HTMLButtonElement).click();
+        const settings = el.querySelector('a[href="/owner/settings"]');
+        expect(settings?.textContent).toContain("Réglages");
+        expect(el.querySelectorAll(".nav-link").length).toBe(5);
+        (el.querySelector(".foot-btn.logout") as HTMLButtonElement).click();
         // un seul clic ouvre la confirmation, il ne déconnecte pas
         expect(logoutAsked()).toBe(true);
     });

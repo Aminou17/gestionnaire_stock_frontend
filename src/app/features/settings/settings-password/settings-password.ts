@@ -38,7 +38,7 @@ export class SettingsPassword implements HasUnsavedChanges {
     private router = inject(Router);
 
     protected back = this.auth.isOwner()
-        ? getBackLink("/owner", "Retour aux boutiques")
+        ? getBackLink("/owner/settings", "Retour aux réglages")
         : getBackLink("/settings", "Retour aux paramètres");
 
     private leaveDialog = viewChild.required(UnsavedDialog);

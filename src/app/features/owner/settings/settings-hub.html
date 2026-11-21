@@ -1,0 +1,32 @@
+<div class="head">
+    <h1>Réglages</h1>
+    <p class="muted">Votre compte et le fonctionnement du logiciel.</p>
+</div>
+
+<nav class="links" aria-label="Réglages">
+    @for (link of links; track link.path) {
+        <a class="card link" [routerLink]="link.path">
+            <span class="link-icon"><app-icon [name]="link.icon" [size]="22" /></span>
+            <span class="link-text">
+                <strong>{{ link.title }}</strong>
+                <small class="muted">{{ link.text }}</small>
+            </span>
+            <app-icon name="chevron-right" [size]="18" />
+        </a>
+    }
+</nav>
+
+<section class="card session">
+    <div class="who">
+        <strong>{{ auth.user()?.name }}</strong>
+        <small class="muted">Propriétaire</small>
+    </div>
+    <button type="button" class="btn btn-outline" (click)="theme.toggle()">
+        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
+        {{ theme.theme() === "dark" ? "Mode clair" : "Mode sombre" }}
+    </button>
+    <button type="button" class="btn btn-outline" (click)="auth.logoutAsked.set(true)">
+        <app-icon name="logout" [size]="18" />
+        Déconnexion
+    </button>
+</section>

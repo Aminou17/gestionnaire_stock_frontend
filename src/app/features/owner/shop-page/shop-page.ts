@@ -21,7 +21,7 @@ import { getBackLink } from "../../../core/back-link";
     styleUrls: ["../../../shared/dialog/dialog.css", "./shop-page.css"],
 })
 export class ShopPage {
-    protected back = getBackLink("/owner", "Retour aux boutiques");
+    protected back = getBackLink("/owner/shops", "Retour aux boutiques");
     private owner = inject(OwnerShopService);
     private id = Number(inject(ActivatedRoute).snapshot.paramMap.get("id"));
 

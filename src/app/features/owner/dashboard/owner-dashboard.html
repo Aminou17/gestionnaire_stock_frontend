@@ -1,0 +1,121 @@
+<div class="head">
+    <div>
+        <h1>Bonjour {{ auth.user()?.name }}</h1>
+        <p class="muted">Voici l'état de toutes vos boutiques aujourd'hui.</p>
+    </div>
+    <a routerLink="/owner/shops" class="btn btn-primary">
+        <app-icon name="store" [size]="18" />
+        <span>Voir les boutiques</span>
+    </a>
+</div>
+
+<section class="kpis" aria-label="Chiffres clés">
+    <a class="card kpi" routerLink="/owner/shops">
+        <span class="kpi-icon tone-blue"><app-icon name="store" [size]="20" /></span>
+        <span class="kpi-label">Boutiques actives</span>
+        <strong>{{ shops.hasValue() ? active() : "–" }}</strong>
+    </a>
+    <a class="card kpi" routerLink="/owner/shops">
+        <span class="kpi-icon tone-orange"><app-icon name="ban" [size]="20" /></span>
+        <span class="kpi-label">Suspendues</span>
+        <strong [class.warn]="suspended() > 0">{{ shops.hasValue() ? suspended() : "–" }}</strong>
+    </a>
+    <div class="card kpi">
+        <span class="kpi-icon tone-green"><app-icon name="trending-up" [size]="20" /></span>
+        <span class="kpi-label">Ventes, 30 jours</span>
+        <strong>{{ shops.hasValue() ? sales() : "–" }}</strong>
+    </div>
+    <a class="card kpi" routerLink="/owner/support">
+        <span class="kpi-icon tone-violet"><app-icon name="message" [size]="20" /></span>
+        <span class="kpi-label">Messages non lus</span>
+        <strong [class.warn]="support.unread() > 0">{{ support.unread() }}</strong>
+    </a>
+</section>
+
+<div class="grid">
+    <section class="card panel">
+        <div class="panel-head">
+            <h2>À suivre</h2>
+            <a routerLink="/owner/shops" class="more">Tout voir</a>
+        </div>
+
+        @if (shops.isLoading() && all().length === 0) {
+            <div class="skeleton row-skeleton"></div>
+            <div class="skeleton row-skeleton"></div>
+        } @else if (shops.error() && all().length === 0) {
+            <p class="muted empty" role="alert">Impossible de charger les boutiques.</p>
+        } @else if (toWatch().length === 0) {
+            <p class="muted empty">
+                <app-icon name="check" [size]="18" /> Rien à signaler : aucun essai ne se termine.
+            </p>
+        } @else {
+            <ul class="rows">
+                @for (item of toWatch(); track item.shop.id) {
+                    <li>
+                        <a [routerLink]="['/owner/shops', item.shop.id]" class="row">
+                            <span class="avatar">{{ item.shop.name.charAt(0) }}</span>
+                            <span class="row-text">
+                                <strong>{{ item.shop.name }}</strong>
+                                <small class="muted">
+                                    {{
+                                        item.shop.status === "SUSPENDED"
+                                            ? "Boutique suspendue"
+                                            : item.state?.label
+                                    }}
+                                </small>
+                            </span>
+                            <app-icon name="chevron-right" [size]="18" />
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    <section class="card panel">
+        <div class="panel-head">
+            <h2>Sécurité</h2>
+            <a routerLink="/owner/security" class="more">Détails</a>
+        </div>
+
+        @if (overview.isLoading()) {
+            <div class="skeleton row-skeleton"></div>
+        } @else if (alerts() === null) {
+            <p class="muted empty" role="alert">Impossible de charger la sécurité.</p>
+        } @else if (alerts() === 0) {
+            <p class="safe"><app-icon name="shield" [size]="20" /> Rien d'anormal en 24 heures.</p>
+        } @else {
+            <p class="safe warn"><app-icon name="alert" [size]="20" /> {{ alerts() }} à surveiller.</p>
+            <a routerLink="/owner/security/locked" class="btn btn-outline btn-sm">
+                Voir les comptes bloqués
+            </a>
+        }
+    </section>
+
+    <section class="card panel wide">
+        <div class="panel-head">
+            <h2>Dernières boutiques</h2>
+        </div>
+
+        @if (latest().length === 0) {
+            <p class="muted empty">Aucune boutique pour le moment.</p>
+        } @else {
+            <ul class="rows">
+                @for (shop of latest(); track shop.id) {
+                    <li>
+                        <a [routerLink]="['/owner/shops', shop.id]" class="row">
+                            <span class="avatar">{{ shop.name.charAt(0) }}</span>
+                            <span class="row-text">
+                                <strong>{{ shop.name }}</strong>
+                                <small class="muted">
+                                    Créée le {{ shop.created_at | date: "d MMM y" }}
+                                </small>
+                            </span>
+                            <app-icon name="chevron-right" [size]="18" />
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+</div>

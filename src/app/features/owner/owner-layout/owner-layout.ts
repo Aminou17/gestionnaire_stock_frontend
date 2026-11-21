@@ -6,10 +6,19 @@ import { AuthService } from "../../../core/auth/auth.service";
 import { SupportService } from "../../../core/support/support.service";
 import { ThemeService } from "../../../core/theme/theme.service";
 import { Icon } from "../../../shared/icon/icon";
+import { IconName } from "../../../shared/icon/icons";
 import { LogoutDialog } from "../../../shared/logout-dialog/logout-dialog";
 
-// Le propriétaire n'a pas de boutique : ni menu de la caisse, ni alertes de stock,
-// seulement sa barre, la page des boutiques et son mot de passe
+interface OwnerLink {
+    path: string;
+    label: string;
+    icon: IconName;
+    // seule la page d'accueil doit être exacte, sinon elle resterait allumée partout
+    exact?: boolean;
+}
+
+// Le propriétaire n'a pas de boutique : ni menu de la caisse, ni alertes de stock.
+// Une coque avec cinq entrées : menu latéral sur ordinateur, barre du bas sur téléphone
 @Component({
     selector: "app-owner-layout",
     imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, LogoutDialog],
@@ -21,6 +30,14 @@ export class OwnerLayout {
     protected theme = inject(ThemeService);
     protected support = inject(SupportService);
     protected productName = PRODUCT_NAME;
+
+    protected links: OwnerLink[] = [
+        { path: "/owner", label: "Accueil", icon: "dashboard", exact: true },
+        { path: "/owner/shops", label: "Boutiques", icon: "store" },
+        { path: "/owner/support", label: "Messages", icon: "message" },
+        { path: "/owner/security", label: "Sécurité", icon: "shield" },
+        { path: "/owner/settings", label: "Réglages", icon: "settings" },
+    ];
 
     constructor() {
         // les nouveaux messages des boutiques apparaissent sans recharger la page

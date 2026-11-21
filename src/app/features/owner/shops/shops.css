@@ -349,7 +349,7 @@ h1 {
         place-items: center;
         position: fixed;
         right: 16px;
-        bottom: calc(16px + env(safe-area-inset-bottom));
+        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
         z-index: 25;
         width: 56px;
         height: 56px;

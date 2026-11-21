@@ -1,45 +1,46 @@
-<header class="topbar">
+<!-- taches de couleur floues derrière tout l'espace -->
+<div class="blobs" aria-hidden="true">
+    <span class="blob blob-blue"></span>
+    <span class="blob blob-violet"></span>
+    <span class="blob blob-teal"></span>
+</div>
+
+<aside class="side">
     <div class="brand">
-        <img class="brand-logo" src="/icons/icon-192.png" alt="" width="36" height="36" />
-        <div class="brand-text">
+        <img class="brand-logo" src="/icons/icon-192.png" alt="" width="38" height="38" />
+        <div>
             <div class="brand-name">{{ productName }}</div>
             <div class="brand-sub">Espace propriétaire</div>
         </div>
     </div>
 
-    <div class="tools">
+    <nav class="nav" aria-label="Espace propriétaire">
+        @for (link of links; track link.path) {
+            <a
+                class="nav-link"
+                [routerLink]="link.path"
+                routerLinkActive="active"
+                [routerLinkActiveOptions]="{ exact: !!link.exact }"
+                ariaCurrentWhenActive="page"
+            >
+                <span class="nav-icon">
+                    <app-icon [name]="link.icon" [size]="20" />
+                    @if (link.path === "/owner/support" && support.unread() > 0) {
+                        <span class="badge-count" [attr.aria-label]="support.unread() + ' non lus'">{{
+                            support.unread()
+                        }}</span>
+                    }
+                </span>
+                <span class="nav-label">{{ link.label }}</span>
+            </a>
+        }
+    </nav>
+
+    <div class="foot">
         <span class="who">{{ auth.user()?.name }}</span>
-        <a
-            routerLink="/owner/support"
-            class="icon-btn"
-            [attr.aria-label]="
-                support.unread() > 0
-                    ? 'Messages des boutiques, ' + support.unread() + ' non lus'
-                    : 'Messages des boutiques'
-            "
-        >
-            <app-icon name="message" [size]="18" />
-            @if (support.unread() > 0) {
-                <span class="badge-count">{{ support.unread() }}</span>
-            }
-        </a>
-        <a
-            routerLink="/owner/security"
-            routerLinkActive="active"
-            class="icon-btn"
-            aria-label="Sécurité"
-        >
-            <app-icon name="shield" [size]="18" />
-        </a>
-        <a routerLink="/owner/mail" class="icon-btn" aria-label="E-mails d'envoi">
-            <app-icon name="mail" [size]="18" />
-        </a>
-        <a routerLink="/owner/password" class="icon-btn" aria-label="Mot de passe">
-            <app-icon name="key" [size]="18" />
-        </a>
         <button
             type="button"
-            class="icon-btn"
+            class="foot-btn"
             (click)="theme.toggle()"
             [attr.aria-label]="
                 theme.theme() === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'
@@ -47,12 +48,16 @@
         >
             <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
         </button>
-        <button type="button" class="btn btn-outline btn-sm" (click)="auth.logoutAsked.set(true)">
-            <app-icon name="logout" [size]="16" />
-            <span>Déconnexion</span>
+        <button
+            type="button"
+            class="foot-btn logout"
+            aria-label="Déconnexion"
+            (click)="auth.logoutAsked.set(true)"
+        >
+            <app-icon name="logout" [size]="18" />
         </button>
     </div>
-</header>
+</aside>
 
 <main class="content">
     <router-outlet />
