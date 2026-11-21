@@ -43,11 +43,17 @@
     gap: 16px;
     padding: 20px;
     border: 1px solid color-mix(in srgb, var(--tone) 22%, var(--border));
+    /* taches de couleur douces et floues : la teinte de l'état, puis un reflet violet discret */
     background:
         radial-gradient(
-            90% 70% at 100% 0%,
-            color-mix(in srgb, var(--tone) 14%, transparent),
-            transparent 70%
+            80% 90% at 100% 0%,
+            color-mix(in srgb, var(--tone) 22%, transparent),
+            transparent 75%
+        ),
+        radial-gradient(
+            70% 80% at 0% 100%,
+            color-mix(in srgb, var(--violet) 10%, transparent),
+            transparent 75%
         ),
         var(--surface);
     box-shadow: 0 8px 24px color-mix(in srgb, var(--tone) 10%, transparent);
@@ -783,4 +789,73 @@ app-page-header {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
+}
+
+/* téléphone : carte plus compacte, boutons plus bas, aucun mot ni montant coupé */
+@media (max-width: 767px) {
+    .summary {
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .summary-total {
+        font-size: var(--fs-kpi);
+    }
+
+    .status {
+        white-space: nowrap;
+    }
+
+    /* « sur 9 500 F » et « 5 000 F payés » passent à la ligne en entier, jamais au milieu */
+    .summary-text small {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0 6px;
+    }
+
+    .summary-text small span {
+        white-space: nowrap;
+    }
+
+    .summary-actions {
+        gap: 8px;
+    }
+
+    .act {
+        height: 42px;
+        border-radius: 12px;
+    }
+
+    .act-more {
+        --menu-btn-size: 42px;
+        --menu-btn-radius: 12px;
+    }
+
+    .summary-actions {
+        grid-template-columns: 1fr 1fr 42px;
+    }
+
+    /* lignes de la fiche : libellé qui se resserre, montant toujours entier et à droite */
+    dl > div {
+        min-height: 44px;
+        flex-wrap: nowrap;
+    }
+
+    dt {
+        flex: 1;
+        min-width: 0;
+        font-size: var(--fs-small);
+    }
+
+    dd {
+        flex: none;
+        font-size: var(--fs-small);
+        font-weight: var(--fw-semibold);
+        white-space: nowrap;
+    }
+
+    .sheet,
+    .panel {
+        padding: 4px 16px 16px;
+    }
 }

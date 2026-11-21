@@ -73,14 +73,15 @@
                         (due() > 0 ? due() : hasReturns() ? net() : sale.total) | fcfa
                     }}</strong>
                     @if (due() > 0) {
-                        <small class="muted"
-                            >sur {{ sale.total | fcfa }} ·
-                            {{ sale.paid_amount | fcfa }} payés</small
-                        >
+                        <small class="muted">
+                            <span>sur {{ sale.total | fcfa }} ·</span>
+                            <span>{{ sale.paid_amount | fcfa }} payés</span>
+                        </small>
                     } @else if (hasReturns()) {
-                        <small class="muted"
-                            >sur {{ sale.total | fcfa }} · {{ returned() | fcfa }} rendus</small
-                        >
+                        <small class="muted">
+                            <span>sur {{ sale.total | fcfa }} ·</span>
+                            <span>{{ returned() | fcfa }} rendus</span>
+                        </small>
                     }
                 </div>
 
