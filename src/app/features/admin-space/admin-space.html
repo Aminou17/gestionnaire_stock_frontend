@@ -1,108 +1,6 @@
 <app-page-header title="Espace admin" subtitle="Le bilan de votre boutique" />
 
-<!-- 1. Stock à un jour précis -->
-<section class="card block" aria-labelledby="stock-title">
-    <header class="block-head">
-        <span class="tone-icon" data-tone="violet"><app-icon name="package" [size]="18" /></span>
-        <div class="block-title">
-            <h2 id="stock-title">Stock disponible</h2>
-            <p>À la fin du jour choisi</p>
-        </div>
-        <label class="date-field">
-            <span>Le</span>
-            <input
-                #stockInput
-                class="input"
-                type="date"
-                [max]="today"
-                [value]="stockDate()"
-                (change)="changeStockDate(stockInput.value)"
-            />
-        </label>
-    </header>
-
-    @if (failed()) {
-        <ng-container *ngTemplateOutlet="errorTpl" />
-    } @else {
-        <div class="tiles">
-            <app-stat-card
-                label="Valeur d'achat"
-                icon="wallet"
-                tone="violet"
-                [money]="true"
-                [loading]="loading()"
-                [value]="data()?.stock?.purchaseValue ?? 0 | fcfa"
-            />
-            <app-stat-card
-                label="Valeur de vente"
-                icon="banknote"
-                tone="primary"
-                [money]="true"
-                [loading]="loading()"
-                [value]="data()?.stock?.saleValue ?? 0 | fcfa"
-            />
-            <app-stat-card
-                label="Bénéfice potentiel"
-                icon="trending-up"
-                tone="success"
-                valueTone="success"
-                [money]="true"
-                [loading]="loading()"
-                [value]="data()?.stock?.potentialProfit ?? 0 | fcfa"
-            />
-        </div>
-
-        @if (data(); as d) {
-            <button
-                type="button"
-                class="fold"
-                [attr.aria-expanded]="categoriesOpen()"
-                (click)="categoriesOpen.set(!categoriesOpen())"
-            >
-                <span>{{ categoriesOpen() ? "Masquer les détails" : "Voir les détails" }}</span>
-                <app-icon
-                    [name]="categoriesOpen() ? 'chevron-down' : 'chevron-right'"
-                    [size]="16"
-                />
-            </button>
-
-            @if (categoriesOpen()) {
-                <p class="summary-line">
-                    <strong>{{ d.stock.products }}</strong>
-                    {{ d.stock.products > 1 ? "produits" : "produit" }} en stock,
-                    <strong>{{ d.stock.units }}</strong>
-                    {{ d.stock.units > 1 ? "unités" : "unité" }}
-                </p>
-
-                <ul class="rows">
-                    @for (row of stockRows(); track row.categoryId) {
-                        <li class="row">
-                            <div class="row-top">
-                                <span class="row-name">{{ row.categoryName }}</span>
-                                <span class="row-value" appMoney>{{ row.saleValue | fcfa }}</span>
-                            </div>
-                            <div class="bar" aria-hidden="true">
-                                <span
-                                    [style.width.%]="row.share"
-                                    style="--bar: var(--primary)"
-                                ></span>
-                            </div>
-                            <span class="row-sub">
-                                {{ row.products }}
-                                {{ row.products > 1 ? "produits" : "produit" }} · {{ row.units }}
-                                {{ row.units > 1 ? "unités" : "unité" }}
-                            </span>
-                        </li>
-                    }
-                </ul>
-
-                <p class="note">Valeur calculée avec les prix d'achat et de vente d'aujourd'hui.</p>
-            }
-        }
-    }
-</section>
-
-<!-- période des ventes et des dépenses -->
+<!-- une seule période pour toute la page -->
 <div class="period-bar">
     <div class="periods" role="group" aria-label="Période">
         @for (choice of periodPills; track choice.value) {
@@ -172,119 +70,44 @@
                     {{ data()?.netProfit ?? 0 | fcfa: true }}
                 </p>
             }
-            <p class="net-hint">Bénéfice brut moins les dépenses</p>
         </div>
     </section>
 
-    <div class="pair">
-        <!-- 2. Ventes -->
-        <section class="card block" aria-labelledby="sales-title">
-            <header class="block-head">
-                <span class="tone-icon" data-tone="success"
-                    ><app-icon name="cart" [size]="18"
-                /></span>
-                <div class="block-title">
-                    <h2 id="sales-title">Ventes</h2>
-                    @if (data(); as d) {
-                        <p>{{ d.sales.count }} {{ d.sales.count > 1 ? "ventes" : "vente" }}</p>
-                    }
-                </div>
-            </header>
+    <section class="card block" aria-labelledby="period-title">
+        <h2 id="period-title">Sur la période</h2>
+        <dl class="figures">
+            <div class="figure">
+                <dt>Ventes encaissées</dt>
+                <dd appMoney>{{ data()?.sales?.revenue ?? 0 | fcfa }}</dd>
+            </div>
+            <div class="figure">
+                <dt>Bénéfice sur les ventes</dt>
+                <dd appMoney>{{ data()?.sales?.grossProfit ?? 0 | fcfa }}</dd>
+            </div>
+            <div class="figure">
+                <dt>Dépenses</dt>
+                <dd appMoney>{{ data()?.expenses?.total ?? 0 | fcfa }}</dd>
+            </div>
+        </dl>
+    </section>
 
-            <dl class="figures">
-                <div class="figure">
-                    <dt>Total encaissé</dt>
-                    <dd appMoney>{{ data()?.sales?.revenue ?? 0 | fcfa }}</dd>
-                </div>
-                <div class="figure total">
-                    <dt>Bénéfice brut</dt>
-                    <dd appMoney>{{ data()?.sales?.grossProfit ?? 0 | fcfa }}</dd>
-                </div>
-            </dl>
-
-            <button
-                type="button"
-                class="fold"
-                [attr.aria-expanded]="salesOpen()"
-                (click)="salesOpen.set(!salesOpen())"
-            >
-                <span>{{ salesOpen() ? "Masquer les détails" : "Voir les détails" }}</span>
-                <app-icon [name]="salesOpen() ? 'chevron-down' : 'chevron-right'" [size]="16" />
-            </button>
-
-            @if (salesOpen()) {
-                <dl class="figures">
-                    <div class="figure">
-                        <dt>Coût d'achat des articles vendus</dt>
-                        <dd appMoney>{{ data()?.sales?.cost ?? 0 | fcfa }}</dd>
-                    </div>
-                </dl>
-                <p class="note">
-                    Les articles rendus par les clients sont retirés du total et du coût.
-                </p>
-            }
-        </section>
-
-        <!-- 3. Dépenses -->
-        <section class="card block" aria-labelledby="expenses-title">
-            <header class="block-head">
-                <span class="tone-icon" data-tone="danger"
-                    ><app-icon name="receipt" [size]="18"
-                /></span>
-                <div class="block-title">
-                    <h2 id="expenses-title">Dépenses</h2>
-                    @if (data(); as d) {
-                        <p appMoney>{{ d.expenses.total | fcfa }} au total</p>
-                    }
-                </div>
-            </header>
-
-            @if (loading()) {
-                <div class="skeleton line"></div>
-                <div class="skeleton line"></div>
-            } @else if (expenseRows().length === 0) {
-                <p class="empty-line">Aucune dépense sur cette période</p>
-            } @else {
-                <button
-                    type="button"
-                    class="fold"
-                    [attr.aria-expanded]="expensesOpen()"
-                    (click)="expensesOpen.set(!expensesOpen())"
-                >
-                    <span>{{ expensesOpen() ? "Masquer les détails" : "Voir par motif" }}</span>
-                    <app-icon
-                        [name]="expensesOpen() ? 'chevron-down' : 'chevron-right'"
-                        [size]="16"
-                    />
-                </button>
-
-                @if (expensesOpen()) {
-                    <ul class="rows">
-                        @for (row of expenseRows(); track row.category) {
-                            <li class="row">
-                                <div class="row-top">
-                                    <span class="row-name">
-                                        <span
-                                            class="dot"
-                                            [style.background]="row.look.color"
-                                        ></span>
-                                        {{ row.look.short }}
-                                    </span>
-                                    <span class="row-value" appMoney>{{ row.total | fcfa }}</span>
-                                </div>
-                                <div class="bar" aria-hidden="true">
-                                    <span
-                                        [style.width.%]="row.share"
-                                        [style.--bar]="row.look.color"
-                                    ></span>
-                                </div>
-                            </li>
-                        }
-                    </ul>
-                }
-            }
-        </section>
-    </div>
+    <section class="card block" aria-labelledby="stock-title">
+        <h2 id="stock-title">Stock au {{ stockLabel() }}</h2>
+        <dl class="figures">
+            <div class="figure">
+                <dt>Valeur d'achat</dt>
+                <dd appMoney>{{ data()?.stock?.purchaseValue ?? 0 | fcfa }}</dd>
+            </div>
+            <div class="figure">
+                <dt>Valeur de vente</dt>
+                <dd appMoney>{{ data()?.stock?.saleValue ?? 0 | fcfa }}</dd>
+            </div>
+            <div class="figure">
+                <dt>Bénéfice possible</dt>
+                <dd appMoney>{{ data()?.stock?.potentialProfit ?? 0 | fcfa }}</dd>
+            </div>
+        </dl>
+    </section>
 }
 
 <ng-template #errorTpl>

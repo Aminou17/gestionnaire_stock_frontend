@@ -78,24 +78,18 @@ describe("AdminSpace", () => {
         expect(query.date).toBe(query.from);
         expect(query.from).toBe(query.to);
 
-        expect(text()).toContain("Stock disponible");
-        expect(text()).toContain("Ventes");
+        expect(text()).toContain("Stock au");
+        expect(text()).toContain("Ventes encaissées");
         expect(text()).toContain("Dépenses");
         expect(text()).toContain("Bénéfice net");
     });
 
-    it("should keep the details folded until asked", async () => {
+    it("should have no hidden details and a single date choice", async () => {
         await render(of(balance()));
         const el: HTMLElement = fixture.nativeElement;
 
-        expect(el.textContent).not.toContain("Coût d'achat des articles vendus");
-        expect(el.querySelectorAll(".rows").length).toBe(0);
-
-        el.querySelectorAll<HTMLButtonElement>(".fold").forEach((b) => b.click());
-        await fixture.whenStable();
-
-        expect(el.textContent).toContain("Coût d'achat des articles vendus");
-        expect(el.textContent).toContain("Valeur calculée avec les prix");
+        expect(el.querySelectorAll(".fold, .rows").length).toBe(0);
+        expect(el.querySelectorAll("input[type=date]").length).toBe(0);
     });
 
     it("should show a positive net profit in green", async () => {
@@ -111,12 +105,6 @@ describe("AdminSpace", () => {
         const card = fixture.nativeElement.querySelector(".net") as HTMLElement;
         expect(card.getAttribute("data-tone")).toBe("danger");
         expect(card.querySelector(".net-value")?.classList.contains("negative")).toBe(true);
-    });
-
-    it("should say so when there is no expense", async () => {
-        await render(of(balance({ expenses: { total: 0, count: 0, categories: [] } })));
-
-        expect(text()).toContain("Aucune dépense sur cette période");
     });
 
     it("should reload with a longer range when a period pill is chosen", async () => {
@@ -142,15 +130,6 @@ describe("AdminSpace", () => {
 
         expect(fixture.componentInstance.customError()).toContain("précéder");
         expect(getBalance.mock.calls.length).toBe(calls);
-    });
-
-    it("should ignore a future stock date", async () => {
-        await render(of(balance()));
-        const before = fixture.componentInstance.stockDate();
-
-        fixture.componentInstance.changeStockDate("2999-01-01");
-
-        expect(fixture.componentInstance.stockDate()).toBe(before);
     });
 
     it("should offer a retry on error", async () => {
