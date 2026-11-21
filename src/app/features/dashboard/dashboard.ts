@@ -15,6 +15,7 @@ import { SecretValues } from "../../shared/secret/secret-values";
 import type { IconName } from "../../shared/icon/icons";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { DashboardService } from "./dashboard.service";
+import { ThemeService } from "../../core/theme/theme.service";
 import { CashClosedNotice } from "../cash/cash-closed-notice/cash-closed-notice";
 import { ReopenCashDialog } from "../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { OpenCashDialog } from "../cash/open-cash-dialog/open-cash-dialog";
@@ -49,6 +50,8 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
     styleUrl: "./dashboard.css",
 })
 export class Dashboard {
+    protected theme = inject(ThemeService);
+
     protected secret = inject(SecretValues);
     private dashboard = inject(DashboardService);
     private saleService = inject(SaleService);

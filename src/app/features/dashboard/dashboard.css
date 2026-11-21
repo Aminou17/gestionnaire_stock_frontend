@@ -202,3 +202,26 @@ app-page-header {
         grid-column: 1 / -1;
     }
 }
+
+/* mode sombre : bouton rond dans la barre du haut, à côté des notifications */
+.theme-btn {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+}
+
+.theme-btn:hover {
+    background: var(--surface-hover);
+}
+
+.theme-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
