@@ -109,6 +109,9 @@ export interface ClosedCash {
 
 export interface CashMovementRow extends CashMovement {
     session_id: number | null;
+    // dépense : un reçu en photo est joint, ou elle a été annulée
+    has_receipt?: boolean;
+    cancelled?: boolean;
 }
 
 export interface CashMovementFilters {
@@ -117,6 +120,8 @@ export interface CashMovementFilters {
     from: string | null;
     to: string | null;
     category: string | null;
+    // mot cherché dans la description ou chez la personne
+    search?: string | null;
     page: number;
     limit: number;
 }
@@ -137,4 +142,6 @@ export interface ExpenseSummary {
 // GET /cash_movements/:id
 export interface CashMovementDetail extends CashMovementRow {
     user_name: string | null;
+    // photo du reçu (image en base64), seulement sur la fiche
+    receipt: string | null;
 }

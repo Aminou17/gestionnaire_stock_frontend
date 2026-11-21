@@ -109,25 +109,69 @@ describe("Expenses", () => {
         expect(getMovements.mock.lastCall![0].category).toBeNull();
     });
 
-    it("should hide the history, stop loading it, and show it again", async () => {
-        const toggle = () => el.querySelector<HTMLButtonElement>(".history-toggle")!;
-        const calls = getMovements.mock.calls.length;
+    it("should show the history right away, without a button to unfold it", () => {
+        expect(el.querySelector(".history-toggle")).toBeNull();
+        expect(el.querySelectorAll(".row").length).toBe(3);
+    });
 
-        toggle().click();
+    it("should search by word after a short pause", async () => {
+        vi.useFakeTimers();
+        const input = el.querySelector<HTMLInputElement>(".search input")!;
+        input.value = "taxi";
+        input.dispatchEvent(new Event("input"));
+        vi.advanceTimersByTime(350);
+        vi.useRealTimers();
         await fixture.whenStable();
-        expect(el.querySelector("#expense-history")).toBeNull();
-        expect(toggle().textContent).toContain("Afficher l'historique");
-        expect(localStorage.getItem("expenses-history")).toBe("0");
 
-        toggle().click();
+        expect(getMovements.mock.lastCall![0].search).toBe("taxi");
+    });
+
+    it("should let the admin choose dates, and wait for valid ones", async () => {
+        [...el.querySelectorAll<HTMLButtonElement>(".period")].at(-1)!.click();
         await fixture.whenStable();
-        expect(el.querySelector("#expense-history")).not.toBeNull();
-        expect(toggle().textContent).toContain("Masquer l'historique");
-        expect(getMovements.mock.calls.length).toBeGreaterThan(calls);
+
+        const [from, to] = el.querySelectorAll<HTMLInputElement>(".custom-range input");
+        expect(from.value).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+        from.value = "2026-11-10";
+        to.value = "2026-11-05";
+        from.dispatchEvent(new Event("change"));
+        await fixture.whenStable();
+        expect(el.querySelector(".custom-range .field-error")?.textContent).toContain(
+            "doit précéder",
+        );
+
+        to.value = "2026-11-12";
+        to.dispatchEvent(new Event("change"));
+        await fixture.whenStable();
+        expect(getMovements.mock.lastCall![0]).toEqual(
+            expect.objectContaining({ from: "2026-11-10", to: "2026-11-12" }),
+        );
+    });
+
+    it("should show a cancelled expense struck through and out of the day total", async () => {
+        getMovements.mockReturnValue(
+            of({
+                data: [
+                    expense({ id: 1, amount: 2500 }),
+                    expense({ id: 2, amount: 900, cancelled: true }),
+                ],
+                summary: { totalIn: 0, totalOut: 0 },
+                pagination: { page: 1, limit: 25, total: 2, totalPages: 1 },
+            }),
+        );
+        fixture.componentInstance.category.set("FOOD");
+        await fixture.whenStable();
+
+        expect(el.querySelectorAll(".row.cancelled").length).toBe(1);
+        expect(el.querySelector(".cancelled-tag")?.textContent).toContain("Annulée");
+        expect(el.querySelector(".day-total")?.textContent).toMatch(/2\s500/);
     });
 
     it("should take the whole history with the Tout period", async () => {
-        [...el.querySelectorAll<HTMLButtonElement>(".period")].at(-1)!.click();
+        [...el.querySelectorAll<HTMLButtonElement>(".period")]
+            .find((b) => b.textContent?.trim() === "Tout")!
+            .click();
         await fixture.whenStable();
 
         expect(getMovements.mock.lastCall![0]).toEqual(
@@ -199,7 +243,7 @@ describe("NewExpense", () => {
         component().submit();
         await fixture.whenStable();
 
-        expect(create).toHaveBeenCalledWith("EXPENSE", 2500, "TRANSPORT", "Taxi");
+        expect(create).toHaveBeenCalledWith("EXPENSE", 2500, "TRANSPORT", "Taxi", null);
         expect(navigate).toHaveBeenCalled();
     });
 
@@ -211,7 +255,7 @@ describe("NewExpense", () => {
         component().submit();
         await fixture.whenStable();
 
-        expect(create).toHaveBeenCalledWith("EXPENSE", 1000, "FOOD", "");
+        expect(create).toHaveBeenCalledWith("EXPENSE", 1000, "FOOD", "", null);
     });
 
     it("should say the cash is closed before the form, with a button to open it", async () => {
@@ -226,9 +270,39 @@ describe("NewExpense", () => {
         );
     });
 
+    it("should not save before a reason is chosen", async () => {
+        await render();
+        const el: HTMLElement = fixture.nativeElement;
+        component().onAmount("1000");
+
+        expect(component().category()).toBeNull();
+        expect(el.querySelector<HTMLButtonElement>("button[type=submit]")!.disabled).toBe(true);
+        component().submit();
+        expect(create).not.toHaveBeenCalled();
+    });
+
+    it("should send the receipt photo with the expense", async () => {
+        await render();
+        vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
+        component().onAmount("1000");
+        component().category.set("FOOD");
+        component().receipt.set("data:image/jpeg;base64,AAAA");
+        component().submit();
+        await fixture.whenStable();
+
+        expect(create).toHaveBeenCalledWith(
+            "EXPENSE",
+            1000,
+            "FOOD",
+            "",
+            "data:image/jpeg;base64,AAAA",
+        );
+    });
+
     it("should show the message of the server", async () => {
         await render("OPEN", true);
         component().onAmount("1000");
+        component().category.set("FOOD");
         component().reason.set("Repas");
         component().submit();
         await fixture.whenStable();
@@ -238,7 +312,10 @@ describe("NewExpense", () => {
 });
 
 describe("ExpensePage", () => {
-    async function render(type: "EXPENSE" | "DEPOSIT" = "EXPENSE") {
+    const cancelExpense = vi.fn(() => of({}));
+
+    async function render(type: "EXPENSE" | "DEPOSIT" = "EXPENSE", extra = {}) {
+        cancelExpense.mockClear();
         await TestBed.configureTestingModule({
             imports: [ExpensePage],
             providers: [
@@ -249,7 +326,7 @@ describe("ExpensePage", () => {
                 },
                 {
                     provide: CashMovementService,
-                    useValue: { getMovement: () => of(expense({ type })) },
+                    useValue: { getMovement: () => of(expense({ type, ...extra })), cancelExpense },
                 },
             ],
         }).compileComponents();
@@ -270,5 +347,34 @@ describe("ExpensePage", () => {
     it("should refuse another kind of cash movement", async () => {
         const el = await render("DEPOSIT");
         expect(el.textContent).toContain("Cette dépense est introuvable.");
+    });
+
+    it("should ask for confirmation, then cancel the expense", async () => {
+        const el = await render();
+
+        expect(cancelExpense).not.toHaveBeenCalled();
+        [...el.querySelectorAll<HTMLButtonElement>(".cancel-card button")][0].click();
+        TestBed.tick();
+        await Promise.resolve();
+        const confirm = el.querySelector<HTMLButtonElement>(".cancel-card .btn-danger")!;
+        expect(el.querySelector(".cancel-card")?.textContent).toContain(
+            "reviennent dans la caisse",
+        );
+
+        confirm.click();
+        expect(cancelExpense).toHaveBeenCalledWith(1);
+    });
+
+    it("should not offer to cancel an expense that is already cancelled", async () => {
+        const el = await render("EXPENSE", { cancelled: true });
+
+        expect(el.querySelector(".cancel-card")).toBeNull();
+        expect(el.textContent).toContain("Annulée");
+    });
+
+    it("should show the receipt photo when there is one", async () => {
+        const el = await render("EXPENSE", { receipt: "data:image/jpeg;base64,AAAA" });
+
+        expect(el.querySelector(".receipt-card img")?.getAttribute("src")).toContain("base64");
     });
 });

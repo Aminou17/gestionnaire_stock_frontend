@@ -3,6 +3,7 @@ import { Injectable, inject } from "@angular/core";
 import { map } from "rxjs";
 
 import { API_URL } from "../api.config";
+import { ExportFormat } from "../export-format";
 import {
     CashMovementDetail,
     CashMovementFilters,
@@ -16,12 +17,40 @@ export class CashMovementService {
     private http = inject(HttpClient);
 
     // category vient de CASH_REASONS et reste facultatif ; reason est toujours obligatoire
-    create(type: ManualMovementType, amount: number, category: string, reason: string) {
+    create(
+        type: ManualMovementType,
+        amount: number,
+        category: string,
+        reason: string,
+        receipt: string | null = null,
+    ) {
         return this.http.post(`${API_URL}/cash_movements`, {
             type,
             amount,
             reason,
             ...(category ? { category } : {}),
+            ...(receipt ? { receipt } : {}),
+        });
+    }
+
+    // l'argent revient dans le tiroir ; la ligne reste, marquée annulée
+    cancelExpense(id: number) {
+        return this.http.post(`${API_URL}/cash_movements/${id}/cancel`, {});
+    }
+
+    exportExpenses(
+        filters: Omit<CashMovementFilters, "page" | "limit" | "type">,
+        format: ExportFormat,
+    ) {
+        const params: Record<string, string> = { format };
+        if (filters.from) params["from"] = filters.from;
+        if (filters.to) params["to"] = filters.to;
+        if (filters.category) params["category"] = filters.category;
+        if (filters.search) params["search"] = filters.search;
+
+        return this.http.get(`${API_URL}/cash_movements/expenses/export`, {
+            params,
+            responseType: "blob",
         });
     }
 
@@ -35,6 +64,7 @@ export class CashMovementService {
         if (filters.from) params["from"] = filters.from;
         if (filters.to) params["to"] = filters.to;
         if (filters.category) params["category"] = filters.category;
+        if (filters.search) params["search"] = filters.search;
 
         return this.http.get<CashMovementPage>(`${API_URL}/cash_movements`, { params }).pipe(
             // PostgreSQL renvoie les montants en texte ("1500.00")

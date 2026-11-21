@@ -66,6 +66,9 @@
                         </button>
                     }
                 </div>
+                @if (!category()) {
+                    <small class="muted">Choisissez un motif pour enregistrer.</small>
+                }
             </section>
 
             <!-- 3. Précision -->
@@ -80,6 +83,35 @@
                     [value]="reason()"
                     (input)="reason.set($any($event.target).value)"
                 />
+
+                <!-- photo du reçu : la justification de la dépense, facultative -->
+                <div class="receipt">
+                    @if (receipt(); as photo) {
+                        <img class="receipt-thumb" [src]="photo" alt="Reçu joint" />
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm"
+                            (click)="receipt.set(null)"
+                        >
+                            Retirer le reçu
+                        </button>
+                    } @else {
+                        <label class="btn btn-outline receipt-add">
+                            <app-icon name="camera" [size]="18" />
+                            Joindre le reçu (facultatif)
+                            <input
+                                type="file"
+                                accept="image/*"
+                                capture="environment"
+                                class="sr-only"
+                                (change)="onReceipt($event)"
+                            />
+                        </label>
+                    }
+                    @if (receiptError()) {
+                        <small class="field-error">{{ receiptError() }}</small>
+                    }
+                </div>
             </section>
         </div>
 
@@ -91,7 +123,7 @@
                         ><app-icon [name]="chosen().icon" [size]="20"
                     /></span>
                     <div class="summary-title">
-                        <strong>{{ chosen().short }}</strong>
+                        <strong>{{ category() ? chosen().short : "Motif à choisir" }}</strong>
                         <small class="muted">{{ reason().trim() || "Dépense" }}</small>
                     </div>
                 </div>
@@ -122,7 +154,7 @@
                     <button
                         type="submit"
                         class="btn btn-primary btn-block"
-                        [disabled]="saving() || (today.hasValue() && !cashOpen())"
+                        [disabled]="saving() || !category() || (today.hasValue() && !cashOpen())"
                     >
                         @if (saving()) {
                             <span class="spinner"></span>
