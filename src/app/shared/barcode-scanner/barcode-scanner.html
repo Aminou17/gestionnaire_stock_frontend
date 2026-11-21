@@ -16,13 +16,26 @@
         <video #video playsinline muted></video>
 
         @if (status() !== "error") {
-            <div class="bs-frame" [class.bs-live]="status() === 'scanning'" aria-hidden="true">
+            <div
+                class="bs-frame"
+                [class.bs-live]="status() === 'scanning'"
+                [class.bs-found]="status() === 'found'"
+                aria-hidden="true"
+            >
                 <span class="bs-line"></span>
             </div>
         }
 
+        @if (status() === "found") {
+            <div class="bs-flash" aria-hidden="true"></div>
+        }
+
         @if (status() === "starting") {
             <p class="bs-hint"><span class="spinner"></span> Ouverture de la caméra…</p>
+        } @else if (status() === "found") {
+            <p class="bs-hint bs-ok" role="status">
+                <app-icon name="check" [size]="18" /> Code lu · {{ code() }}
+            </p>
         } @else if (status() === "scanning") {
             <p class="bs-hint">Placez le code-barres dans le cadre</p>
         } @else {

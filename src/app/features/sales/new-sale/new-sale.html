@@ -707,6 +707,23 @@
     </div>
 }
 
+@if (scanCard(); as card) {
+    <div class="scan-card" role="status">
+        <span class="scan-photo">
+            @if (card.image) {
+                <img [src]="card.image" alt="" />
+            } @else {
+                <app-icon name="package" [size]="22" />
+            }
+        </span>
+        <span class="scan-text">
+            <strong>{{ card.name }}</strong>
+            <small>{{ card.price | fcfa }}</small>
+        </span>
+        <span class="scan-qty"><app-icon name="check" [size]="16" /> ×{{ card.qty }}</span>
+    </div>
+}
+
 @if (photoNotice(); as notice) {
     <div
         class="photo-notice alert"

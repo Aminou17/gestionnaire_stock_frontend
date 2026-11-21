@@ -485,7 +485,25 @@ export class NewSale {
         } else {
             this.addProduct(product);
         }
-        this.notify("success", `${product.name} ajouté au panier.`);
+        this.showScanCard(product);
+    }
+
+    // la fiche du produit scanné monte en bas de l'écran, avec la quantité dans le panier
+    scanCard = signal<{ name: string; price: number; image: string | null; qty: number } | null>(
+        null,
+    );
+    private scanTimer?: ReturnType<typeof setTimeout>;
+
+    private showScanCard(product: Product) {
+        const qty = this.cart().find((l) => l.product.id === product.id)?.quantity ?? 1;
+        clearTimeout(this.scanTimer);
+        this.scanCard.set({
+            name: product.name,
+            price: product.sale_price,
+            image: product.image ?? null,
+            qty,
+        });
+        this.scanTimer = setTimeout(() => this.scanCard.set(null), 2500);
     }
 
     private async findByBarcode(code: string): Promise<Product | null> {

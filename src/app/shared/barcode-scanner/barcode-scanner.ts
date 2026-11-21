@@ -13,6 +13,9 @@ import { getBarcodeDetector } from "./barcode-detector";
 
 // Scanner plein écran : caméra arrière, viseur, lampe si le téléphone en a une,
 // et saisie à la main quand la caméra n'est pas disponible.
+// durée du flash vert avant de refermer le scanner
+const FOUND_DELAY = 650;
+
 @Component({
     selector: "app-barcode-scanner",
     imports: [Icon],
@@ -25,7 +28,9 @@ export class BarcodeScanner {
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("box");
     private video = viewChild.required<ElementRef<HTMLVideoElement>>("video");
 
-    status = signal<"starting" | "scanning" | "error">("starting");
+    status = signal<"starting" | "scanning" | "found" | "error">("starting");
+    // dernier code lu, montré le temps du flash vert
+    code = signal("");
     message = signal("");
     torch = signal<boolean | null>(null);
     manual = signal("");
@@ -98,7 +103,7 @@ export class BarcodeScanner {
                 if (video.readyState >= 2) {
                     const [found] = await detector.detect(video);
                     if (found?.rawValue) {
-                        this.done(found.rawValue);
+                        this.found(found.rawValue);
                         return;
                     }
                 }
@@ -129,10 +134,39 @@ export class BarcodeScanner {
         if (code) this.done(code);
     }
 
-    private done(code: string) {
+    // lecture réussie : bip, vibration et flash vert un instant, puis on rend le code
+    private found(code: string) {
+        this.status.set("found");
+        this.code.set(code.trim());
         navigator.vibrate?.(60);
+        this.beep();
+        this.timer = setTimeout(() => this.done(code), FOUND_DELAY);
+    }
+
+    private done(code: string) {
         this.close();
         this.scanned.emit(code.trim());
+    }
+
+    // petit « bip » de caisse, sans fichier son
+    private beep() {
+        try {
+            const Audio = window.AudioContext;
+            if (!Audio) return;
+            const context = new Audio();
+            const tone = context.createOscillator();
+            const volume = context.createGain();
+            tone.type = "sine";
+            tone.frequency.value = 1568;
+            volume.gain.setValueAtTime(0.18, context.currentTime);
+            volume.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.15);
+            tone.connect(volume).connect(context.destination);
+            tone.start();
+            tone.stop(context.currentTime + 0.16);
+            tone.onended = () => void context.close();
+        } catch {
+            // pas de son : la vibration et le flash suffisent
+        }
     }
 
     private fail(text: string) {
