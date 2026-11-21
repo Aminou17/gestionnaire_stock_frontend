@@ -48,12 +48,17 @@
                     step="1"
                     inputmode="numeric"
                     formControlName="actualAmount"
+                    placeholder="Ex. 50000"
                     (input)="edited.set(true)"
                     [class.invalid]="
                         form.controls.actualAmount.touched && form.controls.actualAmount.invalid
                     "
                 />
-                @if (form.controls.actualAmount.touched && form.controls.actualAmount.invalid) {
+                @if (
+                    form.controls.actualAmount.touched &&
+                    form.controls.actualAmount.invalid &&
+                    form.controls.actualAmount.value !== null
+                ) {
                     <small class="field-error">Le montant doit être positif ou nul.</small>
                 }
             </label>

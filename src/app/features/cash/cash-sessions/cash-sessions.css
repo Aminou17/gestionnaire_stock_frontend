@@ -11,53 +11,6 @@ app-page-header {
     min-width: 0;
 }
 
-.cards {
-    display: none;
-}
-
-.count {
-    margin: 0;
-    padding: 16px 16px 0;
-    font-size: var(--fs-body);
-}
-
-.table-wrap {
-    overflow-x: auto;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: var(--fs-body);
-}
-
-th {
-    padding: 12px 16px;
-    text-align: left;
-    font-size: var(--fs-caption);
-    font-weight: var(--fw-semibold);
-    color: var(--text-muted);
-    white-space: nowrap;
-    border-bottom: 1px solid var(--border);
-}
-
-td {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    vertical-align: middle;
-    white-space: nowrap;
-}
-
-tbody tr {
-    cursor: pointer;
-}
-
-/* au clavier, la ligne entière s'éclaire comme au survol */
-tbody tr:hover,
-tbody tr:has(a:focus-visible) {
-    background: var(--surface-hover);
-}
-
 .session-link {
     color: var(--text);
     font-weight: var(--fw-semibold);
@@ -70,27 +23,6 @@ tbody tr:has(a:focus-visible) {
 
 .session-link:hover {
     color: var(--primary);
-}
-
-.num {
-    text-align: right;
-    font-variant-numeric: tabular-nums;
-}
-
-.strong {
-    font-weight: var(--fw-semibold);
-}
-
-td .badge + .badge {
-    margin-left: 4px;
-}
-
-.in {
-    color: var(--success);
-}
-
-.out {
-    color: var(--danger);
 }
 
 .loading {
@@ -110,120 +42,102 @@ td .badge + .badge {
     padding: 40px 16px;
 }
 
-@media (max-width: 1023px) {
-    th,
-    td {
-        padding-left: 10px;
-        padding-right: 10px;
-    }
+:host {
+    gap: 12px;
 }
 
-@media (max-width: 767px) {
-    :host {
-        gap: 12px;
-    }
+.btn-sm {
+    height: 44px;
+}
 
-    .table-wrap {
-        display: none;
-    }
+.list-card {
+    background: transparent;
+    border: 0;
+}
 
-    .btn-sm {
-        height: 44px;
-    }
+.cards {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-    .list-card {
-        background: transparent;
-        border: 0;
-    }
+.session-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 84px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    cursor: pointer;
+}
 
-    .count {
-        padding: 0 0 8px;
-    }
+.session-card:active {
+    background: var(--surface-hover);
+}
 
-    .cards {
-        display: grid;
-        gap: 12px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-    }
+.session-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
 
-    .session-card {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        min-height: 84px;
-        padding: 14px 16px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        cursor: pointer;
-    }
+.session-icon.success {
+    background: var(--success-soft);
+    color: var(--success);
+}
 
-    .session-card:active {
-        background: var(--surface-hover);
-    }
+.session-icon.warning {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
 
-    .session-icon {
-        display: grid;
-        place-items: center;
-        flex: none;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-    }
+.session-icon.danger {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
 
-    .session-icon.success {
-        background: var(--success-soft);
-        color: var(--success);
-    }
+.session-icon.primary {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
 
-    .session-icon.warning {
-        background: var(--warning-soft);
-        color: var(--warning);
-    }
+.session-main {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
 
-    .session-icon.danger {
-        background: var(--danger-soft);
-        color: var(--danger);
-    }
+.session-card .session-link {
+    font-size: var(--fs-body);
+}
 
-    .session-icon.primary {
-        background: var(--primary-soft);
-        color: var(--primary-text);
-    }
+.session-sub {
+    margin: 0;
+    overflow: hidden;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
-    .session-main {
-        display: grid;
-        flex: 1;
-        gap: 2px;
-        min-width: 0;
-    }
+.session-end {
+    display: grid;
+    flex: none;
+    justify-items: end;
+    gap: 6px;
+}
 
-    .session-card .session-link {
-        font-size: var(--fs-body);
-    }
-
-    .session-sub {
-        margin: 0;
-        overflow: hidden;
-        color: var(--text-muted);
-        font-size: var(--fs-small);
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .session-end {
-        display: grid;
-        flex: none;
-        justify-items: end;
-        gap: 6px;
-    }
-
-    .session-amount {
-        font-size: var(--fs-body);
-        font-variant-numeric: tabular-nums;
-    }
+.session-amount {
+    font-size: var(--fs-body);
+    font-variant-numeric: tabular-nums;
 }
 
 .chip:disabled {

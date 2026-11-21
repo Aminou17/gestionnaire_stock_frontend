@@ -87,28 +87,48 @@ describe("Sales", () => {
 
     const text = () => el.textContent!.replace(/\s/g, " ");
 
-    it("should show the counters and the sales with their status", async () => {
+    it("should list the sales of the day with their status", async () => {
         await render();
 
-        expect(text()).toContain("Toutes les ventes");
+        expect(text()).toContain("Toutes");
         expect(text()).toContain("3 000 F");
-        expect(el.querySelectorAll("tbody tr").length).toBe(2);
+        expect(el.querySelectorAll(".sale-row").length).toBe(2);
         // une vente normale n'a pas de badge, seul le remboursement est signalé
-        expect(text()).not.toContain("Validée");
-        expect(el.querySelectorAll("tbody .badge").length).toBe(1);
+        expect(el.querySelectorAll(".sale-row .badge").length).toBe(1);
         expect(text()).toContain("Remboursée");
-        expect(text()).toContain("Vendeur");
-        expect(text()).toContain("Awa K.");
+        // la liste est la même sur ordinateur et sur téléphone
+        expect(el.querySelector("table")).toBeNull();
+        expect(el.querySelector(".stats")).toBeNull();
     });
 
-    it("should hide the seller column from the manager", async () => {
+    it("should show the seller to the admin only", async () => {
+        await render();
+        expect(text()).toContain("Awa K.");
+
+        TestBed.resetTestingModule();
         await render(false);
-        expect(el.querySelector("thead")?.textContent).not.toContain("Vendeur");
+        expect(text()).not.toContain("Awa K.");
+    });
+
+    it("should start on today's sales", async () => {
+        await render();
+
+        const filters = getSalesPage.mock.calls[0][0] as SaleFilters;
+        expect(filters.from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(filters.from).toBe(filters.to);
+    });
+
+    it("should not limit the unpaid sales to today", async () => {
+        await render(true, undefined, undefined, "/?filter=unpaid");
+
+        const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
+        expect(filters.unpaid).toBe(true);
+        expect(filters.from).toBeNull();
     });
 
     it("should filter by status from page 1", async () => {
         await render();
-        el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
+        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[2].click();
         await fixture.whenStable();
 
         expect(getSalesPage).toHaveBeenLastCalledWith(
@@ -126,7 +146,7 @@ describe("Sales", () => {
             expect.objectContaining({ page: 2, limit: 25 }),
         );
 
-        el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
+        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[2].click();
         await fixture.whenStable();
         expect(getSalesPage).toHaveBeenLastCalledWith(
             expect.objectContaining({ status: "CANCELLED", page: 1 }),
@@ -135,7 +155,7 @@ describe("Sales", () => {
 
     it("should ask only for unpaid sales from the 'À solder' card", async () => {
         await render();
-        el.querySelectorAll<HTMLButtonElement>(".stat")[1].click();
+        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[1].click();
         await fixture.whenStable();
 
         expect(getSalesPage).toHaveBeenLastCalledWith(
@@ -200,7 +220,7 @@ describe("Sales", () => {
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.paymentMethod).toBe("MOBILE_MONEY");
         expect(filters.page).toBe(1);
-        expect(el.querySelector(".filters-count")?.textContent).toContain("1");
+        expect(el.querySelector(".filters-count")?.textContent).toContain("2");
     });
 
     it("should remove a filter with the cross of its chip and reset them all", async () => {
@@ -241,14 +261,14 @@ describe("Sales", () => {
         expect(summary().textContent).toContain("Encaissé");
         expect(summary().textContent).toContain("3 000 F");
 
-        el.querySelectorAll<HTMLButtonElement>(".stat")[1].click();
+        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[1].click();
         await fixture.whenStable();
         expect(summary().getAttribute("data-tone")).toBe("warning");
         expect(summary().textContent).toContain("Reste à encaisser");
         expect(summary().textContent).toContain("7 500 F");
         expect(summary().textContent).toContain("2 ventes");
 
-        el.querySelectorAll<HTMLButtonElement>(".stat")[2].click();
+        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[2].click();
         await fixture.whenStable();
         expect(summary().getAttribute("data-tone")).toBe("danger");
         expect(summary().textContent).toContain("Remboursé");
@@ -282,7 +302,8 @@ describe("Sales", () => {
 
     it("should invite to make a sale when there is none", async () => {
         await render(true, []);
-        expect(text()).toContain("Aucune vente pour le moment");
+        expect(text()).toContain("Aucune vente aujourd'hui");
+        expect(el.querySelector("app-empty-state a")!.getAttribute("href")).toBe("/sales/new");
     });
 
     it("should prefill a custom period with the last 7 days", async () => {

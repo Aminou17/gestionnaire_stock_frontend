@@ -1,5 +1,9 @@
-<app-page-header title="Caisse" />
-<app-cash-tabs />
+<app-page-header title="Caisse">
+    <a routerLink="/cash/sessions" class="btn btn-outline history">
+        <app-icon name="clock" [size]="18" />
+        <span>Historique</span>
+    </a>
+</app-page-header>
 
 @if (today.isLoading() && !today.hasValue()) {
     <div class="layout" aria-busy="true">
@@ -78,14 +82,6 @@
         }
     }
 
-    @if (closingTime() && closeDate()) {
-        <div class="alert reminder banner" role="status">
-            <app-icon name="clock" />
-            <!-- simple rappel : le bouton pour clôturer est sur la carte juste en dessous -->
-            <span>Il se fait tard : pensez à clôturer la caisse.</span>
-        </div>
-    }
-
     <div class="layout">
         <div class="main">
             <!-- la couleur suit l'état : vert ouverte, gris clôturée, bleu à ouvrir -->
@@ -107,6 +103,9 @@
                                     {{ cash.closedAt | date: "HH:mm" }}
                                 } @else {
                                     Depuis {{ cash.openedAt | date: "HH:mm" }}
+                                }
+                                @if (cash.balance !== null) {
+                                    · fonds {{ cash.openingAmount | fcfa }}
                                 }
                             </small>
                         </div>
@@ -132,15 +131,72 @@
                         </div>
                     }
 
+                    @if (session.hasValue()) {
+                        <dl class="lines">
+                            <div>
+                                <dt>Ventes</dt>
+                                <dd appMoney class="in">{{ summary().sales | fcfa }}</dd>
+                            </div>
+                            @if (summary().deposits > 0) {
+                                <div>
+                                    <dt>Argent ajouté</dt>
+                                    <dd appMoney class="in">{{ summary().deposits | fcfa }}</dd>
+                                </div>
+                            }
+                            @if (spent() > 0) {
+                                <div>
+                                    <dt>Sorti de la caisse</dt>
+                                    <dd appMoney class="out">−{{ spent() | fcfa }}</dd>
+                                </div>
+                            }
+                            @if (session.value().mobile_money_total) {
+                                <div>
+                                    <dt>Mobile Money, hors tiroir</dt>
+                                    <dd appMoney>
+                                        {{ session.value().mobile_money_total | fcfa }}
+                                    </dd>
+                                </div>
+                            }
+                            @if (session.value().status === "CLOSED") {
+                                <div>
+                                    <dt>Montant compté</dt>
+                                    <dd appMoney>{{ session.value().actual_amount | fcfa }}</dd>
+                                </div>
+                                <div>
+                                    <dt>Écart</dt>
+                                    @if (session.value().difference === 0) {
+                                        <dd>Aucun</dd>
+                                    } @else {
+                                        <dd
+                                            [class.in]="session.value().difference! > 0"
+                                            [class.out]="session.value().difference! < 0"
+                                        >
+                                            {{ session.value().difference | fcfa: true }}
+                                        </dd>
+                                    }
+                                </div>
+                            }
+                        </dl>
+                        @if (session.value().status === "CLOSED") {
+                            @if (session.value().closing_note; as note) {
+                                <p class="note closing-note">Explication : {{ note }}</p>
+                            } @else if (session.value().explanation_pending) {
+                                <span class="badge badge-warning closing-note"
+                                    >Écart à expliquer</span
+                                >
+                            }
+                        }
+                    }
+
                     @if (isOpen()) {
                         <div class="actions">
-                            <a routerLink="/sales/new" class="btn btn-primary new-sale">
-                                <app-icon name="plus" [size]="18" />
-                                Nouvelle vente
-                            </a>
+                            <!-- le soir, le bouton se met en avant au lieu d'ajouter un message -->
                             <button
                                 type="button"
-                                class="btn btn-outline"
+                                class="btn"
+                                [class.btn-primary]="closingTime()"
+                                [class.btn-outline]="!closingTime()"
+                                [class.late]="closingTime()"
                                 [disabled]="!closeDate()"
                                 (click)="closeDialog.open(closeDate()!, cash.balance)"
                             >
@@ -231,58 +287,6 @@
                 }
             </section>
 
-            @if (auth.isAdmin() && team().length > 0) {
-                <section class="card panel team" aria-label="Caisses de l'équipe">
-                    <div class="card-header">
-                        <h2>Suivi des caisses</h2>
-                        <span class="badge badge-neutral">{{ team().length }}</span>
-                    </div>
-                    <ul class="team-list">
-                        @for (member of team(); track member.id) {
-                            <li>
-                                <a
-                                    [routerLink]="['/cash/sessions', member.id]"
-                                    [state]="backState"
-                                    class="team-row"
-                                >
-                                    <app-avatar class="team-avatar" aria-hidden="true" />
-                                    <span class="team-name">
-                                        <strong>{{ member.openedByName ?? "—" }}</strong>
-                                        <small class="muted"
-                                            >Ventes {{ member.salesTotal | fcfa }}</small
-                                        >
-                                    </span>
-                                    <span class="team-state">
-                                        @if (member.status === "OPEN") {
-                                            <span class="badge badge-success">Ouverte</span>
-                                        } @else {
-                                            <span class="badge badge-neutral">Clôturée</span>
-                                            @if (member.explanationPending) {
-                                                <span class="badge badge-warning"
-                                                    >Écart à expliquer</span
-                                                >
-                                            } @else if (member.difference !== null) {
-                                                <strong
-                                                    class="gap"
-                                                    [class.in]="member.difference > 0"
-                                                    [class.out]="member.difference < 0"
-                                                >
-                                                    @if (member.difference === 0) {
-                                                        Aucun écart
-                                                    } @else {
-                                                        Écart {{ member.difference | fcfa: true }}
-                                                    }
-                                                </strong>
-                                            }
-                                        }
-                                    </span>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </section>
-            }
-
             <!-- l'employé peut seulement ajouter de l'argent -->
             @if (isOpen()) {
                 <!-- carreaux colorés : vert l'argent qui entre, rouge et violet celui qui sort -->
@@ -334,6 +338,79 @@
                 </section>
             }
 
+            <!-- suivi de l'équipe : une ligne qui s'ouvre, pour ne pas passer avant les actions -->
+            @if (auth.isAdmin() && team().length > 0) {
+                <section class="card team" aria-label="Caisses de l'équipe">
+                    <button
+                        type="button"
+                        class="team-toggle"
+                        [attr.aria-expanded]="teamOpen()"
+                        aria-controls="team-list"
+                        (click)="teamOpen.set(!teamOpen())"
+                    >
+                        <span class="team-summary">
+                            <strong>Suivi des caisses</strong>
+                            <small class="muted">{{ teamSummary() }}</small>
+                        </span>
+                        @if (teamToExplain() > 0) {
+                            <span class="badge badge-warning">À expliquer</span>
+                        }
+                        <app-icon
+                            [name]="teamOpen() ? 'chevron-down' : 'chevron-right'"
+                            [size]="18"
+                        />
+                    </button>
+                    @if (teamOpen()) {
+                        <ul class="team-list" id="team-list">
+                            @for (member of team(); track member.id) {
+                                <li>
+                                    <a
+                                        [routerLink]="['/cash/sessions', member.id]"
+                                        [state]="backState"
+                                        class="team-row"
+                                    >
+                                        <app-avatar class="team-avatar" aria-hidden="true" />
+                                        <span class="team-name">
+                                            <strong>{{ member.openedByName ?? "—" }}</strong>
+                                            <small class="muted"
+                                                >Ventes {{ member.salesTotal | fcfa }}</small
+                                            >
+                                        </span>
+                                        <span class="team-state">
+                                            @if (member.status === "OPEN") {
+                                                <span class="badge badge-success">Ouverte</span>
+                                            } @else {
+                                                <span class="badge badge-neutral">Clôturée</span>
+                                                @if (member.explanationPending) {
+                                                    <span class="badge badge-warning"
+                                                        >Écart à expliquer</span
+                                                    >
+                                                } @else if (member.difference !== null) {
+                                                    <strong
+                                                        class="gap"
+                                                        [class.in]="member.difference > 0"
+                                                        [class.out]="member.difference < 0"
+                                                    >
+                                                        @if (member.difference === 0) {
+                                                            Aucun écart
+                                                        } @else {
+                                                            Écart
+                                                            {{ member.difference | fcfa: true }}
+                                                        }
+                                                    </strong>
+                                                }
+                                            }
+                                        </span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+            }
+        </div>
+
+        <aside class="side">
             @if (cash()) {
                 <section class="card panel movements">
                     <div class="card-header">
@@ -347,9 +424,6 @@
                                       : "Mouvements du jour"
                             }}
                         </h2>
-                        @if (auth.isAdmin()) {
-                            <a routerLink="/cash/movements">Tout voir</a>
-                        }
                     </div>
                     @if (session.error() && !session.hasValue()) {
                         <div class="inline-error">
@@ -374,121 +448,7 @@
                     }
                 </section>
             }
-        </div>
-
-        @if (cash(); as cash) {
-            @if (cash.balance !== null) {
-                <aside class="side">
-                    <section class="card panel">
-                        <div class="card-header">
-                            <h2>Mon résumé du jour</h2>
-                        </div>
-                        @if (session.hasValue()) {
-                            <dl class="lines">
-                                <div>
-                                    <dt>Fonds de départ</dt>
-                                    <dd appMoney>{{ cash.openingAmount | fcfa }}</dd>
-                                </div>
-                                <div>
-                                    <dt>Ventes</dt>
-                                    <dd appMoney class="in">{{ summary().sales | fcfa }}</dd>
-                                </div>
-                                @if (summary().deposits > 0) {
-                                    <div>
-                                        <dt>Argent ajouté</dt>
-                                        <dd appMoney class="in">{{ summary().deposits | fcfa }}</dd>
-                                    </div>
-                                }
-                                @if (summary().refunds > 0) {
-                                    <div>
-                                        <dt>Remboursements</dt>
-                                        <dd appMoney class="out">
-                                            −{{ summary().refunds | fcfa }}
-                                        </dd>
-                                    </div>
-                                }
-                                @if (summary().expenses > 0) {
-                                    <div>
-                                        <dt>Dépenses</dt>
-                                        <dd appMoney class="out">
-                                            −{{ summary().expenses | fcfa }}
-                                        </dd>
-                                    </div>
-                                }
-                                @if (summary().withdrawals > 0) {
-                                    <div>
-                                        <dt>Retraits</dt>
-                                        <dd appMoney class="out">
-                                            −{{ summary().withdrawals | fcfa }}
-                                        </dd>
-                                    </div>
-                                }
-                                <div class="total">
-                                    <dt>Solde attendu</dt>
-                                    <dd appMoney>{{ cash.balance | fcfa }}</dd>
-                                </div>
-                            </dl>
-                            @if (session.value().mobile_money_total) {
-                                <dl class="lines closing">
-                                    <div>
-                                        <dt>Mobile Money, hors tiroir</dt>
-                                        <dd appMoney>
-                                            {{ session.value().mobile_money_total | fcfa }}
-                                        </dd>
-                                    </div>
-                                </dl>
-                            }
-                            @if (session.value().status === "CLOSED") {
-                                <dl class="lines closing">
-                                    <div>
-                                        <dt>Montant compté</dt>
-                                        <dd appMoney>{{ session.value().actual_amount | fcfa }}</dd>
-                                    </div>
-                                    @if (session.value().difference === 0) {
-                                        <div>
-                                            <dt>Écart</dt>
-                                            <dd>Aucun</dd>
-                                        </div>
-                                    } @else {
-                                        <div>
-                                            <dt>Écart</dt>
-                                            <dd
-                                                [class.in]="session.value().difference! > 0"
-                                                [class.out]="session.value().difference! < 0"
-                                            >
-                                                {{ session.value().difference | fcfa: true }}
-                                            </dd>
-                                        </div>
-                                    }
-                                </dl>
-                                @if (session.value().closing_note; as note) {
-                                    <p class="note closing-note">Explication : {{ note }}</p>
-                                } @else if (session.value().explanation_pending) {
-                                    <span class="badge badge-warning closing-note"
-                                        >Écart à expliquer</span
-                                    >
-                                }
-                            }
-                        } @else if (session.error()) {
-                            <div class="inline-error">
-                                Résumé indisponible.
-                                <button
-                                    type="button"
-                                    class="btn btn-outline btn-sm"
-                                    (click)="session.reload()"
-                                >
-                                    Réessayer
-                                </button>
-                            </div>
-                        } @else {
-                            @for (i of [1, 2, 3]; track i) {
-                                <div class="skeleton row-skeleton"></div>
-                            }
-                        }
-                    </section>
-                </aside>
-            }
-        }
+        </aside>
     </div>
 }
 

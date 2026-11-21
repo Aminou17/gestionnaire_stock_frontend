@@ -1,4 +1,4 @@
-import { DatePipe, formatDate } from "@angular/common";
+import { formatDate } from "@angular/common";
 import { Component, computed, LOCALE_ID, inject, linkedSignal, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
@@ -6,7 +6,6 @@ import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { PaymentMethod, Sale, SalePage, SaleStatus } from "../../core/sales/sale.model";
-import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
 import { SaleService } from "../../core/sales/sale.service";
 import { ExportService } from "../settings/settings-export/export.service";
 import { UserService } from "../users/user.service";
@@ -38,7 +37,6 @@ type FilterKey = "period" | "payment" | "seller";
     imports: [
         MoneyToggle,
         RouterLink,
-        DatePipe,
         PageHeader,
         Avatar,
         ExportMenu,
@@ -54,14 +52,12 @@ type FilterKey = "period" | "payment" | "seller";
 export class Sales {
     private locale = inject(LOCALE_ID);
     private saleService = inject(SaleService);
-    // ventes faites sans internet, pas encore envoyées
-    protected outbox = inject(SaleOutboxService);
     private router = inject(Router);
     private userService = inject(UserService);
     private exportService = inject(ExportService);
     protected auth = inject(AuthService);
 
-    // période choisie dans <app-period-filter> (toutes les dates au départ)
+    // période choisie dans le filtre (aujourd'hui au départ : c'est ce que le vendeur regarde)
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     status = signal<SaleStatus | null>(null);
     page = signal(1);
@@ -104,7 +100,7 @@ export class Sales {
     counters = computed(() => this.last()?.counters);
     firstLoad = computed(() => this.sales.isLoading() && !this.last());
 
-    // téléphone : les ventes chargées, regroupées par jour (la liste est déjà triée par date)
+    // les ventes chargées, regroupées par jour (la liste est déjà triée par date)
     days = computed(() => groupByDay(this.list(), this.locale));
 
     tabs = computed(() => {
@@ -314,10 +310,6 @@ export class Sales {
         });
     }
 
-    paymentLabel(method: Sale["payment_method"]) {
-        return method === "MOBILE_MONEY" ? "Mobile Money" : method === "CASH" ? "Espèces" : "";
-    }
-
     selectStatus(value: SaleStatus | "UNPAID" | null) {
         this.unpaid.set(value === "UNPAID");
         this.status.set(value === "UNPAID" ? null : value);
@@ -327,9 +319,14 @@ export class Sales {
     // filtre demandé par le lien qui a ouvert la page (cartes du tableau de bord)
     constructor() {
         const params = inject(ActivatedRoute).snapshot.queryParamMap;
-        if (params.get("filter") === "unpaid") this.selectStatus("UNPAID");
         const period = params.get("period");
-        if (period === "today" || period === "week" || period === "month") {
+        const unpaid = params.get("filter") === "unpaid";
+
+        // les ventes à solder viennent de toutes les dates : on ne les limite pas à aujourd'hui
+        if (unpaid) this.selectStatus("UNPAID");
+        else if (period === "week" || period === "month") this.selectPeriod(period);
+        else this.selectPeriod("today");
+        if (unpaid && (period === "today" || period === "week" || period === "month")) {
             this.selectPeriod(period);
         }
     }
@@ -353,12 +350,19 @@ export class Sales {
         return this.due(sale) > 0 ? "warning" : "success";
     }
 
-    // heure, client, nombre d'articles : le vendeur est dans la fiche de la vente
+    // heure, client, nombre d'articles, et le vendeur pour l'administrateur
     subtitle(sale: Sale) {
         const parts = [formatDate(sale.created_at, "HH:mm", this.locale)];
         if (sale.customer_name) parts.push(sale.customer_name);
+        if (this.auth.isAdmin() && sale.user_name) parts.push(sale.user_name);
         parts.push(`${sale.items_count} article${sale.items_count > 1 ? "s" : ""}`);
         return parts.join(" · ");
+    }
+
+    emptyTitle() {
+        const period = this.range().period;
+        if (period === "today") return "Aucune vente aujourd'hui";
+        return period === "all" ? "Aucune vente pour le moment" : "Aucune vente sur cette période";
     }
 
     isToday(date: string) {

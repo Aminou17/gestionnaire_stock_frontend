@@ -1,0 +1,35 @@
+<section
+    class="notice card tinted"
+    [class.compact]="compact()"
+    [attr.data-tone]="tone()"
+    role="status"
+>
+    <span class="tone-icon"><app-icon name="banknote" [size]="compact() ? 18 : 24" /></span>
+    <div class="notice-text">
+        <strong>{{ title() }}</strong>
+        <span class="muted">
+            @if (state() === "previous" && since()) {
+                Caisse du {{ since() | date: "d MMMM" }}.
+            }
+            {{ text() }}
+        </span>
+    </div>
+
+    @switch (state()) {
+        @case ("notOpened") {
+            <button type="button" class="btn btn-primary" (click)="openCash.emit()">
+                Ouvrir la caisse
+            </button>
+        }
+        @case ("closedToday") {
+            @if (canReopen()) {
+                <button type="button" class="btn btn-primary" (click)="reopen.emit()">
+                    Rouvrir la caisse
+                </button>
+            }
+        }
+        @default {
+            <a routerLink="/cash" class="btn btn-primary">Aller à la caisse</a>
+        }
+    }
+</section>

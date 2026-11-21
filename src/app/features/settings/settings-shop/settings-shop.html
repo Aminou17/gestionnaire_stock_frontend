@@ -293,13 +293,11 @@
 
                 <p class="ticket-total"><span>TOTAL</span><span>15 000 F</span></p>
 
-                <div class="ticket-foot">
-                    <!-- même texte que sales/sale-receipt/sale-receipt.html -->
-                    <span>Merci de votre visite !</span>
-                    @if (values().receiptFooter.trim()) {
+                @if (values().receiptFooter.trim()) {
+                    <div class="ticket-foot">
                         <span>{{ values().receiptFooter }}</span>
-                    }
-                </div>
+                    </div>
+                }
             </div>
         </aside>
 

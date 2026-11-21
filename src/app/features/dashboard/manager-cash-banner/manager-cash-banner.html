@@ -32,10 +32,15 @@
             <span class="icon"><app-icon name="wallet" [size]="20" /></span>
             <div class="text">
                 @if (closedToday()) {
-                    <strong>Caisse clôturée</strong>
-                    <small>Les ventes reprennent demain</small>
+                    <strong>Caisse clôturée pour aujourd'hui</strong>
+                    <small
+                        >Demandez à l'administrateur de la rouvrir, sinon rendez-vous demain.</small
+                    >
+                } @else if (previousOpen()) {
+                    <strong>Caisse d'un jour passé pas clôturée</strong>
+                    <small>Clôturez-la avant d'ouvrir celle d'aujourd'hui.</small>
                 } @else {
-                    <strong>Caisse fermée</strong>
+                    <strong>Caisse pas encore ouverte</strong>
                     <small>Ouvrez-la pour commencer à vendre</small>
                 }
             </div>
@@ -49,7 +54,11 @@
         </a>
     } @else if (closedToday()) {
         <a routerLink="/cash" class="btn btn-outline new-sale">Voir la caisse</a>
+    } @else if (previousOpen()) {
+        <a routerLink="/cash" class="btn btn-primary new-sale">Aller à la caisse</a>
     } @else {
-        <a routerLink="/cash" class="btn btn-primary new-sale">Ouvrir la caisse</a>
+        <button type="button" class="btn btn-primary new-sale" (click)="openCash.emit()">
+            Ouvrir la caisse
+        </button>
     }
 </section>

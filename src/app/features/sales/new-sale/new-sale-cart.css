@@ -7,6 +7,11 @@
     grid-template-rows: auto minmax(96px, 1fr) auto;
     padding: 0;
     border-color: color-mix(in srgb, var(--primary) 14%, var(--border));
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--primary) 5%, var(--surface)) 0%,
+        var(--surface) 60%
+    );
     overflow: hidden;
 }
 
@@ -22,16 +27,17 @@
     align-items: center;
     gap: 8px;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    border-bottom: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+    background: linear-gradient(
+        115deg,
+        color-mix(in srgb, var(--primary) 16%, var(--surface)) 0%,
+        color-mix(in srgb, var(--primary) 4%, var(--surface)) 100%
+    );
 }
 
 /* poignée, croix, retour et titre du paiement : seulement sur la feuille du téléphone */
 .grip,
-.sheet-close,
-.step-back,
-.title-pay,
-.cart-only {
+.sheet-close {
     display: none;
 }
 
@@ -66,9 +72,7 @@
 
 .clear:focus-visible,
 .icon-btn:focus-visible,
-.add-customer:focus-visible,
 .method:focus-visible,
-.option:focus-visible,
 .free-link:focus-visible,
 .picker-row:focus-visible,
 .picked-change:focus-visible,
@@ -109,6 +113,7 @@
 /* lignes du panier */
 .lines {
     display: grid;
+    gap: 10px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -119,18 +124,21 @@
     grid-template-columns: 44px minmax(0, 1fr) auto;
     align-items: center;
     gap: 8px 12px;
-    padding: 12px 0;
-    border-top: 1px solid var(--border);
-}
-
-.line:first-child {
-    border-top: 0;
-    padding-top: 0;
+    padding: 12px;
+    border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+    border-radius: 14px;
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--primary) 9%, var(--surface)) 0%,
+        var(--surface) 70%
+    );
+    box-shadow: 0 6px 14px -12px color-mix(in srgb, var(--primary) 70%, transparent);
 }
 
 .line .thumb {
     width: 44px;
     height: 44px;
+    border-radius: 12px;
 }
 
 .line-main {
@@ -163,6 +171,7 @@
 }
 
 .line-total {
+    color: var(--primary-text, var(--primary));
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
@@ -172,7 +181,7 @@
 /* « Modifier le prix » : un vrai bouton, pour le rabais sur la ligne */
 .price-link {
     display: inline-flex;
-    flex: 1;
+    flex: none;
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -307,89 +316,6 @@
     gap: 8px;
 }
 
-.section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.section-title {
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-}
-
-.add-customer {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 48px;
-    padding: 0 16px;
-    border: 1px dashed var(--border);
-    border-radius: var(--radius);
-    background: transparent;
-    color: var(--text);
-    font: inherit;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
-    text-align: left;
-    cursor: pointer;
-}
-
-.add-customer small {
-    margin-left: auto;
-}
-
-.add-customer:hover {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-}
-
-/* options avancées : une ligne discrète tant qu'on n'en a pas besoin */
-.more-toggle {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 100%;
-    min-height: 48px;
-    padding: 0 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    color: var(--text);
-    font: inherit;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
-    text-align: left;
-    cursor: pointer;
-}
-
-.more-toggle small {
-    margin-left: auto;
-    font-size: var(--fs-small);
-}
-
-.more-toggle:hover {
-    border-color: var(--primary);
-}
-
-.more-toggle:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.more {
-    display: grid;
-    gap: 16px;
-    padding: 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--bg);
-}
-
-.more .section:last-child {
-    padding-bottom: 0;
-}
-
 /* modes de paiement en segments */
 .methods {
     display: grid;
@@ -421,8 +347,14 @@
 }
 
 .method.active {
-    background: var(--surface);
-    box-shadow: var(--shadow-card);
+    background: linear-gradient(
+        145deg,
+        var(--surface) 0%,
+        color-mix(in srgb, var(--primary) 14%, var(--surface)) 100%
+    );
+    box-shadow:
+        var(--shadow-card),
+        inset 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
     color: var(--primary-text, var(--primary));
     font-weight: var(--fw-semibold);
 }
@@ -438,43 +370,6 @@
     margin-top: 4px;
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
-}
-
-.options {
-    display: flex;
-    gap: 8px;
-}
-
-.option {
-    min-height: 32px;
-    padding: 0 16px;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    background: var(--surface);
-    color: var(--text-muted, var(--text));
-    font: inherit;
-    font-size: var(--fs-small);
-    font-weight: var(--fw-medium);
-    cursor: pointer;
-}
-
-.option::before {
-    content: "+ ";
-}
-
-.option.on {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-    color: var(--primary-text, var(--primary));
-    font-weight: var(--fw-semibold);
-}
-
-.option.on::before {
-    content: "✓ ";
-}
-
-.option:hover {
-    border-color: var(--primary);
 }
 
 .chips {
@@ -493,7 +388,12 @@
 }
 
 .chips .chip.active {
-    background: var(--primary-soft);
+    border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
+    background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--primary) 20%, var(--surface)),
+        color-mix(in srgb, var(--primary) 8%, var(--surface))
+    );
 }
 
 .change,
@@ -529,14 +429,22 @@
 }
 
 .change {
-    border: 1px solid color-mix(in srgb, var(--success) 25%, transparent);
-    background: var(--success-soft);
+    border: 1px solid color-mix(in srgb, var(--success) 28%, transparent);
+    background: linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--success) 20%, var(--surface)),
+        color-mix(in srgb, var(--success) 6%, var(--surface))
+    );
     color: var(--success);
 }
 
 .remaining {
-    border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
-    background: var(--warning-soft, var(--surface));
+    border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
+    background: linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--warning) 20%, var(--surface)),
+        color-mix(in srgb, var(--warning) 6%, var(--surface))
+    );
     color: var(--warning, var(--text));
 }
 
@@ -583,8 +491,12 @@
     gap: 12px;
     max-height: 70dvh;
     padding: 16px;
-    border-top: 2px solid color-mix(in srgb, var(--primary) 30%, var(--border));
-    background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+    border-top: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--primary) 11%, var(--surface)) 0%,
+        color-mix(in srgb, var(--primary) 3%, var(--surface)) 100%
+    );
     box-shadow: 0 -8px 16px -12px rgba(15, 23, 42, 0.18);
     overflow-y: auto;
 }
@@ -613,6 +525,19 @@
     color: var(--success);
 }
 
+/* le total : une carte dégradée, le chiffre le plus lisible du pied */
+.total {
+    align-items: center;
+    padding: 12px 16px;
+    border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
+    border-radius: 14px;
+    background: linear-gradient(
+        120deg,
+        color-mix(in srgb, var(--primary) 18%, var(--surface)) 0%,
+        color-mix(in srgb, var(--primary) 5%, var(--surface)) 100%
+    );
+}
+
 .total span {
     font-size: var(--fs-lead);
     font-weight: var(--fw-semibold);
@@ -632,6 +557,16 @@
     min-height: 52px;
     font-size: var(--fs-lead);
     font-weight: var(--fw-semibold);
+}
+
+.submit:not(:disabled) {
+    border-color: transparent;
+    background: linear-gradient(
+        135deg,
+        var(--primary) 0%,
+        color-mix(in srgb, var(--primary) 68%, #000) 100%
+    );
+    box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--primary) 75%, transparent);
 }
 
 /* rappel du raccourci dans le bouton, seulement avec un clavier */
@@ -722,10 +657,6 @@
     background: var(--surface-hover);
 }
 
-.picker-new strong {
-    color: var(--primary-text, var(--primary));
-}
-
 .picker-empty {
     padding: 12px 8px;
     font-size: var(--fs-body);
@@ -743,12 +674,6 @@
     color: var(--danger);
 }
 
-.customer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
 .avatar {
     display: grid;
     flex-shrink: 0;
@@ -760,13 +685,7 @@
     font-weight: var(--fw-semibold);
 }
 
-.av-add {
-    background: var(--primary-soft);
-    color: var(--primary-text, var(--primary));
-}
-
-.picked,
-.match {
+.picked {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -841,14 +760,15 @@
 }
 
 @media (max-width: 1023px) {
-    /* le panier est une feuille qui monte du bas sur 60 % de l'écran, le catalogue reste visible */
+    /* le panier est une feuille qui monte du bas : lignes, client, paiement et bouton Encaisser au même endroit */
     .cart {
         position: fixed;
         right: 0;
         bottom: 0;
         left: 0;
         z-index: 45;
-        height: 60dvh;
+        height: auto;
+        max-height: calc(100dvh - 32px);
         border-radius: 16px 16px 0 0;
         box-shadow: var(--shadow-drawer);
         transform: translateY(100%);
@@ -865,11 +785,6 @@
         transition:
             transform 0.25s ease,
             height 0.25s ease;
-    }
-
-    /* seconde étape : le paiement prend presque tout l'écran */
-    .cart.paying {
-        height: calc(100dvh - 32px);
     }
 
     .cart.cart-empty {
@@ -910,47 +825,9 @@
         background: var(--surface-hover);
     }
 
-    .sheet-close:focus-visible,
-    .step-back:focus-visible {
+    .sheet-close:focus-visible {
         outline: 2px solid var(--primary);
         outline-offset: 2px;
-    }
-
-    /* étape panier : lignes et bouton « Continuer ». Étape paiement : options, paiement, Encaisser */
-    .cart:not(.paying) .pay-only {
-        display: none;
-    }
-
-    .cart.paying .lines,
-    .cart.paying .cart-only,
-    .cart.paying .head-icon,
-    .cart.paying .title-cart,
-    .cart.paying .count,
-    .cart.paying .clear {
-        display: none;
-    }
-
-    .cart.paying .title-pay {
-        display: block;
-        margin: 0 auto 0 0;
-    }
-
-    .cart.paying .step-back {
-        display: inline-flex;
-        align-items: center;
-        min-height: 44px;
-        margin-left: -8px;
-        padding: 0 8px 0 0;
-        border: 0;
-        background: none;
-        color: var(--primary-text, var(--primary));
-        font: inherit;
-        font-weight: var(--fw-semibold);
-        cursor: pointer;
-    }
-
-    .cart:not(.paying) .cart-only {
-        display: flex;
     }
 
     .to-pay {
@@ -983,7 +860,11 @@
         gap: 12px;
         padding: 8px 8px 8px 12px;
         border-radius: 16px;
-        background: var(--primary);
+        background: linear-gradient(
+            120deg,
+            var(--primary) 0%,
+            color-mix(in srgb, var(--primary) 66%, #000) 100%
+        );
         box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--primary) 60%, transparent);
         color: var(--on-primary);
     }
@@ -1028,10 +909,16 @@
         font-variant-numeric: tabular-nums;
     }
 
+    .bar-actions {
+        display: flex;
+        flex-shrink: 0;
+        gap: 6px;
+    }
+
     .bar-btn {
         flex-shrink: 0;
         min-height: 44px;
-        padding: 0 18px;
+        padding: 0 14px;
         border: 0;
         border-radius: 12px;
         background: #fff;
@@ -1041,14 +928,21 @@
         cursor: pointer;
     }
 
+    .bar-btn:disabled {
+        opacity: 0.6;
+    }
+
+    /* « Panier » : discret à côté du bouton Encaisser */
+    .bar-ghost {
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.14);
+        color: #fff;
+    }
+
     .bar-btn:focus-visible,
     .bar-info:focus-visible {
         outline: 2px solid #fff;
         outline-offset: 2px;
-    }
-
-    .option {
-        min-height: 44px;
     }
 }
 
@@ -1061,4 +955,17 @@
     .change strong {
         font-size: var(--fs-figure);
     }
+}
+
+/* petit téléphone : le total et les deux boutons doivent tenir sur la barre */
+@media (max-width: 400px) {
+    .bar-icon {
+        display: none;
+    }
+}
+
+/* le client reste visible au-dessus du total, même quand les lignes défilent */
+.cart-footer > .section {
+    padding-top: 0;
+    border-top: 0;
 }

@@ -335,13 +335,10 @@ describe("SalePage", () => {
         expect(moves[0].textContent!.replace(/\s+/g, " ")).toContain("+1 · stock 42 → 43");
     });
 
-    it("should link to the previous sale and disable the next one when there is none", async () => {
+    it("should not offer to jump to the other sales", async () => {
         await render();
 
-        const links = el.querySelectorAll<HTMLAnchorElement>(".pager a.pager-btn");
-        expect(links.length).toBe(1);
-        expect(links[0].getAttribute("href")).toBe("/sales/5");
-        expect(el.querySelectorAll(".pager .disabled").length).toBe(1);
+        expect(el.querySelector(".pager")).toBeNull();
     });
 
     it("should show the subtotal and the discounts when a discount was given", async () => {

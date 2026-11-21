@@ -95,7 +95,6 @@ app-page-header {
         min-height: 0;
     }
 
-    .tiles,
     .gtiles {
         flex: 1;
         min-height: 0;
@@ -163,31 +162,6 @@ kbd {
     font-size: var(--fs-caption);
 }
 
-/* un seul bouton qui bascule lignes ou carreaux, sur ordinateur comme sur téléphone */
-.view-single {
-    display: grid;
-    width: 48px;
-    height: 48px;
-    flex-shrink: 0;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--text-muted);
-    place-items: center;
-    cursor: pointer;
-}
-
-.view-single[aria-pressed="true"] {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-    color: var(--primary-text);
-}
-
-.view-single:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
-}
-
 .chip {
     padding: 0 12px;
     border: 1px solid var(--border);
@@ -211,50 +185,6 @@ kbd {
     outline-offset: 2px;
 }
 
-/* une ligne par produit : photo, nom, prix. Deux colonnes sur grand écran */
-.tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.tiles li.empty {
-    grid-column: 1 / -1;
-}
-
-.tile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 80px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface);
-    box-shadow: var(--shadow-card);
-    transition:
-        border-color 0.15s,
-        background 0.15s;
-}
-
-.tile:hover:has(.result:not(:disabled)) {
-    border-color: var(--primary);
-}
-
-.tile.in-cart {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 1px var(--primary);
-    background: var(--primary-soft);
-}
-
-.tile:has(.result:disabled) .thumb,
-.tile:has(.result:disabled) .result-text {
-    opacity: 0.55;
-}
-
 /* la photo est un bouton à part : un clic dessus l'agrandit, le reste de la ligne ajoute au panier */
 .thumb {
     display: grid;
@@ -274,88 +204,9 @@ kbd {
     object-fit: cover;
 }
 
-.thumb-zoom {
-    display: block;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    border-radius: inherit;
-    background: none;
-    cursor: zoom-in;
-}
-
 /* pastille de la loupe ou de l'appareil photo, dans le coin de la miniature */
 .thumb {
     position: relative;
-}
-
-.thumb-add {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    border-radius: inherit;
-    background: none;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-}
-
-.thumb-add:disabled {
-    cursor: progress;
-    opacity: 0.6;
-}
-
-.thumb-hint {
-    position: absolute;
-    right: -4px;
-    bottom: -4px;
-    display: grid;
-    place-items: center;
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--surface);
-    border-radius: 50%;
-    background: var(--primary);
-    color: #fff;
-}
-
-/* la loupe et l'appareil photo ne se montrent qu'au survol sur ordinateur :
-   pendant une vente, la carte reste propre */
-.thumb-zoom .thumb-hint,
-.thumb-add .thumb-hint {
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-
-.thumb-zoom:hover .thumb-hint,
-.thumb-zoom:focus-visible .thumb-hint,
-.thumb-add:hover .thumb-hint,
-.thumb-add:focus-visible .thumb-hint {
-    opacity: 1;
-}
-
-.gcorner-add {
-    opacity: 0;
-    transition: opacity 0.15s;
-}
-
-li:hover > .gcorner-add,
-.gcorner-add:focus-visible {
-    opacity: 1;
-}
-
-/* écran tactile : pas de survol, la photo s'ajoute depuis la fiche produit */
-@media (hover: none) {
-    .gcorner-add {
-        display: none;
-    }
-
-    .thumb-add {
-        pointer-events: none;
-    }
 }
 
 .photo-notice {
@@ -369,35 +220,35 @@ li:hover > .gcorner-add,
     box-shadow: var(--shadow-card);
 }
 
-.thumb-zoom:focus-visible,
-.thumb-add:focus-visible,
-.result:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
 /* pastilles d'initiales : huit teintes douces, stables pour un même produit */
 .tone-0 {
     --hue: 350;
 }
+
 .tone-1 {
     --hue: 24;
 }
+
 .tone-2 {
     --hue: 42;
 }
+
 .tone-3 {
     --hue: 145;
 }
+
 .tone-4 {
     --hue: 175;
 }
+
 .tone-5 {
     --hue: 205;
 }
+
 .tone-6 {
     --hue: 255;
 }
+
 .tone-7 {
     --hue: 300;
 }
@@ -435,48 +286,6 @@ li:hover > .gcorner-add,
     color: var(--success);
 }
 
-.result {
-    flex: 1;
-    min-width: 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 56px;
-    padding: 0;
-    border: 0;
-    border-radius: 8px;
-    background: none;
-    color: var(--text);
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-}
-
-.result:disabled {
-    cursor: default;
-}
-
-.result-text {
-    flex: 1;
-    min-width: 0;
-    display: grid;
-    gap: 2px;
-}
-
-.result-name {
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-    line-height: 1.3;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-.result-text small {
-    font-size: var(--fs-small);
-}
-
 /* stock bas : pastille orange */
 .stock {
     padding: 2px 8px;
@@ -489,32 +298,6 @@ li:hover > .gcorner-add,
 .gstock {
     color: var(--text-muted);
     font-size: var(--fs-small);
-}
-
-.result-price {
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-}
-
-.add {
-    flex-shrink: 0;
-    min-width: 36px;
-    height: 36px;
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    background: var(--primary-soft);
-    color: var(--primary-text, var(--primary));
-    font-size: var(--fs-small);
-    font-weight: var(--fw-semibold);
-}
-
-.tile:hover .add,
-.tile.in-cart .add {
-    background: var(--primary);
-    color: #fff;
 }
 
 /* carreaux : vignette nette et texte centré dessous */
@@ -689,11 +472,6 @@ li:hover > .gcorner-add,
     transition: opacity 0.15s;
 }
 
-.tile-skeleton {
-    height: 80px;
-    border-radius: var(--radius);
-}
-
 .empty {
     display: grid;
     justify-items: center;
@@ -710,11 +488,6 @@ li:hover > .gcorner-add,
     /* la barre du panier en bas d'écran demande de la place sous la page */
     :host(.has-cart) {
         padding-bottom: 88px;
-    }
-
-    /* panier ouvert : le catalogue défile au-dessus de la feuille (60 % de l'écran) */
-    :host(.sheet-open) {
-        padding-bottom: 60dvh;
     }
 
     .chip {
@@ -741,19 +514,17 @@ li:hover > .gcorner-add,
         box-shadow: none;
     }
 
-    .tiles {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 8px;
-    }
-
     .gtiles {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
     }
 }
 
-/* confirmation d'une vente gardée sur l'appareil, sans internet */
+/* confirmation d'une vente : reste visible même si le catalogue a défilé */
 .queued {
+    position: sticky;
+    top: 8px;
+    z-index: 30;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -918,13 +689,5 @@ li:hover > .gcorner-add,
 @media (max-width: 767px) {
     .toolbar {
         flex-wrap: nowrap;
-    }
-
-    /* bascule d'affichage : discrète, au bout des pastilles */
-    .view-single {
-        width: 36px;
-        height: 36px;
-        border: 0;
-        background: transparent;
     }
 }

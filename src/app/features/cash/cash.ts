@@ -1,6 +1,5 @@
-import { CashTabs } from "./cash-tabs/cash-tabs";
 import { DatePipe } from "@angular/common";
-import { Component, computed, inject } from "@angular/core";
+import { Component, computed, inject, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 import { map } from "rxjs";
@@ -26,7 +25,6 @@ const CLOSING_REMINDER_HOUR = 19;
     imports: [
         MoneyToggle,
         Avatar,
-        CashTabs,
         RouterLink,
         DatePipe,
         PageHeader,
@@ -131,6 +129,22 @@ export class Cash {
             month: "long",
         });
     }
+
+    // tout ce qui est sorti du tiroir : remboursements, dépenses et retraits
+    spent = computed(() => {
+        const { refunds, expenses, withdrawals } = this.summary();
+        return refunds + expenses + withdrawals;
+    });
+
+    teamOpen = signal(false);
+    teamToExplain = computed(() => this.team().filter((m) => m.explanationPending).length);
+    teamSummary = computed(() => {
+        const open = this.team().filter((m) => m.status === "OPEN").length;
+        const parts = [open === 0 ? "Aucune ouverte" : `${open} ouverte${open > 1 ? "s" : ""}`];
+        const toExplain = this.teamToExplain();
+        if (toExplain > 0) parts.push(`${toExplain} écart${toExplain > 1 ? "s" : ""} à expliquer`);
+        return parts.join(" · ");
+    });
 
     reload() {
         this.today.reload();

@@ -40,9 +40,9 @@ export const receiptMessage = (
         if (due > 0) lines.push(`Reste à payer : ${amount(due)}`);
     }
 
-    if (announce) lines.push("", announce);
+    // le bas du ticket est écrit par l'administrateur dans Paramètres
+    if (announce.trim()) lines.push("", announce.trim());
 
-    lines.push("", "Merci de votre visite !");
     return lines.join("\n");
 };
 

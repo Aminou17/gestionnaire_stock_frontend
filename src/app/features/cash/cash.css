@@ -42,33 +42,9 @@ app-page-header {
     min-width: 0;
 }
 
-/* sur petit écran, le résumé passe avant la longue liste des mouvements */
-@media (max-width: 1023px) {
-    .main {
-        display: contents;
-    }
-
-    .status,
-    .quick {
-        order: 1;
-    }
-
-    .side {
-        order: 2;
-    }
-
-    .team {
-        order: 3;
-    }
-
-    .movements {
-        order: 4;
-    }
-}
-
 @media (min-width: 1024px) {
     .layout {
-        grid-template-columns: minmax(0, 1fr) 360px;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 440px);
     }
 }
 
@@ -242,22 +218,8 @@ app-page-header {
     color: var(--danger);
 }
 
-.lines .total {
-    border-bottom: 0;
-    font-size: var(--fs-lead);
-}
-
-.lines .total dt {
-    color: var(--text);
-    font-weight: var(--fw-semibold);
-}
-
-.closing {
-    margin-top: 4px;
-    border-top: 1px solid var(--border);
-}
-
-.closing > div:last-child {
+/* dans la carte d'état, le résumé suit le solde sans trait de fin */
+.status .lines > div:last-child {
     border-bottom: 0;
 }
 
@@ -325,11 +287,6 @@ app-page-header {
 
     .balance strong {
         font-size: var(--fs-kpi);
-    }
-
-    /* sur téléphone, « Vendre » est déjà au milieu de la barre du bas */
-    .actions .new-sale {
-        display: none;
     }
 
     .actions .btn {
@@ -464,24 +421,50 @@ app-page-header {
     color: var(--danger);
 }
 
-.reminder {
-    border: 1px solid var(--primary);
-    background: var(--surface);
-    color: var(--text);
+/* le soir, « Clôturer » bat doucement pour qu'on ne l'oublie pas */
+.late {
+    animation: late-pulse 2s ease-in-out infinite;
 }
 
-/* le rappel du soir tient sur une ligne, le bouton à droite */
-@media (max-width: 767px) {
-    .reminder {
-        flex-wrap: nowrap;
+@keyframes late-pulse {
+    50% {
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--primary) 25%, transparent);
     }
+}
 
-    .reminder > span {
-        flex: 1 1 0;
+@media (prefers-reduced-motion: reduce) {
+    .late {
+        animation: none;
     }
+}
 
-    .reminder .link-btn {
-        margin-left: auto;
-        padding: 0 4px;
-    }
+.team {
+    padding: 4px 20px;
+}
+
+.team-toggle {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.team-summary {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
+
+.team-list {
+    padding-bottom: 8px;
+    border-top: 1px solid var(--border);
 }

@@ -117,10 +117,8 @@
         }
     </div>
 
-    <footer class="receipt-thanks">
-        @if (shop()?.receipt_footer; as footer) {
-            <p class="receipt-announce">{{ footer }}</p>
-        }
-        <span>Merci de votre visite !</span>
-    </footer>
+    <!-- le bas du ticket est écrit par l'administrateur dans Paramètres -->
+    @if (shop()?.receipt_footer?.trim(); as footer) {
+        <footer class="receipt-thanks">{{ footer }}</footer>
+    }
 </section>

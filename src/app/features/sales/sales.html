@@ -1,10 +1,4 @@
 <app-page-header title="Ventes">
-    @if (outbox.count() > 0) {
-        <a routerLink="/sales/pending" class="btn btn-outline pending-link">
-            <app-icon name="upload" [size]="18" />
-            <span>{{ outbox.count() }} en attente</span>
-        </a>
-    }
     @if (auth.isAdmin()) {
         <app-export-menu
             class="icon-phone"
@@ -19,40 +13,6 @@
         <span>Nouvelle vente</span>
     </a>
 </app-page-header>
-
-<!-- Compteurs de la période : cartes sur ordinateur, pastilles sur téléphone -->
-<div class="stats">
-    @for (tab of tabs(); track tab.label) {
-        <button
-            type="button"
-            class="card stat tinted"
-            [attr.data-tone]="tab.tone"
-            [class.selected]="isSelected(tab.value)"
-            [attr.aria-pressed]="isSelected(tab.value)"
-            (click)="selectStatus(tab.value)"
-        >
-            <span class="stat-label">{{ tab.label }}</span>
-            <span class="tone-icon"><app-icon [name]="tab.icon" [size]="18" /></span>
-            @if (firstLoad()) {
-                <span class="skeleton stat-skeleton"></span>
-            } @else {
-                <strong class="stat-value tone-{{ tab.tone }}">{{ tab.count ?? "—" }}</strong>
-            }
-        </button>
-    }
-
-    <div class="card stat stat-static tinted" [attr.data-tone]="summary().tone">
-        <span class="stat-label">{{ summary().label }}</span>
-        <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
-        @if (firstLoad()) {
-            <span class="skeleton stat-skeleton wide"></span>
-        } @else {
-            <strong appMoney class="stat-value tone-{{ summary().tone }}">{{
-                summary().amount | fcfa
-            }}</strong>
-        }
-    </div>
-</div>
 
 <section class="card list-card">
     @if (exportError()) {
@@ -306,11 +266,11 @@
                 title="Aucune vente à solder"
                 text="Toutes les ventes de cette période sont payées."
             />
-        } @else if (range().period === "all" && !search() && activeFilters().length === 0) {
+        } @else if (!search() && !paymentMethod() && sellerId() === null) {
             <app-empty-state
                 icon="cart"
-                title="Aucune vente pour le moment"
-                text="Votre première vente apparaîtra ici dès qu'elle sera enregistrée."
+                [title]="emptyTitle()"
+                text="Les ventes encaissées apparaîtront ici."
             >
                 <a routerLink="/sales/new" class="btn btn-primary">Nouvelle vente</a>
             </app-empty-state>
@@ -332,7 +292,7 @@
             </div>
         }
 
-        <!-- téléphone : la carte suit la puce choisie (encaissé, reste à encaisser, remboursé) -->
+        <!-- la carte suit la puce choisie (encaissé, reste à encaisser, remboursé) -->
         <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
             <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
             <div class="summary-main">
@@ -342,79 +302,7 @@
             <span class="summary-count">{{ summary().note }}</span>
         </section>
 
-        <div class="table-wrap">
-            <table [class.reloading]="sales.isLoading()">
-                <thead>
-                    <tr>
-                        <th>N°</th>
-                        <th>Date</th>
-                        @if (auth.isAdmin()) {
-                            <th>Vendeur</th>
-                        }
-                        <th>Client</th>
-                        <th>Paiement</th>
-                        <th class="num">Articles</th>
-                        <th class="num">Montant</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (sale of list(); track sale.id) {
-                        <tr
-                            [class.cancelled]="sale.status === 'CANCELLED'"
-                            (click)="openSale(sale)"
-                        >
-                            <td>
-                                <a
-                                    [routerLink]="['/sales', sale.id]"
-                                    class="sale-link"
-                                    (click)="$event.stopPropagation()"
-                                    >#{{ sale.number }}</a
-                                >
-                            </td>
-                            <td>
-                                {{
-                                    isToday(sale.created_at)
-                                        ? "Aujourd'hui, " + (sale.created_at | date: "HH:mm")
-                                        : (sale.created_at | date: "d MMM y, HH:mm")
-                                }}
-                            </td>
-                            @if (auth.isAdmin()) {
-                                <td>
-                                    {{ sale.user_name }}
-                                </td>
-                            }
-                            <td>
-                                @if (sale.customer_id) {
-                                    <a
-                                        class="customer-link"
-                                        [routerLink]="['/customers', sale.customer_id]"
-                                        (click)="$event.stopPropagation()"
-                                        >{{ sale.customer_name }}</a
-                                    >
-                                } @else {
-                                    {{ sale.customer_name }}
-                                }
-                            </td>
-                            <td>{{ paymentLabel(sale.payment_method) }}</td>
-                            <td class="num">{{ sale.items_count }}</td>
-                            <td class="num strong">{{ sale.total | fcfa }}</td>
-                            <td>
-                                @if (sale.status === "CANCELLED") {
-                                    <span class="badge badge-danger">Remboursée</span>
-                                } @else if (due(sale) > 0) {
-                                    <span class="badge badge-warning"
-                                        >Reste {{ due(sale) | fcfa }}</span
-                                    >
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Version téléphone : les ventes regroupées par jour -->
+        <!-- les ventes regroupées par jour, sur téléphone comme sur ordinateur -->
         <div class="days">
             @for (day of days(); track day.key) {
                 <section class="day">

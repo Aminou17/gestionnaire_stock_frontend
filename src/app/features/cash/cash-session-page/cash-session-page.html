@@ -60,9 +60,7 @@
                             }
                         }
                     } @else {
-                        <small class="muted">
-                            Cette caisse est encore ouverte. L'écart sera calculé à la clôture.
-                        </small>
+                        <small class="muted">En cours : l'écart sera connu à la clôture.</small>
                     }
                 </div>
                 @if (auth.isAdmin() && cash.status === "CLOSED") {
@@ -80,10 +78,6 @@
                         Ticket
                     </button>
                 }
-                <button type="button" class="btn btn-outline print" (click)="print()">
-                    <app-icon name="printer" [size]="18" />
-                    Imprimer
-                </button>
             </section>
 
             <section class="card panel movements">
@@ -92,7 +86,7 @@
                 </div>
                 <app-cash-movement-list
                     backLabel="Journée de caisse"
-                    [movements]="cash.movements"
+                    [movements]="latest()"
                     emptyText="Aucun mouvement sur cette caisse."
                 />
             </section>

@@ -6,15 +6,18 @@
 .receipt {
     display: grid;
     gap: 16px;
-    width: 72mm;
+    width: 100%;
+    max-width: 76mm;
     margin: 0 auto;
     padding-top: 4mm;
-    color: #111827;
+    color: #000;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
     /* police de caisse, comme les tickets de supermarché */
     font-family: "Courier New", "Liberation Mono", "DejaVu Sans Mono", monospace;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.4;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.45;
 }
 
 .receipt header,
@@ -48,26 +51,13 @@
 }
 
 .receipt-meta {
-    color: #374151;
-    font-size: 12px;
+    color: #111827;
+    font-size: 13px;
 }
 
 .receipt-client {
     margin-top: 8px;
     font-weight: 600;
-}
-
-/* petite annonce de la boutique, réglée dans Paramètres */
-.receipt-announce {
-    width: 100%;
-    margin: 0 0 6px;
-    padding: 8px 10px;
-    border: 1px dashed #9ca3af;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 1.4;
-    text-align: center;
-    overflow-wrap: anywhere;
 }
 
 .receipt-cancelled {
@@ -93,8 +83,8 @@
 
 .receipt-note {
     padding-left: 12px;
-    color: #374151;
-    font-size: 12px;
+    color: #111827;
+    font-size: 13px;
 }
 
 .receipt-line {
@@ -107,7 +97,7 @@
 
 .receipt-item .receipt-line {
     padding-left: 12px;
-    color: #374151;
+    color: #111827;
 }
 
 .receipt-sums {
@@ -121,7 +111,7 @@
 .receipt-total {
     align-items: baseline;
     margin: 4px 0 8px;
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 700;
     letter-spacing: -0.01em;
 }
@@ -137,16 +127,18 @@
 
 .receipt-thanks {
     padding-top: 16px;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
     border-top: 1px dashed #d1d5db;
-    color: #374151;
-    font-size: 12px;
+    color: #111827;
+    font-size: 13px;
 }
 
 /* détail d'un paiement en espèces : même alignement que les autres montants, en retrait */
 .receipt-sub {
     padding-left: 12px;
-    color: #374151;
-    font-size: 12px;
+    color: #111827;
+    font-size: 13px;
 }
 
 /* coordonnées et mentions légales : papier seulement */
@@ -156,6 +148,7 @@
 
 @media print {
     .receipt {
+        width: 72mm;
         color: #000;
         font-size: 12px;
     }
