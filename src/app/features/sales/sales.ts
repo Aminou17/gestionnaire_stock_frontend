@@ -15,7 +15,6 @@ import { Period, PeriodRange, validateRange } from "../../shared/period-filter/p
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { ExportFormat } from "../../core/export-format";
 import { ExportMenu } from "../../shared/export-menu/export-menu";
-import { Avatar } from "../../shared/avatar/avatar";
 import { Icon } from "../../shared/icon/icon";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { MoneyToggle } from "../../shared/money/money-toggle";
@@ -39,15 +38,12 @@ const PERIOD_PILLS: { value: Period; label: string }[] = [
     { value: "custom", label: "Dates" },
 ];
 
-type FilterKey = "period" | "payment" | "seller";
-
 @Component({
     selector: "app-sales",
     imports: [
         MoneyToggle,
         RouterLink,
         PageHeader,
-        Avatar,
         ExportMenu,
         Icon,
         FcfaPipe,
@@ -175,18 +171,6 @@ export class Sales {
     customTo = signal("");
     customError = signal<string | null>(null);
 
-    // filtres actifs, affichés en pastilles qu'on retire d'un clic
-    activeFilters = computed(() => {
-        const filters: { key: FilterKey; label: string }[] = [];
-        const method = this.paymentMethod();
-        if (method)
-            filters.push({ key: "payment", label: method === "CASH" ? "Espèces" : "Mobile Money" });
-        const seller = this.sellers().find((user) => user.id === this.sellerId());
-        if (this.sellerId() !== null)
-            filters.push({ key: "seller", label: seller?.name ?? "Vendeur" });
-        return filters;
-    });
-
     // carte du haut : elle suit la puce choisie (toutes, à solder, remboursées)
     summary = computed(() => {
         const counters = this.counters();
@@ -268,12 +252,6 @@ export class Sales {
         if (!from || !to) return "Dates choisies";
         const short = (date: string) => formatDate(date, "d MMM", this.locale);
         return from === to ? short(from) : `${short(from)} au ${short(to)}`;
-    }
-
-    clearFilter(key: FilterKey) {
-        if (key === "period") this.selectPeriod("all");
-        if (key === "payment") this.selectPayment(null);
-        if (key === "seller") this.selectSeller(null);
     }
 
     resetFilters() {

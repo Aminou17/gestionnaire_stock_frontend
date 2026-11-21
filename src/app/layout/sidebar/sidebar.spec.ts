@@ -66,7 +66,7 @@ describe("Sidebar", () => {
             "Catégories",
             "Historique du stock",
             "Alertes de stock",
-            "Rotation des produits",
+            "Vitesse de vente",
         ]);
     });
 
@@ -89,7 +89,7 @@ describe("Sidebar", () => {
             "Corriger le stock",
             "Historique du stock",
             "Alertes de stock",
-            "Rotation des produits",
+            "Vitesse de vente",
             "Entrées de stock",
             "Fournisseurs",
             "Utilisateurs",
@@ -118,7 +118,7 @@ describe("Sidebar", () => {
             "Corriger le stock",
             "Historique du stock",
             "Alertes de stock",
-            "Rotation des produits",
+            "Vitesse de vente",
             "Entrées de stock",
             "Fournisseurs",
         ]);

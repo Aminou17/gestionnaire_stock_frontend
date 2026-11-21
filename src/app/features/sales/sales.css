@@ -711,3 +711,60 @@ app-page-header {
     display: grid;
     min-width: 200px;
 }
+
+.filter-icon {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text-muted);
+}
+
+.filter-icon.active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.filter-icon select {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.filter-icon:focus-within {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* la période se change dans la carte du haut, sans champ de plus */
+.period-pill {
+    flex: none;
+    height: 32px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-muted) 12%, var(--surface));
+    color: var(--text);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+}
+
+.searchbar {
+    align-items: center;
+}
+
+/* pas de traits entre les ventes : l'espace suffit */
+.sale-row {
+    border-bottom: 0;
+}

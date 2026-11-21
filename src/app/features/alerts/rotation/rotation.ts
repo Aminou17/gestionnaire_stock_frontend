@@ -35,8 +35,6 @@ const labels: Record<RotationSpeed, string> = {
     DORMANT: "Ne bouge pas",
 };
 
-const speeds: RotationSpeed[] = ["FAST", "NORMAL", "SLOW", "DORMANT"];
-
 @Component({
     selector: "app-rotation",
     imports: [RouterLink, PageHeader, Icon, PhotoZoom, DaysLeftPipe, Pagination],
@@ -121,24 +119,6 @@ export class Rotation {
         event.stopPropagation();
         if (product.image) this.zoom.set({ src: product.image, name: product.name });
     }
-
-    // la barre de répartition : la part de chaque vitesse parmi tous les produits
-    shares = computed(() => {
-        const total = this.all().length || 1;
-        return speeds.map((speed) => ({
-            speed,
-            label: labels[speed],
-            count: this.count(speed),
-            width: (this.count(speed) / total) * 100,
-        }));
-    });
-
-    splitLabel = computed(() =>
-        this.shares()
-            .filter((share) => share.count > 0)
-            .map((share) => `${share.label} ${share.count}`)
-            .join(", "),
-    );
 
     select(view: View) {
         this.view.set(view);

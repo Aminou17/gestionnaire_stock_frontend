@@ -125,9 +125,17 @@ describe("Sales", () => {
         expect(filters.from).toBeNull();
     });
 
+    const chooseStatus = (index: number) => {
+        const select = el.querySelector<HTMLSelectElement>(
+            'select[aria-label="Filtrer les ventes"]',
+        )!;
+        select.value = String(index);
+        select.dispatchEvent(new Event("change"));
+    };
+
     it("should filter by status from page 1", async () => {
         await render();
-        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[2].click();
+        chooseStatus(2);
         await fixture.whenStable();
 
         expect(getSalesPage).toHaveBeenLastCalledWith(
@@ -145,7 +153,7 @@ describe("Sales", () => {
             expect.objectContaining({ page: 2, limit: 25 }),
         );
 
-        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[2].click();
+        chooseStatus(2);
         await fixture.whenStable();
         expect(getSalesPage).toHaveBeenLastCalledWith(
             expect.objectContaining({ status: "CANCELLED", page: 1 }),
@@ -154,7 +162,7 @@ describe("Sales", () => {
 
     it("should ask only for unpaid sales from the 'À solder' card", async () => {
         await render();
-        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[1].click();
+        chooseStatus(1);
         await fixture.whenStable();
 
         expect(getSalesPage).toHaveBeenLastCalledWith(
@@ -184,10 +192,10 @@ describe("Sales", () => {
     };
 
     const pick = async (label: string) => {
-        const button = [...el.querySelectorAll<HTMLButtonElement>(".option, .period")].find(
-            (option) => option.textContent!.trim() === label,
-        )!;
-        button.click();
+        const select = el.querySelector<HTMLSelectElement>('select[aria-label="Période"]')!;
+        const index = [...select.options].findIndex((o) => o.textContent!.trim() === label);
+        select.value = select.options[index].value;
+        select.dispatchEvent(new Event("change"));
         await fixture.whenStable();
     };
 
@@ -212,38 +220,6 @@ describe("Sales", () => {
         expect(filters.from).toMatch(/-01$/);
     });
 
-    it("should send the payment method chosen in the filter", async () => {
-        await render();
-        await open();
-        await pick("Mobile Money");
-
-        const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
-        expect(filters.paymentMethod).toBe("MOBILE_MONEY");
-        expect(filters.page).toBe(1);
-        expect(el.querySelectorAll(".active-chip").length).toBe(1);
-    });
-
-    it("should remove a filter with the cross of its chip and reset them all", async () => {
-        await render();
-        await open();
-        await pick("Espèces");
-        await pick("7 jours");
-        // la période se lit sur ses pastilles : seul le paiement est un filtre en plus
-        expect(el.querySelectorAll(".active-chip").length).toBe(1);
-
-        el.querySelector<HTMLButtonElement>(".active-chip")!.click();
-        await fixture.whenStable();
-        expect(el.querySelectorAll(".active-chip").length).toBe(0);
-        await pick("Espèces");
-
-        el.querySelector<HTMLButtonElement>(".active-chip")!.click();
-        await fixture.whenStable();
-        expect(el.querySelectorAll(".active-chip").length).toBe(0);
-        expect(getSalesPage.mock.lastCall![0]).toEqual(
-            expect.objectContaining({ paymentMethod: null }),
-        );
-    });
-
     it("should follow the chip in the summary card", async () => {
         await render();
         const summary = () => ({
@@ -254,14 +230,14 @@ describe("Sales", () => {
         expect(summary().textContent).toContain("Encaissé");
         expect(summary().textContent).toContain("3 000 F");
 
-        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[1].click();
+        chooseStatus(1);
         await fixture.whenStable();
         expect(summary().getAttribute("data-tone")).toBe("warning");
         expect(summary().textContent).toContain("Reste à encaisser");
         expect(summary().textContent).toContain("7 500 F");
         expect(summary().textContent).toContain("2 ventes");
 
-        el.querySelectorAll<HTMLButtonElement>(".status-chips .chip")[2].click();
+        chooseStatus(2);
         await fixture.whenStable();
         expect(summary().getAttribute("data-tone")).toBe("danger");
         expect(summary().textContent).toContain("Remboursé");

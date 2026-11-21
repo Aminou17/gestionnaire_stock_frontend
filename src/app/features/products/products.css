@@ -1029,3 +1029,66 @@ td.num small {
         padding: 0;
     }
 }
+
+/* filtres : un bouton Filtre ouvre catégorie, statut et tri, rien d'ouvert par défaut sur téléphone */
+@media (max-width: 767px) {
+    .list-card > .filters {
+        display: none;
+    }
+
+    .list-card > .filters.open {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--surface);
+    }
+
+    .list-card > .filters .sheet-head,
+    .list-card > .filters .sheet-foot,
+    .sheet-backdrop {
+        display: none;
+    }
+
+    .toolbar .filter-btn {
+        display: inline-flex;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        min-height: 40px;
+        padding: 0;
+        border-radius: 12px;
+    }
+
+    .toolbar .filter-label {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .list-card > .filters {
+        display: flex;
+        gap: 8px;
+    }
+
+    .list-card > .filters .field {
+        flex: 1;
+        max-width: 220px;
+        min-width: 0;
+    }
+
+    .list-card > .filters .field-label,
+    .list-card > .filters .sheet-head,
+    .list-card > .filters .sheet-foot {
+        display: none;
+    }
+
+    .list-card > .filters .input {
+        height: 38px;
+        min-height: 38px;
+        padding-inline: 10px;
+        font-size: var(--fs-small);
+    }
+}

@@ -14,20 +14,6 @@
     </a>
 </app-page-header>
 
-<!-- période : pastilles visibles, comme sur Dépenses -->
-<div class="periods" role="group" aria-label="Période">
-    @for (choice of periodPills; track choice.value) {
-        <button
-            type="button"
-            class="period"
-            [attr.aria-pressed]="range().period === choice.value"
-            (click)="selectPeriod(choice.value)"
-        >
-            {{ choice.label }}
-        </button>
-    }
-</div>
-
 @if (range().period === "custom") {
     <div class="custom-range" role="group" aria-label="Dates choisies">
         <label class="date-field">
@@ -63,28 +49,23 @@
 <!-- le résumé suit la pastille choisie (encaissé, reste à encaisser, remboursé) -->
 @if (!firstLoad() && !(sales.error() && list().length === 0)) {
     <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
-        <!-- les trois vues (toutes, à solder, remboursées) sont dans la carte : un seul bloc au lieu de deux -->
-        <div class="status-chips">
-            @for (tab of tabs(); track tab.label) {
-                <button
-                    type="button"
-                    class="chip"
-                    [class.selected]="isSelected(tab.value)"
-                    [attr.aria-pressed]="isSelected(tab.value)"
-                    (click)="selectStatus(tab.value)"
-                >
-                    {{ tab.short }}
-                    <span>{{ tab.count ?? "—" }}</span>
-                </button>
-            }
-        </div>
         <div class="summary-body">
             <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
             <div class="summary-main">
-                <span class="summary-label">{{ summary().label }}</span>
+                <span class="summary-label">{{ summary().label }} · {{ summary().note }}</span>
                 <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>
             </div>
-            <span class="summary-count">{{ summary().note }}</span>
+            <select
+                class="period-pill"
+                aria-label="Période"
+                (change)="selectPeriod($any($event.target).value)"
+            >
+                @for (choice of periodPills; track choice.value) {
+                    <option [value]="choice.value" [selected]="range().period === choice.value">
+                        {{ choice.label }}
+                    </option>
+                }
+            </select>
         </div>
     </section>
 }
@@ -106,78 +87,22 @@
                 (input)="onSearch($any($event.target).value)"
             />
         </div>
+
+        <!-- icône de filtre : la liste native s'ouvre au toucher, sans bouton de plus -->
+        <label class="filter-icon" [class.active]="status() !== null || unpaid()">
+            <app-icon name="filter" [size]="20" />
+            <select
+                aria-label="Filtrer les ventes"
+                (change)="selectStatus(tabs()[+$any($event.target).value].value)"
+            >
+                @for (tab of tabs(); track tab.label; let i = $index) {
+                    <option [value]="i" [selected]="isSelected(tab.value)">
+                        {{ tab.short }}{{ tab.count ? " (" + tab.count + ")" : "" }}
+                    </option>
+                }
+            </select>
+        </label>
     </div>
-
-    <!-- les filtres restent sous la recherche, toujours visibles : paiement et vendeur -->
-    <div class="filters" id="sales-filters">
-        <div role="group" aria-label="Paiement">
-            <span class="field-label">Paiement</span>
-            <div class="options">
-                <button
-                    type="button"
-                    class="option"
-                    [attr.aria-pressed]="paymentMethod() === null"
-                    (click)="selectPayment(null)"
-                >
-                    Tous
-                </button>
-                <button
-                    type="button"
-                    class="option"
-                    [attr.aria-pressed]="paymentMethod() === 'CASH'"
-                    (click)="selectPayment('CASH')"
-                >
-                    <app-icon name="banknote" [size]="16" />
-                    Espèces
-                </button>
-                <button
-                    type="button"
-                    class="option"
-                    [attr.aria-pressed]="paymentMethod() === 'MOBILE_MONEY'"
-                    (click)="selectPayment('MOBILE_MONEY')"
-                >
-                    <app-icon name="phone" [size]="16" />
-                    Mobile Money
-                </button>
-            </div>
-        </div>
-
-        @if (auth.isAdmin() && sellers().length > 1) {
-            <label class="seller-select">
-                <span class="field-label">Vendeur</span>
-                <select
-                    class="input"
-                    [value]="sellerId() ?? ''"
-                    (change)="
-                        selectSeller($any($event.target).value ? +$any($event.target).value : null)
-                    "
-                >
-                    <option value="">Tous les vendeurs</option>
-                    @for (user of sellers(); track user.id) {
-                        <option [value]="user.id" [selected]="sellerId() === user.id">
-                            {{ user.name }}
-                        </option>
-                    }
-                </select>
-            </label>
-        }
-    </div>
-
-    @if (activeFilters().length > 0) {
-        <div class="active-filters">
-            @for (filter of activeFilters(); track filter.key) {
-                <button
-                    type="button"
-                    class="active-chip"
-                    [attr.aria-label]="'Retirer le filtre ' + filter.label"
-                    (click)="clearFilter(filter.key)"
-                >
-                    {{ filter.label }}
-                    <app-icon name="close" [size]="14" />
-                </button>
-            }
-        </div>
-    }
 
     @if (firstLoad()) {
         <div class="loading">

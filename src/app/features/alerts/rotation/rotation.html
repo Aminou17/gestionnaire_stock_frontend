@@ -1,36 +1,26 @@
 <app-page-header
-    title="Rotation des produits"
-    subtitle="Vitesse de vente sur les 30 derniers jours"
+    title="Vitesse de vente"
+    subtitle="Ce qui se vend, sur les 30 derniers jours"
     section="Stock"
     [back]="back.link"
     [backLabel]="back.label"
 />
 
 @if (!rotation.error() && all().length > 0) {
-    <section class="card summary" aria-label="Répartition des produits">
-        <div class="split" role="img" [attr.aria-label]="'Répartition : ' + splitLabel()">
-            @for (share of shares(); track share.speed) {
-                @if (share.count > 0) {
-                    <i
-                        class="seg {{ share.speed.toLowerCase() }}"
-                        [style.width.%]="share.width"
-                    ></i>
-                }
-            }
+    <div class="figures" aria-label="Résumé">
+        <div class="card figure tinted" data-tone="success">
+            <span class="figure-label">Sortent vite</span>
+            <strong class="figure-value">{{ count("FAST") }}</strong>
         </div>
-
-        @if (urgentCount() > 0) {
-            <p class="urgent-note">
-                <strong>{{ urgentCount() }}</strong>
-                {{
-                    urgentCount() === 1
-                        ? "produit qui sort vite a"
-                        : "produits qui sortent vite ont"
-                }}
-                moins de 14 jours de stock.
-            </p>
-        }
-    </section>
+        <div class="card figure tinted" data-tone="danger">
+            <span class="figure-label">Bientôt en rupture</span>
+            <strong class="figure-value">{{ urgentCount() }}</strong>
+        </div>
+        <div class="card figure tinted" data-tone="warning">
+            <span class="figure-label">À solder</span>
+            <strong class="figure-value">{{ count("CLEAR") }}</strong>
+        </div>
+    </div>
 }
 
 <section class="card list-card">
@@ -62,7 +52,7 @@
     } @else if (rotation.error()) {
         <div class="empty" role="alert">
             <span class="empty-icon" aria-hidden="true"><app-icon name="alert" [size]="22" /></span>
-            <p>Impossible de charger la rotation des produits.</p>
+            <p>Impossible de charger la vitesse de vente.</p>
             <button type="button" class="btn btn-outline btn-sm" (click)="rotation.reload()">
                 Réessayer
             </button>

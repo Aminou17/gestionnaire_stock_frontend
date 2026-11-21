@@ -52,7 +52,7 @@ export const SECTIONS: NavSection[] = [
                     // la rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
                     { label: "Alertes de stock", path: "/alerts", icon: "alert", exact: true },
                     {
-                        label: "Rotation des produits",
+                        label: "Vitesse de vente",
                         path: "/alerts/rotation",
                         icon: "trending-up",
                     },

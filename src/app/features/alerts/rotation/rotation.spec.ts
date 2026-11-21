@@ -175,7 +175,7 @@ describe("Rotation", () => {
     it("signale les produits qui sortent vite avec moins de 14 jours de stock", async () => {
         await load([bazin, pagne, savon]);
 
-        expect(text()).toContain("1 produit qui sort vite a moins de 14 jours de stock");
+        expect(text()).toContain("Bientôt en rupture");
         expect((fixture.nativeElement as HTMLElement).querySelector(".days.urgent")).not.toBeNull();
     });
 
@@ -213,6 +213,6 @@ describe("Rotation", () => {
         await fixture.whenStable();
         fixture.detectChanges();
 
-        expect(text()).toContain("Impossible de charger la rotation des produits.");
+        expect(text()).toContain("Impossible de charger la vitesse de vente.");
     });
 });

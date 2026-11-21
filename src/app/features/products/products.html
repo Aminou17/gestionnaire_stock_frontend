@@ -74,7 +74,7 @@
                 #searchBox
                 class="input"
                 type="search"
-                placeholder="Chercher ou scanner…"
+                placeholder="Chercher…"
                 aria-label="Rechercher un produit"
                 (input)="onSearch($any($event.target).value)"
             />
@@ -139,7 +139,7 @@
         <label class="field">
             <span class="field-label">Catégorie</span>
             <select class="input" (change)="selectCategory($any($event.target).value)">
-                <option value="">Toutes les catégories</option>
+                <option value="">Catégorie</option>
                 @for (category of categoryList(); track category.id) {
                     <option [value]="category.id" [selected]="category.id === categoryId()">
                         {{ category.name }}

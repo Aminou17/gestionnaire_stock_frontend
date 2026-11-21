@@ -254,7 +254,7 @@ export const routes: Routes = [
             },
             {
                 path: "alerts/rotation",
-                title: "Rotation des produits",
+                title: "Vitesse de vente",
                 loadComponent: () =>
                     import("./features/alerts/rotation/rotation").then((m) => m.Rotation),
             },

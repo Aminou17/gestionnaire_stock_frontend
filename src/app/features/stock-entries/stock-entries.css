@@ -321,7 +321,7 @@ tbody tr:hover {
         gap: 12px;
     }
 
-    ..stats,
+    .stats,
     .table-wrap {
         display: none;
     }
