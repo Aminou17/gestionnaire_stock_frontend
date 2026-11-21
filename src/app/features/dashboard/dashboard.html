@@ -1,4 +1,14 @@
 <app-page-header title="Accueil" [subtitle]="today">
+    <button
+        type="button"
+        class="theme-btn"
+        [attr.aria-label]="
+            theme.theme() === 'dark' ? 'Passer au mode clair' : 'Passer au mode sombre'
+        "
+        (click)="theme.toggle()"
+    >
+        <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="20" />
+    </button>
     @if (auth.isAdmin()) {
         <!-- sur téléphone, "Vendre" est déjà dans la barre du bas -->
         <a routerLink="/sales/new" class="btn btn-primary header-sale">
