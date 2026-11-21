@@ -30,9 +30,6 @@ const discountValidator = (group: AbstractControl): ValidationErrors | null => {
     return null;
 };
 
-// valeur de l'option "+ Créer" dans les listes de catégories et de fournisseurs
-const NEW_ID = -1;
-
 @Component({
     selector: "app-product-form",
     imports: [ReactiveFormsModule, Icon, FcfaPipe, BarcodeScanner],
@@ -56,8 +53,9 @@ export class ProductForm {
     form = this.fb.group(
         {
             name: ["", Validators.required],
-            categoryId: [0, Validators.min(1)],
-            supplierId: [0, Validators.min(1)],
+            // facultatifs : 0 veut dire aucun
+            categoryId: [0],
+            supplierId: [0],
             // le backend refuse un prix d'achat à 0 à la création
             purchasePrice: [null as number | null, [Validators.required, Validators.min(1)]],
             salePrice: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -70,8 +68,6 @@ export class ProductForm {
         },
         { validators: discountValidator },
     );
-
-    protected newId = NEW_ID;
 
     // petit formulaire "Créer une catégorie", ouvert depuis la liste des catégories
     categoryForm = this.fb.group({
@@ -147,44 +143,25 @@ export class ProductForm {
 
     private values = toSignal(this.form.valueChanges, { initialValue: this.form.getRawValue() });
 
-    // dernier choix valable, rétabli quand on choisit "+ Créer"
-    private lastCategoryId = 0;
-    private lastSupplierId = 0;
-
-    constructor() {
-        // Ouvrir le petit formulaire quand on choisit "+ Créer une catégorie"
-        this.form.controls.categoryId.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => {
-            if (id !== NEW_ID) {
-                this.lastCategoryId = id;
-                return;
-            }
-            this.form.controls.categoryId.setValue(this.lastCategoryId, { emitEvent: false });
-            this.categoryForm.reset();
-            this.categoryError.set(null);
-            this.addingCategory.set(true);
-        });
-
-        // Ouvrir le petit formulaire quand on choisit "+ Créer un fournisseur"
-        this.form.controls.supplierId.valueChanges.pipe(takeUntilDestroyed()).subscribe((id) => {
-            if (id !== NEW_ID) {
-                this.lastSupplierId = id;
-                return;
-            }
-            this.form.controls.supplierId.setValue(this.lastSupplierId, { emitEvent: false });
-            this.supplierForm.reset();
-            this.supplierError.set(null);
-            this.addingSupplier.set(true);
-        });
+    openCategoryForm() {
+        this.categoryForm.reset();
+        this.categoryError.set(null);
+        this.addingCategory.set(true);
     }
+
+    openSupplierForm() {
+        this.supplierForm.reset();
+        this.supplierError.set(null);
+        this.addingSupplier.set(true);
+    }
+
     pricingMode = computed(() => this.values().pricingMode);
 
-    // champs obligatoires pas encore remplis : ils guident l'utilisateur
+    // champs obligatoires pas encore remplis
     todo = computed(() => {
         const v = this.values();
         return {
             name: !v.name?.trim(),
-            category: !v.categoryId,
-            supplier: !v.supplierId,
             purchase: !v.purchasePrice,
             sale: !v.salePrice,
             discount:
@@ -192,18 +169,6 @@ export class ProductForm {
                 (v.maxDiscount === null || v.maxDiscount === undefined),
         };
     });
-    missing = computed(() => {
-        const todo = this.todo();
-        return [
-            todo.name ? "le nom" : null,
-            todo.category ? "la catégorie" : null,
-            todo.supplier ? "le fournisseur" : null,
-            todo.purchase ? "le prix d'achat" : null,
-            todo.sale ? "le prix de vente" : null,
-            todo.discount ? "la remise maximale" : null,
-        ].filter((label): label is string => label !== null);
-    });
-    requiredCount = computed(() => (this.pricingMode() === "NEGOTIABLE" ? 6 : 5));
 
     // Marge affichée sous les prix
     margin = computed(() => {
@@ -438,8 +403,8 @@ export class ProductForm {
         const value = this.form.getRawValue();
         const input = {
             name: value.name.trim(),
-            categoryId: value.categoryId,
-            supplierId: value.supplierId,
+            categoryId: value.categoryId || null,
+            supplierId: value.supplierId || null,
             purchasePrice: value.purchasePrice!,
             salePrice: value.salePrice!,
             pricingMode: value.pricingMode,

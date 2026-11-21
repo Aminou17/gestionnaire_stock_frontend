@@ -119,25 +119,6 @@ describe("ProductForm", () => {
         );
     });
 
-    it("should list what is still missing and say when everything is ready", () => {
-        component.openNew();
-        expect(component.missing()).toEqual([
-            "le nom",
-            "la catégorie",
-            "le fournisseur",
-            "le prix d'achat",
-            "le prix de vente",
-        ]);
-
-        fill("FIXED", null);
-        expect(component.missing()).toEqual([]);
-
-        component.setMode("NEGOTIABLE");
-        component.form.controls.maxDiscount.setValue(null);
-        expect(component.missing()).toEqual(["la remise maximale"]);
-        expect(component.requiredCount()).toBe(6);
-    });
-
     it("should not touch the photo when it was not changed", () => {
         createProduct.mockReturnValue(of({ id: 21 }));
         component.openNew();
@@ -212,7 +193,7 @@ describe("ProductForm", () => {
         component.openNew();
         await fixture.whenStable();
 
-        await pick("supplierId", -1);
+        component.openSupplierForm();
         expect(component.addingSupplier()).toBe(true);
         // "+ Créer" n'est jamais gardé comme choix
         expect(component.form.controls.supplierId.value).toBe(0);
@@ -230,7 +211,7 @@ describe("ProductForm", () => {
 
     it("should not create a supplier without a name", async () => {
         component.openNew();
-        await pick("supplierId", -1);
+        component.openSupplierForm();
         component.addSupplier();
 
         expect(createSupplier).not.toHaveBeenCalled();
@@ -239,7 +220,7 @@ describe("ProductForm", () => {
     it("should keep the previous category when the new category form is cancelled", async () => {
         component.openNew();
         await pick("categoryId", 1);
-        await pick("categoryId", -1);
+        component.openCategoryForm();
 
         expect(component.addingCategory()).toBe(true);
         expect(component.form.controls.categoryId.value).toBe(1);
@@ -251,7 +232,8 @@ describe("ProductForm", () => {
 
     it("should create a category with its description and select it", async () => {
         component.openNew();
-        await pick("categoryId", -1);
+        await fixture.whenStable();
+        component.openCategoryForm();
 
         component.categoryForm.setValue({ name: " Wax ", description: "  Pagnes wax  " });
         component.addCategory();

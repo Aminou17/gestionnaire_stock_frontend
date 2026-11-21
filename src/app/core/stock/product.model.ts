@@ -5,7 +5,7 @@ export type ProductStatus = "active" | "deleted" | "all";
 export interface Product {
     id: number;
     name: string;
-    category_name: string;
+    category_name: string | null;
     // envoyé seulement à l'admin
     purchase_price?: number;
     sale_price: number;
@@ -71,8 +71,8 @@ export interface ProductFilters {
 
 export interface ProductInput {
     name: string;
-    categoryId: number;
-    supplierId: number;
+    categoryId: number | null;
+    supplierId: number | null;
     purchasePrice: number;
     salePrice: number;
     pricingMode: PricingMode;

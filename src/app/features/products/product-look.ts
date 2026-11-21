@@ -25,9 +25,9 @@ export const productInitials = (name: string) => {
     return letters.toUpperCase();
 };
 
-export const categoryTone = (category: string) => {
+export const categoryTone = (category: string | null) => {
     let sum = 0;
-    for (const char of category) sum += char.charCodeAt(0);
+    for (const char of category ?? "") sum += char.charCodeAt(0);
     return sum % 4;
 };
 

@@ -339,57 +339,6 @@ h2:focus {
 }
 
 /* ce qu'il reste à remplir : bandeau collé en haut, champs vides mis en évidence */
-.progress {
-    position: sticky;
-    top: -16px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid var(--primary);
-    border-radius: 12px;
-    background: var(--primary-soft);
-    color: var(--primary-text);
-    box-shadow: var(--shadow-card);
-}
-
-.progress.done {
-    border-color: var(--success);
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.progress-icon {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--surface);
-}
-
-.progress-text {
-    display: grid;
-    flex: 1;
-    gap: 2px;
-    min-width: 0;
-    font-size: var(--fs-body);
-}
-
-.progress-text small {
-    font-size: var(--fs-small);
-    line-height: 1.4;
-}
-
-.progress-count {
-    flex-shrink: 0;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-    font-variant-numeric: tabular-nums;
-}
-
 .field .input.todo,
 .money .input.todo {
     border-color: var(--primary);
@@ -454,4 +403,31 @@ h2:focus {
     margin-left: 26px;
     color: var(--text-muted);
     font-weight: var(--fw-regular, 400);
+}
+
+/* titre du champ et lien d'ajout visible à droite, comme dans les grands logiciels */
+.field-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.add-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+}
+
+.field-head label {
+    font-weight: var(--fw-semibold);
 }

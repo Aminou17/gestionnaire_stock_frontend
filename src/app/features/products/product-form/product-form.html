@@ -21,25 +21,6 @@
                     <div class="skeleton field-skeleton"></div>
                 }
             } @else {
-                <div class="progress" [class.done]="missing().length === 0" role="status">
-                    <span class="progress-icon">
-                        <app-icon [name]="missing().length === 0 ? 'check' : 'edit'" [size]="18" />
-                    </span>
-                    <div class="progress-text">
-                        <strong>{{
-                            missing().length === 0 ? "Tout est prêt" : "À remplir"
-                        }}</strong>
-                        <small>{{
-                            missing().length === 0
-                                ? "Vous pouvez enregistrer."
-                                : "Il manque " + missing().join(", ") + "."
-                        }}</small>
-                    </div>
-                    <span class="progress-count"
-                        >{{ requiredCount() - missing().length }}/{{ requiredCount() }}</span
-                    >
-                </div>
-
                 <section class="group">
                     <h3><span class="step">1</span>Informations</h3>
                     <label class="field">
@@ -62,31 +43,20 @@
                         }
                     </label>
 
-                    <label class="field">
-                        <span>Catégorie</span>
-                        <select
-                            class="input"
-                            formControlName="categoryId"
-                            [class.todo]="todo().category"
-                            [attr.aria-invalid]="
-                                form.controls.categoryId.touched && form.controls.categoryId.invalid
-                            "
-                            [class.invalid]="
-                                form.controls.categoryId.touched && form.controls.categoryId.invalid
-                            "
-                        >
-                            <option [ngValue]="0" disabled>Choisir…</option>
+                    <div class="field">
+                        <div class="field-head">
+                            <label for="category">Catégorie</label>
+                            <button type="button" class="add-link" (click)="openCategoryForm()">
+                                <app-icon name="plus" [size]="14" /> Nouvelle
+                            </button>
+                        </div>
+                        <select id="category" class="input" formControlName="categoryId">
+                            <option [ngValue]="0">Aucune</option>
                             @for (category of activeCategories(); track category.id) {
                                 <option [ngValue]="category.id">{{ category.name }}</option>
                             }
-                            <option [ngValue]="newId">+ Créer une catégorie…</option>
                         </select>
-                        @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
-                            <small class="field-error" role="alert"
-                                >Choisissez une catégorie.</small
-                            >
-                        }
-                    </label>
+                    </div>
 
                     @if (addingCategory()) {
                         <!-- pas de <form> imbriqué : Entrée crée la catégorie, pas le produit -->
@@ -158,30 +128,18 @@
                     }
 
                     <div class="field">
-                        <label for="supplier">Fournisseur</label>
-                        <select
-                            id="supplier"
-                            class="input"
-                            formControlName="supplierId"
-                            [class.todo]="todo().supplier"
-                            [attr.aria-invalid]="
-                                form.controls.supplierId.touched && form.controls.supplierId.invalid
-                            "
-                            [class.invalid]="
-                                form.controls.supplierId.touched && form.controls.supplierId.invalid
-                            "
-                        >
-                            <option [ngValue]="0" disabled>Choisir…</option>
+                        <div class="field-head">
+                            <label for="supplier">Fournisseur</label>
+                            <button type="button" class="add-link" (click)="openSupplierForm()">
+                                <app-icon name="plus" [size]="14" /> Nouveau
+                            </button>
+                        </div>
+                        <select id="supplier" class="input" formControlName="supplierId">
+                            <option [ngValue]="0">Aucun</option>
                             @for (supplier of supplierList(); track supplier.id) {
                                 <option [ngValue]="supplier.id">{{ supplier.name }}</option>
                             }
-                            <option [ngValue]="newId">+ Créer un fournisseur…</option>
                         </select>
-                        @if (form.controls.supplierId.touched && form.controls.supplierId.invalid) {
-                            <small class="field-error" role="alert"
-                                >Choisissez un fournisseur.</small
-                            >
-                        }
                     </div>
 
                     @if (addingSupplier()) {
