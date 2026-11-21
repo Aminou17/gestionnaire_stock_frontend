@@ -399,6 +399,14 @@ export const routes: Routes = [
                             ),
                     },
                     {
+                        path: "install",
+                        title: "Installer l'application",
+                        loadComponent: () =>
+                            import("./features/settings/settings-install/settings-install").then(
+                                (m) => m.SettingsInstall,
+                            ),
+                    },
+                    {
                         path: "sales",
                         title: "Paramètres des ventes",
                         canActivate: [adminGuard],

@@ -1,0 +1,122 @@
+:host {
+    display: grid;
+    gap: 16px;
+    max-width: 640px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+.hero {
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    padding: 28px 20px;
+    text-align: center;
+    background: linear-gradient(
+        160deg,
+        color-mix(in srgb, var(--primary) 16%, var(--surface)) 0%,
+        var(--surface) 70%
+    );
+}
+
+.hero.done {
+    justify-items: start;
+    grid-auto-flow: column;
+    align-items: center;
+    text-align: left;
+}
+
+.hero h2,
+.reassure h3,
+.share h3 {
+    margin: 0;
+    font-size: var(--fs-heading);
+}
+
+.hero p,
+.reassure p,
+.share p {
+    margin: 4px 0 0;
+}
+
+.hero-logo {
+    border-radius: 18px;
+    box-shadow: var(--shadow-card);
+}
+
+.hero-icon {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    background: var(--success);
+    color: #fff;
+}
+
+.big {
+    min-height: 52px;
+    font-size: var(--fs-lead);
+}
+
+.small {
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
+.steps {
+    display: grid;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    text-align: left;
+}
+
+.steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.step-n {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-weight: var(--fw-bold);
+    font-size: var(--fs-small);
+}
+
+.reassure,
+.share {
+    display: grid;
+    gap: 8px;
+    padding: 20px;
+}
+
+.reassure h3,
+.share h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.share-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+@media (max-width: 767px) {
+    .share-actions .btn {
+        flex: 1 1 100%;
+    }
+}

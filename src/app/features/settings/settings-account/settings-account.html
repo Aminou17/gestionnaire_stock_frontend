@@ -205,7 +205,7 @@
     </button>
 
     @if (pwa.available) {
-        <button type="button" class="option" (click)="pwa.install()">
+        <a routerLink="/settings/install" class="option">
             <span class="option-icon"><app-icon name="download" [size]="18" /></span>
             <span class="option-text">
                 Installer {{ productName }}
@@ -215,7 +215,7 @@
                     <small class="muted">{{ pwa.hint }}</small>
                 }
             </span>
-        </button>
+        </a>
     }
 </section>
 

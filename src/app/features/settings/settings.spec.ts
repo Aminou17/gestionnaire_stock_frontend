@@ -95,13 +95,21 @@ describe("Settings", () => {
             "/contact",
             "/privacy",
             "/terms",
+            "/settings/install",
         ]);
     });
 
     it("should only offer the account to the manager", async () => {
         await render(false);
 
-        expect(hrefs()).toEqual(["/account", "/password", "/contact", "/privacy", "/terms"]);
+        expect(hrefs()).toEqual([
+            "/account",
+            "/password",
+            "/contact",
+            "/privacy",
+            "/terms",
+            "/settings/install",
+        ]);
     });
 
     it("should show the state of the main settings for the administrator", async () => {

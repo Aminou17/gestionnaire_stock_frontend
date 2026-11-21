@@ -11,7 +11,6 @@ import { AlertEmailService } from "../../core/stock/alert-email.service";
 import { StockSettingsService } from "../../core/stock/stock-settings.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { InstallService } from "../../core/pwa/install.service";
-import { ToastService } from "../../shared/toast/toast.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { Avatar } from "../../shared/avatar/avatar";
@@ -171,16 +170,6 @@ export class Settings {
     protected footer = `${PRODUCT_NAME} par ${COMPANY_NAME}`;
     protected productName = PRODUCT_NAME;
     protected pwa = inject(InstallService);
-    private toast = inject(ToastService);
-
-    // Chrome et Edge : leur fenêtre d'installation ; ailleurs, on explique le geste
-    protected installApp() {
-        if (this.pwa.canInstall()) {
-            this.pwa.install();
-        } else {
-            this.toast.show(this.pwa.hint, 6000);
-        }
-    }
 
     private shopService = inject(ShopSettingsService);
     private stockService = inject(StockSettingsService);
