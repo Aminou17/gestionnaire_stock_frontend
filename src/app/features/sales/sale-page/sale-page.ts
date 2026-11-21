@@ -301,7 +301,9 @@ export class SalePage {
                 this.shopService.defaultCountryCode(),
             );
             if (result === "copied") {
-                this.shareNotice.set("Image copiée. Collez-la dans la conversation avec Ctrl+V.");
+                this.shareNotice.set(
+                    "Image copiée, conversation du client ouverte. Collez l'image (Ctrl+V, ou appui long puis Coller).",
+                );
             } else if (result === "downloaded") {
                 this.shareNotice.set(
                     "Image téléchargée. Glissez-la dans la conversation WhatsApp.",

@@ -24,7 +24,8 @@ const download = (blob: Blob, fileName: string) => {
     URL.revokeObjectURL(url);
 };
 
-// téléphone : menu de partage. ordinateur : image copiée, conversation ouverte, à coller avec Ctrl+V.
+// client avec un numéro : image copiée et conversation WhatsApp du client ouverte, à coller (Ctrl+V ou appui long).
+// sans numéro, sur téléphone : menu de partage, où l'on choisit la personne.
 // à appeler directement depuis le clic : le navigateur refuse la copie et l'ouverture sinon
 export const shareReceiptImage = async (
     element: HTMLElement,
@@ -34,10 +35,10 @@ export const shareReceiptImage = async (
 ): Promise<ShareResult> => {
     const pending = receiptBlob(element);
 
-    // le menu de partage n'existe que sur téléphone et tablette
+    // le menu de partage n'existe que sur téléphone et tablette, et ne sait pas viser un client
     const isTouch =
         navigator.maxTouchPoints > 0 && /android|iphone|ipad/i.test(navigator.userAgent);
-    if (isTouch && navigator.share) {
+    if (isTouch && navigator.share && !phone) {
         const file = new File([await pending], fileName, { type: "image/png" });
         if (navigator.canShare?.({ files: [file] })) {
             try {
