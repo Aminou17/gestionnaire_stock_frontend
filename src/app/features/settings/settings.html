@@ -67,20 +67,20 @@
                 ></span>
             </button>
 
-            <!-- caché quand l'application est déjà installée sur cet appareil -->
-            @if (pwa.available) {
-                <a routerLink="/settings/install" class="item">
-                    <span class="item-icon" [style.--tone]="'#2563eb'">
-                        <app-icon name="download" [size]="18" />
-                    </span>
-                    <span class="item-text">
-                        <strong>Installer {{ productName }}</strong>
-                        <small class="muted"
-                            >Une icône sur l'écran d'accueil, comme une appli</small
-                        >
-                    </span>
-                </a>
-            }
+            <!-- toujours visible : la page dit si l'application est déjà installée sur cet appareil -->
+            <a routerLink="/settings/install" class="item">
+                <span class="item-icon" [style.--tone]="'#2563eb'">
+                    <app-icon name="download" [size]="18" />
+                </span>
+                <span class="item-text">
+                    <strong>Installer {{ productName }}</strong>
+                    <small class="muted">{{
+                        pwa.available
+                            ? "Une icône sur l'écran d'accueil, comme une appli"
+                            : "Déjà installé sur cet appareil"
+                    }}</small>
+                </span>
+            </a>
         </div>
     </section>
 

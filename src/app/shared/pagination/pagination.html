@@ -39,11 +39,11 @@
             <button
                 type="button"
                 class="btn btn-outline step next"
+                aria-label="Page suivante"
                 [disabled]="page() >= pages()"
                 (click)="go(page() + 1)"
             >
-                Suivant
-                <app-icon name="chevron-right" [size]="16" />
+                <app-icon name="chevron-right" [size]="18" />
             </button>
         </div>
     </nav>

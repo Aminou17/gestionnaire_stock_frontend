@@ -237,11 +237,11 @@
     border-color: var(--text-muted);
 }
 
+/* bouton discret : le mot WhatsApp et son logo suffisent */
 .act-image {
     border: 0;
-    background: linear-gradient(180deg, #22c55e, #128c4a);
+    background: #128c4a;
     color: #fff;
-    box-shadow: 0 8px 18px rgba(18, 140, 74, 0.28);
 }
 
 /* même hauteur et même arrondi que Ticket et Envoyer en image */

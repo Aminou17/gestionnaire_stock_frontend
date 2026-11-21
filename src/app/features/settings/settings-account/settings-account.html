@@ -204,19 +204,19 @@
         <span class="switch" [class.on]="theme.theme() === 'dark'"></span>
     </button>
 
-    @if (pwa.available) {
-        <a routerLink="/settings/install" class="option">
-            <span class="option-icon"><app-icon name="download" [size]="18" /></span>
-            <span class="option-text">
-                Installer {{ productName }}
-                @if (pwa.canInstall()) {
-                    <small class="muted">Une icône sur l'écran d'accueil, accès en un geste</small>
-                } @else {
-                    <small class="muted">{{ pwa.hint }}</small>
-                }
-            </span>
-        </a>
-    }
+    <a routerLink="/settings/install" class="option">
+        <span class="option-icon"><app-icon name="download" [size]="18" /></span>
+        <span class="option-text">
+            Installer {{ productName }}
+            <small class="muted">{{
+                !pwa.available
+                    ? "Déjà installé sur cet appareil"
+                    : pwa.canInstall()
+                      ? "Une icône sur l'écran d'accueil, accès en un geste"
+                      : pwa.hint
+            }}</small>
+        </span>
+    </a>
 </section>
 
 <section class="card options" aria-label="Session">
