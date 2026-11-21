@@ -1,10 +1,14 @@
 [
   {
-    "relation": ["delegate_permission/common.handle_all_urls"],
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
     "target": {
       "namespace": "android_app",
       "package_name": "pages.dev.boutiki.twa",
-      "sha256_cert_fingerprints": ["5B:F7:58:AA:72:B5:76:61:76:E9:4B:EC:EA:0D:4C:9E:86:F5:98:FD:B0:26:95:3E:D7:1C:93:63:89:48:8A:21"]
+      "sha256_cert_fingerprints": [
+        "5B:F7:58:AA:72:B5:76:61:76:E9:4B:EC:EA:0D:4C:9E:86:F5:98:FD:B0:26:95:3E:D7:1C:93:63:89:48:8A:21"
+      ]
     }
   }
 ]

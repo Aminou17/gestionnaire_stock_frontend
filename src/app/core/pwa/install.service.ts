@@ -40,14 +40,32 @@ export class InstallService {
         return !this.installed();
     }
 
+    readonly isInstalled$ = this.installed.asReadonly();
+
+    // l'appareil, pour montrer les bons gestes
+    get platform(): "android" | "ios" | "desktop" {
+        const ua = window.navigator.userAgent;
+        if (/iphone|ipad|ipod/i.test(ua)) return "ios";
+        if (/android/i.test(ua)) return "android";
+        return "desktop";
+    }
+
+    // WhatsApp, Facebook, Instagram... ouvrent les liens dans leur propre fenêtre :
+    // l'installation n'y est pas proposée, il faut passer par le navigateur
+    get inAppBrowser() {
+        return /FBAN|FBAV|Instagram|WhatsApp|Line\/|MicroMessenger|; wv\)/i.test(
+            window.navigator.userAgent,
+        );
+    }
+
     // le geste à faire quand le navigateur ne propose pas sa propre fenêtre
     get hint() {
         const ua = window.navigator.userAgent;
-        if (/iphone|ipad|ipod/i.test(ua)) {
+        if (this.platform === "ios") {
             return "Dans Safari, touchez Partager, puis « Sur l'écran d'accueil »";
         }
-        if (/android/i.test(ua)) {
-            return "Ouvrez le menu ⋮ du navigateur, puis « Ajouter à l'écran d'accueil »";
+        if (this.platform === "android") {
+            return "Ouvrez le menu ⋮ de Chrome, puis « Installer l'application »";
         }
         if (/firefox/i.test(ua)) {
             return "Firefox n'installe pas les applications : ouvrez Boutiki dans Chrome ou Edge";
@@ -55,12 +73,14 @@ export class InstallService {
         return "Cliquez sur l'icône d'installation à droite de la barre d'adresse";
     }
 
+    // vrai si l'utilisateur a accepté la fenêtre d'installation du navigateur
     async install() {
-        if (!this.prompt) return;
+        if (!this.prompt) return false;
         this.prompt.prompt();
-        await this.prompt.userChoice;
+        const choice = await this.prompt.userChoice;
         this.prompt = null;
         this.canInstall.set(false);
+        return choice?.outcome === "accepted";
     }
 
     private isInstalled() {

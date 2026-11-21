@@ -1,0 +1,139 @@
+<app-page-header
+    [title]="'Installer ' + productName"
+    subtitle="Une vraie application sur votre écran d'accueil"
+    section="Paramètres"
+    [back]="back.link"
+    [backLabel]="back.label"
+/>
+
+@if (installed()) {
+    <section class="card hero done tinted" data-tone="success">
+        <span class="hero-icon"><app-icon name="check" [size]="28" /></span>
+        <div>
+            <h2>{{ productName }} est installé</h2>
+            <p class="muted">Vous l'utilisez déjà comme une application. Rien d'autre à faire.</p>
+        </div>
+    </section>
+} @else {
+    @if (platform === "android" && !inApp) {
+        <!-- l'application Android : un fichier à télécharger, Boutiki n'est pas (encore) sur Google Play -->
+        <section class="card hero">
+            <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
+            <div class="hero-text">
+                <h2>L'application {{ productName }} pour Android</h2>
+                <p class="muted">
+                    Une vraie application : icône, plein écran, et la vente continue sans internet.
+                </p>
+            </div>
+            <a class="btn btn-primary btn-block big" [href]="apk.url" download="Boutiki.apk">
+                <app-icon name="download" [size]="20" />
+                Télécharger l'application
+            </a>
+            <p class="muted small">Version {{ apk.version }} · {{ apk.size }}</p>
+        </section>
+
+        <section class="card reassure">
+            <h3><app-icon name="shield" [size]="18" /> Si Android affiche un avertissement</h3>
+            <p>
+                {{ productName }} n'est pas encore sur Google Play : Android prévient donc pour
+                toute application installée depuis un fichier. C'est normal et ça n'arrive qu'à la
+                première installation.
+            </p>
+            <ol class="steps">
+                <li>
+                    <span class="step-n">1</span>
+                    <span>
+                        Si Chrome dit que « ce type de fichier peut être nuisible », touchez
+                        <strong>Télécharger quand même</strong>.
+                    </span>
+                </li>
+                <li>
+                    <span class="step-n">2</span>
+                    <span>
+                        Ouvrez le fichier. Si Android le demande, autorisez Chrome à
+                        <strong>installer des applications inconnues</strong>, puis revenez en
+                        arrière.
+                    </span>
+                </li>
+                <li>
+                    <span class="step-n">3</span>
+                    <span>
+                        Si Play Protect propose d'analyser l'application, touchez
+                        <strong>Plus d'infos</strong> puis <strong>Installer quand même</strong>.
+                    </span>
+                </li>
+            </ol>
+        </section>
+    }
+
+    @if (platform !== "android" || inApp || pwa.canInstall()) {
+        <section class="card hero">
+            <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
+            <div class="hero-text">
+                <h2>
+                    {{
+                        platform === "android"
+                            ? "Ou installez-la sans fichier"
+                            : productName + " sur votre écran d'accueil"
+                    }}
+                </h2>
+                <p class="muted">
+                    Une icône, un écran sans barre d'adresse, et la vente continue même sans
+                    internet.
+                </p>
+            </div>
+
+            @if (inApp) {
+                <!-- WhatsApp, Facebook... : l'installation n'y est pas proposée -->
+                <div class="alert alert-warning" role="status">
+                    Vous êtes dans une fenêtre intégrée (WhatsApp, Facebook…) où l'installation
+                    n'est pas possible. Copiez l'adresse puis ouvrez-la dans
+                    {{ platform === "ios" ? "Safari" : "Chrome" }}.
+                </div>
+                <button type="button" class="btn btn-primary btn-block" (click)="copyAddress()">
+                    <app-icon name="copy" [size]="18" />
+                    Copier l'adresse
+                </button>
+            } @else if (pwa.canInstall()) {
+                <button
+                    type="button"
+                    class="btn btn-primary btn-block big"
+                    [disabled]="busy()"
+                    (click)="install()"
+                >
+                    <app-icon name="download" [size]="20" />
+                    Installer {{ productName }}
+                </button>
+                <p class="muted small">
+                    C'est le navigateur qui installe l'application : aucun fichier à télécharger.
+                </p>
+            } @else {
+                <ol class="steps">
+                    @for (step of steps(); track $index) {
+                        <li>
+                            <span class="step-n">{{ $index + 1 }}</span>
+                            <span>{{ step }}</span>
+                        </li>
+                    }
+                </ol>
+            }
+        </section>
+    }
+
+    <section class="card share">
+        <h3><app-icon name="message" [size]="18" /> Installer sur un autre téléphone</h3>
+        <p class="muted">
+            Envoyez-vous l'adresse, puis ouvrez-la dans
+            {{ platform === "ios" ? "Safari" : "Chrome" }}.
+        </p>
+        <div class="share-actions">
+            <a class="btn btn-outline" [href]="whatsappLink" target="_blank" rel="noopener">
+                Envoyer par WhatsApp
+            </a>
+            <button type="button" class="btn btn-outline" (click)="copyAddress()">
+                <app-icon name="copy" [size]="18" />
+                Copier l'adresse
+            </button>
+        </div>
+    </section>
+}
