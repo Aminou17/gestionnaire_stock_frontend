@@ -13,25 +13,6 @@
         </div>
     </section>
 } @else {
-    @if (platform !== "ios" && !inApp) {
-        <!-- l'application Android : un fichier à télécharger, Boutiki n'est pas (encore) sur Google Play -->
-        <section class="card hero">
-            <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
-            <div class="hero-text">
-                <h2>{{ productName }} pour Android</h2>
-                <p class="muted small">Version {{ apk.version }} · {{ apk.size }}</p>
-            </div>
-            <a class="btn btn-primary btn-block big" [href]="apk.url" download="Boutiki.apk">
-                <app-icon name="download" [size]="20" />
-                Télécharger l'application
-            </a>
-            <p class="muted small hint">
-                Android peut afficher un avertissement : touchez « Télécharger quand même » puis «
-                Installer quand même ».
-            </p>
-        </section>
-    }
-
     <!-- l'application (APK) est proposée partout sauf sur iPhone ; le navigateur ne sert que pour iPhone ou une fenêtre intégrée -->
     @if (platform === "ios" || inApp) {
         <section class="card hero">
@@ -79,4 +60,23 @@
             }
         </section>
     }
+}
+
+@if (platform !== "ios") {
+    <!-- l'application Android : un fichier à télécharger, Boutiki n'est pas (encore) sur Google Play -->
+    <section class="card hero">
+        <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
+        <div class="hero-text">
+            <h2>{{ productName }} pour Android</h2>
+            <p class="muted small">Version {{ apk.version }} · {{ apk.size }}</p>
+        </div>
+        <a class="btn btn-primary btn-block big" [href]="apk.url" download="Boutiki.apk">
+            <app-icon name="download" [size]="20" />
+            Télécharger l'application
+        </a>
+        <p class="muted small hint">
+            Android peut afficher un avertissement : touchez « Télécharger quand même » puis «
+            Installer quand même ».
+        </p>
+    </section>
 }
