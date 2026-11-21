@@ -11,7 +11,7 @@ import {
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { map } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { BackState, getBackLink } from "../../../core/back-link";
@@ -23,7 +23,7 @@ import { formatTicketNumber } from "../../../core/sales/ticket-number";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { StockMovement } from "../../../core/stock/stock-movement.model";
 import { shareReceiptImage } from "../sale-receipt/receipt-image";
-import { receiptLink } from "../sale-receipt/receipt-message";
+import { receiptLink, ticketLinkLink } from "../sale-receipt/receipt-message";
 import { SaleReceipt } from "../sale-receipt/sale-receipt";
 import { MovementDetail } from "../../stock-movements/movement-detail/movement-detail";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -284,15 +284,39 @@ export class SalePage {
     shareNotice = signal("");
     shareError = signal(false);
 
+    // ouvre la conversation WhatsApp du client avec l'adresse du ticket, prête à envoyer.
+    // sans réseau, l'image du ticket est copiée à la place
     async shareImage() {
+        const sale = this.data();
+        const shop = this.shopInfo();
+        if (!sale || !shop) return;
+
+        this.sharing.set(true);
+        this.shareNotice.set("");
+        this.shareError.set(false);
+        try {
+            const { url } = await firstValueFrom(this.saleService.getTicketLink(sale.id));
+            const link = ticketLinkLink(
+                sale,
+                shop.name,
+                this.shopService.defaultCountryCode(),
+                this.ticketPrefix(),
+                url,
+            );
+            window.open(link, "_blank", "noopener");
+        } catch {
+            await this.shareImageFallback();
+        } finally {
+            this.sharing.set(false);
+        }
+    }
+
+    private async shareImageFallback() {
         // on photographie le ticket, pas le bloc qui le décale hors de l'écran
         const box = this.captureBox()?.nativeElement.firstElementChild as HTMLElement | null;
         const sale = this.data();
         if (!box || !sale) return;
 
-        this.sharing.set(true);
-        this.shareNotice.set("");
-        this.shareError.set(false);
         try {
             const result = await shareReceiptImage(
                 box,
@@ -311,8 +335,6 @@ export class SalePage {
             }
         } catch {
             this.shareError.set(true);
-        } finally {
-            this.sharing.set(false);
         }
     }
 

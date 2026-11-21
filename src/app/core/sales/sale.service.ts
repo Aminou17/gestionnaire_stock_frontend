@@ -44,6 +44,11 @@ export class SaleService {
             .pipe(map((res) => ({ ...res, data: res.data.map(toSale) })));
     }
 
+    // adresse publique du ticket, que le client ouvre depuis WhatsApp sans se connecter
+    getTicketLink(id: number) {
+        return this.http.post<{ url: string }>(`${API_URL}/tickets/sales/${id}/link`, {});
+    }
+
     getSale(id: number) {
         return this.http.get<SaleDetail>(`${API_URL}/sales/${id}`).pipe(
             map((sale) => ({

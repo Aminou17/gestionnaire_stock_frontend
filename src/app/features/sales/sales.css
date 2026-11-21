@@ -771,3 +771,25 @@ app-page-header {
 .sale-row {
     border-bottom: 0;
 }
+
+/* téléphone : le libellé, le montant et la période restent chacun sur une seule ligne */
+@media (max-width: 767px) {
+    .summary-label {
+        overflow: hidden;
+        font-size: var(--fs-caption);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .summary-amount {
+        font-size: var(--fs-figure);
+        white-space: nowrap;
+    }
+
+    .period-pill {
+        max-width: 42%;
+        font-size: var(--fs-caption);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}

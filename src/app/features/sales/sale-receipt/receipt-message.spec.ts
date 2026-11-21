@@ -1,5 +1,5 @@
 import { SaleDetail } from "../../../core/sales/sale.model";
-import { receiptLink, receiptMessage } from "./receipt-message";
+import { receiptLink, ticketLinkLink, ticketLinkMessage, receiptMessage } from "./receipt-message";
 
 const sale = (changes: Partial<SaleDetail> = {}) =>
     ({
@@ -61,5 +61,20 @@ describe("receipt message", () => {
         expect(receiptLink(sale({ customer_phone: null }), "Awa Bazin", "242")).toMatch(
             /^https:\/\/wa\.me\/\?text=/,
         );
+    });
+
+    it("should open the customer chat with a short message and the ticket address", () => {
+        const url = "https://api.exemple.test/t/9.abc";
+        const link = ticketLinkLink(
+            sale({ customer_phone: "66 09 90 60" }),
+            "Awa Bazin",
+            "226",
+            "",
+            url,
+        );
+
+        expect(link).toMatch(/^https:\/\/wa\.me\/22666099060\?text=/);
+        expect(decodeURIComponent(link)).toContain(url);
+        expect(ticketLinkMessage(sale(), "Awa Bazin", "AB", url)).toContain("Awa Bazin");
     });
 });
