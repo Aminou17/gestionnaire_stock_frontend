@@ -228,7 +228,7 @@ describe("Products", () => {
         expect(el.querySelector(".fab")).toBeNull();
         expect(text()).not.toContain("Prix d'achat");
         expect(text()).not.toContain("Marge");
-        expect(el.querySelectorAll(".filters select").length).toBe(2);
+        expect(el.querySelectorAll(".filters select").length).toBe(3);
     });
 
     it("should give the manager only the Vendre action in the row menu", async () => {
