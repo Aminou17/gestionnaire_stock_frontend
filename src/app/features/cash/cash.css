@@ -468,3 +468,40 @@ app-page-header {
     padding-bottom: 8px;
     border-top: 1px solid var(--border);
 }
+
+/* carte principale : dégradé doux de la couleur de l'état (vert ouverte, bleu à ouvrir, gris clôturée) */
+.status {
+    --tone: var(--primary);
+    border-color: color-mix(in srgb, var(--tone) 30%, var(--border));
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--tone) 22%, var(--surface)) 0%,
+        color-mix(in srgb, var(--tone) 8%, var(--surface)) 55%,
+        var(--surface) 100%
+    );
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--tone) 14%, transparent);
+}
+
+.status[data-tone="success"] {
+    --tone: var(--success);
+}
+
+.status[data-tone="warning"] {
+    --tone: var(--warning);
+}
+
+.status[data-tone="neutral"] {
+    --tone: var(--text-muted);
+}
+
+.status .balance strong {
+    color: color-mix(in srgb, var(--tone) 55%, var(--text));
+}
+
+.status .last-closed {
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.status .status-head .badge {
+    background: var(--surface);
+}
