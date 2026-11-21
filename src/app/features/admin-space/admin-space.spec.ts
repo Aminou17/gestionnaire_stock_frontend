@@ -38,6 +38,7 @@ const balance = (overrides: Partial<Balance> = {}): Balance => ({
     period: { from: "2026-11-21", to: "2026-11-21" },
     sales: { count: 2, revenue: 20000, cost: 12000, grossProfit: 8000 },
     expenses: { total: 3000, count: 1, categories: [{ category: "FOOD", count: 1, total: 3000 }] },
+    losses: { count: 0, units: 0, value: 0 },
     netProfit: 5000,
     ...overrides,
 });
@@ -78,7 +79,7 @@ describe("AdminSpace", () => {
         expect(query.date).toBe(query.from);
         expect(query.from).toBe(query.to);
 
-        expect(text()).toContain("Stock au");
+        expect(text()).toContain("Stock actuel");
         expect(text()).toContain("Ventes encaissées");
         expect(text()).toContain("Dépenses");
         expect(text()).toContain("Bénéfice net");
@@ -90,6 +91,30 @@ describe("AdminSpace", () => {
 
         expect(el.querySelectorAll(".fold, .rows").length).toBe(0);
         expect(el.querySelectorAll("input[type=date]").length).toBe(0);
+    });
+
+    it("should flag stock losses when there are some", async () => {
+        await render(of(balance({ losses: { count: 1, units: 2, value: 1200 } })));
+
+        expect(text()).toContain("Pertes de stock");
+        expect(text()).toContain("2 unités perdues");
+    });
+
+    it("should hide the losses line when there is no loss", async () => {
+        await render(of(balance()));
+
+        expect(text()).not.toContain("Pertes de stock");
+    });
+
+    it("should ask for everything when Tous is chosen", async () => {
+        await render(of(balance()));
+
+        fixture.componentInstance.selectPeriod("all");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(getBalance.mock.calls.at(-1)![0].from).toBe("2000-01-01");
+        expect(text()).toContain("depuis le début");
     });
 
     it("should show a positive net profit in green", async () => {

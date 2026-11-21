@@ -198,3 +198,13 @@ app-page-header {
         font-size: var(--fs-small);
     }
 }
+
+.figure.loss dd {
+    color: var(--danger);
+}
+
+.figure dt small {
+    display: block;
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+}

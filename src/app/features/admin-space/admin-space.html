@@ -88,11 +88,20 @@
                 <dt>Dépenses</dt>
                 <dd appMoney>{{ data()?.expenses?.total ?? 0 | fcfa }}</dd>
             </div>
+            @if (data()?.losses?.count) {
+                <div class="figure loss">
+                    <dt>
+                        Pertes de stock
+                        <small>{{ data()?.losses?.units }} unités perdues</small>
+                    </dt>
+                    <dd appMoney>{{ data()?.losses?.value ?? 0 | fcfa }}</dd>
+                </div>
+            }
         </dl>
     </section>
 
     <section class="card block" aria-labelledby="stock-title">
-        <h2 id="stock-title">Stock au {{ stockLabel() }}</h2>
+        <h2 id="stock-title">{{ stockLabel() }}</h2>
         <dl class="figures">
             <div class="figure">
                 <dt>Valeur d'achat</dt>

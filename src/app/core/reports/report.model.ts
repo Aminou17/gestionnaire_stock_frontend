@@ -28,6 +28,7 @@ export interface Balance {
     period: { from: string; to: string };
     sales: { count: number; revenue: number; cost: number; grossProfit: number };
     expenses: { total: number; count: number; categories: ExpenseByCategory[] };
+    losses: { count: number; units: number; value: number };
     netProfit: number;
 }
 

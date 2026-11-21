@@ -14,6 +14,7 @@ const PERIOD_PILLS: { value: Period; label: string }[] = [
     { value: "today", label: "Aujourd'hui" },
     { value: "week", label: "7 jours" },
     { value: "month", label: "Ce mois" },
+    { value: "all", label: "Tous" },
     { value: "custom", label: "Dates" },
 ];
 
@@ -39,6 +40,7 @@ export class AdminSpace {
         const period = this.period();
 
         if (period === "custom") return { from: this.customFrom(), to: this.customTo() };
+        if (period === "all") return { from: "2000-01-01", to: this.today };
         if (period === "week") return { from: this.daysAgo(6), to: this.today };
         if (period === "month") {
             return { from: formatDate(new Date(), "yyyy-MM-01", this.locale), to: this.today };
@@ -58,12 +60,18 @@ export class AdminSpace {
 
     periodLabel = computed(() => {
         const { from, to } = this.range();
+        if (this.period() === "all") return "depuis le début";
         const short = (date: string) => formatDate(date, "d MMM", this.locale);
         return from === to ? short(from) : `${short(from)} au ${short(to)}`;
     });
 
-    // le stock est compté à la fin de la période choisie
-    stockLabel = computed(() => formatDate(this.range().to, "d MMM", this.locale));
+    // le stock est compté à la fin de la période : actuel tant que la période va jusqu'à aujourd'hui
+    stockLabel = computed(() => {
+        const { to } = this.range();
+        return to === this.today
+            ? "Stock actuel"
+            : `Stock au ${formatDate(to, "d MMM", this.locale)}`;
+    });
 
     netPositive = computed(() => (this.data()?.netProfit ?? 0) >= 0);
 
