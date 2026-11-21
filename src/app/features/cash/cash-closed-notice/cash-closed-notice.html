@@ -8,8 +8,8 @@
     <div class="notice-text">
         <strong>{{ title() }}</strong>
         <span class="muted">
-            @if (state() === "previous" && since()) {
-                Caisse du {{ since() | date: "d MMMM" }}.
+            @if (state() === "previous" && previous(); as old) {
+                Caisse du {{ old.sessionDate | date: "d MMMM" }}.
             }
             {{ text() }}
         </span>
@@ -29,7 +29,13 @@
             }
         }
         @default {
-            <a routerLink="/cash" class="btn btn-primary">Aller à la caisse</a>
+            @if (previous(); as old) {
+                <button type="button" class="btn btn-primary" (click)="closePrevious.emit()">
+                    Clôturer la caisse du {{ old.sessionDate | date: "d MMM" }}
+                </button>
+            } @else {
+                <a routerLink="/cash" class="btn btn-primary">Aller à la caisse</a>
+            }
         }
     }
 </section>

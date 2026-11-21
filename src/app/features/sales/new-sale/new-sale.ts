@@ -31,6 +31,7 @@ import { CategoryService } from "../../../core/stock/category.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
+import { CloseCashDialog } from "../../cash/close-cash-dialog/close-cash-dialog";
 import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
 import { CashClosedNotice } from "../../cash/cash-closed-notice/cash-closed-notice";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
@@ -78,6 +79,7 @@ export const getMinPrice = (product: Product) =>
         Icon,
         FcfaPipe,
         OpenCashDialog,
+        CloseCashDialog,
         CashClosedNotice,
         ReopenCashDialog,
         PhotoZoom,
@@ -817,14 +819,27 @@ export class NewSale {
 
     private reopenDialog = viewChild.required<ReopenCashDialog>("reopenCash");
     private openDialog = viewChild.required<OpenCashDialog>("openCashDialog");
+    private closeDialog = viewChild.required<CloseCashDialog>("closeCash");
 
     reopen() {
         const cash = this.cash.value();
         if (cash) this.reopenDialog().open(cash.id);
     }
 
+    // une caisse oubliée bloque l'ouverture : on la clôture d'abord, puis on ouvre celle d'aujourd'hui
     openCash() {
-        this.openDialog().open();
+        if (this.ownPrevious()) this.closePrevious();
+        else this.openDialog().open();
+    }
+
+    closePrevious() {
+        const previous = this.ownPrevious();
+        if (previous) this.closeDialog().open(previous.sessionDate, previous.balance);
+    }
+
+    onPreviousClosed() {
+        this.previousOpen.reload();
+        this.cash.reload();
     }
 
     // la feuille prend une entrée d'historique : le bouton retour du téléphone la ferme d'abord

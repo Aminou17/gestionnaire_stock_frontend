@@ -3,6 +3,7 @@ import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { CashClosedNotice } from "../../cash/cash-closed-notice/cash-closed-notice";
+import { CloseCashDialog } from "../../cash/close-cash-dialog/close-cash-dialog";
 import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
@@ -37,6 +38,7 @@ import { BackLink, injectGoBack } from "../../../shared/back-link/back-link";
         FcfaPipe,
         CashClosedNotice,
         OpenCashDialog,
+        CloseCashDialog,
         ReopenCashDialog,
     ],
     templateUrl: "./new-expense.html",

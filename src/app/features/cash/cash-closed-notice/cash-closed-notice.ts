@@ -17,8 +17,8 @@ export class CashClosedNotice {
     state = input.required<CashNoticeState>();
     // ce qu'on veut faire, pour finir la phrase : "vendre", "payer une dépense"
     purpose = input("vendre");
-    // jour de la caisse oubliée, pour l'état "previous"
-    since = input<string | null>(null);
+    // caisse oubliée d'un jour passé, pour l'état "previous" : on peut la clôturer d'ici
+    previous = input<{ sessionDate: string; balance: number | null } | null>(null);
     // l'administrateur seul peut rouvrir une caisse clôturée
     canReopen = input(false);
     // petite ligne dans une page, au lieu d'une grande carte au centre
@@ -26,6 +26,7 @@ export class CashClosedNotice {
 
     openCash = output();
     reopen = output();
+    closePrevious = output();
 
     tone = computed(() =>
         this.state() === "notOpened"
@@ -55,7 +56,7 @@ export class CashClosedNotice {
                     ? `Rouvrez-la pour ${this.purpose()}.`
                     : `Demandez à l'administrateur de la rouvrir pour ${this.purpose()}, sinon rendez-vous demain.`;
             default:
-                return "Clôturez-la avant d'ouvrir celle d'aujourd'hui.";
+                return "Clôturez-la, puis ouvrez celle d'aujourd'hui.";
         }
     });
 }

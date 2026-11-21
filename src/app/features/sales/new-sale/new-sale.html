@@ -61,9 +61,10 @@
 @if (gateVisible()) {
     <app-cash-closed-notice
         [state]="gateState()"
-        [since]="ownPrevious()?.sessionDate ?? null"
+        [previous]="ownPrevious()"
         [canReopen]="auth.isAdmin()"
         (openCash)="openCash()"
+        (closePrevious)="closePrevious()"
         (reopen)="reopen()"
     />
 } @else {
@@ -831,5 +832,7 @@
 <app-reopen-cash-dialog #reopenCash (reopened)="cash.reload()" />
 
 <app-open-cash-dialog #openCashDialog (opened)="cash.reload()" />
+
+<app-close-cash-dialog #closeCash (closed)="onPreviousClosed()" />
 
 <app-barcode-scanner #scanner (scanned)="onScanned($event)" />

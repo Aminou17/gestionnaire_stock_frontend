@@ -18,6 +18,7 @@ import { DashboardService } from "./dashboard.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { CashClosedNotice } from "../cash/cash-closed-notice/cash-closed-notice";
 import { ReopenCashDialog } from "../cash/reopen-cash-dialog/reopen-cash-dialog";
+import { CloseCashDialog } from "../cash/close-cash-dialog/close-cash-dialog";
 import { OpenCashDialog } from "../cash/open-cash-dialog/open-cash-dialog";
 import { RecentActivity } from "./recent-activity/recent-activity";
 import { RecentSales } from "./recent-sales/recent-sales";
@@ -41,6 +42,7 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
         RecentSales,
         RecentActivity,
         OpenCashDialog,
+        CloseCashDialog,
         ReopenCashDialog,
         CashClosedNotice,
         ManagerCashBanner,

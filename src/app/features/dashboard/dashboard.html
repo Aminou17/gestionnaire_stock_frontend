@@ -39,11 +39,14 @@
         <app-cash-closed-notice
             [compact]="true"
             [state]="cashGate()"
-            [since]="previousOwn()?.sessionDate ?? null"
+            [previous]="previousOwn()"
             [canReopen]="true"
             purpose="vendre"
             (openCash)="openCashDialog.open()"
             (reopen)="reopenDialog.open(cash()!.id)"
+            (closePrevious)="
+                closeCashDialog.open(previousOwn()!.sessionDate, previousOwn()!.balance)
+            "
         />
     }
 
@@ -190,6 +193,7 @@
 
     <app-open-cash-dialog #openCashDialog (opened)="onCashOpened()" />
     <app-reopen-cash-dialog #reopenDialog (reopened)="onCashOpened()" />
+    <app-close-cash-dialog #closeCashDialog (closed)="onCashOpened()" />
 } @else {
     <!-- même ordre sur téléphone et sur ordinateur : la grille ne fait que placer les blocs -->
     <div class="manager">

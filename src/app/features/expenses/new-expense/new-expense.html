@@ -4,10 +4,11 @@
 @if (today.hasValue() && !cashOpen()) {
     <app-cash-closed-notice
         [state]="gateState()"
-        [since]="ownPrevious()?.sessionDate ?? null"
+        [previous]="ownPrevious()"
         [canReopen]="true"
         purpose="payer une dépense"
         (openCash)="openDialog.open()"
+        (closePrevious)="closeDialog.open(ownPrevious()!.sessionDate, ownPrevious()!.balance)"
         (reopen)="reopenDialog.open(cash()!.id)"
     />
 } @else {
@@ -172,3 +173,4 @@
 
 <app-open-cash-dialog #openDialog (opened)="today.reload()" />
 <app-reopen-cash-dialog #reopenDialog (reopened)="today.reload()" />
+<app-close-cash-dialog #closeDialog (closed)="today.reload()" />
