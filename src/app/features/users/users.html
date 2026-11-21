@@ -6,45 +6,34 @@
 </app-page-header>
 
 <section class="card list-card">
-    <div class="chips" role="group" aria-label="Afficher">
-        <button
-            type="button"
-            class="chip"
-            [class.selected]="view() === 'active'"
-            [attr.aria-pressed]="view() === 'active'"
-            (click)="selectView('active')"
-        >
-            Actifs <span>{{ activeCount() }}</span>
-        </button>
-        <button
-            type="button"
-            class="chip"
-            [class.selected]="view() === 'deleted'"
-            [attr.aria-pressed]="view() === 'deleted'"
-            (click)="selectView('deleted')"
-        >
-            Supprimés <span>{{ deletedCount() }}</span>
-        </button>
-    </div>
-
-    @if (view() === "deleted") {
-        <p class="deleted-note">
-            Ces personnes ne peuvent plus se connecter. Leurs ventes et leur historique sont
-            conservés. Restaurez un compte pour lui rendre l'accès.
-        </p>
-    }
-
     <div class="toolbar">
         <label class="search">
             <app-icon name="search" [size]="18" />
             <input
                 class="input"
                 type="search"
-                placeholder="Rechercher par nom ou e-mail…"
+                placeholder="Chercher…"
                 aria-label="Rechercher un utilisateur"
                 [value]="search()"
                 (input)="search.set($any($event.target).value)"
             />
+        </label>
+
+        <!-- liste native sous l'icône : un seul bouton, avec son mot -->
+        <label class="filter-icon" [class.active]="view() === 'deleted'">
+            <app-icon name="filter" [size]="18" />
+            <span class="filter-word">Filtre</span>
+            <select
+                aria-label="Afficher les utilisateurs"
+                (change)="selectView($any($event.target).value)"
+            >
+                <option value="active" [selected]="view() === 'active'">
+                    Actifs ({{ activeCount() }})
+                </option>
+                <option value="deleted" [selected]="view() === 'deleted'">
+                    Supprimés ({{ deletedCount() }})
+                </option>
+            </select>
         </label>
     </div>
 
@@ -82,83 +71,52 @@
             <div class="alert alert-error list-error" role="alert">{{ restoreError() }}</div>
         }
 
-        <!-- en-têtes de colonnes, cachées sur téléphone où chaque ligne devient une carte -->
-        <div class="columns" aria-hidden="true">
-            <span>Utilisateur</span>
-            <span>Rôle</span>
-            <span>Dernière connexion</span>
-            <span></span>
-        </div>
-
         <ul class="rows" [class.reloading]="users.isLoading()">
             @for (user of paging.visible(); track user.id) {
                 <li class="row" [class.inactive]="!user.is_active" (click)="openUser(user)">
-                    <div class="who">
-                        <app-avatar class="avatar" [photo]="user.avatar" aria-hidden="true" />
-                        <div class="text">
-                            <span class="name-line">
-                                <button
-                                    type="button"
-                                    class="name"
-                                    [attr.aria-label]="'Voir la fiche de ' + user.name"
-                                >
-                                    {{ user.name }}
-                                </button>
-                                @if (isMe(user)) {
-                                    <span class="me">Vous</span>
-                                }
-                            </span>
-                            <small class="muted email">{{ user.email }}</small>
-                        </div>
-                    </div>
-
-                    <div class="role">
-                        <span
-                            class="badge"
-                            [class.badge-primary]="user.role === 'admin'"
-                            [class.role-manager]="user.role !== 'admin'"
-                        >
-                            {{ getRoleLabel(user.role) }}
-                        </span>
-                    </div>
-
-                    @if (user.is_active) {
-                        <small class="last-login" [class.never]="!user.last_login_at">
-                            <!-- « Jamais connecté » se lit seul, sans « Dernière connexion : » devant -->
-                            @if (user.last_login_at) {
-                                <span class="mobile-label">Dernière connexion : </span>
-                            }
-                            {{ lastLogin(user) }}
-                        </small>
-                    } @else {
-                        <small class="last-login">{{ deletion(user) }}</small>
-                    }
-
-                    <div class="end">
-                        @if (!user.is_active) {
+                    <app-avatar class="avatar" [photo]="user.avatar" aria-hidden="true" />
+                    <div class="text">
+                        <span class="name-line">
                             <button
                                 type="button"
-                                class="btn btn-outline btn-sm restore-btn"
-                                [disabled]="restoringId() !== null"
-                                [attr.aria-label]="'Restaurer ' + user.name"
-                                (click)="$event.stopPropagation(); restoreUser(user)"
+                                class="name"
+                                [attr.aria-label]="'Voir la fiche de ' + user.name"
                             >
-                                @if (restoringId() === user.id) {
-                                    <span class="spinner"></span>
-                                } @else {
-                                    <app-icon name="undo" [size]="16" />
-                                }
-                                Restaurer
+                                {{ user.name }}
                             </button>
-                        } @else {
-                            <app-action-menu
-                                [items]="menuItems(user)"
-                                [label]="'Actions pour ' + user.name"
-                                [title]="user.name"
-                                (picked)="onMenu(user, $event)"
-                            />
-                        }
+                            @if (isMe(user)) {
+                                <span class="me">Vous</span>
+                            }
+                        </span>
+                        <small class="muted sub">
+                            {{ getRoleLabel(user.role) }} ·
+                            {{ user.is_active ? lastLogin(user) : deletion(user) }}
+                        </small>
                     </div>
+
+                    @if (!user.is_active) {
+                        <button
+                            type="button"
+                            class="btn btn-outline btn-sm restore-btn"
+                            [disabled]="restoringId() !== null"
+                            [attr.aria-label]="'Restaurer ' + user.name"
+                            (click)="$event.stopPropagation(); restoreUser(user)"
+                        >
+                            @if (restoringId() === user.id) {
+                                <span class="spinner"></span>
+                            } @else {
+                                <app-icon name="undo" [size]="16" />
+                            }
+                            Restaurer
+                        </button>
+                    } @else {
+                        <app-action-menu
+                            [items]="menuItems(user)"
+                            [label]="'Actions pour ' + user.name"
+                            [title]="user.name"
+                            (picked)="onMenu(user, $event)"
+                        />
+                    }
                 </li>
             }
         </ul>

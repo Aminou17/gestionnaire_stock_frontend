@@ -108,8 +108,8 @@ describe("Users", () => {
         expect(text()).toContain("Employé");
         expect(text()).toContain("Administrateur");
         expect(text()).toContain("Jamais connecté");
-        expect(text()).toContain("Actifs 2");
-        expect(text()).toContain("Supprimés 1");
+        expect(text()).toContain("Actifs (2)");
+        expect(text()).toContain("Supprimés (1)");
         expect(text()).not.toContain("Ancien employé");
     });
 
@@ -163,7 +163,10 @@ describe("Users", () => {
 
     it("should restore a deleted user", async () => {
         await render();
-        await click(el.querySelectorAll(".chip")[1]);
+        const select = el.querySelector<HTMLSelectElement>(".filter-icon select")!;
+        select.value = "deleted";
+        select.dispatchEvent(new Event("change"));
+        fixture.detectChanges();
 
         expect(text()).toContain("Ancien employé");
         await click(el.querySelector(".restore-btn"));
