@@ -660,11 +660,19 @@ describe("NewSale", () => {
     describe("carreaux", () => {
         const tiles = () => [...el.querySelectorAll<HTMLElement>(".gtile")];
 
-        it("should show every product as a tile, without a list mode", async () => {
+        it("should show tiles first, then switch to lines and back with the single button", async () => {
             await render();
             expect(tiles().length).toBe(3);
-            expect(el.querySelector(".view-single")).toBeNull();
-            expect(el.querySelector("app-pagination")).toBeNull();
+            expect(el.querySelector(".tiles")).toBeNull();
+
+            el.querySelector<HTMLButtonElement>(".view-single")!.click();
+            await fixture.whenStable();
+            expect(el.querySelectorAll(".tile").length).toBe(3);
+            expect(tiles().length).toBe(0);
+
+            el.querySelector<HTMLButtonElement>(".view-single")!.click();
+            await fixture.whenStable();
+            expect(tiles().length).toBe(3);
         });
 
         it("should add one more at each tap and show the quantity, then take one off", async () => {

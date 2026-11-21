@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import {
     Component,
@@ -51,6 +52,16 @@ interface CartLine {
 // tout le catalogue tient sur une seule liste : la recherche et les catégories suffisent à s'y retrouver
 const CATALOG_LIMIT = 500;
 
+const VIEW_KEY = "new-sale-view";
+
+const readView = (): "list" | "grid" => {
+    try {
+        return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "grid";
+    } catch {
+        return "grid";
+    }
+};
+
 // Prix minimum accepté pour un produit
 export const getMinPrice = (product: Product) =>
     product.pricing_mode === "NEGOTIABLE"
@@ -60,6 +71,7 @@ export const getMinPrice = (product: Product) =>
 @Component({
     selector: "app-new-sale",
     imports: [
+        NgTemplateOutlet,
         BarcodeScanner,
         PageHeader,
         RouterLink,
@@ -115,6 +127,8 @@ export class NewSale {
     photoNotice = signal<{ kind: "success" | "error"; text: string } | null>(null);
 
     // téléphone : le panier est une feuille qui monte du bas
+    // produits en carreaux par défaut (photo bien visible), choix mémorisé
+    view = signal<"list" | "grid">(readView());
     cartOpen = signal(false);
     // produits dont le champ de prix négocié est déplié
     priceOpenIds = signal<ReadonlySet<number>>(new Set());
@@ -535,6 +549,22 @@ export class NewSale {
             ...lines,
             { product, quantity: 1, unitPrice: product.sale_price },
         ]);
+    }
+
+    setView(view: "list" | "grid") {
+        this.view.set(view);
+        try {
+            localStorage.setItem(VIEW_KEY, view);
+        } catch {
+            // stockage indisponible : le choix ne sera pas retenu
+        }
+    }
+
+    // lignes : un appui ajoute le produit, un second le retire
+    toggleProduct(product: Product) {
+        const line = this.cart().find((l) => l.product.id === product.id);
+        if (line) this.removeLine(line);
+        else this.addProduct(product);
     }
 
     // carreaux : un appui ajoute un exemplaire, jusqu'au stock disponible

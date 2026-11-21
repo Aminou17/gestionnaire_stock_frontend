@@ -124,12 +124,28 @@
                         }
                     }
                 </div>
+                <button
+                    type="button"
+                    class="view-single"
+                    [attr.aria-label]="
+                        view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'
+                    "
+                    [title]="view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'"
+                    [attr.aria-pressed]="view() === 'grid'"
+                    (click)="setView(view() === 'grid' ? 'list' : 'grid')"
+                >
+                    <app-icon [name]="view() === 'grid' ? 'list' : 'grid'" [size]="18" />
+                </button>
             </div>
 
             @if (!offline() && products.isLoading() && results().length === 0) {
-                <div class="gtiles">
+                <div [class.gtiles]="view() === 'grid'" [class.tiles]="view() === 'list'">
                     @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-                        <div class="skeleton gtile-skeleton"></div>
+                        <div
+                            class="skeleton"
+                            [class.gtile-skeleton]="view() === 'grid'"
+                            [class.tile-skeleton]="view() === 'list'"
+                        ></div>
                     }
                 </div>
             } @else if (!offline() && products.error()) {
@@ -144,78 +160,131 @@
                     </button>
                 </div>
             } @else {
-                <ul class="gtiles" [class.reloading]="products.isLoading()">
-                    @for (product of results(); track product.id) {
-                        <li class="gtile" [class.in-cart]="inCart(product)">
-                            <button
-                                type="button"
-                                class="gmain"
-                                [disabled]="product.theoretical_stock <= 0"
-                                [attr.aria-label]="'Ajouter ' + product.name"
-                                (click)="tapTile(product)"
-                            >
-                                <span class="gphoto tone-{{ tone(product.name) }}">
-                                    @if (product.image) {
-                                        <img [src]="product.image" alt="" />
-                                    } @else {
-                                        {{ initials(product.name) }}
-                                    }
-                                </span>
-                                <span class="gbody">
-                                    <strong class="gname">{{ product.name }}</strong>
-                                    <span class="gfoot">
-                                        <strong class="gprice">{{
+                @if (view() === "list") {
+                    <ul class="tiles" [class.reloading]="products.isLoading()">
+                        @for (product of results(); track product.id) {
+                            <li class="tile" [class.in-cart]="inCart(product)">
+                                <ng-container
+                                    *ngTemplateOutlet="thumb; context: { $implicit: product }"
+                                />
+                                <button
+                                    type="button"
+                                    class="result"
+                                    [attr.aria-pressed]="inCart(product)"
+                                    [disabled]="product.theoretical_stock <= 0"
+                                    (click)="toggleProduct(product)"
+                                >
+                                    <span class="result-text">
+                                        <strong class="result-name">{{ product.name }}</strong>
+                                        <span class="result-price">{{
                                             product.sale_price | fcfa
-                                        }}</strong>
-                                        @if (product.theoretical_stock <= 0) {
-                                            <span class="badge badge-danger">Rupture</span>
-                                        } @else if (product.stock_status !== "OK") {
+                                        }}</span>
+                                        @if (
+                                            product.theoretical_stock > 0 &&
+                                            product.stock_status !== "OK"
+                                        ) {
                                             <small class="stock"
                                                 >Plus que {{ product.theoretical_stock }}</small
                                             >
-                                        } @else {
-                                            <small class="gstock"
-                                                >Stock : {{ product.theoretical_stock }}</small
-                                            >
                                         }
                                     </span>
-                                </span>
-                            </button>
-
-                            @if (quantityOf(product); as qty) {
-                                <span class="gqty">
-                                    <button
-                                        type="button"
-                                        [attr.aria-label]="'Retirer un ' + product.name"
-                                        (click)="untapTile(product)"
-                                    >
-                                        <app-icon name="minus" [size]="16" />
-                                    </button>
-                                    <span aria-live="polite">{{ qty }}</span>
-                                </span>
-                            }
-
-                            @if (product.image) {
+                                    @if (product.theoretical_stock <= 0) {
+                                        <span class="badge badge-danger">Rupture</span>
+                                    } @else {
+                                        <span class="add" aria-hidden="true">
+                                            @if (quantityOf(product); as qty) {
+                                                {{ qty }}
+                                            } @else {
+                                                <app-icon name="plus" [size]="18" />
+                                            }
+                                        </span>
+                                    }
+                                </button>
+                            </li>
+                        } @empty {
+                            <li class="empty">
+                                {{
+                                    search()
+                                        ? "Aucun produit ne correspond à cette recherche."
+                                        : "Aucun produit en vente."
+                                }}
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <ul class="gtiles" [class.reloading]="products.isLoading()">
+                        @for (product of results(); track product.id) {
+                            <li class="gtile" [class.in-cart]="inCart(product)">
                                 <button
                                     type="button"
-                                    class="gcorner"
-                                    [attr.aria-label]="'Agrandir la photo de ' + product.name"
-                                    (click)="zoomImage(product)"
+                                    class="gmain"
+                                    [disabled]="product.theoretical_stock <= 0"
+                                    [attr.aria-label]="'Ajouter ' + product.name"
+                                    (click)="tapTile(product)"
                                 >
-                                    <app-icon name="search" [size]="16" />
+                                    <span class="gphoto tone-{{ tone(product.name) }}">
+                                        @if (product.image) {
+                                            <img [src]="product.image" alt="" />
+                                        } @else {
+                                            {{ initials(product.name) }}
+                                        }
+                                    </span>
+                                    <span class="gbody">
+                                        <strong class="gname">{{ product.name }}</strong>
+                                        <span class="gfoot">
+                                            <strong class="gprice">{{
+                                                product.sale_price | fcfa
+                                            }}</strong>
+                                            @if (product.theoretical_stock <= 0) {
+                                                <span class="badge badge-danger">Rupture</span>
+                                            } @else if (product.stock_status !== "OK") {
+                                                <small class="stock"
+                                                    >Plus que {{ product.theoretical_stock }}</small
+                                                >
+                                            } @else {
+                                                <small class="gstock"
+                                                    >Stock : {{ product.theoretical_stock }}</small
+                                                >
+                                            }
+                                        </span>
+                                    </span>
                                 </button>
-                            }
-                        </li>
-                    } @empty {
-                        <li class="empty">
-                            {{
-                                search()
-                                    ? "Aucun produit ne correspond à cette recherche."
-                                    : "Aucun produit en vente."
-                            }}
-                        </li>
-                    }
-                </ul>
+
+                                @if (quantityOf(product); as qty) {
+                                    <span class="gqty">
+                                        <button
+                                            type="button"
+                                            [attr.aria-label]="'Retirer un ' + product.name"
+                                            (click)="untapTile(product)"
+                                        >
+                                            <app-icon name="minus" [size]="16" />
+                                        </button>
+                                        <span aria-live="polite">{{ qty }}</span>
+                                    </span>
+                                }
+
+                                @if (product.image) {
+                                    <button
+                                        type="button"
+                                        class="gcorner"
+                                        [attr.aria-label]="'Agrandir la photo de ' + product.name"
+                                        (click)="zoomImage(product)"
+                                    >
+                                        <app-icon name="search" [size]="16" />
+                                    </button>
+                                }
+                            </li>
+                        } @empty {
+                            <li class="empty">
+                                {{
+                                    search()
+                                        ? "Aucun produit ne correspond à cette recherche."
+                                        : "Aucun produit en vente."
+                                }}
+                            </li>
+                        }
+                    </ul>
+                }
             }
         </section>
 
@@ -723,6 +792,26 @@
         <span class="scan-qty"><app-icon name="check" [size]="16" /> ×{{ card.qty }}</span>
     </div>
 }
+
+<ng-template #thumb let-product>
+    <span class="thumb tone-{{ tone(product.name) }}">
+        @if (product.image) {
+            <button
+                type="button"
+                class="thumb-zoom"
+                [attr.aria-label]="'Agrandir la photo de ' + product.name"
+                (click)="zoomImage(product)"
+            >
+                <img [src]="product.image" alt="" />
+                <span class="thumb-hint" aria-hidden="true"
+                    ><app-icon name="search" [size]="12"
+                /></span>
+            </button>
+        } @else {
+            {{ initials(product.name) }}
+        }
+    </span>
+</ng-template>
 
 @if (photoNotice(); as notice) {
     <div
