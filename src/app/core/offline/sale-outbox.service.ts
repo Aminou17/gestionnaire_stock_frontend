@@ -151,7 +151,7 @@ export class SaleOutboxService {
                     const error = err as HttpErrorResponse;
 
                     // toujours sans réseau : on s'arrête là, rien n'est perdu
-                    if (error.status === 0 || error.status >= 500) {
+                    if (error.status === 0 || error.status === 429 || error.status >= 500) {
                         await this.put({ ...sale, status: "waiting", attempts: sale.attempts + 1 });
                         break;
                     }
