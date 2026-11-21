@@ -980,20 +980,11 @@ td.num small {
 
     .filter-btn {
         justify-content: center;
-        width: 44px;
+        gap: 6px;
         height: 44px;
         min-height: 44px;
-        padding: 0;
+        padding: 0 12px;
         border-radius: 12px;
-    }
-
-    .filter-label {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        overflow: hidden;
-        clip: rect(0 0 0 0);
-        white-space: nowrap;
     }
 
     .chips {
@@ -1055,14 +1046,20 @@ td.num small {
     .toolbar .filter-btn {
         display: inline-flex;
         justify-content: center;
-        width: 40px;
         height: 40px;
         min-height: 40px;
-        padding: 0;
+        padding: 0 12px;
         border-radius: 12px;
     }
 
-    .toolbar .filter-label {
+    /* le statut de stock passe dans le panneau Filtre : plus de rangée de pastilles */
+    .list-card .chips {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) {
+    .stock-field {
         display: none;
     }
 }

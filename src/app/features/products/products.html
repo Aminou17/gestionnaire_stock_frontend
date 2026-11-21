@@ -136,6 +136,21 @@
             </button>
         </div>
 
+        <label class="field stock-field">
+            <span class="field-label">Stock</span>
+            <select
+                class="input"
+                aria-label="Stock"
+                (change)="selectStock(tabs()[+$any($event.target).value].value)"
+            >
+                @for (tab of tabs(); track tab.label; let i = $index) {
+                    <option [value]="i" [selected]="stockStatus() === tab.value">
+                        {{ tab.short }}
+                    </option>
+                }
+            </select>
+        </label>
+
         <label class="field">
             <span class="field-label">Catégorie</span>
             <select class="input" (change)="selectCategory($any($event.target).value)">

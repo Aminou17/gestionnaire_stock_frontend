@@ -714,11 +714,14 @@ app-page-header {
 
 .filter-icon {
     position: relative;
-    display: grid;
+    display: inline-flex;
     flex: none;
-    place-items: center;
-    width: 40px;
+    align-items: center;
+    gap: 6px;
     height: 40px;
+    padding: 0 12px;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     border: 1px solid var(--border);
     border-radius: 10px;
     background: var(--surface);

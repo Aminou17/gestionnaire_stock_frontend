@@ -90,7 +90,8 @@
 
         <!-- icône de filtre : la liste native s'ouvre au toucher, sans bouton de plus -->
         <label class="filter-icon" [class.active]="status() !== null || unpaid()">
-            <app-icon name="filter" [size]="20" />
+            <app-icon name="filter" [size]="18" />
+            <span class="filter-word">Filtre</span>
             <select
                 aria-label="Filtrer les ventes"
                 (change)="selectStatus(tabs()[+$any($event.target).value].value)"
