@@ -1,3 +1,4 @@
+import { closeOnOutsideClick } from "../../shared/outside-click";
 import { formatDate } from "@angular/common";
 import {
     Component,
@@ -25,7 +26,6 @@ const MAX_PRODUCTS = 4;
     templateUrl: "./notifications.html",
     styleUrl: "./notifications.css",
     host: {
-        "(document:click)": "onDocumentClick($event)",
         "(document:keydown.escape)": "onEscape()",
         "(focusout)": "onFocusOut($event)",
     },
@@ -35,6 +35,12 @@ export class Notifications {
     private locale = inject(LOCALE_ID);
     protected stock = inject(LowStockAlertService);
     protected security = inject(SecurityAlertService);
+
+    private outsideClick = closeOnOutsideClick(
+        () => this.open(),
+        (target) => this.el.nativeElement.contains(target),
+        () => this.open.set(false),
+    );
 
     private button = viewChild.required<ElementRef<HTMLButtonElement>>("button");
 
@@ -102,9 +108,5 @@ export class Notifications {
     onFocusOut(event: FocusEvent) {
         const next = event.relatedTarget as Node | null;
         if (next && !this.el.nativeElement.contains(next)) this.open.set(false);
-    }
-
-    onDocumentClick(event: Event) {
-        if (!this.el.nativeElement.contains(event.target)) this.open.set(false);
     }
 }

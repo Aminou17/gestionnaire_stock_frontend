@@ -1,7 +1,17 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, ElementRef, input, output, signal, viewChild } from "@angular/core";
+import {
+    Component,
+    DestroyRef,
+    ElementRef,
+    inject,
+    input,
+    output,
+    signal,
+    viewChild,
+} from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+import { swallowNextOutsideClick } from "../outside-click";
 import { Icon } from "../icon/icon";
 import { WhatsappIcon } from "../icon/whatsapp-icon";
 import { IconName } from "../icon/icons";
@@ -50,10 +60,17 @@ export class ActionMenu {
 
     open = signal(false);
 
+    private stopSwallowing: () => void = () => {};
+
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.stopSwallowing());
+    }
+
     toggle() {
         const panel = this.panel().nativeElement;
 
         if (this.open()) {
+            this.stopSwallowing();
             panel.hidePopover?.();
             return;
         }
@@ -65,6 +82,9 @@ export class ActionMenu {
 
         panel.showPopover?.();
         this.open.set(true);
+        this.stopSwallowing = swallowNextOutsideClick(
+            (target) => panel.contains(target) || this.trigger().nativeElement.contains(target),
+        );
         panel.querySelector<HTMLElement>(".item:not(:disabled)")?.focus();
     }
 
@@ -74,6 +94,7 @@ export class ActionMenu {
     }
 
     pick(item: ActionItem) {
+        this.stopSwallowing();
         this.panel().nativeElement.hidePopover?.();
         this.open.set(false);
         this.picked.emit(item.id);

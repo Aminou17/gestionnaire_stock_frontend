@@ -1,3 +1,4 @@
+import { closeOnOutsideClick } from "../../shared/outside-click";
 import { Component, DestroyRef, ElementRef, computed, inject, signal } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from "@angular/router";
@@ -20,7 +21,6 @@ import { FOOTER_LINKS, NavItem, SECTIONS } from "../nav-items";
     templateUrl: "./sidebar.html",
     styleUrl: "./sidebar.css",
     host: {
-        "(document:click)": "onDocumentClick($event)",
         "(document:keydown.escape)": "profileOpen.set(false); panel.set(null)",
     },
 })
@@ -68,6 +68,12 @@ export class Sidebar {
 
     // rubrique ouverte en carreaux ; le menu réduit garde ses icônes à plat
     panel = signal<string | null>(null);
+
+    private outsideClick = closeOnOutsideClick(
+        () => this.profileOpen(),
+        (target) => !!this.el.nativeElement.querySelector(".profile")?.contains(target),
+        () => this.profileOpen.set(false),
+    );
     panelGroup = computed(() => {
         const label = this.panel();
         if (!label || this.layout.collapsed()) return null;
@@ -131,11 +137,5 @@ export class Sidebar {
     openSearch() {
         this.close();
         this.layout.searchOpen.set(true);
-    }
-
-    onDocumentClick(event: Event) {
-        if (!this.el.nativeElement.querySelector(".profile")?.contains(event.target)) {
-            this.profileOpen.set(false);
-        }
     }
 }

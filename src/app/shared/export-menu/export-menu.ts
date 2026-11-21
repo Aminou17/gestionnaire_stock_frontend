@@ -1,4 +1,15 @@
-import { Component, ElementRef, input, output, signal, viewChild } from "@angular/core";
+import {
+    Component,
+    DestroyRef,
+    ElementRef,
+    inject,
+    input,
+    output,
+    signal,
+    viewChild,
+} from "@angular/core";
+
+import { swallowNextOutsideClick } from "../outside-click";
 
 import { ExportFormat } from "../../core/export-format";
 import { Icon } from "../icon/icon";
@@ -25,11 +36,17 @@ export class ExportMenu {
     picked = output<ExportFormat>();
 
     open = signal(false);
+    private stopSwallowing: () => void = () => {};
+
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.stopSwallowing());
+    }
 
     toggle() {
         const panel = this.panel().nativeElement;
 
         if (this.open()) {
+            this.stopSwallowing();
             panel.hidePopover?.();
             return;
         }
@@ -41,6 +58,9 @@ export class ExportMenu {
 
         panel.showPopover?.();
         this.open.set(true);
+        this.stopSwallowing = swallowNextOutsideClick(
+            (target) => panel.contains(target) || this.trigger().nativeElement.contains(target),
+        );
         // le clavier arrive directement sur le premier choix
         panel.querySelector<HTMLElement>(".item")?.focus();
     }
@@ -51,6 +71,7 @@ export class ExportMenu {
     }
 
     pick(format: ExportFormat) {
+        this.stopSwallowing();
         this.panel().nativeElement.hidePopover?.();
         this.open.set(false);
         this.picked.emit(format);

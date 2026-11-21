@@ -1,3 +1,4 @@
+import { closeOnOutsideClick } from "../../shared/outside-click";
 import { DatePipe, DecimalPipe, formatDate } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import {
@@ -73,13 +74,18 @@ const toId = (value: string | null) => {
     templateUrl: "./stock-movements.html",
     styleUrl: "./stock-movements.css",
     host: {
-        "(document:click)": "onDocumentClick($event)",
         "(document:keydown.escape)": "menuOpen.set(false); filtersOpen.set(false)",
     },
 })
 export class StockMovements {
     private locale = inject(LOCALE_ID);
     private destroyRef = inject(DestroyRef);
+
+    private outsideClick = closeOnOutsideClick(
+        () => this.menuOpen(),
+        (target) => !!target.closest(".head-menu"),
+        () => this.menuOpen.set(false),
+    );
     private movementService = inject(StockMovementService);
     private router = inject(Router);
     private route = inject(ActivatedRoute);
@@ -316,10 +322,6 @@ export class StockMovements {
 
     toggleMenu() {
         this.menuOpen.set(!this.menuOpen());
-    }
-
-    onDocumentClick(event: Event) {
-        if (!(event.target as HTMLElement).closest(".head-menu")) this.menuOpen.set(false);
     }
 
     selectType(value: StockMovementFilter | null) {

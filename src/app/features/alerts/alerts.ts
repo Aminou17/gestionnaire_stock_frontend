@@ -1,3 +1,4 @@
+import { closeOnOutsideClick } from "../../shared/outside-click";
 import { HttpErrorResponse } from "@angular/common/http";
 import { DatePipe } from "@angular/common";
 import {
@@ -48,7 +49,6 @@ interface AlertGroup {
     templateUrl: "./alerts.html",
     styleUrl: "./alerts.css",
     host: {
-        "(document:click)": "closeMenuOutside($event)",
         "(document:keydown.escape)": "escapeMenu()",
     },
 })
@@ -60,6 +60,12 @@ export class Alerts {
     private alertService = inject(LowStockAlertService);
     private productService = inject(ProductService);
     private destroyRef = inject(DestroyRef);
+
+    private outsideClick = closeOnOutsideClick(
+        () => this.openMenu() !== null,
+        (target) => !!target.closest(".menu-wrap"),
+        () => this.closeMenu(),
+    );
     private injector = inject(Injector);
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
     private router = inject(Router);
@@ -221,10 +227,6 @@ export class Alerts {
 
     closeMenu() {
         this.openMenu.set(null);
-    }
-
-    closeMenuOutside(event: Event) {
-        if (!(event.target as Element).closest(".menu-wrap")) this.closeMenu();
     }
 
     lastEntryLabel(alert: LowStockAlert) {
