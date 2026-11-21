@@ -6,94 +6,6 @@
     margin-top: 16px;
 }
 
-/* texte d'explication en haut de la page */
-.intro {
-    padding: 4px 16px;
-}
-
-.intro-icon {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: var(--primary-soft);
-    color: var(--primary-text);
-}
-
-.intro-body {
-    display: grid;
-    gap: 12px;
-    padding: 4px 0 16px;
-}
-
-.intro p {
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-body);
-    line-height: 1.5;
-}
-
-.intro-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    min-height: 48px;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: var(--text);
-    font: inherit;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
-    text-align: left;
-    cursor: pointer;
-}
-
-.intro-toggle > app-icon {
-    margin-left: auto;
-    color: var(--text-muted);
-}
-
-.intro-toggle app-icon {
-    transition: transform 0.15s ease;
-}
-
-.intro-toggle .turned {
-    transform: rotate(180deg);
-}
-
-.rules {
-    display: grid;
-    gap: 8px;
-    margin: 0;
-}
-
-.rules > div {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 12px;
-}
-
-.rules dt {
-    flex: 0 0 128px;
-}
-
-.rules dd {
-    flex: 1 1 180px;
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-}
-
-.intro .rules-note {
-    font-size: var(--fs-small);
-}
-
-/* répartition des produits par vitesse */
 .summary {
     display: grid;
     gap: 12px;
@@ -135,23 +47,6 @@
     background: var(--danger);
 }
 
-.legend {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 16px;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-}
-
-.legend li {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-
 .dot {
     display: inline-block;
     width: 8px;
@@ -175,24 +70,20 @@
     min-width: 0;
 }
 
-/* filtres */
 .toolbar {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     gap: 8px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border);
 }
 
-.tabs-inline {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.toolbar .chip {
+    gap: 6px;
 }
 
 .chip-count {
-    margin-left: 6px;
+    margin-left: 2px;
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
 }
@@ -200,38 +91,6 @@
 .chip[aria-pressed="true"] .chip-count {
     color: inherit;
     font-weight: var(--fw-semibold);
-}
-
-.filter-btn,
-.active-chip {
-    display: none;
-}
-
-.filters {
-    display: none;
-}
-
-/* liste */
-.columns,
-.row {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 2fr) 100px 80px 140px;
-    align-items: center;
-    gap: 16px;
-    padding: 0 16px;
-}
-
-.columns {
-    min-height: 40px;
-    border-bottom: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-    font-weight: var(--fw-semibold);
-}
-
-/* la colonne vide est celle de la miniature */
-.columns span:first-child {
-    grid-column: 1 / 3;
 }
 
 .rows {
@@ -242,8 +101,11 @@
 
 .row {
     position: relative;
-    min-height: 76px;
-    padding-block: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 68px;
+    padding: 12px 16px;
     border-bottom: 1px solid var(--border);
 }
 
@@ -313,33 +175,47 @@
 }
 
 .identity {
+    flex: 1;
     min-width: 0;
     display: grid;
-    gap: 4px;
+    gap: 2px;
 }
 
 .name {
     min-width: 0;
+    overflow: hidden;
     color: var(--text);
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .name:hover {
     text-decoration: underline;
 }
 
-.meta-line {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px 8px;
-}
-
 .meta {
     color: var(--text-muted);
     font-size: var(--fs-small);
+}
+
+.end {
+    display: grid;
+    justify-items: end;
+    gap: 4px;
+}
+
+.days {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.days.urgent {
+    color: var(--danger);
+    font-weight: var(--fw-semibold);
 }
 
 /* pastille de vitesse : vert rapide, bleu normal, orange lent, rouge dormant */
@@ -377,61 +253,6 @@
     color: var(--danger);
 }
 
-.figures,
-.counts {
-    display: contents;
-}
-
-.sold {
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-}
-
-.stock,
-.days {
-    color: var(--text-muted);
-    font-size: var(--fs-body);
-}
-
-.days {
-    display: grid;
-    gap: 6px;
-    font-variant-numeric: tabular-nums;
-}
-
-.days.urgent {
-    color: var(--danger);
-    font-weight: var(--fw-semibold);
-}
-
-.gauge {
-    display: block;
-    height: 4px;
-    overflow: hidden;
-    border-radius: 999px;
-    background: var(--neutral-soft);
-}
-
-.gauge i {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-}
-
-.tone-danger {
-    background: var(--danger);
-}
-
-.tone-neutral {
-    background: var(--text-muted);
-    opacity: 0.55;
-}
-
-.mobile-label {
-    display: none;
-}
-
-/* chargement, vide, erreur */
 .loading {
     display: grid;
     gap: 12px;
@@ -467,220 +288,7 @@
 }
 
 .name:focus-visible,
-.thumb-zoom:focus-visible,
-.intro-toggle:focus-visible,
-.filter-btn:focus-visible,
-.active-chip:focus-visible,
-.sheet-close:focus-visible {
+.thumb-zoom:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
-}
-
-@media (max-width: 767px) {
-    .card + .card {
-        margin-top: 12px;
-    }
-
-    .intro {
-        padding: 12px 16px;
-    }
-
-    .intro-icon {
-        display: none;
-    }
-
-    .rules dt {
-        flex-basis: 116px;
-    }
-
-    .list-card {
-        padding-bottom: 0;
-    }
-
-    .toolbar {
-        flex-wrap: nowrap;
-        gap: 8px;
-        padding: 12px 16px;
-    }
-
-    .all-chip {
-        height: 40px;
-    }
-
-    .tabs-inline {
-        display: none;
-    }
-
-    .filter-btn {
-        display: inline-flex;
-        flex-shrink: 0;
-        align-items: center;
-        gap: 6px;
-        height: 40px;
-        padding: 0 12px;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--surface);
-        color: var(--text);
-        font: inherit;
-        font-size: var(--fs-small);
-        font-weight: var(--fw-medium);
-        cursor: pointer;
-    }
-
-    .filter-btn.active {
-        border-color: var(--primary);
-        background: var(--primary-soft);
-        color: var(--primary-text);
-    }
-
-    /* le filtre actif reste visible, avec sa croix pour le retirer */
-    .active-chip {
-        display: inline-flex;
-        align-items: center;
-        flex: 0 1 auto;
-        gap: 6px;
-        min-width: 0;
-        height: 40px;
-        padding: 0 12px;
-        border: 1px solid var(--primary);
-        border-radius: 999px;
-        background: var(--primary-soft);
-        color: var(--primary-text);
-        font: inherit;
-        font-size: var(--fs-small);
-        font-weight: var(--fw-medium);
-        cursor: pointer;
-    }
-
-    .active-chip span {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    /* la fenêtre des filtres monte du bas, comme sur la page Produits */
-    .filters {
-        position: fixed;
-        inset: auto 0 0;
-        z-index: 41;
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
-        border-radius: 16px 16px 0 0;
-        background: var(--surface);
-        box-shadow: var(--shadow-dialog);
-    }
-
-    .filters.open {
-        display: flex;
-    }
-
-    .sheet-backdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 40;
-        background: var(--overlay);
-    }
-
-    .field-label {
-        display: block;
-        margin-bottom: 8px;
-        font-size: var(--fs-small);
-        font-weight: var(--fw-medium);
-    }
-
-    .options {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .options .chip {
-        height: 40px;
-    }
-
-    .columns {
-        display: none;
-    }
-
-    /* photo et produit à gauche, jours restants à droite, chiffres sous le nom */
-    .row {
-        grid-template-columns: 44px minmax(0, 1fr) auto;
-        grid-template-areas:
-            "thumb id days"
-            "thumb counts days";
-        gap: 4px 12px;
-        min-height: 84px;
-        padding: 14px 16px;
-    }
-
-    .thumb {
-        grid-area: thumb;
-        align-self: start;
-        width: 48px;
-        height: 48px;
-    }
-
-    .identity {
-        grid-area: id;
-    }
-
-    .counts {
-        display: flex;
-        grid-area: counts;
-        gap: 12px;
-        color: var(--text-muted);
-        font-size: var(--fs-small);
-    }
-
-    .sold,
-    .stock {
-        font-size: var(--fs-small);
-        font-weight: var(--fw-regular);
-        color: var(--text-muted);
-    }
-
-    .mobile-label {
-        display: inline;
-    }
-
-    .days {
-        grid-area: days;
-        align-self: center;
-        justify-items: end;
-        color: var(--text);
-        font-size: var(--fs-heading);
-        font-weight: var(--fw-semibold);
-        text-align: right;
-        white-space: nowrap;
-    }
-
-    .days.urgent {
-        color: var(--danger);
-    }
-
-    .days.none {
-        font-size: var(--fs-body);
-        font-weight: var(--fw-regular);
-    }
-
-    .days .muted {
-        font-size: var(--fs-caption);
-        font-weight: var(--fw-regular);
-    }
-
-    .days-value.long {
-        color: var(--text-muted);
-        font-size: var(--fs-small);
-        font-weight: var(--fw-medium);
-    }
-
-    .gauge {
-        width: 56px;
-    }
-
-    .empty .btn-sm {
-        min-height: 44px;
-    }
 }

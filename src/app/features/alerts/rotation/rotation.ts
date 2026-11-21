@@ -40,7 +40,6 @@ const speeds: RotationSpeed[] = ["FAST", "NORMAL", "SLOW", "DORMANT"];
 @Component({
     selector: "app-rotation",
     imports: [RouterLink, PageHeader, Icon, PhotoZoom, DaysLeftPipe, Pagination],
-    host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
     templateUrl: "./rotation.html",
     styleUrl: "./rotation.css",
 })
@@ -66,8 +65,6 @@ export class Rotation {
         { value: "CLEAR", label: "À solder" },
     ];
 
-    filtersOpen = signal(false);
-    explainOpen = signal(false);
     zoom = signal<{ src: string; name: string } | null>(null);
     initials = productInitials;
 
@@ -80,7 +77,12 @@ export class Rotation {
         return { backTo: this.router.serializeUrl(url), backLabel: "Rotation" };
     });
 
-    list = computed(() => this.filter(this.view()));
+    // les produits qui risquent la rupture passent en premier
+    list = computed(() =>
+        [...this.filter(this.view())].sort(
+            (a, b) => Number(this.isUrgent(b)) - Number(this.isUrgent(a)),
+        ),
+    );
 
     paging = clientPaging(
         () => this.list(),
@@ -111,14 +113,6 @@ export class Rotation {
         return this.all().filter((p) => p.speed === view);
     }
 
-    idleLabel(product: ProductRotation) {
-        const days = product.idle_days ?? 0;
-        if (product.last_sale_at === null) {
-            return days === 0 ? "Jamais vendu" : `Jamais vendu, en rayon depuis ${days} j`;
-        }
-        return days === 0 ? "Dernière vente aujourd'hui" : `Dernière vente il y a ${days} j`;
-    }
-
     tone(product: ProductRotation) {
         return categoryTone(product.category_name ?? product.name);
     }
@@ -146,26 +140,12 @@ export class Rotation {
             .join(", "),
     );
 
-    activeLabel = computed(() => this.tabs.find((tab) => tab.value === this.view())?.label);
-
     select(view: View) {
         this.view.set(view);
     }
 
     label(speed: RotationSpeed) {
         return labels[speed];
-    }
-
-    // jauge de stock restant : pleine à 90 jours et plus
-    gaugeWidth(product: ProductRotation) {
-        return Math.min(product.days_left ?? 0, 90) / 0.9;
-    }
-
-    // la jauge parle du stock, pas de la vitesse : elle reste neutre pour ne pas contredire
-    // le badge (vert, bleu, orange, rouge) et ne rougit que si le stock va bientôt manquer
-    gaugeTone(product: ProductRotation) {
-        const days = product.days_left ?? 0;
-        return days < URGENT_DAYS ? "danger" : "neutral";
     }
 
     isUrgent(product: ProductRotation) {

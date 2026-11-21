@@ -121,21 +121,16 @@ describe("Rotation", () => {
         const el = fixture.nativeElement as HTMLElement;
         expect(el.querySelector(".row .speed.fast")!.textContent).toContain("Sort vite");
         expect(el.querySelector(".row .speed.slow")!.textContent).toContain("Sort lentement");
-        expect(el.querySelector(".row .speed.dormant")!.textContent).toContain("Ne bouge pas");
+        expect(el.querySelector(".row .speed.clear")!.textContent).toContain("À solder");
     });
 
-    it("explique la période de 30 jours et ouvre les règles de classement", async () => {
+    it("rappelle la période de 30 jours, sans texte d'aide caché", async () => {
         await load([bazin, pagne, savon]);
-        const el = fixture.nativeElement as HTMLElement;
 
         expect(text()).toContain("30 derniers jours");
-        expect(el.querySelector(".rules")).toBeNull();
-
-        el.querySelector<HTMLButtonElement>(".intro-toggle")!.click();
-        fixture.detectChanges();
-
-        expect(text()).toContain("Cette période est fixe");
-        expect(el.querySelector(".rules")!.textContent).toContain("60 jours");
+        expect(
+            (fixture.nativeElement as HTMLElement).querySelector(".intro, .filter-btn"),
+        ).toBeNull();
     });
 
     it("affiche la photo du produit, sinon ses initiales", async () => {
@@ -146,27 +141,10 @@ describe("Rotation", () => {
         expect(thumbs[1].textContent).toContain("PW");
     });
 
-    it("ouvre la fenêtre de filtre et réinitialise la vue", async () => {
-        await load([bazin, pagne, savon]);
-        const el = fixture.nativeElement as HTMLElement;
-
-        el.querySelector<HTMLButtonElement>(".filter-btn")!.click();
-        fixture.detectChanges();
-        expect(el.querySelector(".filters")!.classList).toContain("open");
-
-        fixture.componentInstance.view.set("SLOW");
-        fixture.detectChanges();
-        expect(el.querySelector(".active-chip")!.textContent).toContain("Lent");
-
-        el.querySelector<HTMLButtonElement>(".active-chip")!.click();
-        fixture.detectChanges();
-        expect(el.querySelectorAll(".row").length).toBe(3);
-    });
-
     it("liste les produits à solder et depuis quand ils ne se vendent plus", async () => {
         await load([bazin, pagne, savon]);
-        const tab = [...fixture.nativeElement.querySelectorAll(".tab")].find((t: HTMLElement) =>
-            t.textContent!.includes("À solder"),
+        const tab = [...fixture.nativeElement.querySelectorAll(".toolbar .chip")].find(
+            (t: HTMLElement) => t.textContent!.includes("À solder"),
         ) as HTMLButtonElement;
 
         expect(tab.textContent).toContain("1");
@@ -176,8 +154,14 @@ describe("Rotation", () => {
         const rows = (fixture.nativeElement as HTMLElement).querySelectorAll(".row");
         expect(rows.length).toBe(1);
         expect(rows[0].textContent).toContain("Savon de Marseille");
-        expect(rows[0].textContent).toContain("Dernière vente il y a 74 j");
         expect(rows[0].textContent).toContain("À solder");
+    });
+
+    it("met en premier les produits qui risquent la rupture", async () => {
+        await load([pagne, savon, bazin]);
+
+        const rows = (fixture.nativeElement as HTMLElement).querySelectorAll(".row");
+        expect(rows[0].textContent).toContain("Bazin riche bleu");
     });
 
     it("affiche plus d'un an au lieu d'un nombre de jours démesuré", async () => {
@@ -199,9 +183,9 @@ describe("Rotation", () => {
         await load([bazin, pagne, savon]);
 
         const tabs = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLButtonElement>(
-            ".tab",
+            ".toolbar .chip",
         );
-        tabs[3].click();
+        tabs[4].click();
         fixture.detectChanges();
 
         const rows = (fixture.nativeElement as HTMLElement).querySelectorAll(".row");
