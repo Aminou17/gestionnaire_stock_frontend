@@ -146,12 +146,11 @@ export class ProductPage {
 
     // menu « ... » : la photo ne peut être retirée que si elle existe
     menuItems = computed<ActionItem[]>(() => [
-        { id: "adjust", label: "Ajuster le stock", icon: "stock-entry" },
-        { id: "edit", label: "Modifier", icon: "edit" },
+        { id: "adjust", label: "Corriger la quantité", icon: "stock-entry" },
         ...(this.data()?.image
             ? [{ id: "photo", label: "Retirer la photo", icon: "image" } as ActionItem]
             : []),
-        { id: "delete", label: "Supprimer", icon: "ban", danger: true },
+        { id: "delete", label: "Supprimer", icon: "ban", danger: true, separated: true },
     ]);
 
     onPick(id: string) {

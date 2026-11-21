@@ -100,7 +100,7 @@
 }
 
 .summary-total {
-    font-size: 36px;
+    font-size: var(--fs-hero);
     line-height: 1.1;
     white-space: nowrap;
     font-weight: var(--fw-bold);

@@ -371,15 +371,7 @@ app-page-header {
     transition: opacity 0.15s;
 }
 
-.fab {
-    display: none;
-}
-
 @media (max-width: 767px) {
-    .new-expense {
-        display: none;
-    }
-
     .periods {
         width: 100%;
     }
@@ -405,21 +397,6 @@ app-page-header {
     .search {
         flex: 1 1 100%;
         max-width: none;
-    }
-
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
     }
 
     /* la liste ne passe pas sous le bouton flottant */

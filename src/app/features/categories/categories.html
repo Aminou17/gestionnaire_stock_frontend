@@ -162,11 +162,7 @@
     }
 </section>
 
-@if (auth.isAdmin()) {
-    <button type="button" class="fab" (click)="newCategory()" aria-label="Nouvelle catégorie">
-        <app-icon name="plus" [size]="24" />
-    </button>
-}
+@if (auth.isAdmin()) {}
 
 <dialog
     #formBox

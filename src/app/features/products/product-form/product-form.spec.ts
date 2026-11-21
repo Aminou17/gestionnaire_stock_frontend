@@ -159,6 +159,7 @@ describe("ProductForm", () => {
 
     it("should show the margin and the price range of a negotiable product", async () => {
         component.openNew();
+        component.moreOpen.set(true);
         fill("NEGOTIABLE", 1500);
         await fixture.whenStable();
 
@@ -186,6 +187,7 @@ describe("ProductForm", () => {
 
     it("should send no threshold when left empty, so the default one applies", async () => {
         component.openNew();
+        component.moreOpen.set(true);
         await fixture.whenStable();
         expect(el.textContent).toContain("seuil par défaut (5)");
 
@@ -266,5 +268,21 @@ describe("ProductForm", () => {
         component.submit();
 
         expect(updateProduct).toHaveBeenCalledWith(7, expect.objectContaining({ minStock: 12 }));
+    });
+
+    it("should keep the optional fields folded for a first product, and unfold them on demand", async () => {
+        component.openNew();
+        await fixture.whenStable();
+
+        expect(el.querySelector("#product-barcode")).toBeNull();
+        expect(el.querySelector(".photo-row")).toBeNull();
+        expect(el.querySelector("#mode-label")).toBeNull();
+
+        el.querySelector<HTMLButtonElement>(".more-toggle")!.click();
+        await fixture.whenStable();
+
+        expect(el.querySelector("#product-barcode")).not.toBeNull();
+        expect(el.querySelector(".photo-row")).not.toBeNull();
+        expect(el.querySelector("#mode-label")).not.toBeNull();
     });
 });

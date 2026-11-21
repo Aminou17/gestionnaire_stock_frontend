@@ -80,6 +80,8 @@
 
     /* Échelle typographique (modèle : Tableau de bord) */
     --fs-title: 28px;
+    /* le plus gros chiffre d'une page (montant d'une vente, d'une dépense, première carte de l'accueil) */
+    --fs-hero: 32px;
     --fs-kpi: 28px;
     --fs-figure: 22px;
     --fs-heading: 17px;
@@ -99,8 +101,11 @@
 /* Sur téléphone, titres et gros chiffres rétrécissent comme sur le Tableau de bord */
 @media (max-width: 767px) {
     :root {
-        --fs-title: 18px;
-        --fs-kpi: 24px;
+        --fs-title: 20px;
+        --fs-hero: 26px;
+        --fs-kpi: 22px;
+        --fs-figure: 18px;
+        --fs-heading: 16px;
     }
 }
 
@@ -829,4 +834,20 @@ select.chip {
 
 .has-scan .input {
     padding-right: 48px;
+}
+
+/* téléphone : un bouton d'en-tête garde son verbe et son « + », le complément passe en second plan */
+.btn .short {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .btn .more,
+    .btn .long {
+        display: none;
+    }
+
+    .btn .short {
+        display: inline;
+    }
 }

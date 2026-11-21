@@ -237,6 +237,8 @@ export class SalePage {
     });
 
     // menu « ... » : envoyer en texte, imprimer, et rembourser pour le propriétaire
+    returnMode = signal(false);
+
     menuItems = computed<ActionItem[]>(() => {
         const items: ActionItem[] = [];
         const link = this.whatsAppReceipt();
@@ -249,13 +251,22 @@ export class SalePage {
             icon: "printer",
             disabled: !this.settingsReady(),
         });
+        // rendre un seul article : les boutons « Rendre » n'apparaissent sur les lignes qu'à ce moment
+        if (this.canReturn()) {
+            items.push({
+                id: "return-mode",
+                label: this.returnMode() ? "Terminer les retours" : "Rendre un article",
+                icon: "undo",
+                separated: true,
+            });
+        }
         if (this.canRefund()) {
             items.push({
                 id: "refund",
                 label: "Rembourser",
                 icon: "undo",
                 danger: true,
-                separated: true,
+                separated: !this.canReturn(),
                 disabled: this.reloading(),
             });
         }
@@ -264,6 +275,7 @@ export class SalePage {
 
     onPick(id: string) {
         if (id === "print") this.print();
+        else if (id === "return-mode") this.returnMode.set(!this.returnMode());
         else if (id === "refund") this.askRefund();
     }
 

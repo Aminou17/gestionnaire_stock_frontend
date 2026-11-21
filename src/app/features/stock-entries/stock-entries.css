@@ -209,10 +209,6 @@ tbody tr:hover {
 
 .mobile-count,
 .cards,
-.fab {
-    display: none;
-}
-
 .loading {
     display: grid;
     gap: 10px;
@@ -325,8 +321,7 @@ tbody tr:hover {
         gap: 12px;
     }
 
-    .new-entry,
-    .stats,
+    ..stats,
     .table-wrap {
         display: none;
     }
@@ -428,22 +423,5 @@ tbody tr:hover {
 
     .row-skeleton {
         height: 80px;
-    }
-
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border: 0;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
-        cursor: pointer;
     }
 }

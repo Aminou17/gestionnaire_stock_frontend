@@ -95,13 +95,9 @@
 }
 
 @media (max-width: 767px) {
-    /* dans l'en-tête, le bouton se réduit à son icône */
-    :host(.icon-phone) .trigger {
-        width: 36px;
-        min-height: 36px;
-        height: 36px;
-        padding: 0;
-        justify-content: center;
+    /* l'export sert à la comptabilité : sur téléphone il se fait depuis Paramètres, pas d'icône seule en plus */
+    :host(.icon-phone) {
+        display: none;
     }
 
     /* petite puce réduite à son icône, pour les lignes de résumé */

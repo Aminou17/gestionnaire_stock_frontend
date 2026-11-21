@@ -2,7 +2,7 @@
     @if (auth.isAdmin()) {
         <!-- télécharger la liste : une icône, le format se choisit ensuite -->
         <app-export-menu
-            class="icon-only"
+            class="icon-only icon-phone"
             ariaLabel="Télécharger la liste des produits"
             title="Télécharger"
             [busy]="exporting()"
@@ -143,6 +143,29 @@
                     </select>
                 </label>
             }
+
+            <!-- téléphone : le choix liste ou carreaux est ici, pas dans un bouton de plus sur la barre -->
+            <div class="field phone-only" role="group" aria-label="Affichage">
+                <span class="field-label">Affichage</span>
+                <div class="view-choice">
+                    <button
+                        type="button"
+                        class="chip"
+                        [attr.aria-pressed]="view() === 'list'"
+                        (click)="setView('list')"
+                    >
+                        Liste
+                    </button>
+                    <button
+                        type="button"
+                        class="chip"
+                        [attr.aria-pressed]="view() === 'grid'"
+                        (click)="setView('grid')"
+                    >
+                        Carreaux
+                    </button>
+                </div>
+            </div>
 
             <label class="field">
                 <span class="field-label">Trier par</span>
@@ -481,11 +504,6 @@
 </ng-template>
 
 @if (auth.isAdmin()) {
-    <!-- téléphone : bouton flottant au-dessus de la barre du bas -->
-    <button type="button" class="fab" (click)="newProduct()" aria-label="Nouveau produit">
-        <app-icon name="plus" [size]="24" />
-    </button>
-
     <app-product-form (saved)="refresh()" />
     <app-adjust-dialog (saved)="onAdjusted($event)" />
 }

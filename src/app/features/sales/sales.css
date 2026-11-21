@@ -568,3 +568,75 @@ app-page-header {
         margin: 12px 0 0;
     }
 }
+
+/* période : pastilles groupées, comme sur Dépenses */
+.periods {
+    display: flex;
+    gap: 4px;
+    width: max-content;
+    max-width: 100%;
+    padding: 4px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    scrollbar-width: none;
+}
+
+.period {
+    flex: none;
+    height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.period[aria-pressed="true"] {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.period:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+    .periods {
+        width: 100%;
+    }
+
+    .period {
+        flex: 1 0 auto;
+        padding: 0 10px;
+        font-size: var(--fs-small);
+    }
+}
+
+/* la carte du haut est maintenant seule, au-dessus de la liste */
+.summary {
+    margin-top: 0;
+}
+
+/* ligne de vente légère : un titre, une ligne grise, le montant */
+.sale-row {
+    min-height: 64px;
+    padding: 10px 16px;
+}
+
+.sale-icon {
+    width: 36px;
+    height: 36px;
+}
+
+/* la carte du haut a la même largeur que la liste */
+.summary {
+    max-width: 920px;
+}

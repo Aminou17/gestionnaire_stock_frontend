@@ -364,8 +364,9 @@ export class Products {
         if (this.auth.isAdmin()) {
             items.push(
                 { id: "stock", label: "Ajouter du stock", icon: "stock-entry" },
-                { id: "adjust", label: "Ajuster le stock", icon: "edit" },
                 { id: "edit", label: "Modifier", icon: "edit" },
+                // corriger une erreur de comptage : rare, donc après les gestes de tous les jours
+                { id: "adjust", label: "Corriger la quantité", icon: "edit", separated: true },
                 { id: "delete", label: "Supprimer", icon: "ban", danger: true },
             );
         }

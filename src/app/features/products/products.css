@@ -161,30 +161,6 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-/* bouton flottant, téléphone seulement : carré "+" comme sur les autres listes,
-   assez petit pour ne pas cacher la colonne des prix */
-.fab {
-    display: none;
-    position: fixed;
-    right: 16px;
-    bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 16px);
-    z-index: 30;
-    place-items: center;
-    width: 56px;
-    height: 56px;
-    border: 0;
-    border-radius: 16px;
-    background: var(--primary);
-    color: var(--on-primary);
-    box-shadow: var(--shadow-menu);
-    cursor: pointer;
-}
-
-.fab:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 3px;
-}
-
 .filter-btn.active {
     border-color: var(--primary);
     color: var(--primary-text);
@@ -498,13 +474,13 @@ td.num small {
         display: none;
     }
 
-    /* sur téléphone, le bouton flottant remplace celui de l'en-tête */
+    /* téléphone : le bouton « Nouveau produit » reste dans l'en-tête, avec ses mots (plus de « + » flottant) */
     .new-product {
-        display: none;
+        padding: 0 14px;
     }
 
-    .fab {
-        display: grid;
+    .view-single {
+        display: none;
     }
 
     .list-error {
@@ -1060,5 +1036,21 @@ td.num small {
         align-items: center;
         gap: 6px;
         white-space: nowrap;
+    }
+}
+
+/* choix liste ou carreaux : dans la fenêtre des filtres, téléphone seulement */
+.phone-only {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .phone-only {
+        display: grid;
+    }
+
+    .view-choice {
+        display: flex;
+        gap: 8px;
     }
 }

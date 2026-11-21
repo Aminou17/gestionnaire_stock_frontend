@@ -219,10 +219,6 @@ app-page-header {
     white-space: nowrap;
 }
 
-.fab {
-    display: none;
-}
-
 .confirm {
     width: min(420px, calc(100% - 32px));
     padding: 0;
@@ -300,10 +296,6 @@ app-page-header {
         gap: 12px;
     }
 
-    .new-user {
-        display: none;
-    }
-
     /* place pour le bouton + flottant */
     .list-card {
         padding-bottom: 88px;
@@ -377,23 +369,6 @@ app-page-header {
     .empty .btn-sm,
     .restore-btn {
         min-height: 44px;
-    }
-
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border: 0;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
-        cursor: pointer;
     }
 
     .confirm-actions {

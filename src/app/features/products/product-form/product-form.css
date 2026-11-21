@@ -430,3 +430,28 @@ h2:focus {
     flex: none;
     gap: 6px;
 }
+
+/* les champs facultatifs restent repliés : le formulaire du premier jour ne demande que l'essentiel */
+.more-toggle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 4px;
+    border: 0;
+    background: none;
+    color: var(--primary-text);
+    font: inherit;
+    font-weight: var(--fw-semibold);
+    text-align: left;
+    cursor: pointer;
+}
+
+.more-toggle .hint {
+    flex-basis: 100%;
+    margin-left: 26px;
+    color: var(--text-muted);
+    font-weight: var(--fw-regular, 400);
+}

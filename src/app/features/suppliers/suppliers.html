@@ -1,7 +1,7 @@
 <app-page-header title="Fournisseurs" section="Stock">
     <button type="button" class="btn btn-primary new-supplier" (click)="newSupplier()">
         <app-icon name="plus" [size]="18" />
-        <span>Nouveau fournisseur</span>
+        <span>Nouveau <span class="more">fournisseur</span></span>
     </button>
 </app-page-header>
 
@@ -157,10 +157,6 @@
         />
     }
 </section>
-
-<button type="button" class="fab" (click)="newSupplier()" aria-label="Nouveau fournisseur">
-    <app-icon name="plus" [size]="24" />
-</button>
 
 <app-supplier-form (saved)="onSaved()" />
 

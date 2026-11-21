@@ -188,10 +188,6 @@ app-page-header {
     padding: 40px 16px;
 }
 
-.fab {
-    display: none;
-}
-
 .confirm {
     width: min(420px, calc(100% - 32px));
     padding: 0;
@@ -236,10 +232,6 @@ app-page-header {
 
     :host {
         gap: 12px;
-    }
-
-    .new-supplier {
-        display: none;
     }
 
     /* place pour le bouton + flottant */
@@ -287,23 +279,6 @@ app-page-header {
 
     .loading {
         padding: 0;
-    }
-
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border: 0;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
-        cursor: pointer;
     }
 
     .confirm-actions {

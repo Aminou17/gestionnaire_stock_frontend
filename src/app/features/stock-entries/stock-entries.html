@@ -1,7 +1,7 @@
 <app-page-header title="Entrées de stock" section="Stock">
     <a routerLink="/stock-entries/new" [state]="backState()" class="btn btn-primary new-entry">
         <app-icon name="plus" [size]="18" />
-        <span>Nouvelle entrée</span>
+        <span class="long">Nouvelle entrée</span><span class="short">Entrée</span>
     </a>
 </app-page-header>
 
@@ -231,15 +231,6 @@
         />
     }
 </section>
-
-<a
-    routerLink="/stock-entries/new"
-    [state]="backState()"
-    class="fab"
-    aria-label="Nouvelle entrée de stock"
->
-    <app-icon name="plus" [size]="24" />
-</a>
 
 <app-adjust-dialog (saved)="onCorrected($event)" />
 

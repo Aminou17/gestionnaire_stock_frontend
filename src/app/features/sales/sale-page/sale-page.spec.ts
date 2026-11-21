@@ -207,21 +207,42 @@ describe("SalePage", () => {
     const returnButtons = () =>
         Array.from(el.querySelectorAll<HTMLButtonElement>(".items .link-btn"));
 
+    // les boutons « Rendre » n'apparaissent qu'après « Rendre un article » dans le menu
+    const startReturns = async () => {
+        fixture.componentInstance.onPick("return-mode");
+        await fixture.whenStable();
+    };
+
+    it("should hide the return buttons until asked in the menu", async () => {
+        await render();
+        expect(returnButtons().length).toBe(0);
+
+        await startReturns();
+        expect(returnButtons().length).toBe(2);
+
+        await startReturns();
+        expect(returnButtons().length).toBe(0);
+    });
+
     it("should let only the owner return an item of a settled sale", async () => {
         await render();
+        await startReturns();
         expect(returnButtons().length).toBe(2);
 
         TestBed.resetTestingModule();
         await render({ isAdmin: false });
+        await startReturns();
         expect(returnButtons().length).toBe(0);
 
         TestBed.resetTestingModule();
         await render({ sale: detail({ paid_amount: 5000 }) });
+        await startReturns();
         expect(returnButtons().length).toBe(0);
     });
 
     it("should return an item with a reason", async () => {
         await render();
+        await startReturns();
         returnButtons()[0].click();
         await fixture.whenStable();
 
@@ -264,6 +285,7 @@ describe("SalePage", () => {
             }),
         });
 
+        await startReturns();
         expect(text()).toContain("1 × Riz");
         expect(returnButtons().length).toBe(1);
         // le net remplace le total en haut et dans la carte Paiement

@@ -130,6 +130,11 @@
                     Ajouter du stock
                 </button>
 
+                <button type="button" class="btn btn-outline edit" (click)="edit()">
+                    <app-icon name="edit" [size]="18" />
+                    Modifier
+                </button>
+
                 <app-action-menu
                     class="framed"
                     [items]="menuItems()"

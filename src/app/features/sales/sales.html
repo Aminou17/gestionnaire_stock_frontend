@@ -14,6 +14,64 @@
     </a>
 </app-page-header>
 
+<!-- période : pastilles visibles, comme sur Dépenses -->
+<div class="periods" role="group" aria-label="Période">
+    @for (choice of periodPills; track choice.value) {
+        <button
+            type="button"
+            class="period"
+            [attr.aria-pressed]="range().period === choice.value"
+            (click)="selectPeriod(choice.value)"
+        >
+            {{ choice.label }}
+        </button>
+    }
+</div>
+
+@if (range().period === "custom") {
+    <div class="custom-range" role="group" aria-label="Dates choisies">
+        <label class="date-field">
+            <span>Du</span>
+            <input
+                #fromInput
+                class="input"
+                type="date"
+                [max]="customTo()"
+                [value]="customFrom()"
+                [class.invalid]="!!customError()"
+                (change)="applyCustomRange(fromInput.value, toInput.value)"
+            />
+        </label>
+        <label class="date-field">
+            <span>Au</span>
+            <input
+                #toInput
+                class="input"
+                type="date"
+                [min]="customFrom()"
+                [value]="customTo()"
+                [class.invalid]="!!customError()"
+                (change)="applyCustomRange(fromInput.value, toInput.value)"
+            />
+        </label>
+        @if (customError()) {
+            <p class="field-error" role="alert">{{ customError() }}</p>
+        }
+    </div>
+}
+
+<!-- le résumé suit la pastille choisie (encaissé, reste à encaisser, remboursé) -->
+@if (!firstLoad() && !(sales.error() && list().length === 0)) {
+    <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
+        <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
+        <div class="summary-main">
+            <span class="summary-label">{{ summary().label }}</span>
+            <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>
+        </div>
+        <span class="summary-count">{{ summary().note }}</span>
+    </section>
+}
+
 <section class="card list-card">
     @if (exportError()) {
         <div class="alert alert-error list-error" role="alert">{{ exportError() }}</div>
@@ -70,58 +128,6 @@
                     >
                         <app-icon name="close" [size]="20" />
                     </button>
-                </div>
-
-                <div role="group" aria-label="Période">
-                    <span class="field-label">Période</span>
-                    <div class="options">
-                        @for (choice of periodChoices; track choice.value) {
-                            <button
-                                type="button"
-                                class="option"
-                                [attr.aria-pressed]="range().period === choice.value"
-                                (click)="selectPeriod(choice.value)"
-                            >
-                                {{ choice.label }}
-                            </button>
-                        }
-                    </div>
-
-                    @if (range().period === "custom") {
-                        <div class="custom-range" role="group" aria-label="Dates choisies">
-                            <label class="date-field">
-                                <span>Du</span>
-                                <input
-                                    #fromInput
-                                    class="input"
-                                    type="date"
-                                    [max]="customTo()"
-                                    [value]="customFrom()"
-                                    [class.invalid]="!!customError()"
-                                    [attr.aria-invalid]="!!customError()"
-                                    (change)="applyCustomRange(fromInput.value, toInput.value)"
-                                />
-                            </label>
-                            <label class="date-field">
-                                <span>Au</span>
-                                <input
-                                    #toInput
-                                    class="input"
-                                    type="date"
-                                    [min]="customFrom()"
-                                    [value]="customTo()"
-                                    [class.invalid]="!!customError()"
-                                    [attr.aria-invalid]="!!customError()"
-                                    (change)="applyCustomRange(fromInput.value, toInput.value)"
-                                />
-                            </label>
-                            @if (customError()) {
-                                <p class="field-error range-error" role="alert">
-                                    {{ customError() }}
-                                </p>
-                            }
-                        </div>
-                    }
                 </div>
 
                 <div role="group" aria-label="Paiement">
@@ -291,16 +297,6 @@
                 </button>
             </div>
         }
-
-        <!-- la carte suit la puce choisie (encaissé, reste à encaisser, remboursé) -->
-        <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
-            <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
-            <div class="summary-main">
-                <span class="summary-label">{{ summary().label }}</span>
-                <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>
-            </div>
-            <span class="summary-count">{{ summary().note }}</span>
-        </section>
 
         <!-- les ventes regroupées par jour, sur téléphone comme sur ordinateur -->
         <div class="days">

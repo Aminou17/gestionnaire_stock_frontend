@@ -25,4 +25,6 @@ export class PageHeader {
     // lien de la flèche retour affichée à côté du titre (ex. "/categories")
     back = input<string | UrlTree>();
     backLabel = input("Retour");
+    // Accueil : la cloche et le profil restent visibles sur téléphone, ailleurs la page se concentre sur son action
+    home = input(false);
 }

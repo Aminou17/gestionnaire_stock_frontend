@@ -267,7 +267,7 @@
                             <strong class="item-total">{{
                                 item.quantity * item.unit_price | fcfa
                             }}</strong>
-                            @if (canReturn() && returnable(item) > 0) {
+                            @if (returnMode() && canReturn() && returnable(item) > 0) {
                                 <button type="button" class="link-btn" (click)="askReturn(item)">
                                     Rendre
                                 </button>

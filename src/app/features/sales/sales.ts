@@ -30,6 +30,15 @@ const PERIOD_CHOICES: { value: Period; label: string }[] = [
     { value: "custom", label: "Personnalisée" },
 ];
 
+// pastilles sous le titre : « Personnalisée » devient « Dates »
+const PERIOD_PILLS: { value: Period; label: string }[] = [
+    { value: "today", label: "Aujourd'hui" },
+    { value: "week", label: "7 jours" },
+    { value: "month", label: "Ce mois" },
+    { value: "all", label: "Tout" },
+    { value: "custom", label: "Dates" },
+];
+
 type FilterKey = "period" | "payment" | "seller";
 
 @Component({
@@ -161,6 +170,7 @@ export class Sales {
     // fenêtre Filtre : fenêtre du bas sur téléphone, petit panneau sur ordinateur
     filtersOpen = signal(false);
     periodChoices = PERIOD_CHOICES;
+    periodPills = PERIOD_PILLS;
     customFrom = signal("");
     customTo = signal("");
     customError = signal<string | null>(null);
@@ -168,13 +178,6 @@ export class Sales {
     // filtres actifs, affichés en pastilles qu'on retire d'un clic
     activeFilters = computed(() => {
         const filters: { key: FilterKey; label: string }[] = [];
-        const { period, from, to } = this.range();
-        if (period === "custom") filters.push({ key: "period", label: this.customLabel(from, to) });
-        else if (period !== "all")
-            filters.push({
-                key: "period",
-                label: this.periodChoices.find((c) => c.value === period)!.label,
-            });
         const method = this.paymentMethod();
         if (method)
             filters.push({ key: "payment", label: method === "CASH" ? "Espèces" : "Mobile Money" });
@@ -350,13 +353,10 @@ export class Sales {
         return this.due(sale) > 0 ? "warning" : "success";
     }
 
-    // heure, client, nombre d'articles, et le vendeur pour l'administrateur
+    // une liste reste légère : l'heure et le client, le détail est sur la fiche de la vente
     subtitle(sale: Sale) {
-        const parts = [formatDate(sale.created_at, "HH:mm", this.locale)];
-        if (sale.customer_name) parts.push(sale.customer_name);
-        if (this.auth.isAdmin() && sale.user_name) parts.push(sale.user_name);
-        parts.push(`${sale.items_count} article${sale.items_count > 1 ? "s" : ""}`);
-        return parts.join(" · ");
+        const time = formatDate(sale.created_at, "HH:mm", this.locale);
+        return sale.customer_name ? `${time} · ${sale.customer_name}` : time;
     }
 
     emptyTitle() {

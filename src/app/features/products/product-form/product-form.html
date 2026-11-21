@@ -62,39 +62,41 @@
                         }
                     </label>
 
-                    <div class="field">
-                        <label for="product-barcode"
-                            >Code-barres <small class="hint">facultatif</small></label
-                        >
-                        <div class="barcode-row">
-                            <input
-                                id="product-barcode"
-                                class="input"
-                                type="text"
-                                inputmode="numeric"
-                                autocomplete="off"
-                                formControlName="barcode"
-                                placeholder="Ex. 6111245781234"
-                                [class.invalid]="
-                                    form.controls.barcode.touched && form.controls.barcode.invalid
-                                "
-                            />
-                            <button
-                                type="button"
-                                class="btn btn-outline scan"
-                                (click)="scanner.start()"
+                    @if (moreOpen()) {
+                        <div class="field">
+                            <label for="product-barcode"
+                                >Code-barres <small class="hint">facultatif</small></label
                             >
-                                <app-icon name="scan" [size]="18" />
-                                Scanner
-                            </button>
+                            <div class="barcode-row">
+                                <input
+                                    id="product-barcode"
+                                    class="input"
+                                    type="text"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    formControlName="barcode"
+                                    placeholder="Ex. 6111245781234"
+                                    [class.invalid]="
+                                        form.controls.barcode.touched &&
+                                        form.controls.barcode.invalid
+                                    "
+                                />
+                                <button
+                                    type="button"
+                                    class="btn btn-outline scan"
+                                    (click)="scanner.start()"
+                                >
+                                    <app-icon name="scan" [size]="18" />
+                                    Scanner
+                                </button>
+                            </div>
+                            @if (form.controls.barcode.touched && form.controls.barcode.invalid) {
+                                <small class="field-error" role="alert"
+                                    >Chiffres, lettres et - . _ / seulement (64 au plus).</small
+                                >
+                            }
                         </div>
-                        @if (form.controls.barcode.touched && form.controls.barcode.invalid) {
-                            <small class="field-error" role="alert"
-                                >Chiffres, lettres et - . _ / seulement (64 au plus).</small
-                            >
-                        }
-                    </div>
-
+                    }
                     <label class="field">
                         <span>Catégorie</span>
                         <select
@@ -291,43 +293,45 @@
                             Impossible de charger les catégories ou les fournisseurs.
                         </div>
                     }
-                    <hr class="divider" />
-                    <div class="photo-row">
-                        <span class="photo-thumb">
-                            @if (photoPreview(); as image) {
-                                <img [src]="image" alt="" />
-                            } @else {
-                                <app-icon name="image" [size]="24" />
-                            }
-                        </span>
-                        <div class="photo-text">
-                            <strong>Photo</strong>
-                            <small class="hint">Facultatif. PNG ou JPEG.</small>
-                            <div class="photo-actions">
-                                <label class="btn btn-outline btn-sm">
-                                    <app-icon name="camera" [size]="16" />
-                                    {{ photoPreview() ? "Changer" : "Ajouter" }}
-                                    <input
-                                        type="file"
-                                        accept="image/png,image/jpeg"
-                                        class="sr-only"
-                                        (change)="pickPhoto($event)"
-                                    />
-                                </label>
-                                @if (photoPreview()) {
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline btn-sm"
-                                        (click)="removePhoto()"
-                                    >
-                                        Retirer
-                                    </button>
+                    @if (moreOpen()) {
+                        <hr class="divider" />
+                        <div class="photo-row">
+                            <span class="photo-thumb">
+                                @if (photoPreview(); as image) {
+                                    <img [src]="image" alt="" />
+                                } @else {
+                                    <app-icon name="image" [size]="24" />
                                 }
+                            </span>
+                            <div class="photo-text">
+                                <strong>Photo</strong>
+                                <small class="hint">Facultatif. PNG ou JPEG.</small>
+                                <div class="photo-actions">
+                                    <label class="btn btn-outline btn-sm">
+                                        <app-icon name="camera" [size]="16" />
+                                        {{ photoPreview() ? "Changer" : "Ajouter" }}
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg"
+                                            class="sr-only"
+                                            (change)="pickPhoto($event)"
+                                        />
+                                    </label>
+                                    @if (photoPreview()) {
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline btn-sm"
+                                            (click)="removePhoto()"
+                                        >
+                                            Retirer
+                                        </button>
+                                    }
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    @if (photoError()) {
-                        <small class="field-error" role="alert">{{ photoError() }}</small>
+                        @if (photoError()) {
+                            <small class="field-error" role="alert">{{ photoError() }}</small>
+                        }
                     }
                 </section>
 
@@ -406,128 +410,145 @@
                         }
                     </div>
 
-                    <div class="field">
-                        <span id="mode-label">Mode de prix</span>
-                        <div class="segmented" role="group" aria-labelledby="mode-label">
-                            <button
-                                type="button"
-                                [attr.aria-pressed]="pricingMode() === 'FIXED'"
-                                [class.selected]="pricingMode() === 'FIXED'"
-                                (click)="setMode('FIXED')"
-                            >
-                                Prix fixe
-                            </button>
-                            <button
-                                type="button"
-                                [attr.aria-pressed]="pricingMode() === 'NEGOTIABLE'"
-                                [class.selected]="pricingMode() === 'NEGOTIABLE'"
-                                (click)="setMode('NEGOTIABLE')"
-                            >
-                                Négociable
-                            </button>
-                        </div>
-                    </div>
-
-                    <p class="hint">
-                        {{
-                            pricingMode() === "FIXED"
-                                ? "L'employé vend toujours à ce prix."
-                                : "L'employé peut baisser le prix, jusqu'à une limite."
-                        }}
-                    </p>
-
-                    @if (pricingMode() === "NEGOTIABLE") {
-                        <div class="discount">
-                            <label class="field">
-                                <span>Remise maximale</span>
-                                <span class="money">
-                                    <input
-                                        class="input"
-                                        type="number"
-                                        min="0"
-                                        inputmode="numeric"
-                                        formControlName="maxDiscount"
-                                        [class.todo]="todo().discount"
-                                        [class.invalid]="
-                                            form.controls.maxDiscount.touched &&
-                                            (form.controls.maxDiscount.invalid ||
-                                                form.hasError('discountRequired') ||
-                                                form.hasError('discountTooHigh'))
-                                        "
-                                    />
-                                    <span class="unit">F</span>
-                                </span>
-                            </label>
-                            @if (
-                                form.controls.maxDiscount.touched &&
-                                (form.controls.maxDiscount.invalid ||
-                                    form.hasError("discountRequired"))
-                            ) {
-                                <small class="field-error" role="alert"
-                                    >Indiquez la remise maximale.</small
+                    @if (moreOpen()) {
+                        <div class="field">
+                            <span id="mode-label">Mode de prix</span>
+                            <div class="segmented" role="group" aria-labelledby="mode-label">
+                                <button
+                                    type="button"
+                                    [attr.aria-pressed]="pricingMode() === 'FIXED'"
+                                    [class.selected]="pricingMode() === 'FIXED'"
+                                    (click)="setMode('FIXED')"
                                 >
-                            } @else if (form.hasError("discountTooHigh")) {
-                                <small class="field-error" role="alert">
-                                    La remise ne peut pas dépasser le prix de vente.
-                                </small>
-                            } @else if (priceRange(); as range) {
-                                <p class="range" aria-live="polite">
-                                    L'employé pourra vendre entre
-                                    <strong>{{ range.min | fcfa }} et {{ range.max | fcfa }}</strong
-                                    >.
-                                </p>
-                            }
+                                    Prix fixe
+                                </button>
+                                <button
+                                    type="button"
+                                    [attr.aria-pressed]="pricingMode() === 'NEGOTIABLE'"
+                                    [class.selected]="pricingMode() === 'NEGOTIABLE'"
+                                    (click)="setMode('NEGOTIABLE')"
+                                >
+                                    Négociable
+                                </button>
+                            </div>
                         </div>
-                    }
-                </section>
 
-                <section class="group">
-                    <h3><span class="step">3</span>Alerte de stock</h3>
-                    <label class="field">
-                        <span>Seuil d'alerte <small class="hint">facultatif</small></span>
-                        <input
-                            class="input"
-                            type="number"
-                            min="0"
-                            step="1"
-                            inputmode="numeric"
-                            formControlName="minStock"
-                            [attr.aria-invalid]="
-                                form.controls.minStock.touched && form.controls.minStock.invalid
-                            "
-                            [placeholder]="
-                                defaultThreshold() !== null
-                                    ? 'Par défaut : ' + defaultThreshold()
-                                    : ''
-                            "
-                            [class.invalid]="
-                                form.controls.minStock.touched && form.controls.minStock.invalid
-                            "
-                        />
-                        @if (form.controls.minStock.touched && form.controls.minStock.invalid) {
-                            <small class="field-error" role="alert"
-                                >Indiquez un nombre entier positif.</small
-                            >
-                        } @else if (defaultThreshold() !== null) {
-                            <small class="hint">
-                                Laissez vide pour utiliser le seuil par défaut ({{
-                                    defaultThreshold()
-                                }}).
-                            </small>
-                        } @else {
-                            <small class="hint">
-                                Laissez vide pour utiliser le seuil par défaut, une fois réglé dans
-                                les paramètres.
-                            </small>
-                        }
-                    </label>
-
-                    @if (!productId()) {
                         <p class="hint">
-                            Le stock de départ s'ajoute ensuite avec une entrée de stock.
+                            {{
+                                pricingMode() === "FIXED"
+                                    ? "L'employé vend toujours à ce prix."
+                                    : "L'employé peut baisser le prix, jusqu'à une limite."
+                            }}
                         </p>
+
+                        @if (pricingMode() === "NEGOTIABLE") {
+                            <div class="discount">
+                                <label class="field">
+                                    <span>Remise maximale</span>
+                                    <span class="money">
+                                        <input
+                                            class="input"
+                                            type="number"
+                                            min="0"
+                                            inputmode="numeric"
+                                            formControlName="maxDiscount"
+                                            [class.todo]="todo().discount"
+                                            [class.invalid]="
+                                                form.controls.maxDiscount.touched &&
+                                                (form.controls.maxDiscount.invalid ||
+                                                    form.hasError('discountRequired') ||
+                                                    form.hasError('discountTooHigh'))
+                                            "
+                                        />
+                                        <span class="unit">F</span>
+                                    </span>
+                                </label>
+                                @if (
+                                    form.controls.maxDiscount.touched &&
+                                    (form.controls.maxDiscount.invalid ||
+                                        form.hasError("discountRequired"))
+                                ) {
+                                    <small class="field-error" role="alert"
+                                        >Indiquez la remise maximale.</small
+                                    >
+                                } @else if (form.hasError("discountTooHigh")) {
+                                    <small class="field-error" role="alert">
+                                        La remise ne peut pas dépasser le prix de vente.
+                                    </small>
+                                } @else if (priceRange(); as range) {
+                                    <p class="range" aria-live="polite">
+                                        L'employé pourra vendre entre
+                                        <strong
+                                            >{{ range.min | fcfa }} et
+                                            {{ range.max | fcfa }}</strong
+                                        >.
+                                    </p>
+                                }
+                            </div>
+                        }
                     }
                 </section>
+
+                <button
+                    type="button"
+                    class="more-toggle"
+                    [attr.aria-expanded]="moreOpen()"
+                    (click)="moreOpen.set(!moreOpen())"
+                >
+                    <app-icon [name]="moreOpen() ? 'chevron-down' : 'chevron-right'" [size]="18" />
+                    {{ moreOpen() ? "Moins d'options" : "Plus d'options" }}
+                    <small class="hint">code-barres, photo, prix négociable, alerte de stock</small>
+                </button>
+
+                @if (moreOpen()) {
+                    <section class="group">
+                        <h3>Alerte de stock</h3>
+                        <label class="field">
+                            <span>Seuil d'alerte <small class="hint">facultatif</small></span>
+                            <input
+                                class="input"
+                                type="number"
+                                min="0"
+                                step="1"
+                                inputmode="numeric"
+                                formControlName="minStock"
+                                [attr.aria-invalid]="
+                                    form.controls.minStock.touched && form.controls.minStock.invalid
+                                "
+                                [placeholder]="
+                                    defaultThreshold() !== null
+                                        ? 'Par défaut : ' + defaultThreshold()
+                                        : ''
+                                "
+                                [class.invalid]="
+                                    form.controls.minStock.touched && form.controls.minStock.invalid
+                                "
+                            />
+                            @if (form.controls.minStock.touched && form.controls.minStock.invalid) {
+                                <small class="field-error" role="alert"
+                                    >Indiquez un nombre entier positif.</small
+                                >
+                            } @else if (defaultThreshold() !== null) {
+                                <small class="hint">
+                                    Laissez vide pour utiliser le seuil par défaut ({{
+                                        defaultThreshold()
+                                    }}).
+                                </small>
+                            } @else {
+                                <small class="hint">
+                                    Laissez vide pour utiliser le seuil par défaut, une fois réglé
+                                    dans les paramètres.
+                                </small>
+                            }
+                        </label>
+
+                        @if (!productId()) {
+                            <p class="hint">
+                                Le stock de départ s'ajoute ensuite avec une entrée de stock.
+                            </p>
+                        }
+                    </section>
+                }
             }
         </div>
 

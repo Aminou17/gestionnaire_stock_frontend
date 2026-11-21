@@ -185,3 +185,16 @@ h1 {
         white-space: nowrap;
     }
 }
+
+/* téléphone : la cloche et le profil ne sont que sur l'Accueil, le menu du bas et le tiroir les donnent ailleurs */
+@media (max-width: 767px) {
+    header:not(.home) app-notifications,
+    header:not(.home) .me {
+        display: none;
+    }
+}
+
+.actions .btn-primary {
+    flex: none;
+    white-space: nowrap;
+}

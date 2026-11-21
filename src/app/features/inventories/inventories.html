@@ -8,13 +8,9 @@
     />
     <a routerLink="/inventories/new" class="btn btn-primary new-inventory">
         <app-icon name="plus" [size]="18" />
-        Nouvel inventaire
+        <span class="long">Nouvel inventaire</span><span class="short">Nouveau</span>
     </a>
 </app-page-header>
-
-<a routerLink="/inventories/new" class="fab" aria-label="Nouvel inventaire">
-    <app-icon name="plus" [size]="24" />
-</a>
 
 @if (exportError()) {
     <div class="alert alert-error" role="alert">Impossible d'exporter les inventaires.</div>

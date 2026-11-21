@@ -1,7 +1,7 @@
 <app-page-header title="Utilisateurs" section="Équipe">
     <button type="button" class="btn btn-primary new-user" (click)="newUser()">
         <app-icon name="plus" [size]="18" />
-        <span>Nouvel utilisateur</span>
+        <span class="long">Nouvel utilisateur</span><span class="short">Ajouter</span>
     </button>
 </app-page-header>
 
@@ -171,10 +171,6 @@
         />
     }
 </section>
-
-<button type="button" class="fab" (click)="newUser()" aria-label="Nouvel utilisateur">
-    <app-icon name="plus" [size]="24" />
-</button>
 
 <app-user-form (saved)="onSaved()" />
 <app-password-dialog />

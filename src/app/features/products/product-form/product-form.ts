@@ -104,6 +104,8 @@ export class ProductForm {
     // catégorie du produit modifié, gardée dans la liste même si elle est désactivée
     currentCategoryId = signal<number | null>(null);
     loading = signal(false);
+    // champs facultatifs (code-barres, photo, prix négociable, alerte) : repliés pour un premier produit
+    moreOpen = signal(false);
     loadFailed = signal(false);
     saving = signal(false);
     error = signal<string | null>(null);
@@ -224,6 +226,7 @@ export class ProductForm {
     // barcode : code déjà scanné qui ne correspond à aucun produit
     openNew(categoryId: number | null = null, barcode = "") {
         this.prepare(null);
+        this.moreOpen.set(!!barcode);
         if (categoryId) this.form.controls.categoryId.setValue(categoryId);
         if (barcode) this.form.controls.barcode.setValue(barcode);
         this.dialog().nativeElement.showModal();
@@ -251,6 +254,13 @@ export class ProductForm {
                     minStock: product.min_stock,
                     barcode: product.barcode ?? "",
                 });
+                // ce qui est déjà renseigné se voit tout de suite
+                this.moreOpen.set(
+                    !!product.barcode ||
+                        !!product.image ||
+                        product.pricing_mode === "NEGOTIABLE" ||
+                        product.min_stock !== null,
+                );
             },
             error: (err: HttpErrorResponse) => {
                 this.loading.set(false);
@@ -417,6 +427,11 @@ export class ProductForm {
     submit() {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
+            // une erreur dans un champ replié : on le montre
+            const { barcode, maxDiscount, minStock } = this.form.controls;
+            if (barcode.invalid || maxDiscount.invalid || minStock.invalid || this.form.errors) {
+                this.moreOpen.set(true);
+            }
             return;
         }
 

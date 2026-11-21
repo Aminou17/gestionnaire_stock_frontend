@@ -42,7 +42,7 @@ app-page-header {
 
 .hero-amount {
     color: var(--danger);
-    font-size: 36px;
+    font-size: var(--fs-hero);
     font-weight: var(--fw-bold);
     font-variant-numeric: tabular-nums;
 }

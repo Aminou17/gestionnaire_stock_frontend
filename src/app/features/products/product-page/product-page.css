@@ -201,7 +201,8 @@ dd {
 }
 
 .sell,
-.add-stock {
+.add-stock,
+.edit {
     flex: 1 1 0;
     min-width: 0;
     padding-inline: 12px;

@@ -15,10 +15,6 @@ app-page-header {
     white-space: nowrap;
 }
 
-.fab {
-    display: none;
-}
-
 /* barre du haut : recherche, filtre, puces */
 .toolbar {
     display: flex;
@@ -361,27 +357,7 @@ li:last-child > .row {
         gap: 12px;
     }
 
-    .new-customer {
-        display: none;
-    }
-
     /* sur téléphone, le bouton d'ajout flotte en bas à droite, comme dans les autres listes */
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border: 0;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
-        cursor: pointer;
-    }
 
     /* le dernier élément de la liste reste visible au-dessus du bouton */
     :host {

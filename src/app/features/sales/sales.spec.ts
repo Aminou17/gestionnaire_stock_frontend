@@ -101,13 +101,12 @@ describe("Sales", () => {
         expect(el.querySelector(".stats")).toBeNull();
     });
 
-    it("should show the seller to the admin only", async () => {
+    it("should keep each row light: no seller and no item count, the sheet has them", async () => {
         await render();
-        expect(text()).toContain("Awa K.");
+        const row = el.querySelector(".sale-row")!.textContent!;
 
-        TestBed.resetTestingModule();
-        await render(false);
-        expect(text()).not.toContain("Awa K.");
+        expect(row).not.toContain("Awa K.");
+        expect(row).not.toMatch(/article/);
     });
 
     it("should start on today's sales", async () => {
@@ -185,7 +184,7 @@ describe("Sales", () => {
     };
 
     const pick = async (label: string) => {
-        const button = [...el.querySelectorAll<HTMLButtonElement>(".option")].find(
+        const button = [...el.querySelectorAll<HTMLButtonElement>(".option, .period")].find(
             (option) => option.textContent!.trim() === label,
         )!;
         button.click();
@@ -200,7 +199,8 @@ describe("Sales", () => {
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(filters.from).toBe(filters.to);
-        expect(el.querySelector(".active-chip")?.textContent).toContain("Aujourd'hui");
+        // c'est le réglage de départ : pas de pastille de filtre en plus
+        expect(el.querySelector(".active-chip")).toBeNull();
     });
 
     it("should start the month on the first day", async () => {
@@ -220,7 +220,7 @@ describe("Sales", () => {
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.paymentMethod).toBe("MOBILE_MONEY");
         expect(filters.page).toBe(1);
-        expect(el.querySelector(".filters-count")?.textContent).toContain("2");
+        expect(el.querySelector(".filters-count")?.textContent).toContain("1");
     });
 
     it("should remove a filter with the cross of its chip and reset them all", async () => {
@@ -228,11 +228,13 @@ describe("Sales", () => {
         await open();
         await pick("Espèces");
         await pick("7 jours");
-        expect(el.querySelectorAll(".active-chip").length).toBe(2);
+        // la période se lit sur ses pastilles : seul le paiement est un filtre en plus
+        expect(el.querySelectorAll(".active-chip").length).toBe(1);
 
         el.querySelector<HTMLButtonElement>(".active-chip")!.click();
         await fixture.whenStable();
-        expect(el.querySelectorAll(".active-chip").length).toBe(1);
+        expect(el.querySelectorAll(".active-chip").length).toBe(0);
+        await pick("Espèces");
 
         const reset = [...el.querySelectorAll<HTMLButtonElement>(".sheet-foot .btn")][0];
         reset.click();
@@ -309,7 +311,7 @@ describe("Sales", () => {
     it("should prefill a custom period with the last 7 days", async () => {
         await render();
         await open();
-        await pick("Personnalisée");
+        await pick("Dates");
 
         const dates = el.querySelectorAll<HTMLInputElement>(".custom-range input[type='date']");
         expect(dates.length).toBe(2);
@@ -321,7 +323,7 @@ describe("Sales", () => {
     it("should not reload the list when the custom period is invalid", async () => {
         await render();
         await open();
-        await pick("Personnalisée");
+        await pick("Dates");
         const calls = getSalesPage.mock.calls.length;
 
         const [from, to] = el.querySelectorAll<HTMLInputElement>(".custom-range input");

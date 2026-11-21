@@ -79,7 +79,7 @@
     grid-area: value;
     min-width: 0;
     margin-top: 12px;
-    font-size: 24px;
+    font-size: var(--fs-kpi);
     font-weight: 700;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
@@ -134,7 +134,7 @@
 .hero .value,
 .hero .value.text-muted {
     margin-top: 14px;
-    font-size: 32px;
+    font-size: var(--fs-hero);
     font-weight: 700;
     color: #fff;
 }
@@ -203,7 +203,7 @@
     }
     .hero .value,
     .hero .value.text-muted {
-        font-size: 36px;
+        font-size: var(--fs-hero);
     }
     .spark {
         width: 180px;
