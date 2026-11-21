@@ -7,11 +7,7 @@
     grid-template-rows: auto minmax(96px, 1fr) auto;
     padding: 0;
     border-color: color-mix(in srgb, var(--primary) 14%, var(--border));
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--primary) 5%, var(--surface)) 0%,
-        var(--surface) 60%
-    );
+    background: var(--surface);
     overflow: hidden;
 }
 
@@ -28,11 +24,7 @@
     gap: 8px;
     padding: 12px 16px;
     border-bottom: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
-    background: linear-gradient(
-        115deg,
-        color-mix(in srgb, var(--primary) 16%, var(--surface)) 0%,
-        color-mix(in srgb, var(--primary) 4%, var(--surface)) 100%
-    );
+    background: var(--surface);
 }
 
 /* poignée, croix, retour et titre du paiement : seulement sur la feuille du téléphone */
@@ -342,11 +334,7 @@
 }
 
 .method.active {
-    background: linear-gradient(
-        145deg,
-        var(--surface) 0%,
-        color-mix(in srgb, var(--primary) 14%, var(--surface)) 100%
-    );
+    background: color-mix(in srgb, var(--primary) 10%, var(--surface));
     box-shadow:
         var(--shadow-card),
         inset 0 0 0 1px color-mix(in srgb, var(--primary) 35%, transparent);
@@ -384,11 +372,7 @@
 
 .chips .chip.active {
     border-color: color-mix(in srgb, var(--primary) 45%, var(--border));
-    background: linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--primary) 20%, var(--surface)),
-        color-mix(in srgb, var(--primary) 8%, var(--surface))
-    );
+    background: color-mix(in srgb, var(--primary) 12%, var(--surface));
 }
 
 .change,
@@ -425,21 +409,13 @@
 
 .change {
     border: 1px solid color-mix(in srgb, var(--success) 28%, transparent);
-    background: linear-gradient(
-        120deg,
-        color-mix(in srgb, var(--success) 20%, var(--surface)),
-        color-mix(in srgb, var(--success) 6%, var(--surface))
-    );
+    background: color-mix(in srgb, var(--success) 10%, var(--surface));
     color: var(--success);
 }
 
 .remaining {
     border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
-    background: linear-gradient(
-        120deg,
-        color-mix(in srgb, var(--warning) 20%, var(--surface)),
-        color-mix(in srgb, var(--warning) 6%, var(--surface))
-    );
+    background: color-mix(in srgb, var(--warning) 12%, var(--surface));
     color: var(--warning, var(--text));
 }
 
@@ -487,11 +463,7 @@
     max-height: 70dvh;
     padding: 16px;
     border-top: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
-    background: linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--primary) 11%, var(--surface)) 0%,
-        color-mix(in srgb, var(--primary) 3%, var(--surface)) 100%
-    );
+    background: var(--surface);
     box-shadow: 0 -8px 16px -12px rgba(15, 23, 42, 0.18);
     overflow-y: auto;
 }
@@ -526,11 +498,7 @@
     padding: 12px 16px;
     border: 1px solid color-mix(in srgb, var(--primary) 26%, var(--border));
     border-radius: 14px;
-    background: linear-gradient(
-        120deg,
-        color-mix(in srgb, var(--primary) 18%, var(--surface)) 0%,
-        color-mix(in srgb, var(--primary) 5%, var(--surface)) 100%
-    );
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
 }
 
 .total span {
@@ -556,12 +524,7 @@
 
 .submit:not(:disabled) {
     border-color: transparent;
-    background: linear-gradient(
-        135deg,
-        var(--primary) 0%,
-        color-mix(in srgb, var(--primary) 68%, #000) 100%
-    );
-    box-shadow: 0 10px 20px -10px color-mix(in srgb, var(--primary) 75%, transparent);
+    background: var(--primary);
 }
 
 /* rappel du raccourci dans le bouton, seulement avec un clavier */
@@ -855,11 +818,7 @@
         gap: 12px;
         padding: 8px 8px 8px 12px;
         border-radius: 16px;
-        background: linear-gradient(
-            120deg,
-            var(--primary) 0%,
-            color-mix(in srgb, var(--primary) 66%, #000) 100%
-        );
+        background: var(--primary);
         box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--primary) 60%, transparent);
         color: var(--on-primary);
     }
@@ -963,4 +922,10 @@
 .cart-footer > .section {
     padding-top: 0;
     border-top: 0;
+}
+
+/* une seule couleur d'accent dans le panier : les vignettes ne changent plus de couleur d'un produit à l'autre */
+.line .thumb {
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+    color: var(--primary-text, var(--primary));
 }

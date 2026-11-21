@@ -253,16 +253,16 @@ kbd {
     --hue: 300;
 }
 
+/* vignettes sans photo : toutes de la même couleur, pour que seul l'état compte */
 .thumb,
 .gphoto {
-    background: hsl(var(--hue) 80% 90%);
-    color: hsl(var(--hue) 70% 25%);
+    background: var(--neutral-soft);
+    color: var(--text-muted);
 }
 
-:root[data-theme="dark"] .thumb,
-:root[data-theme="dark"] .gphoto {
-    background: hsl(var(--hue) 40% 24%);
-    color: hsl(var(--hue) 85% 85%);
+.gtile.in-cart .gphoto {
+    background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+    color: var(--primary-text, var(--primary));
 }
 
 /* avatars des clients */
@@ -337,11 +337,12 @@ kbd {
 
 .gtile.in-cart {
     border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary);
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    box-shadow: none;
 }
 
 .gtile.in-cart .gbody {
-    background: var(--primary-soft);
+    background: transparent;
 }
 
 .gmain {
