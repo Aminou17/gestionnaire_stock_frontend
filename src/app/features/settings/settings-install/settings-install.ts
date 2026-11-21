@@ -70,9 +70,4 @@ export class SettingsInstall {
             this.toast.show(this.address, 6000);
         }
     }
-
-    // envoyer le lien à soi-même ou à un collègue pour l'ouvrir dans le bon navigateur
-    protected whatsappLink = `https://wa.me/?text=${encodeURIComponent(
-        `Installez ${PRODUCT_NAME} : ${window.location.origin}`,
-    )}`;
 }
