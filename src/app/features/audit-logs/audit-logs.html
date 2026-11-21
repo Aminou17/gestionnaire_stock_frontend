@@ -51,53 +51,10 @@
                 (input)="onSearch($any($event.target).value)"
             />
         </label>
-
-        <button
-            type="button"
-            class="filter-btn"
-            [class.active]="filtersOpen() || activeFilters().length > 0"
-            [attr.aria-expanded]="filtersOpen()"
-            aria-label="Filtre"
-            (click)="filtersOpen.set(!filtersOpen())"
-        >
-            <app-icon name="filter" [size]="18" />
-            <span class="filter-label">Filtre</span>
-            @if (activeFilters().length > 0) {
-                <span class="filter-count">{{ activeFilters().length }}</span>
-            }
-        </button>
     </div>
 
-    @if (activeFilters().length > 0) {
-        <div class="active-row">
-            @for (filter of activeFilters(); track filter.key) {
-                <button
-                    type="button"
-                    class="active-chip"
-                    [attr.aria-label]="'Retirer le filtre ' + filter.label"
-                    (click)="clearFilter(filter.key)"
-                >
-                    <span>{{ filter.label }}</span>
-                    <app-icon name="close" [size]="14" />
-                </button>
-            }
-        </div>
-    }
-
-    <!-- sur ordinateur ce bloc est une barre de puces ; sur téléphone c'est la fenêtre qui monte du bas -->
+    <!-- les filtres restent visibles : personne et action, plus les échecs sur l'onglet Sécurité -->
     <div class="filters" [class.open]="filtersOpen()">
-        <div class="sheet-head">
-            <h2>Filtres</h2>
-            <button
-                type="button"
-                class="sheet-close"
-                aria-label="Fermer les filtres"
-                (click)="filtersOpen.set(false)"
-            >
-                <app-icon name="close" [size]="20" />
-            </button>
-        </div>
-
         <app-period-filter
             #period
             [chips]="true"
@@ -144,48 +101,7 @@
                 </button>
             }
         </app-period-filter>
-
-        <div class="sheet-foot">
-            <button type="button" class="btn btn-outline" (click)="resetFilters()">
-                Réinitialiser
-            </button>
-            <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
-                Voir {{ total() }} résultat{{ total() > 1 ? "s" : "" }}
-            </button>
-        </div>
     </div>
-
-    @if (filtersOpen()) {
-        <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
-    }
-
-    @if (tab() === "security") {
-        <div class="summary">
-            @for (stat of stats; track stat.action) {
-                <button
-                    type="button"
-                    class="chip stat"
-                    [attr.aria-pressed]="action() === stat.action"
-                    (click)="toggleAction(stat.action)"
-                >
-                    @if (stat.count.hasValue()) {
-                        <strong [class.alert]="stat.count.value() > 0">{{
-                            stat.count.value()
-                        }}</strong>
-                        {{ stat.count.value() === 1 ? stat.one : stat.many }}
-                    } @else if (stat.count.error()) {
-                        {{ stat.many }} : indisponible
-                    } @else {
-                        <span class="skeleton stat-skeleton"></span>
-                        {{ stat.many }}
-                    }
-                </button>
-            }
-            @if (stats[0].count.error() || stats[1].count.error()) {
-                <button type="button" class="chip" (click)="reloadStats()">Réessayer</button>
-            }
-        </div>
-    }
 </section>
 
 @if (firstLoad()) {

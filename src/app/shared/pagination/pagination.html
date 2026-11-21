@@ -9,11 +9,11 @@
             <button
                 type="button"
                 class="btn btn-outline step prev"
+                aria-label="Page précédente"
                 [disabled]="page() <= 1"
                 (click)="go(page() - 1)"
             >
-                <app-icon name="chevron-left" [size]="16" />
-                Précédent
+                <app-icon name="chevron-left" [size]="18" />
             </button>
 
             <ol class="pages">

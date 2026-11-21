@@ -1,0 +1,275 @@
+<app-page-header title="Espace admin" subtitle="Le bilan de votre boutique" />
+
+<!-- 1. Stock à un jour précis -->
+<section class="card block" aria-labelledby="stock-title">
+    <header class="block-head">
+        <span class="tone-icon" data-tone="violet"><app-icon name="package" [size]="18" /></span>
+        <div class="block-title">
+            <h2 id="stock-title">Stock disponible</h2>
+            <p>À la fin du jour choisi</p>
+        </div>
+        <label class="date-field">
+            <span>Le</span>
+            <input
+                #stockInput
+                class="input"
+                type="date"
+                [max]="today"
+                [value]="stockDate()"
+                (change)="changeStockDate(stockInput.value)"
+            />
+        </label>
+    </header>
+
+    @if (failed()) {
+        <ng-container *ngTemplateOutlet="errorTpl" />
+    } @else {
+        <div class="tiles">
+            <app-stat-card
+                label="Valeur d'achat"
+                icon="wallet"
+                tone="violet"
+                [money]="true"
+                [loading]="loading()"
+                [value]="data()?.stock?.purchaseValue ?? 0 | fcfa"
+            />
+            <app-stat-card
+                label="Valeur de vente"
+                icon="banknote"
+                tone="primary"
+                [money]="true"
+                [loading]="loading()"
+                [value]="data()?.stock?.saleValue ?? 0 | fcfa"
+            />
+            <app-stat-card
+                label="Bénéfice potentiel"
+                icon="trending-up"
+                tone="success"
+                valueTone="success"
+                [money]="true"
+                [loading]="loading()"
+                [value]="data()?.stock?.potentialProfit ?? 0 | fcfa"
+            />
+        </div>
+
+        @if (data(); as d) {
+            <p class="summary-line">
+                <strong>{{ d.stock.products }}</strong>
+                {{ d.stock.products > 1 ? "produits" : "produit" }} en stock,
+                <strong>{{ d.stock.units }}</strong>
+                {{ d.stock.units > 1 ? "unités" : "unité" }}
+            </p>
+
+            @if (stockRows().length > 0) {
+                <button
+                    type="button"
+                    class="fold"
+                    [attr.aria-expanded]="categoriesOpen()"
+                    (click)="categoriesOpen.set(!categoriesOpen())"
+                >
+                    <span>Détail par catégorie</span>
+                    <app-icon
+                        [name]="categoriesOpen() ? 'chevron-down' : 'chevron-right'"
+                        [size]="16"
+                    />
+                </button>
+
+                @if (categoriesOpen()) {
+                    <ul class="rows">
+                        @for (row of stockRows(); track row.categoryId) {
+                            <li class="row">
+                                <div class="row-top">
+                                    <span class="row-name">{{ row.categoryName }}</span>
+                                    <span class="row-value" appMoney>{{
+                                        row.saleValue | fcfa
+                                    }}</span>
+                                </div>
+                                <div class="bar" aria-hidden="true">
+                                    <span
+                                        [style.width.%]="row.share"
+                                        style="--bar: var(--primary)"
+                                    ></span>
+                                </div>
+                                <span class="row-sub">
+                                    {{ row.products }}
+                                    {{ row.products > 1 ? "produits" : "produit" }} ·
+                                    {{ row.units }} {{ row.units > 1 ? "unités" : "unité" }}
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        }
+
+        <p class="note">Valeur calculée avec les prix d'achat et de vente d'aujourd'hui.</p>
+    }
+</section>
+
+<!-- période des ventes et des dépenses -->
+<div class="period-bar">
+    <div class="periods" role="group" aria-label="Période">
+        @for (choice of periodPills; track choice.value) {
+            <button
+                type="button"
+                class="period"
+                [attr.aria-pressed]="period() === choice.value"
+                (click)="selectPeriod(choice.value)"
+            >
+                {{ choice.label }}
+            </button>
+        }
+    </div>
+
+    @if (period() === "custom") {
+        <div class="custom-range" role="group" aria-label="Dates choisies">
+            <label class="date-field stacked">
+                <span>Du</span>
+                <input
+                    #fromInput
+                    class="input"
+                    type="date"
+                    [max]="customTo()"
+                    [value]="customFrom()"
+                    [class.invalid]="!!customError()"
+                    (change)="applyCustomRange(fromInput.value, toInput.value)"
+                />
+            </label>
+            <label class="date-field stacked">
+                <span>Au</span>
+                <input
+                    #toInput
+                    class="input"
+                    type="date"
+                    [min]="customFrom()"
+                    [max]="today"
+                    [value]="customTo()"
+                    [class.invalid]="!!customError()"
+                    (change)="applyCustomRange(fromInput.value, toInput.value)"
+                />
+            </label>
+            @if (customError()) {
+                <p class="field-error" role="alert">{{ customError() }}</p>
+            }
+        </div>
+    }
+</div>
+
+@if (failed()) {
+    <ng-container *ngTemplateOutlet="errorTpl" />
+} @else {
+    <!-- bénéfice net : le chiffre à retenir -->
+    <section
+        class="card tinted net"
+        [attr.data-tone]="netPositive() ? 'success' : 'danger'"
+        aria-labelledby="net-title"
+    >
+        <span class="tone-icon">
+            <app-icon [name]="netPositive() ? 'trending-up' : 'arrow-down'" [size]="18" />
+        </span>
+        <div class="net-text">
+            <h2 id="net-title">Bénéfice net · {{ periodLabel() }}</h2>
+            @if (loading()) {
+                <div class="skeleton net-skeleton"></div>
+            } @else {
+                <p class="net-value" [class.negative]="!netPositive()" appMoney>
+                    {{ data()?.netProfit ?? 0 | fcfa: true }}
+                </p>
+            }
+            <p class="net-hint">Bénéfice brut moins les dépenses</p>
+        </div>
+    </section>
+
+    <div class="pair">
+        <!-- 2. Ventes -->
+        <section class="card block" aria-labelledby="sales-title">
+            <header class="block-head">
+                <span class="tone-icon" data-tone="success"
+                    ><app-icon name="cart" [size]="18"
+                /></span>
+                <div class="block-title">
+                    <h2 id="sales-title">Ventes</h2>
+                    @if (data(); as d) {
+                        <p>{{ d.sales.count }} {{ d.sales.count > 1 ? "ventes" : "vente" }}</p>
+                    }
+                </div>
+            </header>
+
+            <dl class="figures">
+                <div class="figure">
+                    <dt>Total encaissé</dt>
+                    <dd appMoney>{{ data()?.sales?.revenue ?? 0 | fcfa }}</dd>
+                </div>
+                <div class="figure">
+                    <dt>Coût d'achat des articles vendus</dt>
+                    <dd appMoney>{{ data()?.sales?.cost ?? 0 | fcfa }}</dd>
+                </div>
+                <div class="figure total">
+                    <dt>Bénéfice brut</dt>
+                    <dd appMoney>{{ data()?.sales?.grossProfit ?? 0 | fcfa }}</dd>
+                </div>
+            </dl>
+
+            <p class="note">
+                Les articles rendus par les clients sont retirés du total et du coût.
+            </p>
+        </section>
+
+        <!-- 3. Dépenses -->
+        <section class="card block" aria-labelledby="expenses-title">
+            <header class="block-head">
+                <span class="tone-icon" data-tone="danger"
+                    ><app-icon name="receipt" [size]="18"
+                /></span>
+                <div class="block-title">
+                    <h2 id="expenses-title">Dépenses</h2>
+                    @if (data(); as d) {
+                        <p appMoney>{{ d.expenses.total | fcfa }} au total</p>
+                    }
+                </div>
+            </header>
+
+            @if (loading()) {
+                <div class="skeleton line"></div>
+                <div class="skeleton line"></div>
+            } @else if (expenseRows().length === 0) {
+                <p class="empty-line">Aucune dépense sur cette période</p>
+            } @else {
+                <ul class="rows">
+                    @for (row of expenseRows(); track row.category) {
+                        <li class="row">
+                            <div class="row-top">
+                                <span class="row-name">
+                                    <span class="dot" [style.background]="row.look.color"></span>
+                                    {{ row.look.short }}
+                                </span>
+                                <span class="row-value" appMoney>{{ row.total | fcfa }}</span>
+                            </div>
+                            <div class="bar" aria-hidden="true">
+                                <span
+                                    [style.width.%]="row.share"
+                                    [style.--bar]="row.look.color"
+                                ></span>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </section>
+    </div>
+}
+
+<ng-template #errorTpl>
+    <div class="card error-card">
+        <app-empty-state
+            icon="alert"
+            tone="danger"
+            title="Impossible de charger le bilan"
+            text="Vérifiez votre connexion, puis réessayez."
+        >
+            <button type="button" class="btn btn-primary" (click)="balance.reload()">
+                Réessayer
+            </button>
+        </app-empty-state>
+    </div>
+</ng-template>

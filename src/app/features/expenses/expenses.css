@@ -405,35 +405,41 @@ app-page-header {
     }
 }
 
-/* chaque jour est un bloc à part : le total du jour est une pastille grise « Total », les montants des lignes restent en rouge */
+/* chaque jour est un bloc séparé : le nom du jour et son total sont AU-DESSUS de la carte, les lignes dedans */
 .days {
-    gap: 12px;
-}
-
-.day + .day {
-    margin-top: 8px;
+    gap: 24px;
+    padding: 8px 16px 16px;
 }
 
 .day-head {
-    padding-block: 14px 8px;
+    padding: 0 4px 8px;
+    background: none;
+}
+
+.day-name {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    color: var(--text);
 }
 
 .day-total {
     display: inline-flex;
     align-items: baseline;
     gap: 6px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    background: var(--neutral-soft);
     color: var(--text-muted);
     font-size: var(--fs-small);
-    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
 }
 
 .day-total small {
     font-size: var(--fs-caption);
-    font-weight: var(--fw-regular, 400);
+}
+
+.rows {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
 }
 
 .row-amount {

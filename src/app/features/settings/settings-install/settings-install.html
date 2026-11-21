@@ -15,7 +15,7 @@
         </div>
     </section>
 } @else {
-    @if (platform === "android" && !inApp) {
+    @if (platform !== "ios" && !inApp) {
         <!-- l'application Android : un fichier à télécharger, Boutiki n'est pas (encore) sur Google Play -->
         <section class="card hero">
             <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
@@ -66,8 +66,8 @@
         </section>
     }
 
-    <!-- sur Android, seule l'application est proposée ; l'installation par le navigateur est pour les autres appareils -->
-    @if (platform !== "android" || inApp) {
+    <!-- l'application (APK) est proposée partout sauf sur iPhone ; le navigateur ne sert que pour iPhone ou une fenêtre intégrée -->
+    @if (platform === "ios" || inApp) {
         <section class="card hero">
             <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
             <div class="hero-text">

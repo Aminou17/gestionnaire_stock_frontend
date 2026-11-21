@@ -106,92 +106,6 @@
             }
         </button>
 
-        <div class="filters" [class.open]="filtersOpen()">
-            <div class="sheet-head">
-                <h2>Filtres</h2>
-                <button
-                    type="button"
-                    class="sheet-close"
-                    aria-label="Fermer les filtres"
-                    (click)="filtersOpen.set(false)"
-                >
-                    <app-icon name="close" [size]="20" />
-                </button>
-            </div>
-
-            <label class="field">
-                <span class="field-label">Catégorie</span>
-                <select class="input" (change)="selectCategory($any($event.target).value)">
-                    <option value="">Toutes les catégories</option>
-                    @for (category of categoryList(); track category.id) {
-                        <option [value]="category.id" [selected]="category.id === categoryId()">
-                            {{ category.name }}
-                        </option>
-                    }
-                </select>
-            </label>
-
-            @if (auth.isAdmin()) {
-                <label class="field">
-                    <span class="field-label">Statut</span>
-                    <select class="input" (change)="selectStatus($any($event.target).value)">
-                        <option value="active" [selected]="status() === 'active'">Actifs</option>
-                        <option value="deleted" [selected]="status() === 'deleted'">
-                            Supprimés
-                        </option>
-                        <option value="all" [selected]="status() === 'all'">Tous</option>
-                    </select>
-                </label>
-            }
-
-            <!-- téléphone : le choix liste ou carreaux est ici, pas dans un bouton de plus sur la barre -->
-            <div class="field phone-only" role="group" aria-label="Affichage">
-                <span class="field-label">Affichage</span>
-                <div class="view-choice">
-                    <button
-                        type="button"
-                        class="chip"
-                        [attr.aria-pressed]="view() === 'list'"
-                        (click)="setView('list')"
-                    >
-                        Liste
-                    </button>
-                    <button
-                        type="button"
-                        class="chip"
-                        [attr.aria-pressed]="view() === 'grid'"
-                        (click)="setView('grid')"
-                    >
-                        Carreaux
-                    </button>
-                </div>
-            </div>
-
-            <label class="field">
-                <span class="field-label">Trier par</span>
-                <select
-                    class="input"
-                    aria-label="Trier par"
-                    (change)="selectSort($any($event.target).value)"
-                >
-                    @for (option of sorts; track option.value) {
-                        <option [value]="option.value" [selected]="option.value === sort()">
-                            {{ option.label }}
-                        </option>
-                    }
-                </select>
-            </label>
-
-            <div class="sheet-foot">
-                <button type="button" class="btn btn-outline" (click)="resetFilters()">
-                    Réinitialiser
-                </button>
-                <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
-                    Voir {{ total() }} produit{{ total() > 1 ? "s" : "" }}
-                </button>
-            </div>
-        </div>
-
         <!-- un seul bouton qui active ou coupe les carreaux -->
         <button
             type="button"
@@ -207,6 +121,67 @@
         @if (filtersOpen()) {
             <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
         }
+    </div>
+
+    <div class="filters" [class.open]="filtersOpen()">
+        <div class="sheet-head">
+            <h2>Filtres</h2>
+            <button
+                type="button"
+                class="sheet-close"
+                aria-label="Fermer les filtres"
+                (click)="filtersOpen.set(false)"
+            >
+                <app-icon name="close" [size]="20" />
+            </button>
+        </div>
+
+        <label class="field">
+            <span class="field-label">Catégorie</span>
+            <select class="input" (change)="selectCategory($any($event.target).value)">
+                <option value="">Toutes les catégories</option>
+                @for (category of categoryList(); track category.id) {
+                    <option [value]="category.id" [selected]="category.id === categoryId()">
+                        {{ category.name }}
+                    </option>
+                }
+            </select>
+        </label>
+
+        @if (auth.isAdmin()) {
+            <label class="field">
+                <span class="field-label">Statut</span>
+                <select class="input" (change)="selectStatus($any($event.target).value)">
+                    <option value="active" [selected]="status() === 'active'">Actifs</option>
+                    <option value="deleted" [selected]="status() === 'deleted'">Supprimés</option>
+                    <option value="all" [selected]="status() === 'all'">Tous</option>
+                </select>
+            </label>
+        }
+
+        <label class="field">
+            <span class="field-label">Trier par</span>
+            <select
+                class="input"
+                aria-label="Trier par"
+                (change)="selectSort($any($event.target).value)"
+            >
+                @for (option of sorts; track option.value) {
+                    <option [value]="option.value" [selected]="option.value === sort()">
+                        {{ option.label }}
+                    </option>
+                }
+            </select>
+        </label>
+
+        <div class="sheet-foot">
+            <button type="button" class="btn btn-outline" (click)="resetFilters()">
+                Réinitialiser
+            </button>
+            <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
+                Voir {{ total() }} produit{{ total() > 1 ? "s" : "" }}
+            </button>
+        </div>
     </div>
 
     @if (supplierId()) {

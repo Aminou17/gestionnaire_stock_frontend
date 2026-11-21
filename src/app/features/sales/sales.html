@@ -106,126 +106,61 @@
                 (input)="onSearch($any($event.target).value)"
             />
         </div>
+    </div>
 
-        <div class="filter-anchor">
-            <button
-                type="button"
-                class="filters-btn"
-                [class.on]="activeFilters().length > 0"
-                [attr.aria-expanded]="filtersOpen()"
-                aria-controls="sales-filters"
-                (click)="filtersOpen.set(!filtersOpen())"
-            >
-                <app-icon name="filter" [size]="18" />
-                Filtre
-                @if (activeFilters().length > 0) {
-                    <span class="filters-count">{{ activeFilters().length }}</span>
-                }
-            </button>
-
-            @if (filtersOpen()) {
-                <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
-            }
-
-            <!-- téléphone : fenêtre qui monte du bas ; ordinateur : petit panneau sous le bouton -->
-            <div
-                class="filters"
-                [class.open]="filtersOpen()"
-                id="sales-filters"
-                role="dialog"
-                aria-label="Filtre des ventes"
-            >
-                <div class="sheet-head">
-                    <h2>Filtre</h2>
-                    <button
-                        type="button"
-                        class="sheet-close"
-                        aria-label="Fermer le filtre"
-                        (click)="filtersOpen.set(false)"
-                    >
-                        <app-icon name="close" [size]="20" />
-                    </button>
-                </div>
-
-                <div role="group" aria-label="Paiement">
-                    <span class="field-label">Paiement</span>
-                    <div class="options">
-                        <button
-                            type="button"
-                            class="option"
-                            [attr.aria-pressed]="paymentMethod() === null"
-                            (click)="selectPayment(null)"
-                        >
-                            Tous
-                        </button>
-                        <button
-                            type="button"
-                            class="option"
-                            [attr.aria-pressed]="paymentMethod() === 'CASH'"
-                            (click)="selectPayment('CASH')"
-                        >
-                            <app-icon name="banknote" [size]="16" />
-                            Espèces
-                        </button>
-                        <button
-                            type="button"
-                            class="option"
-                            [attr.aria-pressed]="paymentMethod() === 'MOBILE_MONEY'"
-                            (click)="selectPayment('MOBILE_MONEY')"
-                        >
-                            <app-icon name="phone" [size]="16" />
-                            Mobile Money
-                        </button>
-                    </div>
-                </div>
-
-                @if (auth.isAdmin() && sellers().length > 1) {
-                    <div role="group" aria-label="Vendeur">
-                        <span class="field-label">Vendeur</span>
-                        <div class="options">
-                            <button
-                                type="button"
-                                class="option"
-                                [attr.aria-pressed]="sellerId() === null"
-                                (click)="selectSeller(null)"
-                            >
-                                Tous
-                            </button>
-                            @for (user of sellers(); track user.id) {
-                                <button
-                                    type="button"
-                                    class="option"
-                                    [attr.aria-pressed]="sellerId() === user.id"
-                                    (click)="selectSeller(user.id)"
-                                >
-                                    <app-avatar class="seller-avatar" [photo]="user.avatar" />
-                                    {{ user.name }}
-                                </button>
-                            }
-                        </div>
-                    </div>
-                }
-
-                <div class="sheet-foot">
-                    <button
-                        type="button"
-                        class="btn btn-outline"
-                        [disabled]="activeFilters().length === 0"
-                        (click)="resetFilters()"
-                    >
-                        Réinitialiser
-                    </button>
-                    <button
-                        type="button"
-                        class="btn btn-primary"
-                        [disabled]="!!customError()"
-                        (click)="filtersOpen.set(false)"
-                    >
-                        Voir {{ total() }} vente{{ total() > 1 ? "s" : "" }}
-                    </button>
-                </div>
+    <!-- les filtres restent sous la recherche, toujours visibles : paiement et vendeur -->
+    <div class="filters" id="sales-filters">
+        <div role="group" aria-label="Paiement">
+            <span class="field-label">Paiement</span>
+            <div class="options">
+                <button
+                    type="button"
+                    class="option"
+                    [attr.aria-pressed]="paymentMethod() === null"
+                    (click)="selectPayment(null)"
+                >
+                    Tous
+                </button>
+                <button
+                    type="button"
+                    class="option"
+                    [attr.aria-pressed]="paymentMethod() === 'CASH'"
+                    (click)="selectPayment('CASH')"
+                >
+                    <app-icon name="banknote" [size]="16" />
+                    Espèces
+                </button>
+                <button
+                    type="button"
+                    class="option"
+                    [attr.aria-pressed]="paymentMethod() === 'MOBILE_MONEY'"
+                    (click)="selectPayment('MOBILE_MONEY')"
+                >
+                    <app-icon name="phone" [size]="16" />
+                    Mobile Money
+                </button>
             </div>
         </div>
+
+        @if (auth.isAdmin() && sellers().length > 1) {
+            <label class="seller-select">
+                <span class="field-label">Vendeur</span>
+                <select
+                    class="input"
+                    [value]="sellerId() ?? ''"
+                    (change)="
+                        selectSeller($any($event.target).value ? +$any($event.target).value : null)
+                    "
+                >
+                    <option value="">Tous les vendeurs</option>
+                    @for (user of sellers(); track user.id) {
+                        <option [value]="user.id" [selected]="sellerId() === user.id">
+                            {{ user.name }}
+                        </option>
+                    }
+                </select>
+            </label>
+        }
     </div>
 
     @if (activeFilters().length > 0) {

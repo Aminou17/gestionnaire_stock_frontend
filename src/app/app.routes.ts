@@ -144,6 +144,13 @@ export const routes: Routes = [
                     ),
             },
             {
+                path: "admin",
+                title: "Espace admin",
+                canActivate: [adminGuard],
+                loadComponent: () =>
+                    import("./features/admin-space/admin-space").then((m) => m.AdminSpace),
+            },
+            {
                 path: "stock-entries/new",
                 title: "Nouvelle entrée de stock",
                 canActivate: [adminGuard],

@@ -479,10 +479,6 @@ td.num small {
         padding: 0 14px;
     }
 
-    .view-single {
-        display: none;
-    }
-
     .list-error {
         margin: 12px 0 0;
     }
@@ -499,50 +495,33 @@ td.num small {
     }
 
     .search {
-        flex-basis: 0;
+        flex: 1 1 0;
+        min-width: 0;
     }
 
-    .filter-btn {
-        display: inline-flex;
-    }
-
-    /* les filtres s'ouvrent en feuille depuis le bas, comme les autres menus du téléphone */
+    /* les filtres restent sous la recherche, visibles : catégorie, statut et tri en deux colonnes */
     .filters {
-        display: none;
-        position: fixed;
-        inset: auto 0 0;
-        z-index: 41;
-        flex-direction: column;
-        gap: 16px;
-        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
-        border-radius: 16px 16px 0 0;
-        background: var(--surface);
-        box-shadow: var(--shadow-dialog);
-    }
-
-    .filters.open {
-        display: flex;
-    }
-
-    .sheet-backdrop {
-        display: block;
-        position: fixed;
-        inset: 0;
-        z-index: 40;
-        background: var(--overlay);
-    }
-
-    .field-label {
-        display: block;
-        font-size: var(--fs-small);
-        font-weight: var(--fw-medium);
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        flex: 0 0 100%;
+        order: 4;
+        gap: 8px;
     }
 
     .filters .field {
         display: grid;
-        gap: 6px;
-        flex: none;
+        gap: 4px;
         width: auto;
+    }
+
+    .filters .field:last-of-type {
+        grid-column: 1 / -1;
+    }
+
+    .field-label {
+        display: block;
+        color: var(--text-muted);
+        font-size: var(--fs-caption);
     }
 
     /* compteurs : une rangée fine de pastilles qui servent de filtres */
@@ -1039,18 +1018,14 @@ td.num small {
     }
 }
 
-/* choix liste ou carreaux : dans la fenêtre des filtres, téléphone seulement */
-.phone-only {
-    display: none;
+/* les filtres sont maintenant sous la barre de recherche, dans leur propre rangée */
+.list-card > .filters {
+    padding: 0 16px 12px;
 }
 
 @media (max-width: 767px) {
-    .phone-only {
-        display: grid;
-    }
-
-    .view-choice {
-        display: flex;
-        gap: 8px;
+    .list-card > .filters {
+        margin: 8px 0 0;
+        padding: 0;
     }
 }

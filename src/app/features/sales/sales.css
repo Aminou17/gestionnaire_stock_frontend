@@ -673,3 +673,41 @@ app-page-header {
     color: var(--primary-text);
     border-color: var(--primary);
 }
+
+/* paiement et vendeur : toujours visibles sous la recherche, plus de panneau caché */
+.filters {
+    position: static;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    width: auto;
+    max-height: none;
+    margin: 12px 0 0;
+    padding: 0;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+}
+
+.filters .field-label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+}
+
+.filters-btn,
+.sheet-backdrop {
+    display: none;
+}
+
+.filters .option {
+    min-height: 36px;
+}
+
+.seller-select {
+    display: grid;
+    min-width: 200px;
+}

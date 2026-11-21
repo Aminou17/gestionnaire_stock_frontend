@@ -178,8 +178,8 @@ describe("Sales", () => {
         expect(text()).toContain("Reste");
     });
 
+    // les filtres sont toujours visibles : plus de panneau à ouvrir
     const open = async () => {
-        el.querySelector<HTMLButtonElement>(".filters-btn")!.click();
         await fixture.whenStable();
     };
 
@@ -220,7 +220,7 @@ describe("Sales", () => {
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.paymentMethod).toBe("MOBILE_MONEY");
         expect(filters.page).toBe(1);
-        expect(el.querySelector(".filters-count")?.textContent).toContain("1");
+        expect(el.querySelectorAll(".active-chip").length).toBe(1);
     });
 
     it("should remove a filter with the cross of its chip and reset them all", async () => {
@@ -236,20 +236,11 @@ describe("Sales", () => {
         expect(el.querySelectorAll(".active-chip").length).toBe(0);
         await pick("Espèces");
 
-        const reset = [...el.querySelectorAll<HTMLButtonElement>(".sheet-foot .btn")][0];
-        reset.click();
+        el.querySelector<HTMLButtonElement>(".active-chip")!.click();
         await fixture.whenStable();
         expect(el.querySelectorAll(".active-chip").length).toBe(0);
         expect(getSalesPage.mock.lastCall![0]).toEqual(
-            expect.objectContaining({ paymentMethod: null, from: null, to: null }),
-        );
-    });
-
-    it("should show the number of results on the button of the filter", async () => {
-        await render();
-        await open();
-        expect(el.querySelector(".sheet-foot .btn-primary")?.textContent).toContain(
-            "Voir 2 ventes",
+            expect.objectContaining({ paymentMethod: null }),
         );
     });
 

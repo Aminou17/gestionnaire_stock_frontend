@@ -173,10 +173,9 @@ describe("AuditLogs", () => {
         expect(getLogs).toHaveBeenCalledWith(
             expect.objectContaining({ category: "security", limit: 25 }),
         );
-        expect(getLogs).toHaveBeenCalledWith(
-            expect.objectContaining({ action: "ACCESS_DENIED", result: "FAILURE", limit: 1 }),
-        );
-        expect(el.querySelector(".summary")!.textContent).toContain("2");
+        // plus de rangée de compteurs : les filtres de l'onglet sont visibles tout de suite
+        expect(el.querySelector(".summary")).toBeNull();
+        expect(el.querySelectorAll(".filters select").length).toBe(2);
     });
 
     it("should ask only for failures when asked", async () => {
@@ -281,17 +280,11 @@ describe("AuditLogs", () => {
         );
     });
 
-    it("should show the active filters as chips that can be removed", async () => {
+    it("should keep the filters visible, with no panel to open", async () => {
         await render();
-        fixture.componentInstance.selectAction("SALE_CREATED");
-        await fixture.whenStable();
-        fixture.detectChanges();
 
-        const chip = el.querySelector<HTMLButtonElement>(".active-chip")!;
-        expect(chip.textContent).toContain("Vente enregistrée");
-
-        chip.click();
-        await fixture.whenStable();
-        expect(getLogs).toHaveBeenLastCalledWith(expect.objectContaining({ action: null }));
+        expect(el.querySelector(".filter-btn")).toBeNull();
+        expect(el.querySelectorAll(".filters select").length).toBe(2);
+        expect(el.querySelectorAll(".periods .period").length).toBe(4);
     });
 });

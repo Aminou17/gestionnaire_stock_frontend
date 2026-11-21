@@ -68,21 +68,28 @@
     text-align: center;
 }
 
-/* téléphone : flèches seules, numéros plus larges pour le doigt */
-@media (max-width: 767px) {
-    .step {
-        width: 40px;
-        padding: 0;
-        justify-content: center;
-        font-size: 0;
-    }
+.prev {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+    margin-right: 4px;
+}
 
+.next {
+    margin-left: 4px;
+}
+
+.pager {
+    flex-wrap: nowrap;
+}
+
+@media (max-width: 400px) {
     .num {
-        min-width: 40px;
-        height: 40px;
+        min-width: 32px;
+        padding: 0 4px;
     }
 
-    .pager {
-        gap: 2px;
+    .next {
+        padding: 0 8px;
     }
 }

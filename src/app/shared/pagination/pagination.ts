@@ -90,8 +90,8 @@ export class Pagination {
     first = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1));
     last = computed(() => Math.min(this.total(), this.page() * this.pageSize()));
 
-    // en dessous de la plus petite taille, une seule page : rien à afficher
-    visible = computed(() => this.total() > Math.min(...this.sizes()));
+    // une seule page : rien à afficher
+    visible = computed(() => this.pages() > 1);
 
     constructor() {
         // une suppression ou un filtre peut laisser la page courante sans élément

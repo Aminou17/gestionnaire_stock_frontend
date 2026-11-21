@@ -82,6 +82,7 @@ describe("Sidebar", () => {
             "Clients",
             "Caisse",
             "Dépenses",
+            "Espace admin",
             "Produits",
             "Catégories",
             "Inventaires",

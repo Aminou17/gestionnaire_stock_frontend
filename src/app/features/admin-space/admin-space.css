@@ -1,0 +1,399 @@
+:host {
+    display: grid;
+    gap: 16px;
+}
+
+app-page-header {
+    margin-bottom: -4px;
+}
+
+/* bloc : titre avec pastille d'icône, puis contenu */
+.block {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    padding: 16px;
+}
+
+.block-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.block-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.block-title h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+    font-weight: var(--fw-semibold);
+}
+
+.block-title p {
+    margin: 2px 0 0;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+/* stock : trois cartes teintées, côte à côte dès que la place le permet */
+.tiles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* sur téléphone, le bénéfice prend toute la largeur sous les deux valeurs */
+.tiles app-stat-card:last-child {
+    grid-column: 1 / -1;
+}
+
+.summary-line {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.summary-line strong {
+    color: var(--text);
+    font-weight: var(--fw-semibold);
+}
+
+.note {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+}
+
+/* détail par catégorie : liste repliable */
+.fold {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+}
+
+.fold:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.rows {
+    display: grid;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    display: grid;
+    gap: 8px;
+}
+
+.row-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.row-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    font-size: var(--fs-body);
+}
+
+.row-value {
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+.row-sub {
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+}
+
+.dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+/* barre de part : la couleur arrive par --bar */
+.bar {
+    height: 6px;
+    overflow: hidden;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--text-muted) 14%, var(--surface));
+}
+
+.bar span {
+    display: block;
+    height: 100%;
+    min-width: 4px;
+    border-radius: 3px;
+    background: var(--bar);
+}
+
+/* choix de la date et de la période */
+.date-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.date-field.stacked {
+    display: grid;
+    gap: 4px;
+}
+
+.date-field .input {
+    width: auto;
+    min-height: 40px;
+}
+
+.stacked .input {
+    width: 100%;
+}
+
+.period-bar {
+    display: grid;
+    gap: 12px;
+}
+
+.periods {
+    display: flex;
+    gap: 4px;
+    width: max-content;
+    max-width: 100%;
+    padding: 4px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    scrollbar-width: none;
+}
+
+.period {
+    flex: none;
+    height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.period[aria-pressed="true"] {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.period:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.custom-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.field-error {
+    grid-column: 1 / -1;
+    margin: 0;
+    color: var(--danger);
+    font-size: var(--fs-small);
+}
+
+/* bénéfice net : grande carte teintée, verte ou rouge selon le signe */
+.net {
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--tone) 16%, var(--surface)) 0%,
+        var(--surface) 75%
+    );
+    border-color: color-mix(in srgb, var(--tone) 26%, var(--border));
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 16px;
+}
+
+.net .tone-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+}
+
+.net-text {
+    min-width: 0;
+}
+
+.net-text h2 {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+}
+
+.net-value {
+    margin: 4px 0;
+    color: var(--success);
+    font-size: var(--fs-hero);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+}
+
+.net-value.negative {
+    color: var(--danger);
+}
+
+.net-hint {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+}
+
+.net-skeleton {
+    width: 160px;
+    height: 32px;
+    margin: 4px 0;
+}
+
+/* ventes : trois lignes, la dernière mise en valeur */
+.figures {
+    display: grid;
+    gap: 0;
+    margin: 0;
+}
+
+.figure {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.figure dt {
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.figure dd {
+    margin: 0;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.figure.total {
+    border-bottom: 0;
+}
+
+.figure.total dt {
+    color: var(--text);
+    font-weight: var(--fw-semibold);
+}
+
+.figure.total dd {
+    color: var(--success);
+    font-size: var(--fs-figure);
+}
+
+.empty-line {
+    margin: 0;
+    padding: 16px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--text-muted) 8%, var(--surface));
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+    text-align: center;
+}
+
+.line {
+    height: 36px;
+}
+
+.error-card {
+    padding: 16px;
+}
+
+/* ordinateur : stock en trois cartes, ventes et dépenses côte à côte */
+@media (min-width: 768px) {
+    .tiles {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .tiles app-stat-card:last-child {
+        grid-column: auto;
+    }
+
+    .pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+
+    .block {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 767px) {
+    .pair {
+        display: grid;
+        gap: 16px;
+    }
+
+    .periods {
+        width: 100%;
+    }
+
+    .period {
+        flex: 1 0 auto;
+        padding: 0 10px;
+        font-size: var(--fs-small);
+    }
+
+    /* titre et date sur deux lignes : le champ prend toute la largeur */
+    .block-head {
+        flex-wrap: wrap;
+    }
+
+    .block-head .date-field {
+        flex: 1 0 100%;
+    }
+
+    .block-head .date-field .input {
+        flex: 1;
+    }
+}

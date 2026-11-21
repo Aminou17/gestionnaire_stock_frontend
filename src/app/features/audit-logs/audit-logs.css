@@ -737,3 +737,50 @@ app-page-header {
 .entry .chevron {
     display: none;
 }
+
+/* filtres toujours visibles sous la recherche : deux listes côte à côte */
+.filters {
+    position: static;
+    display: block;
+    width: auto;
+    max-height: none;
+    margin: 0;
+    padding: 12px 16px 16px;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+    transform: none;
+}
+
+.filters select.chip {
+    flex: none;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border-radius: 8px;
+    font-size: var(--fs-body);
+}
+
+.filter-btn,
+.sheet-backdrop.filters-backdrop {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .filters app-period-filter {
+        display: block;
+    }
+}
+
+.filters app-period-filter {
+    display: grid;
+    gap: 8px;
+}
+
+@media (min-width: 768px) {
+    .filters app-period-filter {
+        grid-template-columns: repeat(3, minmax(0, 220px));
+    }
+}

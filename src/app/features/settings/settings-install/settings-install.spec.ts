@@ -44,7 +44,7 @@ describe("SettingsInstall", () => {
     }
 
     it("should show the install button when the browser offers it, and install on tap", async () => {
-        const { el, install } = await render({ canInstall: signal(true), platform: "desktop" });
+        const { el, install } = await render({ canInstall: signal(true), platform: "ios" });
 
         const button = el.querySelector<HTMLButtonElement>("button.big")!;
         expect(button.textContent).toContain("Installer Boutiki");
@@ -72,11 +72,18 @@ describe("SettingsInstall", () => {
     });
 
     it("should give the steps for the device when no install window is offered", async () => {
-        const { el } = await render({ platform: "desktop" });
+        const { el } = await render({ platform: "ios" });
 
         const steps = [...el.querySelectorAll(".steps li")].map((li) => li.textContent);
         expect(steps.length).toBe(3);
-        expect(steps[1]).toContain("icône d'installation");
+        expect(steps[1]).toContain("Partager");
+    });
+
+    it("should offer the app file on a computer too, to send it to a phone", async () => {
+        const { el } = await render({ platform: "desktop" });
+
+        expect(el.querySelector("a.big")?.getAttribute("href")).toBe("/boutiki.apk");
+        expect(el.querySelector(".hero .steps")).toBeNull();
     });
 
     it("should explain the iPhone gesture with Safari", async () => {
