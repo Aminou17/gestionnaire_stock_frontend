@@ -12,7 +12,11 @@ describe("SaleOutboxService", () => {
     let service: SaleOutboxService;
     let httpMock: HttpTestingController;
     const online = signal(false);
-    const catalog = { takeStock: vi.fn(async () => {}), refresh: vi.fn(async () => {}) };
+    const catalog = {
+        takeStock: vi.fn(async () => {}),
+        refresh: vi.fn(async () => {}),
+        registerPending: vi.fn(),
+    };
 
     const summary = {
         total: 15000,
@@ -99,5 +103,16 @@ describe("SaleOutboxService", () => {
 
         expect(service.pending()[0].status).toBe("cash");
         expect(service.needsAttention()).toBe(1);
+    });
+
+    it("réessaie une vente quand le serveur répond « trop de requêtes »", async () => {
+        await service.add([{ productId: 1, quantity: 1 }], { paymentMethod: "CASH" }, summary);
+
+        const sync = service.sync();
+        await new Promise((r) => setTimeout(r));
+        httpMock.expectOne("/api/sales").flush({}, { status: 429, statusText: "Too Many" });
+        await sync;
+
+        expect(service.pending()[0].status).toBe("waiting");
     });
 });

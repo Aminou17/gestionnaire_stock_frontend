@@ -69,6 +69,7 @@ export class SaleOutboxService {
 
     constructor() {
         void this.reload();
+        this.catalog.registerPending(() => this.pending().flatMap((sale) => sale.items));
 
         // retour du réseau : on envoie tout de suite
         effect(() => {

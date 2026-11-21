@@ -38,6 +38,12 @@ export class OfflineCatalogService {
     readonly savedAt = signal<string | null>(null);
 
     private loadedFor: number | null = null;
+    private pendingLines: () => { productId: number; quantity: number }[] = () => [];
+
+    // la file des ventes hors ligne dit ce qui n'est pas encore sorti du stock du serveur
+    registerPending(lines: () => { productId: number; quantity: number }[]) {
+        this.pendingLines = lines;
+    }
 
     // une clé par compte : deux vendeurs sur le même appareil ne mélangent pas leurs caisses
     private key() {
@@ -79,7 +85,22 @@ export class OfflineCatalogService {
 
         const categories = await firstValueFrom(this.http.get<Category[]>(`${API_URL}/categories`));
 
-        this.products.set(products);
+        // le serveur ne connaît pas encore les ventes en attente : on les retire du stock affiché
+        const waiting = new Map<number, number>();
+        for (const line of this.pendingLines()) {
+            waiting.set(line.productId, (waiting.get(line.productId) ?? 0) + line.quantity);
+        }
+
+        this.products.set(
+            products.map((product) =>
+                waiting.has(product.id)
+                    ? {
+                          ...product,
+                          theoretical_stock: product.theoretical_stock - waiting.get(product.id)!,
+                      }
+                    : product,
+            ),
+        );
         this.categories.set(categories);
         await this.save();
     }
