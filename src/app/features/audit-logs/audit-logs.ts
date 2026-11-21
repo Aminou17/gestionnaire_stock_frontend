@@ -65,12 +65,6 @@ const ENTITY_LINKS: Record<string, string> = {
     category: "/categories",
 };
 
-const PERIOD_LABELS: Record<string, string> = {
-    today: "Aujourd'hui",
-    week: "7 derniers jours",
-    month: "30 derniers jours",
-};
-
 const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1);
 
 // Page réservée à l'administrateur (adminGuard sur la route, 403 côté backend)
@@ -173,10 +167,6 @@ export class AuditLogs {
     // les filtres posés, en puces avec croix sous la barre de recherche
     activeFilters = computed(() => {
         const filters: { key: "period" | "user" | "action" | "failures"; label: string }[] = [];
-        const { period, from, to } = this.range();
-
-        if (period !== "all")
-            filters.push({ key: "period", label: this.periodLabel(period, from, to) });
         if (this.userId() !== null) filters.push({ key: "user", label: this.userName() });
         if (this.action() !== null) {
             filters.push({ key: "action", label: LABELS[this.action()!] ?? "Autre action" });
@@ -210,6 +200,18 @@ export class AuditLogs {
             this.search.set(value.trim());
             this.page.set(1);
         }, 300);
+    }
+
+    // pastilles sous le titre : Aujourd'hui, 7 jours, 30 jours, Tout
+    periodPills = [
+        { value: "today", label: "Aujourd'hui" },
+        { value: "week", label: "7 jours" },
+        { value: "month", label: "30 jours" },
+        { value: "all", label: "Tout" },
+    ];
+
+    pickPeriod(value: string) {
+        this.periodFilter().selectPeriod(value);
     }
 
     selectRange(range: PeriodRange) {
@@ -277,11 +279,6 @@ export class AuditLogs {
     private userName() {
         const user = this.users.value()?.find((item) => item.id === this.userId());
         return user?.name ?? "Personne";
-    }
-
-    private periodLabel(period: string, from: string | null, to: string | null) {
-        if (PERIOD_LABELS[period]) return PERIOD_LABELS[period];
-        return `${formatDate(from!, "d MMM", this.locale)} au ${formatDate(to!, "d MMM", this.locale)}`;
     }
 
     private entityLink(log: AuditLog) {

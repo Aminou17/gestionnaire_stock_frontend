@@ -43,6 +43,8 @@ export class PeriodFilter {
     stacked = input(false);
     // sur téléphone, sans cadre ni défilement : pour le placer dans une fenêtre de filtres
     flat = input(false);
+    // la période est choisie ailleurs (pastilles de la page) : seuls les filtres projetés restent
+    hidePeriod = input(false);
 
     period = signal<Period>("all");
     customFrom = signal("");

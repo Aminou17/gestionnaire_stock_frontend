@@ -404,3 +404,39 @@ app-page-header {
         margin-bottom: 72px;
     }
 }
+
+/* chaque jour est un bloc à part : le total du jour est une pastille grise « Total », les montants des lignes restent en rouge */
+.days {
+    gap: 12px;
+}
+
+.day + .day {
+    margin-top: 8px;
+}
+
+.day-head {
+    padding-block: 14px 8px;
+}
+
+.day-total {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--neutral-soft);
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+.day-total small {
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-regular, 400);
+}
+
+.row-amount {
+    min-width: 88px;
+    text-align: right;
+}

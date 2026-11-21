@@ -24,40 +24,25 @@
                     </span>
 
                     <div class="text">
+                        <!-- une ligne légère : quoi, et quand ; le détail est sur la fiche -->
                         @switch (item.type) {
                             @case ("SALE") {
                                 <strong>Vente #{{ item.saleNumber }}</strong>
-                                <small
-                                    >{{ item.itemsCount }} article{{
-                                        (item.itemsCount ?? 0) > 1 ? "s" : ""
-                                    }}
-                                    · {{ when(item) }}</small
-                                >
                             }
                             @case ("REFUND") {
-                                <strong>Remboursement</strong>
-                                <small
-                                    >Vente #{{ item.saleNumber }} annulée · {{ when(item) }}</small
-                                >
+                                <strong>Remboursement #{{ item.saleNumber }}</strong>
                             }
                             @case ("STOCK_ENTRY") {
-                                <strong>Entrée de stock</strong>
-                                <small
-                                    >{{ item.productName }} · {{ item.quantity }} unité{{
-                                        (item.quantity ?? 0) > 1 ? "s" : ""
-                                    }}
-                                    · {{ when(item) }}</small
-                                >
+                                <strong>{{ item.productName }}</strong>
                             }
                             @case ("INVENTORY_ADJUSTMENT") {
-                                <strong>Ajustement d'inventaire</strong>
-                                <small>{{ item.productName }} · {{ when(item) }}</small>
+                                <strong>{{ item.productName }}</strong>
                             }
                             @case ("CASH_OPENING") {
                                 <strong>Ouverture de caisse</strong>
-                                <small>{{ when(item) }}</small>
                             }
                         }
+                        <small>{{ kind(item) }}{{ when(item) }}</small>
                     </div>
 
                     <span

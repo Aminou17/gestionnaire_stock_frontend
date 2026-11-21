@@ -1,24 +1,9 @@
 @if (visible()) {
     <nav class="pager" aria-label="Pagination">
-        <div class="left">
-            <p class="status" aria-live="polite">
-                <span class="where">Page {{ page() }} sur {{ pages() }}</span>
-                <span class="range">{{ first() }}–{{ last() }} sur {{ total() }}</span>
-            </p>
-
-            <label class="size">
-                <span>Lignes par page</span>
-                <select
-                    class="chip"
-                    [value]="pageSize()"
-                    (change)="changeSize($any($event.target).value)"
-                >
-                    @for (size of sizes(); track size) {
-                        <option [value]="size" [selected]="size === pageSize()">{{ size }}</option>
-                    }
-                </select>
-            </label>
-        </div>
+        <!-- lu par les lecteurs d'écran seulement : l'écran montre juste les numéros -->
+        <p class="sr-only" aria-live="polite">
+            Page {{ page() }} sur {{ pages() }}, {{ first() }} à {{ last() }} sur {{ total() }}
+        </p>
 
         <div class="right">
             <button

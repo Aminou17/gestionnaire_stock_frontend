@@ -47,8 +47,9 @@ describe("Pagination", () => {
 
     it("should show the range and the page count", async () => {
         await setup(248, 2);
-        expect(text(".range")).toBe("26–50 sur 248");
-        expect(text(".where")).toBe("Page 2 sur 10");
+        // l'écran ne montre que les numéros ; le détail est pour les lecteurs d'écran
+        expect(text(".sr-only")).toBe("Page 2 sur 10, 26 à 50 sur 248");
+        expect(el.querySelector(".range")).toBeNull();
         expect(el.querySelector("nav")?.getAttribute("aria-label")).toBe("Pagination");
     });
 
@@ -60,7 +61,7 @@ describe("Pagination", () => {
         await setup(60, 3);
         expect(button(".prev").disabled).toBe(false);
         expect(button(".next").disabled).toBe(true);
-        expect(text(".range")).toBe("51–60 sur 60");
+        expect(text(".sr-only")).toContain("51 à 60 sur 60");
     });
 
     it("should go to the next page and mark the current number", async () => {
@@ -76,18 +77,6 @@ describe("Pagination", () => {
         await setup(100, 1);
         button(".num[aria-label='Page 3']").click();
         expect(fixture.componentInstance.page()).toBe(3);
-    });
-
-    it("should return to the first page when the page size changes", async () => {
-        await setup(300, 4, 25);
-        const select = el.querySelector<HTMLSelectElement>("select")!;
-        select.value = "50";
-        select.dispatchEvent(new Event("change"));
-        await fixture.whenStable();
-
-        expect(fixture.componentInstance.pageSize()).toBe(50);
-        expect(fixture.componentInstance.page()).toBe(1);
-        expect(text(".range")).toBe("1–50 sur 300");
     });
 
     it("should fall back to the last page when the list shrinks", async () => {

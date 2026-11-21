@@ -66,7 +66,8 @@
         </section>
     }
 
-    @if (platform !== "android" || inApp || pwa.canInstall()) {
+    <!-- sur Android, seule l'application est proposée ; l'installation par le navigateur est pour les autres appareils -->
+    @if (platform !== "android" || inApp) {
         <section class="card hero">
             <img class="hero-logo" src="icons/icon-192.png" alt="" width="72" height="72" />
             <div class="hero-text">

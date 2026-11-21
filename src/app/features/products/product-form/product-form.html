@@ -62,41 +62,6 @@
                         }
                     </label>
 
-                    @if (moreOpen()) {
-                        <div class="field">
-                            <label for="product-barcode"
-                                >Code-barres <small class="hint">facultatif</small></label
-                            >
-                            <div class="barcode-row">
-                                <input
-                                    id="product-barcode"
-                                    class="input"
-                                    type="text"
-                                    inputmode="numeric"
-                                    autocomplete="off"
-                                    formControlName="barcode"
-                                    placeholder="Ex. 6111245781234"
-                                    [class.invalid]="
-                                        form.controls.barcode.touched &&
-                                        form.controls.barcode.invalid
-                                    "
-                                />
-                                <button
-                                    type="button"
-                                    class="btn btn-outline scan"
-                                    (click)="scanner.start()"
-                                >
-                                    <app-icon name="scan" [size]="18" />
-                                    Scanner
-                                </button>
-                            </div>
-                            @if (form.controls.barcode.touched && form.controls.barcode.invalid) {
-                                <small class="field-error" role="alert"
-                                    >Chiffres, lettres et - . _ / seulement (64 au plus).</small
-                                >
-                            }
-                        </div>
-                    }
                     <label class="field">
                         <span>Catégorie</span>
                         <select
@@ -293,46 +258,6 @@
                             Impossible de charger les catégories ou les fournisseurs.
                         </div>
                     }
-                    @if (moreOpen()) {
-                        <hr class="divider" />
-                        <div class="photo-row">
-                            <span class="photo-thumb">
-                                @if (photoPreview(); as image) {
-                                    <img [src]="image" alt="" />
-                                } @else {
-                                    <app-icon name="image" [size]="24" />
-                                }
-                            </span>
-                            <div class="photo-text">
-                                <strong>Photo</strong>
-                                <small class="hint">Facultatif. PNG ou JPEG.</small>
-                                <div class="photo-actions">
-                                    <label class="btn btn-outline btn-sm">
-                                        <app-icon name="camera" [size]="16" />
-                                        {{ photoPreview() ? "Changer" : "Ajouter" }}
-                                        <input
-                                            type="file"
-                                            accept="image/png,image/jpeg"
-                                            class="sr-only"
-                                            (change)="pickPhoto($event)"
-                                        />
-                                    </label>
-                                    @if (photoPreview()) {
-                                        <button
-                                            type="button"
-                                            class="btn btn-outline btn-sm"
-                                            (click)="removePhoto()"
-                                        >
-                                            Retirer
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                        @if (photoError()) {
-                            <small class="field-error" role="alert">{{ photoError() }}</small>
-                        }
-                    }
                 </section>
 
                 <section class="group">
@@ -409,8 +334,53 @@
                             </p>
                         }
                     </div>
+                </section>
 
-                    @if (moreOpen()) {
+                <button
+                    type="button"
+                    class="more-toggle"
+                    [attr.aria-expanded]="moreOpen()"
+                    (click)="moreOpen.set(!moreOpen())"
+                >
+                    <app-icon [name]="moreOpen() ? 'chevron-down' : 'chevron-right'" [size]="18" />
+                    {{ moreOpen() ? "Moins d'options" : "Plus d'options" }}
+                </button>
+
+                @if (moreOpen()) {
+                    <!-- tout le facultatif est ici, en bas, séparé de ce qui est obligatoire -->
+                    <section class="group extras">
+                        <div class="field">
+                            <label for="product-barcode">Code-barres</label>
+                            <div class="barcode-row">
+                                <input
+                                    id="product-barcode"
+                                    class="input"
+                                    type="text"
+                                    inputmode="numeric"
+                                    autocomplete="off"
+                                    formControlName="barcode"
+                                    placeholder="Ex. 6111245781234"
+                                    [class.invalid]="
+                                        form.controls.barcode.touched &&
+                                        form.controls.barcode.invalid
+                                    "
+                                />
+                                <button
+                                    type="button"
+                                    class="btn btn-outline scan"
+                                    (click)="scanner.start()"
+                                >
+                                    <app-icon name="scan" [size]="18" />
+                                    Scanner
+                                </button>
+                            </div>
+                            @if (form.controls.barcode.touched && form.controls.barcode.invalid) {
+                                <small class="field-error" role="alert"
+                                    >Chiffres, lettres et - . _ / seulement (64 au plus).</small
+                                >
+                            }
+                        </div>
+
                         <div class="field">
                             <span id="mode-label">Mode de prix</span>
                             <div class="segmented" role="group" aria-labelledby="mode-label">
@@ -432,14 +402,6 @@
                                 </button>
                             </div>
                         </div>
-
-                        <p class="hint">
-                            {{
-                                pricingMode() === "FIXED"
-                                    ? "L'employé vend toujours à ce prix."
-                                    : "L'employé peut baisser le prix, jusqu'à une limite."
-                            }}
-                        </p>
 
                         @if (pricingMode() === "NEGOTIABLE") {
                             <div class="discount">
@@ -486,25 +448,9 @@
                                 }
                             </div>
                         }
-                    }
-                </section>
 
-                <button
-                    type="button"
-                    class="more-toggle"
-                    [attr.aria-expanded]="moreOpen()"
-                    (click)="moreOpen.set(!moreOpen())"
-                >
-                    <app-icon [name]="moreOpen() ? 'chevron-down' : 'chevron-right'" [size]="18" />
-                    {{ moreOpen() ? "Moins d'options" : "Plus d'options" }}
-                    <small class="hint">code-barres, photo, prix négociable, alerte de stock</small>
-                </button>
-
-                @if (moreOpen()) {
-                    <section class="group">
-                        <h3>Alerte de stock</h3>
                         <label class="field">
-                            <span>Seuil d'alerte <small class="hint">facultatif</small></span>
+                            <span>Alerte de stock faible</span>
                             <input
                                 class="input"
                                 type="number"
@@ -528,24 +474,44 @@
                                 <small class="field-error" role="alert"
                                     >Indiquez un nombre entier positif.</small
                                 >
-                            } @else if (defaultThreshold() !== null) {
-                                <small class="hint">
-                                    Laissez vide pour utiliser le seuil par défaut ({{
-                                        defaultThreshold()
-                                    }}).
-                                </small>
-                            } @else {
-                                <small class="hint">
-                                    Laissez vide pour utiliser le seuil par défaut, une fois réglé
-                                    dans les paramètres.
-                                </small>
                             }
                         </label>
 
-                        @if (!productId()) {
-                            <p class="hint">
-                                Le stock de départ s'ajoute ensuite avec une entrée de stock.
-                            </p>
+                        <div class="photo-row">
+                            <span class="photo-thumb">
+                                @if (photoPreview(); as image) {
+                                    <img [src]="image" alt="" />
+                                } @else {
+                                    <app-icon name="image" [size]="24" />
+                                }
+                            </span>
+                            <div class="photo-text">
+                                <strong>Photo</strong>
+                                <div class="photo-actions">
+                                    <label class="btn btn-outline btn-sm">
+                                        <app-icon name="camera" [size]="16" />
+                                        {{ photoPreview() ? "Changer" : "Ajouter" }}
+                                        <input
+                                            type="file"
+                                            accept="image/png,image/jpeg"
+                                            class="sr-only"
+                                            (change)="pickPhoto($event)"
+                                        />
+                                    </label>
+                                    @if (photoPreview()) {
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline btn-sm"
+                                            (click)="removePhoto()"
+                                        >
+                                            Retirer
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        @if (photoError()) {
+                            <small class="field-error" role="alert">{{ photoError() }}</small>
                         }
                     </section>
                 }

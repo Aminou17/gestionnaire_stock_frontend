@@ -1,20 +1,22 @@
 <div class="toolbar">
-    <label class="period">
-        <span class="muted" [class.sr-only]="chips()">Période</span>
-        <select
-            [class.input]="!chips()"
-            [class.chip]="chips()"
-            [class.active]="chips() && period() !== 'all'"
-            [value]="period()"
-            (change)="selectPeriod($any($event.target).value)"
-        >
-            <option value="today">Aujourd'hui</option>
-            <option value="week">7 derniers jours</option>
-            <option value="month">30 derniers jours</option>
-            <option value="all">Toutes les dates</option>
-            <option value="custom">Personnalisée…</option>
-        </select>
-    </label>
+    @if (!hidePeriod()) {
+        <label class="period">
+            <span class="muted" [class.sr-only]="chips()">Période</span>
+            <select
+                [class.input]="!chips()"
+                [class.chip]="chips()"
+                [class.active]="chips() && period() !== 'all'"
+                [value]="period()"
+                (change)="selectPeriod($any($event.target).value)"
+            >
+                <option value="today">Aujourd'hui</option>
+                <option value="week">7 derniers jours</option>
+                <option value="month">30 derniers jours</option>
+                <option value="all">Toutes les dates</option>
+                <option value="custom">Personnalisée…</option>
+            </select>
+        </label>
+    }
 
     <!-- autres filtres de la page (fournisseur) -->
     <ng-content />

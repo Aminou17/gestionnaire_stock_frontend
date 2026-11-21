@@ -652,3 +652,88 @@ app-page-header {
         min-height: 44px;
     }
 }
+
+/* onglets Activité / Sécurité : même habillage que les pastilles de période */
+.tabs {
+    gap: 4px;
+    margin: 16px 16px 0;
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+}
+
+.tab {
+    flex: 1;
+    justify-content: center;
+    min-height: 40px;
+    margin-bottom: 0;
+    border: 0;
+    border-radius: 8px;
+}
+
+.tab.selected {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.periods {
+    display: flex;
+    gap: 4px;
+    margin: 12px 16px 0;
+    padding: 4px;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    scrollbar-width: none;
+}
+
+.period {
+    flex: 1 0 auto;
+    height: 36px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.period[aria-pressed="true"] {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.period:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* ligne légère : une icône de couleur, la phrase, l'heure */
+.entry {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    min-height: 60px;
+    padding: 12px 16px;
+}
+
+.kind {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+.sentence {
+    font-size: var(--fs-body);
+    line-height: 1.35;
+}
+
+.entry .chevron {
+    display: none;
+}

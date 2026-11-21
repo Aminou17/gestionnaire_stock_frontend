@@ -86,7 +86,7 @@ describe("AuditLogs", () => {
 
         expect(text()).toContain("Moussa a encaissé une vente de");
         expect(el.querySelector("a.entry[href='/sales/12']")).not.toBeNull();
-        expect(el.querySelector(".entry .who")!.textContent).toContain("MT");
+        expect(el.querySelector(".entry .kind")).not.toBeNull();
     });
 
     it("should show the email tried on a failed login", async () => {
@@ -214,14 +214,14 @@ describe("AuditLogs", () => {
                 pagination: { page, limit: 25, total: 30, totalPages: 2 },
             }),
         );
-        expect(text()).toContain("1–25 sur 30");
+        expect(text()).toContain("1 à 25 sur 30");
 
         el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();
 
         expect(getLogs).toHaveBeenLastCalledWith(expect.objectContaining({ page: 2, limit: 25 }));
         expect(el.querySelectorAll(".entry").length).toBe(1);
-        expect(text()).toContain("26–30 sur 30");
+        expect(text()).toContain("26 à 30 sur 30");
     });
 
     it("should offer to retry when the first page fails", async () => {

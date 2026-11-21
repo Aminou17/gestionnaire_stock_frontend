@@ -640,3 +640,36 @@ app-page-header {
 .summary {
     max-width: 920px;
 }
+
+/* la carte porte aussi les trois vues : pastilles en haut, montant dessous */
+.summary {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+}
+
+.summary .status-chips {
+    order: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.summary-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.summary .chip {
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+}
+
+.summary .chip.selected {
+    background: var(--surface);
+}
+
+.summary .chip.selected {
+    color: var(--primary-text);
+    border-color: var(--primary);
+}

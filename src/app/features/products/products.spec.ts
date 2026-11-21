@@ -244,7 +244,7 @@ describe("Products", () => {
 
     it("should show the stock value to the admin only", async () => {
         await render(true, [product({})]);
-        expect(text(el.querySelector(".value-card"))).toContain("Valeur du stock");
+        expect(text(el.querySelector(".value-card"))).toContain("Valeur totale");
     });
 
     it("should not show the stock value to the manager", async () => {
@@ -303,7 +303,7 @@ describe("Products", () => {
         expect(getProducts).toHaveBeenLastCalledWith(
             expect.objectContaining({ page: 1, limit: 25 }),
         );
-        expect(text(el.querySelector("app-pagination"))).toContain("1–25 sur 60");
+        expect(text(el.querySelector("app-pagination"))).toContain("1 à 25 sur 60");
 
         el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();
@@ -311,23 +311,7 @@ describe("Products", () => {
         expect(getProducts).toHaveBeenLastCalledWith(
             expect.objectContaining({ page: 2, limit: 25 }),
         );
-        expect(text(el.querySelector("app-pagination"))).toContain("26–50 sur 60");
-    });
-
-    it("should go back to the first page when the page size changes", async () => {
-        await render(true, [product({ id: 1 })], 120);
-        el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
-        await fixture.whenStable();
-
-        const select = el.querySelector<HTMLSelectElement>("app-pagination select")!;
-        select.value = "50";
-        select.dispatchEvent(new Event("change"));
-        await fixture.whenStable();
-
-        expect(getProducts).toHaveBeenLastCalledWith(
-            expect.objectContaining({ page: 1, limit: 50 }),
-        );
-        expect(localStorage.getItem("page-size-products")).toBe("50");
+        expect(text(el.querySelector("app-pagination"))).toContain("26 à 50 sur 60");
     });
 
     it("should not show the pagination when everything fits one small page", async () => {

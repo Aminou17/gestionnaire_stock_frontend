@@ -35,6 +35,13 @@ export class RecentActivity {
     }
 
     // "14:32" aujourd'hui, "10 nov., 14:32" les jours précédents
+    // petit mot devant l'heure quand le titre ne dit pas de quoi il s'agit
+    kind(item: Activity) {
+        if (item.type === "STOCK_ENTRY") return "Entrée · ";
+        if (item.type === "INVENTORY_ADJUSTMENT") return "Inventaire · ";
+        return "";
+    }
+
     when(item: Activity) {
         const isToday = new Date(item.occurredAt).toDateString() === new Date().toDateString();
         return formatDate(item.occurredAt, isToday ? "HH:mm" : "d MMMM 'à' HH:mm", this.locale);

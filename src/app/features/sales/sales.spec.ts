@@ -137,7 +137,7 @@ describe("Sales", () => {
 
     it("should page through the sales and return to page 1 when a filter changes", async () => {
         await render(true, [sale(6)], 80);
-        expect(text()).toContain("1–25 sur 80");
+        expect(text()).toContain("1 à 25 sur 80");
 
         el.querySelector<HTMLButtonElement>("app-pagination .next")!.click();
         await fixture.whenStable();

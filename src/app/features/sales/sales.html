@@ -63,12 +63,29 @@
 <!-- le résumé suit la pastille choisie (encaissé, reste à encaisser, remboursé) -->
 @if (!firstLoad() && !(sales.error() && list().length === 0)) {
     <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
-        <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
-        <div class="summary-main">
-            <span class="summary-label">{{ summary().label }}</span>
-            <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>
+        <!-- les trois vues (toutes, à solder, remboursées) sont dans la carte : un seul bloc au lieu de deux -->
+        <div class="status-chips">
+            @for (tab of tabs(); track tab.label) {
+                <button
+                    type="button"
+                    class="chip"
+                    [class.selected]="isSelected(tab.value)"
+                    [attr.aria-pressed]="isSelected(tab.value)"
+                    (click)="selectStatus(tab.value)"
+                >
+                    {{ tab.short }}
+                    <span>{{ tab.count ?? "—" }}</span>
+                </button>
+            }
         </div>
-        <span class="summary-count">{{ summary().note }}</span>
+        <div class="summary-body">
+            <span class="tone-icon"><app-icon [name]="summary().icon" [size]="18" /></span>
+            <div class="summary-main">
+                <span class="summary-label">{{ summary().label }}</span>
+                <strong appMoney class="summary-amount">{{ summary().amount | fcfa }}</strong>
+            </div>
+            <span class="summary-count">{{ summary().note }}</span>
+        </div>
     </section>
 }
 
@@ -226,21 +243,6 @@
             }
         </div>
     }
-
-    <div class="status-chips">
-        @for (tab of tabs(); track tab.label) {
-            <button
-                type="button"
-                class="chip"
-                [class.selected]="isSelected(tab.value)"
-                [attr.aria-pressed]="isSelected(tab.value)"
-                (click)="selectStatus(tab.value)"
-            >
-                {{ tab.short }}
-                <span>{{ tab.count ?? "—" }}</span>
-            </button>
-        }
-    </div>
 
     @if (firstLoad()) {
         <div class="loading">

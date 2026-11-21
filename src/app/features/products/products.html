@@ -25,7 +25,7 @@
     <div class="card value-card tinted" data-tone="violet">
         <span class="value-icon tone-icon"><app-icon name="wallet" [size]="18" /></span>
         <div class="value-text">
-            <span class="value-label">Valeur du stock</span>
+            <span class="value-label">Valeur totale</span>
             <strong class="value-amount">
                 @if (secret.revealed()) {
                     {{ stockValue() | fcfa }}
@@ -252,7 +252,7 @@
         <span class="muted">{{ total() }} produit{{ total() > 1 ? "s" : "" }}</span>
         @if (stockValue() !== undefined) {
             <span class="summary-value">
-                <span class="muted">Valeur</span>
+                <span class="muted">Valeur totale</span>
                 <strong>
                     @if (secret.revealed()) {
                         {{ stockValue() | fcfa }}

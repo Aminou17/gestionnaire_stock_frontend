@@ -189,7 +189,9 @@ describe("ProductForm", () => {
         component.openNew();
         component.moreOpen.set(true);
         await fixture.whenStable();
-        expect(el.textContent).toContain("seuil par défaut (5)");
+        expect(
+            el.querySelector<HTMLInputElement>("input[formControlName=minStock]")?.placeholder,
+        ).toBe("Par défaut : 5");
 
         fill("FIXED", null, null);
         component.submit();

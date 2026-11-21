@@ -26,6 +26,20 @@
         </button>
     </div>
 
+    <!-- période : pastilles visibles, comme sur Ventes et Dépenses -->
+    <div class="periods" role="group" aria-label="Période">
+        @for (item of periodPills; track item.value) {
+            <button
+                type="button"
+                class="period"
+                [attr.aria-pressed]="range().period === item.value"
+                (click)="pickPeriod(item.value)"
+            >
+                {{ item.label }}
+            </button>
+        }
+    </div>
+
     <div class="bar">
         <label class="search">
             <app-icon name="search" [size]="18" />
@@ -84,7 +98,13 @@
             </button>
         </div>
 
-        <app-period-filter #period [chips]="true" [flat]="true" (changed)="selectRange($event)">
+        <app-period-filter
+            #period
+            [chips]="true"
+            [flat]="true"
+            [hidePeriod]="true"
+            (changed)="selectRange($event)"
+        >
             <select
                 class="chip"
                 aria-label="Personne"
@@ -244,13 +264,10 @@
     <app-pagination class="list-pager" [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
 }
 
-<!-- contenu d'une ligne : pastille de la personne, phrase, heure -->
+<!-- une ligne : l'icône du type, la phrase, l'heure ; la précision sous la phrase seulement s'il y en a une -->
 <ng-template #line let-row>
-    <span class="who" aria-hidden="true">
-        {{ row.initials }}
-        <span class="type-pill pill-{{ row.tone }}">
-            <app-icon [name]="row.icon" [size]="10" />
-        </span>
+    <span class="kind pill-{{ row.tone }}" aria-hidden="true">
+        <app-icon [name]="row.icon" [size]="18" />
     </span>
 
     <span class="what">
@@ -272,7 +289,6 @@
     <time class="time" [attr.datetime]="row.log.created_at">{{
         row.log.created_at | date: "HH:mm"
     }}</time>
-    <app-icon class="chevron" name="chevron-right" [size]="16" />
 </ng-template>
 
 <!-- détail d'un événement : feuille qui monte du bas sur téléphone, fenêtre au centre sur ordinateur -->

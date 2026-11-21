@@ -44,7 +44,7 @@ describe("SettingsInstall", () => {
     }
 
     it("should show the install button when the browser offers it, and install on tap", async () => {
-        const { el, install } = await render({ canInstall: signal(true) });
+        const { el, install } = await render({ canInstall: signal(true), platform: "desktop" });
 
         const button = el.querySelector<HTMLButtonElement>("button.big")!;
         expect(button.textContent).toContain("Installer Boutiki");
@@ -61,6 +61,14 @@ describe("SettingsInstall", () => {
         expect(link.getAttribute("href")).toBe("/boutiki.apk");
         expect(link.textContent).toContain("Télécharger l'application");
         expect(el.textContent).toContain("Installer quand même");
+    });
+
+    it("should offer only the app on Android, never the browser install", async () => {
+        const { el } = await render({ canInstall: signal(true) });
+
+        expect(el.querySelector("a.big")).not.toBeNull();
+        expect(el.querySelector("button.big")).toBeNull();
+        expect(el.textContent).not.toContain("sans fichier");
     });
 
     it("should give the steps for the device when no install window is offered", async () => {
