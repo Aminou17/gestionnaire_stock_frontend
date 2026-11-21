@@ -51,11 +51,11 @@ export class Expenses {
     protected backState = { backTo: "/expenses", backLabel: "Dépenses" };
 
     periods: { key: PeriodKey; label: string }[] = [
-        { key: "month", label: "Ce mois-ci" },
+        { key: "month", label: "Ce mois" },
         { key: "last-month", label: "Mois dernier" },
         { key: "week", label: "7 jours" },
         { key: "all", label: "Tout" },
-        { key: "custom", label: "Dates…" },
+        { key: "custom", label: "Dates" },
     ];
 
     period = signal<PeriodKey>("month");
