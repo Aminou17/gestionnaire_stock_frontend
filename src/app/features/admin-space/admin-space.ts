@@ -38,7 +38,10 @@ export class AdminSpace {
     customFrom = signal(this.daysAgo(6));
     customTo = signal(this.today);
     customError = signal<string | null>(null);
+    // les détails restent repliés : la page montre d'abord les gros chiffres
     categoriesOpen = signal(false);
+    salesOpen = signal(false);
+    expensesOpen = signal(false);
 
     range = computed(() => {
         const period = this.period();

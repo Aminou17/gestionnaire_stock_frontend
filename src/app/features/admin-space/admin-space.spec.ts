@@ -84,6 +84,20 @@ describe("AdminSpace", () => {
         expect(text()).toContain("Bénéfice net");
     });
 
+    it("should keep the details folded until asked", async () => {
+        await render(of(balance()));
+        const el: HTMLElement = fixture.nativeElement;
+
+        expect(el.textContent).not.toContain("Coût d'achat des articles vendus");
+        expect(el.querySelectorAll(".rows").length).toBe(0);
+
+        el.querySelectorAll<HTMLButtonElement>(".fold").forEach((b) => b.click());
+        await fixture.whenStable();
+
+        expect(el.textContent).toContain("Coût d'achat des articles vendus");
+        expect(el.textContent).toContain("Valeur calculée avec les prix");
+    });
+
     it("should show a positive net profit in green", async () => {
         await render(of(balance()));
 

@@ -53,56 +53,52 @@
         </div>
 
         @if (data(); as d) {
-            <p class="summary-line">
-                <strong>{{ d.stock.products }}</strong>
-                {{ d.stock.products > 1 ? "produits" : "produit" }} en stock,
-                <strong>{{ d.stock.units }}</strong>
-                {{ d.stock.units > 1 ? "unités" : "unité" }}
-            </p>
+            <button
+                type="button"
+                class="fold"
+                [attr.aria-expanded]="categoriesOpen()"
+                (click)="categoriesOpen.set(!categoriesOpen())"
+            >
+                <span>{{ categoriesOpen() ? "Masquer les détails" : "Voir les détails" }}</span>
+                <app-icon
+                    [name]="categoriesOpen() ? 'chevron-down' : 'chevron-right'"
+                    [size]="16"
+                />
+            </button>
 
-            @if (stockRows().length > 0) {
-                <button
-                    type="button"
-                    class="fold"
-                    [attr.aria-expanded]="categoriesOpen()"
-                    (click)="categoriesOpen.set(!categoriesOpen())"
-                >
-                    <span>Détail par catégorie</span>
-                    <app-icon
-                        [name]="categoriesOpen() ? 'chevron-down' : 'chevron-right'"
-                        [size]="16"
-                    />
-                </button>
+            @if (categoriesOpen()) {
+                <p class="summary-line">
+                    <strong>{{ d.stock.products }}</strong>
+                    {{ d.stock.products > 1 ? "produits" : "produit" }} en stock,
+                    <strong>{{ d.stock.units }}</strong>
+                    {{ d.stock.units > 1 ? "unités" : "unité" }}
+                </p>
 
-                @if (categoriesOpen()) {
-                    <ul class="rows">
-                        @for (row of stockRows(); track row.categoryId) {
-                            <li class="row">
-                                <div class="row-top">
-                                    <span class="row-name">{{ row.categoryName }}</span>
-                                    <span class="row-value" appMoney>{{
-                                        row.saleValue | fcfa
-                                    }}</span>
-                                </div>
-                                <div class="bar" aria-hidden="true">
-                                    <span
-                                        [style.width.%]="row.share"
-                                        style="--bar: var(--primary)"
-                                    ></span>
-                                </div>
-                                <span class="row-sub">
-                                    {{ row.products }}
-                                    {{ row.products > 1 ? "produits" : "produit" }} ·
-                                    {{ row.units }} {{ row.units > 1 ? "unités" : "unité" }}
-                                </span>
-                            </li>
-                        }
-                    </ul>
-                }
+                <ul class="rows">
+                    @for (row of stockRows(); track row.categoryId) {
+                        <li class="row">
+                            <div class="row-top">
+                                <span class="row-name">{{ row.categoryName }}</span>
+                                <span class="row-value" appMoney>{{ row.saleValue | fcfa }}</span>
+                            </div>
+                            <div class="bar" aria-hidden="true">
+                                <span
+                                    [style.width.%]="row.share"
+                                    style="--bar: var(--primary)"
+                                ></span>
+                            </div>
+                            <span class="row-sub">
+                                {{ row.products }}
+                                {{ row.products > 1 ? "produits" : "produit" }} · {{ row.units }}
+                                {{ row.units > 1 ? "unités" : "unité" }}
+                            </span>
+                        </li>
+                    }
+                </ul>
+
+                <p class="note">Valeur calculée avec les prix d'achat et de vente d'aujourd'hui.</p>
             }
         }
-
-        <p class="note">Valeur calculée avec les prix d'achat et de vente d'aujourd'hui.</p>
     }
 </section>
 
@@ -200,19 +196,33 @@
                     <dt>Total encaissé</dt>
                     <dd appMoney>{{ data()?.sales?.revenue ?? 0 | fcfa }}</dd>
                 </div>
-                <div class="figure">
-                    <dt>Coût d'achat des articles vendus</dt>
-                    <dd appMoney>{{ data()?.sales?.cost ?? 0 | fcfa }}</dd>
-                </div>
                 <div class="figure total">
                     <dt>Bénéfice brut</dt>
                     <dd appMoney>{{ data()?.sales?.grossProfit ?? 0 | fcfa }}</dd>
                 </div>
             </dl>
 
-            <p class="note">
-                Les articles rendus par les clients sont retirés du total et du coût.
-            </p>
+            <button
+                type="button"
+                class="fold"
+                [attr.aria-expanded]="salesOpen()"
+                (click)="salesOpen.set(!salesOpen())"
+            >
+                <span>{{ salesOpen() ? "Masquer les détails" : "Voir les détails" }}</span>
+                <app-icon [name]="salesOpen() ? 'chevron-down' : 'chevron-right'" [size]="16" />
+            </button>
+
+            @if (salesOpen()) {
+                <dl class="figures">
+                    <div class="figure">
+                        <dt>Coût d'achat des articles vendus</dt>
+                        <dd appMoney>{{ data()?.sales?.cost ?? 0 | fcfa }}</dd>
+                    </div>
+                </dl>
+                <p class="note">
+                    Les articles rendus par les clients sont retirés du total et du coût.
+                </p>
+            }
         </section>
 
         <!-- 3. Dépenses -->
@@ -235,25 +245,43 @@
             } @else if (expenseRows().length === 0) {
                 <p class="empty-line">Aucune dépense sur cette période</p>
             } @else {
-                <ul class="rows">
-                    @for (row of expenseRows(); track row.category) {
-                        <li class="row">
-                            <div class="row-top">
-                                <span class="row-name">
-                                    <span class="dot" [style.background]="row.look.color"></span>
-                                    {{ row.look.short }}
-                                </span>
-                                <span class="row-value" appMoney>{{ row.total | fcfa }}</span>
-                            </div>
-                            <div class="bar" aria-hidden="true">
-                                <span
-                                    [style.width.%]="row.share"
-                                    [style.--bar]="row.look.color"
-                                ></span>
-                            </div>
-                        </li>
-                    }
-                </ul>
+                <button
+                    type="button"
+                    class="fold"
+                    [attr.aria-expanded]="expensesOpen()"
+                    (click)="expensesOpen.set(!expensesOpen())"
+                >
+                    <span>{{ expensesOpen() ? "Masquer les détails" : "Voir par motif" }}</span>
+                    <app-icon
+                        [name]="expensesOpen() ? 'chevron-down' : 'chevron-right'"
+                        [size]="16"
+                    />
+                </button>
+
+                @if (expensesOpen()) {
+                    <ul class="rows">
+                        @for (row of expenseRows(); track row.category) {
+                            <li class="row">
+                                <div class="row-top">
+                                    <span class="row-name">
+                                        <span
+                                            class="dot"
+                                            [style.background]="row.look.color"
+                                        ></span>
+                                        {{ row.look.short }}
+                                    </span>
+                                    <span class="row-value" appMoney>{{ row.total | fcfa }}</span>
+                                </div>
+                                <div class="bar" aria-hidden="true">
+                                    <span
+                                        [style.width.%]="row.share"
+                                        [style.--bar]="row.look.color"
+                                    ></span>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                }
             }
         </section>
     </div>
