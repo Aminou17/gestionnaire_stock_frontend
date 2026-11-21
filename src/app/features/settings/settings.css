@@ -121,7 +121,7 @@
     font-weight: var(--fw-semibold);
 }
 
-/* une seule ligne : le texte trop long se termine par « … » */
+/* une seule ligne : le texte trop long se termine par des points de suite */
 .item-text small {
     overflow: hidden;
     text-overflow: ellipsis;

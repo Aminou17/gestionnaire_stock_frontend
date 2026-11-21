@@ -7,7 +7,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { ToastService } from "../../../shared/toast/toast.service";
 
-// Page « Installer Boutiki » : le bouton quand le navigateur le propose, sinon les gestes pas à pas
+// Page "Installer Boutiki" : le bouton quand le navigateur le propose, sinon les gestes pas à pas
 @Component({
     selector: "app-settings-install",
     imports: [PageHeader, Icon],

@@ -1,6 +1,6 @@
 import { Injectable, signal } from "@angular/core";
 
-// Chrome n'envoie « installation possible » qu'une fois, au chargement de la page :
+// Chrome n'envoie "installation possible" qu'une fois, au chargement de la page :
 // on l'écoute dès le démarrage (main.ts), avant que le menu du profil n'existe.
 let earlyPrompt: any = null;
 const earlyListeners: Array<(event: any) => void> = [];
@@ -50,7 +50,7 @@ export class InstallService {
         return "desktop";
     }
 
-    // WhatsApp, Facebook, Instagram... ouvrent les liens dans leur propre fenêtre :
+    // WhatsApp, Facebook ou Instagram ouvrent les liens dans leur propre fenêtre :
     // l'installation n'y est pas proposée, il faut passer par le navigateur
     get inAppBrowser() {
         return /FBAN|FBAV|Instagram|WhatsApp|Line\/|MicroMessenger|; wv\)/i.test(

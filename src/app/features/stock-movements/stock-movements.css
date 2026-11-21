@@ -603,7 +603,7 @@ td.quantity {
         font-size: var(--fs-small);
     }
 
-    /* l'auteur est dans le détail : sur téléphone on évite "Awa Ba..." coupé */
+    /* l'auteur est dans le détail : sur téléphone on évite un nom coupé */
     .meta-author {
         display: none;
     }

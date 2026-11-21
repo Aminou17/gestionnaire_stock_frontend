@@ -1,0 +1,280 @@
+:host {
+    display: block;
+}
+
+.list-card {
+    min-width: 0;
+}
+
+.toolbar {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+/* choix entre deux vues d'une même liste */
+.segmented {
+    display: inline-flex;
+    justify-self: start;
+    padding: 3px;
+    border-radius: 10px;
+    background: var(--neutral-soft);
+}
+
+.segment {
+    height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.segment.selected {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-card, 0 1px 2px rgb(0 0 0 / 0.08));
+}
+
+.segment:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.bar {
+    display: flex;
+    gap: 8px;
+}
+
+.search {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.search app-icon {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.search .input {
+    padding-left: 40px;
+}
+
+.bar .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ordinateur : la pastille de période ne défile pas */
+@media (min-width: 768px) {
+    .filters ::ng-deep app-period-filter.chips .toolbar {
+        flex-wrap: wrap;
+        padding: 0;
+        border: 0;
+        overflow: visible;
+    }
+}
+
+.export-btn {
+    margin-left: auto;
+}
+
+/* le bouton Filtre n'existe que sur téléphone */
+.bar .filter-btn {
+    display: none;
+}
+
+.count {
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--primary);
+    color: var(--on-primary);
+    font-size: var(--fs-caption);
+    line-height: 18px;
+    text-align: center;
+}
+
+/* ordinateur : filtres sur une ligne */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.ip-field {
+    width: 160px;
+    height: 36px;
+    padding: 0 14px;
+    border-radius: 999px;
+    font-size: var(--fs-small);
+}
+
+.sheet-head,
+.sheet-foot,
+.sheet-backdrop,
+.active {
+    display: none;
+}
+
+.active-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 32px;
+    padding: 0 6px 0 12px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+}
+
+.active-chip button,
+.sheet-close {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+.active-chip button {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+}
+
+.sheet-close {
+    width: 44px;
+    height: 44px;
+    margin-right: -10px;
+    color: var(--text-muted);
+}
+
+.active-chip button:focus-visible,
+.sheet-close:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
+@media (max-width: 767px) {
+    .list-card {
+        padding-bottom: 24px;
+        background: transparent;
+        border: 0;
+    }
+
+    .toolbar {
+        padding: 0 0 12px;
+        border: 0;
+    }
+
+    .segmented {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        justify-self: stretch;
+    }
+
+    .segment {
+        height: 36px;
+    }
+
+    .bar .btn {
+        min-height: 40px;
+    }
+
+    .bar .filter-btn {
+        display: inline-flex;
+    }
+
+    /* seule l'icône reste pour l'export */
+    .export-btn {
+        margin-left: 0;
+        padding: 0 12px;
+    }
+
+    .export-btn span:not(.spinner) {
+        display: none;
+    }
+
+    .active {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .filters {
+        display: none;
+        position: fixed;
+        inset: auto 0 0;
+        z-index: 41;
+        flex-direction: column;
+        align-items: stretch;
+        flex-wrap: nowrap;
+        gap: 16px;
+        padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+        border-radius: 16px 16px 0 0;
+        background: var(--surface);
+        box-shadow: var(--shadow-dialog);
+    }
+
+    .filters.open {
+        display: flex;
+    }
+
+    /* dans la fenêtre, chaque filtre prend toute la largeur */
+    .filters select.chip,
+    .filters ::ng-deep app-period-filter select.chip,
+    .ip-field {
+        width: 100%;
+        height: 44px;
+        border-radius: 8px;
+        font-size: var(--fs-body);
+    }
+
+    .sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .sheet-head strong {
+        font-size: var(--fs-heading);
+        font-weight: var(--fw-semibold);
+    }
+
+    .sheet-foot {
+        display: grid;
+        grid-template-columns: 1fr 1.4fr;
+        gap: 8px;
+    }
+
+    .sheet-foot .btn {
+        min-height: 44px;
+        justify-content: center;
+    }
+
+    .sheet-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: var(--overlay);
+    }
+}

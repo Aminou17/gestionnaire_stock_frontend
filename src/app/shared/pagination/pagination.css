@@ -2,7 +2,7 @@
     display: block;
 }
 
-/* des numéros simples, au centre : ‹ 1 2 3 … 10 › */
+/* des numéros simples, au centre, avec des points de suite quand il y en a beaucoup */
 .pager {
     display: flex;
     align-items: center;

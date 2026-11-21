@@ -26,6 +26,12 @@ export class Login {
 
     productName = PRODUCT_NAME;
 
+    // propriétaire avec la double authentification : deuxième étape avec un code
+    step = signal<"password" | "code">("password");
+    useBackupCode = signal(false);
+    codeControl = this.fb.control("", Validators.required);
+    private twoFactorToken = "";
+
     loading = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
@@ -47,12 +53,14 @@ export class Login {
         const { email, password, remember } = this.form.getRawValue();
 
         this.auth.login(email.trim(), password, remember).subscribe({
-            next: () => {
-                if (this.auth.user()?.mustChangePassword) {
-                    this.router.navigate(["/settings/password"]);
+            next: (challenge) => {
+                if (challenge?.twoFactorRequired) {
+                    this.twoFactorToken = challenge.twoFactorToken;
+                    this.loading.set(false);
+                    this.step.set("code");
                     return;
                 }
-                this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
+                this.enterApp();
             },
             error: (err: HttpErrorResponse) => {
                 this.loading.set(false);
@@ -63,12 +71,68 @@ export class Login {
                     });
                     return;
                 }
-                if (err.status === 0 || err.status >= 502) {
-                    this.error.set("Impossible de joindre le serveur. Vérifiez votre connexion.");
-                } else {
-                    this.error.set(err.error?.message ?? "Une erreur est survenue, réessayez.");
-                }
+                this.error.set(this.messageFor(err));
             },
         });
+    }
+
+    // un code de 6 chiffres complet part tout seul, sans appuyer sur le bouton
+    onCodeInput() {
+        const value = this.codeControl.value;
+        if (!this.useBackupCode() && /^\d{6}$/.test(value)) this.submitCode();
+    }
+
+    submitCode() {
+        const code = this.codeControl.value.trim();
+        if (!code || this.loading()) return;
+
+        this.loading.set(true);
+        this.error.set(null);
+
+        this.auth
+            .verifyTwoFactor(this.twoFactorToken, code, this.form.controls.remember.value)
+            .subscribe({
+                next: () => this.enterApp(),
+                error: (err: HttpErrorResponse) => {
+                    this.loading.set(false);
+                    // le jeton dure 5 minutes : au-delà, on repart du mot de passe en gardant le message
+                    if (err.status === 401 && err.error?.message?.includes("expiré")) {
+                        this.backToPassword(this.messageFor(err));
+                        return;
+                    }
+                    this.error.set(this.messageFor(err));
+                    this.codeControl.reset("");
+                },
+            });
+    }
+
+    toggleBackupCode() {
+        this.useBackupCode.set(!this.useBackupCode());
+        this.codeControl.reset("");
+        this.error.set(null);
+    }
+
+    // message : affiché sur l'écran du mot de passe (par exemple "étape expirée")
+    backToPassword(message: string | null = null) {
+        this.step.set("password");
+        this.useBackupCode.set(false);
+        this.codeControl.reset("");
+        this.twoFactorToken = "";
+        this.error.set(message);
+    }
+
+    private enterApp() {
+        if (this.auth.user()?.mustChangePassword) {
+            this.router.navigate(["/settings/password"]);
+            return;
+        }
+        this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
+    }
+
+    private messageFor(err: HttpErrorResponse) {
+        if (err.status === 0 || err.status >= 502) {
+            return "Impossible de joindre le serveur. Vérifiez votre connexion.";
+        }
+        return err.error?.message ?? "Une erreur est survenue, réessayez.";
     }
 }

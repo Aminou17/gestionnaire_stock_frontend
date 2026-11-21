@@ -148,7 +148,7 @@ export class BarcodeScanner {
         this.scanned.emit(code.trim());
     }
 
-    // petit « bip » de caisse, sans fichier son
+    // petit "bip" de caisse, sans fichier son
     private beep() {
         try {
             const Audio = window.AudioContext;

@@ -157,7 +157,7 @@ describe("SalePage", () => {
 
     const text = () => el.textContent!.replace(/\s/g, " ");
 
-    // les actions secondaires sont dans le menu "..."
+    // les actions secondaires sont dans le menu des trois points
     const openMenu = async () => {
         el.querySelector<HTMLButtonElement>(".more-btn")!.click();
         fixture.detectChanges();
@@ -207,7 +207,7 @@ describe("SalePage", () => {
     const returnButtons = () =>
         Array.from(el.querySelectorAll<HTMLButtonElement>(".items .link-btn"));
 
-    // les boutons « Rendre » n'apparaissent qu'après « Rendre un article » dans le menu
+    // les boutons "Rendre" n'apparaissent qu'après "Rendre un article" dans le menu
     const startReturns = async () => {
         fixture.componentInstance.onPick("return-mode");
         await fixture.whenStable();

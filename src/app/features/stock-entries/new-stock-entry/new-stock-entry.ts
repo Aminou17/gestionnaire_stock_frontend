@@ -59,7 +59,7 @@ export class NewStockEntry implements AfterViewInit {
     protected initials = productInitials;
     protected tone = categoryTone;
 
-    // ---------- Produits reçus ----------
+    // Produits reçus
 
     lines = signal<EntryLine[]>([]);
     search = signal("");
@@ -86,7 +86,7 @@ export class NewStockEntry implements AfterViewInit {
 
     units = computed(() => this.lines().reduce((sum, line) => sum + line.quantity, 0));
 
-    // ---------- Fournisseur ----------
+    // Fournisseur
 
     suppliers = rxResource({ stream: () => this.supplierService.getSuppliers() });
     supplierList = computed(() =>
@@ -103,7 +103,7 @@ export class NewStockEntry implements AfterViewInit {
     savingSupplier = signal(false);
     supplierError = signal<string | null>(null);
 
-    // ---------- Enregistrement ----------
+    // Enregistrement
 
     saving = signal(false);
     error = signal<string | null>(null);

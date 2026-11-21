@@ -78,7 +78,7 @@ export class StockEntries {
     protected initials = productInitials;
     protected tone = categoryTone;
 
-    // menu « … » d'une entrée
+    // menu des trois points d'une entrée
     protected rowActions: ActionItem[] = [
         { id: "product", label: "Voir le produit", icon: "package" },
         { id: "correct", label: "Corriger la quantité", icon: "edit" },
@@ -87,7 +87,7 @@ export class StockEntries {
     // photo agrandie au centre de la page
     protected zoom = signal<{ src: string; name: string } | null>(null);
 
-    // ---------- Liste ----------
+    // Liste
 
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     // arrivée depuis la fiche d'un fournisseur : /stock-entries?supplierId=4

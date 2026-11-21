@@ -29,7 +29,7 @@ const PERIOD_CHOICES: { value: Period; label: string }[] = [
     { value: "custom", label: "Personnalisée" },
 ];
 
-// pastilles sous le titre : « Personnalisée » devient « Dates »
+// pastilles sous le titre : "Personnalisée" devient "Dates"
 const PERIOD_PILLS: { value: Period; label: string }[] = [
     { value: "today", label: "Aujourd'hui" },
     { value: "week", label: "7 jours" },

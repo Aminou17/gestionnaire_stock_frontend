@@ -227,7 +227,7 @@ export class NewSale {
             this.customer() !== null ||
             this.customerText() !== "",
     );
-    // montant reçu libre : caché derrière le bouton « Autre »
+    // montant reçu libre : caché derrière le bouton "Autre"
     otherOpen = signal(false);
     pickerOpen = signal(false);
     private customerTimer?: ReturnType<typeof setTimeout>;

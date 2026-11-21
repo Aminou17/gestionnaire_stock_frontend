@@ -85,6 +85,11 @@
     text-align: center;
 }
 
+.icon-btn.active {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
 .icon-btn:hover {
     background: var(--surface-hover);
     color: var(--text);
@@ -110,6 +115,15 @@
         padding: 16px;
     }
 
+    .tools {
+        gap: 4px;
+    }
+
+    /* la place manque pour la ligne sous le nom */
+    .brand-sub {
+        display: none;
+    }
+
     /* sur téléphone : l'icône suffit, le nom reste dans le menu de déconnexion */
     .who,
     .tools .btn span {
@@ -133,4 +147,11 @@
     height: 36px;
     flex: none;
     border-radius: 10px;
+}
+
+/* très petit écran : le logo suffit, les six icônes ont besoin de la place */
+@media (max-width: 399px) {
+    .brand-text {
+        display: none;
+    }
 }

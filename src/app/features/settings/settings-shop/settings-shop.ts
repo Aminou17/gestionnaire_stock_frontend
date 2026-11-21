@@ -124,7 +124,7 @@ export class SettingsShop implements HasUnsavedChanges {
         return countryName(this.form.controls.defaultCountryCode.value);
     }
 
-    // le téléphone de la boutique commence par un autre indicatif (+226...) : on propose de le prendre
+    // le téléphone de la boutique commence par un autre indicatif (+226) : on propose de le prendre
     suggestedCode = computed(() => {
         const { phone, defaultCountryCode } = this.values();
         const digits = /^\s*(\+|00)/.test(phone)

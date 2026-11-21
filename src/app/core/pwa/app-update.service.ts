@@ -7,10 +7,9 @@ import { filter } from "rxjs";
 // vérifier s'il existe une nouvelle version toutes les 30 minutes
 const CHECK_EVERY = 30 * 60 * 1000;
 
-// L'application garde une copie d'elle-même sur l'appareil pour marcher sans internet.
-// Sans ce service, une nouvelle version mise en ligne restait téléchargée mais jamais affichée.
-// Ici : on cherche les mises à jour, et dès qu'une version est prête, on bascule au
-// prochain changement de page (rechargement complet, aucune saisie en cours n'est perdue).
+// Sans ce service, une nouvelle version restait téléchargée mais jamais affichée.
+// On cherche les mises à jour et on bascule au prochain changement de page,
+// ce qui ne fait perdre aucune saisie en cours.
 @Injectable({ providedIn: "root" })
 export class AppUpdateService {
     // absent quand le service worker n'est pas fourni (tests)

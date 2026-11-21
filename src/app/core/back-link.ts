@@ -1,7 +1,7 @@
 import { inject } from "@angular/core";
 import { Router } from "@angular/router";
 
-// état transmis par la page d'origine avec [state] ou navigate(..., { state })
+// état transmis par la page d'origine avec [state] ou avec navigate et son option state
 export interface BackState {
     backTo: string;
     backLabel: string;

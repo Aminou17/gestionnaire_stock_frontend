@@ -1,0 +1,64 @@
+@if (loading()) {
+    <div class="skeletons" aria-busy="true" aria-label="Chargement">
+        @for (i of skeletons; track i) {
+            <div class="skeleton skeleton-row"></div>
+        }
+    </div>
+} @else if (error()) {
+    <div class="state" role="alert">
+        <p>{{ error() }}</p>
+        <button type="button" class="btn btn-outline btn-sm" (click)="retry.emit()">
+            Réessayer
+        </button>
+    </div>
+} @else if (rows().length === 0) {
+    <app-empty-state icon="shield" [title]="emptyTitle()" [text]="emptyText()">
+        <ng-content />
+    </app-empty-state>
+} @else {
+    <div class="head" aria-hidden="true">
+        <span></span>
+        <span>{{ headings().main }}</span>
+        <span>{{ headings().shop }}</span>
+        <span>{{ headings().detail }}</span>
+        <span></span>
+        <span class="right">{{ headings().when }}</span>
+    </div>
+
+    <ul class="rows">
+        @for (row of rows(); track row.id) {
+            <li class="row">
+                <span class="icon tone-{{ row.tone }}" aria-hidden="true">
+                    <app-icon [name]="row.icon" [size]="18" />
+                </span>
+
+                <div class="main">
+                    <strong>{{ row.title }}</strong>
+                    @if (row.subtitle) {
+                        <small class="muted">{{ row.subtitle }}</small>
+                    }
+                    <!-- téléphone : boutique et détail passent sous le titre -->
+                    @if (meta(row); as line) {
+                        <small class="muted mobile-meta">{{ line }}</small>
+                    }
+                </div>
+
+                <span class="shop">{{ row.shop ?? "–" }}</span>
+                <span class="detail">{{ row.detail ?? "–" }}</span>
+
+                <span class="badge-cell">
+                    @if (row.badge) {
+                        <span class="badge badge-{{ row.badge.tone }}">{{ row.badge.label }}</span>
+                    }
+                </span>
+
+                <span class="when">
+                    <time [attr.datetime]="row.when">{{ row.when | date: "d MMM, HH:mm" }}</time>
+                    @if (row.note) {
+                        <small class="muted">{{ row.note }}</small>
+                    }
+                </span>
+            </li>
+        }
+    </ul>
+}

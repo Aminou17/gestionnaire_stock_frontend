@@ -236,7 +236,7 @@ export class SalePage {
         return phone ? toWhatsAppLink(phone, this.shopService.defaultCountryCode()) : null;
     });
 
-    // menu « ... » : envoyer en texte, imprimer, et rembourser pour le propriétaire
+    // menu des trois points : envoyer en texte, imprimer, et rembourser pour le propriétaire
     returnMode = signal(false);
 
     menuItems = computed<ActionItem[]>(() => {
@@ -251,7 +251,7 @@ export class SalePage {
             icon: "printer",
             disabled: !this.settingsReady(),
         });
-        // rendre un seul article : les boutons « Rendre » n'apparaissent sur les lignes qu'à ce moment
+        // rendre un seul article : les boutons "Rendre" n'apparaissent sur les lignes qu'à ce moment
         if (this.canReturn()) {
             items.push({
                 id: "return-mode",

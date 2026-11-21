@@ -20,6 +20,8 @@ export interface User {
     avatar?: string | null;
     // mot de passe provisoire donné par le service client : à changer avant tout le reste
     mustChangePassword?: boolean;
+    // double authentification du propriétaire
+    twoFactorEnabled?: boolean;
 }
 
 // accès de la boutique : essai, payé, délai de grâce, terminé ; null pour le propriétaire
@@ -42,6 +44,17 @@ interface LoginResponse {
     refreshToken: string;
     user: User;
     access: Access | null;
+}
+
+// propriétaire avec la double authentification : le mot de passe ne suffit pas, il faut encore un code
+export interface TwoFactorChallenge {
+    twoFactorRequired: true;
+    twoFactorToken: string;
+}
+
+export interface TwoFactorSetup {
+    secret: string;
+    otpauthUrl: string;
 }
 
 export interface RegisterResult {
@@ -152,8 +165,43 @@ export class AuthService {
 
     login(email: string, password: string, remember = true) {
         return this.http
-            .post<LoginResponse>(`${API_URL}/auth/login`, { email, password })
+            .post<LoginResponse | TwoFactorChallenge>(`${API_URL}/auth/login`, { email, password })
+            .pipe(
+                tap((res) => {
+                    // avec la double authentification, la session s'ouvre à l'étape du code
+                    if (!("twoFactorRequired" in res)) this.openSession(res, remember);
+                }),
+                map((res) => ("twoFactorRequired" in res ? res : null)),
+            );
+    }
+
+    // deuxième étape : le jeton reçu avec le mot de passe et un code (ou un code de secours)
+    verifyTwoFactor(twoFactorToken: string, code: string, remember = true) {
+        return this.http
+            .post<LoginResponse>(`${API_URL}/auth/2fa/verify`, { twoFactorToken, code })
             .pipe(tap((res) => this.openSession(res, remember)));
+    }
+
+    setupTwoFactor() {
+        return this.http.post<TwoFactorSetup>(`${API_URL}/auth/2fa/setup`, {});
+    }
+
+    // renvoie les codes de secours, visibles une seule fois
+    enableTwoFactor(code: string) {
+        return this.http.post<{ backupCodes: string[] }>(`${API_URL}/auth/2fa/enable`, { code });
+    }
+
+    disableTwoFactor(password: string, code: string) {
+        return this.http.post<{ message: string }>(`${API_URL}/auth/2fa/disable`, {
+            password,
+            code,
+        });
+    }
+
+    // l'état de la double authentification est lu sur le compte : on le met à jour sans recharger
+    setTwoFactorEnabled(enabled: boolean) {
+        const user = this._user();
+        if (user) this.saveUser({ ...user, twoFactorEnabled: enabled });
     }
 
     // la boutique est créée ; le commerçant confirme ensuite son e-mail avec le code reçu
@@ -285,6 +333,16 @@ export class AuthService {
 
         this.clearSession();
         this.router.navigate(["/login"]);
+    }
+
+    // ferme les sessions de tous les appareils, puis celle-ci
+    logoutAll() {
+        return this.http.post(`${API_URL}/auth/logout-all`, {}).pipe(
+            tap(() => {
+                this.clearSession();
+                this.router.navigate(["/login"]);
+            }),
+        );
     }
 
     // fin de session sans changer de page (après un nouveau mot de passe choisi avec le lien reçu)

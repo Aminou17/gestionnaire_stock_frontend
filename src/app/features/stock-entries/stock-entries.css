@@ -384,6 +384,7 @@ tbody tr:hover {
     }
 
     .entry-card {
+        position: relative;
         display: grid;
         grid-template-columns: 48px minmax(0, 1fr) auto;
         gap: 14px;
@@ -411,6 +412,25 @@ tbody tr:hover {
         display: block;
         font-size: var(--fs-body);
         overflow-wrap: anywhere;
+    }
+
+    /* le lien couvre toute la carte : un clic n'importe où ouvre la fiche */
+    .entry-card .product-link::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: var(--radius);
+    }
+
+    .entry-card:active {
+        background: var(--bg);
+    }
+
+    /* la photo et le menu restent cliquables au-dessus du lien */
+    .entry-card .thumb,
+    .entry-card app-action-menu {
+        position: relative;
+        z-index: 1;
     }
 
     .meta {

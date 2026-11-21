@@ -28,7 +28,7 @@ const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
 export class ResetPassword {
     private auth = inject(AuthService);
 
-    // le lien reçu par e-mail : /reset-password?token=...
+    // le lien reçu par e-mail : /reset-password?token
     private token = inject(ActivatedRoute).snapshot.queryParamMap.get("token") ?? "";
 
     form = inject(NonNullableFormBuilder).group(

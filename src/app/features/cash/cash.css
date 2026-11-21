@@ -421,7 +421,7 @@ app-page-header {
     color: var(--danger);
 }
 
-/* le soir, « Clôturer » bat doucement pour qu'on ne l'oublie pas */
+/* le soir, "Clôturer" bat doucement pour qu'on ne l'oublie pas */
 .late {
     animation: late-pulse 2s ease-in-out infinite;
 }

@@ -17,6 +17,18 @@ export interface AuditChange {
 
 const fcfa = new FcfaPipe();
 
+// type d'export enregistré par l'API, dit comme dans la phrase
+const EXPORT_LABELS: Record<string, string> = {
+    produits: "les produits",
+    ventes: "les ventes",
+    depenses: "les dépenses",
+    "mouvements-stock": "les mouvements de stock",
+    inventaires: "la liste des inventaires",
+    inventaire: "un inventaire",
+    "historique-caisses": "l'historique des caisses",
+    "bon-de-commande": "un bon de commande",
+};
+
 const text = (value: unknown) => (typeof value === "string" && value.trim() ? value : null);
 const money = (value: unknown) =>
     value === null || value === undefined ? null : fcfa.transform(Number(value));
@@ -94,6 +106,8 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
     switch (log.action) {
         case "AUTH_LOGIN_SUCCEEDED":
             return { verb: "s'est connecté" };
+        case "AUTH_LOGOUT_ALL":
+            return { verb: "s'est déconnecté de tous ses appareils" };
         case "AUTH_LOGIN_FAILED":
             return { verb: "n'a pas pu se connecter", note: "e-mail ou mot de passe incorrect" };
         case "ACCESS_DENIED":
@@ -106,6 +120,12 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
             return { verb: "a changé son mot de passe" };
         case "PASSWORD_CHANGE_FAILED":
             return { verb: "a saisi un mauvais mot de passe actuel" };
+        case "TWO_FACTOR_ENABLED":
+            return { verb: "a activé la double authentification" };
+        case "TWO_FACTOR_DISABLED":
+            return { verb: "a désactivé la double authentification" };
+        case "TWO_FACTOR_FAILED":
+            return { verb: "a saisi un code de double authentification incorrect" };
         case "PASSWORD_RESET_REQUESTED":
             return { verb: "a demandé un lien pour changer son mot de passe" };
         case "PASSWORD_RESET_COMPLETED":
@@ -147,6 +167,8 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                 object: name,
                 note: text(d["reason"]) ?? undefined,
             };
+        case "EXPORT_CREATED":
+            return { verb: "a exporté", object: EXPORT_LABELS[String(d["type"])] ?? "un fichier" };
         case "SALES_EXPORTED":
             return { verb: "a exporté les ventes" };
         case "PRODUCTS_EXPORTED":

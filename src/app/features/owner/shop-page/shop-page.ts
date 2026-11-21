@@ -38,7 +38,7 @@ export class ShopPage {
 
     trial = computed(() => (this.shop.hasValue() ? accessStateOf(this.shop.value()) : null));
 
-    // résultat des actions de la page (lien envoyé, essai modifié...)
+    // résultat des actions de la page (lien envoyé, essai modifié)
     message = signal<{ ok: boolean; text: string } | null>(null);
     busy = signal(false);
 
@@ -170,7 +170,7 @@ export class ShopPage {
         const base = current && current >= today ? current : today;
 
         const [year, month, day] = base.split("-").map(Number);
-        // même jour le mois suivant, ramené au dernier jour du mois si besoin (31 janvier → 28 février)
+        // même jour le mois suivant, ramené au dernier jour du mois si besoin (31 janvier donne 28 février)
         const target = new Date(Date.UTC(year, month - 1 + months, 1));
         const lastDay = new Date(
             Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),

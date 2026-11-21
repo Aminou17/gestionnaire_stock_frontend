@@ -178,7 +178,7 @@ h1 {
         display: none;
     }
 
-    /* fiche (nom de produit, de fournisseur...) : le titre tient sur une ligne */
+    /* fiche (nom de produit, de fournisseur) : le titre tient sur une ligne */
     .detail h1 {
         overflow: hidden;
         text-overflow: ellipsis;

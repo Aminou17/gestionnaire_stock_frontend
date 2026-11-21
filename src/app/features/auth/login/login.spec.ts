@@ -12,13 +12,14 @@ describe("Login", () => {
     let el: HTMLElement;
     let auth: {
         login: ReturnType<typeof vi.fn>;
+        verifyTwoFactor: ReturnType<typeof vi.fn>;
         isOwner: () => boolean;
         user: () => { mustChangePassword?: boolean } | null;
     };
     let router: Router;
 
     beforeEach(async () => {
-        auth = { login: vi.fn(), isOwner: () => false, user: () => null };
+        auth = { login: vi.fn(), verifyTwoFactor: vi.fn(), isOwner: () => false, user: () => null };
 
         await TestBed.configureTestingModule({
             imports: [Login],
@@ -128,5 +129,74 @@ describe("Login", () => {
         await fixture.whenStable();
 
         expect(input.type).toBe("text");
+    });
+
+    describe("double authentification", () => {
+        async function toCodeStep() {
+            auth.login.mockReturnValue(of({ twoFactorRequired: true, twoFactorToken: "jeton" }));
+            fillForm();
+            await submit();
+        }
+
+        it("should ask for a code after the password and not open the app", async () => {
+            await toCodeStep();
+
+            expect(component.step()).toBe("code");
+            expect(router.navigate).not.toHaveBeenCalled();
+            expect(el.querySelector('input[autocomplete="one-time-code"]')).toBeTruthy();
+            expect(el.textContent).toContain("Utiliser un code de secours");
+        });
+
+        it("should send the token and the code, then enter the app", async () => {
+            await toCodeStep();
+            auth.verifyTwoFactor.mockReturnValue(of({}));
+
+            component.codeControl.setValue("123456");
+            component.submitCode();
+
+            expect(auth.verifyTwoFactor).toHaveBeenCalledWith("jeton", "123456", true);
+            expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+        });
+
+        it("should send the code by itself once 6 digits are typed", async () => {
+            await toCodeStep();
+            auth.verifyTwoFactor.mockReturnValue(of({}));
+
+            component.codeControl.setValue("123456");
+            component.onCodeInput();
+
+            expect(auth.verifyTwoFactor).toHaveBeenCalledTimes(1);
+        });
+
+        it("should show the error and empty the field after a wrong code", async () => {
+            await toCodeStep();
+            auth.verifyTwoFactor.mockReturnValue(
+                throwError(
+                    () =>
+                        new HttpErrorResponse({
+                            status: 401,
+                            error: { message: "Code incorrect." },
+                        }),
+                ),
+            );
+
+            component.codeControl.setValue("000000");
+            component.submitCode();
+            await fixture.whenStable();
+
+            expect(component.error()).toBe("Code incorrect.");
+            expect(component.codeControl.value).toBe("");
+        });
+
+        it("should switch to the backup code field and go back to the password", async () => {
+            await toCodeStep();
+
+            component.toggleBackupCode();
+            await fixture.whenStable();
+            expect(el.querySelector('input[placeholder="xxxxx-xxxxx"]')).toBeTruthy();
+
+            component.backToPassword();
+            expect(component.step()).toBe("password");
+        });
     });
 });

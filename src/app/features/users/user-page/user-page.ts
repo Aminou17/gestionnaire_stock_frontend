@@ -92,7 +92,7 @@ export class UserPage {
 
     lastLogin = computed(() => formatLastLogin(this.data()?.last_login_at ?? null, this.locale));
 
-    // dans une journée, les mêmes actions qui se suivent tiennent sur une ligne (« 4 fois »)
+    // dans une journée, les mêmes actions qui se suivent tiennent sur une ligne ("4 fois")
     activityDays = computed(() =>
         this.activity.hasValue()
             ? groupByDay(this.activity.value(), this.locale).map((day) => ({

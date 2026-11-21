@@ -31,7 +31,7 @@ export interface ActionItem {
     separated?: boolean;
 }
 
-// Menu « ... » d'une ligne ou d'une carte. Le panneau est un popover (couche supérieure du
+// Menu des trois points d'une ligne ou d'une carte. Le panneau est un popover (couche supérieure du
 // navigateur) : rien ne peut le recouvrir ni le couper, et un clic dedans ne traverse jamais
 // jusqu'à la ligne située derrière. Sur téléphone il monte du bas de l'écran.
 @Component({
@@ -49,7 +49,7 @@ export class ActionMenu {
     private panel = viewChild.required<ElementRef<HTMLElement>>("panel");
 
     items = input.required<ActionItem[]>();
-    // nom lu par les lecteurs d'écran, par exemple « Actions pour Awa »
+    // nom lu par les lecteurs d'écran, par exemple "Actions pour Awa"
     label = input("Actions");
     // titre de la feuille sur téléphone
     title = input<string>();

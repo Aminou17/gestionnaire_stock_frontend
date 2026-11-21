@@ -144,7 +144,7 @@ export class ProductPage {
         this.router.navigate(["/sales/new"], { queryParams: { productId: this.id() } });
     }
 
-    // menu « ... » : la photo ne peut être retirée que si elle existe
+    // menu des trois points : la photo ne peut être retirée que si elle existe
     menuItems = computed<ActionItem[]>(() => [
         { id: "adjust", label: "Corriger la quantité", icon: "stock-entry" },
         ...(this.data()?.image

@@ -12,6 +12,7 @@ describe("SettingsPassword", () => {
     let el: HTMLElement;
     let changePassword: ReturnType<typeof vi.fn>;
     let forgotPassword: ReturnType<typeof vi.fn>;
+    let logoutAll: ReturnType<typeof vi.fn>;
     let router: Router;
 
     async function render(passwordError?: string, mustChangePassword = false) {
@@ -25,6 +26,7 @@ describe("SettingsPassword", () => {
         );
 
         forgotPassword = vi.fn(() => of({ message: "ok" }));
+        logoutAll = vi.fn(() => of({}));
 
         await TestBed.configureTestingModule({
             imports: [SettingsPassword],
@@ -39,6 +41,7 @@ describe("SettingsPassword", () => {
                         roleLabel: signal("Employé"),
                         changePassword,
                         forgotPassword,
+                        logoutAll,
                     },
                 },
             ],
@@ -162,5 +165,61 @@ describe("SettingsPassword", () => {
 
         expect(forgotPassword).toHaveBeenCalledWith("awa@test.com");
         expect(el.textContent).toContain("Un lien vous a été envoyé par e-mail.");
+    });
+
+    const buttonByText = (text: string) =>
+        Array.from(el.querySelectorAll<HTMLButtonElement>("button")).find((b) =>
+            b.textContent?.includes(text),
+        );
+
+    async function click(text: string) {
+        buttonByText(text)!.click();
+        await fixture.whenStable();
+    }
+
+    it("should ask for a confirmation before logging out everywhere", async () => {
+        await render();
+
+        await click("Me déconnecter partout");
+
+        expect(logoutAll).not.toHaveBeenCalled();
+        expect(buttonByText("Oui, tout fermer")).toBeTruthy();
+        expect(buttonByText("Me déconnecter partout")).toBeUndefined();
+    });
+
+    it("should go back to the first button when the confirmation is cancelled", async () => {
+        await render();
+
+        await click("Me déconnecter partout");
+        await click("Annuler");
+
+        expect(logoutAll).not.toHaveBeenCalled();
+        expect(buttonByText("Me déconnecter partout")).toBeTruthy();
+        expect(buttonByText("Oui, tout fermer")).toBeUndefined();
+    });
+
+    it("should log out everywhere after the second click", async () => {
+        await render();
+
+        await click("Me déconnecter partout");
+        await click("Oui, tout fermer");
+
+        expect(logoutAll).toHaveBeenCalledTimes(1);
+    });
+
+    it("should show the backend message when logging out everywhere fails", async () => {
+        await render();
+        logoutAll.mockReturnValue(
+            throwError(
+                () => new HttpErrorResponse({ status: 500, error: { message: "Erreur serveur." } }),
+            ),
+        );
+
+        await click("Me déconnecter partout");
+        await click("Oui, tout fermer");
+
+        expect(el.querySelector(".alert-error")?.textContent).toContain("Erreur serveur.");
+        // la confirmation reste ouverte avec l'erreur près des boutons
+        expect(buttonByText("Oui, tout fermer")).toBeTruthy();
     });
 });

@@ -5,7 +5,7 @@ import { tap } from "rxjs";
 import { API_URL } from "../api.config";
 import { NetworkService } from "./network.service";
 
-// chaque réponse du serveur dit s'il est joignable : le bandeau « hors ligne » suit la réalité
+// chaque réponse du serveur dit s'il est joignable : le bandeau "hors ligne" suit la réalité
 export const networkInterceptor: HttpInterceptorFn = (req, next) => {
     if (!req.url.startsWith(API_URL)) return next(req);
 

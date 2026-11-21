@@ -474,7 +474,7 @@ td.num small {
         display: none;
     }
 
-    /* téléphone : le bouton « Nouveau produit » reste dans l'en-tête, avec ses mots (plus de « + » flottant) */
+    /* téléphone : le bouton "Nouveau produit" reste dans l'en-tête, avec ses mots (plus de "+" flottant) */
     .new-product {
         padding: 0 14px;
     }

@@ -59,7 +59,7 @@ export class Expenses {
     ];
 
     period = signal<PeriodKey>("month");
-    // dates choisies à la main (YYYY-MM-DD), valables quand la période est « Dates… »
+    // dates choisies à la main (YYYY-MM-DD), valables quand la période est Dates
     customFrom = signal("");
     customTo = signal("");
     search = signal("");

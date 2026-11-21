@@ -473,7 +473,7 @@ describe("NewSale", () => {
         await fixture.whenStable();
     }
 
-    // le montant reçu libre est derrière le bouton « Autre »
+    // le montant reçu libre est derrière le bouton "Autre"
     async function openOther() {
         [...el.querySelectorAll<HTMLButtonElement>(".chip")]
             .find((chip) => chip.textContent!.trim() === "Autre")!

@@ -1,6 +1,5 @@
-// Les champs « nombre » de l'appli n'attendent que des entiers positifs (quantités, montants en FCFA).
-// Le navigateur y accepte pourtant « e », « - » ou « , » et change la valeur à la molette.
-// On corrige ça une fois pour toute la page plutôt que champ par champ.
+// Les champs "nombre" de l'appli n'attendent que des entiers positifs (quantités, montants en FCFA).
+// Le navigateur accepte pourtant "e", "-" ou "," et change la valeur à la molette : on corrige une fois pour toute la page.
 
 const BLOCKED_KEYS = new Set(["e", "E", "+", "-", ".", ","]);
 

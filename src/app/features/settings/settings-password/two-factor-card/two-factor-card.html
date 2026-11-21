@@ -1,0 +1,181 @@
+<section class="card section">
+    <div class="section-head">
+        <span class="section-icon" style="--tone: #10b981"
+            ><app-icon name="shield" [size]="18"
+        /></span>
+        <div>
+            <h2>Double authentification</h2>
+            <p class="muted">
+                En plus du mot de passe, un code à 6 chiffres change toutes les 30 secondes dans
+                votre téléphone. Un mot de passe volé ne suffit plus.
+            </p>
+        </div>
+        @if (step() === "on") {
+            <span class="badge badge-success state">Activée</span>
+        } @else if (step() === "off") {
+            <span class="badge badge-neutral state">Désactivée</span>
+        }
+    </div>
+
+    @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+    }
+
+    @switch (step()) {
+        @case ("off") {
+            <div class="actions">
+                <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="start()">
+                    @if (busy()) {
+                        <span class="spinner"></span>
+                    }
+                    Activer la double authentification
+                </button>
+            </div>
+        }
+
+        @case ("setup") {
+            <ol class="steps">
+                <li>
+                    <span class="num">1</span>
+                    <div class="step-body">
+                        <strong>Ajoutez le compte dans votre application</strong>
+                        <p class="muted">
+                            Google Authenticator, Microsoft Authenticator, Authy... Ouvrez-la, puis
+                            ajoutez un compte avec cette clé.
+                        </p>
+                        <div class="key-box">
+                            <code aria-label="Clé secrète">{{ spacedKey }}</code>
+                            <button type="button" class="btn btn-sm" (click)="copy('key')">
+                                <app-icon
+                                    [name]="copied() === 'key' ? 'check' : 'copy'"
+                                    [size]="16"
+                                />
+                                {{ copied() === "key" ? "Copiée" : "Copier" }}
+                            </button>
+                        </div>
+                        <a class="open-link" [href]="setup()?.otpauthUrl">
+                            Sur ce téléphone ? Ouvrir l'application
+                        </a>
+                    </div>
+                </li>
+                <li>
+                    <span class="num">2</span>
+                    <div class="step-body">
+                        <strong>Saisissez le code affiché</strong>
+                        <input
+                            class="input code-input"
+                            type="text"
+                            inputmode="numeric"
+                            maxlength="6"
+                            autocomplete="one-time-code"
+                            placeholder="000000"
+                            aria-label="Code à 6 chiffres"
+                            [formControl]="codeControl"
+                            [class.invalid]="codeControl.touched && codeControl.invalid"
+                            (input)="onCodeInput()"
+                        />
+                        @if (codeControl.touched && codeControl.invalid) {
+                            <small class="field-error" role="alert">
+                                Le code contient 6 chiffres.
+                            </small>
+                        }
+                    </div>
+                </li>
+            </ol>
+
+            <div class="actions">
+                <button type="button" class="btn" [disabled]="busy()" (click)="cancelSetup()">
+                    Annuler
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="busy()"
+                    (click)="enable()"
+                >
+                    @if (busy()) {
+                        <span class="spinner"></span>
+                    }
+                    Activer
+                </button>
+            </div>
+        }
+
+        @case ("codes") {
+            <div class="alert alert-success" role="status">Double authentification activée.</div>
+
+            <div class="backup">
+                <strong>Vos codes de secours</strong>
+                <p class="muted">
+                    Si vous perdez votre téléphone, chaque code remplace une fois le code de
+                    l'application. Notez-les maintenant : ils ne seront plus affichés.
+                </p>
+                <ul class="codes">
+                    @for (code of backupCodes(); track code) {
+                        <li>{{ code }}</li>
+                    }
+                </ul>
+                <button type="button" class="btn btn-sm" (click)="copy('codes')">
+                    <app-icon [name]="copied() === 'codes' ? 'check' : 'copy'" [size]="16" />
+                    {{ copied() === "codes" ? "Copiés" : "Copier les codes" }}
+                </button>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-primary" (click)="finishCodes()">
+                    J'ai noté mes codes
+                </button>
+            </div>
+        }
+
+        @case ("on") {
+            @if (disabling()) {
+                <form class="disable" [formGroup]="disableForm" (ngSubmit)="disable()" novalidate>
+                    <label class="field">
+                        <span>Mot de passe</span>
+                        <input
+                            class="input"
+                            type="password"
+                            formControlName="password"
+                            autocomplete="current-password"
+                        />
+                    </label>
+                    <label class="field">
+                        <span>Code de l'application ou code de secours</span>
+                        <input
+                            class="input"
+                            type="text"
+                            formControlName="code"
+                            autocomplete="one-time-code"
+                            maxlength="11"
+                        />
+                    </label>
+                    <div class="actions">
+                        <button
+                            type="button"
+                            class="btn"
+                            [disabled]="busy()"
+                            (click)="cancelDisable()"
+                        >
+                            Annuler
+                        </button>
+                        <button type="submit" class="btn btn-danger" [disabled]="busy()">
+                            @if (busy()) {
+                                <span class="spinner"></span>
+                            }
+                            Désactiver
+                        </button>
+                    </div>
+                </form>
+            } @else {
+                <p class="on-text">
+                    <app-icon name="check" [size]="16" />
+                    Votre compte demande un code à chaque connexion.
+                </p>
+                <div class="actions">
+                    <button type="button" class="btn" (click)="askDisable()">Désactiver</button>
+                </div>
+            }
+        }
+    }
+</section>

@@ -1,0 +1,144 @@
+.state {
+    margin-left: auto;
+}
+
+/* deux étapes numérotées, lisibles d'un coup d'oeil */
+.steps {
+    display: grid;
+    gap: 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.num {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary-text);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
+}
+
+.step-body {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    flex: 1;
+}
+
+.step-body p {
+    margin: 0;
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+.key-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-hover);
+}
+
+.key-box code {
+    min-width: 0;
+    font-family: "Courier New", monospace;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    letter-spacing: 0.06em;
+    overflow-wrap: anywhere;
+}
+
+.open-link {
+    width: fit-content;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--primary-text);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+}
+
+.code-input {
+    height: 52px;
+    font-size: 24px;
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.4em;
+    text-align: center;
+}
+
+.code-input::placeholder {
+    opacity: 0.4;
+}
+
+/* codes de secours en grille de deux colonnes */
+.backup {
+    display: grid;
+    gap: 12px;
+}
+
+.backup p {
+    margin: 0;
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+.backup .btn {
+    justify-self: start;
+}
+
+.codes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.codes li {
+    padding: 10px 12px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    font-family: "Courier New", monospace;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
+.on-text {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: var(--success);
+    font-size: var(--fs-body);
+}
+
+.disable {
+    display: grid;
+    gap: 16px;
+}
+
+@media (max-width: 767px) {
+    .key-box {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

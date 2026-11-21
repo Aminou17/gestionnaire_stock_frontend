@@ -1,0 +1,15 @@
+/* styles communs aux écrans de sécurité (vue d'ensemble et tableau des listes) */
+
+/* état vide ou erreur : icône, titre, texte et bouton centrés */
+.state {
+    display: grid;
+    justify-items: center;
+    gap: 12px;
+    padding: 40px 16px;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+.state p {
+    margin: 0;
+}

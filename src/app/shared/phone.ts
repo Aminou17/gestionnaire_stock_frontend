@@ -6,7 +6,7 @@ export const DEFAULT_COUNTRY_CODE = "242";
 
 const digitsOf = (phone: string) => phone.replace(/\D/g, "");
 
-// vrai pour +226... et 00226...
+// vrai pour les numéros qui commencent par +226 ou 00226
 const isInternational = (phone: string) => /^\s*(\+|00)/.test(phone);
 
 // chiffres avec l'indicatif devant, jamais de + ni de 00

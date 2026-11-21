@@ -355,7 +355,7 @@ export class Products {
         }
     }
 
-    // menu « ... » d'un produit : vendre seulement s'il en reste, le reste pour l'admin
+    // menu des trois points d'un produit : vendre seulement s'il en reste, le reste pour l'admin
     rowItems(product: Product): ActionItem[] {
         const items: ActionItem[] = [];
         if (product.theoretical_stock > 0) {

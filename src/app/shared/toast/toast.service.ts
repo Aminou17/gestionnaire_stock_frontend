@@ -1,6 +1,6 @@
 import { Injectable, signal } from "@angular/core";
 
-// Petit message de confirmation en bas de l'écran (« Produit enregistré »).
+// Petit message de confirmation en bas de l'écran ("Produit enregistré").
 // Il disparaît seul après quelques secondes ; un nouveau message remplace l'ancien.
 @Injectable({ providedIn: "root" })
 export class ToastService {

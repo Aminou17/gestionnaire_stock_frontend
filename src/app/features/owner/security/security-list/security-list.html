@@ -1,0 +1,162 @@
+<section class="card list-card">
+    <div class="toolbar">
+        @if (config.views; as views) {
+            <div class="segmented" role="tablist" aria-label="Affichage">
+                @for (item of views; track item.value) {
+                    <button
+                        type="button"
+                        role="tab"
+                        class="segment"
+                        [class.selected]="view() === item.value"
+                        [attr.aria-selected]="view() === item.value"
+                        (click)="selectView(item.value)"
+                    >
+                        {{ item.label }}
+                    </button>
+                }
+            </div>
+        }
+
+        <div class="bar">
+            @if (has("email")) {
+                <label class="search">
+                    <app-icon name="search" [size]="18" />
+                    <input
+                        class="input"
+                        type="search"
+                        placeholder="Adresse e-mail…"
+                        aria-label="Rechercher une adresse e-mail"
+                        [value]="filters().email"
+                        (input)="onSearch($any($event.target).value)"
+                    />
+                </label>
+            }
+
+            <button
+                type="button"
+                class="btn btn-outline filter-btn"
+                (click)="filtersOpen.set(true)"
+            >
+                <app-icon name="filter" [size]="18" />
+                <span>Filtre</span>
+                @if (activeFilters().length > 0) {
+                    <span class="count">{{ activeFilters().length }}</span>
+                }
+            </button>
+
+            <button
+                type="button"
+                class="btn btn-outline export-btn"
+                aria-label="Exporter en CSV"
+                [disabled]="exporting() || total() === 0"
+                (click)="exportCsv()"
+            >
+                @if (exporting()) {
+                    <span class="spinner"></span>
+                } @else {
+                    <app-icon name="download" [size]="18" />
+                }
+                <span>Exporter</span>
+            </button>
+        </div>
+
+        <!-- ordinateur : les filtres restent affichés ; téléphone : fenêtre qui monte du bas -->
+        @if (filtersOpen()) {
+            <div class="sheet-backdrop" (click)="filtersOpen.set(false)"></div>
+        }
+        <div class="filters" [class.open]="filtersOpen()" role="group" aria-label="Filtres">
+            <div class="sheet-head">
+                <strong>Filtres</strong>
+                <button
+                    type="button"
+                    class="sheet-close"
+                    aria-label="Fermer"
+                    (click)="filtersOpen.set(false)"
+                >
+                    <app-icon name="close" [size]="20" />
+                </button>
+            </div>
+
+            @if (has("shop")) {
+                <select
+                    class="chip"
+                    aria-label="Boutique"
+                    [class.active]="filters().shopId !== null"
+                    [value]="filters().shopId ?? ''"
+                    (change)="selectShop($any($event.target).value)"
+                >
+                    <option value="">Toutes les boutiques</option>
+                    @if (shops.hasValue()) {
+                        @for (shop of shops.value(); track shop.id) {
+                            <option [value]="shop.id">{{ shop.name }}</option>
+                        }
+                    }
+                </select>
+            }
+
+            @if (has("ip")) {
+                <input
+                    class="input ip-field"
+                    type="search"
+                    inputmode="text"
+                    placeholder="Adresse IP"
+                    aria-label="Adresse IP"
+                    [value]="filters().ip"
+                    (input)="onIp($any($event.target).value)"
+                />
+            }
+
+            @if (has("period")) {
+                <app-period-filter [chips]="true" [flat]="true" (changed)="selectRange($event)" />
+            }
+
+            <div class="sheet-foot">
+                <button type="button" class="btn btn-outline" (click)="resetFilters()">
+                    Réinitialiser
+                </button>
+                <button type="button" class="btn btn-primary" (click)="filtersOpen.set(false)">
+                    Voir {{ total() }} résultat{{ total() > 1 ? "s" : "" }}
+                </button>
+            </div>
+        </div>
+
+        @if (activeFilters().length > 0) {
+            <div class="active" aria-label="Filtres actifs">
+                @for (chip of activeFilters(); track chip.key) {
+                    <span class="active-chip">
+                        {{ chip.label }}
+                        <button
+                            type="button"
+                            [attr.aria-label]="'Retirer le filtre ' + chip.label"
+                            (click)="clearFilter(chip.key)"
+                        >
+                            <app-icon name="close" [size]="14" />
+                        </button>
+                    </span>
+                }
+            </div>
+        }
+
+        @if (exportError()) {
+            <div class="alert alert-error" role="alert">{{ exportError() }}</div>
+        }
+    </div>
+
+    <app-security-table
+        [rows]="rows()"
+        [headings]="headings()"
+        [loading]="list.isLoading()"
+        [error]="list.error() ? errorMessage() : null"
+        [emptyTitle]="emptyTitle()"
+        [emptyText]="emptyText()"
+        (retry)="list.reload()"
+    >
+        @if (filtered()) {
+            <button type="button" class="btn btn-outline btn-sm" (click)="resetFilters()">
+                Réinitialiser les filtres
+            </button>
+        }
+    </app-security-table>
+
+    <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" [attached]="true" />
+</section>

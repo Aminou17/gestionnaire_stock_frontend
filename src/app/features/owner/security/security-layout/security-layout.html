@@ -1,0 +1,21 @@
+<div class="head">
+    <h1>Sécurité</h1>
+    <p class="muted">Connexions, comptes bloqués et accès refusés de toutes les boutiques.</p>
+</div>
+
+<nav class="tabs" aria-label="Sections de la sécurité">
+    @for (tab of tabs; track tab.path) {
+        <a
+            class="tab"
+            [routerLink]="tab.path"
+            routerLinkActive="selected"
+            [routerLinkActiveOptions]="{ exact: tab.exact }"
+            ariaCurrentWhenActive="page"
+        >
+            <span class="short">{{ tab.short }}</span>
+            <span class="long">{{ tab.long }}</span>
+        </a>
+    }
+</nav>
+
+<router-outlet />

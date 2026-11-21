@@ -14,7 +14,7 @@ import { Icon } from "../icon/icon";
 
 export const PAGE_SIZES = [10, 25, 50, 100];
 
-// numéros affichés : première et dernière page, la page courante et ses voisines, null pour « … »
+// numéros affichés : première et dernière page, la page courante et ses voisines, null pour les points de suite
 export const pageItems = (page: number, pages: number): (number | null)[] => {
     const wanted = new Set([1, pages, page - 1, page, page + 1]);
     const numbers = [...wanted].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);

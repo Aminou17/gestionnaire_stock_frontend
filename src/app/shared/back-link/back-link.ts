@@ -2,11 +2,8 @@ import { Location } from "@angular/common";
 import { Directive, computed, inject, input } from "@angular/core";
 import { Router, UrlTree } from "@angular/router";
 
-// Revenir en arrière comme une vraie application :
-// - la page visée est celle d'où l'on vient : on recule dans l'historique, la touche
-//   retour du téléphone reste alors cohérente (pas d'aller-retour sans fin) ;
-// - sinon (lien ouvert directement, page rechargée) : on la met à la place de la page
-//   actuelle au lieu de l'empiler.
+// Retour comme une vraie application : si la page visée est celle d'où l'on vient, on recule
+// dans l'historique (la touche retour du téléphone reste cohérente) ; sinon elle remplace la page actuelle.
 // À appeler dans le constructeur ou un champ du composant.
 export const injectGoBack = () => {
     const router = inject(Router);
@@ -24,7 +21,7 @@ export const injectGoBack = () => {
     };
 };
 
-// Lien « Retour » : garde une vraie adresse (clic du milieu, survol) mais recule avec injectGoBack
+// Lien "Retour" : garde une vraie adresse (clic du milieu, survol) mais recule avec injectGoBack
 @Directive({
     selector: "a[appBackLink]",
     host: {

@@ -187,4 +187,62 @@ describe("AuthService", () => {
         expect(localStorage.getItem("token")).toBeNull();
         expect(navigate).toHaveBeenCalledWith(["/login"]);
     });
+
+    it("should call logout-all, clear the session and redirect to /login", () => {
+        localStorage.setItem("token", fakeToken());
+        localStorage.setItem("user", JSON.stringify(user));
+        setup();
+        const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+
+        service.logoutAll().subscribe();
+
+        const req = httpMock.expectOne("/api/auth/logout-all");
+        expect(req.request.method).toBe("POST");
+        req.flush(null);
+
+        expect(service.isLoggedIn()).toBe(false);
+        expect(localStorage.getItem("token")).toBeNull();
+        expect(navigate).toHaveBeenCalledWith(["/login"]);
+    });
+
+    it("should keep the session when logout-all fails", () => {
+        localStorage.setItem("token", fakeToken());
+        localStorage.setItem("user", JSON.stringify(user));
+        setup();
+        const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
+
+        service.logoutAll().subscribe({ error: () => {} });
+        httpMock.expectOne("/api/auth/logout-all").flush({}, { status: 500, statusText: "Erreur" });
+
+        expect(service.isLoggedIn()).toBe(true);
+        expect(navigate).not.toHaveBeenCalled();
+    });
+
+    it("should not open a session when the owner still has to give a code", () => {
+        setup();
+        let challenge: unknown;
+
+        service.login("proprio@test.com", "secret").subscribe((res) => (challenge = res));
+        httpMock
+            .expectOne("/api/auth/login")
+            .flush({ twoFactorRequired: true, twoFactorToken: "jeton" });
+
+        expect(challenge).toEqual({ twoFactorRequired: true, twoFactorToken: "jeton" });
+        expect(service.isLoggedIn()).toBe(false);
+        expect(localStorage.getItem("token")).toBeNull();
+    });
+
+    it("should open the session once the code is verified", () => {
+        setup();
+        const token = fakeToken();
+
+        service.verifyTwoFactor("jeton", "123456").subscribe();
+
+        const req = httpMock.expectOne("/api/auth/2fa/verify");
+        expect(req.request.body).toEqual({ twoFactorToken: "jeton", code: "123456" });
+        req.flush({ message: "", token, user: { ...user, role: "owner" } });
+
+        expect(localStorage.getItem("token")).toBe(token);
+        expect(service.isOwner()).toBe(true);
+    });
 });

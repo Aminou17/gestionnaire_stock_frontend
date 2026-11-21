@@ -17,6 +17,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { errorText } from "../error-text";
 import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
+import { TwoFactorCard } from "./two-factor-card/two-factor-card";
 
 const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
     const { newPassword, confirmPassword } = group.getRawValue();
@@ -26,7 +27,7 @@ const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
 
 @Component({
     selector: "app-settings-password",
-    imports: [ReactiveFormsModule, PageHeader, Icon, UnsavedDialog],
+    imports: [ReactiveFormsModule, PageHeader, Icon, UnsavedDialog, TwoFactorCard],
     templateUrl: "./settings-password.html",
     styleUrls: ["../settings-section.css", "./settings-password.css"],
 })
@@ -56,6 +57,10 @@ export class SettingsPassword implements HasUnsavedChanges {
 
     sendingReset = signal(false);
     resetMessage = signal<{ ok: boolean; text: string } | null>(null);
+
+    askingLogoutAll = signal(false);
+    loggingOutAll = signal(false);
+    logoutAllMessage = signal<string | null>(null);
 
     constructor() {
         // dirty est faux après un reset : seule une saisie de l'utilisateur efface le message
@@ -100,6 +105,21 @@ export class SettingsPassword implements HasUnsavedChanges {
                     ok: false,
                     text: errorText(err, "Impossible d'envoyer le lien. Réessayez."),
                 });
+            },
+        });
+    }
+
+    logoutAll() {
+        this.loggingOutAll.set(true);
+        this.logoutAllMessage.set(null);
+
+        this.auth.logoutAll().subscribe({
+            error: (err) => {
+                // la confirmation reste ouverte : l'erreur s'affiche près des boutons
+                this.loggingOutAll.set(false);
+                this.logoutAllMessage.set(
+                    errorText(err, "Impossible de vous déconnecter partout."),
+                );
             },
         });
     }

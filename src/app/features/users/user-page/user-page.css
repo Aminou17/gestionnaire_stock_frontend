@@ -68,7 +68,7 @@ dl > div {
     border-bottom: 1px solid var(--border);
 }
 
-/* le libellé reste sur une ligne (« E-mail » ne se coupe pas au tiret) */
+/* le libellé reste sur une ligne ("E-mail" ne se coupe pas au tiret) */
 dt {
     flex-shrink: 0;
     white-space: nowrap;

@@ -1,6 +1,6 @@
 import { Injectable, signal } from "@angular/core";
 
-// Connexion de l'appareil. Le navigateur dit « en ligne » dès qu'il a un réseau,
+// Connexion de l'appareil. Le navigateur dit "en ligne" dès qu'il a un réseau,
 // même sans accès réel à internet : un appel qui échoue sans réponse (status 0) le corrige.
 @Injectable({ providedIn: "root" })
 export class NetworkService {

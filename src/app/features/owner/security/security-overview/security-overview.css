@@ -1,0 +1,258 @@
+:host {
+    display: grid;
+    gap: 16px;
+}
+
+.status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    background: var(--success-soft);
+    color: var(--success);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+}
+
+.status.warn {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.kpi {
+    display: grid;
+    gap: 6px;
+    padding: 16px 20px;
+    color: var(--text);
+    text-decoration: none;
+    transition: background-color 0.15s;
+}
+
+.kpi:hover {
+    background: var(--surface-hover);
+}
+
+.kpi:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.kpi-label {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+}
+
+.kpi strong {
+    font-size: var(--fs-kpi);
+    font-weight: var(--fw-bold);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.kpi strong.warn {
+    color: var(--warning);
+}
+
+.panels {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 12px;
+}
+
+.panel {
+    display: grid;
+    align-content: start;
+    gap: 16px;
+    padding: 20px;
+}
+
+.panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+}
+
+.panel h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.01em;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+}
+
+.legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot-logins,
+.bar-logins {
+    background: var(--danger-strong);
+}
+
+.dot-denied,
+.bar-denied {
+    background: var(--warning);
+}
+
+/* courbe en barres : une colonne par jour, les deux séries empilées */
+.chart {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+    height: 180px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.bar-col {
+    display: grid;
+    grid-template-rows: 16px minmax(0, 1fr) 16px;
+    justify-items: center;
+    gap: 4px;
+    font-size: var(--fs-caption);
+    color: var(--text-muted);
+}
+
+.bar-total {
+    font-variant-numeric: tabular-nums;
+}
+
+.bar-track {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: min(100%, 32px);
+    height: 100%;
+    border-radius: 6px;
+    background: var(--neutral-soft);
+    overflow: hidden;
+}
+
+.bar {
+    display: block;
+    flex: none;
+}
+
+.bar-day {
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.shops {
+    display: grid;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.shop-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 12px;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.shop-line:hover .shop-name {
+    text-decoration: underline;
+}
+
+.shop-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--fs-body);
+}
+
+.shop-line strong {
+    font-size: var(--fs-body);
+    font-variant-numeric: tabular-nums;
+}
+
+.shop-bar {
+    grid-column: 1 / -1;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--neutral-soft);
+    overflow: hidden;
+}
+
+.shop-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: var(--warning);
+}
+
+.calm {
+    margin: 0;
+    padding: 24px 0;
+    text-align: center;
+    font-size: var(--fs-body);
+}
+
+.skeleton-kpi {
+    height: 84px;
+}
+
+.skeleton-chart {
+    height: 260px;
+}
+
+@media (max-width: 1023px) {
+    .panels {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+@media (max-width: 767px) {
+    .kpis {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .kpi {
+        gap: 4px;
+        padding: 12px;
+    }
+
+    .kpi strong {
+        font-size: var(--fs-figure);
+    }
+
+    .panel {
+        padding: 16px;
+    }
+
+    .chart {
+        gap: 4px;
+        height: 150px;
+    }
+}

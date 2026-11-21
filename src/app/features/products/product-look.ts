@@ -1,4 +1,4 @@
-// petits mots ignorés : « Savon de Marseille » donne SM et non SD
+// petits mots ignorés : "Savon de Marseille" donne SM et non SD
 const SMALL_WORDS = new Set([
     "de",
     "du",

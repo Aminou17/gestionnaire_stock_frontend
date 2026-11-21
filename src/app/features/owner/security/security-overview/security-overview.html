@@ -1,0 +1,113 @@
+@if (overview.isLoading()) {
+    <div class="kpis" aria-busy="true" aria-label="Chargement">
+        @for (i of skeletons; track i) {
+            <div class="skeleton skeleton-kpi"></div>
+        }
+    </div>
+    <div class="skeleton skeleton-chart"></div>
+} @else if (overview.error()) {
+    <div class="card state" role="alert">
+        <p>Impossible de charger la vue d'ensemble.</p>
+        <button type="button" class="btn btn-outline btn-sm" (click)="overview.reload()">
+            Réessayer
+        </button>
+    </div>
+} @else if (overview.hasValue()) {
+    @let data = overview.value();
+
+    @if (status(); as status) {
+        <p class="status" [class.warn]="status.tone === 'warn'" role="status">
+            <app-icon [name]="status.tone === 'warn' ? 'alert' : 'shield'" [size]="18" />
+            {{ status.text }}
+        </p>
+    }
+
+    <!-- chaque chiffre mène à la liste correspondante, comme chez Stripe -->
+    <section class="kpis" aria-label="Chiffres clés">
+        <a class="card kpi" routerLink="/owner/security/logins">
+            <span class="kpi-label">Échecs, 24 heures</span>
+            <strong [class.warn]="data.failedLogins24h > 0">{{ data.failedLogins24h }}</strong>
+        </a>
+        <a class="card kpi" routerLink="/owner/security/logins">
+            <span class="kpi-label">Échecs, 7 jours</span>
+            <strong>{{ data.failedLogins7d }}</strong>
+        </a>
+        <a class="card kpi" routerLink="/owner/security/locked">
+            <span class="kpi-label">Comptes bloqués</span>
+            <strong [class.warn]="data.lockedAccounts > 0">{{ data.lockedAccounts }}</strong>
+        </a>
+        <a class="card kpi" routerLink="/owner/security/events">
+            <span class="kpi-label">Refusés, 7 jours</span>
+            <strong>{{ data.accessDenied7d }}</strong>
+        </a>
+    </section>
+
+    <div class="panels">
+        <section class="card panel">
+            <div class="panel-head">
+                <h2>7 derniers jours</h2>
+                <div class="legend">
+                    <span><i class="dot dot-logins"></i>Connexions échouées</span>
+                    <span><i class="dot dot-denied"></i>Accès refusés</span>
+                </div>
+            </div>
+
+            @if (hasActivity()) {
+                <ul class="chart" aria-label="Événements par jour">
+                    @for (day of days(); track day.day) {
+                        <li
+                            class="bar-col"
+                            [attr.aria-label]="
+                                (day.date | date: 'EEEE d MMMM') +
+                                ' : ' +
+                                day.failed_logins +
+                                ' connexions échouées, ' +
+                                day.access_denied +
+                                ' accès refusés'
+                            "
+                        >
+                            <span class="bar-total">{{ day.total || "" }}</span>
+                            <span class="bar-track">
+                                <span
+                                    class="bar bar-denied"
+                                    [style.height.%]="day.deniedHeight"
+                                ></span>
+                                <span
+                                    class="bar bar-logins"
+                                    [style.height.%]="day.loginsHeight"
+                                ></span>
+                            </span>
+                            <span class="bar-day">{{ day.date | date: "EEE d" }}</span>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="muted calm">Aucun événement de sécurité sur la semaine.</p>
+            }
+        </section>
+
+        <section class="card panel">
+            <div class="panel-head">
+                <h2>Boutiques les plus visées</h2>
+            </div>
+
+            @if (topShops().length > 0) {
+                <ul class="shops">
+                    @for (shop of topShops(); track shop.id) {
+                        <li>
+                            <a [routerLink]="['/owner/shops', shop.id]" class="shop-line">
+                                <span class="shop-name">{{ shop.name }}</span>
+                                <strong>{{ shop.total }}</strong>
+                                <span class="shop-bar"
+                                    ><span [style.width.%]="shop.width"></span
+                                ></span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <p class="muted calm">Aucune boutique visée cette semaine.</p>
+            }
+        </section>
+    </div>
+}

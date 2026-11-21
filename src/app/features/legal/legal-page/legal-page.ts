@@ -31,7 +31,7 @@ export class LegalPage {
     title = input.required<string>();
     // texte court sous le titre
     intro = input<string>();
-    // « Dernière mise à jour : … »
+    // date de dernière mise à jour
     updated = input<string>();
     sections = input<LegalSection[]>([]);
 

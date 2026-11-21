@@ -493,6 +493,51 @@ export const routes: Routes = [
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
             },
             {
+                path: "security",
+                title: "Sécurité",
+                loadComponent: () =>
+                    import("./features/owner/security/security-layout/security-layout").then(
+                        (m) => m.SecurityLayout,
+                    ),
+                children: [
+                    {
+                        path: "",
+                        title: "Sécurité",
+                        loadComponent: () =>
+                            import("./features/owner/security/security-overview/security-overview").then(
+                                (m) => m.SecurityOverview,
+                            ),
+                    },
+                    {
+                        path: "logins",
+                        title: "Connexions suspectes",
+                        data: { kind: "logins" },
+                        loadComponent: () =>
+                            import("./features/owner/security/security-list/security-list").then(
+                                (m) => m.SecurityList,
+                            ),
+                    },
+                    {
+                        path: "locked",
+                        title: "Comptes bloqués",
+                        data: { kind: "locked" },
+                        loadComponent: () =>
+                            import("./features/owner/security/security-list/security-list").then(
+                                (m) => m.SecurityList,
+                            ),
+                    },
+                    {
+                        path: "events",
+                        title: "Accès refusés et mots de passe",
+                        data: { kind: "events" },
+                        loadComponent: () =>
+                            import("./features/owner/security/security-list/security-list").then(
+                                (m) => m.SecurityList,
+                            ),
+                    },
+                ],
+            },
+            {
                 path: "mail",
                 title: "E-mails d'envoi",
                 loadComponent: () =>

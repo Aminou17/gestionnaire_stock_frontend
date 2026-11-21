@@ -4,7 +4,7 @@ import { RouterLink } from "@angular/router";
 
 import { Icon } from "../../../shared/icon/icon";
 
-// Le message unique « la caisse ne permet pas encore de travailler », avec le geste qui règle le cas
+// Le message unique "la caisse ne permet pas encore de travailler", avec le geste qui règle le cas
 export type CashNoticeState = "notOpened" | "closedToday" | "previous";
 
 @Component({
@@ -15,9 +15,9 @@ export type CashNoticeState = "notOpened" | "closedToday" | "previous";
 })
 export class CashClosedNotice {
     state = input.required<CashNoticeState>();
-    // ce qu'on veut faire, pour finir la phrase : « vendre », « payer une dépense »
+    // ce qu'on veut faire, pour finir la phrase : "vendre", "payer une dépense"
     purpose = input("vendre");
-    // jour de la caisse oubliée, pour l'état « previous »
+    // jour de la caisse oubliée, pour l'état "previous"
     since = input<string | null>(null);
     // l'administrateur seul peut rouvrir une caisse clôturée
     canReopen = input(false);
