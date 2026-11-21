@@ -311,6 +311,7 @@ describe("Dashboard", () => {
                 id: 3,
                 sessionDate: "2026-11-10",
                 openedAt: "2026-11-10T08:00:00",
+                openedBy: 2,
                 balance: null,
             },
             pendingExplanation: {
@@ -387,7 +388,7 @@ describe("Dashboard", () => {
     it("should offer the manager to open the cash register when the cash register is closed", async () => {
         await render({ isAdmin: false, cash: null });
 
-        expect(text()).toContain("Caisse fermée");
+        expect(text()).toContain("Caisse pas encore ouverte");
         expect(text()).toContain("Ouvrez-la pour commencer à vendre");
         expect(el.querySelector(".new-sale")?.textContent).toContain("Ouvrir la caisse");
         expect(el.querySelector(".close-cash")).toBeNull();
@@ -399,7 +400,7 @@ describe("Dashboard", () => {
             cash: { ...openCash!, status: "CLOSED", closedAt: "2026-11-11T18:00:00" },
         });
 
-        expect(text()).toContain("Caisse clôturée");
+        expect(text()).toContain("Caisse clôturée pour aujourd'hui");
         expect(el.querySelector(".new-sale")?.textContent).toContain("Voir la caisse");
         expect(el.querySelector(".close-cash")).toBeNull();
     });
@@ -411,6 +412,7 @@ describe("Dashboard", () => {
                 id: 3,
                 sessionDate: "2026-11-10",
                 openedAt: "2026-11-10T08:00:00",
+                openedBy: 2,
                 balance: null,
             },
         });
@@ -424,7 +426,7 @@ describe("Dashboard", () => {
         await render({ isAdmin: false, summaryFails: true });
 
         expect(text()).toContain("État de la caisse indisponible");
-        expect(text()).not.toContain("Caisse fermée");
+        expect(text()).not.toContain("Caisse pas encore ouverte");
         expect(text()).not.toContain("Caisse ouverte");
         expect(el.querySelector(".new-sale")?.textContent).toContain("Ouvrir la caisse");
     });

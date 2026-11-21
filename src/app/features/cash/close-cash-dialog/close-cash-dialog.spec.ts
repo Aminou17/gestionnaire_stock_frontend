@@ -111,7 +111,16 @@ describe("CloseCashDialog", () => {
         expect(el.querySelector("textarea")).toBeNull();
     });
 
-    it("should not close the cash register from the starting 0 without typing an amount", async () => {
+    it("should start with an empty amount field, not a 0 to erase", async () => {
+        fixture.componentInstance.open("2026-11-10", 1000);
+        await fixture.whenStable();
+
+        expect(
+            el.querySelector<HTMLInputElement>("input[formControlName=actualAmount]")?.value,
+        ).toBe("");
+    });
+
+    it("should not close the cash register without typing an amount", async () => {
         fixture.componentInstance.open("2026-11-10", 1000);
         await clickSubmit();
 

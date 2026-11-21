@@ -133,12 +133,13 @@ describe("Cash", () => {
         await render();
 
         expect(text()).toContain("Caissedujour");
-        expect(text()).toContain("Depuis08:00Ouverte");
+        expect(text()).toContain("Depuis08:00·fonds5000FOuverte");
         expect(text()).toContain("9500F");
         expect(text()).toContain("Vente#112");
-        expect(text()).toContain("Fondsdedépart5000F");
+        expect(text()).toContain("Ventes4500F");
         expect(text()).not.toContain("Ventesenespèces4500F");
-        expect(buttons()).toContain("Nouvelle vente");
+        // la vente se lance depuis le menu et la page Ventes, pas d'ici
+        expect(buttons()).not.toContain("Nouvelle vente");
         expect(buttons()).toContain("Clôturer la caisse");
     });
 
@@ -154,23 +155,28 @@ describe("Cash", () => {
         expect(text()).not.toContain("MobileMoney");
     });
 
-    it("should remind to close the cash register in the evening", async () => {
+    it("should highlight the closing button in the evening", async () => {
         vi.useFakeTimers({ toFake: ["Date"] });
         vi.setSystemTime(new Date(2026, 10, 10, 20, 0));
 
         await render();
 
-        expect(el.querySelector(".reminder")?.textContent).toContain("pensez à clôturer");
+        const button = [...el.querySelectorAll("button")].find((b) =>
+            b.textContent?.includes("Clôturer la caisse"),
+        );
+        expect(button?.classList).toContain("late");
+        // plus de bandeau en plus
+        expect(el.querySelector(".reminder")).toBeNull();
         vi.useRealTimers();
     });
 
-    it("should not remind to close the cash register during the day", async () => {
+    it("should not highlight the closing button during the day", async () => {
         vi.useFakeTimers({ toFake: ["Date"] });
         vi.setSystemTime(new Date(2026, 10, 10, 11, 0));
 
         await render();
 
-        expect(el.querySelector(".reminder")).toBeNull();
+        expect(el.querySelector(".late")).toBeNull();
         vi.useRealTimers();
     });
 
@@ -295,7 +301,7 @@ describe("Cash", () => {
             }),
         });
 
-        expect(text()).toContain("De08:00à19:00Clôturée");
+        expect(text()).toContain("De08:00à19:00·fonds5000FClôturée");
         expect(text()).toContain("Montantcompté9000F");
         expect(text()).toContain("Écart−500F");
         expect(text()).toContain("Explication:Erreurdemonnaie");
@@ -357,9 +363,16 @@ describe("Cash", () => {
             },
         });
 
-        const team = el.querySelector(".team");
-        expect(team?.textContent).toContain("Kevin Bakala");
-        expect(team?.textContent).toContain("Écart");
+        // fermé par défaut : une ligne de résumé, la liste s'ouvre au toucher
+        const team = el.querySelector(".team")!;
+        expect(team.textContent).toContain("Aucune ouverte");
+        expect(team.textContent).not.toContain("Kevin Bakala");
+
+        team.querySelector<HTMLButtonElement>(".team-toggle")!.click();
+        await fixture.whenStable();
+
+        expect(team.textContent).toContain("Kevin Bakala");
+        expect(team.textContent).toContain("Écart");
     });
 
     it("should let the person who closed explain a pending gap", async () => {

@@ -57,9 +57,11 @@
 .summary.is-due {
     --tone: var(--warning);
 }
+
 .summary.is-paid {
     --tone: var(--success);
 }
+
 .summary.is-refunded {
     --tone: var(--danger);
 }
@@ -171,6 +173,7 @@
     color: #128c4a;
     transition: background 0.15s;
 }
+
 .wa-chip:hover {
     background: #d3f1e0;
 }
@@ -206,13 +209,16 @@
         border-color 0.15s,
         transform 0.1s;
 }
+
 .act:active:not(:disabled) {
     transform: scale(0.98);
 }
+
 .act:disabled {
     opacity: 0.55;
     cursor: not-allowed;
 }
+
 .act:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;
@@ -413,7 +419,7 @@ a.seller:hover {
 
 /* aperçu du ticket : le papier blanc reste blanc en thème sombre */
 .ticket-dialog {
-    width: min(380px, calc(100% - 32px));
+    width: min(400px, calc(100% - 16px));
     max-height: calc(100dvh - 32px);
     padding: 0;
     border: 0;
@@ -428,8 +434,8 @@ a.seller:hover {
 }
 
 .ticket-paper {
-    margin: 16px 16px 0;
-    padding: 16px 8px 20px;
+    margin: 12px 12px 0;
+    padding: 16px 12px 20px;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: #fff;
@@ -492,32 +498,6 @@ a.seller:hover {
 
 .timeline li.danger::before {
     background: var(--danger);
-}
-
-.pager {
-    display: flex;
-    gap: 4px;
-}
-
-.pager-btn {
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    color: var(--text);
-}
-
-.pager-btn:hover {
-    background: var(--surface-hover);
-    color: var(--primary-text);
-}
-
-.pager-btn.disabled {
-    color: var(--text-muted);
-    opacity: 0.4;
 }
 
 .banner a {

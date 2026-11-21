@@ -2,7 +2,12 @@ import { CashCounter } from "../cash-counter/cash-counter";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, computed, inject, output, signal, viewChild } from "@angular/core";
 import { toSignal } from "@angular/core/rxjs-interop";
-import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import {
+    FormControl,
+    NonNullableFormBuilder,
+    ReactiveFormsModule,
+    Validators,
+} from "@angular/forms";
 
 import { CashSessionService } from "../../../core/cash/cash-session.service";
 import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
@@ -29,7 +34,10 @@ export class CloseCashDialog {
     closed = output();
 
     form = this.fb.group({
-        actualAmount: [0, [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)]],
+        // vide au départ : pas de 0 à effacer avant de taper
+        actualAmount: new FormControl<number | null>(null, {
+            validators: [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)],
+        }),
         closingNote: ["", [Validators.maxLength(300)]],
     });
 
@@ -50,7 +58,7 @@ export class CloseCashDialog {
 
     blind = computed(() => this.expected() === null);
 
-    private typed = toSignal(this.form.controls.actualAmount.valueChanges, { initialValue: 0 });
+    private typed = toSignal(this.form.controls.actualAmount.valueChanges, { initialValue: null });
 
     // écart entre le montant compté et le solde attendu, quand on le connaît
     difference = computed(() => {
@@ -136,14 +144,14 @@ export class CloseCashDialog {
 
         const { actualAmount, closingNote } = this.form.getRawValue();
 
-        if (this.form.invalid || (this.noteRequired() && !closingNote.trim())) {
+        if (actualAmount === null) {
             this.form.markAllAsTouched();
+            this.error.set("Saisissez le montant compté dans le tiroir.");
             return;
         }
 
-        // le 0 de départ ne doit pas clôturer la caisse par un simple clic
-        if (!this.edited()) {
-            this.error.set("Saisissez le montant compté dans le tiroir.");
+        if (this.form.invalid || (this.noteRequired() && !closingNote.trim())) {
+            this.form.markAllAsTouched();
             return;
         }
 

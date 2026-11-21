@@ -1,25 +1,32 @@
 import { Component, computed, inject } from "@angular/core";
-import { RouterLink } from "@angular/router";
 
 import { NetworkService } from "../../core/offline/network.service";
 import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
+import { PendingSalesDialog } from "../../features/sales/pending-sales-dialog/pending-sales-dialog";
 import { Icon } from "../../shared/icon/icon";
 
 // Bandeau discret en haut des pages : hors ligne, ventes en attente d'envoi, ventes à vérifier
 @Component({
     selector: "app-offline-banner",
-    imports: [RouterLink, Icon],
+    imports: [Icon, PendingSalesDialog],
     template: `
         @if (state(); as s) {
-            <a class="bar" routerLink="/sales/pending" [attr.data-tone]="s.tone" role="status">
+            <button
+                type="button"
+                class="bar"
+                [attr.data-tone]="s.tone"
+                role="status"
+                (click)="pending.open()"
+            >
                 <span class="dot" aria-hidden="true"></span>
                 <span class="text">{{ s.text }}</span>
                 @if (outbox.count() > 0) {
                     <span class="count">{{ outbox.count() }}</span>
                 }
                 <app-icon name="chevron-right" [size]="16" />
-            </a>
+            </button>
         }
+        <app-pending-sales-dialog #pending />
     `,
     styleUrl: "./offline-banner.css",
 })

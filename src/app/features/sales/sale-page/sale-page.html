@@ -5,13 +5,6 @@
     [backLabel]="back.label"
 />
 
-@if (justCreated()) {
-    <div class="alert alert-success banner" role="status">
-        <span>Vente enregistrée.</span>
-        <a routerLink="/sales/new">Nouvelle vente</a>
-    </div>
-}
-
 @if (sale.isLoading() && !data()) {
     <!-- même forme que la page chargée, pour qu'elle ne saute pas -->
     <div class="layout" aria-busy="true">
@@ -73,40 +66,6 @@
                                   : "Payée"
                         }}</span
                     >
-                    <nav class="pager" aria-label="Autres ventes">
-                        @if (sale.previous_id; as id) {
-                            <a
-                                class="pager-btn"
-                                [routerLink]="['/sales', id]"
-                                [state]="navState()"
-                                (click)="justCreated.set(false)"
-                                aria-label="Vente précédente, plus ancienne"
-                                title="Vente précédente (plus ancienne)"
-                            >
-                                <app-icon name="chevron-left" [size]="18" />
-                            </a>
-                        } @else {
-                            <span class="pager-btn disabled" title="Pas de vente plus ancienne">
-                                <app-icon name="chevron-left" [size]="18" />
-                            </span>
-                        }
-                        @if (sale.next_id; as id) {
-                            <a
-                                class="pager-btn"
-                                [routerLink]="['/sales', id]"
-                                [state]="navState()"
-                                (click)="justCreated.set(false)"
-                                aria-label="Vente suivante, plus récente"
-                                title="Vente suivante (plus récente)"
-                            >
-                                <app-icon name="chevron-right" [size]="18" />
-                            </a>
-                        } @else {
-                            <span class="pager-btn disabled" title="C'est la vente la plus récente">
-                                <app-icon name="chevron-right" [size]="18" />
-                            </span>
-                        }
-                    </nav>
                 </div>
 
                 <div class="summary-text">
@@ -454,90 +413,94 @@
         </div>
 
         <aside class="side">
-            <section class="card panel">
-                <h2 class="section-title">Activité</h2>
-                <ol class="timeline">
-                    @for (event of timeline(); track event.key) {
-                        <li [class.danger]="event.kind === 'return' || event.kind === 'cancel'">
-                            <div class="event">
-                                @switch (event.kind) {
-                                    @case ("sale") {
-                                        <strong>Vente enregistrée</strong>
+            @if (auth.isAdmin()) {
+                <section class="card panel">
+                    <h2 class="section-title">Activité</h2>
+                    <ol class="timeline">
+                        @for (event of timeline(); track event.key) {
+                            <li [class.danger]="event.kind === 'return' || event.kind === 'cancel'">
+                                <div class="event">
+                                    @switch (event.kind) {
+                                        @case ("sale") {
+                                            <strong>Vente enregistrée</strong>
+                                        }
+                                        @case ("payment") {
+                                            <strong
+                                                >{{ event.payment!.amount | fcfa }} en
+                                                {{
+                                                    event.payment!.payment_method === "MOBILE_MONEY"
+                                                        ? "Mobile Money"
+                                                        : "espèces"
+                                                }}</strong
+                                            >
+                                        }
+                                        @case ("return") {
+                                            <strong
+                                                >Rendu : {{ event.ret!.quantity }} ×
+                                                {{ event.ret!.product_name }}</strong
+                                            >
+                                            <span class="muted">{{ event.ret!.reason }}</span>
+                                        }
+                                        @case ("cancel") {
+                                            <strong>Vente remboursée</strong>
+                                        }
                                     }
-                                    @case ("payment") {
-                                        <strong
-                                            >{{ event.payment!.amount | fcfa }} en
-                                            {{
-                                                event.payment!.payment_method === "MOBILE_MONEY"
-                                                    ? "Mobile Money"
-                                                    : "espèces"
-                                            }}</strong
-                                        >
-                                    }
-                                    @case ("return") {
-                                        <strong
-                                            >Rendu : {{ event.ret!.quantity }} ×
-                                            {{ event.ret!.product_name }}</strong
-                                        >
-                                        <span class="muted">{{ event.ret!.reason }}</span>
-                                    }
-                                    @case ("cancel") {
-                                        <strong>Vente remboursée</strong>
-                                    }
-                                }
-                                <span class="muted">
-                                    {{ event.at | date: "d MMM y, HH:mm" }}
-                                    @if (
-                                        auth.isAdmin() &&
-                                        event.kind === "return" &&
-                                        event.ret!.user_name
-                                    ) {
-                                        · par {{ event.ret!.user_name }}
-                                    }
-                                    @if (
-                                        auth.isAdmin() &&
-                                        event.kind === "cancel" &&
-                                        sale.cancelled_by_name
-                                    ) {
-                                        · par {{ sale.cancelled_by_name }}
-                                    }
-                                </span>
-                            </div>
-                            @if (event.moves.length > 1) {
-                                <button
-                                    type="button"
-                                    class="stock-toggle"
-                                    [attr.aria-expanded]="openStock().includes(event.key)"
-                                    (click)="toggleStock(event.key)"
-                                >
-                                    Stock : {{ event.moves.length }} produits
-                                    <app-icon name="chevron-down" [size]="16" />
-                                </button>
-                            }
-                            @if (event.moves.length === 1 || openStock().includes(event.key)) {
-                                @for (move of event.moves; track move.id) {
-                                    <button type="button" class="move" (click)="openMove(move)">
-                                        <span class="move-name">{{ move.product_name }}</span>
-                                        <span class="move-stock">
-                                            @if (move.type === "SALE") {
-                                                <strong class="out">−{{ move.quantity }}</strong>
-                                                · stock
-                                                {{ move.stock_after + move.quantity | number }}
-                                            } @else {
-                                                <strong class="in">+{{ move.quantity }}</strong>
-                                                · stock
-                                                {{ move.stock_after - move.quantity | number }}
-                                            }
-                                            → {{ move.stock_after | number }}
-                                        </span>
-                                        <app-icon name="chevron-right" [size]="16" />
+                                    <span class="muted">
+                                        {{ event.at | date: "d MMM y, HH:mm" }}
+                                        @if (
+                                            auth.isAdmin() &&
+                                            event.kind === "return" &&
+                                            event.ret!.user_name
+                                        ) {
+                                            · par {{ event.ret!.user_name }}
+                                        }
+                                        @if (
+                                            auth.isAdmin() &&
+                                            event.kind === "cancel" &&
+                                            sale.cancelled_by_name
+                                        ) {
+                                            · par {{ sale.cancelled_by_name }}
+                                        }
+                                    </span>
+                                </div>
+                                @if (event.moves.length > 1) {
+                                    <button
+                                        type="button"
+                                        class="stock-toggle"
+                                        [attr.aria-expanded]="openStock().includes(event.key)"
+                                        (click)="toggleStock(event.key)"
+                                    >
+                                        Stock : {{ event.moves.length }} produits
+                                        <app-icon name="chevron-down" [size]="16" />
                                     </button>
                                 }
-                            }
-                        </li>
-                    }
-                </ol>
-            </section>
+                                @if (event.moves.length === 1 || openStock().includes(event.key)) {
+                                    @for (move of event.moves; track move.id) {
+                                        <button type="button" class="move" (click)="openMove(move)">
+                                            <span class="move-name">{{ move.product_name }}</span>
+                                            <span class="move-stock">
+                                                @if (move.type === "SALE") {
+                                                    <strong class="out"
+                                                        >−{{ move.quantity }}</strong
+                                                    >
+                                                    · stock
+                                                    {{ move.stock_after + move.quantity | number }}
+                                                } @else {
+                                                    <strong class="in">+{{ move.quantity }}</strong>
+                                                    · stock
+                                                    {{ move.stock_after - move.quantity | number }}
+                                                }
+                                                → {{ move.stock_after | number }}
+                                            </span>
+                                            <app-icon name="chevron-right" [size]="16" />
+                                        </button>
+                                    }
+                                }
+                            </li>
+                        }
+                    </ol>
+                </section>
+            }
         </aside>
     </div>
 

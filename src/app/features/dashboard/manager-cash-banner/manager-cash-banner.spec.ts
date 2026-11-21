@@ -45,11 +45,15 @@ describe("ManagerCashBanner", () => {
     it("should offer to open the cash register instead of selling when the cash register is closed", async () => {
         await fixture.whenStable();
 
-        expect(text()).toContain("Caisse fermée");
+        expect(text()).toContain("Caisse pas encore ouverte");
         expect(text()).toContain("Ouvrez-la pour commencer à vendre");
         expect(newSale().textContent).toContain("Ouvrir la caisse");
-        expect(newSale().getAttribute("href")).toBe("/cash");
-        expect(el.querySelector("button")).toBeNull();
+
+        // le geste se fait sur place, sans changer de page
+        const opened = vi.fn();
+        fixture.componentInstance.openCash.subscribe(opened);
+        (newSale() as HTMLElement).click();
+        expect(opened).toHaveBeenCalled();
     });
 
     it("should show a skeleton while loading", async () => {
@@ -57,7 +61,7 @@ describe("ManagerCashBanner", () => {
         await fixture.whenStable();
 
         expect(el.querySelector(".skeleton")).not.toBeNull();
-        expect(text()).not.toContain("Caisse fermée");
+        expect(text()).not.toContain("Caisse pas encore ouverte");
         expect(newSale().textContent).toContain("Ouvrir la caisse");
     });
 
@@ -68,7 +72,7 @@ describe("ManagerCashBanner", () => {
         await fixture.whenStable();
 
         expect(text()).toContain("État de la caisse indisponible");
-        expect(text()).not.toContain("Caisse fermée");
+        expect(text()).not.toContain("Caisse pas encore ouverte");
         el.querySelector<HTMLButtonElement>(".link-btn")!.click();
         expect(retry).toHaveBeenCalled();
     });

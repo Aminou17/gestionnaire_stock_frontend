@@ -1,6 +1,6 @@
 import { DatePipe, formatDate } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
-import { Component, LOCALE_ID, computed, inject, signal } from "@angular/core";
+import { Component, LOCALE_ID, computed, effect, inject, signal } from "@angular/core";
 import { rxResource, toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { map } from "rxjs";
@@ -40,9 +40,11 @@ export class CashSessionPage {
     protected auth = inject(AuthService);
     protected shopName = inject(ShopSettingsService).shopName;
 
+    private router = inject(Router);
+
     // retour vers la page d'où l'on vient (Caisse ou Historique), sinon l'historique
     private back = getBackLink("/cash/sessions", "Retour à l'historique");
-    protected backUrl = inject(Router).serializeUrl(this.back.link);
+    protected backUrl = this.router.serializeUrl(this.back.link);
     protected backLabel = this.back.label;
 
     private id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => Number(p.get("id")))), {
@@ -67,6 +69,18 @@ export class CashSessionPage {
         return session ? formatDate(session.session_date, "d MMMM y", this.locale) : "Caisse";
     });
     summary = computed(() => summarizeMovements(this.data()?.movements ?? []));
+    // les plus récents en premier, comme sur la page Caisse
+    latest = computed(() => [...(this.data()?.movements ?? [])].reverse());
+
+    constructor() {
+        // sa propre caisse encore ouverte se suit sur la page Caisse : cette fiche n'apporterait rien
+        effect(() => {
+            const cash = this.data();
+            if (cash?.status === "OPEN" && cash.opened_by === this.auth.user()?.id) {
+                void this.router.navigateByUrl("/cash", { replaceUrl: true });
+            }
+        });
+    }
 
     notFound = computed(() => {
         const err = this.session.error();
@@ -83,13 +97,6 @@ export class CashSessionPage {
             window.print();
             this.ticketMode.set(false);
         });
-    }
-
-    print() {
-        const title = document.title;
-        document.title = `Caisse-${this.data()?.session_date}`;
-        window.print();
-        document.title = title;
     }
 
     errorMessage = computed(() =>

@@ -5,14 +5,24 @@
     [backLabel]="back.label"
 />
 
-@if (queued(); as done) {
+@if (done(); as sale) {
     <div class="queued" role="status">
         <span class="queued-icon"><app-icon name="check" [size]="20" /></span>
         <div class="queued-text">
-            <strong>Vente enregistrée sur cet appareil</strong>
-            <span>{{ done.total | fcfa }} · elle partira dès le retour d'internet.</span>
+            @if (sale.kind === "sent") {
+                <strong>Encaissé · {{ sale.total | fcfa }}</strong>
+                <a
+                    [routerLink]="['/sales', sale.id]"
+                    [state]="{ backTo: '/sales/new', backLabel: 'Nouvelle vente' }"
+                    class="queued-link"
+                    >Ticket et WhatsApp</a
+                >
+            } @else {
+                <strong>Vente enregistrée sur cet appareil</strong>
+                <span>{{ sale.total | fcfa }} · elle partira dès le retour d'internet.</span>
+            }
         </div>
-        <button type="button" class="btn btn-sm queued-ok" (click)="queued.set(null)">OK</button>
+        <button type="button" class="btn btn-sm queued-ok" (click)="done.set(null)">OK</button>
     </div>
 }
 
@@ -40,19 +50,6 @@
         <span>Impossible de vérifier l'état de la caisse.</span>
         <button type="button" class="link-btn" (click)="cash.reload()">Réessayer</button>
     </div>
-} @else if (cashClosed()) {
-    <div class="alert alert-warning banner" role="alert">
-        <app-icon name="alert" />
-        @if (cashClosedToday()) {
-            <span>Votre caisse du jour est clôturée : les ventes reprennent demain.</span>
-            @if (auth.isAdmin()) {
-                <button type="button" class="link-btn" (click)="reopen()">Rouvrir la caisse</button>
-            }
-        } @else {
-            <span>Votre caisse est fermée : ouvrez-la pour enregistrer une vente.</span>
-            <button type="button" class="link-btn" (click)="openCash()">Ouvrir la caisse</button>
-        }
-    </div>
 } @else if (error() && cart().length === 0) {
     <div class="alert alert-error banner" role="alert">
         <app-icon name="alert" />
@@ -60,147 +57,92 @@
     </div>
 }
 
-<div class="layout">
-    <section class="card catalog">
-        <div class="zone-head">
-            <span class="head-icon"><app-icon name="package" [size]="18" /></span>
-            <h2>Produits</h2>
-            <span class="muted">{{ resultsTotal() }}</span>
-        </div>
+<!-- caisse pas prête : un seul message à la place du catalogue, avant de choisir un produit -->
+@if (gateVisible()) {
+    <app-cash-closed-notice
+        [state]="gateState()"
+        [since]="ownPrevious()?.sessionDate ?? null"
+        [canReopen]="auth.isAdmin()"
+        (openCash)="openCash()"
+        (reopen)="reopen()"
+    />
+} @else {
+    <div class="layout">
+        <section class="card catalog">
+            <div class="zone-head">
+                <span class="head-icon"><app-icon name="package" [size]="18" /></span>
+                <h2>Produits</h2>
+                <span class="muted">{{ resultsTotal() }}</span>
+            </div>
 
-        <!-- une seule barre : chercher ou scanner, comme sur les caisses du commerce -->
-        <div class="search">
-            <app-icon name="search" [size]="18" />
-            <input
-                #searchInput
-                class="input"
-                type="search"
-                placeholder="Chercher ou scanner…"
-                aria-label="Rechercher un produit"
-                aria-keyshortcuts="/ Control+K"
-                (input)="onSearch($any($event.target).value)"
-            />
-            <kbd class="search-key" aria-hidden="true">/</kbd>
-            <button
-                type="button"
-                class="scan-btn"
-                aria-label="Scanner un code-barres"
-                title="Scanner un code-barres"
-                [disabled]="scanning()"
-                (click)="scanner.start()"
-            >
-                <app-icon name="scan" [size]="20" />
-            </button>
-        </div>
+            <!-- une seule barre : chercher ou scanner, comme sur les caisses du commerce -->
+            <div class="search">
+                <app-icon name="search" [size]="18" />
+                <input
+                    #searchInput
+                    class="input"
+                    type="search"
+                    placeholder="Chercher ou scanner…"
+                    aria-label="Rechercher un produit"
+                    aria-keyshortcuts="/ Control+K"
+                    (input)="onSearch($any($event.target).value)"
+                />
+                <kbd class="search-key" aria-hidden="true">/</kbd>
+                <button
+                    type="button"
+                    class="scan-btn"
+                    aria-label="Scanner un code-barres"
+                    title="Scanner un code-barres"
+                    [disabled]="scanning()"
+                    (click)="scanner.start()"
+                >
+                    <app-icon name="scan" [size]="20" />
+                </button>
+            </div>
 
-        <!-- catégories en pastilles qui défilent, affichage au bout -->
-        <div class="toolbar">
-            <div class="cats" role="group" aria-label="Catégorie">
-                @if (categoryChips().length > 1) {
-                    <button
-                        type="button"
-                        class="cat"
-                        [attr.aria-pressed]="categoryId() === null"
-                        (click)="selectCategory('')"
-                    >
-                        Tout
-                    </button>
-                    @for (category of categoryChips(); track category.id) {
+            <!-- catégories en pastilles qui défilent -->
+            <div class="toolbar">
+                <div class="cats" role="group" aria-label="Catégorie">
+                    @if (categoryChips().length > 1) {
                         <button
                             type="button"
                             class="cat"
-                            [attr.aria-pressed]="categoryId() === category.id"
-                            (click)="selectCategory('' + category.id)"
+                            [attr.aria-pressed]="categoryId() === null"
+                            (click)="selectCategory('')"
                         >
-                            {{ category.name }}
+                            Tout
                         </button>
-                    }
-                }
-            </div>
-
-            <button
-                type="button"
-                class="view-single"
-                [attr.aria-label]="
-                    view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'
-                "
-                [title]="view() === 'grid' ? 'Afficher en lignes' : 'Afficher en carreaux'"
-                [attr.aria-pressed]="view() === 'grid'"
-                (click)="setView(view() === 'grid' ? 'list' : 'grid')"
-            >
-                <app-icon [name]="view() === 'grid' ? 'list' : 'grid'" [size]="18" />
-            </button>
-        </div>
-
-        @if (!offline() && products.isLoading() && results().length === 0) {
-            <div [class.gtiles]="view() === 'grid'" [class.tiles]="view() === 'list'">
-                @for (i of [1, 2, 3, 4, 5, 6]; track i) {
-                    <div
-                        class="skeleton"
-                        [class.gtile-skeleton]="view() === 'grid'"
-                        [class.tile-skeleton]="view() === 'list'"
-                    ></div>
-                }
-            </div>
-        } @else if (!offline() && products.error()) {
-            <div class="empty">
-                Impossible de charger les produits.
-                <button type="button" class="btn btn-outline btn-sm" (click)="products.reload()">
-                    Réessayer
-                </button>
-            </div>
-        } @else {
-            @if (view() === "list") {
-                <ul class="tiles" [class.reloading]="products.isLoading()">
-                    @for (product of results(); track product.id) {
-                        <li class="tile" [class.in-cart]="inCart(product)">
-                            <ng-container
-                                *ngTemplateOutlet="thumb; context: { $implicit: product }"
-                            />
+                        @for (category of categoryChips(); track category.id) {
                             <button
                                 type="button"
-                                class="result"
-                                [attr.aria-pressed]="inCart(product)"
-                                [disabled]="product.theoretical_stock <= 0"
-                                (click)="toggleProduct(product)"
+                                class="cat"
+                                [attr.aria-pressed]="categoryId() === category.id"
+                                (click)="selectCategory('' + category.id)"
                             >
-                                <span class="result-text">
-                                    <strong class="result-name">{{ product.name }}</strong>
-                                    <span class="result-price">{{
-                                        product.sale_price | fcfa
-                                    }}</span>
-                                    @if (
-                                        product.theoretical_stock > 0 &&
-                                        product.stock_status !== "OK"
-                                    ) {
-                                        <small class="stock"
-                                            >Plus que {{ product.theoretical_stock }}</small
-                                        >
-                                    }
-                                </span>
-                                @if (product.theoretical_stock <= 0) {
-                                    <span class="badge badge-danger">Rupture</span>
-                                } @else {
-                                    <span class="add" aria-hidden="true">
-                                        @if (quantityOf(product); as qty) {
-                                            {{ qty }}
-                                        } @else {
-                                            <app-icon name="plus" [size]="18" />
-                                        }
-                                    </span>
-                                }
+                                {{ category.name }}
                             </button>
-                        </li>
-                    } @empty {
-                        <li class="empty">
-                            {{
-                                search()
-                                    ? "Aucun produit ne correspond à cette recherche."
-                                    : "Aucun produit en vente."
-                            }}
-                        </li>
+                        }
                     }
-                </ul>
+                </div>
+            </div>
+
+            @if (!offline() && products.isLoading() && results().length === 0) {
+                <div class="gtiles">
+                    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+                        <div class="skeleton gtile-skeleton"></div>
+                    }
+                </div>
+            } @else if (!offline() && products.error()) {
+                <div class="empty">
+                    Impossible de charger les produits.
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="products.reload()"
+                    >
+                        Réessayer
+                    </button>
+                </div>
             } @else {
                 <ul class="gtiles" [class.reloading]="products.isLoading()">
                     @for (product of results(); track product.id) {
@@ -262,16 +204,6 @@
                                 >
                                     <app-icon name="search" [size]="16" />
                                 </button>
-                            } @else if (auth.isAdmin()) {
-                                <button
-                                    type="button"
-                                    class="gcorner gcorner-add"
-                                    [disabled]="photoBusyId() === product.id"
-                                    [attr.aria-label]="'Ajouter une photo pour ' + product.name"
-                                    (click)="askPhoto(product)"
-                                >
-                                    <app-icon name="camera" [size]="16" />
-                                </button>
                             }
                         </li>
                     } @empty {
@@ -285,511 +217,183 @@
                     }
                 </ul>
             }
-            <app-pagination
-                [total]="resultsTotal()"
-                [(page)]="page"
-                [(pageSize)]="pageSize"
-                (pageChange)="resetCatalogScroll()"
-            />
-        }
-    </section>
+        </section>
 
-    <section
-        class="card cart"
-        id="cart"
-        aria-label="Panier"
-        [class.cart-empty]="cart().length === 0"
-        [class.open]="cartOpen()"
-        [class.paying]="payStep()"
-    >
-        <div class="cart-header" (touchstart)="swipeStart($event)" (touchend)="swipeEnd($event)">
-            <span class="grip" aria-hidden="true"></span>
-            <button type="button" class="step-back" (click)="backToCart()">
-                <app-icon name="chevron-left" [size]="20" />
-                Panier
-            </button>
-            <span class="head-icon"><app-icon name="cart" [size]="18" /></span>
-            <h2 class="title-cart">Panier</h2>
-            <h2 class="title-pay">Paiement</h2>
-            @if (cart().length > 0) {
-                <span class="count"
-                    >{{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}</span
-                >
-                <button type="button" class="clear" (click)="clearCart()">Vider</button>
-            }
-            <button
-                type="button"
-                class="sheet-close"
-                aria-label="Fermer le panier"
-                (click)="closeCart()"
+        <section
+            class="card cart"
+            id="cart"
+            aria-label="Panier"
+            [class.cart-empty]="cart().length === 0"
+            [class.open]="cartOpen()"
+        >
+            <div
+                class="cart-header"
+                (touchstart)="swipeStart($event)"
+                (touchend)="swipeEnd($event)"
             >
-                <app-icon name="close" [size]="20" />
-            </button>
-        </div>
-
-        @if (cart().length === 0) {
-            <div class="empty-cart">
-                <span class="empty-icon"><app-icon name="cart" [size]="26" /></span>
-                <strong>Votre panier est vide</strong>
-                <span class="muted">Choisissez un produit pour commencer la vente.</span>
-            </div>
-        } @else {
-            <div class="cart-body">
-                <ul class="lines">
-                    @for (line of cart(); track line.product.id) {
-                        <li class="line">
-                            <ng-container
-                                *ngTemplateOutlet="thumb; context: { $implicit: line.product }"
-                            />
-                            <div class="line-main">
-                                <strong class="line-name">{{ line.product.name }}</strong>
-                                @if (lineError(line); as message) {
-                                    <small class="field-error" role="alert">{{ message }}</small>
-                                }
-                                <span class="line-sub">
-                                    @if (!lineError(line)) {
-                                        <small class="muted">
-                                            {{ line.unitPrice | fcfa }} l'unité
-                                            @if (line.unitPrice !== line.product.sale_price) {
-                                                <s>{{ line.product.sale_price | fcfa }}</s>
-                                            }
-                                        </small>
-                                    }
-                                </span>
-                            </div>
-                            <strong class="line-total">{{
-                                line.quantity * line.unitPrice | fcfa
-                            }}</strong>
-
-                            <div class="line-actions">
-                                <div class="stepper" role="group" aria-label="Quantité">
-                                    <button
-                                        type="button"
-                                        [disabled]="line.quantity <= 1"
-                                        aria-label="Diminuer la quantité"
-                                        (click)="setQuantity(line, line.quantity - 1)"
-                                    >
-                                        <app-icon name="minus" [size]="16" />
-                                    </button>
-                                    <input
-                                        type="number"
-                                        inputmode="numeric"
-                                        min="1"
-                                        [max]="line.product.theoretical_stock"
-                                        [value]="line.quantity"
-                                        [attr.aria-label]="'Quantité de ' + line.product.name"
-                                        (change)="onQuantityChange(line, $any($event.target))"
-                                    />
-                                    <button
-                                        type="button"
-                                        [disabled]="line.quantity >= line.product.theoretical_stock"
-                                        aria-label="Augmenter la quantité"
-                                        (click)="setQuantity(line, line.quantity + 1)"
-                                    >
-                                        <app-icon name="plus" [size]="16" />
-                                    </button>
-                                </div>
-
-                                @if (line.product.pricing_mode === "NEGOTIABLE") {
-                                    <button
-                                        type="button"
-                                        class="price-link"
-                                        [class.on]="isPriceOpen(line)"
-                                        [attr.aria-expanded]="isPriceOpen(line)"
-                                        (click)="togglePrice(line)"
-                                    >
-                                        <app-icon name="tag" [size]="16" />
-                                        {{
-                                            isPriceOpen(line)
-                                                ? "Masquer le prix"
-                                                : "Modifier le prix"
-                                        }}
-                                    </button>
-                                }
-
-                                <button
-                                    type="button"
-                                    class="icon-btn"
-                                    [attr.aria-label]="'Retirer ' + line.product.name"
-                                    (click)="removeLine(line)"
-                                >
-                                    <app-icon name="trash" [size]="18" />
-                                </button>
-                            </div>
-
-                            @if (line.product.pricing_mode === "NEGOTIABLE" && isPriceOpen(line)) {
-                                <label class="price-edit">
-                                    <span>Prix unitaire</span>
-                                    <input
-                                        class="input price-input"
-                                        type="number"
-                                        inputmode="numeric"
-                                        [min]="minPrice(line.product)"
-                                        [max]="line.product.sale_price"
-                                        [value]="line.unitPrice"
-                                        step="1"
-                                        [class.invalid]="!!lineError(line)"
-                                        (change)="onPriceChange(line, $any($event.target))"
-                                    />
-                                    <small class="muted"
-                                        >Entre {{ minPrice(line.product) | fcfa }} et
-                                        {{ line.product.sale_price | fcfa }}</small
-                                    >
-                                </label>
-                            }
-                        </li>
-                    }
-                </ul>
-
-                @if (!optionsOpen()) {
-                    <button
-                        type="button"
-                        class="more-toggle pay-only"
-                        aria-expanded="false"
-                        (click)="moreOpen.set(true)"
+                <span class="grip" aria-hidden="true"></span>
+                <span class="head-icon"><app-icon name="cart" [size]="18" /></span>
+                <h2>Panier</h2>
+                @if (cart().length > 0) {
+                    <span class="count"
+                        >{{ itemsCount() }} article{{ itemsCount() > 1 ? "s" : "" }}</span
                     >
-                        <span>Plus d'options</span>
-                        <small class="muted">Client, acompte, paiement mixte</small>
-                        <app-icon name="chevron-down" [size]="16" />
-                    </button>
-                } @else {
-                    <div class="more pay-only" role="group" aria-label="Options de la vente">
-                        <div class="section-head">
-                            <span class="section-title">Plus d'options</span>
-                            @if (canFoldOptions()) {
-                                <button type="button" class="clear" (click)="moreOpen.set(false)">
-                                    Replier
-                                </button>
-                            }
-                        </div>
-
-                        <!-- client facultatif -->
-                        @if (showCustomer()) {
-                            <div class="section" role="group" aria-label="Client">
-                                <div class="section-head">
-                                    <span class="section-title">Client</span>
-                                    <button type="button" class="clear" (click)="toggleCustomer()">
-                                        Retirer
-                                    </button>
-                                </div>
-
-                                @if (customer(); as chosen) {
-                                    <div class="picked">
-                                        <span
-                                            class="avatar av-{{ chosen.id % 4 }}"
-                                            aria-hidden="true"
-                                            >{{ initials(chosen.name) }}</span
-                                        >
-                                        <span class="picked-text">
-                                            <strong>{{ chosen.name }}</strong>
-                                            <small class="muted">{{
-                                                chosen.phone
-                                                    ? formatPhone(chosen.phone)
-                                                    : "Sans téléphone"
-                                            }}</small>
-                                        </span>
-                                        <button
-                                            type="button"
-                                            class="picked-change"
-                                            aria-label="Changer de client"
-                                            (click)="changeCustomer()"
-                                        >
-                                            <app-icon name="close" [size]="18" />
-                                        </button>
-                                    </div>
-                                    @if (chosen.due_amount > 0) {
-                                        <p class="picked-due" role="status">
-                                            <app-icon name="alert" [size]="16" />
-                                            Doit déjà {{ chosen.due_amount | fcfa }} sur ses achats
-                                        </p>
-                                    }
-                                } @else if (freeEntry()) {
-                                    <div class="customer">
-                                        <input
-                                            class="input"
-                                            type="text"
-                                            maxlength="100"
-                                            autocomplete="off"
-                                            placeholder="Nom du client"
-                                            aria-label="Nom du client"
-                                            [value]="customerName()"
-                                            (input)="customerName.set($any($event.target).value)"
-                                        />
-                                        <app-phone-field
-                                            ariaLabel="Téléphone du client"
-                                            placeholder="Téléphone"
-                                            [showCountry]="false"
-                                            [ngModel]="customerPhone()"
-                                            (ngModelChange)="onPhoneInput($event)"
-                                        />
-                                    </div>
-                                    @if (phoneMatch(); as match) {
-                                        <div class="match" role="status">
-                                            <span
-                                                class="avatar av-{{ match.id % 4 }}"
-                                                aria-hidden="true"
-                                                >{{ initials(match.name) }}</span
-                                            >
-                                            <span class="picked-text">
-                                                <strong>C'est {{ match.name }} ?</strong>
-                                                <small class="muted">{{
-                                                    formatPhone(match.phone!)
-                                                }}</small>
-                                            </span>
-                                            <button
-                                                type="button"
-                                                class="btn btn-primary btn-sm"
-                                                (click)="chooseCustomer(match)"
-                                            >
-                                                Choisir
-                                            </button>
-                                        </div>
-                                    }
-                                    <button
-                                        type="button"
-                                        class="free-link"
-                                        (click)="backToPicker()"
-                                    >
-                                        Choisir une fiche
-                                    </button>
-                                } @else {
-                                    <div class="picker-zone" (keydown.escape)="closePicker(search)">
-                                        <div class="picker">
-                                            <app-icon name="search" [size]="18" />
-                                            <input
-                                                #search
-                                                class="input"
-                                                type="search"
-                                                role="combobox"
-                                                maxlength="100"
-                                                autocomplete="off"
-                                                aria-autocomplete="list"
-                                                aria-controls="customer-list"
-                                                placeholder="Chercher un nom ou un téléphone"
-                                                aria-label="Chercher un client"
-                                                [attr.aria-expanded]="pickerOpen()"
-                                                (focus)="pickerOpen.set(true)"
-                                                (input)="
-                                                    onCustomerSearch($any($event.target).value)
-                                                "
-                                            />
-                                        </div>
-
-                                        @if (pickerOpen()) {
-                                            <ul
-                                                id="customer-list"
-                                                class="picker-list"
-                                                role="listbox"
-                                                aria-label="Clients"
-                                            >
-                                                @for (found of customerList(); track found.id) {
-                                                    <li role="presentation">
-                                                        <button
-                                                            type="button"
-                                                            role="option"
-                                                            class="picker-row"
-                                                            (click)="chooseCustomer(found)"
-                                                        >
-                                                            <span
-                                                                class="avatar av-{{ found.id % 4 }}"
-                                                                aria-hidden="true"
-                                                                >{{ initials(found.name) }}</span
-                                                            >
-                                                            <span class="picked-text">
-                                                                <strong>{{ found.name }}</strong>
-                                                                <small class="muted">{{
-                                                                    found.phone
-                                                                        ? formatPhone(found.phone)
-                                                                        : "Sans téléphone"
-                                                                }}</small>
-                                                            </span>
-                                                            @if (found.due_amount > 0) {
-                                                                <span class="badge badge-warning"
-                                                                    >Doit
-                                                                    {{
-                                                                        found.due_amount | fcfa
-                                                                    }}</span
-                                                                >
-                                                            }
-                                                        </button>
-                                                    </li>
-                                                } @empty {
-                                                    @if (customerResults.error()) {
-                                                        <li
-                                                            class="picker-empty picker-error"
-                                                            role="alert"
-                                                        >
-                                                            <span
-                                                                >Impossible de charger les
-                                                                clients.</span
-                                                            >
-                                                            <button
-                                                                type="button"
-                                                                class="btn btn-outline btn-sm"
-                                                                (click)="customerResults.reload()"
-                                                            >
-                                                                Réessayer
-                                                            </button>
-                                                        </li>
-                                                    } @else if (customerResults.isLoading()) {
-                                                        <li
-                                                            class="picker-empty picker-loading muted"
-                                                            role="status"
-                                                        >
-                                                            <span class="spinner"></span>
-                                                            Recherche…
-                                                        </li>
-                                                    } @else {
-                                                        <li class="picker-empty muted">
-                                                            Aucun client trouvé.
-                                                        </li>
-                                                    }
-                                                }
-                                                <li role="presentation">
-                                                    <button
-                                                        type="button"
-                                                        role="option"
-                                                        class="picker-row picker-new"
-                                                        (click)="openNewCustomer(customerForm)"
-                                                    >
-                                                        <span
-                                                            class="avatar av-add"
-                                                            aria-hidden="true"
-                                                        >
-                                                            <app-icon name="plus" [size]="18" />
-                                                        </span>
-                                                        <span class="picked-text">
-                                                            <strong>Nouveau client</strong>
-                                                        </span>
-                                                    </button>
-                                                </li>
-                                            </ul>
-                                        }
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        class="free-link"
-                                        (click)="useFreeEntry()"
-                                    >
-                                        Saisir sans fiche
-                                    </button>
-                                }
-                            </div>
-                        } @else {
-                            <button
-                                type="button"
-                                class="add-customer"
-                                [attr.aria-pressed]="false"
-                                (click)="toggleCustomer()"
-                            >
-                                <app-icon name="user" [size]="18" />
-                                <span>Ajouter un client</span>
-                                <small class="muted">Facultatif</small>
-                            </button>
-                        }
-
-                        <div class="section" role="group" aria-label="Paiement en plusieurs fois">
-                            <div class="section-head">
-                                <span class="section-title">Paiement</span>
-                                <div
-                                    class="options"
-                                    role="group"
-                                    aria-label="Autres façons de payer"
-                                >
-                                    <button
-                                        type="button"
-                                        class="option option-deposit"
-                                        [class.on]="showDeposit()"
-                                        [attr.aria-pressed]="showDeposit()"
-                                        (click)="toggleDeposit()"
-                                    >
-                                        Acompte
-                                    </button>
-                                    <button
-                                        type="button"
-                                        class="option option-split"
-                                        [class.on]="split()"
-                                        [attr.aria-pressed]="split()"
-                                        (click)="toggleSplit()"
-                                    >
-                                        Mixte
-                                    </button>
-                                </div>
-                            </div>
-
-                            @if (showDeposit() || split()) {
-                                <label class="field">
-                                    <span>
-                                        {{
-                                            split()
-                                                ? "Part payée en espèces"
-                                                : "Montant payé maintenant"
-                                        }}
-                                    </span>
-                                    <input
-                                        #depositInput
-                                        class="input"
-                                        type="number"
-                                        inputmode="numeric"
-                                        min="1"
-                                        step="1"
-                                        [placeholder]="
-                                            split() ? 'Ex. 5000' : 'Tout payer : ' + total()
-                                        "
-                                        [value]="deposit() ?? ''"
-                                        [class.invalid]="depositError() !== null"
-                                        (input)="onDepositChange(depositInput)"
-                                    />
-                                </label>
-                                @if (depositError(); as message) {
-                                    <small class="field-error" role="alert">{{ message }}</small>
-                                } @else if (remaining() > 0 && !split()) {
-                                    <div class="remaining">
-                                        <span>Reste à payer</span>
-                                        <strong>{{ remaining() | fcfa }}</strong>
-                                    </div>
-                                }
-                            }
-                        </div>
-                    </div>
+                    <button type="button" class="clear" (click)="clearCart()">Vider</button>
                 }
-            </div>
-
-            <div class="cart-footer">
-                @if (error()) {
-                    <div class="alert alert-error" role="alert">{{ error() }}</div>
-                }
-
-                @if (discount() > 0) {
-                    <dl class="recap">
-                        <div>
-                            <dt>Sous-total</dt>
-                            <dd>{{ subtotal() | fcfa }}</dd>
-                        </div>
-                        <div class="recap-discount">
-                            <dt>Remise</dt>
-                            <dd>− {{ discount() | fcfa }}</dd>
-                        </div>
-                    </dl>
-                }
-                <div class="total">
-                    <span>Total</span>
-                    <strong>{{ total() | fcfa }}</strong>
-                </div>
-
                 <button
                     type="button"
-                    class="btn btn-primary btn-block to-pay cart-only"
-                    [disabled]="hasInvalidLine()"
-                    (click)="goToPayment()"
+                    class="sheet-close"
+                    aria-label="Fermer le panier"
+                    (click)="closeCart()"
                 >
-                    Continuer vers le paiement
-                    <app-icon name="chevron-right" [size]="18" />
+                    <app-icon name="close" [size]="20" />
                 </button>
+            </div>
 
-                <div class="pay pay-only" role="group" aria-label="Paiement">
-                    @if (!split()) {
+            @if (cart().length === 0) {
+                <div class="empty-cart">
+                    <span class="empty-icon"><app-icon name="cart" [size]="26" /></span>
+                    <strong>Votre panier est vide</strong>
+                    <span class="muted">Choisissez un produit pour commencer la vente.</span>
+                </div>
+            } @else {
+                <div class="cart-body">
+                    <ul class="lines">
+                        @for (line of cart(); track line.product.id) {
+                            <li class="line">
+                                <span class="thumb tone-{{ tone(line.product.name) }}">
+                                    @if (line.product.image) {
+                                        <img [src]="line.product.image" alt="" />
+                                    } @else {
+                                        {{ initials(line.product.name) }}
+                                    }
+                                </span>
+                                <div class="line-main">
+                                    <strong class="line-name">{{ line.product.name }}</strong>
+                                    @if (lineError(line); as message) {
+                                        <small class="field-error" role="alert">{{
+                                            message
+                                        }}</small>
+                                    }
+                                    <span class="line-sub">
+                                        @if (!lineError(line)) {
+                                            <small class="muted">
+                                                {{ line.unitPrice | fcfa }} l'unité
+                                                @if (line.unitPrice !== line.product.sale_price) {
+                                                    <s>{{ line.product.sale_price | fcfa }}</s>
+                                                }
+                                            </small>
+                                        }
+                                    </span>
+                                </div>
+                                <strong class="line-total">{{
+                                    line.quantity * line.unitPrice | fcfa
+                                }}</strong>
+
+                                <div class="line-actions">
+                                    <div class="stepper" role="group" aria-label="Quantité">
+                                        <button
+                                            type="button"
+                                            [disabled]="line.quantity <= 1"
+                                            aria-label="Diminuer la quantité"
+                                            (click)="setQuantity(line, line.quantity - 1)"
+                                        >
+                                            <app-icon name="minus" [size]="16" />
+                                        </button>
+                                        <input
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="1"
+                                            [max]="line.product.theoretical_stock"
+                                            [value]="line.quantity"
+                                            [attr.aria-label]="'Quantité de ' + line.product.name"
+                                            (change)="onQuantityChange(line, $any($event.target))"
+                                        />
+                                        <button
+                                            type="button"
+                                            [disabled]="
+                                                line.quantity >= line.product.theoretical_stock
+                                            "
+                                            aria-label="Augmenter la quantité"
+                                            (click)="setQuantity(line, line.quantity + 1)"
+                                        >
+                                            <app-icon name="plus" [size]="16" />
+                                        </button>
+                                    </div>
+
+                                    @if (line.product.pricing_mode === "NEGOTIABLE") {
+                                        <button
+                                            type="button"
+                                            class="price-link"
+                                            [class.on]="isPriceOpen(line)"
+                                            [attr.aria-expanded]="isPriceOpen(line)"
+                                            (click)="togglePrice(line)"
+                                        >
+                                            <app-icon name="tag" [size]="16" />
+                                            {{ isPriceOpen(line) ? "Fermer" : "Prix" }}
+                                        </button>
+                                    }
+
+                                    <button
+                                        type="button"
+                                        class="icon-btn"
+                                        [attr.aria-label]="'Retirer ' + line.product.name"
+                                        (click)="removeLine(line)"
+                                    >
+                                        <app-icon name="trash" [size]="18" />
+                                    </button>
+                                </div>
+
+                                @if (
+                                    line.product.pricing_mode === "NEGOTIABLE" && isPriceOpen(line)
+                                ) {
+                                    <label class="price-edit">
+                                        <span>Prix unitaire</span>
+                                        <input
+                                            class="input price-input"
+                                            type="number"
+                                            inputmode="numeric"
+                                            [min]="minPrice(line.product)"
+                                            [max]="line.product.sale_price"
+                                            [value]="line.unitPrice"
+                                            step="1"
+                                            [class.invalid]="!!lineError(line)"
+                                            (change)="onPriceChange(line, $any($event.target))"
+                                        />
+                                        <small class="muted"
+                                            >Entre {{ minPrice(line.product) | fcfa }} et
+                                            {{ line.product.sale_price | fcfa }}</small
+                                        >
+                                    </label>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                <div class="cart-footer">
+                    @if (error()) {
+                        <div class="alert alert-error" role="alert">{{ error() }}</div>
+                    }
+
+                    @if (discount() > 0) {
+                        <dl class="recap">
+                            <div>
+                                <dt>Sous-total</dt>
+                                <dd>{{ subtotal() | fcfa }}</dd>
+                            </div>
+                            <div class="recap-discount">
+                                <dt>Remise</dt>
+                                <dd>− {{ discount() | fcfa }}</dd>
+                            </div>
+                        </dl>
+                    }
+                    <div class="total">
+                        <span>Total</span>
+                        <strong>{{ total() | fcfa }}</strong>
+                    </div>
+
+                    <div class="pay" role="group" aria-label="Paiement">
                         <div class="methods">
                             <button
                                 type="button"
@@ -812,106 +416,276 @@
                                 Mobile Money
                             </button>
                         </div>
-                    }
 
-                    @if (paymentMethod() === "CASH") {
-                        <label class="pay-label" for="received">Montant reçu</label>
-                        <input
-                            #received
-                            id="received"
-                            class="input"
-                            type="number"
-                            inputmode="numeric"
-                            min="0"
-                            step="1"
-                            placeholder="Ex. 10 000"
-                            aria-label="Montant reçu"
-                            [value]="amountReceived() ?? ''"
-                            [class.invalid]="missingAmount() > 0"
-                            (input)="onReceivedChange(received)"
-                        />
-                        <div class="chips" role="group" aria-label="Montants rapides">
-                            @for (amount of cashSuggestions(); track amount) {
+                        @if (showDeposit()) {
+                            <!-- paiement partiel : ce champ remplace les montants rapides -->
+                            <label class="field">
+                                <span>Montant payé maintenant</span>
+                                <input
+                                    #depositInput
+                                    class="input"
+                                    type="number"
+                                    inputmode="numeric"
+                                    min="1"
+                                    step="1"
+                                    [placeholder]="'Sur ' + total()"
+                                    [value]="deposit() ?? ''"
+                                    [class.invalid]="depositError() !== null"
+                                    (input)="onDepositChange(depositInput)"
+                                />
+                            </label>
+                            @if (depositError(); as message) {
+                                <small class="field-error" role="alert">{{ message }}</small>
+                            } @else if (remaining() > 0) {
+                                <div class="remaining">
+                                    <span>Reste à payer</span>
+                                    <strong>{{ remaining() | fcfa }}</strong>
+                                </div>
+                            }
+                        } @else if (paymentMethod() === "CASH") {
+                            <div class="chips" role="group" aria-label="Montant reçu">
+                                @for (amount of cashSuggestions(); track amount) {
+                                    <button
+                                        type="button"
+                                        class="chip"
+                                        [class.active]="amountReceived() === amount"
+                                        (click)="amountReceived.set(amount); otherOpen.set(false)"
+                                    >
+                                        {{
+                                            $first && amount === toPay()
+                                                ? "Montant exact"
+                                                : (amount | fcfa)
+                                        }}
+                                    </button>
+                                }
                                 <button
                                     type="button"
                                     class="chip"
-                                    [class.active]="amountReceived() === amount"
-                                    (click)="amountReceived.set(amount)"
+                                    [class.active]="otherOpen()"
+                                    (click)="otherOpen.set(true)"
                                 >
-                                    {{
-                                        $first && amount === toPay()
-                                            ? "Montant exact"
-                                            : (amount | fcfa)
-                                    }}
+                                    Autre
+                                </button>
+                            </div>
+                            @if (otherOpen()) {
+                                <input
+                                    #received
+                                    id="received"
+                                    class="input"
+                                    type="number"
+                                    inputmode="numeric"
+                                    min="0"
+                                    step="1"
+                                    placeholder="Montant reçu"
+                                    aria-label="Montant reçu"
+                                    [value]="amountReceived() ?? ''"
+                                    [class.invalid]="missingAmount() > 0"
+                                    (input)="onReceivedChange(received)"
+                                />
+                            }
+                            @if (missingAmount() > 0) {
+                                <small class="field-error" role="alert"
+                                    >Il manque {{ missingAmount() | fcfa }}.</small
+                                >
+                            } @else if (change() !== null) {
+                                <div class="change" [class.exact]="change() === 0">
+                                    @if (change() === 0) {
+                                        <span>Compte juste</span>
+                                    } @else {
+                                        <span>Monnaie à rendre</span>
+                                        <strong>{{ change() | fcfa }}</strong>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    @if (!optionsOpen()) {
+                        <button type="button" class="free-link" (click)="moreOpen.set(true)">
+                            Ajouter un client ou payer une partie
+                        </button>
+                    } @else {
+                        <!-- client et paiement partiel : repliés tant qu'on n'en a pas besoin -->
+                        <div class="section" role="group" aria-label="Client">
+                            @if (customer(); as chosen) {
+                                <div class="picked">
+                                    <span
+                                        class="avatar av-{{ chosen.id % 4 }}"
+                                        aria-hidden="true"
+                                        >{{ initials(chosen.name) }}</span
+                                    >
+                                    <span class="picked-text">
+                                        <strong>{{ chosen.name }}</strong>
+                                        <small class="muted">{{
+                                            chosen.phone
+                                                ? formatPhone(chosen.phone)
+                                                : "Sans téléphone"
+                                        }}</small>
+                                    </span>
+                                    <button
+                                        type="button"
+                                        class="picked-change"
+                                        aria-label="Changer de client"
+                                        (click)="changeCustomer()"
+                                    >
+                                        <app-icon name="close" [size]="18" />
+                                    </button>
+                                </div>
+                                @if (chosen.due_amount > 0) {
+                                    <p class="picked-due" role="status">
+                                        <app-icon name="alert" [size]="16" />
+                                        Doit déjà {{ chosen.due_amount | fcfa }} sur ses achats
+                                    </p>
+                                }
+                            } @else {
+                                <div class="picker-zone" (keydown.escape)="closePicker()">
+                                    <div class="picker">
+                                        <app-icon name="user" [size]="18" />
+                                        <input
+                                            class="input"
+                                            type="text"
+                                            role="combobox"
+                                            maxlength="100"
+                                            autocomplete="off"
+                                            aria-autocomplete="list"
+                                            aria-controls="customer-list"
+                                            [placeholder]="
+                                                showDeposit()
+                                                    ? 'Nom du client'
+                                                    : 'Client (facultatif) : nom ou téléphone'
+                                            "
+                                            aria-label="Client, nom ou téléphone"
+                                            [attr.aria-expanded]="pickerOpen()"
+                                            [value]="customerText()"
+                                            (focus)="pickerOpen.set(true)"
+                                            (input)="onCustomerInput($any($event.target).value)"
+                                        />
+                                    </div>
+
+                                    @if (
+                                        pickerOpen() &&
+                                        (customerList().length > 0 || customerResults.error())
+                                    ) {
+                                        <ul
+                                            id="customer-list"
+                                            class="picker-list"
+                                            role="listbox"
+                                            aria-label="Clients"
+                                        >
+                                            @for (found of customerList(); track found.id) {
+                                                <li role="presentation">
+                                                    <button
+                                                        type="button"
+                                                        role="option"
+                                                        class="picker-row"
+                                                        (click)="chooseCustomer(found)"
+                                                    >
+                                                        <span
+                                                            class="avatar av-{{ found.id % 4 }}"
+                                                            aria-hidden="true"
+                                                            >{{ initials(found.name) }}</span
+                                                        >
+                                                        <span class="picked-text">
+                                                            <strong>{{ found.name }}</strong>
+                                                            <small class="muted">{{
+                                                                found.phone
+                                                                    ? formatPhone(found.phone)
+                                                                    : "Sans téléphone"
+                                                            }}</small>
+                                                        </span>
+                                                        @if (found.due_amount > 0) {
+                                                            <span class="badge badge-warning"
+                                                                >Doit
+                                                                {{ found.due_amount | fcfa }}</span
+                                                            >
+                                                        }
+                                                    </button>
+                                                </li>
+                                            } @empty {
+                                                <li class="picker-empty picker-error" role="alert">
+                                                    <span>Impossible de charger les clients.</span>
+                                                    <button
+                                                        type="button"
+                                                        class="btn btn-outline btn-sm"
+                                                        (click)="customerResults.reload()"
+                                                    >
+                                                        Réessayer
+                                                    </button>
+                                                </li>
+                                            }
+                                        </ul>
+                                    }
+                                </div>
+                            }
+                            @if (showDeposit() && !customer()) {
+                                <input
+                                    class="input"
+                                    type="tel"
+                                    inputmode="tel"
+                                    maxlength="30"
+                                    autocomplete="off"
+                                    placeholder="Téléphone du client"
+                                    aria-label="Téléphone du client"
+                                    [value]="customerPhoneText()"
+                                    (input)="customerPhoneText.set($any($event.target).value)"
+                                />
+                                <small class="muted"
+                                    >Le nom et le téléphone créent la fiche client, pour le
+                                    relancer.</small
+                                >
+                            }
+                            <button
+                                type="button"
+                                class="free-link"
+                                [attr.aria-pressed]="showDeposit()"
+                                (click)="toggleDeposit()"
+                            >
+                                {{
+                                    showDeposit()
+                                        ? "Tout payer maintenant"
+                                        : "Payer une partie seulement"
+                                }}
+                            </button>
+                        </div>
+                    }
+
+                    @if (cashClosedToday()) {
+                        <p class="alert alert-warning closed-note" role="alert">
+                            <app-icon name="alert" />
+                            <span>Caisse clôturée pour aujourd'hui.</span>
+                            @if (auth.isAdmin()) {
+                                <button type="button" class="link-btn" (click)="reopen()">
+                                    Rouvrir la caisse
                                 </button>
                             }
-                        </div>
-                        @if (missingAmount() > 0) {
-                            <small class="field-error" role="alert"
-                                >Il manque {{ missingAmount() | fcfa }}.</small
-                            >
-                        } @else if (change() !== null) {
-                            <div class="change" [class.exact]="change() === 0">
-                                @if (change() === 0) {
-                                    <span>Compte juste</span>
-                                } @else {
-                                    <span>Monnaie à rendre</span>
-                                    <strong>{{ change() | fcfa }}</strong>
-                                }
-                            </div>
-                        }
+                        </p>
                     }
 
-                    @if (split()) {
-                        @if (deposit() !== null && deposit()! < total()) {
-                            <div class="remaining second">
-                                <span>Reste en Mobile Money</span>
-                                <strong>{{ secondAmount() | fcfa }}</strong>
-                            </div>
+                    <button
+                        type="button"
+                        class="btn btn-primary btn-block submit"
+                        [class.busy]="saving()"
+                        [disabled]="cashNeedsOpening() ? false : !canSubmit()"
+                        (click)="cashNeedsOpening() ? openCash() : submit()"
+                    >
+                        @if (saving()) {
+                            <span class="spinner"></span>
                         }
-                    }
+                        @if (cashNeedsOpening()) {
+                            Ouvrir la caisse pour vendre
+                        } @else {
+                            Encaisser {{ payNow() | fcfa }}
+                            <kbd class="btn-key" aria-hidden="true">Entrée</kbd>
+                        }
+                    </button>
                 </div>
+            }
+        </section>
+    </div>
+}
 
-                @if (cashClosed()) {
-                    <p class="alert alert-warning closed-note pay-only" role="alert">
-                        <app-icon name="alert" />
-                        <span>
-                            Caisse
-                            {{ cashClosedToday() ? "clôturée pour aujourd'hui." : "fermée." }}
-                        </span>
-                        @if (!cashClosedToday()) {
-                            <button type="button" class="link-btn" (click)="openCash()">
-                                Ouvrir la caisse
-                            </button>
-                        } @else if (auth.isAdmin()) {
-                            <button type="button" class="link-btn" (click)="reopen()">
-                                Rouvrir la caisse
-                            </button>
-                        }
-                    </p>
-                }
-
-                <button
-                    type="button"
-                    class="btn btn-primary btn-block submit pay-only"
-                    [class.busy]="saving()"
-                    [disabled]="!canSubmit()"
-                    (click)="submit()"
-                >
-                    @if (saving()) {
-                        <span class="spinner"></span>
-                    }
-                    Encaisser {{ payNow() | fcfa }}
-                    <kbd class="btn-key" aria-hidden="true">Entrée</kbd>
-                </button>
-            </div>
-        }
-    </section>
-</div>
-
-<!-- le fond ne s'assombrit qu'à l'étape du paiement : pendant le panier, le catalogue reste utilisable -->
-@if (cartOpen() && payStep()) {
-    <div class="sheet-backdrop" aria-hidden="true" (click)="backToCart()"></div>
+@if (cartOpen()) {
+    <div class="sheet-backdrop" aria-hidden="true" (click)="closeCart()"></div>
 }
 
 <!-- téléphone : barre fixe en bas, le catalogue reste visible derrière -->
@@ -924,45 +698,14 @@
                 <strong>{{ total() | fcfa }}</strong>
             </span>
         </button>
-        <button type="button" class="bar-btn" (click)="openCart()">Voir le panier</button>
+        <div class="bar-actions">
+            <button type="button" class="bar-btn bar-ghost" (click)="openCart()">Panier</button>
+            <button type="button" class="bar-btn" [disabled]="saving()" (click)="quickPay()">
+                Encaisser
+            </button>
+        </div>
     </div>
 }
-
-<!-- photo du produit : l'image s'agrandit au clic, les initiales proposent d'ajouter une photo (administrateur) -->
-<ng-template #thumb let-product>
-    <span class="thumb tone-{{ tone(product.name) }}">
-        @if (product.image) {
-            <button
-                type="button"
-                class="thumb-zoom"
-                [attr.aria-label]="'Agrandir la photo de ' + product.name"
-                (click)="zoomImage(product)"
-            >
-                <img [src]="product.image" alt="" />
-                <span class="thumb-hint" aria-hidden="true"
-                    ><app-icon name="search" [size]="12"
-                /></span>
-            </button>
-        } @else if (auth.isAdmin()) {
-            <button
-                type="button"
-                class="thumb-add"
-                [disabled]="photoBusyId() === product.id"
-                [attr.aria-label]="'Ajouter une photo pour ' + product.name"
-                (click)="askPhoto(product)"
-            >
-                {{ initials(product.name) }}
-                <span class="thumb-hint" aria-hidden="true"
-                    ><app-icon name="camera" [size]="12"
-                /></span>
-            </button>
-        } @else {
-            {{ initials(product.name) }}
-        }
-    </span>
-</ng-template>
-
-<input #photoInput type="file" accept="image/png,image/jpeg" hidden (change)="pickPhoto($event)" />
 
 @if (photoNotice(); as notice) {
     <div
@@ -982,7 +725,5 @@
 <app-reopen-cash-dialog #reopenCash (reopened)="cash.reload()" />
 
 <app-open-cash-dialog #openCashDialog (opened)="cash.reload()" />
-
-<app-customer-form #customerForm (saved)="onCustomerCreated($event)" />
 
 <app-barcode-scanner #scanner (scanned)="onScanned($event)" />

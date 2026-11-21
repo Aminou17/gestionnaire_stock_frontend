@@ -24,7 +24,19 @@
         </div>
     }
 
-    <!-- l'état de la caisse est dans la carte « En caisse » : les messages et les actions sont sur la page Caisse -->
+    <!-- caisse pas prête : le même message et le même geste que partout, sans passer par la page Caisse -->
+    @if (summary.hasValue() && !cashOpen() && !firstSteps()) {
+        <app-cash-closed-notice
+            [compact]="true"
+            [state]="cashGate()"
+            [since]="previousOwn()?.sessionDate ?? null"
+            [canReopen]="true"
+            purpose="vendre"
+            (openCash)="openCashDialog.open()"
+            (reopen)="reopenDialog.open(cash()!.id)"
+        />
+    }
+
     @if (firstSteps(); as start) {
         <section class="start" aria-labelledby="start-title">
             <div class="start-head">
@@ -47,7 +59,7 @@
                                 <button
                                     type="button"
                                     class="btn btn-outline btn-sm"
-                                    (click)="openCash.open()"
+                                    (click)="openCashDialog.open()"
                                 >
                                     Ouvrir
                                 </button>
@@ -166,7 +178,8 @@
         />
     </section>
 
-    <app-open-cash-dialog #openCash (opened)="onCashOpened()" />
+    <app-open-cash-dialog #openCashDialog (opened)="onCashOpened()" />
+    <app-reopen-cash-dialog #reopenDialog (reopened)="onCashOpened()" />
 } @else {
     <!-- même ordre sur téléphone et sur ordinateur : la grille ne fait que placer les blocs -->
     <div class="manager">
@@ -175,18 +188,23 @@
             [cash]="cash()"
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
+            [previousOpen]="!!previousOwn() && !cashOpen()"
             (retry)="summary.reload()"
+            (openCash)="openCashDialog.open()"
         />
 
         @if (summaryData()?.previousOpenSession; as previous) {
-            <div class="alert alert-warning banner m-previous" role="alert">
-                <app-icon name="alert" />
-                <span>
-                    La caisse du <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a
-                    pas été clôturée.
-                </span>
-                <a routerLink="/cash">Clôturer</a>
-            </div>
+            @if (cashOpen() || !previousOwn()) {
+                <div class="alert alert-warning banner m-previous" role="alert">
+                    <app-icon name="alert" />
+                    <span>
+                        La caisse du
+                        <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas été
+                        clôturée.
+                    </span>
+                    <a routerLink="/cash">Clôturer</a>
+                </div>
+            }
         }
 
         <!-- seule la personne qui a compté peut expliquer l'écart -->
@@ -264,4 +282,6 @@
             </div>
         }
     </div>
+
+    <app-open-cash-dialog #openCashDialog (opened)="onCashOpened()" />
 }

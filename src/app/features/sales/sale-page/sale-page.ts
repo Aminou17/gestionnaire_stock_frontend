@@ -87,9 +87,6 @@ export class SalePage {
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
-    // vient de la page Nouvelle vente
-    justCreated = signal(!!inject(Router).currentNavigation()?.extras.state?.["created"]);
-
     // un identifiant qui n'est pas un entier n'est même pas demandé au backend
     validId = computed(() => {
         const id = this.id();
@@ -127,11 +124,6 @@ export class SalePage {
             0,
         ),
     );
-
-    // passer d'une vente à l'autre garde le même lien Retour
-    navState(): BackState {
-        return { backTo: this.router.serializeUrl(this.back.link), backLabel: this.back.label };
-    }
 
     saleMoves = computed(() => (this.data()?.movements ?? []).filter((m) => m.type === "SALE"));
 
@@ -348,13 +340,6 @@ export class SalePage {
     reloading = computed(() => this.sale.isLoading());
     canRefund = computed(() => this.auth.isAdmin() && this.data()?.status === "ACTIVE");
 
-    constructor() {
-        // au retour arrière, le navigateur rejouerait l'état "vente créée" : on l'efface
-        if (this.justCreated()) {
-            history.replaceState({ ...history.state, created: false }, "");
-        }
-    }
-
     // part du total déjà encaissée, pour la barre de progression
     paidPercent = computed(() => {
         const sale = this.data();
@@ -461,7 +446,6 @@ export class SalePage {
             .subscribe({
                 next: () => {
                     this.paying.set(false);
-                    this.justCreated.set(false);
                     this.closePay();
                     this.sale.reload();
                 },
@@ -543,7 +527,6 @@ export class SalePage {
             .subscribe({
                 next: () => {
                     this.returning.set(false);
-                    this.justCreated.set(false);
                     this.closeReturn();
                     this.sale.reload();
                 },
@@ -597,7 +580,6 @@ export class SalePage {
             .subscribe({
                 next: () => {
                     this.refunding.set(false);
-                    this.justCreated.set(false);
                     this.closeRefund();
                     this.sale.reload();
                     this.stockAlerts.alerts.reload();

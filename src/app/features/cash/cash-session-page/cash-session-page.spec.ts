@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ActivatedRoute, convertToParamMap, provideRouter } from "@angular/router";
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
 import { CashSessionPage } from "./cash-session-page";
@@ -51,7 +51,7 @@ describe("CashSessionPage", () => {
         await TestBed.configureTestingModule({
             imports: [CashSessionPage],
             providers: [
-                provideRouter([]),
+                provideRouter([{ path: "cash", children: [] }]),
                 {
                     provide: ActivatedRoute,
                     useValue: { paramMap: of(convertToParamMap({ id: "4" })) },
@@ -105,7 +105,7 @@ describe("CashSessionPage", () => {
     });
 
     it("should not offer a closing ticket while the session is open", async () => {
-        await render(() => of({ ...closed, status: "OPEN", closed_at: null }));
+        await render(() => of({ ...closed, status: "OPEN", closed_at: null, opened_by: 2 }));
 
         expect(el.querySelector(".ticket")).toBeNull();
     });
@@ -115,6 +115,7 @@ describe("CashSessionPage", () => {
             of({
                 ...closed,
                 status: "OPEN",
+                opened_by: 2,
                 theoretical_amount: null,
                 actual_amount: null,
                 difference: null,
@@ -127,9 +128,24 @@ describe("CashSessionPage", () => {
         );
 
         expect(text()).toContain("Ouverte");
-        expect(text()).toContain("encoreouverte");
+        expect(text()).toContain("Encours");
         expect(text()).not.toContain("Montantattendu");
         expect(text()).not.toContain("ClôtureHeure");
+    });
+
+    it("should send you back to the cash page for your own open session", async () => {
+        await render(() => of({ ...closed, status: "OPEN", closed_at: null }));
+        await fixture.whenStable();
+
+        expect(TestBed.inject(Router).url).toBe("/cash");
+    });
+
+    it("should list the movements with the newest first", async () => {
+        const older = { ...closed.movements[0], id: 1, sale_number: 100 };
+        const newer = { ...closed.movements[0], id: 2, sale_number: 200 };
+        await render(() => of({ ...closed, movements: [older, newer] }));
+
+        expect(text().indexOf("Vente#200")).toBeLessThan(text().indexOf("Vente#100"));
     });
 
     it("should say the session is not found on a 404", async () => {

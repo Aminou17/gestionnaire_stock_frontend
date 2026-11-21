@@ -20,7 +20,10 @@ export class ManagerCashBanner {
     cash = input<CashSummary | null>(null);
     loading = input(false);
     error = input(false);
+    // sa propre caisse d'un jour passé, pas clôturée : il faut la régler avant d'ouvrir
+    previousOpen = input(false);
     retry = output();
+    openCash = output();
 
     // une session clôturée aujourd'hui compte comme une caisse fermée
     isOpen = computed(() => this.cash()?.status === "OPEN");

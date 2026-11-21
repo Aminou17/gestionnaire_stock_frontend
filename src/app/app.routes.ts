@@ -263,14 +263,6 @@ export const routes: Routes = [
                     import("./features/sales/new-sale/new-sale").then((m) => m.NewSale),
             },
             {
-                path: "sales/pending",
-                title: "Ventes en attente",
-                loadComponent: () =>
-                    import("./features/sales/pending-sales/pending-sales").then(
-                        (m) => m.PendingSales,
-                    ),
-            },
-            {
                 path: "sales/:id",
                 title: "Vente",
                 loadComponent: () =>
@@ -301,15 +293,6 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import("./features/cash/cash-sessions/cash-sessions").then(
                         (m) => m.CashSessions,
-                    ),
-            },
-            {
-                path: "cash/movements",
-                title: "Mouvements de caisse",
-                canActivate: [adminGuard],
-                loadComponent: () =>
-                    import("./features/cash/cash-movements/cash-movements").then(
-                        (m) => m.CashMovements,
                     ),
             },
             {

@@ -8,24 +8,6 @@ app-page-header {
     margin-bottom: -4px;
 }
 
-.cash-closed {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-}
-
-.cash-closed-text {
-    display: grid;
-    flex: 1;
-    min-width: 0;
-    gap: 2px;
-}
-
-.cash-closed-text span {
-    font-size: var(--fs-small);
-}
-
 .layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 340px;

@@ -15,6 +15,7 @@ export interface DashboardSummary {
         id: number;
         sessionDate: string;
         openedAt: string;
+        openedBy: number;
         balance: number | null;
     } | null;
     // écart découvert après une clôture à l'aveugle, pas encore expliqué

@@ -1,7 +1,23 @@
-:host {
+dialog {
+    width: min(560px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+}
+
+.box {
     display: grid;
     gap: 16px;
-    max-width: 760px;
+    padding: 20px;
+}
+
+.box-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.box-head h2 {
+    margin: 0;
 }
 
 .empty {

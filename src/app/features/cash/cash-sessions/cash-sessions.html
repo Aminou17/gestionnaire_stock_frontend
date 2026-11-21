@@ -1,5 +1,4 @@
 <app-page-header title="Historique des caisses" section="Caisse" />
-<app-cash-tabs />
 
 <section class="card list-card">
     <app-period-filter class="wrap" [chips]="true" (changed)="selectRange($event)">
@@ -49,62 +48,7 @@
             "
         />
     } @else {
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Caisse de</th>
-                        <th class="num">Fonds de départ</th>
-                        <th class="num">Attendu</th>
-                        <th class="num">Compté</th>
-                        <th class="num">Écart</th>
-                        <th>Statut</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (session of list(); track session.id) {
-                        <tr (click)="openSession(session)">
-                            <td>
-                                <a
-                                    [routerLink]="['/cash/sessions', session.id]"
-                                    class="session-link"
-                                    (click)="$event.stopPropagation()"
-                                    >{{ session.session_date | date: "EEEE d MMMM y" }}</a
-                                >
-                            </td>
-                            <td>{{ session.opened_by_name ?? "—" }}</td>
-                            <td class="num">{{ session.opening_amount | fcfa }}</td>
-                            <td class="num">{{ session.theoretical_amount | fcfa }}</td>
-                            <td class="num">{{ session.actual_amount | fcfa }}</td>
-                            <td
-                                class="num strong"
-                                [class.in]="session.difference! > 0"
-                                [class.out]="session.difference! < 0"
-                            >
-                                {{
-                                    session.difference === null
-                                        ? "—"
-                                        : (session.difference | fcfa: true)
-                                }}
-                            </td>
-                            <td>
-                                @if (session.status === "OPEN") {
-                                    <span class="badge badge-success">Ouverte</span>
-                                } @else {
-                                    <span class="badge badge-neutral">Clôturée</span>
-                                }
-                                @if (session.explanation_pending) {
-                                    <span class="badge badge-warning">À expliquer</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <!-- version téléphone : une carte par caisse -->
+        <!-- une ligne par caisse, sur téléphone comme sur ordinateur -->
         <ul class="cards">
             @for (session of list(); track session.id) {
                 <li class="session-card" (click)="openSession(session)">

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { signal } from "@angular/core";
 import { HttpErrorResponse } from "@angular/common/http";
-import { ActivatedRoute, Router, convertToParamMap, provideRouter } from "@angular/router";
+import { ActivatedRoute, convertToParamMap, provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
 import { NewSale } from "./new-sale";
@@ -59,8 +59,6 @@ describe("NewSale", () => {
     let fixture: ComponentFixture<NewSale>;
     let el: HTMLElement;
     let createSale: ReturnType<typeof vi.fn>;
-    let navigate: ReturnType<typeof vi.fn>;
-    let setImage: ReturnType<typeof vi.fn>;
 
     async function render({
         cash = { status: "OPEN", balance: 1000 } as TodayCash | null,
@@ -70,7 +68,6 @@ describe("NewSale", () => {
         customerGone = false,
         customersFail = false,
     } = {}) {
-        setImage = vi.fn(() => of({ id: 1, image: "data:image/jpeg;base64,NEUVE" }));
         createSale = vi.fn(() =>
             customerGone
                 ? throwError(
@@ -128,14 +125,19 @@ describe("NewSale", () => {
                                 : of({ rows: [mireille], total: 1, page: 1, limit: 5 }),
                     },
                 },
-                { provide: CashSessionService, useValue: { getTodayCash: () => of(cash) } },
+                {
+                    provide: CashSessionService,
+                    useValue: {
+                        getTodayCash: () => of(cash),
+                        getToday: () => of({ cash, previousOpenSession: null }),
+                    },
+                },
                 {
                     provide: ProductService,
                     useValue: {
                         getProducts: () =>
                             of({ data: [riz, bazin, savon], total: 3, counters: {} }),
                         getProduct: () => of(preselected),
-                        setImage,
                     },
                 },
                 {
@@ -159,24 +161,13 @@ describe("NewSale", () => {
             ],
         }).compileComponents();
 
-        navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true) as never;
         fixture = TestBed.createComponent(NewSale);
         el = fixture.nativeElement;
         await fixture.whenStable();
     }
 
-    // les options avancées sont repliées : on les déplie avant de s'en servir
-    async function openMore() {
-        el.querySelector<HTMLButtonElement>(".more-toggle")?.click();
-        await fixture.whenStable();
-    }
-
-    // les tests d'ajout passent par la liste en lignes
-    beforeEach(() => localStorage.setItem("new-sale-view", "list"));
-    afterAll(() => localStorage.removeItem("new-sale-view"));
-
     const text = () => el.textContent!.replace(/\s/g, " ");
-    const results = () => [...el.querySelectorAll<HTMLButtonElement>(".result")];
+    const results = () => [...el.querySelectorAll<HTMLButtonElement>(".gmain")];
     const submitBtn = () => el.querySelector<HTMLButtonElement>(".cart-footer .submit")!;
 
     async function add(index: number) {
@@ -200,7 +191,7 @@ describe("NewSale", () => {
         await fixture.whenStable();
 
         expect(el.querySelector(".total")!.textContent!.replace(/\s/g, " ")).toContain("3 000 F");
-        expect(results()[0].closest(".tile")!.classList).toContain("in-cart");
+        expect(results()[0].closest(".gtile")!.classList).toContain("in-cart");
         expect(submitBtn().disabled).toBe(false);
     });
 
@@ -248,57 +239,25 @@ describe("NewSale", () => {
         preselected = { ...bazin, image: "data:image/png;base64,GRANDE" };
         await render();
 
-        el.querySelector<HTMLButtonElement>(".thumb-zoom")!.click();
+        el.querySelectorAll<HTMLButtonElement>(".gcorner")[0].click();
         await fixture.whenStable();
 
         expect(el.querySelector("app-photo-zoom img")!.getAttribute("src")).toContain("GRANDE");
         expect(el.querySelectorAll(".line").length).toBe(0);
-        // une ligne sans photo montre ses initiales, sans bouton
-        expect(el.querySelectorAll(".tile")[0].querySelector(".thumb-zoom")).toBeNull();
-        expect(el.querySelectorAll(".tile")[0].querySelector(".thumb")!.textContent).toContain(
+        // un produit sans photo montre ses initiales, sans bouton de zoom
+        expect(el.querySelectorAll(".gtile")[0].querySelector(".gcorner")).toBeNull();
+        expect(el.querySelectorAll(".gtile")[0].querySelector(".gphoto")!.textContent).toContain(
             "RI",
         );
 
         preselected = bazin;
     });
 
-    it("should offer the admin to add a photo and show it at once", async () => {
+    it("should not offer to add a photo from the cash register", async () => {
         await render({ isAdmin: true });
-        // le redimensionnement passe par un canvas : on le remplace dans le test
-        (fixture.componentInstance as unknown as { resize: unknown }).resize = () =>
-            Promise.resolve("data:image/jpeg;base64,NEUVE");
 
-        const add = el.querySelector<HTMLButtonElement>(".tile .thumb-add")!;
-        expect(add.getAttribute("aria-label")).toBe("Ajouter une photo pour Riz");
-
-        const input = el.querySelector<HTMLInputElement>("input[type=file]")!;
-        const file = new File(["x"], "riz.jpg", { type: "image/jpeg" });
-        Object.defineProperty(input, "files", { value: [file] });
-        add.click();
-        input.dispatchEvent(new Event("change"));
-        await vi.waitFor(() => expect(setImage).toHaveBeenCalled());
-        await fixture.whenStable();
-
-        expect(setImage.mock.calls[0][0]).toBe(riz.id);
-        expect(el.querySelector(".tile .thumb-zoom img")).not.toBeNull();
-        expect(el.querySelector(".photo-notice")!.textContent).toContain("Photo ajoutée");
-    });
-
-    it("should not offer the manager to add a photo", async () => {
-        await render();
-
-        expect(el.querySelector(".thumb-add")).toBeNull();
-        expect(el.querySelector("input[type=file]")).not.toBeNull();
-    });
-
-    it("should remove the product when its tile is clicked again", async () => {
-        await render();
-        await add(0);
-        expect(el.querySelectorAll(".line").length).toBe(1);
-
-        await add(0);
-        expect(el.querySelectorAll(".line").length).toBe(0);
-        expect(results()[0].closest(".tile")!.classList).not.toContain("in-cart");
+        expect(el.querySelector(".thumb-add, .gcorner-add")).toBeNull();
+        expect(el.querySelector("input[type=file]")).toBeNull();
     });
 
     it("should not let an out of stock product be added", async () => {
@@ -326,10 +285,6 @@ describe("NewSale", () => {
             ],
             { paymentMethod: "CASH", amountReceived: 10500 },
         );
-        expect(navigate).toHaveBeenCalledWith(["/sales", 9], {
-            state: { created: true },
-            replaceUrl: false,
-        });
     });
 
     it("should block a negotiated price below the minimum", async () => {
@@ -359,12 +314,47 @@ describe("NewSale", () => {
         expect(submitBtn().disabled).toBe(true);
     });
 
-    it("should tell the manager to ask the owner when the cash register is closed", async () => {
+    it("should say the cash register is closed before any product is chosen", async () => {
+        HTMLDialogElement.prototype.showModal = function () {
+            this.setAttribute("open", "");
+        };
         await render({ cash: null });
-        await add(0);
 
-        expect(text()).toContain("ouvrez-la pour enregistrer une vente");
-        expect(submitBtn().disabled).toBe(true);
+        expect(el.querySelector(".catalog")).toBeNull();
+        expect(text()).toContain("Caisse pas encore ouverte");
+        // un seul message : plus de bandeau en haut
+        expect(el.querySelector(".banner")).toBeNull();
+
+        const dialog = el.querySelector("app-open-cash-dialog dialog")!;
+        expect(dialog.hasAttribute("open")).toBe(false);
+        el.querySelector<HTMLButtonElement>("app-cash-closed-notice .btn")!.click();
+        await fixture.whenStable();
+
+        expect(dialog.hasAttribute("open")).toBe(true);
+    });
+
+    it("should say the cash register is closed for the day when it was closed", async () => {
+        await render({ cash: { status: "CLOSED", balance: 1000 } as TodayCash });
+
+        expect(el.querySelector(".catalog")).toBeNull();
+        expect(text()).toContain("Caisse clôturée pour aujourd'hui");
+    });
+
+    it("should stay on the cash register after the sale and offer the ticket", async () => {
+        await render();
+        await add(0);
+        submitBtn().click();
+        await fixture.whenStable();
+
+        expect(el.querySelectorAll(".line").length).toBe(0);
+        expect(el.querySelector(".cart")!.classList).toContain("cart-empty");
+        const done = el.querySelector(".queued")!;
+        expect(done.textContent!.replace(/\s/g, " ")).toContain("Encaissé · 1 500 F");
+        expect(done.querySelector("a")!.getAttribute("href")).toBe("/sales/9");
+
+        done.querySelector<HTMLButtonElement>("button")!.click();
+        await fixture.whenStable();
+        expect(el.querySelector(".queued")).toBeNull();
     });
 
     it("should prefill the cart from the product page", async () => {
@@ -379,7 +369,8 @@ describe("NewSale", () => {
         await fixture.whenStable();
 
         expect(text()).toContain("Stock insuffisant pour le produit 3.");
-        expect(navigate).not.toHaveBeenCalled();
+        expect(el.querySelector(".queued")).toBeNull();
+        expect(el.querySelectorAll(".line").length).toBe(1);
     });
 
     it("should explain why an out of stock product from the product page is not added", async () => {
@@ -420,7 +411,8 @@ describe("NewSale", () => {
         await render();
         await add(0);
 
-        const received = el.querySelector<HTMLInputElement>("input[placeholder='Ex. 10 000']")!;
+        await openOther();
+        const received = el.querySelector<HTMLInputElement>("input[placeholder='Montant reçu']")!;
         received.value = "5000";
         received.dispatchEvent(new Event("input"));
         await fixture.whenStable();
@@ -437,7 +429,8 @@ describe("NewSale", () => {
         await render();
         await add(0);
 
-        const received = el.querySelector<HTMLInputElement>("input[placeholder='Ex. 10 000']")!;
+        await openOther();
+        const received = el.querySelector<HTMLInputElement>("input[placeholder='Montant reçu']")!;
         received.value = "1000";
         received.dispatchEvent(new Event("input"));
         await fixture.whenStable();
@@ -474,6 +467,20 @@ describe("NewSale", () => {
         });
     });
 
+    // client et paiement partiel sont repliés : on les ouvre d'abord
+    async function openMore() {
+        el.querySelector<HTMLButtonElement>(".free-link:not([aria-pressed])")?.click();
+        await fixture.whenStable();
+    }
+
+    // le montant reçu libre est derrière le bouton « Autre »
+    async function openOther() {
+        [...el.querySelectorAll<HTMLButtonElement>(".chip")]
+            .find((chip) => chip.textContent!.trim() === "Autre")!
+            .click();
+        await fixture.whenStable();
+    }
+
     const type = async (selector: string, value: string) => {
         const input = el.querySelector<HTMLInputElement>(selector)!;
         input.value = value;
@@ -481,33 +488,36 @@ describe("NewSale", () => {
         await fixture.whenStable();
     };
 
+    const clientInput = "input[aria-label='Client, nom ou téléphone']";
+
+    async function toggleDeposit() {
+        await openMore();
+        el.querySelector<HTMLButtonElement>(".free-link[aria-pressed]")!.click();
+        await fixture.whenStable();
+    }
+
     it("should require a customer for a deposit", async () => {
         await render();
         await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
-        await fixture.whenStable();
-        await type("input[placeholder^='Tout payer']", "500");
+        await toggleDeposit();
+        await type("input[placeholder^='Sur ']", "500");
 
-        expect(text()).toContain("Indiquez le nom ou le téléphone du client");
+        expect(text()).toContain("Indiquez le nom et le téléphone du client");
         expect(submitBtn().disabled).toBe(true);
     });
 
-    it("should send a deposit with the customer and show the remaining amount", async () => {
+    it("should send a deposit with the typed name and show the remaining amount", async () => {
         await render();
         await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
-        await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".free-link")!.click();
-        await fixture.whenStable();
-        await type("input[placeholder='Nom du client']", " Fatou Ndiaye ");
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
-        await fixture.whenStable();
-        await type("input[placeholder^='Tout payer']", "500");
+        await toggleDeposit();
+        await type(clientInput, " Fatou Ndiaye ");
+        await type("input[aria-label='Téléphone du client']", "06 61 23 456");
+        await type("input[placeholder^='Sur ']", "500");
 
         expect(text()).toContain("Reste à payer");
+        // un seul champ de montant : le montant reçu disparaît
+        expect(el.querySelector("#received")).toBeNull();
+        expect(el.querySelector(".chips")).toBeNull();
         submitBtn().click();
         expect(createSale).toHaveBeenCalledWith(
             [{ productId: 3, quantity: 1 }],
@@ -516,18 +526,27 @@ describe("NewSale", () => {
                 amountPaid: 500,
                 amountReceived: 500,
                 customerName: "Fatou Ndiaye",
+                customerPhone: "06 61 23 456",
             }),
         );
+    });
+
+    it("should send a typed number as the customer phone", async () => {
+        await render();
+        await add(0);
+        await openMore();
+        await type(clientInput, "06 61 23 456");
+        submitBtn().click();
+
+        const payment = createSale.mock.calls[0][1];
+        expect(payment.customerPhone).toBe("06 61 23 456");
+        expect(payment.customerName).toBeUndefined();
     });
 
     it("should send the customer id and show what the customer already owes", async () => {
         await render();
         await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
-        await fixture.whenStable();
-        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
-        await fixture.whenStable();
+        await openPicker();
         el.querySelector<HTMLButtonElement>(".picker-row")!.click();
         await fixture.whenStable();
 
@@ -541,48 +560,25 @@ describe("NewSale", () => {
         expect(payment.customerPhone).toBeUndefined();
     });
 
-    it("should list recent customers as soon as the customer block opens", async () => {
+    async function openPicker() {
+        await openMore();
+        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
+        await fixture.whenStable();
+    }
+
+    it("should list recent customers as soon as the field gets the focus", async () => {
         await render();
         await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
-        await fixture.whenStable();
+        expect(el.querySelector("#customer-list")).toBeNull();
+        await openPicker();
 
         expect(el.querySelector("#customer-list")).not.toBeNull();
         expect(el.querySelector(".picker-row")!.textContent).toContain("Mireille Ngoma");
     });
 
-    it("should offer the matching customer when a known phone is typed in free entry", async () => {
-        await render();
-        await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
-        await fixture.whenStable();
-        el.querySelector<HTMLButtonElement>(".free-link")!.click();
-        await fixture.whenStable();
-        await type("input[placeholder='Téléphone']", "06 61 23 456");
-        await new Promise((resolve) => setTimeout(resolve, 350));
-        await fixture.whenStable();
-
-        expect(el.querySelector(".match")!.textContent).toContain("C'est Mireille Ngoma ?");
-
-        el.querySelector<HTMLButtonElement>(".match button")!.click();
-        await fixture.whenStable();
-        submitBtn().click();
-        expect(createSale.mock.calls[0][1].customerId).toBe(12);
-    });
-
-    async function openPicker() {
-        await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
-        await fixture.whenStable();
-        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
-        await fixture.whenStable();
-    }
-
     it("should expose the customer picker as a combobox and close it with Escape", async () => {
         await render();
+        await add(0);
         await openPicker();
         const input = el.querySelector<HTMLInputElement>(".picker input")!;
 
@@ -600,6 +596,7 @@ describe("NewSale", () => {
 
     it("should close the picker on a click elsewhere but not inside it", async () => {
         await render();
+        await add(0);
         await openPicker();
 
         el.querySelector<HTMLElement>(".picker-list")!.click();
@@ -611,18 +608,19 @@ describe("NewSale", () => {
         expect(el.querySelector("#customer-list")).toBeNull();
     });
 
-    it("should tell the search failed instead of saying no customer was found", async () => {
+    it("should tell the search failed instead of listing nothing", async () => {
         await render({ customersFail: true });
+        await add(0);
         await openPicker();
 
         expect(el.querySelector(".picker-error")!.getAttribute("role")).toBe("alert");
         expect(text()).toContain("Impossible de charger les clients");
-        expect(text()).not.toContain("Aucun client trouvé");
         expect(text()).toContain("Réessayer");
     });
 
     it("should drop the chosen customer when the API says it is gone", async () => {
         await render({ customerGone: true });
+        await add(0);
         await openPicker();
         el.querySelector<HTMLButtonElement>(".picker-row")!.click();
         await fixture.whenStable();
@@ -634,20 +632,16 @@ describe("NewSale", () => {
         expect(text()).toContain("Ce client n'existe plus ou a été désactivé");
         expect(el.querySelector(".picked")).toBeNull();
         expect(el.querySelector(".picker input")).not.toBeNull();
-        expect(navigate).not.toHaveBeenCalled();
     });
 
     it("should accept a deposit when a customer card is chosen", async () => {
         await render();
         await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
-        await fixture.whenStable();
-        el.querySelector<HTMLInputElement>(".picker input")!.dispatchEvent(new Event("focus"));
-        await fixture.whenStable();
+        await toggleDeposit();
+        await openPicker();
         el.querySelector<HTMLButtonElement>(".picker-row")!.click();
         await fixture.whenStable();
-        await type("input[placeholder^='Tout payer']", "500");
+        await type("input[placeholder^='Sur ']", "500");
 
         expect(text()).not.toContain("Indiquez le nom ou le téléphone");
         expect(submitBtn().disabled).toBe(false);
@@ -656,59 +650,21 @@ describe("NewSale", () => {
     it("should refuse a deposit above the total", async () => {
         await render();
         await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".option-deposit")!.click();
-        await fixture.whenStable();
-        await type("input[placeholder^='Tout payer']", "999999");
+        await toggleDeposit();
+        await type("input[placeholder^='Sur ']", "999999");
 
         expect(text()).toContain("L'acompte dépasse le total");
         expect(submitBtn().disabled).toBe(true);
     });
 
-    it("should send a second payment for a mixed payment", async () => {
-        await render();
-        await add(0);
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".add-customer")!.click();
-        await fixture.whenStable();
-        await openMore();
-        el.querySelector<HTMLButtonElement>(".option-split")!.click();
-        await fixture.whenStable();
-        await type("input[placeholder='Ex. 5000']", "1000");
-
-        expect(text()).toContain("Reste en Mobile Money");
-        submitBtn().click();
-        const payment = createSale.mock.calls[0][1];
-        expect(payment.amountPaid).toBe(1000);
-        expect(payment.secondPayment).toEqual({
-            paymentMethod: "MOBILE_MONEY",
-            amountPaid: payment.secondPayment.amountPaid,
-        });
-    });
-
     describe("carreaux", () => {
-        // un seul bouton bascule entre lignes et carreaux
-        const listButton = () => el.querySelector<HTMLButtonElement>(".view-single")!;
         const tiles = () => [...el.querySelectorAll<HTMLElement>(".gtile")];
 
-        beforeEach(() => localStorage.removeItem("new-sale-view"));
-        afterAll(() => localStorage.removeItem("new-sale-view"));
-
-        it("should switch to tiles and remember the choice", async () => {
+        it("should show every product as a tile, without a list mode", async () => {
             await render();
             expect(tiles().length).toBe(3);
-            expect(el.querySelectorAll(".tile").length).toBe(0);
-
-            listButton().click();
-            await fixture.whenStable();
-
-            expect(tiles().length).toBe(0);
-            expect(localStorage.getItem("new-sale-view")).toBe("list");
-
-            fixture.destroy();
-            TestBed.resetTestingModule();
-            await render();
-            expect(tiles().length).toBe(0);
+            expect(el.querySelector(".view-single")).toBeNull();
+            expect(el.querySelector("app-pagination")).toBeNull();
         });
 
         it("should add one more at each tap and show the quantity, then take one off", async () => {
@@ -782,65 +738,74 @@ describe("NewSale", () => {
             await render();
             await add(0);
 
-            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .bar-btn")!;
-            expect(bar.textContent).toContain("Voir le panier");
+            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .bar-ghost")!;
+            expect(bar.textContent).toContain("Panier");
             expect(el.querySelector(".cart-bar")!.textContent).toContain("1 article");
             bar.click();
             await fixture.whenStable();
 
             expect(createSale).not.toHaveBeenCalled();
             expect(el.querySelector(".cart")!.classList).toContain("open");
-            expect(el.querySelector(".cart")!.classList).not.toContain("paying");
-            // pas de fond assombri pendant le panier : le catalogue reste utilisable
-            expect(el.querySelector(".sheet-backdrop")).toBeNull();
+            // le panier contient le paiement : le fond s'assombrit comme pour une fenêtre
+            expect(el.querySelector(".sheet-backdrop")).not.toBeNull();
         });
 
-        it("should go to the payment step, then come back to the cart", async () => {
+        it("should encash at once from the bar with the default payment", async () => {
             await render();
             await add(0);
-            el.querySelector<HTMLButtonElement>(".bar-btn")!.click();
+
+            el.querySelector<HTMLButtonElement>(".cart-bar .bar-btn:not(.bar-ghost)")!.click();
             await fixture.whenStable();
 
-            el.querySelector<HTMLButtonElement>(".to-pay")!.click();
+            expect(createSale).toHaveBeenCalledWith([{ productId: 3, quantity: 1 }], {
+                paymentMethod: "CASH",
+                amountReceived: 1500,
+            });
+            expect(el.querySelector(".queued")).not.toBeNull();
+        });
+
+        it("should open the cart instead of encashing when a line is wrong", async () => {
+            await render();
+            await add(0);
+            const qty = el.querySelector<HTMLInputElement>(".stepper input")!;
+            qty.value = "11";
+            qty.dispatchEvent(new Event("change"));
             await fixture.whenStable();
-            expect(el.querySelector(".cart")!.classList).toContain("paying");
-            expect(el.querySelector(".sheet-backdrop")).not.toBeNull();
+
+            el.querySelector<HTMLButtonElement>(".cart-bar .bar-btn:not(.bar-ghost)")!.click();
+            await fixture.whenStable();
+
             expect(createSale).not.toHaveBeenCalled();
-
-            // le bouton retour du téléphone revient au panier sans le fermer
-            history.back();
-            await new Promise((resolve) => setTimeout(resolve, 100));
-            await fixture.whenStable();
             expect(el.querySelector(".cart")!.classList).toContain("open");
-            expect(el.querySelector(".cart")!.classList).not.toContain("paying");
+        });
+
+        it("should go back only once in the history when the sale is done from the sheet", async () => {
+            await render();
+            await add(0);
+            el.querySelector<HTMLButtonElement>(".bar-info")!.click();
+            await fixture.whenStable();
+            const back = vi.spyOn(history, "back");
+            const go = vi.spyOn(history, "go");
+
+            submitBtn().click();
+            await fixture.whenStable();
+
+            expect(back.mock.calls.length + go.mock.calls.length).toBeLessThanOrEqual(1);
+            back.mockRestore();
+            go.mockRestore();
         });
 
         it("should still open the cart when the sale is not ready", async () => {
-            await render({ cash: null });
+            await render();
             await add(0);
 
-            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .bar-btn")!;
+            const bar = el.querySelector<HTMLButtonElement>(".cart-bar .bar-ghost")!;
             bar.click();
             await fixture.whenStable();
 
             expect(createSale).not.toHaveBeenCalled();
             expect(el.querySelector(".cart")!.classList).toContain("open");
         });
-    });
-
-    it("should open the cash dialog from the banner and refresh the cash", async () => {
-        HTMLDialogElement.prototype.showModal = function () {
-            this.setAttribute("open", "");
-        };
-        await render({ cash: null });
-        const dialog = el.querySelector("app-open-cash-dialog dialog")!;
-        expect(dialog.hasAttribute("open")).toBe(false);
-
-        el.querySelector<HTMLButtonElement>(".banner .link-btn")!.click();
-        await fixture.whenStable();
-
-        expect(dialog.hasAttribute("open")).toBe(true);
-        expect(el.querySelector(".banner a")).toBeNull();
     });
 
     it("should suggest bills adapted to the total", async () => {
@@ -851,13 +816,14 @@ describe("NewSale", () => {
                 c.textContent!.replace(/\s/g, " ").trim(),
             );
 
-        expect(chips()).toEqual(["Montant exact", "20 000 F", "50 000 F"]);
+        expect(chips()).toEqual(["Montant exact", "20 000 F", "50 000 F", "Autre"]);
     });
 
     it("should show a big change and say when the amount is exact", async () => {
         await render();
         await add(0);
-        await type("input[placeholder='Ex. 10 000']", "1500");
+        await openOther();
+        await type("input[placeholder='Montant reçu']", "1500");
 
         expect(el.querySelector(".change")!.textContent).toContain("Compte juste");
     });
@@ -865,6 +831,7 @@ describe("NewSale", () => {
     it("should encash with the Enter key from the received amount", async () => {
         await render();
         await add(0);
+        await openOther();
 
         el.querySelector<HTMLInputElement>("#received")!.dispatchEvent(
             new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),

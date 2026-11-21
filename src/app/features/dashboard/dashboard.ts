@@ -15,6 +15,8 @@ import { SecretValues } from "../../shared/secret/secret-values";
 import type { IconName } from "../../shared/icon/icons";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { DashboardService } from "./dashboard.service";
+import { CashClosedNotice } from "../cash/cash-closed-notice/cash-closed-notice";
+import { ReopenCashDialog } from "../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { OpenCashDialog } from "../cash/open-cash-dialog/open-cash-dialog";
 import { RecentActivity } from "./recent-activity/recent-activity";
 import { RecentSales } from "./recent-sales/recent-sales";
@@ -38,6 +40,8 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
         RecentSales,
         RecentActivity,
         OpenCashDialog,
+        ReopenCashDialog,
+        CashClosedNotice,
         ManagerCashBanner,
         EmptyState,
     ],
@@ -139,6 +143,14 @@ export class Dashboard {
 
     cash = computed(() => this.summaryData()?.cash ?? null);
     cashOpen = computed(() => this.cash()?.status === "OPEN");
+    // sa propre caisse d'un jour passé, pas clôturée : elle empêche d'ouvrir celle d'aujourd'hui
+    previousOwn = computed(() => {
+        const previous = this.summaryData()?.previousOpenSession;
+        return previous && previous.openedBy === this.auth.user()?.id ? previous : null;
+    });
+    cashGate = computed(() =>
+        this.cash() ? "closedToday" : this.previousOwn() ? "previous" : "notOpened",
+    );
 
     // on compare à hier jusqu'à la même heure : une journée en cours contre une journée complète serait toujours en baisse
     salesHint = computed(() => {

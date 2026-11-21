@@ -82,12 +82,12 @@ describe("CashSessions", () => {
             }),
         );
 
-        expect(el.querySelectorAll("tbody tr").length).toBe(2);
-        expect(text()).toContain("Ouverte");
-        expect(text()).toContain("Clôturée");
-        expect(text()).toContain("−500F");
-        // pas d'écart inventé pour une caisse encore ouverte
-        expect(el.querySelectorAll("tbody tr")[0].textContent).toContain("—");
+        expect(el.querySelectorAll(".session-card").length).toBe(2);
+        expect(el.querySelector("table")).toBeNull();
+        expect(text()).toContain("Àclôturer");
+        expect(text()).toContain("Écartde−500F");
+        // pas de montant inventé pour une caisse encore ouverte
+        expect(el.querySelectorAll(".session-card")[0].querySelector(".session-amount")).toBeNull();
     });
 
     it("should link each session to its detail page", async () => {
@@ -95,7 +95,7 @@ describe("CashSessions", () => {
             of({ data: [session(4)], pagination: { page: 1, limit: 20, total: 1, totalPages: 1 } }),
         );
 
-        const link = el.querySelector<HTMLAnchorElement>("tbody a")!;
+        const link = el.querySelector<HTMLAnchorElement>(".session-card a")!;
         expect(link.getAttribute("href")).toBe("/cash/sessions/4");
     });
 

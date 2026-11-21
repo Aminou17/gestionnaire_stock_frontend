@@ -1,30 +1,40 @@
 import { DatePipe } from "@angular/common";
-import { Component, inject, signal } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { Component, ElementRef, inject, signal, viewChild } from "@angular/core";
 
-import { getBackLink } from "../../../core/back-link";
 import { NetworkService } from "../../../core/offline/network.service";
 import { PendingSale, SaleOutboxService } from "../../../core/offline/sale-outbox.service";
-import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
-// Ventes faites sans internet et pas encore reçues par le serveur
+// Ventes faites sans internet et pas encore reçues par le serveur, ouvertes depuis le bandeau
 @Component({
-    selector: "app-pending-sales",
-    imports: [DatePipe, RouterLink, PageHeader, Icon, FcfaPipe],
-    templateUrl: "./pending-sales.html",
-    styleUrl: "./pending-sales.css",
+    selector: "app-pending-sales-dialog",
+    imports: [DatePipe, Icon, FcfaPipe],
+    templateUrl: "./pending-sales-dialog.html",
+    styleUrls: ["../../../shared/dialog/dialog.css", "./pending-sales-dialog.css"],
 })
-export class PendingSales {
-    // ouverte depuis les Ventes, la Caisse ou le bandeau hors ligne
-    protected back = getBackLink("/sales", "Ventes");
+export class PendingSalesDialog {
     protected outbox = inject(SaleOutboxService);
     protected network = inject(NetworkService);
+
+    private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
 
     sending = signal(false);
     // vente dont on confirme la suppression
     removing = signal<string | null>(null);
+
+    open() {
+        this.removing.set(null);
+        this.dialog().nativeElement.showModal();
+    }
+
+    close() {
+        this.dialog().nativeElement.close();
+    }
+
+    onBackdropClick(event: MouseEvent) {
+        if (event.target === this.dialog().nativeElement) this.close();
+    }
 
     protected statusLabel(sale: PendingSale) {
         switch (sale.status) {

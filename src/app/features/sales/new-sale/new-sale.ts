@@ -1,4 +1,3 @@
-import { NgTemplateOutlet } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import {
     Component,
@@ -13,9 +12,8 @@ import {
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { FormsModule } from "@angular/forms";
-import { firstValueFrom } from "rxjs";
-import { ActivatedRoute, Router } from "@angular/router";
+import { catchError, firstValueFrom, map, of } from "rxjs";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { getBackLink } from "../../../core/back-link";
@@ -33,15 +31,12 @@ import { LowStockAlertService } from "../../../core/stock/low-stock-alert.servic
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
 import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
+import { CashClosedNotice } from "../../cash/cash-closed-notice/cash-closed-notice";
 import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
-import { CustomerForm } from "../../customers/customer-form/customer-form";
 import { productInitials, productTone } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
-import { resizeAvatar } from "../../../shared/avatar/avatar-resizer";
 import { Icon } from "../../../shared/icon/icon";
-import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
-import { formatPhone, phoneKey, splitPhone } from "../../../shared/phone";
-import { PhoneField } from "../../../shared/phone-field/phone-field";
+import { formatPhone } from "../../../shared/phone";
 import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
 import { BarcodeScanner } from "../../../shared/barcode-scanner/barcode-scanner";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
@@ -53,15 +48,8 @@ interface CartLine {
     unitPrice: number;
 }
 
-const VIEW_KEY = "new-sale-view";
-
-const readView = (): "list" | "grid" => {
-    try {
-        return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "grid";
-    } catch {
-        return "grid";
-    }
-};
+// tout le catalogue tient sur une seule liste : la recherche et les catégories suffisent à s'y retrouver
+const CATALOG_LIMIT = 500;
 
 // Prix minimum accepté pour un produit
 export const getMinPrice = (product: Product) =>
@@ -73,24 +61,20 @@ export const getMinPrice = (product: Product) =>
     selector: "app-new-sale",
     imports: [
         BarcodeScanner,
-        FormsModule,
-        NgTemplateOutlet,
         PageHeader,
+        RouterLink,
         Icon,
         FcfaPipe,
         OpenCashDialog,
+        CashClosedNotice,
         ReopenCashDialog,
-        CustomerForm,
-        PhoneField,
         PhotoZoom,
-        Pagination,
     ],
     templateUrl: "./new-sale.html",
     styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
     // la barre du panier en bas d'écran demande de la place sous la page
     host: {
         "[class.has-cart]": "cart().length > 0",
-        "[class.sheet-open]": "cartOpen() && !payStep()",
         "(document:click)": "onDocumentClick($event)",
         "(document:keydown)": "onKeydown($event)",
         "(window:popstate)": "onPopState()",
@@ -103,7 +87,6 @@ export class NewSale {
     private cashService = inject(CashSessionService);
     private customerService = inject(CustomerService);
     private stockAlerts = inject(LowStockAlertService);
-    private router = inject(Router);
     private shop = inject(ShopSettingsService);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
@@ -113,11 +96,11 @@ export class NewSale {
 
     // sans internet, la vente continue avec le catalogue gardé sur l'appareil
     offline = computed(() => !this.network.online());
-    // vente gardée sur l'appareil, affichée en confirmation
-    queued = signal<{ total: number; count: number } | null>(null);
+    // dernière vente encaissée : on reste sur la caisse, la confirmation se referme seule
+    done = signal<{ kind: "sent" | "queued"; total: number; id?: number } | null>(null);
+    private doneTimer?: ReturnType<typeof setTimeout>;
     protected back = getBackLink("/sales", "Ventes");
     protected initials = productInitials;
-    protected resize = resizeAvatar;
     protected tone = productTone;
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
@@ -128,23 +111,15 @@ export class NewSale {
     // photo agrandie au centre de l'écran
     zoom = signal<{ src: string; name: string } | null>(null);
     error = signal<string | null>(null);
-    // ajout d'une photo depuis la liste : produit en cours d'envoi, puis message de retour
-    photoBusyId = signal<number | null>(null);
+    // message bref après un scan
     photoNotice = signal<{ kind: "success" | "error"; text: string } | null>(null);
 
-    // produits en carreaux par défaut (photo bien visible), choix mémorisé
-    view = signal<"list" | "grid">(readView());
     // téléphone : le panier est une feuille qui monte du bas
     cartOpen = signal(false);
-    // téléphone : seconde étape de la feuille, le paiement
-    payStep = signal(false);
     // produits dont le champ de prix négocié est déplié
     priceOpenIds = signal<ReadonlySet<number>>(new Set());
 
-    private host = inject<ElementRef<HTMLElement>>(ElementRef);
-    private photoInput = viewChild<ElementRef<HTMLInputElement>>("photoInput");
     private searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
-    private photoTarget: Product | null = null;
     private noticeTimer?: ReturnType<typeof setTimeout>;
     private searchTimer?: ReturnType<typeof setTimeout>;
 
@@ -162,19 +137,10 @@ export class NewSale {
         () => this.cash.hasValue() && this.cash.value()?.status === "CLOSED",
     );
 
-    // la page revient à 1 quand la recherche ou la catégorie change
-    page = linkedSignal({
-        source: () => `${this.search()}|${this.categoryId()}`,
-        computation: () => 1,
-    });
-    pageSize = storedPageSize("new-sale");
-
     products = rxResource({
         params: () => ({
             search: this.search(),
             categoryId: this.categoryId(),
-            page: this.page(),
-            limit: this.pageSize(),
         }),
         stream: ({ params }) =>
             this.productService.getProducts({
@@ -182,8 +148,8 @@ export class NewSale {
                 categoryId: params.categoryId,
                 stockStatus: null,
                 status: "active",
-                page: params.page,
-                limit: params.limit,
+                page: 1,
+                limit: CATALOG_LIMIT,
             }),
     });
     // les puces ne montrent que les catégories qui ont des produits
@@ -212,9 +178,7 @@ export class NewSale {
                         product.name.toLowerCase().includes(search) ||
                         product.barcode === this.search().trim()),
             );
-        const size = this.pageSize();
-        const start = (this.page() - 1) * size;
-        return { data: found.slice(start, start + size), total: found.length };
+        return { data: found.slice(0, CATALOG_LIMIT), total: found.length };
     });
 
     results = computed(() =>
@@ -248,20 +212,26 @@ export class NewSale {
     paymentMethod = signal<PaymentMethod>("CASH");
     amountReceived = signal<number | null>(null);
 
-    // client facultatif, obligatoire (nom ou téléphone) pour un acompte
-    showCustomer = signal(false);
-    // client choisi dans les fiches : la vente part avec son id
+    // client facultatif, obligatoire (nom ou téléphone) pour un acompte :
+    // un seul champ, une fiche proposée pendant la frappe
     customer = signal<Customer | null>(null);
-    // saisie libre du nom et du téléphone, sans créer de fiche
-    freeEntry = signal(false);
-    customerName = signal("");
-    customerPhone = signal("");
-    customerQuery = signal("");
+    customerText = signal("");
+    // téléphone saisi pour un paiement partiel, quand le client n'a pas encore de fiche
+    customerPhoneText = signal("");
+    // client et paiement partiel restent repliés tant qu'on n'en a pas besoin
+    moreOpen = signal(false);
+    optionsOpen = computed(
+        () =>
+            this.moreOpen() ||
+            this.showDeposit() ||
+            this.customer() !== null ||
+            this.customerText() !== "",
+    );
+    // montant reçu libre : caché derrière le bouton « Autre »
+    otherOpen = signal(false);
     pickerOpen = signal(false);
     private customerTimer?: ReturnType<typeof setTimeout>;
-    private phoneTimer?: ReturnType<typeof setTimeout>;
-    // téléphone tapé en saisie libre, retenu après une pause pour ne pas chercher à chaque touche
-    phoneSearch = signal("");
+    customerQuery = signal("");
 
     // sans texte, on propose les clients les plus récents
     customerResults = rxResource({
@@ -272,58 +242,64 @@ export class NewSale {
     customerList = computed(() =>
         this.customerResults.hasValue() ? this.customerResults.value().rows : [],
     );
-    // assez de chiffres après l'indicatif pour chercher une fiche
-    private searchable = (phone: string) =>
-        splitPhone(phone, this.shop.defaultCountryCode()).national.length >= 6;
-    private phoneKey = (phone: string) => phoneKey(phone, this.shop.defaultCountryCode());
-    // en saisie libre, un numéro tapé qui est celui d'une fiche la propose
-    phoneResults = rxResource({
-        params: () => {
-            const search = this.phoneSearch();
-            return this.freeEntry() && this.searchable(search) ? { search } : undefined;
-        },
-        stream: ({ params }) =>
-            this.customerService.getCustomers({ search: params.search, limit: 5 }),
-    });
-    phoneMatch = computed(() => {
-        const typed = this.phoneKey(this.customerPhone());
-        if (!this.searchable(typed) || typed !== this.phoneKey(this.phoneSearch())) return null;
-        if (!this.phoneResults.hasValue()) return null;
 
-        return (
-            this.phoneResults
-                .value()
-                .rows.find((row) => this.phoneKey(row.phone ?? "") === typed) ?? null
-        );
+    // un numéro tapé part comme téléphone, du texte comme nom ; pour un paiement partiel, deux champs
+    private typed = computed(() => {
+        const text = this.customerText().trim();
+        if (this.showDeposit()) return { name: text, phone: this.customerPhoneText().trim() };
+        if (!text) return { name: "", phone: "" };
+        return /^[0-9+\-.() ]+$/.test(text) ? { name: "", phone: text } : { name: text, phone: "" };
     });
-    // un client est identifié par sa fiche ou par un nom ou un téléphone saisi
-    hasCustomer = computed(
+    hasCustomer = computed(() => this.customer() !== null || this.customerText().trim() !== "");
+    // un paiement partiel laisse une dette : il faut un client qu'on peut relancer
+    canChase = computed(
         () =>
             this.customer() !== null ||
-            !!this.customerName().trim() ||
-            !!this.customerPhone().trim(),
+            (this.customerText().trim() !== "" && this.customerPhoneText().trim() !== ""),
     );
+
+    onCustomerInput(value: string) {
+        this.customerText.set(value);
+        this.pickerOpen.set(true);
+        clearTimeout(this.customerTimer);
+        this.customerTimer = setTimeout(() => this.customerQuery.set(value.trim()), 250);
+    }
+
+    closePicker() {
+        this.pickerOpen.set(false);
+    }
+
+    // un clic à côté du champ referme la liste
+    onDocumentClick(event: Event) {
+        if (!this.pickerOpen()) return;
+        if ((event.target as HTMLElement).closest(".picker-zone")) return;
+
+        this.pickerOpen.set(false);
+    }
+
+    chooseCustomer(customer: Customer) {
+        this.customer.set(customer);
+        this.customerText.set("");
+        this.customerPhoneText.set("");
+        this.customerQuery.set("");
+        this.pickerOpen.set(false);
+    }
+
+    changeCustomer() {
+        this.customer.set(null);
+    }
+
     // acompte : montant payé maintenant, vide = la vente est payée en totalité
+    showDeposit = signal(false);
     deposit = signal<number | null>(null);
     toPay = computed(() => this.deposit() ?? this.total());
     remaining = computed(() => Math.max(0, this.total() - this.toPay()));
-    // deux modes : le premier paie le montant saisi, le second paie le reste du total
-    split = signal(false);
-    secondMethod = computed<PaymentMethod>(() =>
-        this.paymentMethod() === "CASH" ? "MOBILE_MONEY" : "CASH",
-    );
-    secondAmount = computed(() => Math.max(0, this.total() - (this.deposit() ?? 0)));
     depositError = computed(() => {
         const deposit = this.deposit();
         if (deposit === null) return null;
-        if (this.split()) {
-            return deposit >= this.total()
-                ? "La part en espèces doit être inférieure au total."
-                : null;
-        }
         if (deposit > this.total()) return "L'acompte dépasse le total de la vente.";
-        if (deposit < this.total() && !this.hasCustomer())
-            return "Indiquez le nom ou le téléphone du client pour un acompte.";
+        if (deposit < this.total() && !this.canChase())
+            return "Indiquez le nom et le téléphone du client, ou choisissez sa fiche.";
         return null;
     });
 
@@ -347,123 +323,19 @@ export class NewSale {
         const rounded = [500, 1000, 5000, 10000, 20000, 50000].map(
             (step) => Math.ceil(due / step) * step,
         );
-        return [...new Set([due, ...rounded])].sort((a, b) => a - b).slice(0, 4);
+        return [...new Set([due, ...rounded])].sort((a, b) => a - b).slice(0, 3);
     });
 
     // somme encaissée maintenant : le total, ou l'acompte
-    payNow = computed(() => (this.split() ? this.total() : this.toPay()));
-
-    // acompte et paiement en deux modes s'excluent : l'un ou l'autre fixe la part payée maintenant
-    showDeposit = signal(false);
-
-    // options avancées (client, acompte, mixte) repliées par défaut
-    moreOpen = signal(false);
-    optionsOpen = computed(
-        () => this.moreOpen() || this.showCustomer() || this.showDeposit() || this.split(),
-    );
-    // on ne replie pas un panneau qui contient un choix en cours
-    canFoldOptions = computed(
-        () => this.moreOpen() && !this.showCustomer() && !this.showDeposit() && !this.split(),
-    );
-
-    toggleCustomer() {
-        if (this.showCustomer()) this.clearCustomer();
-        this.showCustomer.update((value) => !value);
-        // la liste des clients récents est visible dès l'ouverture
-        this.pickerOpen.set(this.showCustomer());
-    }
-
-    private clearCustomer() {
-        this.customer.set(null);
-        this.freeEntry.set(false);
-        this.customerName.set("");
-        this.customerPhone.set("");
-        this.customerQuery.set("");
-        this.phoneSearch.set("");
-        this.pickerOpen.set(false);
-    }
-
-    onCustomerSearch(value: string) {
-        this.pickerOpen.set(true);
-        clearTimeout(this.customerTimer);
-        this.customerTimer = setTimeout(() => this.customerQuery.set(value.trim()), 250);
-    }
-
-    closePicker(search?: HTMLInputElement) {
-        // le focus rouvre la liste : on le rend d'abord, on ferme ensuite
-        search?.focus();
-        this.pickerOpen.set(false);
-    }
-
-    // un clic à côté du sélecteur referme la liste
-    onDocumentClick(event: Event) {
-        if (!this.pickerOpen()) return;
-        if ((event.target as HTMLElement).closest(".picker-zone, .add-customer")) return;
-
-        this.pickerOpen.set(false);
-    }
-
-    onPhoneInput(value: string) {
-        this.customerPhone.set(value);
-        clearTimeout(this.phoneTimer);
-        this.phoneTimer = setTimeout(() => this.phoneSearch.set(value.trim()), 300);
-    }
-
-    chooseCustomer(customer: Customer) {
-        this.customer.set(customer);
-        this.freeEntry.set(false);
-        this.customerName.set("");
-        this.customerPhone.set("");
-        this.phoneSearch.set("");
-        this.pickerOpen.set(false);
-        this.customerQuery.set("");
-    }
-
-    changeCustomer() {
-        this.customer.set(null);
-    }
-
-    useFreeEntry() {
-        this.freeEntry.set(true);
-        this.pickerOpen.set(false);
-    }
-
-    backToPicker() {
-        this.freeEntry.set(false);
-        this.customerName.set("");
-        this.customerPhone.set("");
-    }
-
-    // ce qui a été tapé sert de départ à la fiche : un numéro va dans le téléphone
-    openNewCustomer(form: CustomerForm) {
-        const text = this.customerQuery();
-        const isPhone = /^[0-9+\-.() ]+$/.test(text);
-        form.openNew(isPhone ? { phone: text } : { name: text });
-    }
-
-    onCustomerCreated(customer: Customer) {
-        this.chooseCustomer(customer);
-    }
+    payNow = computed(() => this.toPay());
 
     toggleDeposit() {
         this.showDeposit.update((value) => !value);
-        this.split.set(false);
         this.deposit.set(null);
         this.amountReceived.set(null);
-        // sans client, personne ne pourrait réclamer le solde
-        if (this.showDeposit() && !this.showCustomer()) {
-            this.showCustomer.set(true);
-            this.pickerOpen.set(true);
-        }
-    }
-
-    toggleSplit() {
-        this.split.update((value) => !value);
-        this.showDeposit.set(false);
-        this.deposit.set(null);
-        this.amountReceived.set(null);
-        // le mixte est toujours espèces puis mobile money
-        if (this.split()) this.paymentMethod.set("CASH");
+        this.customerText.set("");
+        this.customerPhoneText.set("");
+        if (this.showDeposit()) this.pickerOpen.set(!this.customer());
     }
 
     selectPayment(method: PaymentMethod) {
@@ -491,9 +363,37 @@ export class NewSale {
             !this.cashClosed() &&
             this.missingAmount() === 0 &&
             this.depositError() === null &&
-            // le mixte demande la part en espèces
-            !(this.split() && this.deposit() === null) &&
+            // un paiement partiel demande le montant payé
+            !(this.showDeposit() && this.deposit() === null) &&
             !this.saving(),
+    );
+    // une caisse oubliée d'un jour passé empêche d'ouvrir celle d'aujourd'hui
+    previousOpen = rxResource({
+        params: () =>
+            !this.offline() && this.cashKnown() && this.cashClosed() && !this.cashClosedToday()
+                ? true
+                : undefined,
+        stream: () =>
+            this.cashService.getToday().pipe(
+                map((today) => today.previousOpenSession),
+                catchError(() => of(null)),
+            ),
+    });
+    ownPrevious = computed(() => {
+        const previous = this.previousOpen.hasValue() ? this.previousOpen.value() : null;
+        return previous && previous.openedBy === this.auth.user()?.id ? previous : null;
+    });
+    gateState = computed(() =>
+        this.cashClosedToday() ? "closedToday" : this.ownPrevious() ? "previous" : "notOpened",
+    );
+    // panier vide et caisse fermée : on le dit avant que le vendeur choisisse des produits
+    gateVisible = computed(
+        () => !this.offline() && this.cashKnown() && this.cashClosed() && this.cart().length === 0,
+    );
+
+    // caisse fermée en ligne : le bouton principal sert à l'ouvrir
+    cashNeedsOpening = computed(
+        () => !this.offline() && this.cashClosed() && !this.cashClosedToday(),
     );
 
     constructor() {
@@ -523,7 +423,8 @@ export class NewSale {
         this.destroyRef.onDestroy(() => {
             clearTimeout(this.searchTimer);
             clearTimeout(this.customerTimer);
-            clearTimeout(this.phoneTimer);
+            clearTimeout(this.doneTimer);
+            clearTimeout(this.noticeTimer);
         });
 
         // arrivée depuis le bouton "Vendre" d'un produit
@@ -618,20 +519,6 @@ export class NewSale {
         ]);
     }
 
-    // le catalogue défile dans son cadre sur ordinateur : on remonte en haut de la nouvelle page
-    resetCatalogScroll() {
-        this.host.nativeElement.querySelector(".tiles, .gtiles")?.scrollTo({ top: 0 });
-    }
-
-    setView(view: "list" | "grid") {
-        this.view.set(view);
-        try {
-            localStorage.setItem(VIEW_KEY, view);
-        } catch {
-            // stockage indisponible : le choix ne sera pas retenu
-        }
-    }
-
     // carreaux : un appui ajoute un exemplaire, jusqu'au stock disponible
     tapTile(product: Product) {
         const line = this.cart().find((l) => l.product.id === product.id);
@@ -650,13 +537,6 @@ export class NewSale {
 
     selectCategory(value: string) {
         this.categoryId.set(value ? Number(value) : null);
-    }
-
-    // un second clic sur une tuile déjà ajoutée la retire du panier
-    toggleProduct(product: Product) {
-        const line = this.cart().find((l) => l.product.id === product.id);
-        if (line) this.removeLine(line);
-        else this.addProduct(product);
     }
 
     // la liste ne porte que la miniature : on affiche celle-ci tout de suite, puis la photo en grand
@@ -678,63 +558,6 @@ export class NewSale {
             });
     }
 
-    // seul l'administrateur peut changer la photo d'un produit
-    askPhoto(product: Product) {
-        this.photoTarget = product;
-        this.photoInput()?.nativeElement.click();
-    }
-
-    async pickPhoto(event: Event) {
-        const input = event.target as HTMLInputElement;
-        const file = input.files?.[0];
-        const product = this.photoTarget;
-        input.value = "";
-        if (!file || !product) return;
-
-        this.photoBusyId.set(product.id);
-
-        try {
-            const [image, thumb] = await Promise.all([
-                this.resize(file, 320, 85000),
-                this.resize(file, 80, 15000),
-            ]);
-
-            this.productService.setImage(product.id, image, thumb).subscribe({
-                next: () => {
-                    this.photoBusyId.set(null);
-                    this.showPhoto(product.id, thumb);
-                    this.notify("success", "Photo ajoutée.");
-                },
-                error: (err: HttpErrorResponse) => {
-                    this.photoBusyId.set(null);
-                    this.notify("error", err.error?.message ?? "La photo n'a pas pu être envoyée.");
-                },
-            });
-        } catch (err) {
-            this.photoBusyId.set(null);
-            this.notify("error", (err as Error).message);
-        }
-    }
-
-    // la miniature apparaît tout de suite, sans recharger la liste ni toucher au panier
-    private showPhoto(id: number, thumb: string) {
-        this.products.update((page) =>
-            page
-                ? {
-                      ...page,
-                      data: page.data.map((p) => (p.id === id ? { ...p, image: thumb } : p)),
-                  }
-                : page,
-        );
-        this.cart.update((lines) =>
-            lines.map((line) =>
-                line.product.id === id
-                    ? { ...line, product: { ...line.product, image: thumb } }
-                    : line,
-            ),
-        );
-    }
-
     private notify(kind: "success" | "error", text: string) {
         clearTimeout(this.noticeTimer);
         this.photoNotice.set({ kind, text });
@@ -749,61 +572,70 @@ export class NewSale {
         this.error.set(null);
     }
 
+    // charge de la vente : produits, paiement, client
+    private buildSale() {
+        const customer = this.customer();
+        const { name, phone } = this.typed();
+        const method = this.paymentMethod();
+        const deposit = this.deposit();
+
+        const items = this.cart().map((line) => ({
+            productId: line.product.id,
+            quantity: line.quantity,
+            // le backend refuse un prix envoyé pour un produit à prix fixe
+            ...(line.product.pricing_mode === "NEGOTIABLE" ? { unitPrice: line.unitPrice } : {}),
+        }));
+        const payment = {
+            paymentMethod: method,
+            // montant non saisi : le client a donné le compte juste
+            ...(method === "CASH" ? { amountReceived: this.amountReceived() ?? this.toPay() } : {}),
+            ...(deposit !== null && deposit < this.total() ? { amountPaid: deposit } : {}),
+            ...(customer ? { customerId: customer.id } : {}),
+            ...(!customer && name ? { customerName: name } : {}),
+            ...(!customer && phone ? { customerPhone: phone } : {}),
+        };
+        return { items, payment, customerId: customer?.id, customerLabel: customer?.name ?? name };
+    }
+
     // Vente sans internet : gardée sur l'appareil avec un identifiant unique, envoyée au retour du réseau.
     // Le prix envoyé est celui affiché au client.
     async queueSale() {
         this.saving.set(true);
         this.error.set(null);
 
+        const { items, payment, customerLabel } = this.buildSale();
         const lines = this.cart();
-        const customer = this.customer();
-        const items = lines.map((line) => ({
-            productId: line.product.id,
-            quantity: line.quantity,
-            ...(line.product.pricing_mode === "NEGOTIABLE" ? { unitPrice: line.unitPrice } : {}),
-        }));
-        const method = this.paymentMethod();
-        const deposit = this.deposit();
-        const payment = {
-            paymentMethod: method,
-            ...(method === "CASH" ? { amountReceived: this.amountReceived() ?? this.toPay() } : {}),
-            ...(deposit !== null && deposit < this.total() ? { amountPaid: deposit } : {}),
-            ...(this.split()
-                ? {
-                      secondPayment: {
-                          paymentMethod: this.secondMethod(),
-                          amountPaid: this.secondAmount(),
-                      },
-                  }
-                : {}),
-            ...(customer ? { customerId: customer.id } : {}),
-            ...(!customer && this.customerName().trim()
-                ? { customerName: this.customerName().trim() }
-                : {}),
-            ...(!customer && this.customerPhone().trim()
-                ? { customerPhone: this.customerPhone().trim() }
-                : {}),
-        };
+        const total = this.total();
 
         try {
             await this.outbox.add(items, payment, {
-                total: this.total(),
+                total,
                 lines: lines.map((line) => ({
                     name: line.product.name,
                     quantity: line.quantity,
                     unitPrice: line.unitPrice,
                 })),
-                customer: customer?.name ?? (this.customerName().trim() || null),
-                method,
+                customer: customerLabel || null,
+                method: this.paymentMethod(),
             });
 
-            this.queued.set({ total: this.total(), count: this.itemsCount() });
+            this.showDone({ kind: "queued", total });
             this.resetSale();
         } catch {
             this.error.set("Impossible de garder la vente sur cet appareil.");
         } finally {
             this.saving.set(false);
         }
+    }
+
+    // confirmation courte : on reste sur la caisse pour la vente suivante
+    private showDone(done: { kind: "sent" | "queued"; total: number; id?: number }) {
+        clearTimeout(this.doneTimer);
+        this.done.set(done);
+        this.doneTimer = setTimeout(
+            () => this.done.set(null),
+            done.kind === "sent" ? 10000 : 15000,
+        );
     }
 
     // panier et paiement remis à zéro pour la vente suivante
@@ -813,11 +645,15 @@ export class NewSale {
         this.paymentMethod.set("CASH");
         this.amountReceived.set(null);
         this.deposit.set(null);
-        this.split.set(false);
+        this.showDeposit.set(false);
+        this.moreOpen.set(false);
+        this.otherOpen.set(false);
         this.customer.set(null);
-        this.customerName.set("");
-        this.customerPhone.set("");
-        this.showCustomer.set(false);
+        this.customerText.set("");
+        this.customerPhoneText.set("");
+        this.customerQuery.set("");
+        this.pickerOpen.set(false);
+        this.priceOpenIds.set(new Set());
     }
 
     removeLine(line: CartLine) {
@@ -886,49 +722,19 @@ export class NewSale {
         this.saving.set(true);
         this.error.set(null);
 
-        const items = this.cart().map((line) => ({
-            productId: line.product.id,
-            quantity: line.quantity,
-            // le backend refuse un prix envoyé pour un produit à prix fixe
-            ...(line.product.pricing_mode === "NEGOTIABLE" ? { unitPrice: line.unitPrice } : {}),
-        }));
-
-        const method = this.paymentMethod();
-        const received = this.amountReceived();
-        const deposit = this.deposit();
-        const customerId = this.customer()?.id;
-        const customerName = this.customerName().trim();
-        const customerPhone = this.customerPhone().trim();
-        const payment = {
-            paymentMethod: method,
-            // montant non saisi : le client a donné le compte juste
-            ...(method === "CASH" ? { amountReceived: received ?? this.toPay() } : {}),
-            ...(deposit !== null && deposit < this.total() ? { amountPaid: deposit } : {}),
-            ...(this.split()
-                ? {
-                      secondPayment: {
-                          paymentMethod: this.secondMethod(),
-                          amountPaid: this.secondAmount(),
-                      },
-                  }
-                : {}),
-            ...(customerId ? { customerId } : {}),
-            ...(!customerId && customerName ? { customerName } : {}),
-            ...(!customerId && customerPhone ? { customerPhone } : {}),
-        };
+        const { items, payment, customerId } = this.buildSale();
+        const total = this.total();
 
         this.saleService
             .createSale(items, payment)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: (sale) => {
-                    // saving reste à true : la page change juste après
+                    this.saving.set(false);
                     this.stockAlerts.alerts.reload();
-                    // feuille ouverte : on remplace son entrée d'historique, le retour revient à la liste
-                    this.router.navigate(["/sales", sale.id], {
-                        state: { created: true },
-                        replaceUrl: this.cartOpen(),
-                    });
+                    this.products.reload();
+                    this.showDone({ kind: "sent", total, id: sale.id });
+                    this.resetSale();
                 },
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);
@@ -981,42 +787,20 @@ export class NewSale {
         this.cartOpen.set(true);
     }
 
-    // le paiement prend une seconde entrée : retour revient au panier
-    goToPayment() {
-        if (this.payStep()) return;
-
-        history.pushState({ cartSheet: true, pay: true }, "");
-        this.payStep.set(true);
-    }
-
-    backToCart() {
-        if (!this.payStep()) return;
-
-        if (history.state?.pay) history.back();
-        else this.payStep.set(false);
-    }
-
+    // la feuille se ferme tout de suite, puis on retire l'entrée d'historique qu'elle avait ajoutée ;
+    // sans ce garde, deux appels de suite reculaient de deux pages
     closeCart() {
         if (!this.cartOpen()) return;
 
-        // on remonte les entrées ajoutées : une pour le panier, une de plus pour le paiement
-        const steps = history.state?.pay ? 2 : 1;
-        if (history.state?.cartSheet) history.go(-steps);
-        else this.onPopState();
+        this.cartOpen.set(false);
+        if (history.state?.cartSheet) history.back();
     }
 
     onPopState() {
-        // retour depuis le paiement : on reste sur le panier
-        if (this.payStep() && history.state?.cartSheet && !history.state.pay) {
-            this.payStep.set(false);
-            return;
-        }
-
         this.cartOpen.set(false);
-        this.payStep.set(false);
     }
 
-    // glisser l'en-tête vers le bas : revient au panier depuis le paiement, sinon ferme la feuille
+    // glisser l'en-tête vers le bas ferme la feuille
     private swipeFrom = 0;
 
     swipeStart(event: TouchEvent) {
@@ -1024,10 +808,21 @@ export class NewSale {
     }
 
     swipeEnd(event: TouchEvent) {
-        if (event.changedTouches[0].clientY - this.swipeFrom <= 60) return;
+        if (event.changedTouches[0].clientY - this.swipeFrom > 60) this.closeCart();
+    }
 
-        if (this.payStep()) this.backToCart();
-        else this.closeCart();
+    // barre du bas : vendre tout de suite avec le paiement par défaut (espèces, compte juste)
+    quickPay() {
+        if (this.cashNeedsOpening()) {
+            this.openCash();
+            return;
+        }
+        // une ligne à corriger ou un champ à remplir : on montre le panier
+        if (!this.canSubmit()) {
+            this.openCart();
+            return;
+        }
+        this.submit();
     }
 
     focusSearch() {
@@ -1041,8 +836,7 @@ export class NewSale {
         const typing = ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
 
         if (event.key === "Escape") {
-            if (this.payStep()) this.backToCart();
-            else this.closeCart();
+            this.closeCart();
             return;
         }
 

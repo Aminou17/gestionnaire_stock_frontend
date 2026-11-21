@@ -1,4 +1,3 @@
-import { CashTabs } from "../cash-tabs/cash-tabs";
 import { DatePipe, formatDate } from "@angular/common";
 import { Component, LOCALE_ID, computed, inject, linkedSignal, signal } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
@@ -18,7 +17,6 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 @Component({
     selector: "app-cash-sessions",
     imports: [
-        CashTabs,
         RouterLink,
         DatePipe,
         PageHeader,
@@ -45,8 +43,8 @@ export class CashSessions {
 
     statusChips = [
         { label: "Toutes", value: null },
-        { label: "Ouvertes", value: "open" },
         { label: "Avec écart", value: "gap" },
+        { label: "Ouvertes", value: "open" },
     ] as const;
 
     private filters = computed<CashSessionFilters>(() => ({

@@ -35,11 +35,12 @@ describe("receipt message", () => {
         expect(message).not.toContain("Reste à payer");
     });
 
-    it("should add the shop announcement before the thanks", () => {
+    it("should end with the footer written by the shop, and nothing of its own", () => {
         const message = receiptMessage(sale(), "Awa Bazin", "", "Fermé lundi");
 
-        expect(message).toContain("Fermé lundi");
-        expect(message.indexOf("Fermé lundi")).toBeLessThan(message.indexOf("Merci"));
+        expect(message.endsWith("Fermé lundi")).toBe(true);
+        expect(message).not.toContain("Merci");
+        expect(receiptMessage(sale(), "Awa Bazin")).not.toContain("Merci");
     });
 
     it("should say when the sale is refunded", () => {

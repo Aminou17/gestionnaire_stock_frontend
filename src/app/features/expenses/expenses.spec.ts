@@ -214,12 +214,16 @@ describe("NewExpense", () => {
         expect(create).toHaveBeenCalledWith("EXPENSE", 1000, "FOOD", "");
     });
 
-    it("should say the cash is closed and block the button", async () => {
+    it("should say the cash is closed before the form, with a button to open it", async () => {
         await render(null);
         const el: HTMLElement = fixture.nativeElement;
 
-        expect(el.textContent).toContain("Votre caisse n'est pas ouverte");
-        expect(el.querySelector<HTMLButtonElement>("button[type=submit]")!.disabled).toBe(true);
+        expect(el.textContent).toContain("Caisse pas encore ouverte");
+        expect(el.textContent).toContain("Ouvrez-la pour payer une dépense");
+        expect(el.querySelector("form.layout")).toBeNull();
+        expect(el.querySelector("app-cash-closed-notice .btn")?.textContent).toContain(
+            "Ouvrir la caisse",
+        );
     });
 
     it("should show the message of the server", async () => {
