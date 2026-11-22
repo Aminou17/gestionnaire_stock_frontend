@@ -97,14 +97,16 @@ describe("SettingsInstall", () => {
         const { el } = await render({ inAppBrowser: true });
 
         expect(el.querySelector(".alert")?.textContent).toContain("fenêtre intégrée");
-        expect(el.querySelector(".big")).toBeNull();
-        expect(el.querySelector("a.big")).toBeNull();
+        // le fichier Android reste proposé, le bouton du navigateur non
+        expect(el.querySelector("a.big")?.getAttribute("href")).toBe("/boutiki.apk");
+        expect(el.querySelector("button.big")).toBeNull();
     });
 
-    it("should say it is installed, without any button", async () => {
+    it("should say it is installed, and still offer the Android file", async () => {
         const { el } = await render({ isInstalled$: signal(true) });
 
         expect(el.textContent).toContain("est installé");
-        expect(el.querySelector(".big")).toBeNull();
+        expect(el.querySelector("button.big")).toBeNull();
+        expect(el.querySelector("a.big")?.getAttribute("href")).toBe("/boutiki.apk");
     });
 });
