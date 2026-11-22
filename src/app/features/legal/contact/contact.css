@@ -64,36 +64,6 @@
     font-weight: var(--fw-semibold);
 }
 
-/* WhatsApp : le logo seul, le numéro n'est jamais affiché */
-.wa-line {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    max-width: 720px;
-    margin: 12px 0 0;
-    font-size: var(--fs-small);
-}
-
-.wa-button {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #25d366, #128c7e);
-    color: #fff;
-    transition: transform 0.15s;
-}
-
-.wa-button:hover {
-    transform: scale(1.06);
-}
-
-.wa-button:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
 .way-text {
     display: grid;
     gap: 2px;

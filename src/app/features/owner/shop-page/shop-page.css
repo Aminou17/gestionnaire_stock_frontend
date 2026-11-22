@@ -45,11 +45,32 @@
 }
 
 .trial {
-    color: var(--primary);
+    color: var(--primary-text);
 }
 
-.trial.ended {
-    color: var(--warning, #b45309);
+.trial[data-tone="ok"] {
+    color: var(--success);
+}
+
+.trial[data-tone="warn"] {
+    color: var(--warning);
+}
+
+.trial[data-tone="ended"] {
+    color: var(--danger);
+}
+
+.deleted-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-color: var(--danger);
+}
+
+.deleted-banner div {
+    display: grid;
+    gap: 2px;
 }
 
 .accounts {
@@ -73,7 +94,7 @@
 }
 
 .account.inactive .account-text {
-    opacity: 0.55;
+    color: var(--text-muted);
 }
 
 .account-text {
@@ -112,7 +133,7 @@
 .status-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 16px;
     padding-top: 14px;
     border-top: 1px solid var(--border);

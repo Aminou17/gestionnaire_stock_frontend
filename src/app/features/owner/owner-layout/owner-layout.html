@@ -1,10 +1,3 @@
-<!-- taches de couleur floues derrière tout l'espace -->
-<div class="blobs" aria-hidden="true">
-    <span class="blob blob-blue"></span>
-    <span class="blob blob-violet"></span>
-    <span class="blob blob-teal"></span>
-</div>
-
 <aside class="side">
     <div class="brand">
         <img class="brand-logo" src="/icons/icon-192.png" alt="" width="38" height="38" />
@@ -25,10 +18,12 @@
             >
                 <span class="nav-icon">
                     <app-icon [name]="link.icon" [size]="20" />
-                    @if (link.path === "/owner/support" && support.unread() > 0) {
-                        <span class="badge-count" [attr.aria-label]="support.unread() + ' non lus'">{{
-                            support.unread()
-                        }}</span>
+                    @if (link.path === "/owner/support" && messagesBadge() > 0) {
+                        <span
+                            class="badge-count"
+                            [attr.aria-label]="messagesBadge() + ' non lus'"
+                            >{{ messagesBadge() }}</span
+                        >
                     }
                 </span>
                 <span class="nav-label">{{ link.label }}</span>

@@ -11,6 +11,7 @@ const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
     name: "Awa Bazin",
     status: "ACTIVE",
     created_at: "2026-11-01T10:00:00.000Z",
+    deleted_at: null,
     trial_ends_at: null,
     paid_until: null,
     access_ends_at: null,
@@ -28,7 +29,14 @@ const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
 });
 
 describe("Shops", () => {
-    let service: { getShops: any; setStatus: any; setTrial: any; createShop: any };
+    let service: {
+        getShops: any;
+        setStatus: any;
+        setTrial: any;
+        createShop: any;
+        deleteShop: any;
+        restoreShop: any;
+    };
 
     const render = async (shops: OwnedShop[]) => {
         service = {
@@ -36,6 +44,8 @@ describe("Shops", () => {
             setStatus: vi.fn(() => of({})),
             setTrial: vi.fn(() => of({})),
             createShop: vi.fn(),
+            deleteShop: vi.fn(() => of({})),
+            restoreShop: vi.fn(() => of({})),
         };
         await TestBed.configureTestingModule({
             imports: [Shops],
@@ -64,11 +74,10 @@ describe("Shops", () => {
         const el = fixture.nativeElement as HTMLElement;
 
         expect(el.querySelectorAll(".shop").length).toBe(2);
-        expect(el.querySelector(".head p")?.textContent).toContain("30 ventes");
         expect(el.querySelector(".kpis")?.textContent).toContain("Suspendues1");
-        expect(el.textContent).toContain("awa@exemple.com");
-        expect(el.querySelectorAll(".badge").length).toBe(1);
-        expect(el.querySelector(".badge")?.textContent).toContain("Suspendue");
+        expect(el.textContent).toContain("Awa · Bobo-Dioulasso");
+        expect(el.querySelectorAll(".tag").length).toBe(1);
+        expect(el.querySelector(".tag")?.textContent).toContain("Suspendue");
     });
 
     it("should filter the list with the summary tiles", async () => {
@@ -105,7 +114,10 @@ describe("Shops", () => {
 
         (el.querySelector(".more-btn") as HTMLButtonElement).click();
         await fixture.whenStable();
-        (el.querySelector(".item.danger") as HTMLButtonElement).click();
+        const suspendItem = Array.from(el.querySelectorAll<HTMLButtonElement>(".item")).find((b) =>
+            b.textContent?.includes("Suspendre"),
+        );
+        suspendItem!.click();
         await fixture.whenStable();
         expect(service.setStatus).not.toHaveBeenCalled();
         expect(el.querySelector("#suspend-title")?.textContent).toContain("Suspendre Awa Bazin");
@@ -114,10 +126,57 @@ describe("Shops", () => {
         expect(service.setStatus).toHaveBeenCalledWith(1, "SUSPENDED");
     });
 
-    it("should reactivate a suspended shop in one click", async () => {
+    it("should reactivate a suspended shop from the menu", async () => {
         const fixture = await render([shop({ status: "SUSPENDED" })]);
-        (fixture.nativeElement.querySelector(".shop-status .btn") as HTMLButtonElement).click();
+        const el = fixture.nativeElement as HTMLElement;
+
+        (el.querySelector(".more-btn") as HTMLButtonElement).click();
+        await fixture.whenStable();
+        const item = Array.from(el.querySelectorAll<HTMLButtonElement>(".item")).find((b) =>
+            b.textContent?.includes("Réactiver"),
+        );
+        item!.click();
         expect(service.setStatus).toHaveBeenCalledWith(1, "ACTIVE");
+    });
+
+    it("should open the shop sheet from the whole card", async () => {
+        const fixture = await render([shop()]);
+        const link = fixture.nativeElement.querySelector(".shop-link") as HTMLAnchorElement;
+
+        expect(link.getAttribute("href")).toBe("/owner/shops/1");
+    });
+
+    it("should ask for confirmation before deleting a shop", async () => {
+        const fixture = await render([shop()]);
+        const el = fixture.nativeElement as HTMLElement;
+
+        fixture.componentInstance.askDelete(shop());
+        await fixture.whenStable();
+        expect(service.deleteShop).not.toHaveBeenCalled();
+        expect(el.querySelector("#delete-title")?.textContent).toContain("Supprimer Awa Bazin");
+
+        fixture.componentInstance.confirmDelete();
+        expect(service.deleteShop).toHaveBeenCalledWith(1);
+    });
+
+    it("should keep deleted shops out of the lists and restore them from their own tab", async () => {
+        const deletedAt = new Date(Date.now() - 10 * 86_400_000).toISOString();
+        const fixture = await render([
+            shop(),
+            shop({ id: 2, name: "Chez Fatou", deleted_at: deletedAt }),
+        ]);
+        const el = fixture.nativeElement as HTMLElement;
+
+        expect(el.querySelectorAll(".shop").length).toBe(1);
+        expect(el.querySelector(".kpis")?.textContent).toContain("Toutes1");
+
+        fixture.componentInstance.view.set("deleted");
+        await fixture.whenStable();
+        expect(el.querySelectorAll(".shop").length).toBe(1);
+        expect(el.querySelector(".shop")?.textContent).toContain("Effacée dans 80 jours");
+
+        (el.querySelector(".shop-status .btn") as HTMLButtonElement).click();
+        expect(service.restoreShop).toHaveBeenCalledWith(2);
     });
 
     const inDays = (days: number) =>
@@ -125,24 +184,24 @@ describe("Shops", () => {
 
     it("should show the days left of the trial", async () => {
         const fixture = await render([shop({ trial_ends_at: inDays(12) })]);
-        const label = fixture.nativeElement.querySelector(".trial");
+        const label = fixture.nativeElement.querySelector(".tag");
 
         expect(label.textContent).toContain("Essai : 12 jours restants");
-        expect(label.classList.contains("ended")).toBe(false);
+        expect(label.getAttribute("data-tone")).toBe("info");
     });
 
     it("should say when the trial is over", async () => {
         const fixture = await render([shop({ trial_ends_at: inDays(-3) })]);
-        const label = fixture.nativeElement.querySelector(".trial");
+        const label = fixture.nativeElement.querySelector(".tag");
 
         expect(label.textContent).toContain("Essai terminé");
-        expect(label.classList.contains("ended")).toBe(true);
+        expect(label.getAttribute("data-tone")).toBe("ended");
     });
 
     it("should show nothing when the shop has no trial", async () => {
         const fixture = await render([shop({ trial_ends_at: null })]);
 
-        expect(fixture.nativeElement.querySelector(".trial")).toBeNull();
+        expect(fixture.nativeElement.querySelector(".tag")).toBeNull();
     });
 
     it("should open the trial dialog from the menu", async () => {
@@ -244,6 +303,8 @@ describe("Shops", () => {
             setStatus: vi.fn(),
             setTrial: vi.fn(),
             createShop: vi.fn(),
+            deleteShop: vi.fn(),
+            restoreShop: vi.fn(),
         };
         await TestBed.configureTestingModule({
             imports: [Shops],
@@ -256,19 +317,14 @@ describe("Shops", () => {
         expect(fixture.nativeElement.querySelector(".kpis")?.textContent).toContain("–");
     });
 
-    it("should show the phone, the place and the employees of each shop", async () => {
+    it("should keep the card short: name, administrator and city only", async () => {
         const fixture = await render([shop()]);
-        const text = fixture.nativeElement.textContent;
+        const text = fixture.nativeElement.querySelector(".shop").textContent;
 
-        expect(text).toContain("+226 70 12 34 56");
-        expect(text).toContain("Bobo-Dioulasso, Burkina Faso");
-        expect(text).toContain("2 employés");
-        expect(text).toContain("Moussa Traoré, Salif Ouédraogo");
-    });
-
-    it("should say when a shop has no employee", async () => {
-        const fixture = await render([shop({ employees_count: 0, employees: [] })]);
-
-        expect(fixture.nativeElement.textContent).toContain("Aucun employé");
+        expect(text).toContain("Awa Bazin");
+        expect(text).toContain("Awa · Bobo-Dioulasso");
+        expect(text).not.toContain("awa@exemple.com");
+        expect(text).not.toContain("+226 70 12 34 56");
+        expect(text).not.toContain("employé");
     });
 });

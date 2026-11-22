@@ -1,7 +1,8 @@
 import { FailedLogin, FailedLoginIp, LockedAccount, SecurityEvent } from "../security.model";
+import type { IconName } from "../../../../shared/icon/icons";
 import { RowTone, SecurityRow, TableHeadings } from "../security-table/security-table";
 
-export type ListKind = "logins" | "locked" | "events";
+export type ListKind = "logins" | "locked" | "events" | "history";
 export type FilterName = "shop" | "email" | "ip" | "period";
 
 export interface ListConfig {
@@ -18,7 +19,7 @@ export interface ListConfig {
 }
 
 // libellés courts : ceux du journal des boutiques sont des phrases entières
-const EVENT_LABELS: Record<string, string> = {
+export const EVENT_LABELS: Record<string, string> = {
     ACCESS_DENIED: "Accès refusé",
     PASSWORD_CHANGED: "Mot de passe changé",
     PASSWORD_CHANGE_FAILED: "Changement refusé",
@@ -30,6 +31,21 @@ const EVENT_LABELS: Record<string, string> = {
     TWO_FACTOR_ENABLED: "Double authentification activée",
     TWO_FACTOR_DISABLED: "Double authentification désactivée",
     TWO_FACTOR_FAILED: "Code incorrect",
+    SHOP_CREATED: "Boutique créée",
+    SHOP_REGISTERED: "Boutique inscrite",
+    SHOP_SUSPENDED: "Boutique suspendue",
+    SHOP_ACTIVATED: "Boutique réactivée",
+    SHOP_DELETED: "Boutique supprimée",
+    SHOP_RESTORED: "Boutique restaurée",
+    SHOP_TRIAL_CHANGED: "Essai modifié",
+    SHOP_PAID_UNTIL_CHANGED: "Paiement enregistré",
+    AUTH_LOGIN_SUCCEEDED: "Connexion réussie",
+    AUTH_LOGIN_FAILED: "Connexion échouée",
+    AUTH_EMAIL_VERIFIED: "E-mail confirmé",
+    AUTH_LOGOUT_ALL: "Déconnexion de tous les appareils",
+    MAIL_SETTINGS_UPDATED: "E-mail d'envoi modifié",
+    MAIL_SETTINGS_REMOVED: "E-mail d'envoi retiré",
+    MAIL_TEST_SENT: "E-mail de test envoyé",
 };
 
 const plural = (count: number, one: string, many: string) => `${count} ${count > 1 ? many : one}`;
@@ -85,6 +101,15 @@ const lockedRows = (data: LockedAccount[]): SecurityRow[] =>
         note: remaining(account.locked_until),
     }));
 
+const eventIcon = (action: string): IconName =>
+    action.startsWith("SHOP_") && !action.includes("ADMIN")
+        ? "store"
+        : action.startsWith("AUTH_")
+          ? "user"
+          : action.startsWith("MAIL_")
+            ? "mail"
+            : "key";
+
 const eventRows = (data: SecurityEvent[]): SecurityRow[] =>
     data.map((event) => {
         const denied = event.action === "ACCESS_DENIED";
@@ -97,17 +122,21 @@ const eventRows = (data: SecurityEvent[]): SecurityRow[] =>
 
         return {
             id: event.id,
-            icon: denied ? "ban" : "key",
+            icon: denied ? "ban" : eventIcon(event.action),
             tone,
             title: EVENT_LABELS[event.action] ?? event.action,
             subtitle: [event.email ?? event.user_name, path].filter(Boolean).join(" · ") || null,
-            shop: event.shop_name,
+            // les actions du propriétaire sur une boutique n'ont pas de boutique liée : on lit son nom dans le détail
+            shop:
+                event.shop_name ??
+                (typeof event.details?.["name"] === "string" ? event.details["name"] : null),
             detail: event.ip_address,
             badge: {
                 label: denied ? "Refusé" : event.result === "FAILURE" ? "Échec" : "Réussi",
                 tone,
             },
             when: event.created_at,
+            raw: event,
         };
     });
 
@@ -153,6 +182,26 @@ export const LIST_CONFIGS: Record<ListKind, ListConfig> = {
         }),
         emptyText: () => "Aucun compte n'est bloqué en ce moment.",
         toRows: (_view, data) => lockedRows(data as LockedAccount[]),
+    },
+    history: {
+        path: "events",
+        viewParam: "type",
+        views: [
+            { value: "all", label: "Tout" },
+            { value: "shops", label: "Boutiques" },
+            { value: "logins", label: "Connexions" },
+            { value: "password", label: "Sécurité" },
+        ],
+        filters: ["shop", "email", "ip", "period"],
+        exportName: "historique",
+        headings: () => ({
+            main: "Activité",
+            shop: "Boutique",
+            detail: "Adresse IP",
+            when: "Date",
+        }),
+        emptyText: () => "Aucune activité enregistrée.",
+        toRows: (_view, data) => eventRows(data as SecurityEvent[]),
     },
     events: {
         path: "events",

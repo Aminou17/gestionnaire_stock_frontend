@@ -149,6 +149,8 @@
         [error]="list.error() ? errorMessage() : null"
         [emptyTitle]="emptyTitle()"
         [emptyText]="emptyText()"
+        [clickable]="clickable"
+        (picked)="open($event)"
         (retry)="list.reload()"
     >
         @if (filtered()) {
@@ -160,3 +162,82 @@
 
     <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" [attached]="true" />
 </section>
+
+<dialog #detailDialog aria-labelledby="event-title" (close)="selected.set(null)">
+    @if (selected(); as event) {
+        <div class="detail">
+            <h2 id="event-title">{{ eventLabel(event) }}</h2>
+
+            @if (event.action === "ACCESS_DENIED") {
+                <p class="muted">
+                    Ce compte a essayé d'ouvrir une page qui ne lui est pas permise.
+                </p>
+            }
+
+            <dl class="facts">
+                <div>
+                    <dt>Date</dt>
+                    <dd>{{ event.created_at | date: "d MMMM y, HH:mm:ss" }}</dd>
+                </div>
+                <div>
+                    <dt>Résultat</dt>
+                    <dd>{{ event.result === "SUCCESS" ? "Réussi" : "Refusé" }}</dd>
+                </div>
+                <div>
+                    <dt>Compte</dt>
+                    <dd>{{ event.user_name || event.email || "Inconnu" }}</dd>
+                </div>
+                @if (event.email && event.user_name) {
+                    <div>
+                        <dt>E-mail</dt>
+                        <dd>{{ event.email }}</dd>
+                    </div>
+                }
+                @if (event.user_role) {
+                    <div>
+                        <dt>Rôle</dt>
+                        <dd>
+                            {{
+                                event.user_role === "admin"
+                                    ? "Administrateur"
+                                    : event.user_role === "manager"
+                                      ? "Employé"
+                                      : event.user_role
+                            }}
+                        </dd>
+                    </div>
+                }
+                @if (event.shop_name) {
+                    <div>
+                        <dt>Boutique</dt>
+                        <dd>
+                            @if (event.shop_id) {
+                                <a
+                                    [routerLink]="['/owner/shops', event.shop_id]"
+                                    (click)="close()"
+                                    >{{ event.shop_name }}</a
+                                >
+                            } @else {
+                                {{ event.shop_name }}
+                            }
+                        </dd>
+                    </div>
+                }
+                @if (eventPath(event); as path) {
+                    <div>
+                        <dt>Page demandée</dt>
+                        <dd class="mono">{{ path }}</dd>
+                    </div>
+                }
+                <div>
+                    <dt>Adresse IP</dt>
+                    <dd class="mono">{{ event.ip_address || "–" }}</dd>
+                </div>
+            </dl>
+
+            <div class="actions">
+                <button type="button" class="btn btn-outline" (click)="close()">Fermer</button>
+            </div>
+        </div>
+    }
+</dialog>

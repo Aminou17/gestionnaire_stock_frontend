@@ -6,27 +6,29 @@ import {
     inject,
     linkedSignal,
     signal,
+    ElementRef,
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { ActivatedRoute } from "@angular/router";
+import { DatePipe } from "@angular/common";
+import { ActivatedRoute, RouterLink } from "@angular/router";
 
 import { Icon } from "../../../../shared/icon/icon";
 import { Pagination, storedPageSize } from "../../../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../../../shared/period-filter/period-filter";
 import { OwnerShopService } from "../../owner-shop.service";
-import { NO_FILTERS, Page, SecurityFilters } from "../security.model";
+import { NO_FILTERS, Page, SecurityEvent, SecurityFilters } from "../security.model";
 import { SecurityService } from "../security.service";
-import { SecurityTable } from "../security-table/security-table";
-import { LIST_CONFIGS, ListKind } from "./security-list.config";
+import { SecurityRow, SecurityTable } from "../security-table/security-table";
+import { EVENT_LABELS, LIST_CONFIGS, ListKind } from "./security-list.config";
 
 // Une seule page pour les trois listes (connexions, comptes bloqués, accès et mots de passe) :
 // la route indique laquelle avec data.kind, et security-list.config.ts décrit ses colonnes.
 @Component({
     selector: "app-security-list",
-    imports: [Icon, Pagination, PeriodFilter, SecurityTable],
+    imports: [DatePipe, RouterLink, Icon, Pagination, PeriodFilter, SecurityTable],
     templateUrl: "./security-list.html",
-    styleUrl: "./security-list.css",
+    styleUrls: ["../../../../shared/dialog/dialog.css", "./security-list.css"],
     host: { "(document:keydown.escape)": "filtersOpen.set(false)" },
 })
 export class SecurityList {
@@ -34,6 +36,7 @@ export class SecurityList {
     private shopService = inject(OwnerShopService);
     private destroyRef = inject(DestroyRef);
     private periodFilter = viewChild(PeriodFilter);
+    private detailDialog = viewChild.required<ElementRef<HTMLDialogElement>>("detailDialog");
     // une minuterie par champ : taper dans l'un ne doit pas annuler la recherche de l'autre
     private emailTimer: ReturnType<typeof setTimeout> | undefined;
     private ipTimer: ReturnType<typeof setTimeout> | undefined;
@@ -71,6 +74,29 @@ export class SecurityList {
     rows = computed(() =>
         this.list.hasValue() ? this.config.toRows(this.view(), this.list.value().data) : [],
     );
+
+    // seules les lignes du journal (accès refusés, mots de passe) ouvrent un détail
+    clickable = this.kind === "events" || this.kind === "history";
+    selected = signal<SecurityEvent | null>(null);
+
+    open(row: SecurityRow) {
+        this.selected.set(row.raw as SecurityEvent);
+        this.detailDialog().nativeElement.showModal();
+    }
+
+    close() {
+        this.detailDialog().nativeElement.close();
+    }
+
+    eventLabel(event: SecurityEvent) {
+        return EVENT_LABELS[event.action] ?? event.action;
+    }
+
+    eventPath(event: SecurityEvent) {
+        const method = event.details?.["method"];
+        const path = event.details?.["path"];
+        return path ? `${method ? method + " " : ""}${path}` : null;
+    }
 
     headings = computed(() => this.config.headings(this.view()));
     has = (name: "shop" | "email" | "ip" | "period") => this.config.filters.includes(name);

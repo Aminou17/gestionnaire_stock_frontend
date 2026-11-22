@@ -81,6 +81,11 @@ export const routes: Routes = [
                     import("./features/auth/verify-email/verify-email").then((m) => m.VerifyEmail),
             },
             {
+                path: "help",
+                title: "Contacter le support",
+                loadComponent: () => import("./features/help/help-form").then((m) => m.HelpForm),
+            },
+            {
                 path: "forgot-password",
                 title: "Mot de passe oublié",
                 loadComponent: () =>
@@ -494,6 +499,14 @@ export const routes: Routes = [
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
             },
             {
+                path: "help",
+                title: "Demandes sans compte",
+                loadComponent: () =>
+                    import("./features/owner/help-requests/help-requests").then(
+                        (m) => m.HelpRequests,
+                    ),
+            },
+            {
                 path: "support/:id",
                 title: "Messages des boutiques",
                 data: { side: "owner" },
@@ -529,6 +542,15 @@ export const routes: Routes = [
                         path: "locked",
                         title: "Comptes bloqués",
                         data: { kind: "locked" },
+                        loadComponent: () =>
+                            import("./features/owner/security/security-list/security-list").then(
+                                (m) => m.SecurityList,
+                            ),
+                    },
+                    {
+                        path: "history",
+                        title: "Historique",
+                        data: { kind: "history" },
                         loadComponent: () =>
                             import("./features/owner/security/security-list/security-list").then(
                                 (m) => m.SecurityList,

@@ -46,6 +46,20 @@
     border-top: 0;
 }
 
+.row.clickable {
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.row.clickable:hover {
+    background: var(--surface-hover);
+}
+
+.row.clickable:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: -2px;
+}
+
 .icon {
     width: 36px;
     height: 36px;

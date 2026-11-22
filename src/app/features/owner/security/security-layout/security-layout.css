@@ -15,7 +15,7 @@ h1 {
     font-size: var(--fs-body);
 }
 
-/* onglets soulignés sur ordinateur, quatre parts égales sur téléphone (pas de défilement) */
+/* onglets soulignés sur ordinateur, cinq parts égales sur téléphone (pas de défilement) */
 .tabs {
     display: flex;
     gap: 8px;
@@ -65,14 +65,14 @@ h1 {
 
     .tabs {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 0;
     }
 
     .tab {
         justify-content: center;
-        padding: 0 4px;
-        font-size: var(--fs-small);
+        padding: 0 2px;
+        font-size: var(--fs-caption);
     }
 
     .short {

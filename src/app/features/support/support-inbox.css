@@ -342,3 +342,13 @@ textarea.input {
         display: none;
     }
 }
+
+/* espace propriétaire : l'heure garde une couleur pleine, sans opacité */
+:host-context(app-owner-layout) .time {
+    opacity: 1;
+    color: var(--text-muted);
+}
+
+:host-context(app-owner-layout) .mine .time {
+    color: #dbe7ff;
+}

@@ -1,8 +1,5 @@
 <div class="head">
-    <div>
-        <h1>Bonjour {{ auth.user()?.name }}</h1>
-        <p class="muted">Voici l'état de toutes vos boutiques aujourd'hui.</p>
-    </div>
+    <h1>Bonjour {{ auth.user()?.name }}</h1>
     <a routerLink="/owner/shops" class="btn btn-primary">
         <app-icon name="store" [size]="18" />
         <span>Voir les boutiques</span>
@@ -85,7 +82,9 @@
         } @else if (alerts() === 0) {
             <p class="safe"><app-icon name="shield" [size]="20" /> Rien d'anormal en 24 heures.</p>
         } @else {
-            <p class="safe warn"><app-icon name="alert" [size]="20" /> {{ alerts() }} à surveiller.</p>
+            <p class="safe warn">
+                <app-icon name="alert" [size]="20" /> {{ alerts() }} à surveiller.
+            </p>
             <a routerLink="/owner/security/locked" class="btn btn-outline btn-sm">
                 Voir les comptes bloqués
             </a>

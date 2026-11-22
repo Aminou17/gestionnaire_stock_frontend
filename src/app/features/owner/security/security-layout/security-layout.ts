@@ -14,11 +14,17 @@ export class SecurityLayout {
         { path: "/owner/security", short: "Aperçu", long: "Vue d'ensemble", exact: true },
         {
             path: "/owner/security/logins",
-            short: "Connexions",
+            short: "Échecs",
             long: "Connexions suspectes",
             exact: false,
         },
         { path: "/owner/security/locked", short: "Bloqués", long: "Comptes bloqués", exact: false },
+        {
+            path: "/owner/security/history",
+            short: "Activité",
+            long: "Historique",
+            exact: false,
+        },
         {
             path: "/owner/security/events",
             short: "Accès",

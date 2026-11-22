@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { PRODUCT_NAME } from "../../core/brand";
-import { mailtoLink, whatsappLink } from "../../core/contact";
+import { mailtoLink } from "../../core/contact";
 import { Icon } from "../../shared/icon/icon";
 import { ExportService } from "../settings/settings-export/export.service";
 
@@ -27,9 +27,6 @@ export class AccessEnded {
     protected suspended = computed(() => this.access()?.state === "suspended");
     protected wasPaid = computed(() => this.access()?.lastPeriod === "paid");
 
-    protected whatsapp = whatsappLink(
-        `Bonjour, je souhaite continuer à utiliser ${PRODUCT_NAME} pour ma boutique. Comment faire ?`,
-    );
     protected mail = mailtoLink();
 
     checking = signal(false);

@@ -1,15 +1,5 @@
 <div class="head">
-    <div>
-        <h1>Boutiques</h1>
-        <p class="muted">
-            @if (shops.hasValue()) {
-                {{ salesLast30Days() }} vente{{ salesLast30Days() > 1 ? "s" : "" }} ces 30 derniers
-                jours
-            } @else {
-                Les boutiques qui utilisent le logiciel et leur activité.
-            }
-        </p>
-    </div>
+    <h1>Boutiques</h1>
     <button type="button" class="btn btn-primary new-shop" (click)="openNewShop()">
         <app-icon name="plus" [size]="18" />
         <span>Nouvelle boutique</span>
@@ -50,6 +40,18 @@
             shops.hasValue() ? suspendedCount() : "–"
         }}</strong>
     </button>
+    @if (deletedCount() > 0 || view() === "deleted") {
+        <button
+            type="button"
+            class="card kpi"
+            [class.selected]="view() === 'deleted'"
+            [attr.aria-pressed]="view() === 'deleted'"
+            (click)="view.set('deleted')"
+        >
+            <span class="kpi-label"><i class="dot dot-muted"></i>Supprimées</span>
+            <strong>{{ deletedCount() }}</strong>
+        </button>
+    }
 </section>
 
 <section class="card list-card">
@@ -59,7 +61,7 @@
             <input
                 class="input"
                 type="search"
-                placeholder="Boutique, administrateur, e-mail, téléphone ou ville…"
+                placeholder="Rechercher une boutique"
                 aria-label="Rechercher une boutique"
                 [value]="search()"
                 (input)="search.set($any($event.target).value)"
@@ -93,6 +95,8 @@
                 </button>
             } @else if (view() === "SUSPENDED") {
                 Aucune boutique suspendue.
+            } @else if (view() === "deleted") {
+                Aucune boutique supprimée.
             } @else if (view() !== "all") {
                 Aucune boutique dans cette liste.
             } @else {
@@ -105,104 +109,53 @@
     } @else {
         <ul class="shops">
             @for (shop of paging.visible(); track shop.id) {
-                <li class="shop" [class.suspended]="shop.status === 'SUSPENDED'">
+                <li
+                    class="shop"
+                    [class.suspended]="shop.status === 'SUSPENDED'"
+                    [class.deleted]="shop.deleted_at"
+                >
                     <span class="shop-icon" aria-hidden="true">{{ shop.name.charAt(0) }}</span>
 
                     <div class="shop-text">
+                        <!-- le lien couvre toute la carte ; les boutons passent au-dessus -->
                         <a class="shop-link" [routerLink]="['/owner/shops', shop.id]"
                             ><strong>{{ shop.name }}</strong></a
                         >
-                        @if (shop.admin_email) {
-                            <small class="muted">
-                                {{ shop.admin_name }} · <span>{{ shop.admin_email }}</span>
-                            </small>
-                        } @else {
-                            <small class="muted">Aucun administrateur actif</small>
-                        }
-                        @if (shop.phone || shop.city || shop.country) {
-                            <small class="muted contact-line">
-                                @if (shop.phone) {
-                                    <a [href]="'tel:' + phoneDigits(shop.phone)">{{
-                                        shop.phone
-                                    }}</a>
-                                }
-                                @if (shop.phone && (shop.city || shop.country)) {
-                                    ·
-                                }
-                                {{ place(shop) }}
-                            </small>
-                        }
-                        <small class="muted employees" [title]="shop.employees.join(', ')">
-                            @if (shop.employees_count === 0) {
-                                Aucun employé
-                            } @else {
-                                {{ shop.employees_count }}
-                                employé{{ shop.employees_count > 1 ? "s" : "" }} :
-                                {{ shop.employees.join(", ") }}
-                            }
-                        </small>
-                        <!-- sur téléphone, l'activité tient sur une ligne -->
-                        @if (trialState(shop); as trial) {
-                            <small
-                                class="trial"
-                                [class.ended]="trial.ended"
-                                [attr.data-tone]="trial.tone"
-                                >{{ trial.label }}</small
-                            >
-                        }
-                        <small class="shop-meta muted">
-                            {{ shop.sales_last_30_days }}
-                            vente{{ shop.sales_last_30_days > 1 ? "s" : "" }} en 30 j
-                        </small>
+                        <small class="muted">{{ subtitle(shop) }}</small>
                     </div>
 
-                    <dl class="shop-stats">
-                        <div>
-                            <dt>Employés</dt>
-                            <dd>{{ shop.employees_count }}</dd>
-                        </div>
-                        <div>
-                            <dt>Ventes 30 j</dt>
-                            <dd>{{ shop.sales_last_30_days }}</dd>
-                        </div>
-                        <div>
-                            <dt>Dernière vente</dt>
-                            <dd [class.muted]="!shop.last_sale_at">
-                                {{
-                                    shop.last_sale_at
-                                        ? (shop.last_sale_at | date: "d MMM y")
-                                        : "Aucune"
-                                }}
-                            </dd>
-                        </div>
-                    </dl>
-
-                    <!-- pas de badge pour une boutique normale, seulement Suspendue -->
                     <div class="shop-status">
-                        @if (shop.status === "ACTIVE") {
-                            <app-action-menu
-                                [items]="shopActions"
-                                [label]="'Actions pour ' + shop.name"
-                                [title]="shop.name"
-                                [disabled]="updating() === shop.id"
-                                (picked)="onMenu(shop, $event)"
-                            />
-                        } @else {
-                            <span class="badge badge-warning">Suspendue</span>
+                        @if (shop.deleted_at) {
+                            <span class="tag tone-ended">{{ purgeLabel(shop) }}</span>
                             <button
                                 type="button"
                                 class="btn btn-outline btn-sm"
                                 [disabled]="updating() === shop.id"
-                                [attr.aria-label]="'Réactiver ' + shop.name"
-                                (click)="reactivate(shop)"
+                                [attr.aria-label]="'Restaurer ' + shop.name"
+                                (click)="restore(shop)"
                             >
                                 @if (updating() === shop.id) {
                                     <span class="spinner"></span>
                                 } @else {
                                     <app-icon name="undo" [size]="16" />
                                 }
-                                Réactiver
+                                Restaurer
                             </button>
+                        } @else {
+                            @if (shop.status === "SUSPENDED") {
+                                <span class="tag tone-warn">Suspendue</span>
+                            } @else if (trialState(shop); as trial) {
+                                <span class="tag" [attr.data-tone]="trial.tone">{{
+                                    trial.label
+                                }}</span>
+                            }
+                            <app-action-menu
+                                [items]="actionsOf(shop)"
+                                [label]="'Actions pour ' + shop.name"
+                                [title]="shop.name"
+                                [disabled]="updating() === shop.id"
+                                (picked)="onMenu(shop, $event)"
+                            />
                         }
                     </div>
                 </li>
@@ -233,8 +186,7 @@
     <form (submit)="$event.preventDefault(); confirmSuspend()">
         <h2 id="suspend-title">Suspendre {{ pending()?.name }} ?</h2>
         <p class="muted">
-            Plus personne de cette boutique ne pourra se connecter, même avec une session déjà
-            ouverte. Ses données sont conservées et la boutique peut être réactivée à tout moment.
+            Plus personne ne pourra s'y connecter. Vous pouvez la réactiver à tout moment.
         </p>
 
         @if (actionError()) {
@@ -268,10 +220,7 @@
 >
     <form (submit)="$event.preventDefault(); saveTrial()">
         <h2 id="trial-title">Essai de {{ trialShop()?.name }}</h2>
-        <p class="muted">
-            La durée compte à partir d'aujourd'hui. Laissez vide pour retirer l'essai. La boutique
-            n'est pas suspendue automatiquement à la fin.
-        </p>
+        <p class="muted">Compté à partir d'aujourd'hui. Laissez vide pour retirer l'essai.</p>
 
         @if (trialError()) {
             <div class="alert alert-error" role="alert">{{ trialError() }}</div>
@@ -307,6 +256,42 @@
                     <span class="spinner"></span>
                 }
                 Enregistrer
+            </button>
+        </div>
+    </form>
+</dialog>
+
+<dialog
+    #deleteDialog
+    aria-labelledby="delete-title"
+    (cancel)="onDeleteCancel($event)"
+    (close)="deleting.set(null)"
+>
+    <form (submit)="$event.preventDefault(); confirmDelete()">
+        <h2 id="delete-title">Supprimer {{ deleting()?.name }} ?</h2>
+        <p class="muted">
+            Plus personne ne pourra s'y connecter. Vous pouvez la restaurer pendant 90 jours, puis
+            toutes ses données sont effacées.
+        </p>
+
+        @if (actionError()) {
+            <div class="alert alert-error" role="alert">{{ actionError() }}</div>
+        }
+
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="updating() !== null"
+                (click)="closeDelete()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-danger" [disabled]="updating() !== null">
+                @if (updating() !== null) {
+                    <span class="spinner"></span>
+                }
+                Supprimer
             </button>
         </div>
     </form>

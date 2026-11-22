@@ -27,7 +27,14 @@
 
     <ul class="rows">
         @for (row of rows(); track row.id) {
-            <li class="row">
+            <li
+                class="row"
+                [class.clickable]="clickable()"
+                [attr.role]="clickable() ? 'button' : null"
+                [attr.tabindex]="clickable() ? 0 : null"
+                (click)="clickable() && picked.emit(row)"
+                (keydown.enter)="clickable() && picked.emit(row)"
+            >
                 <span class="icon tone-{{ row.tone }}" aria-hidden="true">
                     <app-icon [name]="row.icon" [size]="18" />
                 </span>

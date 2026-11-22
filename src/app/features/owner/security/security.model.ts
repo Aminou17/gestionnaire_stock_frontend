@@ -58,7 +58,9 @@ export interface SecurityEvent {
     details: Record<string, unknown> | null;
     email: string | null;
     user_name: string | null;
+    user_role: string | null;
     ip_address: string | null;
+    shop_id: number | null;
     shop_name: string | null;
     created_at: string;
 }

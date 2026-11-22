@@ -39,6 +39,13 @@
                     <app-icon name="plus" [size]="16" />
                     <span class="new-label">Nouveau message</span>
                 </a>
+            } @else {
+                <a class="btn btn-outline btn-sm new-thread" routerLink="/owner/help">
+                    Sans compte
+                    @if (help.open() > 0) {
+                        <span class="pill">{{ help.open() }}</span>
+                    }
+                </a>
             }
         </div>
 
@@ -65,8 +72,8 @@
                 "
                 [text]="
                     isOwner
-                        ? 'Les messages des boutiques arriveront ici.'
-                        : 'Une question ? Écrivez-nous, le support répond vite.'
+                        ? ''
+                        : 'Une question ? Écrivez-nous, réponse en moins de 3 h en général.'
                 "
             />
         } @else {
@@ -116,8 +123,7 @@
                 }
                 <p class="speed">
                     <app-icon name="clock" [size]="16" />
-                    Le support répond en général plus vite que sur WhatsApp, et vous gardez tout
-                    l'historique ici.
+                    Réponse en moins de 3 h en général, et vous gardez tout l'historique ici.
                 </p>
                 <label class="field">
                     <span>Sujet</span>
@@ -254,9 +260,7 @@
                     isOwner ? 'Choisissez une conversation' : 'Une question ? Écrivez au support'
                 "
                 [text]="
-                    isOwner
-                        ? 'Elle s\'ouvre ici, avec la boutique concernée.'
-                        : 'Nous répondons ici et par e-mail, souvent plus vite que sur WhatsApp.'
+                    isOwner ? '' : 'Nous répondons ici et par e-mail, en moins de 3 h en général.'
                 "
             />
         }

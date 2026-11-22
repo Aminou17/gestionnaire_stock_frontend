@@ -865,11 +865,10 @@ select.chip {
     }
 }
 
-/* Espace propriétaire : cartes en verre dépoli sur le fond de couleurs floues */
+/* Espace propriétaire : cartes pleines et lignes un peu plus nettes, pour une lecture régulière */
 app-owner-layout .card {
-    background: color-mix(in srgb, var(--surface) 72%, transparent);
-    border-color: color-mix(in srgb, var(--border) 70%, transparent);
-    backdrop-filter: blur(14px);
+    background: var(--surface);
+    border-color: color-mix(in srgb, var(--border) 92%, var(--text) 8%);
 }
 
 /* police de caisse du ticket (Liberation Mono, licence libre) : même rendu sur tous les appareils */

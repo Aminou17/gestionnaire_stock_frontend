@@ -42,22 +42,11 @@ describe("Contact", () => {
         expect(el.textContent).toContain("2 nouvelles");
     });
 
-    it("WhatsApp : seulement le logo, jamais le numéro", async () => {
+    it("ne propose plus WhatsApp pour joindre le support", async () => {
         const { el } = await render();
-        const link = el.querySelector<HTMLAnchorElement>(".wa-button")!;
 
-        expect(link.href).toContain(`https://wa.me/${CONTACT.whatsappDigits}?text=`);
-        expect(el.textContent).not.toContain("64 72 54 64");
-        expect(el.textContent).not.toContain(CONTACT.whatsappDigits);
-    });
-
-    it("WhatsApp : le message prérempli donne le nom et la boutique", async () => {
-        const { el } = await render({ role: "manager", name: "Awa Traoré" });
-        const link = el.querySelector<HTMLAnchorElement>(".wa-button")!;
-        const text = decodeURIComponent(link.href.split("text=")[1]);
-
-        expect(text).toContain("Awa Traoré");
-        expect(text).toContain("Chez Fatou");
+        expect(el.querySelector('a[href*="wa.me"]')).toBeNull();
+        expect(el.textContent).toContain("moins de 3 h");
     });
 
     it("ouvre une seule réponse à la fois", async () => {

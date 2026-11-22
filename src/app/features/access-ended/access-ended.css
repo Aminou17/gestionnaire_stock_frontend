@@ -29,18 +29,8 @@
 
 .actions {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 8px;
-}
-
-.btn-whatsapp {
-    border: 0;
-    background: #16a34a;
-    color: #fff;
-}
-
-.btn-whatsapp:hover {
-    background: #15803d;
 }
 
 .files {

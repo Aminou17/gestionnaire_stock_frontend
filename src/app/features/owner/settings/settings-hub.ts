@@ -10,7 +10,6 @@ interface SettingsLink {
     path: string;
     icon: IconName;
     title: string;
-    text: string;
 }
 
 // Page d'entrée des réglages : une carte par sous-page, puis l'apparence et la déconnexion
@@ -30,13 +29,11 @@ export class OwnerSettings {
             path: "/owner/settings/account",
             icon: "key",
             title: "Mot de passe et double authentification",
-            text: "Changer votre mot de passe, activer le code de sécurité.",
         },
         {
             path: "/owner/settings/mail",
             icon: "mail",
             title: "E-mails d'envoi",
-            text: "L'adresse qui envoie les liens de mot de passe oublié.",
         },
     ];
 }

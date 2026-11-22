@@ -20,6 +20,8 @@ export interface SecurityRow {
     // date ISO ; note : précision courte sous la date (ex. "dans 12 min")
     when: string;
     note?: string | null;
+    // donnée d'origine, rendue à la page quand la ligne est touchée
+    raw?: unknown;
 }
 
 export interface TableHeadings {
@@ -44,7 +46,11 @@ export class SecurityTable {
     emptyTitle = input("Rien à signaler");
     emptyText = input<string>();
 
+    // lignes cliquables : touchées, elles ouvrent leur détail
+    clickable = input(false);
+
     retry = output<void>();
+    picked = output<SecurityRow>();
 
     skeletons = [1, 2, 3, 4, 5, 6];
 

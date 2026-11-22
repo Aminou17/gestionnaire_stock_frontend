@@ -278,3 +278,40 @@
         background: var(--overlay);
     }
 }
+
+.detail {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+}
+
+.detail h2,
+.detail p {
+    margin: 0;
+}
+
+.facts {
+    margin: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.facts dt {
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+}
+
+.facts dd {
+    margin: 2px 0 0;
+    font-weight: var(--fw-semibold);
+    overflow-wrap: anywhere;
+}
+
+.facts a {
+    color: var(--primary-text);
+}
+
+.mono {
+    font-family: ui-monospace, monospace;
+    font-size: var(--fs-small);
+}

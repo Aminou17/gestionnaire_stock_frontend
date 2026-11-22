@@ -71,7 +71,7 @@ describe("Subscription", () => {
         const el = await render();
 
         expect(el.querySelector(".help a[href='/contact']")).not.toBeNull();
-        expect(el.querySelector(".wa")?.getAttribute("href")).toContain("wa.me");
+        expect(el.querySelector(".help a[href*='wa.me']")).toBeNull();
     });
 
     it("affiche les jours restants donnés par le serveur", async () => {

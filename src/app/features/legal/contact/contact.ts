@@ -3,11 +3,9 @@ import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { PRODUCT_NAME } from "../../../core/brand";
-import { CONTACT, mailtoLink, whatsappLink } from "../../../core/contact";
-import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
+import { CONTACT, mailtoLink } from "../../../core/contact";
 import { SupportService } from "../../../core/support/support.service";
 import { Icon } from "../../../shared/icon/icon";
-import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { LegalPage } from "../legal-page/legal-page";
 
 interface Question {
@@ -40,13 +38,12 @@ const QUESTIONS: Question[] = [
 
 @Component({
     selector: "app-contact",
-    imports: [LegalPage, Icon, WhatsappIcon, RouterLink],
+    imports: [LegalPage, Icon, RouterLink],
     templateUrl: "./contact.html",
     styleUrl: "./contact.css",
 })
 export class Contact {
     private auth = inject(AuthService);
-    private shop = inject(ShopSettingsService);
     protected support = inject(SupportService);
 
     protected productName = PRODUCT_NAME;
@@ -59,17 +56,6 @@ export class Contact {
         return this.auth.isLoggedIn() && (user?.role === "admin" || user?.role === "manager");
     });
 
-    // message prêt à envoyer, avec la boutique quand la personne est connectée
-    protected whatsapp = computed(() => {
-        const user = this.auth.user();
-        const shopName = this.shop.shopName();
-
-        if (!this.canWriteSupport() || !user) return whatsappLink();
-
-        return whatsappLink(
-            `Bonjour, je suis ${user.name}${shopName ? `, de la boutique ${shopName}` : ""}. J'utilise ${PRODUCT_NAME} et j'aurais besoin d'aide, pourriez-vous me répondre ?`,
-        );
-    });
     protected questions = QUESTIONS;
     constructor() {
         if (this.canWriteSupport()) this.support.refreshUnread("user");

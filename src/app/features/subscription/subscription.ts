@@ -2,12 +2,10 @@ import { DatePipe } from "@angular/common";
 import { Component, computed, inject } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
-import { whatsappLink } from "../../core/contact";
 import { AuthService } from "../../core/auth/auth.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { IconName } from "../../shared/icon/icons";
-import { WhatsappIcon } from "../../shared/icon/whatsapp-icon";
 
 interface Plan {
     name: string;
@@ -47,7 +45,7 @@ const PAYMENTS: PaymentMethod[] = [
 import { getBackLink } from "../../core/back-link";
 @Component({
     selector: "app-subscription",
-    imports: [PageHeader, Icon, WhatsappIcon, RouterLink, DatePipe],
+    imports: [PageHeader, Icon, RouterLink, DatePipe],
     templateUrl: "./subscription.html",
     styleUrl: "./subscription.css",
 })
@@ -56,7 +54,6 @@ export class Subscription {
     protected back = getBackLink("/settings", "Paramètres");
     protected plans = PLANS;
     protected payments = PAYMENTS;
-    protected whatsapp = whatsappLink();
 
     private auth = inject(AuthService);
 

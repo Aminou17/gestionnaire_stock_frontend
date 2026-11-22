@@ -6,6 +6,8 @@ export interface OwnedShop {
     name: string;
     status: ShopStatus;
     created_at: string;
+    // date de suppression : la boutique est effacée pour de bon 90 jours plus tard
+    deleted_at: string | null;
     trial_ends_at: string | null;
     // dernier jour payé inclus (AAAA-MM-JJ)
     paid_until: string | null;
@@ -62,6 +64,7 @@ export interface OwnedShopDetail {
     name: string;
     status: ShopStatus;
     created_at: string;
+    deleted_at: string | null;
     trial_ends_at: string | null;
     paid_until: string | null;
     access_ends_at: string | null;
@@ -69,9 +72,15 @@ export interface OwnedShopDetail {
     address: string | null;
     country: string | null;
     city: string | null;
+    tax_id: string | null;
+    rccm: string | null;
     products_count: number;
+    customers_count: number;
+    suppliers_count: number;
+    sales_total: number;
     sales_last_30_days: number;
     last_sale_at: string | null;
+    last_login_at: string | null;
     users: ShopAccount[];
 }
 

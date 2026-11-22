@@ -1,9 +1,8 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { DatePipe } from "@angular/common";
 import { Component, ElementRef, computed, inject, signal, viewChild } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import { Router, RouterLink } from "@angular/router";
+import { RouterLink } from "@angular/router";
 
 import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Icon } from "../../../shared/icon/icon";
@@ -13,45 +12,57 @@ import { OwnedShop, ShopStatus } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
 import { accessStateOf } from "../trial-state";
 
-type View = "all" | ShopStatus;
+type View = "all" | ShopStatus | "deleted";
+
+// une boutique supprimée est effacée pour de bon après ce délai
+const KEPT_DAYS = 90;
+const DAY = 86_400_000;
 
 @Component({
     selector: "app-shops",
-    imports: [DatePipe, FormsModule, RouterLink, Icon, ActionMenu, NewShopDialog, Pagination],
+    imports: [FormsModule, RouterLink, Icon, ActionMenu, NewShopDialog, Pagination],
     templateUrl: "./shops.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shops.css"],
 })
 export class Shops {
-    protected shopActions: ActionItem[] = [
-        { id: "open", label: "Voir la fiche", icon: "eye" },
-        { id: "trial", label: "Modifier l'essai", icon: "clock" },
-        { id: "suspend", label: "Suspendre la boutique", icon: "ban", danger: true },
-    ];
+    protected actionsOf(shop: OwnedShop): ActionItem[] {
+        return [
+            { id: "trial", label: "Modifier l'essai", icon: "clock" },
+            shop.status === "ACTIVE"
+                ? { id: "suspend", label: "Suspendre", icon: "ban" }
+                : { id: "reactivate", label: "Réactiver", icon: "undo" },
+            { id: "delete", label: "Supprimer", icon: "trash", danger: true, separated: true },
+        ];
+    }
 
     private owner = inject(OwnerShopService);
-    private router = inject(Router);
 
     private newShop = viewChild.required(NewShopDialog);
     private confirm = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
     private trialDialog = viewChild.required<ElementRef<HTMLDialogElement>>("trialDialog");
+    private deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>("deleteDialog");
 
     shops = rxResource({ stream: () => this.owner.getShops() });
 
     search = signal("");
     view = signal<View>("all");
 
-    all = computed(() => (this.shops.hasValue() ? this.shops.value() : []));
+    private every = computed(() => (this.shops.hasValue() ? this.shops.value() : []));
+    // les boutiques supprimées ne comptent que dans leur propre liste
+    all = computed(() => this.every().filter((s) => !s.deleted_at));
+    deletedCount = computed(() => this.every().filter((s) => s.deleted_at).length);
     activeCount = computed(() => this.all().filter((s) => s.status === "ACTIVE").length);
     suspendedCount = computed(() => this.all().filter((s) => s.status === "SUSPENDED").length);
-    salesLast30Days = computed(() =>
-        this.all().reduce((sum, shop) => sum + shop.sales_last_30_days, 0),
-    );
 
     list = computed(() => {
         const term = this.search().trim().toLowerCase();
-        return this.all().filter(
+        const source =
+            this.view() === "deleted" ? this.every().filter((s) => s.deleted_at) : this.all();
+        return source.filter(
             (shop) =>
-                (this.view() === "all" || shop.status === this.view()) &&
+                (this.view() === "all" ||
+                    this.view() === "deleted" ||
+                    shop.status === this.view()) &&
                 (!term ||
                     [
                         shop.name,
@@ -75,12 +86,16 @@ export class Shops {
     updating = signal<number | null>(null);
     actionError = signal<string | null>(null);
 
-    phoneDigits(phone: string) {
-        return `+${phone.replace(/\D/g, "")}`;
+    // sous le nom : l'administrateur et la ville, rien de plus
+    subtitle(shop: OwnedShop) {
+        return [shop.admin_name, shop.city].filter(Boolean).join(" · ") || "Aucun administrateur";
     }
 
-    place(shop: OwnedShop) {
-        return [shop.city, shop.country].filter(Boolean).join(", ");
+    purgeLabel(shop: OwnedShop) {
+        const left = Math.ceil(
+            (new Date(shop.deleted_at!).getTime() + KEPT_DAYS * DAY - Date.now()) / DAY,
+        );
+        return left > 1 ? `Effacée dans ${left} jours` : "Effacée demain";
     }
 
     trialState(shop: OwnedShop) {
@@ -135,18 +150,15 @@ export class Shops {
         });
     }
 
-    openShop(shop: OwnedShop) {
-        this.router.navigate(["/owner/shops", shop.id]);
-    }
-
     openNewShop() {
         this.newShop().open();
     }
 
     onMenu(shop: OwnedShop, action: string) {
-        if (action === "open") this.openShop(shop);
         if (action === "trial") this.askTrial(shop);
         if (action === "suspend") this.askSuspend(shop);
+        if (action === "reactivate") this.reactivate(shop);
+        if (action === "delete") this.askDelete(shop);
     }
 
     askSuspend(shop: OwnedShop) {
@@ -187,6 +199,59 @@ export class Shops {
             error: (err: HttpErrorResponse) => {
                 this.updating.set(null);
                 this.actionError.set(err.error?.message ?? "Impossible de changer le statut.");
+            },
+        });
+    }
+
+    // boutique en cours de suppression, en attente de confirmation
+    deleting = signal<OwnedShop | null>(null);
+
+    askDelete(shop: OwnedShop) {
+        this.deleting.set(shop);
+        this.actionError.set(null);
+        this.deleteDialog().nativeElement.showModal();
+    }
+
+    closeDelete() {
+        if (this.updating() !== null) return;
+        this.deleteDialog().nativeElement.close();
+    }
+
+    onDeleteCancel(event: Event) {
+        if (this.updating() !== null) event.preventDefault();
+    }
+
+    confirmDelete() {
+        const shop = this.deleting();
+        if (!shop) return;
+
+        this.updating.set(shop.id);
+        this.owner.deleteShop(shop.id).subscribe({
+            next: () => {
+                this.updating.set(null);
+                this.deleteDialog().nativeElement.close();
+                this.shops.reload();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.updating.set(null);
+                this.actionError.set(err.error?.message ?? "Impossible de supprimer la boutique.");
+            },
+        });
+    }
+
+    restore(shop: OwnedShop) {
+        this.actionError.set(null);
+        this.updating.set(shop.id);
+
+        this.owner.restoreShop(shop.id).subscribe({
+            next: () => {
+                this.updating.set(null);
+                this.view.set("all");
+                this.shops.reload();
+            },
+            error: (err: HttpErrorResponse) => {
+                this.updating.set(null);
+                this.actionError.set(err.error?.message ?? "Impossible de restaurer la boutique.");
             },
         });
     }

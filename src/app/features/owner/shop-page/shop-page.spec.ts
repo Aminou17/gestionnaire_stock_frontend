@@ -12,6 +12,7 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
     name: "Chez Fatou",
     status: "ACTIVE",
     created_at: "2026-11-01T10:00:00.000Z",
+    deleted_at: null,
     trial_ends_at: null,
     paid_until: null,
     access_ends_at: null,
@@ -19,7 +20,13 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
     address: "Rue 12, Abidjan",
     country: "Côte d'Ivoire",
     city: "Abidjan",
+    tax_id: null,
+    rccm: null,
     products_count: 42,
+    customers_count: 15,
+    suppliers_count: 4,
+    sales_total: 310,
+    last_login_at: "2026-11-13T09:00:00.000Z",
     sales_last_30_days: 28,
     last_sale_at: "2026-11-14T09:00:00.000Z",
     users: [
@@ -62,6 +69,8 @@ describe("ShopPage", () => {
         setTrial: ReturnType<typeof vi.fn>;
         setPaidUntil: ReturnType<typeof vi.fn>;
         setStatus: ReturnType<typeof vi.fn>;
+        deleteShop: ReturnType<typeof vi.fn>;
+        restoreShop: ReturnType<typeof vi.fn>;
     };
 
     const render = async (shop: OwnedShopDetail = detail()) => {
@@ -79,11 +88,13 @@ describe("ShopPage", () => {
             setTrial: vi.fn(() => of({})),
             setPaidUntil: vi.fn(() => of({})),
             setStatus: vi.fn(() => of({})),
+            deleteShop: vi.fn(() => of({})),
+            restoreShop: vi.fn(() => of({})),
         };
         await TestBed.configureTestingModule({
             imports: [ShopPage],
             providers: [
-                provideRouter([]),
+                provideRouter([{ path: "owner/shops", children: [] }]),
                 { provide: OwnerShopService, useValue: service },
                 {
                     provide: ActivatedRoute,
@@ -121,7 +132,9 @@ describe("ShopPage", () => {
         expect(el.textContent).toContain("42");
         expect(el.textContent).toContain("fatou@exemple.com");
         expect(el.textContent).toContain("moussa@exemple.com");
-        expect(el.textContent).toContain("compte supprimé");
+        expect(el.textContent).toContain("supprimé");
+        expect(el.textContent).toContain("Clients");
+        expect(el.textContent).toContain("310");
         expect(el.textContent).not.toMatch(/FCFA|XOF|€|\$|chiffre d'affaires/i);
     });
 
@@ -136,7 +149,7 @@ describe("ShopPage", () => {
         const fixture = await render();
         const el = fixture.nativeElement as HTMLElement;
 
-        button(el, "Envoyer un lien").click();
+        button(el, "Lien par e-mail").click();
         await fixture.whenStable();
 
         expect(service.sendResetLink).toHaveBeenCalledWith(5, 7);
@@ -152,7 +165,7 @@ describe("ShopPage", () => {
             httpError(503, "L'envoi d'e-mails n'est pas configuré."),
         );
 
-        button(el, "Envoyer un lien").click();
+        button(el, "Lien par e-mail").click();
         await fixture.whenStable();
 
         expect(el.querySelector(".alert-error")?.textContent).toContain(
@@ -254,7 +267,7 @@ describe("ShopPage", () => {
         const fixture = await render();
         const el = fixture.nativeElement as HTMLElement;
 
-        button(el, "Suspendre la boutique").click();
+        button(el, "Suspendre").click();
         await fixture.whenStable();
 
         expect(service.setStatus).not.toHaveBeenCalled();
@@ -268,6 +281,35 @@ describe("ShopPage", () => {
         await fixture.whenStable();
 
         expect(service.setStatus).toHaveBeenCalledWith(5, "SUSPENDED");
+    });
+
+    it("should ask for confirmation before deleting the shop", async () => {
+        const fixture = await render();
+        const el = fixture.nativeElement as HTMLElement;
+
+        button(el, "Supprimer").click();
+        await fixture.whenStable();
+        expect(service.deleteShop).not.toHaveBeenCalled();
+
+        el.querySelector<HTMLButtonElement>(
+            "dialog[aria-labelledby='delete-title'] button[type='submit']",
+        )!.click();
+        await fixture.whenStable();
+
+        expect(service.deleteShop).toHaveBeenCalledWith(5);
+    });
+
+    it("should offer to restore a deleted shop and hide the subscription block", async () => {
+        const fixture = await render(
+            detail({ status: "SUSPENDED", deleted_at: new Date().toISOString() }),
+        );
+        const el = fixture.nativeElement as HTMLElement;
+
+        expect(el.querySelector(".trial-form")).toBeNull();
+        expect(el.querySelectorAll(".account-actions").length).toBe(0);
+
+        button(el, "Restaurer").click();
+        expect(service.restoreShop).toHaveBeenCalledWith(5);
     });
 
     it("should extend the paid date by one month from today", async () => {

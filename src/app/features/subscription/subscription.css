@@ -203,10 +203,6 @@ p {
     gap: 8px;
 }
 
-.wa app-whatsapp-icon {
-    color: #128c7e;
-}
-
 @media (min-width: 640px) {
     .actions {
         display: flex;

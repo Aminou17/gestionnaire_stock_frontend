@@ -3,7 +3,7 @@ import { DatePipe } from "@angular/common";
 import { Component, ElementRef, computed, inject, signal, viewChild } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 
 import { getRoleLabel } from "../../../core/auth/role-label";
 import { PageHeader } from "../../../layout/page-header/page-header";
@@ -23,9 +23,11 @@ import { getBackLink } from "../../../core/back-link";
 export class ShopPage {
     protected back = getBackLink("/owner/shops", "Retour aux boutiques");
     private owner = inject(OwnerShopService);
+    private router = inject(Router);
     private id = Number(inject(ActivatedRoute).snapshot.paramMap.get("id"));
 
     private suspendDialog = viewChild.required<ElementRef<HTMLDialogElement>>("suspendDialog");
+    private deleteDialog = viewChild.required<ElementRef<HTMLDialogElement>>("deleteDialog");
     private passwordDialog = viewChild.required<ElementRef<HTMLDialogElement>>("passwordDialog");
 
     shop = rxResource({ stream: () => this.owner.getShop(this.id) });
@@ -34,6 +36,16 @@ export class ShopPage {
     place = computed(() => {
         const detail = this.shop.hasValue() ? this.shop.value() : null;
         return [detail?.city, detail?.country].filter(Boolean).join(", ");
+    });
+
+    // jours avant l'effacement définitif d'une boutique supprimée
+    purgeLabel = computed(() => {
+        const deletedAt = this.shop.hasValue() ? this.shop.value().deleted_at : null;
+        if (!deletedAt) return "";
+        const left = Math.ceil(
+            (new Date(deletedAt).getTime() + 90 * 86_400_000 - Date.now()) / 86_400_000,
+        );
+        return left > 1 ? `Effacée pour de bon dans ${left} jours` : "Effacée pour de bon demain";
     });
 
     trial = computed(() => (this.shop.hasValue() ? accessStateOf(this.shop.value()) : null));
@@ -233,6 +245,47 @@ export class ShopPage {
                 if (this.suspendDialog().nativeElement.open)
                     this.suspendDialog().nativeElement.close();
             },
+        });
+    }
+
+    askDelete() {
+        this.message.set(null);
+        this.deleteDialog().nativeElement.showModal();
+    }
+
+    closeDelete() {
+        if (this.busy()) return;
+        this.deleteDialog().nativeElement.close();
+    }
+
+    remove() {
+        this.busy.set(true);
+
+        this.owner.deleteShop(this.id).subscribe({
+            next: () => {
+                this.busy.set(false);
+                this.deleteDialog().nativeElement.close();
+                this.router.navigate(["/owner/shops"]);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.fail(err, "Impossible de supprimer la boutique.");
+                this.deleteDialog().nativeElement.close();
+            },
+        });
+    }
+
+    restore() {
+        this.busy.set(true);
+        this.message.set(null);
+
+        this.owner.restoreShop(this.id).subscribe({
+            next: () => {
+                this.busy.set(false);
+                this.message.set({ ok: true, text: "Boutique restaurée." });
+                this.shop.reload();
+            },
+            error: (err: HttpErrorResponse) =>
+                this.fail(err, "Impossible de restaurer la boutique."),
         });
     }
 }

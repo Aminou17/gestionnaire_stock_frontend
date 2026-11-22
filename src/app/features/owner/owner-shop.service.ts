@@ -52,4 +52,13 @@ export class OwnerShopService {
     setStatus(id: number, status: ShopStatus) {
         return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/status`, { status });
     }
+
+    // la boutique est bloquée et gardée 90 jours avant d'être effacée
+    deleteShop(id: number) {
+        return this.http.delete<OwnedShop>(`${API_URL}/shops/${id}`);
+    }
+
+    restoreShop(id: number) {
+        return this.http.post<OwnedShop>(`${API_URL}/shops/${id}/restore`, {});
+    }
 }

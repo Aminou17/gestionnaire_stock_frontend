@@ -1,8 +1,9 @@
-import { Component, DestroyRef, inject } from "@angular/core";
+import { Component, DestroyRef, computed, inject } from "@angular/core";
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 
 import { PRODUCT_NAME } from "../../../core/brand";
 import { AuthService } from "../../../core/auth/auth.service";
+import { HelpService } from "../../../core/help/help.service";
 import { SupportService } from "../../../core/support/support.service";
 import { ThemeService } from "../../../core/theme/theme.service";
 import { Icon } from "../../../shared/icon/icon";
@@ -29,6 +30,9 @@ export class OwnerLayout {
     protected auth = inject(AuthService);
     protected theme = inject(ThemeService);
     protected support = inject(SupportService);
+    private help = inject(HelpService);
+    // conversations des boutiques non lues, et demandes sans compte à traiter
+    protected messagesBadge = computed(() => this.support.unread() + this.help.open());
     protected productName = PRODUCT_NAME;
 
     protected links: OwnerLink[] = [
@@ -41,7 +45,10 @@ export class OwnerLayout {
 
     constructor() {
         // les nouveaux messages des boutiques apparaissent sans recharger la page
-        const refresh = () => this.support.refreshUnread("owner");
+        const refresh = () => {
+            this.support.refreshUnread("owner");
+            this.help.refreshOpen();
+        };
         refresh();
 
         const timer = setInterval(refresh, 60_000);

@@ -1,6 +1,5 @@
 <app-page-header
     [title]="shop.hasValue() ? shop.value().name : 'Boutique'"
-    subtitle="Contact, comptes et activité de la boutique"
     section="Espace propriétaire"
     [back]="back.link"
     [backLabel]="back.label"
@@ -27,10 +26,30 @@
 } @else if (shop.hasValue()) {
     @let s = shop.value();
 
+    @if (s.deleted_at) {
+        <section class="card block deleted-banner">
+            <div>
+                <strong>Boutique supprimée le {{ s.deleted_at | date: "d MMM y" }}</strong>
+                <span class="muted">{{ purgeLabel() }}</span>
+            </div>
+            <button
+                type="button"
+                class="btn btn-primary btn-sm"
+                [disabled]="busy()"
+                (click)="restore()"
+            >
+                <app-icon name="undo" [size]="16" />
+                Restaurer
+            </button>
+        </section>
+    }
+
     <section class="card block">
         <div class="block-head">
             <h2>Résumé</h2>
-            @if (s.status === "SUSPENDED") {
+            @if (s.deleted_at) {
+                <span class="badge badge-danger">Supprimée</span>
+            } @else if (s.status === "SUSPENDED") {
                 <span class="badge badge-warning">Suspendue</span>
             } @else {
                 <span class="badge badge-success">Active</span>
@@ -46,17 +65,31 @@
                 <dt>Accès</dt>
                 <dd>
                     @if (trial(); as t) {
-                        <span class="trial" [class.ended]="t.ended" [attr.data-tone]="t.tone">{{
-                            t.label
-                        }}</span>
+                        <span class="trial" [attr.data-tone]="t.tone">{{ t.label }}</span>
                     } @else {
                         Sans limite
                     }
                 </dd>
             </div>
             <div>
+                <dt>Dernière connexion</dt>
+                <dd>{{ s.last_login_at ? (s.last_login_at | date: "d MMM y") : "–" }}</dd>
+            </div>
+            <div>
                 <dt>Produits</dt>
                 <dd>{{ s.products_count }}</dd>
+            </div>
+            <div>
+                <dt>Clients</dt>
+                <dd>{{ s.customers_count }}</dd>
+            </div>
+            <div>
+                <dt>Fournisseurs</dt>
+                <dd>{{ s.suppliers_count }}</dd>
+            </div>
+            <div>
+                <dt>Ventes au total</dt>
+                <dd>{{ s.sales_total }}</dd>
             </div>
             <div>
                 <dt>Ventes sur 30 jours</dt>
@@ -64,19 +97,27 @@
             </div>
             <div>
                 <dt>Dernière vente</dt>
-                <dd>{{ s.last_sale_at ? (s.last_sale_at | date: "d MMM y") : "Aucune" }}</dd>
+                <dd>{{ s.last_sale_at ? (s.last_sale_at | date: "d MMM y") : "–" }}</dd>
             </div>
             <div>
                 <dt>Téléphone</dt>
-                <dd>{{ s.phone || "Non renseigné" }}</dd>
+                <dd>{{ s.phone || "–" }}</dd>
             </div>
             <div>
                 <dt>Ville et pays</dt>
-                <dd>{{ place() || "Non renseignés" }}</dd>
+                <dd>{{ place() || "–" }}</dd>
+            </div>
+            <div>
+                <dt>Identifiant fiscal</dt>
+                <dd>{{ s.tax_id || "–" }}</dd>
+            </div>
+            <div>
+                <dt>RCCM</dt>
+                <dd>{{ s.rccm || "–" }}</dd>
             </div>
             <div class="wide">
                 <dt>Adresse</dt>
-                <dd>{{ s.address || "Non renseignée" }}</dd>
+                <dd>{{ s.address || "–" }}</dd>
             </div>
         </dl>
     </section>
@@ -94,18 +135,18 @@
                         <strong>{{ account.name }}</strong>
                         <small class="muted">{{ account.email }}</small>
                         <small class="muted">
-                            {{ roleLabel(account.role) }} ·
+                            {{ roleLabel(account.role) }}
                             @if (!account.is_active) {
-                                compte supprimé
+                                · supprimé
                             } @else if (account.last_login_at) {
-                                dernière connexion le {{ account.last_login_at | date: "d MMM y" }}
+                                · connecté le {{ account.last_login_at | date: "d MMM y" }}
                             } @else {
-                                jamais connecté
+                                · jamais connecté
                             }
                         </small>
                     </div>
 
-                    @if (account.is_active) {
+                    @if (account.is_active && !s.deleted_at) {
                         <div class="account-actions">
                             <button
                                 type="button"
@@ -117,7 +158,7 @@
                                 (click)="sendLink(account)"
                             >
                                 <app-icon name="mail" [size]="16" />
-                                Envoyer un lien
+                                Lien par e-mail
                             </button>
                             <button
                                 type="button"
@@ -134,121 +175,120 @@
                 </li>
             }
         </ul>
-        <p class="muted hint">
-            Le lien arrive par e-mail et la personne choisit son mot de passe, vous ne le voyez
-            jamais. Le mot de passe provisoire sert seulement si elle n'a plus accès à son e-mail.
-        </p>
     </section>
 
-    <section class="card block">
-        <div class="block-head"><h2>Abonnement et accès</h2></div>
+    @if (!s.deleted_at) {
+        <section class="card block">
+            <div class="block-head"><h2>Abonnement</h2></div>
 
-        <div class="paid">
-            <div class="paid-head">
-                <strong>Payé jusqu'au</strong>
-                <span class="muted">
-                    @if (s.paid_until) {
-                        Actuellement le {{ s.paid_until | date: "d MMMM y" }} inclus
-                    } @else {
-                        Aucun paiement enregistré
+            <div class="paid">
+                <div class="paid-head">
+                    <strong>Payé jusqu'au</strong>
+                    <span class="muted">
+                        {{ s.paid_until ? (s.paid_until | date: "d MMMM y") : "Aucun paiement" }}
+                    </span>
+                </div>
+
+                <div class="chips" role="group" aria-label="Prolonger l'accès">
+                    @for (option of [1, 3, 6, 12]; track option) {
+                        <button
+                            type="button"
+                            class="chip"
+                            [disabled]="busy()"
+                            (click)="extendPaid(option)"
+                        >
+                            + {{ option === 12 ? "1 an" : option + " mois" }}
+                        </button>
                     }
-                </span>
-            </div>
+                </div>
 
-            <div class="chips" role="group" aria-label="Prolonger l'accès">
-                @for (option of [1, 3, 6, 12]; track option) {
+                <form class="trial-form" (submit)="$event.preventDefault(); savePaidUntil()">
+                    <label class="field">
+                        <span>Dernier jour payé</span>
+                        <input
+                            class="input"
+                            type="date"
+                            name="paidUntil"
+                            [ngModel]="paidUntil()"
+                            (ngModelChange)="paidUntil.set($event)"
+                        />
+                    </label>
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        [disabled]="busy() || !paidUntil()"
+                    >
+                        Enregistrer
+                    </button>
+                </form>
+
+                @if (s.paid_until) {
                     <button
                         type="button"
-                        class="chip"
+                        class="link-danger"
                         [disabled]="busy()"
-                        (click)="extendPaid(option)"
+                        (click)="savePaidUntil(true)"
                     >
-                        + {{ option === 12 ? "1 an" : option + " mois" }}
+                        Retirer la date de paiement
                     </button>
                 }
             </div>
 
-            <form class="trial-form" (submit)="$event.preventDefault(); savePaidUntil()">
+            <form class="trial-form" (submit)="$event.preventDefault(); saveTrial()">
                 <label class="field">
-                    <span>Dernier jour payé</span>
+                    <span>Jours d'essai</span>
                     <input
                         class="input"
-                        type="date"
-                        name="paidUntil"
-                        [ngModel]="paidUntil()"
-                        (ngModelChange)="paidUntil.set($event)"
+                        type="number"
+                        inputmode="numeric"
+                        min="1"
+                        max="365"
+                        step="1"
+                        name="trialDays"
+                        placeholder="Vide : retirer l'essai"
+                        [ngModel]="trialDays()"
+                        (ngModelChange)="trialDays.set($event)"
                     />
                 </label>
-                <button type="submit" class="btn btn-primary" [disabled]="busy() || !paidUntil()">
+                <button type="submit" class="btn btn-primary" [disabled]="busy()">
                     Enregistrer
                 </button>
             </form>
 
-            @if (s.paid_until) {
-                <button
-                    type="button"
-                    class="link-danger"
-                    [disabled]="busy()"
-                    (click)="savePaidUntil(true)"
-                >
-                    Retirer la date de paiement
-                </button>
-            }
-            <p class="muted hint">
-                L'accès reste ouvert jusqu'à la plus tardive des deux dates (essai ou paiement),
-                puis 3 jours de grâce. Un rappel part 7 jours et 1 jour avant.
-            </p>
-        </div>
-
-        <form class="trial-form" (submit)="$event.preventDefault(); saveTrial()">
-            <label class="field">
-                <span>Jours d'essai à partir d'aujourd'hui</span>
-                <input
-                    class="input"
-                    type="number"
-                    inputmode="numeric"
-                    min="1"
-                    max="365"
-                    step="1"
-                    name="trialDays"
-                    placeholder="Vide pour retirer l'essai"
-                    [ngModel]="trialDays()"
-                    (ngModelChange)="trialDays.set($event)"
-                />
-            </label>
-            <button type="submit" class="btn btn-primary" [disabled]="busy()">Enregistrer</button>
-        </form>
-
-        <div class="status-row">
-            @if (s.status === "ACTIVE") {
-                <p class="muted">
-                    Suspendre empêche toute la boutique de se connecter. Ses données sont gardées.
-                </p>
+            <div class="status-row">
+                @if (s.status === "ACTIVE") {
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        [disabled]="busy()"
+                        (click)="askSuspend()"
+                    >
+                        <app-icon name="ban" [size]="16" />
+                        Suspendre
+                    </button>
+                } @else {
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        [disabled]="busy()"
+                        (click)="setStatus('ACTIVE')"
+                    >
+                        <app-icon name="undo" [size]="16" />
+                        Réactiver
+                    </button>
+                }
                 <button
                     type="button"
                     class="btn btn-danger btn-sm"
                     [disabled]="busy()"
-                    (click)="askSuspend()"
+                    (click)="askDelete()"
                 >
-                    <app-icon name="ban" [size]="16" />
-                    Suspendre la boutique
+                    <app-icon name="trash" [size]="16" />
+                    Supprimer
                 </button>
-            } @else {
-                <p class="muted">
-                    La boutique est suspendue : plus personne ne peut s'y connecter.
-                </p>
-                <button
-                    type="button"
-                    class="btn btn-outline btn-sm"
-                    [disabled]="busy()"
-                    (click)="setStatus('ACTIVE')"
-                >
-                    <app-icon name="undo" [size]="16" />
-                    Réactiver la boutique
-                </button>
-            }
-        </div>
-    </section>
+            </div>
+        </section>
+    }
 }
 
 <dialog #suspendDialog aria-labelledby="suspend-title">
@@ -257,8 +297,7 @@
             Suspendre {{ shop.hasValue() ? shop.value().name : "la boutique" }} ?
         </h2>
         <p class="muted">
-            Plus personne de cette boutique ne pourra se connecter, même avec une session déjà
-            ouverte. Ses données sont conservées et la boutique peut être réactivée à tout moment.
+            Plus personne ne pourra s'y connecter. Vous pouvez la réactiver à tout moment.
         </p>
         <div class="actions">
             <button
@@ -288,10 +327,7 @@
     @if (tempPassword(); as password) {
         <div class="done">
             <h2 id="temp-title">Mot de passe provisoire</h2>
-            <p class="muted">
-                Transmettez ces accès à {{ tempAccount()?.name }}. Le mot de passe ne sera plus
-                affiché ensuite, et il devra le changer à sa première connexion.
-            </p>
+            <p class="muted">À transmettre à {{ tempAccount()?.name }}. Il ne sera plus affiché.</p>
 
             <pre class="credentials">{{ credentials() }}</pre>
 
@@ -315,9 +351,8 @@
         <form (submit)="$event.preventDefault(); confirmTempPassword()">
             <h2 id="temp-title">Donner un mot de passe provisoire ?</h2>
             <p class="muted">
-                {{ tempAccount()?.name }} sera déconnecté(e) partout et devra choisir son propre mot
-                de passe à la prochaine connexion. Préférez le lien par e-mail quand la personne
-                peut lire sa boîte mail.
+                {{ tempAccount()?.name }} sera déconnecté(e) et devra choisir son mot de passe à la
+                prochaine connexion.
             </p>
 
             @if (tempError()) {
@@ -342,4 +377,32 @@
             </div>
         </form>
     }
+</dialog>
+
+<dialog #deleteDialog aria-labelledby="delete-title">
+    <form (submit)="$event.preventDefault(); remove()">
+        <h2 id="delete-title">
+            Supprimer {{ shop.hasValue() ? shop.value().name : "la boutique" }} ?
+        </h2>
+        <p class="muted">
+            Plus personne ne pourra s'y connecter. Vous pouvez la restaurer pendant 90 jours, puis
+            toutes ses données sont effacées.
+        </p>
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [disabled]="busy()"
+                (click)="closeDelete()"
+            >
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-danger" [disabled]="busy()">
+                @if (busy()) {
+                    <span class="spinner"></span>
+                }
+                Supprimer
+            </button>
+        </div>
+    </form>
 </dialog>

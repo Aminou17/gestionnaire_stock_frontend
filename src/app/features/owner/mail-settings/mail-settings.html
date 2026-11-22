@@ -5,7 +5,6 @@
 
 <div class="head">
     <h1>E-mails d'envoi</h1>
-    <p class="muted">L'adresse qui envoie les liens de mot de passe oublié aux boutiques.</p>
 </div>
 
 @if (settings.hasValue()) {
@@ -74,10 +73,7 @@
             autocomplete="new-password"
             [placeholder]="needsPassword() ? '16 lettres données par Google' : 'Déjà enregistré'"
         />
-        <small class="muted">
-            Ce n'est pas le mot de passe de Gmail. Créez-le dans votre compte Google, Sécurité,
-            Validation en deux étapes, Mots de passe des applications.
-        </small>
+        <small class="muted">Mot de passe d'application Google, pas celui de Gmail.</small>
     </label>
 
     @if (message(); as message) {

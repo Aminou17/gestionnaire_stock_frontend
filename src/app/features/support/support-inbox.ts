@@ -7,6 +7,7 @@ import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 import { map } from "rxjs";
 
 import { SupportSide, SupportThread } from "../../core/support/support.model";
+import { HelpService } from "../../core/help/help.service";
 import { SupportService } from "../../core/support/support.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { EmptyState } from "../../shared/empty-state/empty-state";
@@ -28,6 +29,7 @@ import { BackLink } from "../../shared/back-link/back-link";
 })
 export class SupportInbox {
     private support = inject(SupportService);
+    protected help = inject(HelpService);
     private route = inject(ActivatedRoute);
     private router = inject(Router);
 
@@ -102,9 +104,7 @@ export class SupportInbox {
     }
 
     protected subtitle() {
-        return this.isOwner
-            ? "Les questions de vos clients, avec leur boutique"
-            : "Écrivez-nous, nous vous répondons ici et par e-mail";
+        return this.isOwner ? undefined : "Réponse en moins de 3 h en général";
     }
 
     private fail(err: HttpErrorResponse) {

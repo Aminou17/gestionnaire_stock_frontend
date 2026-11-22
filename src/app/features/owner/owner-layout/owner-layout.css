@@ -1,60 +1,21 @@
 :host {
     --side-width: 248px;
-    --glass: color-mix(in srgb, var(--surface) 70%, transparent);
-    --glass-border: color-mix(in srgb, var(--border) 70%, transparent);
+
+    /* textes de cet espace seulement : trois niveaux pleins, jamais d'opacité sur l'écriture */
+    --text: #0b1325;
+    --text-muted: #475167;
+    --owner-line: color-mix(in srgb, var(--border) 92%, var(--text) 8%);
 
     display: block;
     min-height: 100vh;
-    background: var(--bg);
+    background:
+        radial-gradient(900px 360px at 60% -120px, var(--primary-soft), transparent 70%), var(--bg);
+    color: var(--text);
 }
 
-/* ------- fond de couleurs floues ------- */
-.blobs {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    overflow: hidden;
-    pointer-events: none;
-}
-
-.blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: 0.32;
-}
-
-.blob-blue {
-    top: -140px;
-    left: 18%;
-    width: 520px;
-    height: 520px;
-    background: var(--primary);
-}
-
-.blob-violet {
-    top: 30%;
-    right: -120px;
-    width: 460px;
-    height: 460px;
-    background: #8b5cf6;
-}
-
-.blob-teal {
-    bottom: -160px;
-    left: 35%;
-    width: 480px;
-    height: 480px;
-    background: #06b6d4;
-    opacity: 0.22;
-}
-
-:root[data-theme="dark"] .blob {
-    opacity: 0.2;
-}
-
-:root[data-theme="dark"] .blob-teal {
-    opacity: 0.14;
+:host-context(:root[data-theme="dark"]) {
+    --text: #eef2fb;
+    --text-muted: #a9b4c9;
 }
 
 /* ------- menu latéral (ordinateur) ------- */
@@ -67,10 +28,9 @@
     flex-direction: column;
     gap: 20px;
     padding: 18px 12px 12px;
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
+    background: var(--surface);
+    border: 1px solid var(--owner-line);
     border-radius: 20px;
-    backdrop-filter: blur(18px) saturate(1.4);
     box-shadow: var(--shadow-card);
 }
 
@@ -161,7 +121,7 @@
     gap: 4px;
     margin-top: auto;
     padding: 10px 4px 0;
-    border-top: 1px solid var(--glass-border);
+    border-top: 1px solid var(--owner-line);
 }
 
 .who {

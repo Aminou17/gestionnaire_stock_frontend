@@ -38,15 +38,15 @@ export class OwnerDashboard {
             .map((shop) => ({ shop, state: accessStateOf(shop) }))
             .filter(
                 ({ shop, state }) =>
-                    shop.status === "SUSPENDED" || state?.tone === "warn" || state?.tone === "ended",
+                    shop.status === "SUSPENDED" ||
+                    state?.tone === "warn" ||
+                    state?.tone === "ended",
             )
             .slice(0, 5),
     );
 
     latest = computed(() =>
-        [...this.all()]
-            .sort((a, b) => b.created_at.localeCompare(a.created_at))
-            .slice(0, 5),
+        [...this.all()].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
     );
 
     // une phrase sur la sécurité, la même règle que la page Sécurité

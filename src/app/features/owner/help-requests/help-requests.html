@@ -1,0 +1,151 @@
+<app-page-header
+    title="Sans compte"
+    section="Espace propriétaire"
+    back="/owner/support"
+    backLabel="Messages"
+/>
+
+<div class="tabs" role="tablist">
+    <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="status() === 'OPEN'"
+        [class.on]="status() === 'OPEN'"
+        (click)="status.set('OPEN')"
+    >
+        À traiter
+    </button>
+    <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="status() === 'CLOSED'"
+        [class.on]="status() === 'CLOSED'"
+        (click)="status.set('CLOSED')"
+    >
+        Traitées
+    </button>
+</div>
+
+<section class="card list">
+    @if (requests.isLoading() && !requests.hasValue()) {
+        <div class="skeleton row-skeleton"></div>
+        <div class="skeleton row-skeleton"></div>
+    } @else if (requests.error() && !requests.hasValue()) {
+        <div class="state" role="alert">
+            Impossible de charger les demandes.
+            <button type="button" class="btn btn-outline btn-sm" (click)="requests.reload()">
+                Réessayer
+            </button>
+        </div>
+    } @else if (requests.hasValue() && requests.value().length === 0) {
+        <app-empty-state
+            icon="message"
+            [title]="status() === 'OPEN' ? 'Aucune demande à traiter' : 'Aucune demande traitée'"
+        />
+    } @else if (requests.hasValue()) {
+        <ul>
+            @for (request of requests.value(); track request.id) {
+                <li>
+                    <button type="button" class="row" (click)="open(request)">
+                        <span class="avatar" aria-hidden="true">{{ request.name.charAt(0) }}</span>
+                        <span class="text">
+                            <strong>{{ request.name }}</strong>
+                            <small class="muted">
+                                {{ reasonLabel(request.reason) }}
+                                @if (request.shop_name) {
+                                    · {{ request.shop_name }}
+                                }
+                            </small>
+                            <small class="preview">{{ request.message }}</small>
+                        </span>
+                        <time class="when" [attr.datetime]="request.created_at">{{
+                            request.created_at | date: "d MMM, HH:mm"
+                        }}</time>
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+</section>
+
+<dialog #dialog aria-labelledby="help-title" (close)="selected.set(null)">
+    @if (selected(); as request) {
+        <form (submit)="$event.preventDefault(); send()">
+            <h2 id="help-title">{{ request.name }}</h2>
+
+            <dl class="facts">
+                <div>
+                    <dt>E-mail</dt>
+                    <dd>
+                        <a [href]="'mailto:' + request.email">{{ request.email }}</a>
+                    </dd>
+                </div>
+                @if (request.shop_name) {
+                    <div>
+                        <dt>Boutique</dt>
+                        <dd>{{ request.shop_name }}</dd>
+                    </div>
+                }
+                <div>
+                    <dt>Demande</dt>
+                    <dd>{{ reasonLabel(request.reason) }}</dd>
+                </div>
+                <div>
+                    <dt>Reçue le</dt>
+                    <dd>{{ request.created_at | date: "d MMM y, HH:mm" }}</dd>
+                </div>
+            </dl>
+
+            <p class="message">{{ request.message }}</p>
+
+            @if (request.reply) {
+                <div class="answer">
+                    <small class="muted"
+                        >Réponse envoyée le {{ request.replied_at | date: "d MMM y, HH:mm" }}</small
+                    >
+                    <p>{{ request.reply }}</p>
+                </div>
+            }
+
+            @if (request.status === "OPEN") {
+                <label class="field">
+                    <span>Votre réponse, envoyée par e-mail</span>
+                    <textarea
+                        class="input"
+                        rows="4"
+                        name="reply"
+                        maxlength="4000"
+                        [ngModel]="reply()"
+                        (ngModelChange)="reply.set($event)"
+                    ></textarea>
+                </label>
+            }
+
+            @if (error()) {
+                <div class="alert alert-error" role="alert">{{ error() }}</div>
+            }
+
+            <div class="actions">
+                <button type="button" class="btn btn-outline" [disabled]="busy()" (click)="close()">
+                    Fermer
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="busy()"
+                    (click)="toggle()"
+                >
+                    {{ request.status === "OPEN" ? "Clore sans répondre" : "Rouvrir" }}
+                </button>
+                @if (request.status === "OPEN") {
+                    <button type="submit" class="btn btn-primary" [disabled]="busy()">
+                        @if (busy()) {
+                            <span class="spinner"></span>
+                        }
+                        Envoyer
+                    </button>
+                }
+            </div>
+        </form>
+    }
+</dialog>

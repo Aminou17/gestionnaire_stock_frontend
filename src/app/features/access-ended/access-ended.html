@@ -24,16 +24,15 @@
 @if (auth.isAdmin()) {
     <section class="card next" aria-labelledby="next-title">
         <h2 id="next-title">Continuer avec {{ productName }}</h2>
-        <p class="muted">Écrivez-nous : nous rouvrons votre boutique dès le règlement.</p>
+        <p class="muted">
+            Écrivez au support : nous rouvrons votre boutique dès le règlement. Réponse en moins de
+            3 h en général.
+        </p>
 
         <div class="actions">
-            <a class="btn btn-whatsapp" [href]="whatsapp" target="_blank" rel="noopener">
-                <app-icon name="message" [size]="18" />
-                WhatsApp
-            </a>
-            <a class="btn btn-outline" [href]="mail">
+            <a class="btn btn-primary" [href]="mail">
                 <app-icon name="mail" [size]="18" />
-                E-mail
+                Écrire au support
             </a>
         </div>
     </section>
