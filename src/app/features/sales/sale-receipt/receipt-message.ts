@@ -46,27 +46,12 @@ export const receiptMessage = (
     return lines.join("\n");
 };
 
-// message court avec l'adresse du ticket : WhatsApp en affiche un aperçu, il ne reste qu'à envoyer
-export const ticketLinkMessage = (
-    sale: SaleDetail,
-    shopName: string,
-    ticketPrefix: string,
-    url: string,
-) =>
-    [
-        shopName || "Ticket de caisse",
-        `Ticket n° ${formatTicketNumber(sale.number, ticketPrefix)} : ${amount(sale.total)}`,
-        url,
-    ].join("\n");
+// le message ne contient que l'adresse du ticket : WhatsApp la remplace par l'image du ticket en aperçu
+// (WhatsApp écrit toujours l'adresse elle-même, elle ne peut pas être cachée)
+export const ticketLinkMessage = (url: string) => url;
 
-export const ticketLinkLink = (
-    sale: SaleDetail,
-    shopName: string,
-    defaultCode: string,
-    ticketPrefix: string,
-    url: string,
-) => {
-    const text = ticketLinkMessage(sale, shopName, ticketPrefix, url);
+export const ticketLinkLink = (sale: SaleDetail, defaultCode: string, url: string) => {
+    const text = ticketLinkMessage(url);
     if (sale.customer_phone) return toWhatsAppLink(sale.customer_phone, defaultCode, text);
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
 };

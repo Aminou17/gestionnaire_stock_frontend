@@ -63,18 +63,12 @@ describe("receipt message", () => {
         );
     });
 
-    it("should open the customer chat with a short message and the ticket address", () => {
+    it("should open the customer chat with only the ticket address", () => {
         const url = "https://api.exemple.test/t/9.abc";
-        const link = ticketLinkLink(
-            sale({ customer_phone: "66 09 90 60" }),
-            "Awa Bazin",
-            "226",
-            "",
-            url,
-        );
+        const link = ticketLinkLink(sale({ customer_phone: "66 09 90 60" }), "226", url);
 
         expect(link).toMatch(/^https:\/\/wa\.me\/22666099060\?text=/);
-        expect(decodeURIComponent(link)).toContain(url);
-        expect(ticketLinkMessage(sale(), "Awa Bazin", "AB", url)).toContain("Awa Bazin");
+        expect(decodeURIComponent(link.split("text=")[1])).toBe(url);
+        expect(ticketLinkMessage(url)).toBe(url);
     });
 });

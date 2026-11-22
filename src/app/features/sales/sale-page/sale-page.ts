@@ -296,13 +296,7 @@ export class SalePage {
         this.shareError.set(false);
         try {
             const { url } = await firstValueFrom(this.saleService.getTicketLink(sale.id));
-            const link = ticketLinkLink(
-                sale,
-                shop.name,
-                this.shopService.defaultCountryCode(),
-                this.ticketPrefix(),
-                url,
-            );
+            const link = ticketLinkLink(sale, this.shopService.defaultCountryCode(), url);
             window.open(link, "_blank", "noopener");
         } catch {
             await this.shareImageFallback();
