@@ -10,6 +10,7 @@ import { Observable, catchError, switchMap, throwError } from "rxjs";
 
 import { API_URL } from "../api.config";
 import { AuthService } from "./auth.service";
+import { isUnreachable } from "../offline/network.interceptor";
 
 // routes qui n'ont pas besoin du jeton, ou qui servent à l'obtenir
 const PUBLIC_AUTH =
@@ -39,7 +40,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 function renewed<T>(auth: AuthService, then: (token: string) => Observable<T>) {
     return auth.refresh().pipe(
         catchError((error: HttpErrorResponse) => {
-            if (error.status !== 0) auth.logout();
+            if (!isUnreachable(error.status)) auth.logout();
             return throwError(() => error);
         }),
         switchMap(then),

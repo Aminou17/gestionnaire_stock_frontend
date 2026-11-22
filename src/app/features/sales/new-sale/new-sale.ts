@@ -18,6 +18,7 @@ import { ActivatedRoute, RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { getBackLink } from "../../../core/back-link";
+import { isUnreachable } from "../../../core/offline/network.interceptor";
 import { NetworkService } from "../../../core/offline/network.service";
 import { OfflineCatalogService } from "../../../core/offline/offline-catalog.service";
 import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
@@ -804,7 +805,7 @@ export class NewSale {
                     }
 
                     // le serveur ne répond pas : la vente est gardée sur l'appareil
-                    if (err.status === 0) {
+                    if (isUnreachable(err.status)) {
                         void this.queueSale();
                         return;
                     }
