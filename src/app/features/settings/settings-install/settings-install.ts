@@ -22,7 +22,7 @@ export class SettingsInstall {
     protected productName = PRODUCT_NAME;
 
     // l'application Android, servie par le site lui-même (voir public/boutiki.apk)
-    protected apk = { url: "/boutiki.apk", version: "1.1.1", size: "6 Mo" };
+    protected apk = { url: "/boutiki.apk", version: "1.0.0", size: "5 Mo" };
 
     protected platform = this.pwa.platform;
     protected inApp = this.pwa.inAppBrowser;
