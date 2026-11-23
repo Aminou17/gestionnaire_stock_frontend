@@ -317,10 +317,19 @@ li:last-child > .row {
 
 .spent {
     grid-area: spent;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
+    display: grid;
+    justify-items: end;
     text-align: right;
     white-space: nowrap;
+}
+
+.spent strong {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
+}
+
+.spent small {
+    font-size: var(--fs-caption);
 }
 
 .reloading {

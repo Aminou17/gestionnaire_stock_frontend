@@ -76,14 +76,15 @@ describe("Customers", () => {
 
     const text = () => el.textContent!.replace(/\s/g, " ");
 
-    it("should list the customers with their total and what they owe", async () => {
+    it("should list the customers with their total, and never show debts in the full list", async () => {
         await render();
 
         expect(el.querySelectorAll(".row").length).toBe(2);
         expect(text()).toContain("Awa Kouba");
         expect(text()).toContain("3 achats");
         expect(text()).toContain("45 000 F");
-        expect(text()).toContain("6 500 F");
+        expect(text()).toContain("dépensé");
+        expect(text()).not.toContain("6 500 F");
         // le numéro reste dans la fiche, pas sur les lignes de la liste
         expect(text()).not.toContain("123 45 67");
     });
@@ -161,11 +162,11 @@ describe("Customers", () => {
 
     it("should show the amount to collect only with the filter", async () => {
         await render({ dueTotal: 125000 });
-        expect(text()).not.toContain("À récupérer");
+        expect(text()).not.toContain("Dette totale");
 
         await pressDueChip();
 
-        expect(text()).toContain("À récupérer");
+        expect(text()).toContain("Dette totale");
         expect(text()).toContain("125 000 F");
         expect(text()).toContain("chez 2 clients");
     });
@@ -200,14 +201,14 @@ describe("Customers", () => {
     it("should show only the debt, without total or label, in the debts view", async () => {
         await render({ rows: [awa] });
         expect(el.querySelector(".spent")).not.toBeNull();
-        expect(el.querySelector(".badge.due")).not.toBeNull();
+        expect(el.querySelector(".due-amount")).toBeNull();
 
         await pressDueChip();
 
         expect(el.querySelector(".spent")).toBeNull();
         expect(el.querySelector(".head-spent")).toBeNull();
         expect(el.querySelector(".due-amount")!.textContent!.replace(/\s/g, " ")).toContain(
-            "6 500 F",
+            "−6 500 F",
         );
         expect(el.querySelector(".row")!.textContent).not.toContain("45 000");
         expect(el.querySelector(".row")!.textContent).not.toContain("Dette");
@@ -242,8 +243,11 @@ describe("Customers", () => {
         );
     });
 
-    it("should color the avatar orange only for customers who owe", async () => {
+    it("should color the avatar orange only for customers who owe, in the debts view", async () => {
         await render();
+        expect(el.querySelector(".avatar.owes")).toBeNull();
+
+        await pressDueChip();
         const avatars = el.querySelectorAll(".avatar");
 
         expect(avatars[0].classList).toContain("owes");
