@@ -9,22 +9,15 @@ import { Product } from "../stock/product.model";
 import { ProductService } from "../stock/product.service";
 import { dbGet, dbSet } from "./local-db";
 
-// état de la caisse du jour, gardé pour savoir sans internet si l'on peut vendre
-export interface CachedCash {
-    status: "OPEN" | "CLOSED" | null;
-    sessionDate: string | null;
-}
-
 interface CatalogSnapshot {
     products: Product[];
     categories: Category[];
-    cash: CachedCash | null;
     savedAt: string;
 }
 
 const PAGE = 500;
 
-// Catalogue gardé sur l'appareil pour vendre sans internet : produits actifs, catégories et caisse.
+// Catalogue gardé sur l'appareil pour vendre sans internet : produits actifs et catégories.
 // Rechargé à l'ouverture de la vente quand le réseau est là ; le stock y baisse à chaque vente hors ligne.
 @Injectable({ providedIn: "root" })
 export class OfflineCatalogService {
@@ -34,7 +27,6 @@ export class OfflineCatalogService {
 
     readonly products = signal<Product[]>([]);
     readonly categories = signal<Category[]>([]);
-    readonly cash = signal<CachedCash | null>(null);
     readonly savedAt = signal<string | null>(null);
 
     private loadedFor: number | null = null;
@@ -60,7 +52,6 @@ export class OfflineCatalogService {
 
         this.products.set(snapshot.products);
         this.categories.set(snapshot.categories);
-        this.cash.set(snapshot.cash);
         this.savedAt.set(snapshot.savedAt);
     }
 
@@ -105,11 +96,6 @@ export class OfflineCatalogService {
         await this.save();
     }
 
-    async saveCash(cash: CachedCash | null) {
-        this.cash.set(cash);
-        await this.save();
-    }
-
     // une vente faite sans internet fait baisser le stock affiché tout de suite
     async takeStock(lines: { productId: number; quantity: number }[]) {
         const sold = new Map(lines.map((line) => [line.productId, line.quantity]));
@@ -132,7 +118,6 @@ export class OfflineCatalogService {
         await dbSet("kv", this.key(), {
             products: this.products(),
             categories: this.categories(),
-            cash: this.cash(),
             savedAt,
         } satisfies CatalogSnapshot);
     }

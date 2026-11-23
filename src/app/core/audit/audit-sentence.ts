@@ -179,10 +179,14 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                 verb: "a ouvert la caisse avec",
                 object: money(d["openingAmount"]) ?? undefined,
             };
-        case "CASH_SESSION_CLOSED": {
+        case "CASH_SESSION_CLOSED":
+        case "CASH_SESSION_RECOUNTED": {
             const gap = Number(after["difference"] ?? 0);
             return {
-                verb: "a clôturé la caisse",
+                verb:
+                    log.action === "CASH_SESSION_RECOUNTED"
+                        ? "a rectifié le comptage"
+                        : "a compté la caisse",
                 note: gap ? `écart de ${fcfa.transform(gap, true)}` : "sans écart",
             };
         }
@@ -328,6 +332,21 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                 object: text(d["name"]) ?? name,
                 note: d["trialDays"] ? `${d["trialDays"]} jours` : undefined,
             };
+        case "SHOP_MODULES_CHANGED": {
+            const removed = Array.isArray(d["disabled"]) ? d["disabled"].length : 0;
+            return {
+                verb: "a changé les accès de",
+                object: text(d["name"]) ?? name,
+                note:
+                    removed === 0
+                        ? "tout est inclus"
+                        : `${removed} retiré${removed > 1 ? "s" : ""}`,
+            };
+        }
+        case "SUBSCRIPTIONS_ENABLED":
+            return { verb: "a activé les abonnements" };
+        case "SUBSCRIPTIONS_DISABLED":
+            return { verb: "a désactivé les abonnements" };
         case "MAIL_SETTINGS_UPDATED":
             return { verb: "a réglé l'adresse d'envoi des e-mails" };
         case "MAIL_SETTINGS_REMOVED":

@@ -32,6 +32,18 @@ const openCash: DashboardSummary["cash"] = {
     openedAt: "2026-11-11T08:05:00",
     openedByName: "Admin",
     closedAt: null,
+    actualAmount: null,
+    difference: null,
+};
+
+const uncounted: DashboardSummary["uncountedSession"] = {
+    id: 3,
+    sessionDate: "2026-11-10",
+    openedAt: "2026-11-10T08:00:00",
+    openedBy: 2,
+    openedByName: "Awa",
+    balance: 25000,
+    count: 1,
 };
 
 describe("Dashboard", () => {
@@ -45,8 +57,8 @@ describe("Dashboard", () => {
         summaryFails = false,
         yesterdayUntilNow = 200000,
         alerts = [],
-        previousOpenSession = null,
-        pendingExplanation = null,
+        uncountedSession = null,
+        expectedOpening = 12000 as number | null,
         reserved = false,
         sales = [{ id: 1 }] as any[],
     }: {
@@ -56,15 +68,15 @@ describe("Dashboard", () => {
         summaryFails?: boolean;
         yesterdayUntilNow?: number;
         alerts?: LowStockAlert[];
-        previousOpenSession?: DashboardSummary["previousOpenSession"];
-        pendingExplanation?: DashboardSummary["pendingExplanation"];
+        uncountedSession?: DashboardSummary["uncountedSession"];
+        expectedOpening?: number | null;
         reserved?: boolean;
         sales?: any[];
     } = {}) {
         const summary: DashboardSummary = {
             cash,
-            previousOpenSession,
-            pendingExplanation,
+            uncountedSession,
+            expectedOpening,
             blindClose: false,
             stockValue: isAdmin ? 4860000 : null,
             activeProducts: isAdmin ? 142 : null,
@@ -106,7 +118,11 @@ describe("Dashboard", () => {
                     useValue: {
                         getSales: () => of(sales),
                         getSalesPage: () =>
-                            of({ data: [], total: 0, counters: { unpaid: 2, due_total: 12000 } }),
+                            of({
+                                data: sales,
+                                total: sales.length,
+                                counters: { unpaid: 2, due_total: 12000 },
+                            }),
                     },
                 },
                 {
@@ -155,13 +171,13 @@ describe("Dashboard", () => {
 
         expect(text()).toContain("Bénéfice du jour");
         expect(text()).toContain("86 000 F");
-        expect(text()).toContain("Marge de 40 %");
+        expect(text()).not.toContain("%");
         // la valeur du stock reste masquée tant que le mot de passe n'est pas redonné
         expect(text()).not.toContain("4 860 000 F");
         TestBed.inject(SecretValues).revealed.set(true);
         fixture.detectChanges();
         expect(text()).toContain("4 860 000 F");
-        expect(text()).toContain("142 produits");
+        expect(text()).toContain("Valeur du stock");
         expect(text()).not.toContain("Panier moyen");
     });
 
@@ -245,7 +261,7 @@ describe("Dashboard", () => {
 
         const start = el.querySelector(".start");
         expect(start?.textContent).toContain("Pour bien démarrer");
-        expect(start?.textContent).toContain("1 sur 3");
+        expect(start?.textContent).toContain("1 sur 2");
         expect(el.querySelector(".todo")).toBeNull();
     });
 
@@ -258,22 +274,18 @@ describe("Dashboard", () => {
     it("should show how much customers still owe", async () => {
         await render();
 
-        expect(text()).toContain("À encaisser");
+        expect(text()).toContain("Dettes clients");
         expect(text()).toContain("12 000 F");
         expect(text()).toContain("2 ventes non réglées");
     });
 
-    it("should compare today with yesterday", async () => {
-        await render();
-        expect(text()).toContain("+7 % vs hier");
-    });
-
-    it("should not compute a percentage when there was no sale yesterday", async () => {
+    it("should show the number of sales today without any percentage", async () => {
         await render({
             days: [day("2026-11-10", 0, 0), day("2026-11-11", 5000)],
             yesterdayUntilNow: 0,
         });
-        expect(text()).toContain("1 vente aujourd'hui");
+        expect(text()).toContain("1 vente");
+        expect(text()).not.toContain("%");
     });
 
     it("should not show minus 100 percent when nothing was sold yet today", async () => {
@@ -290,40 +302,46 @@ describe("Dashboard", () => {
         expect(el.querySelector(".hero .spark-line")).not.toBeNull();
     });
 
-    it("should show the cash balance when the session is open", async () => {
+    it("should show the cash balance of the shop to the admin", async () => {
         await render();
 
+        expect(text()).toContain("En caisse");
         expect(text()).toContain("312 000 F");
-        expect(text()).toContain("Ouverte depuis 08:05");
+        expect(text()).toContain("Depuis 08:05");
+        expect(text()).not.toContain("Caisses du jour");
+        expect(text()).not.toContain("Caisse");
+        expect(el.querySelector(".view-switch")).toBeNull();
     });
 
-    it("should show a closed cash register only in its card, without a banner", async () => {
-        await render({ cash: null });
+    it("should announce the opening amount when no cash register exists yet", async () => {
+        await render({ cash: null, isAdmin: false });
 
-        expect(text()).toContain("Caisse fermée");
-        expect(text()).not.toContain("La caisse n'est pas ouverte");
+        expect(text()).toContain("La caisse s'ouvrira avec 12 000 F");
+        expect(text()).not.toContain("Caisse fermée");
         expect(el.querySelector(".alert")).toBeNull();
     });
 
-    it("should leave the cash reminders to the cash page for the owner", async () => {
-        await render({
-            previousOpenSession: {
-                id: 3,
-                sessionDate: "2026-11-10",
-                openedAt: "2026-11-10T08:00:00",
-                openedBy: 2,
-                balance: null,
-            },
-            pendingExplanation: {
-                id: 4,
-                sessionDate: "2026-11-09",
-                difference: -500,
-                closedBy: 999,
-            },
-        });
+    it("should never block anything with an open or reopen button for the owner", async () => {
+        await render({ cash: null, isAdmin: false });
 
-        expect(text()).not.toContain("n'a pas été clôturée");
-        expect(text()).not.toContain("n'est pas expliqué");
+        const buttons = [...el.querySelectorAll("button, a")].map((b) => b.textContent!.trim());
+        expect(buttons).not.toContain("Ouvrir la caisse");
+        expect(buttons).not.toContain("Rouvrir la caisse");
+    });
+
+    it("should remind the owner of an uncounted past cash register", async () => {
+        await render({ uncountedSession: uncounted });
+
+        const notice = el.querySelector("app-uncounted-cash-notice");
+        expect(notice?.textContent).toContain("non comptée");
+        expect(notice?.textContent?.replace(/\s/g, "")).toContain("25000F");
+        expect(notice?.querySelector("button")?.textContent).toContain("Compter");
+    });
+
+    it("should show no reminder when every cash register is counted", async () => {
+        await render();
+
+        expect(el.querySelector("app-uncounted-cash-notice")).toBeNull();
     });
 
     it("should keep only the last 7 days for the chart", async () => {
@@ -342,7 +360,7 @@ describe("Dashboard", () => {
         expect(el.querySelector(".alert-error")?.textContent).toContain(
             "n'ont pas pu être chargées",
         );
-        expect(text()).not.toContain("Caisse fermée");
+        expect(text()).not.toContain("Pas ouverte");
         expect(text()).toContain("Données indisponibles");
     });
 
@@ -351,7 +369,7 @@ describe("Dashboard", () => {
 
         expect(text()).not.toContain("Valeur du stock");
         expect(text()).not.toContain("Bénéfice du jour");
-        expect(text()).not.toContain("À encaisser");
+        expect(text()).not.toContain("Dettes clients");
         expect(text()).not.toContain("À surveiller");
         expect(text()).not.toContain("null");
         expect(el.querySelector("app-stock-alerts")).toBeNull();
@@ -371,7 +389,7 @@ describe("Dashboard", () => {
         const blocks = [...el.querySelectorAll(".manager > *")].map((b) => b.className);
         expect(blocks).toEqual(["m-cash", "m-today", "m-chart", "m-sales", "m-close"]);
         expect(text()).toContain("Mes ventes du jour");
-        expect(text()).toContain("+7 % vs hier");
+        expect(text()).not.toContain("vs hier");
         expect(text()).toContain("Mes ventes sur 7 jours");
         expect(text()).toContain("Mes dernières ventes");
         expect(text()).not.toContain("Mon activité récente");
@@ -380,79 +398,90 @@ describe("Dashboard", () => {
     it("should show the manager the open cash register and its balance", async () => {
         await render({ isAdmin: false });
 
-        expect(text()).toContain("Caisse ouverte");
+        expect(text()).toContain("Caisse");
         expect(text()).toContain("312 000 F");
         expect(el.querySelector(".close-cash")?.getAttribute("href")).toBe("/cash");
+        expect(el.querySelector(".close-cash")?.textContent).toContain("Compter la caisse");
     });
 
-    it("should offer the manager to open the cash register when the cash register is closed", async () => {
+    it("should let the manager sell right away when no cash register exists yet", async () => {
         await render({ isAdmin: false, cash: null });
 
-        expect(text()).toContain("Caisse pas encore ouverte");
-        expect(text()).toContain("Ouvrez-la pour commencer à vendre");
-        expect(el.querySelector(".new-sale")?.textContent).toContain("Ouvrir la caisse");
+        expect(text()).toContain("La caisse s'ouvrira avec 12 000 F");
+        expect(el.querySelector(".new-sale")?.getAttribute("href")).toBe("/sales/new");
+        expect(text()).not.toContain("Ouvrir la caisse");
         expect(el.querySelector(".close-cash")).toBeNull();
     });
 
-    it("should treat a cash register closed today as closed for the manager", async () => {
-        await render({
-            isAdmin: false,
-            cash: { ...openCash!, status: "CLOSED", closedAt: "2026-11-11T18:00:00" },
-        });
+    it("should say the cash opens with the first sale when the opening amount is hidden", async () => {
+        await render({ isAdmin: false, cash: null, expectedOpening: null });
 
-        expect(text()).toContain("Caisse clôturée pour aujourd'hui");
-        expect(el.querySelector(".new-sale")?.textContent).toContain("Voir la caisse");
-        expect(el.querySelector(".close-cash")).toBeNull();
+        expect(text()).toContain("Elle s'ouvrira à la première vente");
     });
 
-    it("should warn the manager when a previous cash session is still open", async () => {
+    it("should show a counted cash register to the manager and still let him sell", async () => {
         await render({
             isAdmin: false,
-            previousOpenSession: {
-                id: 3,
-                sessionDate: "2026-11-10",
-                openedAt: "2026-11-10T08:00:00",
-                openedBy: 2,
-                balance: null,
+            cash: {
+                ...openCash!,
+                status: "CLOSED",
+                closedAt: "2026-11-11T18:00:00",
+                difference: -500,
             },
         });
 
-        const alert = el.querySelector(".m-previous");
-        expect(alert?.classList).toContain("alert-warning");
-        expect(alert?.textContent).toContain("n'a pas été clôturée");
+        expect(text()).toContain("Caisse comptée");
+        expect(text()).toContain("Écart −500 F");
+        expect(el.querySelector(".new-sale")?.getAttribute("href")).toBe("/sales/new");
+        expect(el.querySelector(".close-cash")).toBeNull();
+    });
+
+    it("should remind the manager of his uncounted cash register", async () => {
+        await render({ isAdmin: false, uncountedSession: uncounted });
+
+        const notice = el.querySelector(".m-previous");
+        expect(notice?.tagName.toLowerCase()).toBe("app-uncounted-cash-notice");
+        expect(notice?.textContent).toContain("non comptée");
+        expect(notice?.querySelector("button")?.textContent).toContain("Compter");
+    });
+
+    it("should hide the expected amount from a blind manager", async () => {
+        await render({
+            isAdmin: false,
+            uncountedSession: { ...uncounted, balance: null },
+        });
+
+        expect(el.querySelector(".m-previous")?.textContent?.replace(/\s/g, "")).not.toContain(
+            "25000F",
+        );
     });
 
     it("should not show fake cash values to the manager when the summary fails", async () => {
         await render({ isAdmin: false, summaryFails: true });
 
         expect(text()).toContain("État de la caisse indisponible");
-        expect(text()).not.toContain("Caisse pas encore ouverte");
-        expect(text()).not.toContain("Caisse ouverte");
-        expect(el.querySelector(".new-sale")?.textContent).toContain("Ouvrir la caisse");
+        expect(text()).not.toContain("Caisse du jour");
+        expect(text()).not.toContain("Caisse");
+        expect(el.querySelector(".new-sale")).toBeNull();
+    });
+    it("should give the manager his sales view and no shop totals", async () => {
+        await render({ isAdmin: false });
+
+        expect(text()).toContain("Mes ventes du jour");
+        expect(text()).not.toContain("En caisse");
+        expect(text()).not.toContain("Dettes clients");
+        expect(text()).not.toContain("Mon bénéfice du jour");
     });
 
-    it("should ask the manager who closed to explain a pending gap", async () => {
+    it("should hide the cash amounts from a blind manager", async () => {
         await render({
             isAdmin: false,
-            pendingExplanation: { id: 3, sessionDate: "2026-11-10", difference: -500, closedBy: 1 },
+            cash: { ...openCash, openingAmount: null, balance: null },
+            expectedOpening: null,
         });
 
-        const alert = el.querySelector(".m-previous");
-        expect(alert?.textContent).toContain("Expliquez l'écart");
-        expect(alert?.querySelector("a")?.getAttribute("href")).toBe("/cash");
-    });
-
-    it("should not bother another manager with someone else's gap", async () => {
-        await render({
-            isAdmin: false,
-            pendingExplanation: {
-                id: 3,
-                sessionDate: "2026-11-10",
-                difference: -500,
-                closedBy: 999,
-            },
-        });
-
-        expect(text()).not.toContain("Expliquez l'écart");
+        expect(text()).toContain("Caisse");
+        expect(text()).not.toContain("312 000 F");
+        expect(text()).not.toContain("Solde");
     });
 });

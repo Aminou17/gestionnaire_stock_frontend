@@ -1,0 +1,12 @@
+<section class="notice card tinted" data-tone="warning" aria-label="Caisse non comptée">
+    <span class="tone-icon" data-tone="warning"><app-icon name="banknote" [size]="18" /></span>
+
+    <div class="text">
+        <strong>Caisse {{ when() }} non comptée</strong>
+        @if (details()) {
+            <small class="muted">{{ details() }}</small>
+        }
+    </div>
+
+    <button type="button" class="btn btn-outline btn-sm" (click)="count.emit()">Compter</button>
+</section>

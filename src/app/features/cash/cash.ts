@@ -1,8 +1,7 @@
 import { DatePipe } from "@angular/common";
-import { Component, computed, inject, signal } from "@angular/core";
+import { Component, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
-import { map } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { CashSessionService } from "../../core/cash/cash-session.service";
@@ -12,19 +11,17 @@ import { Icon } from "../../shared/icon/icon";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { CashMovementDialog } from "./cash-movement-dialog/cash-movement-dialog";
 import { CashMovementList } from "./cash-movement-list/cash-movement-list";
-import { CloseCashDialog } from "./close-cash-dialog/close-cash-dialog";
-import { OpenCashDialog } from "./open-cash-dialog/open-cash-dialog";
+import { CountCashDialog } from "./count-cash-dialog/count-cash-dialog";
+import { UncountedCashNotice } from "./uncounted-cash-notice/uncounted-cash-notice";
 import { MoneyToggle } from "../../shared/money/money-toggle";
-import { Avatar } from "../../shared/avatar/avatar";
 
-// heure à partir de laquelle on rappelle de clôturer la caisse
-const CLOSING_REMINDER_HOUR = 19;
+// heure à partir de laquelle on rappelle de compter la caisse
+const COUNTING_REMINDER_HOUR = 19;
 
 @Component({
     selector: "app-cash",
     imports: [
         MoneyToggle,
-        Avatar,
         RouterLink,
         DatePipe,
         PageHeader,
@@ -32,8 +29,8 @@ const CLOSING_REMINDER_HOUR = 19;
         FcfaPipe,
         CashMovementList,
         CashMovementDialog,
-        CloseCashDialog,
-        OpenCashDialog,
+        CountCashDialog,
+        UncountedCashNotice,
     ],
     templateUrl: "./cash.html",
     styleUrl: "./cash.css",
@@ -47,103 +44,36 @@ export class Cash {
 
     today = rxResource({ stream: () => this.cashService.getToday() });
 
-    // détail de la session du jour : mouvements et montants de clôture
+    // détail de la session du jour : mouvements et montants du comptage
     session = rxResource({
         params: () => (this.today.hasValue() ? this.today.value().cash?.id : undefined),
         stream: ({ params }) => this.cashService.getSession(params),
     });
 
-    // dernière caisse clôturée de la personne, pour l'écran sans caisse ouverte
-    lastClosed = rxResource({
-        stream: () =>
-            this.cashService
-                .getSessions(1, 10)
-                .pipe(
-                    map(
-                        (res) =>
-                            res.data.find(
-                                (item) =>
-                                    item.status === "CLOSED" &&
-                                    item.opened_by === this.auth.user()?.id,
-                            ) ?? null,
-                    ),
-                ),
-    });
-
     cash = computed(() => (this.today.hasValue() ? this.today.value().cash : null));
-    previous = computed(() =>
-        this.today.hasValue() ? this.today.value().previousOpenSession : null,
+    // caisse d'un jour passé jamais comptée : un rappel, rien n'est bloqué
+    uncounted = computed(() =>
+        this.today.hasValue() ? this.today.value().uncountedSession : null,
     );
-    pending = computed(() =>
-        this.today.hasValue() ? this.today.value().pendingExplanation : null,
+    // fond de départ tant que la caisse du jour n'existe pas
+    expectedOpening = computed(() =>
+        this.today.hasValue() ? this.today.value().expectedOpening : null,
     );
-    // celui qui a compté explique l'écart ; l'administrateur peut aussi le faire
-    canExplain = computed(
-        () => this.auth.isAdmin() || this.pending()?.closedBy === this.auth.user()?.id,
-    );
-    team = computed(() => (this.today.hasValue() ? (this.today.value().teamSessions ?? []) : []));
-    // une caisse oubliée ou un écart non expliqué empêchent d'en ouvrir une nouvelle
-    blocker = computed(() => {
-        const previous = this.previous();
-        if (previous && this.isOwn(previous.openedBy)) {
-            return `Clôturez d'abord votre caisse du ${this.shortDate(previous.sessionDate)}.`;
-        }
-
-        const pending = this.pending();
-        if (pending && this.isOwn(pending.closedBy)) {
-            return `Expliquez d'abord l'écart de votre caisse du ${this.shortDate(pending.sessionDate)}.`;
-        }
-
-        return null;
-    });
-    isOwn = (userId: number) => userId === this.auth.user()?.id;
-
-    // caisse du jour pas encore ouverte : ce qui bloque SA propre caisse se règle dans la carte,
-    // avec un seul bouton, au lieu d'un bandeau en plus
-    ownPrevious = computed(() => {
-        const previous = this.previous();
-        return !this.cash() && previous && this.isOwn(previous.openedBy) ? previous : null;
-    });
-    ownPending = computed(() => {
-        const pending = this.pending();
-        return !this.cash() && pending && this.isOwn(pending.closedBy) ? pending : null;
-    });
     isOpen = computed(() => this.cash()?.status === "OPEN");
+    isCounted = computed(() => this.cash()?.status === "CLOSED");
 
-    // le soir, on rappelle de compter le tiroir pour ne pas oublier la clôture
-    closingTime = computed(() => this.isOpen() && new Date().getHours() >= CLOSING_REMINDER_HOUR);
+    // le soir, on rappelle de compter le tiroir pour ne pas oublier
+    countingTime = computed(() => this.isOpen() && new Date().getHours() >= COUNTING_REMINDER_HOUR);
 
     movements = computed(() => (this.session.hasValue() ? this.session.value().movements : []));
     // les plus récents en premier, comme un ticket de caisse qui défile
     latest = computed(() => [...this.movements()].reverse());
     summary = computed(() => summarizeMovements(this.movements()));
 
-    // la date vient du détail de la session : le serveur et le navigateur peuvent différer d'un jour
-    closeDate = computed(() =>
-        this.session.hasValue() ? this.session.value().session_date : null,
-    );
-
-    protected shortDate(date: string) {
-        return new Date(date.slice(0, 10) + "T12:00:00").toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-        });
-    }
-
     // tout ce qui est sorti du tiroir : remboursements, dépenses et retraits
     spent = computed(() => {
         const { refunds, expenses, withdrawals } = this.summary();
         return refunds + expenses + withdrawals;
-    });
-
-    teamOpen = signal(false);
-    teamToExplain = computed(() => this.team().filter((m) => m.explanationPending).length);
-    teamSummary = computed(() => {
-        const open = this.team().filter((m) => m.status === "OPEN").length;
-        const parts = [open === 0 ? "Aucune ouverte" : `${open} ouverte${open > 1 ? "s" : ""}`];
-        const toExplain = this.teamToExplain();
-        if (toExplain > 0) parts.push(`${toExplain} écart${toExplain > 1 ? "s" : ""} à expliquer`);
-        return parts.join(" · ");
     });
 
     reload() {

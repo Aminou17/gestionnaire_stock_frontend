@@ -4,7 +4,7 @@
     height: 100%;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto minmax(96px, 1fr) auto;
+    grid-template-rows: auto minmax(136px, 1fr) auto;
     padding: 0;
     border-color: color-mix(in srgb, var(--primary) 14%, var(--border));
     background: var(--surface);
@@ -24,7 +24,11 @@
     gap: 8px;
     padding: 12px 16px;
     border-bottom: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
-    background: var(--surface);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--primary) 9%, var(--surface)),
+        var(--surface)
+    );
 }
 
 /* poignée, croix, retour et titre du paiement : seulement sur la feuille du téléphone */
@@ -425,37 +429,6 @@
     color: var(--primary-text, var(--primary));
 }
 
-.closed-note {
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    margin: 0;
-}
-
-.closed-note .link-btn {
-    margin-left: auto;
-    padding: 0;
-    border: 0;
-    background: none;
-    color: inherit;
-    font: inherit;
-    font-weight: var(--fw-semibold);
-    text-decoration: underline;
-    cursor: pointer;
-}
-
-/* sur ordinateur le bandeau du haut dit déjà que la caisse est fermée */
-@media (min-width: 1024px) {
-    .closed-note {
-        display: none;
-    }
-}
-
-.closed-note app-icon {
-    flex: none;
-    margin-top: 1px;
-}
-
 /* pied du panier : total, paiement et bouton d'encaissement */
 .cart-footer {
     display: grid;
@@ -701,19 +674,22 @@
 
 /* lien discret : la fiche client reste le chemin conseillé */
 .free-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     justify-self: start;
     min-height: 36px;
     padding: 0 4px;
     border: 0;
     background: transparent;
-    color: var(--text-muted);
+    color: var(--primary-text, var(--primary));
     font: inherit;
     font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
     cursor: pointer;
 }
 
 .free-link:hover {
-    color: var(--text);
     text-decoration: underline;
 }
 
@@ -918,14 +894,138 @@
     }
 }
 
-/* le client reste visible au-dessus du total, même quand les lignes défilent */
-.cart-footer > .section {
-    padding-top: 0;
-    border-top: 0;
-}
-
 /* une seule couleur d'accent dans le panier : les vignettes ne changent plus de couleur d'un produit à l'autre */
 .line .thumb {
     background: color-mix(in srgb, var(--primary) 14%, var(--surface));
     color: var(--primary-text, var(--primary));
+}
+
+/* résumé du client et du paiement partiel dans le pied du panier */
+.credit-recap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 8px 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-hover);
+}
+
+.credit-recap-text {
+    display: grid;
+    min-width: 0;
+}
+
+.credit-recap-text strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* fenêtre : client, paiement partiel */
+.credit-dialog {
+    width: min(460px, calc(100% - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+}
+
+.credit-dialog::backdrop {
+    background: var(--overlay);
+}
+
+.credit-box {
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+}
+
+.credit-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.credit-head h2 {
+    margin: 0;
+    margin-right: auto;
+    font-size: var(--fs-heading);
+}
+
+.icon-close {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.icon-close:hover {
+    background: var(--surface-hover);
+    color: var(--text);
+}
+
+.credit-section {
+    display: grid;
+    gap: 12px;
+}
+
+/* interrupteur : le texte ne change jamais, seule la pastille bouge */
+.switch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-weight: var(--fw-medium);
+    text-align: left;
+    cursor: pointer;
+}
+
+.switch-track {
+    position: relative;
+    flex: none;
+    width: 44px;
+    height: 26px;
+    border-radius: 13px;
+    background: var(--border);
+    transition: background 0.15s ease;
+}
+
+.switch-dot {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+    transition: transform 0.15s ease;
+}
+
+.switch[aria-checked="true"] .switch-track {
+    background: var(--primary);
+}
+
+.switch[aria-checked="true"] .switch-dot {
+    transform: translateX(18px);
+}
+
+.switch:focus-visible .switch-track {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }

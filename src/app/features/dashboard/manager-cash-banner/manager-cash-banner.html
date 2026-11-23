@@ -18,31 +18,41 @@
         } @else if (isOpen()) {
             <span class="icon tone-primary"><app-icon name="wallet" [size]="20" /></span>
             <div class="text">
-                <strong>Caisse ouverte</strong>
+                <strong>Caisse</strong>
                 <small>Depuis {{ openedAt() }}</small>
             </div>
-            <!-- clôture à l'aveugle : l'employé ne voit pas le solde -->
+            <!-- comptage à l'aveugle : l'employé ne voit pas le solde -->
             @if (cash()!.balance !== null) {
                 <div class="balance">
                     <small>Solde</small>
                     <strong appMoney>{{ cash()!.balance | fcfa }}</strong>
                 </div>
             }
+        } @else if (isCounted()) {
+            <span class="icon"><app-icon name="wallet" [size]="20" /></span>
+            <div class="text">
+                <strong>Caisse comptée</strong>
+                <small>
+                    @if (cash()!.difference === 0) {
+                        Aucun écart
+                    } @else if (cash()!.difference !== null) {
+                        Écart {{ cash()!.difference | fcfa: true }}
+                    } @else {
+                        Une nouvelle vente la rouvre
+                    }
+                </small>
+            </div>
         } @else {
             <span class="icon"><app-icon name="wallet" [size]="20" /></span>
             <div class="text">
-                @if (closedToday()) {
-                    <strong>Caisse clôturée pour aujourd'hui</strong>
-                    <small
-                        >Demandez à l'administrateur de la rouvrir, sinon rendez-vous demain.</small
-                    >
-                } @else if (previousOpen()) {
-                    <strong>Caisse d'un jour passé pas clôturée</strong>
-                    <small>Clôturez-la avant d'ouvrir celle d'aujourd'hui.</small>
-                } @else {
-                    <strong>Caisse pas encore ouverte</strong>
-                    <small>Ouvrez-la pour commencer à vendre</small>
-                }
+                <strong>Caisse</strong>
+                <small>
+                    @if (expectedOpening() !== null) {
+                        La caisse s'ouvrira avec {{ expectedOpening() | fcfa }}
+                    } @else {
+                        Elle s'ouvrira à la première vente
+                    }
+                </small>
             </div>
         }
     </div>
@@ -52,13 +62,5 @@
             <app-icon name="plus" [size]="18" />
             Nouvelle vente
         </a>
-    } @else if (closedToday()) {
-        <a routerLink="/cash" class="btn btn-outline new-sale">Voir la caisse</a>
-    } @else if (previousOpen()) {
-        <a routerLink="/cash" class="btn btn-primary new-sale">Aller à la caisse</a>
-    } @else {
-        <button type="button" class="btn btn-primary new-sale" (click)="openCash.emit()">
-            Ouvrir la caisse
-        </button>
     }
 </section>

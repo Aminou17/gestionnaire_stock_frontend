@@ -63,6 +63,9 @@
                             >{{ session.session_date | date: "EEEE d MMMM" }}</a
                         >
                         <p class="session-sub">{{ hours(session) }}</p>
+                        @if (session.closed_by_name) {
+                            <p class="session-sub">Compté par {{ session.closed_by_name }}</p>
+                        }
                     </div>
                     <div class="session-end">
                         @if (session.actual_amount !== null) {

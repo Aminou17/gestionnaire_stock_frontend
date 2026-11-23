@@ -1,0 +1,154 @@
+<dialog
+    #dialog
+    aria-labelledby="count-cash-title"
+    (click)="onBackdropClick($event)"
+    (cancel)="onCancel($event)"
+>
+    @if (result(); as done) {
+        <!-- résultat tout de suite : l'écart se lit ici, sans autre étape -->
+        <div class="done">
+            <span
+                class="result-icon"
+                [class.ok]="done.difference === 0"
+                [class.warn]="done.difference !== 0"
+            >
+                <app-icon [name]="done.difference === 0 ? 'check' : 'alert'" [size]="22" />
+            </span>
+
+            <h2 id="count-cash-title">Caisse comptée</h2>
+
+            <p class="verdict" role="status">
+                @if (done.difference === 0) {
+                    Aucun écart : le tiroir correspond au solde attendu.
+                } @else if (done.difference! > 0) {
+                    Il y a {{ done.difference | fcfa }} de plus que prévu dans le tiroir.
+                } @else {
+                    Il manque {{ -done.difference! | fcfa }} dans le tiroir.
+                }
+            </p>
+
+            <dl class="figures">
+                <div>
+                    <dt>Attendu</dt>
+                    <dd>{{ done.theoretical_amount | fcfa }}</dd>
+                </div>
+                <div>
+                    <dt>Compté</dt>
+                    <dd>{{ done.actual_amount | fcfa }}</dd>
+                </div>
+            </dl>
+
+            <div class="actions">
+                <button type="button" class="btn btn-primary" (click)="close()">Terminé</button>
+            </div>
+        </div>
+    } @else {
+        <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+            <h2 id="count-cash-title">Compter la caisse</h2>
+
+            <p class="muted">
+                @if (target().sessionDate; as day) {
+                    Caisse du {{ day + "T12:00:00" | date: "EEEE d MMMM" }}.
+                }
+                Comptez l'argent présent dans le tiroir et indiquez le total.
+                @if (blind()) {
+                    L'écart vous sera montré après l'enregistrement.
+                }
+            </p>
+
+            @if (!blind()) {
+                <div class="expected">
+                    <span>Attendu dans le tiroir</span>
+                    <strong>{{ target().expected | fcfa }}</strong>
+                </div>
+            }
+
+            @if (outbox.count() > 0) {
+                <div class="alert alert-warning" role="alert">
+                    {{ outbox.count() }} vente{{ outbox.count() > 1 ? "s" : "" }} faite{{
+                        outbox.count() > 1 ? "s" : ""
+                    }}
+                    sans internet n'{{ outbox.count() > 1 ? "ont" : "a" }} pas encore été envoyée{{
+                        outbox.count() > 1 ? "s" : ""
+                    }}. Envoyez-les avant de compter.
+                </div>
+            }
+
+            @if (error()) {
+                <div class="alert alert-error" role="alert">{{ error() }}</div>
+            }
+
+            <label class="field">
+                <span>Argent dans le tiroir (F)</span>
+                <input
+                    class="input amount"
+                    type="number"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                    formControlName="actualAmount"
+                    placeholder="Ex. 50000"
+                    (input)="edited.set(true)"
+                    [class.invalid]="
+                        form.controls.actualAmount.touched && form.controls.actualAmount.invalid
+                    "
+                />
+                @if (form.controls.actualAmount.touched && form.controls.actualAmount.invalid) {
+                    <small class="field-error" role="alert">
+                        Saisissez un montant entier, positif ou nul.
+                    </small>
+                }
+            </label>
+
+            @if (difference() !== null) {
+                <div
+                    class="gap"
+                    [class.ok]="difference() === 0"
+                    [class.warn]="difference() !== 0"
+                    aria-live="polite"
+                >
+                    @if (difference() === 0) {
+                        Le montant correspond au solde attendu.
+                    } @else if (difference()! > 0) {
+                        {{ difference() | fcfa }} de plus que prévu.
+                    } @else {
+                        Il manque {{ -difference()! | fcfa }}.
+                    }
+                </div>
+            }
+
+            <label class="field">
+                <span>Raison (facultatif)</span>
+                <input
+                    class="input"
+                    type="text"
+                    maxlength="300"
+                    autocomplete="off"
+                    formControlName="closingNote"
+                    placeholder="Ex. erreur de monnaie rendue"
+                />
+            </label>
+
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="saving()"
+                    (click)="close()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="saving() || outbox.count() > 0"
+                >
+                    @if (saving()) {
+                        <span class="spinner"></span>
+                    }
+                    Enregistrer le comptage
+                </button>
+            </div>
+        </form>
+    }
+</dialog>

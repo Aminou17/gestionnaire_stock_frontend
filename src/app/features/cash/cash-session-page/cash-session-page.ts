@@ -12,8 +12,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { CashMovementList } from "../cash-movement-list/cash-movement-list";
-import { ReopenCashDialog } from "../reopen-cash-dialog/reopen-cash-dialog";
-import { CloseCashDialog } from "../close-cash-dialog/close-cash-dialog";
+import { CountCashDialog } from "../count-cash-dialog/count-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { MoneyToggle } from "../../../shared/money/money-toggle";
@@ -28,8 +27,7 @@ import { MoneyToggle } from "../../../shared/money/money-toggle";
         Icon,
         FcfaPipe,
         CashMovementList,
-        CloseCashDialog,
-        ReopenCashDialog,
+        CountCashDialog,
     ],
     templateUrl: "./cash-session-page.html",
     styleUrl: "./cash-session-page.css",
@@ -59,10 +57,6 @@ export class CashSessionPage {
     private locale = inject(LOCALE_ID);
 
     data = computed(() => (this.session.hasValue() ? this.session.value() : undefined));
-    // celui qui a compté explique l'écart ; l'administrateur peut aussi le faire
-    canExplain = computed(
-        () => this.auth.isAdmin() || this.data()?.closed_by === this.auth.user()?.id,
-    );
 
     title = computed(() => {
         const session = this.data();

@@ -10,19 +10,13 @@ import {
     CashSessionDetail,
     CashSessionPage,
     CashToday,
-    ClosedCash,
 } from "./cash.model";
 
-// open : caisses encore ouvertes, gap : caisses clôturées avec un écart
+// open : caisses du jour en cours, uncounted : jamais comptées, gap : comptées avec un écart
 export interface CashSessionFilters {
     from?: string | null;
     to?: string | null;
-    status?: "open" | "gap" | null;
-}
-
-export interface TodayCash {
-    status: "OPEN" | "CLOSED";
-    balance: number;
+    status?: "open" | "uncounted" | "gap" | null;
 }
 
 // PostgreSQL renvoie les montants en texte ("1500.00")
@@ -46,35 +40,22 @@ const toMovement = (movement: CashMovement): CashMovement => ({
 export class CashSessionService {
     private http = inject(HttpClient);
 
-    // la date de la session est fixée par le serveur (jour courant)
-    open(openingAmount: number) {
-        return this.http.post(`${API_URL}/cash_sessions/open`, { openingAmount });
-    }
+    // compte la caisse : sans sessionId, celle du jour (le serveur l'ouvre si besoin)
+    // sessionId : une caisse passée non comptée, ou une caisse à rectifier (admin)
+    // le serveur renvoie la session comptée, avec l'écart (compté moins attendu)
+    count(actualAmount: number, closingNote = "", sessionId?: number) {
+        const note = closingNote.trim();
 
-    // sessionDate : YYYY-MM-DD de la session à clôturer (celle du jour, ou une oubliée)
-    // closingNote : obligatoire quand le montant compté diffère du solde attendu
-    // sessionId : seulement pour l'admin qui ferme la caisse oubliée d'un autre
-    close(sessionDate: string, actualAmount: number, closingNote = "", sessionId?: number) {
         return this.http
-            .post<ClosedCash>(`${API_URL}/cash_sessions/close`, {
-                sessionDate,
+            .post<CashSession>(`${API_URL}/cash_sessions/close`, {
                 actualAmount,
-                closingNote,
+                ...(note ? { closingNote: note } : {}),
                 ...(sessionId ? { sessionId } : {}),
             })
-            .pipe(map((res) => ({ ...res, difference: Number(res.difference) })));
+            .pipe(map(toSession));
     }
 
-    // explication d'un écart découvert après une clôture à l'aveugle
-    addClosingNote(id: number, closingNote: string) {
-        return this.http.post(`${API_URL}/cash_sessions/${id}/closing-note`, { closingNote });
-    }
-
-    getTodayCash() {
-        return this.getToday().pipe(map((res) => res.cash));
-    }
-
-    // session du jour et session oubliée ouverte, calculées par le serveur avec sa date
+    // état de la caisse du jour, caisse non comptée d'un jour passé et fond de départ
     getToday() {
         return this.http.get<CashToday>(`${API_URL}/dashboard/summary`);
     }
@@ -93,11 +74,6 @@ export class CashSessionService {
             params: { ...this.filterParams(filters), format },
             responseType: "blob",
         });
-    }
-
-    // admin seulement : rouvre une caisse clôturée, le motif reste dans le journal
-    reopen(id: number, reason: string) {
-        return this.http.post(`${API_URL}/cash_sessions/${id}/reopen`, { reason });
     }
 
     private filterParams(filters: CashSessionFilters) {

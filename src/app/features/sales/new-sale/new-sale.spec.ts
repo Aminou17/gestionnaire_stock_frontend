@@ -6,7 +6,6 @@ import { of, throwError } from "rxjs";
 
 import { NewSale } from "./new-sale";
 import { AuthService } from "../../../core/auth/auth.service";
-import { CashSessionService, TodayCash } from "../../../core/cash/cash-session.service";
 import { CustomerService } from "../../../core/customers/customer.service";
 import { SaleService } from "../../../core/sales/sale.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
@@ -60,8 +59,11 @@ describe("NewSale", () => {
     let el: HTMLElement;
     let createSale: ReturnType<typeof vi.fn>;
 
+    // la plupart des tests passent par les carreaux ; sans choix mémorisé la vue dépend des photos
+    beforeEach(() => localStorage.setItem("new-sale-view", "grid"));
+    afterEach(() => localStorage.removeItem("new-sale-view"));
+
     async function render({
-        cash = { status: "OPEN", balance: 1000 } as TodayCash | null,
         isAdmin = false,
         productId = null as string | null,
         createFails = false,
@@ -99,11 +101,9 @@ describe("NewSale", () => {
                     useValue: {
                         products: signal([]),
                         categories: signal([]),
-                        cash: signal(null),
                         savedAt: signal(null),
                         load: async () => {},
                         refresh: async () => {},
-                        saveCash: async () => {},
                     },
                 },
                 { provide: SaleOutboxService, useValue: { add: vi.fn(), count: signal(0) } },
@@ -123,13 +123,6 @@ describe("NewSale", () => {
                             customersFail
                                 ? throwError(() => new HttpErrorResponse({ status: 500 }))
                                 : of({ rows: [mireille], total: 1, page: 1, limit: 5 }),
-                    },
-                },
-                {
-                    provide: CashSessionService,
-                    useValue: {
-                        getTodayCash: () => of(cash),
-                        getToday: () => of({ cash, previousOpenSession: null }),
                     },
                 },
                 {
@@ -314,30 +307,14 @@ describe("NewSale", () => {
         expect(submitBtn().disabled).toBe(true);
     });
 
-    it("should say the cash register is closed before any product is chosen", async () => {
-        HTMLDialogElement.prototype.showModal = function () {
-            this.setAttribute("open", "");
-        };
-        await render({ cash: null });
+    it("should never block the sale because of the cash register", async () => {
+        await render();
 
-        expect(el.querySelector(".catalog")).toBeNull();
-        expect(text()).toContain("Caisse pas encore ouverte");
-        // un seul message : plus de bandeau en haut
-        expect(el.querySelector(".banner")).toBeNull();
-
-        const dialog = el.querySelector("app-open-cash-dialog dialog")!;
-        expect(dialog.hasAttribute("open")).toBe(false);
-        el.querySelector<HTMLButtonElement>("app-cash-closed-notice .btn")!.click();
-        await fixture.whenStable();
-
-        expect(dialog.hasAttribute("open")).toBe(true);
-    });
-
-    it("should say the cash register is closed for the day when it was closed", async () => {
-        await render({ cash: { status: "CLOSED", balance: 1000 } as TodayCash });
-
-        expect(el.querySelector(".catalog")).toBeNull();
-        expect(text()).toContain("Caisse clôturée pour aujourd'hui");
+        // pas de message "caisse fermée" ni de bouton pour l'ouvrir : le serveur l'ouvre tout seul
+        expect(el.querySelector(".catalog")).not.toBeNull();
+        expect(text()).not.toContain("Caisse pas encore ouverte");
+        expect(text()).not.toContain("Ouvrir la caisse");
+        expect(text()).not.toContain("Caisse clôturée");
     });
 
     it("should stay on the cash register after the sale and offer the ticket", async () => {
@@ -469,7 +446,7 @@ describe("NewSale", () => {
 
     // client et paiement partiel sont repliés : on les ouvre d'abord
     async function openMore() {
-        el.querySelector<HTMLButtonElement>(".free-link:not([aria-pressed])")?.click();
+        el.querySelector<HTMLButtonElement>(".free-link")?.click();
         await fixture.whenStable();
     }
 
@@ -492,7 +469,7 @@ describe("NewSale", () => {
 
     async function toggleDeposit() {
         await openMore();
-        el.querySelector<HTMLButtonElement>(".free-link[aria-pressed]")!.click();
+        el.querySelector<HTMLButtonElement>(".switch")!.click();
         await fixture.whenStable();
     }
 
@@ -647,6 +624,45 @@ describe("NewSale", () => {
         expect(submitBtn().disabled).toBe(false);
     });
 
+    it("should keep the cart readable with a summary of the deposit instead of the fields", async () => {
+        await render();
+        await add(0);
+        await toggleDeposit();
+        await type(clientInput, "Fatou Ndiaye");
+        await type("input[aria-label='Téléphone du client']", "06 61 23 456");
+        await type("input[placeholder^='Sur ']", "500");
+
+        const cart = el.querySelector<HTMLElement>(".cart")!;
+        expect(cart.querySelector(".credit-recap")!.textContent).toContain("Fatou Ndiaye");
+        expect(cart.querySelector(".credit-recap")!.textContent).toContain("reste");
+        expect(cart.querySelector("input[placeholder^='Sur ']")).toBeNull();
+        expect(cart.querySelector("input[aria-label='Téléphone du client']")).toBeNull();
+    });
+
+    it("should send both the name and the phone of a sale without a deposit", async () => {
+        await render();
+        await add(0);
+        await openMore();
+        await type(clientInput, "Fatou Ndiaye");
+        await type("input[aria-label='Téléphone du client']", "06 61 23 456");
+        submitBtn().click();
+
+        const payment = createSale.mock.calls[0][1];
+        expect(payment.customerName).toBe("Fatou Ndiaye");
+        expect(payment.customerPhone).toBe("06 61 23 456");
+    });
+
+    it("should write the deposit placeholder as an amount in francs", async () => {
+        await render();
+        await add(0);
+        await toggleDeposit();
+
+        const placeholder = el.querySelector<HTMLInputElement>(
+            "input[placeholder^='Sur ']",
+        )!.placeholder;
+        expect(placeholder.replace(/\s/g, "")).toMatch(/^Sur\d+F/);
+    });
+
     it("should refuse a deposit above the total", async () => {
         await render();
         await add(0);
@@ -659,6 +675,14 @@ describe("NewSale", () => {
 
     describe("carreaux", () => {
         const tiles = () => [...el.querySelectorAll<HTMLElement>(".gtile")];
+
+        it("should show lines first when less than half of the products have a photo", async () => {
+            localStorage.removeItem("new-sale-view");
+            await render();
+
+            expect(el.querySelectorAll(".tile").length).toBe(3);
+            expect(tiles().length).toBe(0);
+        });
 
         it("should show tiles first, then switch to lines and back with the single button", async () => {
             await render();
@@ -673,6 +697,29 @@ describe("NewSale", () => {
             el.querySelector<HTMLButtonElement>(".view-single")!.click();
             await fixture.whenStable();
             expect(tiles().length).toBe(3);
+        });
+
+        it("should add one more at each tap in the lines view and take one off with the minus button", async () => {
+            localStorage.setItem("new-sale-view", "list");
+            await render();
+
+            const tap = async () => {
+                el.querySelector<HTMLButtonElement>(".tile .result")!.click();
+                await fixture.whenStable();
+            };
+            await tap();
+            await tap();
+            expect(el.querySelector(".tile .add")!.textContent).toContain("2");
+            expect(el.querySelector(".stepper input")).toHaveProperty("value", "2");
+
+            el.querySelector<HTMLButtonElement>(".tile .minus")!.click();
+            await fixture.whenStable();
+            expect(el.querySelector(".tile .add")!.textContent).toContain("1");
+
+            el.querySelector<HTMLButtonElement>(".tile .minus")!.click();
+            await fixture.whenStable();
+            expect(el.querySelector(".tile .minus")).toBeNull();
+            expect(el.querySelectorAll(".line").length).toBe(0);
         });
 
         it("should add one more at each tap and show the quantity, then take one off", async () => {

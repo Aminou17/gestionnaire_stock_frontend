@@ -271,10 +271,6 @@ app-page-header {
 }
 
 @media (max-width: 767px) {
-    .cash-closed {
-        flex-wrap: wrap;
-    }
-
     .block,
     .summary {
         padding: 16px;

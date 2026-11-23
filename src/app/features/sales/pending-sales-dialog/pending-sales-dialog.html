@@ -79,7 +79,7 @@
                             <p class="reason">{{ sale.error }}</p>
                         }
 
-                        @if (sale.status === "error" || sale.status === "cash") {
+                        @if (sale.status === "error") {
                             <div class="actions">
                                 @if (removing() === sale.clientRef) {
                                     <span class="confirm-text"

@@ -18,34 +18,45 @@ describe("CashSessionService", () => {
 
     afterEach(() => httpMock.verify());
 
-    it("should open the cash register with the opening amount", () => {
-        service.open(50000).subscribe();
-
-        const req = httpMock.expectOne("/api/cash_sessions/open");
-        expect(req.request.method).toBe("POST");
-        expect(req.request.body).toEqual({ openingAmount: 50000 });
-        req.flush({});
-    });
-
-    it("should close the session of the given date with the counted amount", () => {
-        service.close("2026-11-10", 61500).subscribe();
+    it("should count today's cash with the counted amount only", () => {
+        service.count(61500).subscribe();
 
         const req = httpMock.expectOne("/api/cash_sessions/close");
         expect(req.request.method).toBe("POST");
+        expect(req.request.body).toEqual({ actualAmount: 61500 });
+        req.flush({});
+    });
+
+    it("should send the optional reason and the session to count", () => {
+        service.count(61000, "  Erreur de monnaie ", 7).subscribe();
+
+        const req = httpMock.expectOne("/api/cash_sessions/close");
         expect(req.request.body).toEqual({
-            sessionDate: "2026-11-10",
-            actualAmount: 61500,
-            closingNote: "",
+            actualAmount: 61000,
+            closingNote: "Erreur de monnaie",
+            sessionId: 7,
         });
         req.flush({});
     });
 
-    it("should send the explanation of the gap when closing", () => {
-        service.close("2026-11-10", 61000, "Erreur de monnaie").subscribe();
+    it("should return the counted session with the gap as a number", () => {
+        let result: unknown;
+        service.count(11500).subscribe((res) => (result = res));
 
-        const req = httpMock.expectOne("/api/cash_sessions/close");
-        expect(req.request.body.closingNote).toBe("Erreur de monnaie");
-        req.flush({});
+        httpMock.expectOne("/api/cash_sessions/close").flush({
+            id: 3,
+            status: "CLOSED",
+            theoretical_amount: "12000.00",
+            actual_amount: "11500.00",
+            difference: "-500.00",
+        });
+
+        expect(result).toMatchObject({
+            status: "CLOSED",
+            theoretical_amount: 12000,
+            actual_amount: 11500,
+            difference: -500,
+        });
     });
 
     it("should send the period and the status filters of the history", () => {
@@ -60,13 +71,12 @@ describe("CashSessionService", () => {
         req.flush({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
     });
 
-    it("should reopen a closed session with its reason", () => {
-        service.reopen(4, "erreur de comptage").subscribe();
+    it("should filter the history on uncounted sessions", () => {
+        service.getSessions(1, 20, { status: "uncounted" }).subscribe();
 
-        const req = httpMock.expectOne("/api/cash_sessions/4/reopen");
-        expect(req.request.method).toBe("POST");
-        expect(req.request.body).toEqual({ reason: "erreur de comptage" });
-        req.flush({});
+        const req = httpMock.expectOne((r) => r.url === "/api/cash_sessions");
+        expect(req.request.params.get("status")).toBe("uncounted");
+        req.flush({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } });
     });
 
     it("should convert the amounts of a session list to numbers", () => {
@@ -130,17 +140,22 @@ describe("CashSessionService", () => {
         });
     });
 
-    it("should read today's cash from the dashboard summary", () => {
-        let cash: unknown;
-        service.getTodayCash().subscribe((res) => (cash = res));
+    it("should read today's cash, the uncounted session and the opening amount", () => {
+        let today: unknown;
+        service.getToday().subscribe((res) => (today = res));
 
+        const uncounted = { id: 5, sessionDate: "2026-11-22", balance: 9000, count: 1 };
         httpMock.expectOne("/api/dashboard/summary").flush({
-            cash: { status: "OPEN", balance: 8000 },
-            previousOpenSession: null,
-            pendingExplanation: null,
+            cash: null,
+            uncountedSession: uncounted,
+            expectedOpening: 9000,
             blindClose: false,
         });
 
-        expect(cash).toEqual({ status: "OPEN", balance: 8000 });
+        expect(today).toMatchObject({
+            cash: null,
+            uncountedSession: uncounted,
+            expectedOpening: 9000,
+        });
     });
 });

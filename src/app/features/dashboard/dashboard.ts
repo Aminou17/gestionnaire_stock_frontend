@@ -1,4 +1,4 @@
-import { DatePipe, formatDate } from "@angular/common";
+import { formatDate } from "@angular/common";
 import { Component, LOCALE_ID, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, RouterLink } from "@angular/router";
@@ -10,16 +10,15 @@ import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { Icon } from "../../shared/icon/icon";
 import { EmptyState } from "../../shared/empty-state/empty-state";
+import { MoneyToggle } from "../../shared/money/money-toggle";
 import { RevealToggle } from "../../shared/secret/reveal-toggle";
 import { SecretValues } from "../../shared/secret/secret-values";
 import type { IconName } from "../../shared/icon/icons";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { DashboardService } from "./dashboard.service";
 import { ThemeService } from "../../core/theme/theme.service";
-import { CashClosedNotice } from "../cash/cash-closed-notice/cash-closed-notice";
-import { ReopenCashDialog } from "../cash/reopen-cash-dialog/reopen-cash-dialog";
-import { CloseCashDialog } from "../cash/close-cash-dialog/close-cash-dialog";
-import { OpenCashDialog } from "../cash/open-cash-dialog/open-cash-dialog";
+import { CountCashDialog } from "../cash/count-cash-dialog/count-cash-dialog";
+import { UncountedCashNotice } from "../cash/uncounted-cash-notice/uncounted-cash-notice";
 import { RecentActivity } from "./recent-activity/recent-activity";
 import { RecentSales } from "./recent-sales/recent-sales";
 import { SalesChart } from "./sales-chart/sales-chart";
@@ -30,9 +29,9 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
 @Component({
     selector: "app-dashboard",
     imports: [
+        MoneyToggle,
         RevealToggle,
         RouterLink,
-        DatePipe,
         FcfaPipe,
         PageHeader,
         Icon,
@@ -41,10 +40,8 @@ import { StockAlerts } from "./stock-alerts/stock-alerts";
         StockAlerts,
         RecentSales,
         RecentActivity,
-        OpenCashDialog,
-        CloseCashDialog,
-        ReopenCashDialog,
-        CashClosedNotice,
+        CountCashDialog,
+        UncountedCashNotice,
         ManagerCashBanner,
         EmptyState,
     ],
@@ -58,6 +55,7 @@ export class Dashboard {
     private dashboard = inject(DashboardService);
     private saleService = inject(SaleService);
     private locale = inject(LOCALE_ID);
+    private fcfa = new FcfaPipe();
     private route = inject(ActivatedRoute);
     protected auth = inject(AuthService);
     protected stockAlerts = inject(LowStockAlertService);
@@ -67,9 +65,11 @@ export class Dashboard {
 
     today = formatDate(new Date(), "EEEE d MMMM y", this.locale);
 
+    // l'admin voit toute la boutique, le gérant seulement ses ventes
+    showShop = computed(() => this.auth.isAdmin());
+
     summary = rxResource({ stream: () => this.dashboard.getSummary() });
-    dailySales = rxResource({ stream: () => this.dashboard.getDailySales() });
-    comparison = rxResource({ stream: () => this.dashboard.getSalesComparison() });
+    dailySales = rxResource({ stream: () => this.dashboard.getDailySales(!this.auth.isAdmin()) });
     activity = rxResource({ stream: () => this.dashboard.getRecentActivity(5) });
     sales = rxResource({ stream: () => this.saleService.getSales(5) });
     // une page d'une vente suffit : on ne lit que les compteurs (reste à encaisser)
@@ -124,10 +124,6 @@ export class Dashboard {
         return `${count} vente${count > 1 ? "s" : ""} non réglée${count > 1 ? "s" : ""}`;
     });
 
-    profitHint = computed(() => {
-        const margin = this.summaryData()?.todayMargin;
-        return margin == null ? "Pas encore de vente" : `Marge de ${margin} %`;
-    });
     profitTone = computed(() => {
         const profit = this.summaryData()?.todayProfit ?? 0;
         return profit > 0 ? ("success" as const) : profit < 0 ? ("danger" as const) : undefined;
@@ -148,63 +144,36 @@ export class Dashboard {
 
     cash = computed(() => this.summaryData()?.cash ?? null);
     cashOpen = computed(() => this.cash()?.status === "OPEN");
-    // sa propre caisse d'un jour passé, pas clôturée : elle empêche d'ouvrir celle d'aujourd'hui
-    previousOwn = computed(() => {
-        const previous = this.summaryData()?.previousOpenSession;
-        return previous && previous.openedBy === this.auth.user()?.id ? previous : null;
-    });
-    cashGate = computed(() =>
-        this.cash() ? "closedToday" : this.previousOwn() ? "previous" : "notOpened",
-    );
 
-    // on compare à hier jusqu'à la même heure : une journée en cours contre une journée complète serait toujours en baisse
-    salesHint = computed(() => {
-        const comparison = this.comparison.hasValue() ? this.comparison.value() : undefined;
-        if (!comparison) return { text: undefined, tone: "muted" as const };
-
-        const today = comparison.todayTotal;
-        const yesterday = comparison.yesterdayUntilNowTotal;
-        // rien à comparer : les grands logiciels n'affichent pas de variation, on montre le nombre de ventes
-        // aucune vente encore aujourd'hui : "moins 100 %" serait trompeur tôt le matin
-        if (yesterday <= 0 || today <= 0) {
-            const count = this.todaySales()?.salesCount ?? 0;
-            const text =
-                count === 0 ? "Aucune vente" : `${count} vente${count > 1 ? "s" : ""} aujourd'hui`;
-            return { text, tone: "muted" as const };
-        }
-
-        const change = Math.round(((today - yesterday) / yesterday) * 100);
-        const sign = change > 0 ? "+" : change < 0 ? "−" : "";
-        return {
-            text: `${sign}${Math.abs(change)} % vs hier`,
-            tone: change >= 0 ? ("success" as const) : ("warning" as const),
-        };
-    });
-
+    // sous le montant de la carte "En caisse"
     cashHint = computed(() => {
         const cash = this.cash();
-        if (!cash) return "";
-        if (cash.status === "OPEN")
-            return `Ouverte depuis ${formatDate(cash.openedAt, "HH:mm", this.locale)}`;
-        return `Clôturée à ${formatDate(cash.closedAt!, "HH:mm", this.locale)}`;
+        if (!cash) return "Pas encore de vente";
+        return cash.status === "OPEN"
+            ? `Depuis ${formatDate(cash.openedAt, "HH:mm", this.locale)}`
+            : "Caisse comptée";
+    });
+    // caisse d'un jour passé jamais comptée : un rappel, rien n'est bloqué
+    uncounted = computed(() => this.summaryData()?.uncountedSession ?? null);
+    expectedOpening = computed(() => this.summaryData()?.expectedOpening ?? null);
+
+    salesHint = computed(() => {
+        const count = this.todaySales()?.salesCount ?? 0;
+        const text = count === 0 ? "Aucune vente" : `${count} vente${count > 1 ? "s" : ""}`;
+        return { text, tone: "muted" as const };
     });
 
     // aucune vente enregistrée : on guide l'administrateur pas à pas, comme Shopify ou Square
     firstSteps = computed(() => {
-        if (!this.summary.hasValue() || !this.sales.hasValue() || this.salesList().length > 0)
-            return null;
+        // salesPage ne se charge que pour l'admin : toutes les ventes de la boutique, pas seulement les miennes
+        if (!this.summary.hasValue() || !this.salesPage.hasValue()) return null;
+        if (this.salesPage.value().data.length > 0) return null;
         const steps = [
             {
                 icon: "package" as IconName,
                 label: "Ajouter vos produits",
                 done: (this.summaryData()?.activeProducts ?? 0) > 0,
                 link: "/products",
-            },
-            {
-                icon: "banknote" as IconName,
-                label: "Ouvrir la caisse",
-                done: !!this.cash(),
-                link: undefined,
             },
             {
                 icon: "cart" as IconName,
@@ -219,11 +188,10 @@ export class Dashboard {
     reloadSummary() {
         this.summary.reload();
         this.dailySales.reload();
-        this.comparison.reload();
         this.salesPage.reload();
     }
 
-    onCashOpened() {
+    onCashCounted() {
         this.summary.reload();
         this.activity.reload();
     }

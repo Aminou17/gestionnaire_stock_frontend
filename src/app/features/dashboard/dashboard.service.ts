@@ -15,9 +15,12 @@ export class DashboardService {
 
     // Sans dates, le backend renvoie les 30 derniers jours selon SA date du jour :
     // on évite ainsi un décalage si l'horloge du navigateur et celle du serveur diffèrent.
-    getDailySales() {
+    // mine : seulement mes ventes (le manager n'a que celles-là de toute façon)
+    getDailySales(mine = false) {
+        const params: Record<string, string> = mine ? { scope: "mine" } : {};
+
         return this.http
-            .get<{ data: DailySales[] }>(`${API_URL}/dashboard/daily-sales`)
+            .get<{ data: DailySales[] }>(`${API_URL}/dashboard/daily-sales`, { params })
             .pipe(map((res) => res.data));
     }
 

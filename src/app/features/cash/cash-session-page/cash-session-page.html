@@ -32,12 +32,24 @@
                 <div class="summary-text">
                     <span
                         class="badge"
-                        [class]="cash.status === 'OPEN' ? 'badge-success' : 'badge-neutral'"
+                        [class]="
+                            cash.status === 'OPEN'
+                                ? 'badge-success'
+                                : cash.status === 'UNCOUNTED'
+                                  ? 'badge-warning'
+                                  : 'badge-neutral'
+                        "
                     >
-                        {{ cash.status === "OPEN" ? "Ouverte" : "Clôturée" }}
+                        {{
+                            cash.status === "OPEN"
+                                ? "En cours"
+                                : cash.status === "UNCOUNTED"
+                                  ? "Non comptée"
+                                  : "Comptée"
+                        }}
                     </span>
                     @if (cash.status === "CLOSED") {
-                        <small class="muted">Écart constaté à la clôture</small>
+                        <small class="muted">Écart constaté au comptage</small>
                         <strong
                             class="gap"
                             [class.in]="cash.difference! > 0"
@@ -46,30 +58,33 @@
                             {{ cash.difference | fcfa: true }}
                         </strong>
                         @if (cash.closing_note) {
-                            <p class="note">Explication : {{ cash.closing_note }}</p>
-                        } @else if (cash.explanation_pending) {
-                            <span class="badge badge-warning">Écart à expliquer</span>
-                            @if (canExplain()) {
-                                <button
-                                    type="button"
-                                    class="btn btn-primary explain"
-                                    (click)="closeDialog.openExplain(cash.id, cash.difference!)"
-                                >
-                                    Expliquer l'écart
-                                </button>
-                            }
+                            <p class="note">Raison : {{ cash.closing_note }}</p>
                         }
+                    } @else if (cash.status === "UNCOUNTED") {
+                        <small class="muted">Cette journée n'a pas été comptée.</small>
                     } @else {
-                        <small class="muted">En cours : l'écart sera connu à la clôture.</small>
+                        <small class="muted">En cours : l'écart sera connu au comptage.</small>
                     }
                 </div>
-                @if (auth.isAdmin() && cash.status === "CLOSED") {
+
+                <!-- l'admin rectifie un comptage ; chacun peut compter sa propre caisse passée -->
+                @if (cash.status === "UNCOUNTED" || (cash.status === "CLOSED" && auth.isAdmin())) {
                     <button
                         type="button"
-                        class="btn btn-outline"
-                        (click)="reopenDialog.open(cash.id)"
+                        class="btn btn-primary recount"
+                        (click)="
+                            countDialog.open({
+                                expected: cash.theoretical_amount,
+                                sessionId: cash.id,
+                                sessionDate: cash.session_date,
+                            })
+                        "
                     >
-                        Rouvrir la caisse
+                        {{
+                            cash.status === "UNCOUNTED"
+                                ? "Compter la caisse"
+                                : "Rectifier le comptage"
+                        }}
                     </button>
                 }
                 @if (cash.status === "CLOSED" && !cash.blind) {
@@ -110,7 +125,7 @@
                         </div>
                     </dl>
                     <dl class="lines step">
-                        <dt class="step-title">Clôture</dt>
+                        <dt class="step-title">Comptage</dt>
                         @if (cash.closed_at) {
                             <div>
                                 <dt>Heure</dt>
@@ -121,7 +136,7 @@
                                 <dd>{{ cash.closed_by_name ?? "—" }}</dd>
                             </div>
                         } @else {
-                            <p class="muted pending">Pas encore clôturée.</p>
+                            <p class="muted pending">Pas encore comptée.</p>
                         }
                     </dl>
                 </div>
@@ -133,7 +148,7 @@
                 </div>
                 @if (cash.blind) {
                     <p class="muted blind-note">
-                        Clôture à l'aveugle : les montants seront visibles après la clôture.
+                        Comptage à l'aveugle : les montants seront visibles après le comptage.
                     </p>
                 } @else {
                     <dl class="lines">
@@ -169,11 +184,13 @@
                                 <dd appMoney class="out">−{{ summary().withdrawals | fcfa }}</dd>
                             </div>
                         }
-                        @if (cash.status === "CLOSED") {
+                        @if (cash.status !== "OPEN") {
                             <div class="total">
                                 <dt>Montant attendu</dt>
                                 <dd appMoney>{{ cash.theoretical_amount | fcfa }}</dd>
                             </div>
+                        }
+                        @if (cash.status === "CLOSED") {
                             <div class="total">
                                 <dt>Montant compté</dt>
                                 <dd appMoney>{{ cash.actual_amount | fcfa }}</dd>
@@ -196,7 +213,7 @@
     @if (cash.status === "CLOSED" && !cash.blind) {
         <section class="ticket" aria-hidden="true">
             <h2>{{ shopName() }}</h2>
-            <p class="center">Clôture de caisse</p>
+            <p class="center">Comptage de caisse</p>
             <p class="center">{{ cash.session_date | date: "EEEE d MMMM y" }}</p>
             <hr />
             <p class="row">
@@ -206,7 +223,7 @@
                 <span>Ouverte à</span><span>{{ cash.opened_at | date: "HH:mm" }}</span>
             </p>
             <p class="row">
-                <span>Clôturée à</span><span>{{ cash.closed_at | date: "HH:mm" }}</span>
+                <span>Comptée à</span><span>{{ cash.closed_at | date: "HH:mm" }}</span>
             </p>
             <hr />
             <p class="row">
@@ -246,7 +263,7 @@
                 <span>Écart</span><span>{{ cash.difference | fcfa: true }}</span>
             </p>
             @if (cash.closing_note) {
-                <p>Explication : {{ cash.closing_note }}</p>
+                <p>Raison : {{ cash.closing_note }}</p>
             }
             @if (cash.mobile_money_total) {
                 <hr />
@@ -260,6 +277,4 @@
     }
 }
 
-<app-close-cash-dialog #closeDialog (closed)="session.reload()" />
-
-<app-reopen-cash-dialog #reopenDialog (reopened)="session.reload()" />
+<app-count-cash-dialog #countDialog (counted)="session.reload()" />

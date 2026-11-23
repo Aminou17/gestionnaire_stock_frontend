@@ -21,14 +21,44 @@ export interface CashMovement {
     created_at: string;
 }
 
+// OPEN : en cours ; CLOSED : comptée ; UNCOUNTED : d'un jour passé, jamais comptée
+export type CashStatus = "OPEN" | "CLOSED" | "UNCOUNTED";
+
+export interface CashSummary {
+    id: number;
+    status: CashStatus;
+    // null pour le gérant tant que la caisse n'est pas comptée (clôture à l'aveugle)
+    openingAmount: number | null;
+    balance: number | null;
+    openedAt: string;
+    openedByName: string | null;
+    closedAt: string | null;
+    // renseignés une fois la caisse comptée
+    actualAmount: number | null;
+    difference: number | null;
+}
+
+// caisse d'un jour passé jamais comptée : elle ne bloque rien, on la rappelle
+export interface UncountedSession {
+    id: number;
+    sessionDate: string;
+    openedAt: string;
+    openedBy: number;
+    openedByName: string | null;
+    // montant attendu ; null pour le gérant à l'aveugle
+    balance: number | null;
+    // nombre de caisses non comptées
+    count: number;
+}
+
 export interface CashSession {
     id: number;
     // YYYY-MM-DD
     session_date: string;
-    status: "OPEN" | "CLOSED";
-    // null pour l'employé quand la caisse est ouverte et la clôture à l'aveugle
+    status: CashStatus;
+    // null pour le gérant tant que la caisse n'est pas comptée (clôture à l'aveugle)
     opening_amount: number | null;
-    // les trois montants suivants restent vides tant que la session est ouverte
+    // solde attendu : vide pour le gérant à l'aveugle, et tant que la caisse est ouverte
     theoretical_amount: number | null;
     actual_amount: number | null;
     difference: number | null;
@@ -37,10 +67,8 @@ export interface CashSession {
     opened_by: number;
     opened_by_name: string | null;
     closed_by_name: string | null;
-    // explication de l'écart donnée à la clôture
+    // raison facultative donnée au comptage
     closing_note: string | null;
-    // écart découvert après une clôture à l'aveugle, pas encore expliqué
-    explanation_pending: boolean;
     closed_by: number | null;
     // présent quand le serveur a masqué les montants (clôture à l'aveugle)
     blind?: boolean;
@@ -57,54 +85,12 @@ export interface CashSessionPage {
     pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 
-export interface TeamSession {
-    id: number;
-    status: "OPEN" | "CLOSED";
-    openedBy: number;
-    openedByName: string | null;
-    openedAt: string;
-    closedAt: string | null;
-    difference: number | null;
-    explanationPending: boolean;
-    salesTotal: number;
-}
-
 // partie caisse de /dashboard/summary
-// balance et openingAmount valent null pour l'employé quand la clôture est à l'aveugle
 export interface CashToday {
-    cash: {
-        id: number;
-        status: "OPEN" | "CLOSED";
-        openingAmount: number | null;
-        balance: number | null;
-        openedAt: string;
-        openedByName: string | null;
-        closedAt: string | null;
-    } | null;
-    previousOpenSession: {
-        id: number;
-        sessionDate: string;
-        openedAt: string;
-        openedBy: number;
-        openedByName: string | null;
-        balance: number | null;
-    } | null;
-    // caisses du jour de toute l'équipe, réservées à l'admin
-    teamSessions: TeamSession[] | null;
-    pendingExplanation: {
-        id: number;
-        sessionDate: string;
-        difference: number;
-        closedBy: number;
-    } | null;
+    cash: CashSummary | null;
+    uncountedSession: UncountedSession | null;
+    expectedOpening: number | null;
     blindClose: boolean;
-}
-
-// réponse de la clôture, utile pour révéler l'écart après un comptage à l'aveugle
-export interface ClosedCash {
-    id: number;
-    difference: number;
-    explanation_pending: boolean;
 }
 
 export interface CashMovementRow extends CashMovement {

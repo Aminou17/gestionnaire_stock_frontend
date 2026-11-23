@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { Component, inject, input } from "@angular/core";
+import { Component, ElementRef, inject, input, signal, viewChild } from "@angular/core";
 import { Router, RouterLink } from "@angular/router";
 
 import { CashMovement } from "../../../core/cash/cash.model";
@@ -11,12 +11,11 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
     selector: "app-cash-movement-list",
     imports: [RouterLink, DatePipe, Icon, FcfaPipe],
     templateUrl: "./cash-movement-list.html",
-    styleUrl: "./cash-movement-list.css",
+    styleUrls: ["../../../shared/dialog/dialog.css", "./cash-movement-list.css"],
 })
 export class CashMovementList {
     movements = input.required<CashMovement[]>();
     emptyText = input("Aucun mouvement pour le moment.");
-    showSeller = input(true);
     // la page des mouvements mélange plusieurs jours
     showDate = input(false);
 
@@ -28,6 +27,30 @@ export class CashMovementList {
     }
 
     backLabel = input("Caisse");
+
+    // seules les ventes et leurs remboursements ont une fiche à ouvrir
+    hasSale(movement: CashMovement) {
+        return movement.type === "SALE" || movement.reference_type === "SALE_CANCELLATION";
+    }
+
+    protected selected = signal<CashMovement | null>(null);
+    private detail = viewChild.required<ElementRef<HTMLDialogElement>>("detail");
+
+    open(movement: CashMovement) {
+        this.selected.set(movement);
+        this.detail().nativeElement.showModal();
+    }
+
+    close() {
+        this.detail().nativeElement.close();
+    }
+
+    // ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
+    onBackdropClick(event: MouseEvent) {
+        if (event.target === this.detail().nativeElement) {
+            this.close();
+        }
+    }
 
     label = getMovementLabel;
     income = isIncome;

@@ -23,7 +23,6 @@ const session = (id: number, overrides: Partial<CashSession> = {}): CashSession 
     opened_by_name: "Yabre M.",
     closed_by_name: "Awa K.",
     closing_note: null,
-    explanation_pending: false,
     closed_by: null,
     ...overrides,
 });
@@ -84,10 +83,31 @@ describe("CashSessions", () => {
 
         expect(el.querySelectorAll(".session-card").length).toBe(2);
         expect(el.querySelector("table")).toBeNull();
-        expect(text()).toContain("Àclôturer");
+        expect(text()).toContain("Encours");
         expect(text()).toContain("Écartde−500F");
         // pas de montant inventé pour une caisse encore ouverte
         expect(el.querySelectorAll(".session-card")[0].querySelector(".session-amount")).toBeNull();
+    });
+
+    it("should flag a session that was never counted", async () => {
+        const uncounted = session(6, {
+            status: "UNCOUNTED",
+            actual_amount: null,
+            difference: null,
+        });
+        await render(() =>
+            of({ data: [uncounted], pagination: { page: 1, limit: 20, total: 1, totalPages: 1 } }),
+        );
+
+        expect(text()).toContain("Noncomptée");
+    });
+
+    it("should offer the uncounted filter", async () => {
+        await render(() =>
+            of({ data: [], pagination: { page: 1, limit: 20, total: 0, totalPages: 0 } }),
+        );
+
+        expect(text()).toContain("Noncomptées");
     });
 
     it("should link each session to its detail page", async () => {

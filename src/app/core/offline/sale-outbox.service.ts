@@ -10,8 +10,8 @@ import { dbAll, dbDelete, dbSet } from "./local-db";
 import { NetworkService } from "./network.service";
 import { OfflineCatalogService } from "./offline-catalog.service";
 
-// waiting : en attente du réseau ; cash : en attente d'une caisse ouverte ; error : refusée, à vérifier
-export type PendingStatus = "waiting" | "sending" | "cash" | "error";
+// waiting : en attente du réseau ; error : refusée, à vérifier
+export type PendingStatus = "waiting" | "sending" | "error";
 
 export interface PendingSale {
     clientRef: string;
@@ -62,9 +62,7 @@ export class SaleOutboxService {
     });
     readonly count = computed(() => this.pending().length);
     readonly needsAttention = computed(
-        () =>
-            this.pending().filter((sale) => sale.status === "error" || sale.status === "cash")
-                .length,
+        () => this.pending().filter((sale) => sale.status === "error").length,
     );
 
     constructor() {
@@ -117,7 +115,7 @@ export class SaleOutboxService {
         this.all.update((list) => list.filter((sale) => sale.clientRef !== clientRef));
     }
 
-    // une vente refusée peut être réessayée après correction (caisse ouverte, produit remis en vente)
+    // une vente refusée peut être réessayée après correction (produit remis en vente)
     async retry(clientRef: string) {
         const sale = this.all().find((s) => s.clientRef === clientRef);
         if (!sale) return;
@@ -132,7 +130,7 @@ export class SaleOutboxService {
 
         try {
             for (const sale of this.pending()) {
-                // une vente refusée attend qu'on la vérifie ; la caisse fermée est réessayée
+                // une vente refusée attend qu'on la vérifie ;
                 if (sale.status === "error") continue;
 
                 await this.put({ ...sale, status: "sending" });
@@ -163,10 +161,9 @@ export class SaleOutboxService {
                         break;
                     }
 
-                    const cashClosed = error.error?.code === "CASH_CLOSED";
                     await this.put({
                         ...sale,
-                        status: cashClosed ? "cash" : "error",
+                        status: "error",
                         error: error.error?.message ?? "Vente refusée par le serveur.",
                         attempts: sale.attempts + 1,
                     });

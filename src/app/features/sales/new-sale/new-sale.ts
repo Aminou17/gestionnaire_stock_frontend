@@ -13,16 +13,16 @@ import {
     viewChild,
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
-import { catchError, firstValueFrom, map, of } from "rxjs";
+import { firstValueFrom } from "rxjs";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 
+import { ModuleAccess } from "../../../core/modules/module-access";
 import { AuthService } from "../../../core/auth/auth.service";
 import { getBackLink } from "../../../core/back-link";
 import { isUnreachable } from "../../../core/offline/network.interceptor";
 import { NetworkService } from "../../../core/offline/network.service";
 import { OfflineCatalogService } from "../../../core/offline/offline-catalog.service";
 import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
-import { CashSessionService } from "../../../core/cash/cash-session.service";
 import { Customer } from "../../../core/customers/customer.model";
 import { CustomerService } from "../../../core/customers/customer.service";
 import { PaymentMethod } from "../../../core/sales/sale.model";
@@ -32,10 +32,6 @@ import { CategoryService } from "../../../core/stock/category.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
-import { CloseCashDialog } from "../../cash/close-cash-dialog/close-cash-dialog";
-import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
-import { CashClosedNotice } from "../../cash/cash-closed-notice/cash-closed-notice";
-import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { productInitials, productTone } from "../../products/product-look";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
@@ -56,11 +52,13 @@ const CATALOG_LIMIT = 500;
 
 const VIEW_KEY = "new-sale-view";
 
-const readView = (): "list" | "grid" => {
+// null tant que la personne n'a jamais choisi : la vue dépend alors des photos du catalogue
+const readView = (): "list" | "grid" | null => {
     try {
-        return localStorage.getItem(VIEW_KEY) === "list" ? "list" : "grid";
+        const saved = localStorage.getItem(VIEW_KEY);
+        return saved === "list" || saved === "grid" ? saved : null;
     } catch {
-        return "grid";
+        return null;
     }
 };
 
@@ -72,19 +70,7 @@ export const getMinPrice = (product: Product) =>
 
 @Component({
     selector: "app-new-sale",
-    imports: [
-        NgTemplateOutlet,
-        BarcodeScanner,
-        PageHeader,
-        RouterLink,
-        Icon,
-        FcfaPipe,
-        OpenCashDialog,
-        CloseCashDialog,
-        CashClosedNotice,
-        ReopenCashDialog,
-        PhotoZoom,
-    ],
+    imports: [NgTemplateOutlet, BarcodeScanner, PageHeader, RouterLink, Icon, FcfaPipe, PhotoZoom],
     templateUrl: "./new-sale.html",
     styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
     // la barre du panier en bas d'écran demande de la place sous la page
@@ -99,12 +85,12 @@ export class NewSale {
     private saleService = inject(SaleService);
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);
-    private cashService = inject(CashSessionService);
     private customerService = inject(CustomerService);
     private stockAlerts = inject(LowStockAlertService);
     private shop = inject(ShopSettingsService);
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
+    protected access = inject(ModuleAccess);
     private network = inject(NetworkService);
     protected catalog = inject(OfflineCatalogService);
     protected outbox = inject(SaleOutboxService);
@@ -131,7 +117,9 @@ export class NewSale {
 
     // téléphone : le panier est une feuille qui monte du bas
     // produits en carreaux par défaut (photo bien visible), choix mémorisé
-    view = signal<"list" | "grid">(readView());
+    view = signal<"list" | "grid">(readView() ?? "grid");
+    // sans choix mémorisé, la première liste chargée décide : des carreaux sans photo ne servent à rien
+    private autoView = readView() === null;
     cartOpen = signal(false);
     // produits dont le champ de prix négocié est déplié
     priceOpenIds = signal<ReadonlySet<number>>(new Set());
@@ -139,20 +127,6 @@ export class NewSale {
     private searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
     private noticeTimer?: ReturnType<typeof setTimeout>;
     private searchTimer?: ReturnType<typeof setTimeout>;
-
-    cash = rxResource({ stream: () => this.cashService.getTodayCash() });
-    // on ne bloque la vente que si on SAIT que la caisse est fermée
-    // hors ligne : on se fie au dernier état connu de la caisse
-    cashClosed = computed(() =>
-        this.offline()
-            ? this.catalog.cash()?.status !== "OPEN"
-            : this.cash.hasValue() && this.cash.value()?.status !== "OPEN",
-    );
-    cashKnown = computed(() => (this.offline() ? !!this.catalog.cash() : this.cash.hasValue()));
-
-    cashClosedToday = computed(
-        () => this.cash.hasValue() && this.cash.value()?.status === "CLOSED",
-    );
 
     products = rxResource({
         params: () => ({
@@ -235,15 +209,15 @@ export class NewSale {
     customerText = signal("");
     // téléphone saisi pour un paiement partiel, quand le client n'a pas encore de fiche
     customerPhoneText = signal("");
-    // client et paiement partiel restent repliés tant qu'on n'en a pas besoin
-    moreOpen = signal(false);
+    // client et paiement partiel se règlent dans une fenêtre, le panier n'en montre qu'un résumé
     optionsOpen = computed(
         () =>
-            this.moreOpen() ||
             this.showDeposit() ||
             this.customer() !== null ||
-            this.customerText() !== "",
+            this.customerText() !== "" ||
+            this.customerPhoneText() !== "",
     );
+    private creditDialog = viewChild.required<ElementRef<HTMLDialogElement>>("creditDialog");
     // montant reçu libre : caché derrière le bouton "Autre"
     otherOpen = signal(false);
     pickerOpen = signal(false);
@@ -260,10 +234,11 @@ export class NewSale {
         this.customerResults.hasValue() ? this.customerResults.value().rows : [],
     );
 
-    // un numéro tapé part comme téléphone, du texte comme nom ; pour un paiement partiel, deux champs
+    // nom et téléphone : un numéro tapé dans le champ du nom part comme téléphone si l'autre champ est vide
     private typed = computed(() => {
         const text = this.customerText().trim();
-        if (this.showDeposit()) return { name: text, phone: this.customerPhoneText().trim() };
+        const phone = this.customerPhoneText().trim();
+        if (phone || this.showDeposit()) return { name: text, phone };
         if (!text) return { name: "", phone: "" };
         return /^[0-9+\-.() ]+$/.test(text) ? { name: "", phone: text } : { name: text, phone: "" };
     });
@@ -300,6 +275,24 @@ export class NewSale {
         this.customerPhoneText.set("");
         this.customerQuery.set("");
         this.pickerOpen.set(false);
+    }
+
+    openCredit() {
+        // sans l'accès Dettes et clients : le message d'abonnement, la vente en cours reste intacte
+        if (!this.access.allows("customers")) {
+            this.access.showLocked("customers");
+            return;
+        }
+
+        this.creditDialog().nativeElement.showModal();
+    }
+
+    closeCredit() {
+        this.creditDialog().nativeElement.close();
+    }
+
+    onCreditBackdrop(event: MouseEvent) {
+        if (event.target === this.creditDialog().nativeElement) this.closeCredit();
     }
 
     changeCustomer() {
@@ -376,43 +369,12 @@ export class NewSale {
         () =>
             this.cart().length > 0 &&
             !this.hasInvalidLine() &&
-            this.cashKnown() &&
-            !this.cashClosed() &&
             this.missingAmount() === 0 &&
             this.depositError() === null &&
             // un paiement partiel demande le montant payé
             !(this.showDeposit() && this.deposit() === null) &&
             !this.saving(),
     );
-    // une caisse oubliée d'un jour passé empêche d'ouvrir celle d'aujourd'hui
-    previousOpen = rxResource({
-        params: () =>
-            !this.offline() && this.cashKnown() && this.cashClosed() && !this.cashClosedToday()
-                ? true
-                : undefined,
-        stream: () =>
-            this.cashService.getToday().pipe(
-                map((today) => today.previousOpenSession),
-                catchError(() => of(null)),
-            ),
-    });
-    ownPrevious = computed(() => {
-        const previous = this.previousOpen.hasValue() ? this.previousOpen.value() : null;
-        return previous && previous.openedBy === this.auth.user()?.id ? previous : null;
-    });
-    gateState = computed(() =>
-        this.cashClosedToday() ? "closedToday" : this.ownPrevious() ? "previous" : "notOpened",
-    );
-    // panier vide et caisse fermée : on le dit avant que le vendeur choisisse des produits
-    gateVisible = computed(
-        () => !this.offline() && this.cashKnown() && this.cashClosed() && this.cart().length === 0,
-    );
-
-    // caisse fermée en ligne : le bouton principal sert à l'ouvrir
-    cashNeedsOpening = computed(
-        () => !this.offline() && this.cashClosed() && !this.cashClosedToday(),
-    );
-
     constructor() {
         // un panier vidé ferme la feuille
         effect(() => {
@@ -424,17 +386,14 @@ export class NewSale {
             if (!this.offline()) this.catalog.refresh().catch(() => {});
         });
 
-        // dernier état connu de la caisse, pour vendre sans internet
         effect(() => {
-            if (!this.cash.hasValue()) return;
-            const cash = this.cash.value();
-            untracked(() =>
-                this.catalog.saveCash(
-                    cash
-                        ? { status: cash.status, sessionDate: cash.openedAt?.slice(0, 10) ?? null }
-                        : null,
-                ),
-            );
+            const products = this.results();
+            if (!this.autoView || products.length === 0) return;
+            const withPhoto = products.filter((product) => product.image).length;
+            untracked(() => {
+                this.autoView = false;
+                this.view.set(withPhoto * 2 >= products.length ? "grid" : "list");
+            });
         });
 
         this.destroyRef.onDestroy(() => {
@@ -564,13 +523,7 @@ export class NewSale {
     }
 
     // lignes : un appui ajoute le produit, un second le retire
-    toggleProduct(product: Product) {
-        const line = this.cart().find((l) => l.product.id === product.id);
-        if (line) this.removeLine(line);
-        else this.addProduct(product);
-    }
-
-    // carreaux : un appui ajoute un exemplaire, jusqu'au stock disponible
+    // carreaux et lignes : un appui ajoute un exemplaire, jusqu'au stock disponible
     tapTile(product: Product) {
         const line = this.cart().find((l) => l.product.id === product.id);
         if (!line) this.addProduct(product);
@@ -697,7 +650,6 @@ export class NewSale {
         this.amountReceived.set(null);
         this.deposit.set(null);
         this.showDeposit.set(false);
-        this.moreOpen.set(false);
         this.otherOpen.set(false);
         this.customer.set(null);
         this.customerText.set("");
@@ -811,36 +763,10 @@ export class NewSale {
                     }
 
                     this.error.set(err.error?.message ?? "Impossible d'enregistrer la vente.");
-                    // stock ou caisse ont pu changer entre-temps
+                    // le stock a pu changer entre-temps
                     this.products.reload();
-                    this.cash.reload();
                 },
             });
-    }
-
-    private reopenDialog = viewChild.required<ReopenCashDialog>("reopenCash");
-    private openDialog = viewChild.required<OpenCashDialog>("openCashDialog");
-    private closeDialog = viewChild.required<CloseCashDialog>("closeCash");
-
-    reopen() {
-        const cash = this.cash.value();
-        if (cash) this.reopenDialog().open(cash.id);
-    }
-
-    // une caisse oubliée bloque l'ouverture : on la clôture d'abord, puis on ouvre celle d'aujourd'hui
-    openCash() {
-        if (this.ownPrevious()) this.closePrevious();
-        else this.openDialog().open();
-    }
-
-    closePrevious() {
-        const previous = this.ownPrevious();
-        if (previous) this.closeDialog().open(previous.sessionDate, previous.balance);
-    }
-
-    onPreviousClosed() {
-        this.previousOpen.reload();
-        this.cash.reload();
     }
 
     // la feuille prend une entrée d'historique : le bouton retour du téléphone la ferme d'abord
@@ -877,10 +803,6 @@ export class NewSale {
 
     // barre du bas : vendre tout de suite avec le paiement par défaut (espèces, compte juste)
     quickPay() {
-        if (this.cashNeedsOpening()) {
-            this.openCash();
-            return;
-        }
         // une ligne à corriger ou un champ à remplir : on montre le panier
         if (!this.canSubmit()) {
             this.openCart();

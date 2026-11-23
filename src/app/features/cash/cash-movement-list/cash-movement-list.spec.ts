@@ -77,11 +77,30 @@ describe("CashMovementList", () => {
         expect(links).toEqual(["/sales/12", "/sales/9"]);
     });
 
-    it("should show the seller and the time", async () => {
+    it("should show the time and who made the movement", async () => {
         await render([movement({})]);
 
         expect(text()).toContain("09:30");
         expect(text()).toContain("Awa K.");
+    });
+
+    it("should open the details of a manual movement", async () => {
+        await render([
+            movement({
+                type: "EXPENSE",
+                reference_type: null,
+                reference_id: null,
+                reason: "taxi du matin",
+            }),
+        ]);
+        const dialog = el.querySelector("dialog")!;
+        dialog.showModal = vi.fn();
+        el.querySelector<HTMLButtonElement>("button.label")!.click();
+        await fixture.whenStable();
+
+        expect(dialog.showModal).toHaveBeenCalled();
+        expect(dialog.textContent).toContain("Awa K.");
+        expect(dialog.textContent).toContain("taxi du matin");
     });
 
     it("should show the empty text when there is no movement", async () => {

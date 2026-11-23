@@ -1,0 +1,99 @@
+.expected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--neutral-soft);
+    font-size: var(--fs-body);
+}
+
+.expected strong {
+    font-size: var(--fs-heading);
+    font-variant-numeric: tabular-nums;
+}
+
+.gap {
+    padding: 12px;
+    border-radius: 8px;
+    font-size: var(--fs-body);
+}
+
+.gap.ok {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.gap.warn {
+    background: var(--warning-soft);
+    color: var(--warning);
+    font-weight: var(--fw-semibold);
+}
+
+/* résultat du comptage */
+.done {
+    display: grid;
+    gap: 16px;
+    padding: 24px;
+    justify-items: center;
+    text-align: center;
+}
+
+.result-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+}
+
+.result-icon.ok {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.result-icon.warn {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.verdict {
+    margin: 0;
+}
+
+.figures {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+    margin: 0;
+}
+
+.figures div {
+    display: grid;
+    gap: 4px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--neutral-soft);
+}
+
+.figures dt {
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+}
+
+.figures dd {
+    margin: 0;
+    font-size: var(--fs-heading);
+    font-variant-numeric: tabular-nums;
+}
+
+.done .actions {
+    width: 100%;
+    justify-content: stretch;
+}
+
+.done .actions .btn {
+    flex: none;
+    width: 100%;
+}

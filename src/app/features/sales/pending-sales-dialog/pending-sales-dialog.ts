@@ -40,8 +40,6 @@ export class PendingSalesDialog {
         switch (sale.status) {
             case "sending":
                 return "Envoi…";
-            case "cash":
-                return "Caisse fermée";
             case "error":
                 return "À vérifier";
             default:

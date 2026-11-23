@@ -81,6 +81,17 @@ describe("audit sentence", () => {
         ).toEqual({ verb: "a rouvert la caisse", note: "Oubli" });
     });
 
+    it("should describe a counting and a corrected counting with their gap", () => {
+        const after = { difference: -500 };
+
+        expect(
+            getAuditSentence(log({ action: "CASH_SESSION_CLOSED", details: { after } })),
+        ).toEqual({ verb: "a compté la caisse", note: expect.stringContaining("écart de") });
+        expect(
+            getAuditSentence(log({ action: "CASH_SESSION_RECOUNTED", details: { after } })).verb,
+        ).toBe("a rectifié le comptage");
+    });
+
     it("should count the products of an applied inventory", () => {
         const sentence = getAuditSentence(
             log({ action: "INVENTORY_APPLIED", details: { adjustments: [{}, {}] } }),

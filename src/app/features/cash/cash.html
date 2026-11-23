@@ -1,8 +1,10 @@
 <app-page-header title="Caisse">
-    <a routerLink="/cash/sessions" class="btn btn-outline history">
-        <app-icon name="clock" [size]="18" />
-        <span>Historique</span>
-    </a>
+    @if (auth.isAdmin()) {
+        <a routerLink="/cash/sessions" class="btn btn-outline history">
+            <app-icon name="clock" [size]="18" />
+            <span>Historique</span>
+        </a>
+    }
 </app-page-header>
 
 @if (today.isLoading() && !today.hasValue()) {
@@ -26,70 +28,27 @@
         </button>
     </section>
 } @else {
-    <!-- sa propre caisse se règle dans la carte plus bas tant que celle du jour n'est pas ouverte -->
-    @if (previous(); as previous) {
-        @if (!ownPrevious()) {
-            <div class="alert alert-warning banner" role="alert">
-                <app-icon name="alert" />
-                <span>
-                    @if (isOwn(previous.openedBy)) {
-                        Votre caisse du
-                    } @else {
-                        La caisse de {{ previous.openedByName ?? "un collègue" }} du
-                    }
-                    <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas été
-                    clôturée.
-                </span>
-                <button
-                    type="button"
-                    class="link-btn"
-                    (click)="
-                        closeDialog.open(
-                            previous.sessionDate,
-                            previous.balance,
-                            isOwn(previous.openedBy) ? undefined : previous.id
-                        )
-                    "
-                >
-                    La clôturer
-                </button>
-            </div>
-        }
-    }
-
-    @if (pending(); as pending) {
-        @if (!ownPending()) {
-            <div class="alert alert-warning banner" role="alert">
-                <app-icon name="alert" />
-                <span>
-                    L'écart de la caisse du
-                    <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong>
-                    ({{ pending.difference | fcfa: true }}) n'est pas expliqué.
-                    @if (!canExplain()) {
-                        La personne qui a clôturé doit l'expliquer.
-                    }
-                </span>
-                @if (canExplain()) {
-                    <button
-                        type="button"
-                        class="link-btn"
-                        (click)="closeDialog.openExplain(pending.id, pending.difference)"
-                    >
-                        Expliquer l'écart
-                    </button>
-                }
-            </div>
-        }
+    <!-- rappel doux : une caisse d'un jour passé n'a pas été comptée -->
+    @if (uncounted(); as old) {
+        <app-uncounted-cash-notice
+            class="reminder"
+            [session]="old"
+            (count)="
+                countDialog.open({
+                    expected: old.balance,
+                    sessionId: old.id,
+                    sessionDate: old.sessionDate,
+                })
+            "
+        />
     }
 
     <div class="layout">
         <div class="main">
-            <!-- la couleur suit l'état : vert ouverte, gris clôturée, bleu à ouvrir -->
+            <!-- la couleur suit l'état : vert en cours, gris comptée, bleu pas encore ouverte -->
             <section
                 class="card status tinted"
-                [attr.data-tone]="
-                    isOpen() ? 'success' : cash() ? 'neutral' : blocker() ? 'warning' : 'primary'
-                "
+                [attr.data-tone]="isOpen() ? 'success' : cash() ? 'neutral' : 'primary'"
                 aria-live="polite"
             >
                 @if (cash(); as cash) {
@@ -99,18 +58,17 @@
                             <strong>Caisse du jour</strong>
                             <small class="muted">
                                 @if (cash.closedAt) {
-                                    De {{ cash.openedAt | date: "HH:mm" }} à
-                                    {{ cash.closedAt | date: "HH:mm" }}
+                                    Comptée à {{ cash.closedAt | date: "HH:mm" }}
                                 } @else {
                                     Depuis {{ cash.openedAt | date: "HH:mm" }}
                                 }
-                                @if (cash.balance !== null) {
+                                @if (cash.openingAmount !== null) {
                                     · fonds {{ cash.openingAmount | fcfa }}
                                 }
                             </small>
                         </div>
                         <span class="badge" [class]="isOpen() ? 'badge-success' : 'badge-neutral'">
-                            {{ isOpen() ? "Ouverte" : "Clôturée" }}
+                            {{ isOpen() ? "En cours" : "Comptée" }}
                         </span>
                     </div>
 
@@ -118,14 +76,14 @@
                         <div class="balance">
                             <small>Solde masqué</small>
                             <p class="muted note">
-                                Clôture à l'aveugle : comptez le tiroir à la fin de la journée,
-                                l'écart vous sera montré après la clôture.
+                                Comptage à l'aveugle : comptez le tiroir à la fin de la journée,
+                                l'écart vous sera montré tout de suite.
                             </p>
                         </div>
                     } @else {
                         <div class="balance">
                             <small>{{
-                                isOpen() ? "Solde dans le tiroir" : "Solde à la clôture"
+                                isOpen() ? "Solde dans le tiroir" : "Solde au comptage"
                             }}</small>
                             <strong appMoney>{{ cash.balance | fcfa }}</strong>
                         </div>
@@ -157,7 +115,7 @@
                                     </dd>
                                 </div>
                             }
-                            @if (session.value().status === "CLOSED") {
+                            @if (isCounted()) {
                                 <div>
                                     <dt>Montant compté</dt>
                                     <dd appMoney>{{ session.value().actual_amount | fcfa }}</dd>
@@ -177,253 +135,152 @@
                                 </div>
                             }
                         </dl>
-                        @if (session.value().status === "CLOSED") {
-                            @if (session.value().closing_note; as note) {
-                                <p class="note closing-note">Explication : {{ note }}</p>
-                            } @else if (session.value().explanation_pending) {
-                                <span class="badge badge-warning closing-note"
-                                    >Écart à expliquer</span
-                                >
-                            }
+                        @if (isCounted() && session.value().closed_by_name; as name) {
+                            <p class="note counted-by">Compté par {{ name }}</p>
+                        }
+                        @if (isCounted() && session.value().closing_note; as note) {
+                            <p class="note closing-note">Raison : {{ note }}</p>
                         }
                     }
 
-                    @if (isOpen()) {
-                        <div class="actions">
+                    <div class="actions">
+                        @if (isOpen()) {
                             <!-- le soir, le bouton se met en avant au lieu d'ajouter un message -->
                             <button
                                 type="button"
                                 class="btn"
-                                [class.btn-primary]="closingTime()"
-                                [class.btn-outline]="!closingTime()"
-                                [class.late]="closingTime()"
-                                [disabled]="!closeDate()"
-                                (click)="closeDialog.open(closeDate()!, cash.balance)"
+                                [class.btn-primary]="countingTime()"
+                                [class.btn-outline]="!countingTime()"
+                                [class.late]="countingTime()"
+                                (click)="countDialog.open({ expected: cash.balance })"
                             >
-                                Clôturer la caisse
+                                Compter la caisse
                             </button>
-                        </div>
-                        @if (session.error()) {
-                            <p class="muted note">
-                                Clôture indisponible : le détail de la journée n'a pas pu être
-                                chargé.
-                            </p>
+                        } @else {
+                            <a
+                                [routerLink]="['/cash/sessions', cash.id]"
+                                [state]="backState"
+                                class="btn btn-outline"
+                            >
+                                Voir le détail de la journée
+                            </a>
+                            <!-- seul l'admin rectifie un comptage ; une nouvelle vente rouvre la caisse -->
+                            @if (auth.isAdmin()) {
+                                <button
+                                    type="button"
+                                    class="btn btn-outline"
+                                    (click)="
+                                        countDialog.open({
+                                            expected: session.hasValue()
+                                                ? session.value().theoretical_amount
+                                                : cash.balance,
+                                            sessionId: cash.id,
+                                        })
+                                    "
+                                >
+                                    Rectifier le comptage
+                                </button>
+                            }
                         }
-                    } @else {
-                        <p class="muted note">
-                            Journée terminée. La prochaine caisse s'ouvre demain.
-                        </p>
-                        <a
-                            [routerLink]="['/cash/sessions', cash.id]"
-                            [state]="backState"
-                            class="btn btn-outline"
-                        >
-                            Voir le détail de la journée
-                        </a>
+                    </div>
+                    @if (isOpen() && session.error()) {
+                        <p class="muted note">Le détail de la journée n'a pas pu être chargé.</p>
                     }
                 } @else {
                     <div class="status-head">
                         <span class="tone-icon"><app-icon name="banknote" [size]="18" /></span>
                         <div class="status-title">
-                            <strong>Caisse non ouverte</strong>
-                            <small class="muted">{{
-                                blocker() ?? "Comptez le tiroir, puis ouvrez la caisse."
-                            }}</small>
+                            <strong>Caisse du jour</strong>
+                            <small class="muted">
+                                @if (expectedOpening() !== null) {
+                                    La caisse s'ouvrira avec {{ expectedOpening() | fcfa }}
+                                } @else {
+                                    Elle s'ouvrira à la première vente
+                                }
+                            </small>
                         </div>
                     </div>
-                    <!-- un seul bouton : l'action qui débloque, sinon l'ouverture -->
                     <div class="actions">
-                        @if (ownPrevious(); as previous) {
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                (click)="closeDialog.open(previous.sessionDate, previous.balance)"
-                            >
-                                Clôturer la caisse du {{ shortDate(previous.sessionDate) }}
-                            </button>
-                        } @else if (ownPending(); as pending) {
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                (click)="closeDialog.openExplain(pending.id, pending.difference)"
-                            >
-                                Expliquer l'écart
-                            </button>
-                        } @else {
-                            <button
-                                type="button"
-                                class="btn btn-primary"
-                                (click)="openDialog.open()"
-                            >
-                                Ouvrir la caisse
-                            </button>
-                        }
-                    </div>
-                    @if (lastClosed.value(); as last) {
-                        <a
-                            [routerLink]="['/cash/sessions', last.id]"
-                            [state]="backState"
-                            class="last-closed"
-                        >
-                            <span class="last-text">
-                                <small class="muted">Dernière clôture</small>
-                                <strong>{{ last.session_date | date: "EEEE d MMMM" }}</strong>
-                            </span>
-                            <span class="last-end">
-                                <strong appMoney>{{ last.actual_amount | fcfa }}</strong>
-                                <small
-                                    [class.in]="last.difference! > 0"
-                                    [class.out]="last.difference! < 0"
-                                >
-                                    {{
-                                        last.difference === 0
-                                            ? "Aucun écart"
-                                            : "Écart " + (last.difference | fcfa: true)
-                                    }}
-                                </small>
-                            </span>
-                        </a>
-                    }
-                }
-            </section>
-
-            <!-- l'employé peut seulement ajouter de l'argent -->
-            @if (isOpen()) {
-                <!-- carreaux colorés : vert l'argent qui entre, rouge et violet celui qui sort -->
-                <section
-                    class="quick"
-                    [class.single]="!auth.isAdmin()"
-                    aria-label="Mouvements de caisse"
-                >
-                    <button
-                        type="button"
-                        class="quick-tile"
-                        data-tone="success"
-                        (click)="movementDialog.open('DEPOSIT')"
-                    >
-                        <span class="quick-icon"><app-icon name="arrow-down" [size]="18" /></span>
-                        <span class="quick-text">
-                            <strong>Ajout</strong>
-                            <small>Monnaie, apport</small>
-                        </span>
-                    </button>
-                    @if (auth.isAdmin()) {
-                        <a
-                            routerLink="/expenses/new"
-                            [state]="backState"
-                            class="quick-tile"
-                            data-tone="danger"
-                        >
-                            <span class="quick-icon"><app-icon name="receipt" [size]="18" /></span>
-                            <span class="quick-text">
-                                <strong>Dépense</strong>
-                                <small>Payer un achat</small>
-                            </span>
+                        <a routerLink="/sales/new" class="btn btn-primary">
+                            <app-icon name="plus" [size]="18" />
+                            Nouvelle vente
                         </a>
                         <button
                             type="button"
-                            class="quick-tile"
-                            data-tone="violet"
-                            (click)="movementDialog.open('WITHDRAWAL')"
+                            class="btn btn-outline"
+                            (click)="countDialog.open({ expected: expectedOpening() })"
                         >
-                            <span class="quick-icon"
-                                ><app-icon name="arrow-up-right" [size]="18"
-                            /></span>
-                            <span class="quick-text">
-                                <strong>Retrait</strong>
-                                <small>Banque, coffre</small>
-                            </span>
+                            Compter la caisse
                         </button>
-                    }
-                </section>
-            }
+                    </div>
+                }
+            </section>
 
-            <!-- suivi de l'équipe : une ligne qui s'ouvre, pour ne pas passer avant les actions -->
-            @if (auth.isAdmin() && team().length > 0) {
-                <section class="card team" aria-label="Caisses de l'équipe">
+            <!-- un mouvement ouvre ou rouvre la caisse du jour tout seul -->
+            <!-- carreaux colorés : vert l'argent qui entre, rouge et violet celui qui sort -->
+            <section class="quick" aria-label="Mouvements de caisse">
+                <button
+                    type="button"
+                    class="quick-tile"
+                    data-tone="success"
+                    (click)="movementDialog.open('DEPOSIT')"
+                >
+                    <span class="quick-icon"><app-icon name="arrow-down" [size]="18" /></span>
+                    <span class="quick-text">
+                        <strong>Ajout</strong>
+                        <small>Monnaie, apport</small>
+                    </span>
+                </button>
+
+                <!-- l'admin garde la page complète (reçu en photo), le gérant passe par la fenêtre -->
+                @if (auth.isAdmin()) {
+                    <a
+                        routerLink="/expenses/new"
+                        [state]="backState"
+                        class="quick-tile"
+                        data-tone="danger"
+                    >
+                        <span class="quick-icon"><app-icon name="receipt" [size]="18" /></span>
+                        <span class="quick-text">
+                            <strong>Dépense</strong>
+                            <small>Payer un achat</small>
+                        </span>
+                    </a>
+                } @else {
                     <button
                         type="button"
-                        class="team-toggle"
-                        [attr.aria-expanded]="teamOpen()"
-                        aria-controls="team-list"
-                        (click)="teamOpen.set(!teamOpen())"
+                        class="quick-tile"
+                        data-tone="danger"
+                        (click)="movementDialog.open('EXPENSE')"
                     >
-                        <span class="team-summary">
-                            <strong>Suivi des caisses</strong>
-                            <small class="muted">{{ teamSummary() }}</small>
+                        <span class="quick-icon"><app-icon name="receipt" [size]="18" /></span>
+                        <span class="quick-text">
+                            <strong>Dépense</strong>
+                            <small>Payer un achat</small>
                         </span>
-                        @if (teamToExplain() > 0) {
-                            <span class="badge badge-warning">À expliquer</span>
-                        }
-                        <app-icon
-                            [name]="teamOpen() ? 'chevron-down' : 'chevron-right'"
-                            [size]="18"
-                        />
                     </button>
-                    @if (teamOpen()) {
-                        <ul class="team-list" id="team-list">
-                            @for (member of team(); track member.id) {
-                                <li>
-                                    <a
-                                        [routerLink]="['/cash/sessions', member.id]"
-                                        [state]="backState"
-                                        class="team-row"
-                                    >
-                                        <app-avatar class="team-avatar" aria-hidden="true" />
-                                        <span class="team-name">
-                                            <strong>{{ member.openedByName ?? "—" }}</strong>
-                                            <small class="muted"
-                                                >Ventes {{ member.salesTotal | fcfa }}</small
-                                            >
-                                        </span>
-                                        <span class="team-state">
-                                            @if (member.status === "OPEN") {
-                                                <span class="badge badge-success">Ouverte</span>
-                                            } @else {
-                                                <span class="badge badge-neutral">Clôturée</span>
-                                                @if (member.explanationPending) {
-                                                    <span class="badge badge-warning"
-                                                        >Écart à expliquer</span
-                                                    >
-                                                } @else if (member.difference !== null) {
-                                                    <strong
-                                                        class="gap"
-                                                        [class.in]="member.difference > 0"
-                                                        [class.out]="member.difference < 0"
-                                                    >
-                                                        @if (member.difference === 0) {
-                                                            Aucun écart
-                                                        } @else {
-                                                            Écart
-                                                            {{ member.difference | fcfa: true }}
-                                                        }
-                                                    </strong>
-                                                }
-                                            }
-                                        </span>
-                                    </a>
-                                </li>
-                            }
-                        </ul>
-                    }
-                </section>
-            }
+                }
+
+                <button
+                    type="button"
+                    class="quick-tile"
+                    data-tone="violet"
+                    (click)="movementDialog.open('WITHDRAWAL')"
+                >
+                    <span class="quick-icon"><app-icon name="arrow-up-right" [size]="18" /></span>
+                    <span class="quick-text">
+                        <strong>Retrait</strong>
+                        <small>Banque, coffre</small>
+                    </span>
+                </button>
+            </section>
         </div>
 
         <aside class="side">
             @if (cash()) {
                 <section class="card panel movements">
                     <div class="card-header">
-                        <!-- à l'aveugle, le serveur ne renvoie à l'employé que ses propres mouvements -->
-                        <h2>
-                            {{
-                                cash()!.balance === null
-                                    ? "Mes mouvements du jour"
-                                    : team().length > 0
-                                      ? "Tous les mouvements du jour"
-                                      : "Mouvements du jour"
-                            }}
-                        </h2>
+                        <h2>Mouvements du jour</h2>
                     </div>
                     @if (session.error() && !session.hasValue()) {
                         <div class="inline-error">
@@ -452,6 +309,5 @@
     </div>
 }
 
-<app-open-cash-dialog #openDialog (opened)="reload()" />
-<app-close-cash-dialog #closeDialog (closed)="reload()" />
+<app-count-cash-dialog #countDialog (counted)="reload()" />
 <app-cash-movement-dialog #movementDialog (saved)="reload()" />

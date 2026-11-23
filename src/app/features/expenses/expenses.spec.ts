@@ -258,16 +258,13 @@ describe("NewExpense", () => {
         expect(create).toHaveBeenCalledWith("EXPENSE", 1000, "FOOD", "", null);
     });
 
-    it("should say the cash is closed before the form, with a button to open it", async () => {
+    it("should show the form even when no cash register exists yet", async () => {
         await render(null);
         const el: HTMLElement = fixture.nativeElement;
 
-        expect(el.textContent).toContain("Caisse pas encore ouverte");
-        expect(el.textContent).toContain("Ouvrez-la pour payer une dépense");
-        expect(el.querySelector("form.layout")).toBeNull();
-        expect(el.querySelector("app-cash-closed-notice .btn")?.textContent).toContain(
-            "Ouvrir la caisse",
-        );
+        // la caisse s'ouvre toute seule à l'enregistrement : rien ne bloque
+        expect(el.textContent).not.toContain("Caisse pas encore ouverte");
+        expect(el.querySelector("form.layout")).not.toBeNull();
     });
 
     it("should not save before a reason is chosen", async () => {

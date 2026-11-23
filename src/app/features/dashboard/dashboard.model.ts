@@ -1,30 +1,10 @@
-export interface CashSummary {
-    id: number;
-    status: "OPEN" | "CLOSED";
-    // null pour l'employé quand la clôture est à l'aveugle
-    openingAmount: number | null;
-    balance: number | null;
-    openedAt: string;
-    openedByName: string | null;
-    closedAt: string | null;
-}
+import { CashSummary, UncountedSession } from "../../core/cash/cash.model";
 
 export interface DashboardSummary {
     cash: CashSummary | null;
-    previousOpenSession: {
-        id: number;
-        sessionDate: string;
-        openedAt: string;
-        openedBy: number;
-        balance: number | null;
-    } | null;
-    // écart découvert après une clôture à l'aveugle, pas encore expliqué
-    pendingExplanation: {
-        id: number;
-        sessionDate: string;
-        difference: number;
-        closedBy: number;
-    } | null;
+    uncountedSession: UncountedSession | null;
+    // fond de la caisse du jour tant qu'elle n'existe pas ; null pour le gérant à l'aveugle
+    expectedOpening: number | null;
     blindClose: boolean;
     // null pour le manager
     stockValue: number | null;

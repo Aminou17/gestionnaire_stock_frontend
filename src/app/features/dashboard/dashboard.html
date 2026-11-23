@@ -9,7 +9,7 @@
     >
         <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="20" />
     </button>
-    @if (auth.isAdmin()) {
+    @if (showShop()) {
         <!-- sur téléphone, "Vendre" est déjà dans la barre du bas -->
         <a routerLink="/sales/new" class="btn btn-primary header-sale">
             <app-icon name="plus" [size]="18" />
@@ -25,7 +25,29 @@
     </div>
 }
 
-@if (auth.isAdmin()) {
+@if (firstSteps(); as start) {
+    <section class="start" aria-labelledby="start-title">
+        <div class="start-head">
+            <h2 id="start-title">Pour bien démarrer</h2>
+            <span class="start-count">{{ start.doneCount }} sur {{ start.steps.length }}</span>
+        </div>
+        <ol>
+            @for (step of start.steps; track step.label) {
+                <li [class.done]="step.done">
+                    <span class="step-icon"
+                        ><app-icon [name]="step.done ? 'check' : step.icon" [size]="16"
+                    /></span>
+                    <span class="step-label">{{ step.label }}</span>
+                    @if (!step.done) {
+                        <a class="btn btn-outline btn-sm" [routerLink]="step.link">Commencer</a>
+                    }
+                </li>
+            }
+        </ol>
+    </section>
+}
+
+@if (showShop()) {
     @if (summary.error() || dailySales.error()) {
         <div class="alert alert-error banner" role="alert">
             <app-icon name="alert" />
@@ -34,54 +56,18 @@
         </div>
     }
 
-    <!-- caisse pas prête : le même message et le même geste que partout, sans passer par la page Caisse -->
-    @if (summary.hasValue() && !cashOpen() && !firstSteps()) {
-        <app-cash-closed-notice
-            [compact]="true"
-            [state]="cashGate()"
-            [previous]="previousOwn()"
-            [canReopen]="true"
-            purpose="vendre"
-            (openCash)="openCashDialog.open()"
-            (reopen)="reopenDialog.open(cash()!.id)"
-            (closePrevious)="
-                closeCashDialog.open(previousOwn()!.sessionDate, previousOwn()!.balance)
+    <!-- rappel doux : une caisse d'un jour passé n'a pas été comptée -->
+    @if (uncounted(); as old) {
+        <app-uncounted-cash-notice
+            [session]="old"
+            (count)="
+                countDialog.open({
+                    expected: old.balance,
+                    sessionId: old.id,
+                    sessionDate: old.sessionDate,
+                })
             "
         />
-    }
-
-    @if (firstSteps(); as start) {
-        <section class="start" aria-labelledby="start-title">
-            <div class="start-head">
-                <h2 id="start-title">Pour bien démarrer</h2>
-                <span class="start-count">{{ start.doneCount }} sur {{ start.steps.length }}</span>
-            </div>
-            <ol>
-                @for (step of start.steps; track step.label) {
-                    <li [class.done]="step.done">
-                        <span class="step-icon"
-                            ><app-icon [name]="step.done ? 'check' : step.icon" [size]="16"
-                        /></span>
-                        <span class="step-label">{{ step.label }}</span>
-                        @if (!step.done) {
-                            @if (step.link) {
-                                <a class="btn btn-outline btn-sm" [routerLink]="step.link"
-                                    >Commencer</a
-                                >
-                            } @else {
-                                <button
-                                    type="button"
-                                    class="btn btn-outline btn-sm"
-                                    (click)="openCashDialog.open()"
-                                >
-                                    Ouvrir
-                                </button>
-                            }
-                        }
-                    </li>
-                }
-            </ol>
-        </section>
     }
 
     <section class="stats">
@@ -110,14 +96,13 @@
             icon="banknote"
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
-            [value]="cash() ? (cash()!.balance | fcfa) : 'Caisse fermée'"
-            [valueTone]="cash() ? undefined : 'muted'"
+            [value]="cash()?.balance ?? 0 | fcfa"
             [hint]="cashHint()"
         />
 
         <app-stat-card
             [tone]="dueTotal() > 0 ? 'warning' : 'success'"
-            label="À encaisser"
+            label="Dettes clients"
             [money]="true"
             link="/sales"
             [linkParams]="{ filter: 'unpaid' }"
@@ -138,7 +123,6 @@
             [loading]="summary.isLoading()"
             [error]="!!summary.error() || profitMissing()"
             [value]="summaryData()?.todayProfit ?? 0 | fcfa"
-            [hint]="profitHint()"
         />
 
         <!-- la valeur du stock repose sur le prix d'achat : réservée à l'admin -->
@@ -151,7 +135,6 @@
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
             [value]="secret.revealed() ? (summaryData()?.stockValue | fcfa) : '••••••••'"
-            [hint]="(summaryData()?.activeProducts ?? 0) + ' produits'"
         >
             <app-reveal-toggle />
         </app-stat-card>
@@ -191,9 +174,7 @@
         />
     </section>
 
-    <app-open-cash-dialog #openCashDialog (opened)="onCashOpened()" />
-    <app-reopen-cash-dialog #reopenDialog (reopened)="onCashOpened()" />
-    <app-close-cash-dialog #closeCashDialog (closed)="onCashOpened()" />
+    <app-count-cash-dialog #countDialog (counted)="onCashCounted()" />
 } @else {
     <!-- même ordre sur téléphone et sur ordinateur : la grille ne fait que placer les blocs -->
     <div class="manager">
@@ -202,38 +183,22 @@
             [cash]="cash()"
             [loading]="summary.isLoading()"
             [error]="!!summary.error()"
-            [previousOpen]="!!previousOwn() && !cashOpen()"
+            [expectedOpening]="expectedOpening()"
             (retry)="summary.reload()"
-            (openCash)="openCashDialog.open()"
         />
 
-        @if (summaryData()?.previousOpenSession; as previous) {
-            @if (cashOpen() || !previousOwn()) {
-                <div class="alert alert-warning banner m-previous" role="alert">
-                    <app-icon name="alert" />
-                    <span>
-                        La caisse du
-                        <strong>{{ previous.sessionDate | date: "d MMMM" }}</strong> n'a pas été
-                        clôturée.
-                    </span>
-                    <a routerLink="/cash">Clôturer</a>
-                </div>
-            }
-        }
-
-        <!-- seule la personne qui a compté peut expliquer l'écart -->
-        @if (summaryData()?.pendingExplanation; as pending) {
-            @if (pending.closedBy === auth.user()?.id) {
-                <div class="alert alert-warning banner m-previous" role="alert">
-                    <app-icon name="alert" />
-                    <span>
-                        Expliquez l'écart de la caisse du
-                        <strong>{{ pending.sessionDate | date: "d MMMM" }}</strong
-                        >.
-                    </span>
-                    <a routerLink="/cash">Expliquer</a>
-                </div>
-            }
+        @if (uncounted(); as old) {
+            <app-uncounted-cash-notice
+                class="m-previous"
+                [session]="old"
+                (count)="
+                    countDialog.open({
+                        expected: old.balance,
+                        sessionId: old.id,
+                        sessionDate: old.sessionDate,
+                    })
+                "
+            />
         }
 
         <!-- aucune vente sur 7 jours : un seul message court au lieu d'un 0 F et d'un graphique vide -->
@@ -291,11 +256,11 @@
             <div class="m-close">
                 <a routerLink="/cash" class="btn btn-outline close-cash">
                     <app-icon name="wallet" [size]="18" />
-                    Clôturer la caisse
+                    Compter la caisse
                 </a>
             </div>
         }
     </div>
 
-    <app-open-cash-dialog #openCashDialog (opened)="onCashOpened()" />
+    <app-count-cash-dialog #countDialog (counted)="onCashCounted()" />
 }

@@ -24,7 +24,6 @@ const closed: CashSessionDetail = {
     opened_by_name: "Yabre M.",
     closed_by_name: "Awa K.",
     closing_note: null,
-    explanation_pending: false,
     closed_by: null,
     movements: [
         {
@@ -86,11 +85,11 @@ describe("CashSessionPage", () => {
         await render(() => of(closed));
 
         expect(text()).toMatch(/10(novembre|November)2026/);
-        expect(text()).toContain("Clôturée");
+        expect(text()).toContain("Comptée");
         expect(text()).toContain("−500F");
         expect(text()).toContain("Montantattendu12000F");
         expect(text()).toContain("Montantcompté11500F");
-        expect(text()).toContain("ClôtureHeure19:00ParAwaK.");
+        expect(text()).toContain("ComptageHeure19:00ParAwaK.");
         expect(text()).toContain("Vente#108");
     });
 
@@ -122,15 +121,39 @@ describe("CashSessionPage", () => {
                 closed_at: null,
                 closed_by_name: null,
                 closing_note: null,
-                explanation_pending: false,
                 closed_by: null,
             }),
         );
 
-        expect(text()).toContain("Ouverte");
         expect(text()).toContain("Encours");
         expect(text()).not.toContain("Montantattendu");
-        expect(text()).not.toContain("ClôtureHeure");
+        expect(text()).not.toContain("ComptageHeure");
+    });
+
+    it("should offer to count a session that was never counted", async () => {
+        await render(() =>
+            of({
+                ...closed,
+                status: "UNCOUNTED",
+                opened_by: 2,
+                actual_amount: null,
+                difference: null,
+                closed_at: null,
+                closed_by_name: null,
+            }),
+        );
+
+        expect(text()).toContain("Noncomptée");
+        expect(text()).toContain("Montantattendu12000F");
+        expect(text()).not.toContain("Montantcompté");
+        expect(text()).toContain("Compterlacaisse");
+        expect(el.querySelector(".ticket")).toBeNull();
+    });
+
+    it("should let the owner correct a counting", async () => {
+        await render(() => of(closed));
+
+        expect(text()).toContain("Rectifierlecomptage");
     });
 
     it("should send you back to the cash page for your own open session", async () => {

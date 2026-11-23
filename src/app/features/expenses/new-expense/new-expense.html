@@ -1,176 +1,153 @@
 <app-page-header title="Nouvelle dépense" [back]="back.link" [backLabel]="back.label" />
 
-<!-- caisse pas prête : le message vient avant le formulaire, avec le geste pour la régler -->
-@if (today.hasValue() && !cashOpen()) {
-    <app-cash-closed-notice
-        [state]="gateState()"
-        [previous]="ownPrevious()"
-        [canReopen]="true"
-        purpose="payer une dépense"
-        (openCash)="openDialog.open()"
-        (closePrevious)="closeDialog.open(ownPrevious()!.sessionDate, ownPrevious()!.balance)"
-        (reopen)="reopenDialog.open(cash()!.id)"
-    />
-} @else {
-    <form class="layout" (submit)="$event.preventDefault(); submit()" novalidate>
-        <div class="main">
-            <!-- 1. Montant, en grand -->
-            <section class="card block">
-                <label class="block-title" for="expense-amount">Montant</label>
-                <div class="amount" [class.invalid]="tried() && !amountValid()">
-                    <input
-                        id="expense-amount"
-                        class="amount-input"
-                        type="text"
-                        inputmode="numeric"
-                        autocomplete="off"
-                        placeholder="0"
-                        [value]="amount() ?? ''"
-                        (input)="onAmount($any($event.target).value)"
-                    />
-                    <span class="amount-unit">F</span>
-                </div>
-                <div class="quick" role="group" aria-label="Ajouter au montant">
-                    @for (value of quickAmounts; track value) {
-                        <button type="button" class="chip" (click)="addAmount(value)">
-                            +{{ value | fcfa }}
-                        </button>
-                    }
-                </div>
-                @if (tried() && !amountValid()) {
-                    <small class="field-error">Entrez un montant d'au moins 1 F.</small>
-                }
-            </section>
-
-            <!-- 2. Motif, en carreaux colorés -->
-            <section class="card block">
-                <span class="block-title" id="expense-category">Motif</span>
-                <div class="tiles" role="radiogroup" aria-labelledby="expense-category">
-                    @for (item of categories; track item.value) {
-                        <button
-                            type="button"
-                            class="tile"
-                            role="radio"
-                            [style.--cat]="item.color"
-                            [attr.aria-checked]="category() === item.value"
-                            (click)="category.set(item.value)"
-                        >
-                            <span class="tile-icon"
-                                ><app-icon [name]="item.icon" [size]="20"
-                            /></span>
-                            <span class="tile-label">{{ item.short }}</span>
-                            @if (category() === item.value) {
-                                <span class="tile-check" aria-hidden="true">
-                                    <app-icon name="check" [size]="14" />
-                                </span>
-                            }
-                        </button>
-                    }
-                </div>
-                @if (!category()) {
-                    <small class="muted">Choisissez un motif pour enregistrer.</small>
-                }
-            </section>
-
-            <!-- 3. Précision -->
-            <section class="card block">
-                <label class="block-title" for="expense-reason">Description (facultatif)</label>
+<form class="layout" (submit)="$event.preventDefault(); submit()" novalidate>
+    <div class="main">
+        <!-- 1. Montant, en grand -->
+        <section class="card block">
+            <label class="block-title" for="expense-amount">Montant</label>
+            <div class="amount" [class.invalid]="tried() && !amountValid()">
                 <input
-                    id="expense-reason"
-                    class="input"
+                    id="expense-amount"
+                    class="amount-input"
                     type="text"
-                    maxlength="200"
-                    [placeholder]="placeholder()"
-                    [value]="reason()"
-                    (input)="reason.set($any($event.target).value)"
+                    inputmode="numeric"
+                    autocomplete="off"
+                    placeholder="0"
+                    [value]="amount() ?? ''"
+                    (input)="onAmount($any($event.target).value)"
                 />
-
-                <!-- photo du reçu : la justification de la dépense, facultative -->
-                <div class="receipt">
-                    @if (receipt(); as photo) {
-                        <img class="receipt-thumb" [src]="photo" alt="Reçu joint" />
-                        <button
-                            type="button"
-                            class="btn btn-outline btn-sm"
-                            (click)="receipt.set(null)"
-                        >
-                            Retirer le reçu
-                        </button>
-                    } @else {
-                        <label class="btn btn-outline receipt-add">
-                            <app-icon name="camera" [size]="18" />
-                            Joindre le reçu (facultatif)
-                            <input
-                                type="file"
-                                accept="image/*"
-                                capture="environment"
-                                class="sr-only"
-                                (change)="onReceipt($event)"
-                            />
-                        </label>
-                    }
-                    @if (receiptError()) {
-                        <small class="field-error">{{ receiptError() }}</small>
-                    }
-                </div>
-            </section>
-        </div>
-
-        <!-- résumé et bouton : à droite sur ordinateur, en bas sur téléphone -->
-        <aside class="side">
-            <section class="card summary" [style.--cat]="chosen().color">
-                <div class="summary-head">
-                    <span class="summary-icon"
-                        ><app-icon [name]="chosen().icon" [size]="20"
-                    /></span>
-                    <div class="summary-title">
-                        <strong>{{ category() ? chosen().short : "Motif à choisir" }}</strong>
-                        <small class="muted">{{ reason().trim() || "Dépense" }}</small>
-                    </div>
-                </div>
-                <strong class="summary-amount"
-                    >{{ amount() ? "−" : "" }}{{ amount() ?? 0 | fcfa }}</strong
-                >
-
-                @if (cash()?.balance !== null && cash()?.balance !== undefined && cashOpen()) {
-                    <dl class="summary-lines">
-                        <div>
-                            <dt>Dans le tiroir</dt>
-                            <dd>{{ cash()!.balance | fcfa }}</dd>
-                        </div>
-                        <div>
-                            <dt>Après la dépense</dt>
-                            <dd [class.out]="(balanceAfter() ?? 0) < 0">
-                                {{ balanceAfter() ?? cash()!.balance | fcfa }}
-                            </dd>
-                        </div>
-                    </dl>
-                }
-
-                @if (error()) {
-                    <div class="alert alert-error" role="alert">{{ error() }}</div>
-                }
-
-                <div class="actions">
-                    <button
-                        type="submit"
-                        class="btn btn-primary btn-block"
-                        [disabled]="saving() || !category() || (today.hasValue() && !cashOpen())"
-                    >
-                        @if (saving()) {
-                            <span class="spinner"></span>
-                        }
-                        Enregistrer la dépense
+                <span class="amount-unit">F</span>
+            </div>
+            <div class="quick" role="group" aria-label="Ajouter au montant">
+                @for (value of quickAmounts; track value) {
+                    <button type="button" class="chip" (click)="addAmount(value)">
+                        +{{ value | fcfa }}
                     </button>
-                    <a [appBackLink]="back.link" class="btn btn-outline btn-block cancel"
-                        >Annuler</a
-                    >
-                </div>
-            </section>
-        </aside>
-    </form>
-}
+                }
+            </div>
+            @if (tried() && !amountValid()) {
+                <small class="field-error">Entrez un montant d'au moins 1 F.</small>
+            }
+        </section>
 
-<app-open-cash-dialog #openDialog (opened)="today.reload()" />
-<app-reopen-cash-dialog #reopenDialog (reopened)="today.reload()" />
-<app-close-cash-dialog #closeDialog (closed)="today.reload()" />
+        <!-- 2. Motif, en carreaux colorés -->
+        <section class="card block">
+            <span class="block-title" id="expense-category">Motif</span>
+            <div class="tiles" role="radiogroup" aria-labelledby="expense-category">
+                @for (item of categories; track item.value) {
+                    <button
+                        type="button"
+                        class="tile"
+                        role="radio"
+                        [style.--cat]="item.color"
+                        [attr.aria-checked]="category() === item.value"
+                        (click)="category.set(item.value)"
+                    >
+                        <span class="tile-icon"><app-icon [name]="item.icon" [size]="20" /></span>
+                        <span class="tile-label">{{ item.short }}</span>
+                        @if (category() === item.value) {
+                            <span class="tile-check" aria-hidden="true">
+                                <app-icon name="check" [size]="14" />
+                            </span>
+                        }
+                    </button>
+                }
+            </div>
+            @if (!category()) {
+                <small class="muted">Choisissez un motif pour enregistrer.</small>
+            }
+        </section>
+
+        <!-- 3. Précision -->
+        <section class="card block">
+            <label class="block-title" for="expense-reason">Description (facultatif)</label>
+            <input
+                id="expense-reason"
+                class="input"
+                type="text"
+                maxlength="200"
+                [placeholder]="placeholder()"
+                [value]="reason()"
+                (input)="reason.set($any($event.target).value)"
+            />
+
+            <!-- photo du reçu : la justification de la dépense, facultative -->
+            <div class="receipt">
+                @if (receipt(); as photo) {
+                    <img class="receipt-thumb" [src]="photo" alt="Reçu joint" />
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="receipt.set(null)"
+                    >
+                        Retirer le reçu
+                    </button>
+                } @else {
+                    <label class="btn btn-outline receipt-add">
+                        <app-icon name="camera" [size]="18" />
+                        Joindre le reçu (facultatif)
+                        <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            class="sr-only"
+                            (change)="onReceipt($event)"
+                        />
+                    </label>
+                }
+                @if (receiptError()) {
+                    <small class="field-error">{{ receiptError() }}</small>
+                }
+            </div>
+        </section>
+    </div>
+
+    <!-- résumé et bouton : à droite sur ordinateur, en bas sur téléphone -->
+    <aside class="side">
+        <section class="card summary" [style.--cat]="chosen().color">
+            <div class="summary-head">
+                <span class="summary-icon"><app-icon [name]="chosen().icon" [size]="20" /></span>
+                <div class="summary-title">
+                    <strong>{{ category() ? chosen().short : "Motif à choisir" }}</strong>
+                    <small class="muted">{{ reason().trim() || "Dépense" }}</small>
+                </div>
+            </div>
+            <strong class="summary-amount"
+                >{{ amount() ? "−" : "" }}{{ amount() ?? 0 | fcfa }}</strong
+            >
+
+            @if (cash()?.balance !== null && cash()?.balance !== undefined) {
+                <dl class="summary-lines">
+                    <div>
+                        <dt>Dans le tiroir</dt>
+                        <dd>{{ cash()!.balance | fcfa }}</dd>
+                    </div>
+                    <div>
+                        <dt>Après la dépense</dt>
+                        <dd [class.out]="(balanceAfter() ?? 0) < 0">
+                            {{ balanceAfter() ?? cash()!.balance | fcfa }}
+                        </dd>
+                    </div>
+                </dl>
+            }
+
+            @if (error()) {
+                <div class="alert alert-error" role="alert">{{ error() }}</div>
+            }
+
+            <div class="actions">
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-block"
+                    [disabled]="saving() || !category()"
+                >
+                    @if (saving()) {
+                        <span class="spinner"></span>
+                    }
+                    Enregistrer la dépense
+                </button>
+                <a [appBackLink]="back.link" class="btn btn-outline btn-block cancel">Annuler</a>
+            </div>
+        </section>
+    </aside>
+</form>

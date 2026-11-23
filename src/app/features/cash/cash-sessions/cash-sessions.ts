@@ -44,7 +44,8 @@ export class CashSessions {
     statusChips = [
         { label: "Toutes", value: null },
         { label: "Avec écart", value: "gap" },
-        { label: "Ouvertes", value: "open" },
+        { label: "Non comptées", value: "uncounted" },
+        { label: "En cours", value: "open" },
     ] as const;
 
     private filters = computed<CashSessionFilters>(() => ({
@@ -104,29 +105,23 @@ export class CashSessions {
     total = computed(() => this.last()?.pagination.total ?? 0);
     firstLoad = computed(() => this.sessions.isLoading() && !this.last());
 
-    // pastille d'état : écart de la clôture, ou caisse encore ouverte
+    // pastille d'état : écart du comptage, caisse en cours ou jamais comptée
     state(session: CashSession) {
-        if (session.status === "OPEN") return { tone: "primary", label: "À clôturer" };
-        if (session.explanation_pending) return { tone: "warning", label: "Écart à expliquer" };
+        if (session.status === "OPEN") return { tone: "primary", label: "En cours" };
+        if (session.status === "UNCOUNTED") return { tone: "warning", label: "Non comptée" };
 
         const gap = session.difference ?? 0;
-        if (gap === 0) return { tone: "success", label: "Équilibrée" };
+        if (gap === 0) return { tone: "success", label: "Comptée" };
 
         const label = `Écart de ${this.fcfa.transform(gap, true)}`;
         return { tone: gap < 0 ? "danger" : "warning", label };
     }
 
-    // horaires et personnes : "08:00 - 18:30 · Awa" (prénoms, "Awa, puis Hortense" si deux personnes)
+    // horaires : "08:00 - 18:30", ou "Ouverte à 08:00" tant qu'elle n'est pas comptée
     hours(session: CashSession) {
         const start = formatDate(session.opened_at, "HH:mm", this.locale);
         const end = session.closed_at ? formatDate(session.closed_at, "HH:mm", this.locale) : "";
-        const range = end ? `${start} - ${end}` : `Ouverte à ${start}`;
-
-        const opener = session.opened_by_name?.split(" ")[0];
-        const closer = session.closed_by_name?.split(" ")[0];
-        const people =
-            closer && opener && closer !== opener ? `${opener}, puis ${closer}` : (opener ?? "");
-        return people ? `${range} · ${people}` : range;
+        return end ? `${start} - ${end}` : `Ouverte à ${start}`;
     }
 
     openSession(session: CashSession) {

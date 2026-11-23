@@ -121,11 +121,9 @@ app-page-header {
 
 .session-sub {
     margin: 0;
-    overflow: hidden;
     color: var(--text-muted);
     font-size: var(--fs-small);
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
 }
 
 .session-end {

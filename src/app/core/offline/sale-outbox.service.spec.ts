@@ -88,20 +88,17 @@ describe("SaleOutboxService", () => {
         expect(service.pending()[0].status).toBe("waiting");
     });
 
-    it("marque une vente refusée à vérifier, et une caisse fermée à part", async () => {
+    it("marque une vente refusée à vérifier", async () => {
         await service.add([{ productId: 1, quantity: 1 }], { paymentMethod: "CASH" }, summary);
 
         const sync = service.sync();
         await new Promise((r) => setTimeout(r));
         httpMock
             .expectOne("/api/sales")
-            .flush(
-                { code: "CASH_CLOSED", message: "Ouvrez votre caisse." },
-                { status: 409, statusText: "Conflict" },
-            );
+            .flush({ message: "Produit désactivé." }, { status: 409, statusText: "Conflict" });
         await sync;
 
-        expect(service.pending()[0].status).toBe("cash");
+        expect(service.pending()[0].status).toBe("error");
         expect(service.needsAttention()).toBe(1);
     });
 

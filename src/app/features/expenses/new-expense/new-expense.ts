@@ -2,10 +2,6 @@ import { HttpErrorResponse } from "@angular/common/http";
 import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
-import { CashClosedNotice } from "../../cash/cash-closed-notice/cash-closed-notice";
-import { CloseCashDialog } from "../../cash/close-cash-dialog/close-cash-dialog";
-import { OpenCashDialog } from "../../cash/open-cash-dialog/open-cash-dialog";
-import { ReopenCashDialog } from "../../cash/reopen-cash-dialog/reopen-cash-dialog";
 import { AuthService } from "../../../core/auth/auth.service";
 import { resizeReceipt } from "../../../shared/receipt-resizer";
 import { getBackLink } from "../../../core/back-link";
@@ -31,16 +27,7 @@ const PLACEHOLDERS: Record<string, string> = {
 import { BackLink, injectGoBack } from "../../../shared/back-link/back-link";
 @Component({
     selector: "app-new-expense",
-    imports: [
-        BackLink,
-        PageHeader,
-        Icon,
-        FcfaPipe,
-        CashClosedNotice,
-        OpenCashDialog,
-        CloseCashDialog,
-        ReopenCashDialog,
-    ],
+    imports: [BackLink, PageHeader, Icon, FcfaPipe],
     templateUrl: "./new-expense.html",
     styleUrl: "./new-expense.css",
 })
@@ -67,18 +54,9 @@ export class NewExpense {
     // les messages de champ ne s'affichent qu'après un premier essai
     tried = signal(false);
 
-    // la dépense sort du tiroir de sa propre caisse du jour
+    // la dépense sort du tiroir de sa propre caisse du jour (elle s'ouvre toute seule)
     today = rxResource({ stream: () => this.cashService.getToday() });
     cash = computed(() => (this.today.hasValue() ? this.today.value().cash : null));
-    cashOpen = computed(() => this.cash()?.status === "OPEN");
-    // une caisse oubliée d'un jour passé empêche d'ouvrir celle d'aujourd'hui
-    ownPrevious = computed(() => {
-        const previous = this.today.hasValue() ? this.today.value().previousOpenSession : null;
-        return previous && previous.openedBy === this.auth.user()?.id ? previous : null;
-    });
-    gateState = computed(() =>
-        this.cash() ? "closedToday" : this.ownPrevious() ? "previous" : "notOpened",
-    );
 
     chosen = computed(() => expenseCategory(this.category()));
     placeholder = computed(() => PLACEHOLDERS[this.category() ?? ""] ?? "");

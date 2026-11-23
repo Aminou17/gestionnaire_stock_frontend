@@ -11,9 +11,7 @@
                     />
                 </span>
                 <div class="text">
-                    @if (
-                        movement.type === "SALE" || movement.reference_type === "SALE_CANCELLATION"
-                    ) {
+                    @if (hasSale(movement)) {
                         <a
                             [routerLink]="['/sales', movement.reference_id]"
                             [state]="backState()"
@@ -22,19 +20,18 @@
                             {{ label(movement) }}
                         </a>
                     } @else {
-                        <strong class="label">{{ label(movement) }}</strong>
+                        <button type="button" class="label" (click)="open(movement)">
+                            {{ label(movement) }}
+                        </button>
                     }
                     <small class="muted">
                         {{
                             movement.created_at | date: (showDate() ? "d MMMM 'à' HH:mm" : "HH:mm")
                         }}
-                        @if (showSeller() && movement.user_name) {
+                        @if (movement.user_name) {
                             · {{ movement.user_name }}
                         }
                     </small>
-                    @if (movement.reason) {
-                        <small class="reason">{{ movement.reason }}</small>
-                    }
                 </div>
                 <strong class="amount" [class.in]="income(movement)">
                     {{ income(movement) ? "+" : "−" }}{{ movement.amount | fcfa }}
@@ -43,3 +40,36 @@
         }
     </ul>
 }
+
+<!-- le détail d'un mouvement saisi à la main : motif, précision, auteur -->
+<dialog #detail aria-labelledby="movement-title" (click)="onBackdropClick($event)">
+    @if (selected(); as movement) {
+        <div class="detail">
+            <h2 id="movement-title">{{ label(movement) }}</h2>
+            <strong class="detail-amount" [class.in]="income(movement)">
+                {{ income(movement) ? "+" : "−" }}{{ movement.amount | fcfa }}
+            </strong>
+            <dl class="detail-lines">
+                <div>
+                    <dt>Date</dt>
+                    <dd>{{ movement.created_at | date: "d MMMM y 'à' HH:mm" }}</dd>
+                </div>
+                @if (movement.user_name) {
+                    <div>
+                        <dt>Par</dt>
+                        <dd>{{ movement.user_name }}</dd>
+                    </div>
+                }
+                @if (movement.reason) {
+                    <div>
+                        <dt>Précision</dt>
+                        <dd class="reason">{{ movement.reason }}</dd>
+                    </div>
+                }
+            </dl>
+            <div class="actions">
+                <button type="button" class="btn btn-outline" (click)="close()">Fermer</button>
+            </div>
+        </div>
+    }
+</dialog>

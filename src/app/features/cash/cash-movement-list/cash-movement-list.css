@@ -41,22 +41,32 @@
 }
 
 .label {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     color: var(--text);
+    text-align: left;
     text-decoration: none;
+    cursor: pointer;
 }
 
-/* le lien couvre toute la ligne : zone de toucher de 56 px sans espace en trop */
-a.label::after {
+/* le lien ou le bouton couvre toute la ligne : zone de toucher de 56 px sans espace en trop */
+.label::after {
     content: "";
     position: absolute;
     inset: 0;
 }
 
-a.label:hover {
+.label:hover {
     color: var(--primary);
-    text-decoration: underline;
+}
+
+.label:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .amount {
@@ -77,10 +87,42 @@ a.label:hover {
     font-size: var(--fs-body);
 }
 
-.reason {
-    display: block;
-    color: var(--text);
-    font-size: var(--fs-small);
+.detail {
+    display: grid;
+    gap: 12px;
+    padding: 24px;
+}
+
+.detail-amount {
+    font-size: var(--fs-kpi);
+    font-variant-numeric: tabular-nums;
+}
+
+.detail-amount.in {
+    color: var(--success);
+}
+
+.detail-lines {
+    display: grid;
+    margin: 0;
+}
+
+.detail-lines > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: var(--fs-body);
+}
+
+.detail-lines dt {
+    color: var(--text-muted);
+}
+
+.detail-lines dd {
+    margin: 0;
+    text-align: right;
     overflow-wrap: anywhere;
 }
 

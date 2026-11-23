@@ -811,6 +811,41 @@ kbd {
     list-style: none;
 }
 
+/* les lignes gardent la hauteur de leur texte, sinon elles se tassent et le texte sort de la carte */
+.tiles {
+    grid-auto-rows: max-content;
+}
+
+.result-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+}
+
+.minus {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--primary-text, var(--primary));
+    cursor: pointer;
+}
+
+.minus:hover {
+    background: var(--primary-soft);
+}
+
+.minus:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
 .tiles li.empty {
     grid-column: 1 / -1;
 }

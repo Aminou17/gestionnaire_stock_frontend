@@ -4,10 +4,10 @@ import { RouterLink } from "@angular/router";
 
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
-import { CashSummary } from "../dashboard.model";
+import { CashSummary } from "../../../core/cash/cash.model";
 import { MoneyToggle } from "../../../shared/money/money-toggle";
 
-// Bandeau de caisse de l'employé : état, solde et bouton "Nouvelle vente"
+// Bandeau de caisse de l'employé : état, solde et bouton "Nouvelle vente" (la caisse s'ouvre toute seule)
 @Component({
     selector: "app-manager-cash-banner",
     imports: [MoneyToggle, RouterLink, FcfaPipe, Icon],
@@ -20,16 +20,14 @@ export class ManagerCashBanner {
     cash = input<CashSummary | null>(null);
     loading = input(false);
     error = input(false);
-    // sa propre caisse d'un jour passé, pas clôturée : il faut la régler avant d'ouvrir
-    previousOpen = input(false);
+    // fond de départ annoncé tant que la caisse du jour n'existe pas
+    expectedOpening = input<number | null>(null);
     retry = output();
-    openCash = output();
 
-    // une session clôturée aujourd'hui compte comme une caisse fermée
     isOpen = computed(() => this.cash()?.status === "OPEN");
-    // clôturée aujourd'hui : la caisse ne se rouvre que le lendemain
-    closedToday = computed(() => this.cash()?.status === "CLOSED");
-    canSell = computed(() => !this.loading() && !this.error() && this.isOpen());
+    // comptée aujourd'hui : une nouvelle vente la rouvre toute seule
+    isCounted = computed(() => this.cash()?.status === "CLOSED");
+    canSell = computed(() => !this.loading() && !this.error());
 
     openedAt = computed(() => {
         const cash = this.cash();
