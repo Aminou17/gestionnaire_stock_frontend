@@ -4,29 +4,6 @@
     max-width: 640px;
 }
 
-.back {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    width: fit-content;
-    min-height: 44px;
-    color: var(--text-muted);
-    font-size: var(--fs-body);
-    text-decoration: none;
-}
-
-h1 {
-    margin: 0;
-    font-size: var(--fs-title);
-    font-weight: var(--fw-bold);
-    letter-spacing: -0.02em;
-}
-
-.head p {
-    margin: 4px 0 0;
-    font-size: var(--fs-body);
-}
-
 .status {
     display: flex;
     align-items: flex-start;

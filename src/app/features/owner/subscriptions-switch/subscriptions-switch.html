@@ -1,0 +1,104 @@
+<section class="card panel" aria-labelledby="subs-title">
+    <div class="panel-head">
+        <span class="icon" [class.on]="enabled()" aria-hidden="true">
+            <app-icon name="card" [size]="22" />
+        </span>
+        <div class="titles">
+            <h2 id="subs-title">Abonnements</h2>
+            @if (state.hasValue()) {
+                @if (enabled()) {
+                    <p class="status on">
+                        Activés
+                        @if (state.value().changedAt) {
+                            depuis le {{ state.value().changedAt | date: "d MMM y" }}
+                        }
+                    </p>
+                } @else {
+                    <p class="status">Désactivés, tout est gratuit</p>
+                }
+            }
+        </div>
+
+        @if (state.hasValue()) {
+            <button
+                type="button"
+                class="btn btn-sm"
+                [class.btn-primary]="!enabled()"
+                [class.btn-outline]="enabled()"
+                (click)="ask()"
+            >
+                {{ enabled() ? "Désactiver" : "Activer" }}
+            </button>
+        }
+    </div>
+
+    <p class="explain">
+        @if (enabled()) {
+            Les dates d'essai et de paiement se règlent sur la fiche de chaque boutique.
+        } @else {
+            À activer le jour où vous commencez à faire payer.
+        }
+    </p>
+
+    @if (notice(); as message) {
+        <p
+            class="alert"
+            [class.alert-success]="message.ok"
+            [class.alert-error]="!message.ok"
+            role="status"
+        >
+            {{ message.text }}
+        </p>
+    }
+
+    @if (state.error() && !state.hasValue()) {
+        <p class="muted" role="alert">
+            Impossible de lire l'état des abonnements.
+            <button type="button" class="btn btn-outline btn-sm" (click)="state.reload()">
+                Réessayer
+            </button>
+        </p>
+    }
+</section>
+
+<dialog #dialog aria-labelledby="subs-confirm-title" (click)="onBackdropClick($event)">
+    <div class="confirm">
+        <h2 id="subs-confirm-title">
+            {{ enabled() ? "Désactiver les abonnements ?" : "Activer les abonnements ?" }}
+        </h2>
+
+        @if (enabled()) {
+            <p>
+                La page Abonnement disparaît pour toutes les boutiques, qui redeviennent totalement
+                gratuites. Les dates d'essai et de paiement déjà enregistrées sont conservées.
+            </p>
+        } @else {
+            <p>
+                Toutes les boutiques verront tout de suite la page Abonnement dans leurs réglages.
+            </p>
+            <p class="warning">
+                <app-icon name="alert" [size]="18" />
+                Avez-vous prévenu vos clients un mois avant ? Vous pourrez désactiver à tout moment.
+            </p>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" (click)="close()" [disabled]="saving()">
+                Annuler
+            </button>
+            <button
+                type="button"
+                class="btn"
+                [class.btn-primary]="!enabled()"
+                [class.btn-danger]="enabled()"
+                [disabled]="saving()"
+                (click)="confirm()"
+            >
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                {{ enabled() ? "Oui, désactiver" : "Oui, activer" }}
+            </button>
+        </div>
+    </div>
+</dialog>

@@ -82,7 +82,7 @@ describe("Customers", () => {
         expect(text()).toContain("Awa Kouba");
         expect(text()).toContain("3 achats");
         expect(text()).toContain("45 000 F");
-        expect(text()).toContain("Reste 6 500 F");
+        expect(text()).toContain("6 500 F");
         // le numéro reste dans la fiche, pas sur les lignes de la liste
         expect(text()).not.toContain("123 45 67");
     });
@@ -182,7 +182,10 @@ describe("Customers", () => {
     });
 
     it("should ask to add a number when the customer has none", async () => {
-        await render({ rows: [{ ...jean, due_amount: 3000 }], dueTotal: 3000 });
+        await render({
+            rows: [{ ...jean, due_amount: 3000 }],
+            dueTotal: 3000,
+        });
         await pressDueChip();
 
         expect(text()).toContain("Ajoutez son numéro pour le relancer");

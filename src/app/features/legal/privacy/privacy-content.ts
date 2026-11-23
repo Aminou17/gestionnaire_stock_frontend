@@ -25,6 +25,7 @@ export const PRIVACY_SECTIONS: LegalSection[] = [
                 "Les données que vous saisissez : produits, stocks, ventes, caisse, fournisseurs, ainsi que vos clients et leurs numéros de téléphone.",
                 "Des données techniques : journaux de connexion, adresse IP et type d'appareil ou de navigateur.",
                 "Votre abonnement : dates d'essai et de paiement.",
+                "Des statistiques d'usage : le nom des pages que votre équipe ouvre chaque jour (jamais ce qui y est saisi) et les totaux de vos ventes et de votre marge, sans le détail de vos ventes ni de vos clients. Elles servent à améliorer le service et à fixer un tarif juste.",
             ],
         ],
     },

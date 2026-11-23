@@ -1,5 +1,6 @@
 import { FailedLogin, FailedLoginIp, LockedAccount, SecurityEvent } from "../security.model";
 import type { IconName } from "../../../../shared/icon/icons";
+import { apiLabel } from "../../page-labels";
 import { RowTone, SecurityRow, TableHeadings } from "../security-table/security-table";
 
 export type ListKind = "logins" | "locked" | "events" | "history";
@@ -125,7 +126,10 @@ const eventRows = (data: SecurityEvent[]): SecurityRow[] =>
             icon: denied ? "ban" : eventIcon(event.action),
             tone,
             title: EVENT_LABELS[event.action] ?? event.action,
-            subtitle: [event.email ?? event.user_name, path].filter(Boolean).join(" · ") || null,
+            subtitle:
+                [event.email ?? event.user_name, path ? apiLabel(path) : ""]
+                    .filter(Boolean)
+                    .join(" · ") || null,
             // les actions du propriétaire sur une boutique n'ont pas de boutique liée : on lit son nom dans le détail
             shop:
                 event.shop_name ??

@@ -30,3 +30,13 @@
 .country {
     font-size: var(--fs-caption);
 }
+
+/* dans les pages de connexion et d'inscription, le champ prend la taille des autres champs */
+.phone-inputs .input {
+    height: var(--field-h, 44px);
+    font-size: var(--field-font, var(--fs-body));
+}
+
+.field > span {
+    font-size: var(--field-label, var(--fs-small));
+}

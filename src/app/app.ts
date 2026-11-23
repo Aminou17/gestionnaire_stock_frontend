@@ -5,6 +5,7 @@ import { RouterOutlet } from "@angular/router";
 import { guardNumberInputs } from "./core/number-inputs";
 import { AppUpdateService } from "./core/pwa/app-update.service";
 import { ThemeService } from "./core/theme/theme.service";
+import { PageViewService } from "./core/usage/page-view.service";
 
 @Component({
     selector: "app-root",
@@ -20,5 +21,7 @@ export class App {
         guardNumberInputs(inject(DOCUMENT));
         // une nouvelle version mise en ligne s'affiche sans avoir à vider le cache
         inject(AppUpdateService).start();
+        // pages ouvertes par la boutique, comptées pour le propriétaire du logiciel
+        inject(PageViewService).start();
     }
 }

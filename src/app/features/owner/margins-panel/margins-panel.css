@@ -1,0 +1,184 @@
+:host {
+    display: block;
+}
+
+.panel {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 18px;
+}
+
+.panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+}
+
+h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+}
+
+.note {
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
+.periods {
+    display: flex;
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+    background: var(--surface-hover);
+}
+
+.period {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.period[aria-pressed="true"] {
+    background: var(--surface);
+    color: var(--primary-text);
+    box-shadow: var(--shadow-card);
+}
+
+.head,
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) 56px minmax(0, 1fr) minmax(0, 1fr) 56px;
+    align-items: center;
+    gap: 12px;
+}
+
+.head {
+    padding: 0 8px;
+    color: var(--text-muted);
+    font-size: var(--fs-caption);
+    font-weight: var(--fw-semibold);
+}
+
+.rows {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    min-height: 48px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.row:hover {
+    background: var(--surface-hover);
+}
+
+.name {
+    overflow: hidden;
+    font-weight: var(--fw-semibold);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.margin {
+    color: var(--success);
+}
+
+.rate {
+    color: var(--text-muted);
+}
+
+.hints {
+    display: grid;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: var(--primary-soft);
+}
+
+.hints summary {
+    min-height: 24px;
+    color: var(--primary-text);
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+.hints[open] summary {
+    margin-bottom: 10px;
+}
+
+.hints p {
+    margin: 0;
+    font-size: var(--fs-body);
+    line-height: 1.5;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.chips li {
+    display: grid;
+    gap: 2px;
+    min-width: 110px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--surface);
+    font-size: var(--fs-small);
+}
+
+.chips strong {
+    color: var(--primary-text);
+    font-size: var(--fs-body);
+}
+
+.empty {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.row-skeleton {
+    height: 48px;
+}
+
+@media (max-width: 700px) {
+    .head,
+    .row {
+        grid-template-columns: minmax(0, 1fr) 44px minmax(0, auto) 48px;
+        gap: 8px;
+    }
+
+    .wide-only {
+        display: none;
+    }
+}

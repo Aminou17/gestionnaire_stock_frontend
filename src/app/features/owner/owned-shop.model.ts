@@ -72,14 +72,6 @@ export interface OwnedShopDetail {
     address: string | null;
     country: string | null;
     city: string | null;
-    tax_id: string | null;
-    rccm: string | null;
-    products_count: number;
-    customers_count: number;
-    suppliers_count: number;
-    sales_total: number;
-    sales_last_30_days: number;
-    last_sale_at: string | null;
     last_login_at: string | null;
     users: ShopAccount[];
 }
@@ -87,4 +79,69 @@ export interface OwnedShopDetail {
 export interface TemporaryPassword {
     user: { id: number; name: string; email: string };
     password: string;
+}
+
+// marge d'une boutique sur une période : pour réfléchir à un tarif, jamais le détail des ventes
+export interface ShopMargin {
+    shop_id: number;
+    name: string;
+    sales_count: number;
+    revenue: number;
+    cost: number;
+    margin: number;
+    // marge sur le chiffre d'affaires, en pourcentage ; null sans vente
+    margin_rate: number | null;
+}
+
+export interface MarginReport {
+    days: number;
+    rows: ShopMargin[];
+}
+
+// pages ouvertes dans une boutique un jour donné (AAAA-MM-JJ)
+export interface UsageDay {
+    shop_id: number;
+    day: string;
+    views: number;
+    // la part ouverte par les vendeurs
+    employee_views: number | null;
+}
+
+export interface UsageReport {
+    days: number;
+    rows: UsageDay[];
+}
+
+export interface UsagePage {
+    page: string;
+    views: number;
+    employee_views: number | null;
+}
+
+export interface ShopUsage {
+    days: number;
+    daily: UsageDay[];
+    pages: UsagePage[];
+}
+
+// un accès que le propriétaire peut cocher pour une boutique (formule)
+export interface ShopModule {
+    key: string;
+    group: string;
+    label: string;
+    description: string;
+    enabled: boolean;
+}
+
+export interface ShopModules {
+    // ce que toute boutique a, quoi qu'il arrive
+    core: string[];
+    modules: ShopModule[];
+}
+
+// la page Abonnement est-elle ouverte aux boutiques ?
+export interface SubscriptionsState {
+    enabled: boolean;
+    // dernier changement ; null si jamais activés
+    changedAt: string | null;
 }

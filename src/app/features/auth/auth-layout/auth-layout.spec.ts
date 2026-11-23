@@ -24,32 +24,21 @@ describe("AuthLayout", () => {
         expect(page.textContent).not.toContain("Awa Bazin");
     });
 
-    it("should show the presentation in the page footer on small screens", async () => {
+    it("should lead back to the home page from the brand and from the Accueil link", async () => {
         const page = await render();
-        const pitch = page.querySelector(".mobile-pitch")!;
+        const links = Array.from(page.querySelectorAll(".brand, .home")).map((link) =>
+            link.getAttribute("href"),
+        );
 
-        expect(pitch).not.toBeNull();
-        expect(pitch.querySelector(".main-card")).not.toBeNull();
-        expect(pitch.querySelectorAll(".mini").length).toBe(2);
-        expect(pitch.querySelectorAll(".figures > div").length).toBe(3);
-        expect(pitch.querySelector("footer")?.textContent).toContain("Boutiki · YABRE TECH");
+        expect(links).toEqual(["/", "/"]);
     });
 
-    it("should come after the form in the page", async () => {
-        const page = await render();
-        const card = page.querySelector(".card")!;
-        const pitch = page.querySelector(".mobile-pitch")!;
-
-        expect(card.compareDocumentPosition(pitch) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
-    });
-
-    it("should link to the legal pages in the page footer", async () => {
+    it("should link to the legal pages once, in the page footer", async () => {
         const page = await render();
         const links = Array.from(page.querySelectorAll(".legal-links a")).map((link) =>
             link.getAttribute("href"),
         );
 
-        // un pied de page sur ordinateur, un autre sous la présentation sur téléphone
-        expect(links).toEqual(["/privacy", "/terms", "/contact", "/privacy", "/terms", "/contact"]);
+        expect(links).toEqual(["/privacy", "/terms", "/contact"]);
     });
 });

@@ -4,6 +4,7 @@ import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { PRODUCT_NAME, COMPANY_NAME } from "../../core/brand";
+import { ModuleAccess } from "../../core/modules/module-access";
 import { CashSettingsService } from "../../core/cash/cash-settings.service";
 import { SalesSettingsService } from "../../core/sales/sales-settings.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
@@ -172,6 +173,7 @@ export class Settings {
     protected pwa = inject(InstallService);
 
     private shopService = inject(ShopSettingsService);
+    private access = inject(ModuleAccess);
     private stockService = inject(StockSettingsService);
     private alertEmailService = inject(AlertEmailService);
     private cashService = inject(CashSettingsService);
@@ -239,7 +241,9 @@ export class Settings {
         }
 
         // la fiche d'abonnement n'est pas encore lue ici : toute boutique démarre par un essai
-        if (this.auth.isAdmin()) statuses["/subscription"] = { text: "Essai gratuit" };
+        if (this.shopService.subscriptionsEnabled() && this.auth.isAdmin()) {
+            statuses["/subscription"] = { text: "Essai gratuit" };
+        }
 
         return statuses;
     });
@@ -248,7 +252,13 @@ export class Settings {
     groups = computed(() =>
         GROUPS.map((group) => ({
             ...group,
-            links: group.links.filter((link) => this.auth.isAdmin() || !link.adminOnly),
+            links: group.links
+                .filter(
+                    (link) =>
+                        (this.auth.isAdmin() || !link.adminOnly) &&
+                        (this.shopService.subscriptionsEnabled() || link.path !== "/subscription"),
+                )
+                .map((link) => ({ ...link, locked: this.access.isLocked(link.path) })),
         })).filter((group) => group.links.length > 0),
     );
 

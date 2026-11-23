@@ -44,83 +44,72 @@
         </section>
     }
 
-    <section class="card block">
-        <div class="block-head">
-            <h2>Résumé</h2>
-            @if (s.deleted_at) {
-                <span class="badge badge-danger">Supprimée</span>
-            } @else if (s.status === "SUSPENDED") {
-                <span class="badge badge-warning">Suspendue</span>
-            } @else {
-                <span class="badge badge-success">Active</span>
+    <section class="card hero" aria-label="Résumé">
+        <div class="hero-top">
+            <span class="hero-icon" aria-hidden="true">{{ s.name.charAt(0) }}</span>
+
+            <div class="hero-text">
+                @if (status(); as st) {
+                    <span class="badge" [ngClass]="'badge-' + st.badge">{{ st.label }}</span>
+                }
+                <small class="muted">Inscrite le {{ s.created_at | date: "d MMM y" }}</small>
+            </div>
+
+            @if (!s.deleted_at) {
+                <app-action-menu
+                    [items]="menuItems()"
+                    [label]="'Actions pour ' + s.name"
+                    [title]="s.name"
+                    [disabled]="busy()"
+                    (picked)="onMenu($event)"
+                />
             }
         </div>
 
         <dl class="facts">
             <div>
-                <dt>Inscrite le</dt>
-                <dd>{{ s.created_at | date: "d MMM y" }}</dd>
-            </div>
-            <div>
-                <dt>Accès</dt>
-                <dd>
-                    @if (trial(); as t) {
-                        <span class="trial" [attr.data-tone]="t.tone">{{ t.label }}</span>
-                    } @else {
-                        Sans limite
-                    }
-                </dd>
-            </div>
-            <div>
                 <dt>Dernière connexion</dt>
-                <dd>{{ s.last_login_at ? (s.last_login_at | date: "d MMM y") : "–" }}</dd>
+                <dd>{{ s.last_login_at ? (s.last_login_at | date: "d MMM y") : "Jamais" }}</dd>
             </div>
-            <div>
-                <dt>Produits</dt>
-                <dd>{{ s.products_count }}</dd>
-            </div>
-            <div>
-                <dt>Clients</dt>
-                <dd>{{ s.customers_count }}</dd>
-            </div>
-            <div>
-                <dt>Fournisseurs</dt>
-                <dd>{{ s.suppliers_count }}</dd>
-            </div>
-            <div>
-                <dt>Ventes au total</dt>
-                <dd>{{ s.sales_total }}</dd>
-            </div>
-            <div>
-                <dt>Ventes sur 30 jours</dt>
-                <dd>{{ s.sales_last_30_days }}</dd>
-            </div>
-            <div>
-                <dt>Dernière vente</dt>
-                <dd>{{ s.last_sale_at ? (s.last_sale_at | date: "d MMM y") : "–" }}</dd>
-            </div>
-            <div>
-                <dt>Téléphone</dt>
-                <dd>{{ s.phone || "–" }}</dd>
-            </div>
-            <div>
-                <dt>Ville et pays</dt>
-                <dd>{{ place() || "–" }}</dd>
-            </div>
-            <div>
-                <dt>Identifiant fiscal</dt>
-                <dd>{{ s.tax_id || "–" }}</dd>
-            </div>
-            <div>
-                <dt>RCCM</dt>
-                <dd>{{ s.rccm || "–" }}</dd>
-            </div>
-            <div class="wide">
-                <dt>Adresse</dt>
-                <dd>{{ s.address || "–" }}</dd>
-            </div>
+            @if (s.phone) {
+                <div>
+                    <dt>Téléphone</dt>
+                    <dd>{{ s.phone }}</dd>
+                </div>
+            }
+            @if (place()) {
+                <div>
+                    <dt>Ville et pays</dt>
+                    <dd>{{ place() }}</dd>
+                </div>
+            }
+            @if (s.address) {
+                <div class="wide">
+                    <dt>Adresse</dt>
+                    <dd>{{ s.address }}</dd>
+                </div>
+            }
         </dl>
     </section>
+
+    <nav class="tools" aria-label="Accès et suivi">
+        <a class="tool" [routerLink]="['/owner/shops', s.id, 'access']">
+            <span class="tool-icon"><app-icon name="shield" [size]="20" /></span>
+            <span class="tool-text">
+                <strong>Accès</strong>
+                <small class="muted">Ce que la boutique peut utiliser</small>
+            </span>
+            <app-icon name="chevron-right" [size]="18" />
+        </a>
+        <a class="tool" [routerLink]="['/owner/shops', s.id, 'activity']">
+            <span class="tool-icon"><app-icon name="trending-up" [size]="20" /></span>
+            <span class="tool-text">
+                <strong>Activité détaillée</strong>
+                <small class="muted">Pages ouvertes et marge</small>
+            </span>
+            <app-icon name="chevron-right" [size]="18" />
+        </a>
+    </nav>
 
     <section class="card block">
         <div class="block-head">
@@ -254,39 +243,6 @@
                     Enregistrer
                 </button>
             </form>
-
-            <div class="status-row">
-                @if (s.status === "ACTIVE") {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        [disabled]="busy()"
-                        (click)="askSuspend()"
-                    >
-                        <app-icon name="ban" [size]="16" />
-                        Suspendre
-                    </button>
-                } @else {
-                    <button
-                        type="button"
-                        class="btn btn-outline btn-sm"
-                        [disabled]="busy()"
-                        (click)="setStatus('ACTIVE')"
-                    >
-                        <app-icon name="undo" [size]="16" />
-                        Réactiver
-                    </button>
-                }
-                <button
-                    type="button"
-                    class="btn btn-danger btn-sm"
-                    [disabled]="busy()"
-                    (click)="askDelete()"
-                >
-                    <app-icon name="trash" [size]="16" />
-                    Supprimer
-                </button>
-            </div>
         </section>
     }
 }

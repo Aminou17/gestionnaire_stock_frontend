@@ -1,10 +1,8 @@
-<div class="head">
-    <h1>Bonjour {{ auth.user()?.name }}</h1>
-    <a routerLink="/owner/shops" class="btn btn-primary">
-        <app-icon name="store" [size]="18" />
-        <span>Voir les boutiques</span>
-    </a>
-</div>
+<app-page-header
+    [title]="'Bonjour ' + (auth.user()?.name ?? '')"
+    section="Espace propriétaire"
+    [home]="true"
+/>
 
 <section class="kpis" aria-label="Chiffres clés">
     <a class="card kpi" routerLink="/owner/shops">
@@ -13,27 +11,27 @@
         <strong>{{ shops.hasValue() ? active() : "–" }}</strong>
     </a>
     <a class="card kpi" routerLink="/owner/shops">
-        <span class="kpi-icon tone-orange"><app-icon name="ban" [size]="20" /></span>
-        <span class="kpi-label">Suspendues</span>
-        <strong [class.warn]="suspended() > 0">{{ shops.hasValue() ? suspended() : "–" }}</strong>
+        <span class="kpi-icon tone-orange"><app-icon name="clock" [size]="20" /></span>
+        <span class="kpi-label">En essai</span>
+        <strong>{{ shops.hasValue() ? trial() : "–" }}</strong>
     </a>
     <div class="card kpi">
         <span class="kpi-icon tone-green"><app-icon name="trending-up" [size]="20" /></span>
         <span class="kpi-label">Ventes, 30 jours</span>
         <strong>{{ shops.hasValue() ? sales() : "–" }}</strong>
     </div>
-    <a class="card kpi" routerLink="/owner/support">
-        <span class="kpi-icon tone-violet"><app-icon name="message" [size]="20" /></span>
-        <span class="kpi-label">Messages non lus</span>
-        <strong [class.warn]="support.unread() > 0">{{ support.unread() }}</strong>
-    </a>
+    <div class="card kpi">
+        <span class="kpi-icon tone-violet"><app-icon name="wallet" [size]="20" /></span>
+        <span class="kpi-label">Marge, 30 jours</span>
+        <strong>{{ marginReport.hasValue() ? (margin() | fcfa) : "–" }}</strong>
+    </div>
 </section>
 
 <div class="grid">
     <section class="card panel">
         <div class="panel-head">
             <h2>À suivre</h2>
-            <a routerLink="/owner/shops" class="more">Tout voir</a>
+            <a routerLink="/owner/shops" class="more">Toutes les boutiques</a>
         </div>
 
         @if (shops.isLoading() && all().length === 0) {
@@ -41,9 +39,9 @@
             <div class="skeleton row-skeleton"></div>
         } @else if (shops.error() && all().length === 0) {
             <p class="muted empty" role="alert">Impossible de charger les boutiques.</p>
-        } @else if (toWatch().length === 0) {
+        } @else if (toWatch().length === 0 && !alerts() && support.unread() === 0) {
             <p class="muted empty">
-                <app-icon name="check" [size]="18" /> Rien à signaler : aucun essai ne se termine.
+                <app-icon name="check" [size]="18" /> Rien à signaler pour le moment.
             </p>
         } @else {
             <ul class="rows">
@@ -65,49 +63,34 @@
                         </a>
                     </li>
                 }
-            </ul>
-        }
-    </section>
-
-    <section class="card panel">
-        <div class="panel-head">
-            <h2>Sécurité</h2>
-            <a routerLink="/owner/security" class="more">Détails</a>
-        </div>
-
-        @if (overview.isLoading()) {
-            <div class="skeleton row-skeleton"></div>
-        } @else if (alerts() === null) {
-            <p class="muted empty" role="alert">Impossible de charger la sécurité.</p>
-        } @else if (alerts() === 0) {
-            <p class="safe"><app-icon name="shield" [size]="20" /> Rien d'anormal en 24 heures.</p>
-        } @else {
-            <p class="safe warn">
-                <app-icon name="alert" [size]="20" /> {{ alerts() }} à surveiller.
-            </p>
-            <a routerLink="/owner/security/locked" class="btn btn-outline btn-sm">
-                Voir les comptes bloqués
-            </a>
-        }
-    </section>
-
-    <section class="card panel wide">
-        <div class="panel-head">
-            <h2>Dernières boutiques</h2>
-        </div>
-
-        @if (latest().length === 0) {
-            <p class="muted empty">Aucune boutique pour le moment.</p>
-        } @else {
-            <ul class="rows">
-                @for (shop of latest(); track shop.id) {
+                @if (alerts()) {
                     <li>
-                        <a [routerLink]="['/owner/shops', shop.id]" class="row">
-                            <span class="avatar">{{ shop.name.charAt(0) }}</span>
+                        <a routerLink="/owner/security" class="row">
+                            <span class="avatar alert-icon"
+                                ><app-icon name="alert" [size]="18"
+                            /></span>
                             <span class="row-text">
-                                <strong>{{ shop.name }}</strong>
+                                <strong>Sécurité</strong>
+                                <small class="muted"
+                                    >{{ alerts() }} à surveiller en 24 heures</small
+                                >
+                            </span>
+                            <app-icon name="chevron-right" [size]="18" />
+                        </a>
+                    </li>
+                }
+                @if (support.unread() > 0) {
+                    <li>
+                        <a routerLink="/owner/support" class="row">
+                            <span class="avatar message-icon"
+                                ><app-icon name="message" [size]="18"
+                            /></span>
+                            <span class="row-text">
+                                <strong>Messages</strong>
                                 <small class="muted">
-                                    Créée le {{ shop.created_at | date: "d MMM y" }}
+                                    {{ support.unread() }} non lu{{
+                                        support.unread() > 1 ? "s" : ""
+                                    }}
                                 </small>
                             </span>
                             <app-icon name="chevron-right" [size]="18" />
@@ -117,4 +100,8 @@
             </ul>
         }
     </section>
+
+    <app-margins-panel />
+
+    <app-usage-panel [shops]="all()" />
 </div>

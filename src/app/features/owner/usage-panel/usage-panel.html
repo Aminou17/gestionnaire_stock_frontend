@@ -1,0 +1,50 @@
+<section class="card panel" aria-labelledby="usage-title">
+    <div class="panel-head">
+        <h2 id="usage-title">Activité des boutiques</h2>
+        <span class="muted">{{ days }} derniers jours</span>
+    </div>
+
+    <p class="muted note">
+        Pages ouvertes par les administrateurs et les vendeurs, jour par jour. Seul le nom de la
+        page est compté, jamais ce qui est saisi.
+    </p>
+
+    @if (report.isLoading() && !report.hasValue()) {
+        <div class="skeleton row-skeleton"></div>
+        <div class="skeleton row-skeleton"></div>
+    } @else if (report.error() && !report.hasValue()) {
+        <p class="muted empty" role="alert">
+            Impossible de charger l'activité.
+            <button type="button" class="btn btn-outline btn-sm" (click)="report.reload()">
+                Réessayer
+            </button>
+        </p>
+    } @else if (active().length === 0) {
+        <p class="muted empty">Aucune page ouverte sur cette période.</p>
+    } @else {
+        <ul class="rows">
+            @for (row of active(); track row.shop.id) {
+                <li>
+                    <a [routerLink]="['/owner/shops', row.shop.id]" class="row">
+                        <span class="who">
+                            <strong>{{ row.shop.name }}</strong>
+                            <small class="muted">
+                                {{ row.total }} pages
+                                @if (row.employees > 0) {
+                                    · dont {{ row.employees }} par les vendeurs
+                                }
+                            </small>
+                        </span>
+                        <app-usage-bars [bars]="row.bars" />
+                    </a>
+                </li>
+            }
+        </ul>
+
+        @if (silent() > 0) {
+            <p class="muted footnote">
+                {{ silent() }} boutique{{ silent() > 1 ? "s" : "" }} sans activité cette semaine.
+            </p>
+        }
+    }
+</section>

@@ -4,6 +4,8 @@ import { Router } from "@angular/router";
 import { catchError, debounceTime, distinctUntilChanged, map, of, switchMap } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
+import { ModuleAccess } from "../../core/modules/module-access";
+import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { ProductService } from "../../core/stock/product.service";
 import { Icon } from "../../shared/icon/icon";
 import { ScanButton } from "../../shared/scan-button/scan-button";
@@ -35,6 +37,8 @@ const plain = (text: string) =>
 export class Search {
     private router = inject(Router);
     private auth = inject(AuthService);
+    private shop = inject(ShopSettingsService);
+    private access = inject(ModuleAccess);
     private products = inject(ProductService);
     protected layout = inject(LayoutService);
 
@@ -46,7 +50,10 @@ export class Search {
 
     results = computed<Result[]>(() => {
         const text = plain(this.query().trim());
-        const pages = searchablePages(this.auth.isAdmin())
+        const pages = searchablePages(this.auth.isAdmin(), {
+            subscriptions: this.shop.subscriptionsEnabled(),
+            allowsPath: (path) => this.access.allowsPath(path),
+        })
             .filter((page) => plain(page.label).includes(text))
             .slice(0, text ? 6 : 8)
             .map((page) => ({

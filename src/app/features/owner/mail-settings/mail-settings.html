@@ -1,11 +1,9 @@
-<a appBackLink="/owner/settings" class="back" aria-label="Retour aux réglages">
-    <app-icon name="chevron-left" [size]="16" />
-    Réglages
-</a>
-
-<div class="head">
-    <h1>E-mails d'envoi</h1>
-</div>
+<app-page-header
+    title="E-mails d'envoi"
+    section="Espace propriétaire"
+    back="/owner/settings"
+    backLabel="Retour aux réglages"
+/>
 
 @if (settings.hasValue()) {
     @let current = settings.value();

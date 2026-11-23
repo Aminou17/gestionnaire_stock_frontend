@@ -500,3 +500,37 @@ li.with-remind:last-child {
         justify-content: center;
     }
 }
+
+/* ordinateur : chaque client est une carte à part, avec de l'air entre elles */
+@media (min-width: 768px) {
+    .rows {
+        display: grid;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .rows > li {
+        overflow: hidden;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        transition:
+            border-color 0.15s,
+            box-shadow 0.15s;
+    }
+
+    .rows > li:hover {
+        border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+        box-shadow: var(--shadow-card);
+    }
+
+    .row,
+    li:last-child > .row {
+        border-bottom: 0;
+    }
+
+    /* l'en-tête des colonnes suit le retrait des cartes */
+    .rows-head {
+        padding-inline: 28px;
+    }
+}

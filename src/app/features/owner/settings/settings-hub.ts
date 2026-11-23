@@ -3,8 +3,10 @@ import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { ThemeService } from "../../../core/theme/theme.service";
+import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { IconName } from "../../../shared/icon/icons";
+import { SubscriptionsSwitch } from "../subscriptions-switch/subscriptions-switch";
 
 interface SettingsLink {
     path: string;
@@ -16,7 +18,7 @@ interface SettingsLink {
 // (sur téléphone, c'est le seul endroit où ils se trouvent)
 @Component({
     selector: "app-owner-settings",
-    imports: [RouterLink, Icon],
+    imports: [RouterLink, PageHeader, Icon, SubscriptionsSwitch],
     templateUrl: "./settings-hub.html",
     styleUrl: "./settings-hub.css",
 })

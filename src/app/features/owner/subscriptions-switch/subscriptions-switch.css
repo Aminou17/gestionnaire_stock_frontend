@@ -1,0 +1,121 @@
+:host {
+    display: block;
+}
+
+.panel {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--surface-hover);
+    color: var(--text-muted);
+}
+
+.icon.on {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.titles {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
+
+h2 {
+    margin: 0;
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+}
+
+.status {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.status.on {
+    color: var(--success);
+    font-weight: var(--fw-semibold);
+}
+
+.explain {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    line-height: 1.5;
+}
+
+.panel-head .btn {
+    flex: none;
+    min-height: 44px;
+}
+
+.alert {
+    margin: 0;
+}
+
+/* fenêtre de confirmation */
+.confirm {
+    display: grid;
+    gap: 14px;
+    padding: 24px;
+}
+
+.confirm h2 {
+    font-size: var(--fs-heading);
+}
+
+.confirm p {
+    margin: 0;
+    font-size: var(--fs-body);
+    line-height: 1.55;
+}
+
+.warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.warning app-icon {
+    flex: none;
+    margin-top: 2px;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+@media (max-width: 767px) {
+    .actions {
+        flex-direction: column-reverse;
+    }
+
+    .actions .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+}

@@ -16,6 +16,7 @@ import { ActivatedRoute, RouterLink } from "@angular/router";
 import { Icon } from "../../../../shared/icon/icon";
 import { Pagination, storedPageSize } from "../../../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../../../shared/period-filter/period-filter";
+import { accessAttempt, roleLabel } from "../../page-labels";
 import { OwnerShopService } from "../../owner-shop.service";
 import { NO_FILTERS, Page, SecurityEvent, SecurityFilters } from "../security.model";
 import { SecurityService } from "../security.service";
@@ -95,8 +96,10 @@ export class SecurityList {
     eventPath(event: SecurityEvent) {
         const method = event.details?.["method"];
         const path = event.details?.["path"];
-        return path ? `${method ? method + " " : ""}${path}` : null;
+        return typeof path === "string" ? accessAttempt(String(method ?? ""), path) : null;
     }
+
+    roleLabel = roleLabel;
 
     headings = computed(() => this.config.headings(this.view()));
     has = (name: "shop" | "email" | "ip" | "period") => this.config.filters.includes(name);

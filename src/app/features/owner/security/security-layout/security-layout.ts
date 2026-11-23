@@ -1,10 +1,12 @@
 import { Component } from "@angular/core";
 import { RouterLink, RouterLinkActive, RouterOutlet } from "@angular/router";
 
+import { PageHeader } from "../../../../layout/page-header/page-header";
+
 // Coquille de la section Sécurité : titre, onglets, puis la page choisie
 @Component({
     selector: "app-security-layout",
-    imports: [RouterOutlet, RouterLink, RouterLinkActive],
+    imports: [PageHeader, RouterOutlet, RouterLink, RouterLinkActive],
     templateUrl: "./security-layout.html",
     styleUrl: "./security-layout.css",
 })

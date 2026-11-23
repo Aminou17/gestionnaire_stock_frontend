@@ -109,7 +109,7 @@
     font-size: var(--fs-small);
 }
 
-.mobile-meta {
+.main small.mobile-meta {
     display: none;
     white-space: normal;
 }
@@ -160,7 +160,11 @@
         display: none;
     }
 
-    .mobile-meta {
+    .main small {
+        white-space: normal;
+    }
+
+    .main small.mobile-meta {
         display: block;
     }
 

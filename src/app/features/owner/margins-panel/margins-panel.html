@@ -1,0 +1,82 @@
+<section class="card panel" aria-labelledby="margins-title">
+    <div class="panel-head">
+        <h2 id="margins-title">Marge par boutique</h2>
+        <div class="periods" role="group" aria-label="Période">
+            @for (period of periods; track period.days) {
+                <button
+                    type="button"
+                    class="period"
+                    [attr.aria-pressed]="days() === period.days"
+                    (click)="select(period.days)"
+                >
+                    {{ period.label }}
+                </button>
+            }
+        </div>
+    </div>
+
+    <p class="muted note">
+        Chiffre d'affaires moins le prix d'achat des produits vendus, ventes annulées et retours
+        retirés.
+    </p>
+
+    @if (report.isLoading() && !report.hasValue()) {
+        <div class="skeleton row-skeleton"></div>
+        <div class="skeleton row-skeleton"></div>
+    } @else if (report.error() && !report.hasValue()) {
+        <p class="muted empty" role="alert">
+            Impossible de charger les marges.
+            <button type="button" class="btn btn-outline btn-sm" (click)="report.reload()">
+                Réessayer
+            </button>
+        </p>
+    } @else if (rows().length === 0) {
+        <p class="muted empty">Aucune vente sur cette période.</p>
+    } @else {
+        <div class="head" aria-hidden="true">
+            <span>Boutique</span>
+            <span class="num">Ventes</span>
+            <span class="num wide-only">Chiffre d'affaires</span>
+            <span class="num">Marge</span>
+            <span class="num">Taux</span>
+        </div>
+
+        <ul class="rows">
+            @for (row of rows(); track row.shop_id) {
+                <li>
+                    <a [routerLink]="['/owner/shops', row.shop_id]" class="row">
+                        <strong class="name">{{ row.name }}</strong>
+                        <span class="num">{{ row.sales_count }}</span>
+                        <span class="num wide-only">{{ row.revenue | fcfa }}</span>
+                        <strong class="num margin">{{ row.margin | fcfa }}</strong>
+                        <span class="num rate">
+                            {{
+                                row.margin_rate === null
+                                    ? "—"
+                                    : (row.margin_rate | number: "1.0-1") + " %"
+                            }}
+                        </span>
+                    </a>
+                </li>
+            }
+        </ul>
+
+        @if (monthlyMedian() > 0) {
+            <details class="hints">
+                <summary>Repères pour un tarif mensuel</summary>
+                <p>
+                    Une boutique moyenne dégage environ
+                    <strong>{{ monthlyMedian() | fcfa }}</strong> de marge par mois.
+                </p>
+                <ul class="chips">
+                    @for (hint of hints(); track hint.rate) {
+                        <li>
+                            <strong>{{ hint.rate }} %</strong>
+                            <span>{{ hint.amount | fcfa }} / mois</span>
+                        </li>
+                    }
+                </ul>
+            </details>
+        }
+    }
+</section>

@@ -1,0 +1,33 @@
+<dialog #dialog aria-labelledby="locked-title" (click)="onBackdropClick($event)" (close)="close()">
+    @if (feature(); as feature) {
+        <div class="box">
+            <span class="badge-icon" aria-hidden="true"><app-icon name="lock" [size]="26" /></span>
+
+            <div class="text">
+                <p class="kicker">{{ feature.label }}</p>
+                <h2 id="locked-title">Disponible avec l'abonnement</h2>
+                <p>
+                    {{ feature.description }}
+                    Cette fonction ne fait pas partie de votre formule actuelle.
+                </p>
+                <p class="help">
+                    Pour l'activer sur votre boutique, contactez-nous : nous vous répondons dans les
+                    meilleurs délais.
+                </p>
+            </div>
+
+            <div class="actions">
+                <button type="button" class="btn btn-outline" (click)="close()">Fermer</button>
+                @if (subscriptions()) {
+                    <a routerLink="/subscription" class="btn btn-primary" (click)="close()">
+                        Voir l'abonnement
+                    </a>
+                } @else {
+                    <a routerLink="/contact" class="btn btn-primary" (click)="close()">
+                        Nous contacter
+                    </a>
+                }
+            </div>
+        </div>
+    }
+</dialog>

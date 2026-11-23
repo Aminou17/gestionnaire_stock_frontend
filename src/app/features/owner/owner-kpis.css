@@ -1,0 +1,42 @@
+/* tuiles de chiffres communes à l'accueil et à l'activité d'une boutique */
+.kpis {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.kpi strong {
+    font-size: var(--fs-kpi);
+    letter-spacing: -0.02em;
+}
+
+.kpi-label {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+}
+
+.kpi-icon {
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+}
+
+.tone-blue {
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.tone-orange {
+    background: var(--warning-soft);
+    color: var(--warning);
+}
+
+.tone-green {
+    background: var(--success-soft);
+    color: var(--success);
+}
+
+.tone-violet {
+    background: var(--violet-soft);
+    color: var(--violet);
+}

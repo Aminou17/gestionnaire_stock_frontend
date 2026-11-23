@@ -5,6 +5,7 @@ import { FormsModule } from "@angular/forms";
 import { RouterLink } from "@angular/router";
 
 import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
+import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { Pagination, clientPaging } from "../../../shared/pagination/pagination";
 import { NewShopDialog } from "../new-shop-dialog/new-shop-dialog";
@@ -20,7 +21,7 @@ const DAY = 86_400_000;
 
 @Component({
     selector: "app-shops",
-    imports: [FormsModule, RouterLink, Icon, ActionMenu, NewShopDialog, Pagination],
+    imports: [FormsModule, RouterLink, PageHeader, Icon, ActionMenu, NewShopDialog, Pagination],
     templateUrl: "./shops.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shops.css"],
 })

@@ -15,6 +15,7 @@ import { PricingMode } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
 import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
 import { StockSettingsService } from "../../../core/stock/stock-settings.service";
+import { ModuleAccess } from "../../../core/modules/module-access";
 import { SupplierService } from "../../../core/stock/supplier.service";
 import { resizeAvatar, resizeThumb } from "../../../shared/avatar/avatar-resizer";
 import { BarcodeScanner } from "../../../shared/barcode-scanner/barcode-scanner";
@@ -41,6 +42,7 @@ export class ProductForm {
     private productService = inject(ProductService);
     private categoryService = inject(CategoryService);
     private supplierService = inject(SupplierService);
+    protected access = inject(ModuleAccess);
     private stockSettings = inject(StockSettingsService);
     private salesSettingsService = inject(SalesSettingsService);
     private fb = inject(NonNullableFormBuilder);
@@ -116,7 +118,7 @@ export class ProductForm {
         stream: () => this.categoryService.getCategories(),
     });
     suppliers = rxResource({
-        params: () => this.wanted() || undefined,
+        params: () => (this.wanted() && this.access.allows("purchases")) || undefined,
         stream: () => this.supplierService.getSuppliers(),
     });
     settings = rxResource({
@@ -147,6 +149,11 @@ export class ProductForm {
         this.categoryForm.reset();
         this.categoryError.set(null);
         this.addingCategory.set(true);
+    }
+
+    // sans l'accès Achats : le message d'abonnement
+    showSupplierLocked() {
+        this.access.showLocked("purchases");
     }
 
     openSupplierForm() {

@@ -1,12 +1,13 @@
 import { HttpErrorResponse } from "@angular/common/http";
-import { DatePipe } from "@angular/common";
+import { DatePipe, NgClass } from "@angular/common";
 import { Component, ElementRef, computed, inject, signal, viewChild } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { FormsModule } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
+import { ActivatedRoute, Router, RouterLink } from "@angular/router";
 
 import { getRoleLabel } from "../../../core/auth/role-label";
 import { PageHeader } from "../../../layout/page-header/page-header";
+import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Icon } from "../../../shared/icon/icon";
 import { ShopAccount } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
@@ -16,7 +17,7 @@ import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-shop-page",
-    imports: [DatePipe, FormsModule, PageHeader, Icon],
+    imports: [DatePipe, NgClass, FormsModule, RouterLink, PageHeader, Icon, ActionMenu],
     templateUrl: "./shop-page.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shop-page.css"],
 })
@@ -48,7 +49,33 @@ export class ShopPage {
         return left > 1 ? `Effacée pour de bon dans ${left} jours` : "Effacée pour de bon demain";
     });
 
-    trial = computed(() => (this.shop.hasValue() ? accessStateOf(this.shop.value()) : null));
+    // un seul statut lisible : supprimée, suspendue, essai ou paiement en cours, sinon active
+    status = computed(() => {
+        if (!this.shop.hasValue()) return null;
+        const detail = this.shop.value();
+
+        if (detail.deleted_at) return { label: "Supprimée", badge: "danger" };
+        if (detail.status === "SUSPENDED") return { label: "Suspendue", badge: "warning" };
+
+        const access = accessStateOf(detail);
+        if (!access) return { label: "Active", badge: "success" };
+
+        const badges = { ok: "success", info: "primary", warn: "warning", ended: "danger" };
+        return { label: access.label, badge: badges[access.tone] };
+    });
+
+    menuItems = computed<ActionItem[]>(() => [
+        this.shop.hasValue() && this.shop.value().status === "SUSPENDED"
+            ? { id: "reactivate", label: "Réactiver", icon: "undo" }
+            : { id: "suspend", label: "Suspendre", icon: "ban" },
+        { id: "delete", label: "Supprimer", icon: "trash", danger: true, separated: true },
+    ]);
+
+    onMenu(action: string) {
+        if (action === "suspend") this.askSuspend();
+        else if (action === "reactivate") this.setStatus("ACTIVE");
+        else if (action === "delete") this.askDelete();
+    }
 
     // résultat des actions de la page (lien envoyé, essai modifié)
     message = signal<{ ok: boolean; text: string } | null>(null);

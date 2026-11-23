@@ -56,7 +56,7 @@ describe("security list config", () => {
         ]);
 
         expect(denied.badge?.label).toBe("Refusé");
-        expect(denied.subtitle).toBe("m@x.com · /reports/balance");
+        expect(denied.subtitle).toBe("m@x.com · Rapports");
         expect(changed.title).toBe("Mot de passe changé");
         expect(changed.badge?.label).toBe("Réussi");
     });

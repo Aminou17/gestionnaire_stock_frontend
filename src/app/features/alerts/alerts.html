@@ -1,4 +1,4 @@
-<app-page-header title="Alertes de stock" section="Stock" />
+<app-page-header title="Alertes de stock" section="Gestion" />
 
 <section class="list-card" [class.readonly]="!auth.isAdmin()">
     @if (snoozedNotice(); as notice) {
@@ -310,6 +310,7 @@
                                                             alert.suggested_quantity
                                                         }})
                                                     </a>
+
                                                     <button
                                                         type="button"
                                                         class="menu-item edit-threshold"

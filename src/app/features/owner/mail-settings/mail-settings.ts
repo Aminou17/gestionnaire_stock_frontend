@@ -9,6 +9,7 @@ import {
     Validators,
 } from "@angular/forms";
 
+import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
 import { MailSettings, MailSettingsService } from "../mail-settings.service";
 
@@ -19,10 +20,9 @@ const emailValidator = (control: AbstractControl): ValidationErrors | null =>
     EMAIL.test(String(control.value ?? "").trim()) ? null : { email: true };
 
 // Adresse Gmail qui envoie les e-mails du logiciel (mot de passe oublié, liens du propriétaire)
-import { BackLink } from "../../../shared/back-link/back-link";
 @Component({
     selector: "app-mail-settings",
-    imports: [ReactiveFormsModule, BackLink, Icon],
+    imports: [ReactiveFormsModule, PageHeader, Icon],
     templateUrl: "./mail-settings.html",
     styleUrl: "./mail-settings.css",
 })

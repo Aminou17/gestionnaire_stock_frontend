@@ -4,7 +4,11 @@
     [section]="isOwner ? 'Espace propriétaire' : undefined"
 />
 
-<div class="inbox" [class.has-detail]="threadId() || composing">
+<div
+    class="inbox"
+    [class.has-detail]="threadId() || composing"
+    [class.help-mode]="filter() === 'nocount'"
+>
     <section class="card list-pane" aria-label="Conversations">
         <div class="list-head">
             <div class="tabs" role="tablist">
@@ -29,6 +33,20 @@
                 >
                     Terminées
                 </button>
+                @if (isOwner) {
+                    <button
+                        type="button"
+                        role="tab"
+                        [attr.aria-selected]="filter() === 'nocount'"
+                        [class.on]="filter() === 'nocount'"
+                        (click)="filter.set('nocount')"
+                    >
+                        Sans compte
+                        @if (help.open() > 0) {
+                            <span class="pill">{{ help.open() }}</span>
+                        }
+                    </button>
+                }
             </div>
             @if (!isOwner) {
                 <a
@@ -39,17 +57,12 @@
                     <app-icon name="plus" [size]="16" />
                     <span class="new-label">Nouveau message</span>
                 </a>
-            } @else {
-                <a class="btn btn-outline btn-sm new-thread" routerLink="/owner/help">
-                    Sans compte
-                    @if (help.open() > 0) {
-                        <span class="pill">{{ help.open() }}</span>
-                    }
-                </a>
             }
         </div>
 
-        @if (threads.isLoading() && !threads.hasValue()) {
+        @if (filter() === "nocount") {
+            <app-help-requests />
+        } @else if (threads.isLoading() && !threads.hasValue()) {
             <div class="loading">
                 @for (i of [1, 2, 3]; track i) {
                     <div class="skeleton row-skeleton"></div>

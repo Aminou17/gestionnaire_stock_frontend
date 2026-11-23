@@ -25,7 +25,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
-import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
+import { formatPhone, toWhatsAppLink } from "../../../shared/phone";
 import { productInitials } from "../../products/product-look";
 import { CustomerForm } from "../customer-form/customer-form";
 import { reminderLink } from "../customer-reminder";
@@ -62,7 +62,6 @@ export class CustomerPage {
     private confirmDialog = viewChild<ElementRef<HTMLDialogElement>>("confirmBox");
 
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
-    protected telLink = (phone: string) => toTelLink(phone, this.shop.defaultCountryCode());
     protected whatsAppLink = (phone: string) =>
         toWhatsAppLink(phone, this.shop.defaultCountryCode());
     protected initials = productInitials;
@@ -142,7 +141,7 @@ export class CustomerPage {
         return months;
     });
 
-    // lien WhatsApp du rappel, vide sans numéro ou sans reste à payer
+    // lien WhatsApp du rappel, vide sans numéro ou sans dette
     reminder = computed(() => {
         const customer = this.data();
         return customer
@@ -152,7 +151,7 @@ export class CustomerPage {
 
     canManage = computed(() => !!this.data()?.is_active);
 
-    // reste à payer d'une vente non annulée
+    // dette d'une vente non annulée
     due(sale: CustomerSale) {
         return sale.status === "ACTIVE" ? Math.max(sale.total - sale.paid_amount, 0) : 0;
     }

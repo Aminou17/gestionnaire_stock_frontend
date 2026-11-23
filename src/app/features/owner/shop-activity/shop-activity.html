@@ -1,0 +1,139 @@
+<app-page-header
+    title="Activité de la boutique"
+    [subtitle]="shop.hasValue() ? shop.value().name : undefined"
+    section="Espace propriétaire"
+    [back]="backLink"
+    backLabel="Retour à la boutique"
+/>
+
+<div class="periods" role="group" aria-label="Période">
+    @for (period of periods; track period.days) {
+        <button
+            type="button"
+            class="period"
+            [attr.aria-pressed]="days() === period.days"
+            (click)="select(period.days)"
+        >
+            {{ period.label }}
+        </button>
+    }
+</div>
+
+@if (usage.isLoading() && !usage.hasValue()) {
+    <div class="skeleton kpis-skeleton"></div>
+    <div class="skeleton chart-skeleton"></div>
+} @else if (usage.error() && !usage.hasValue()) {
+    <section class="card block" role="alert">
+        Impossible de charger l'activité.
+        <button type="button" class="btn btn-outline btn-sm" (click)="usage.reload()">
+            Réessayer
+        </button>
+    </section>
+} @else if (total() === 0) {
+    <section class="card block empty">
+        <app-icon name="clock" [size]="28" />
+        <strong>Aucune page ouverte sur cette période</strong>
+        <span class="muted"
+            >Dès que l'équipe de la boutique utilisera l'application, tout apparaîtra ici.</span
+        >
+    </section>
+} @else {
+    <section class="kpis" aria-label="Chiffres clés">
+        <div class="card kpi">
+            <span class="kpi-icon tone-blue"><app-icon name="list" [size]="18" /></span>
+            <span class="kpi-label">Pages ouvertes</span>
+            <strong>{{ total() }}</strong>
+        </div>
+        <div class="card kpi">
+            <span class="kpi-icon tone-green"><app-icon name="check" [size]="18" /></span>
+            <span class="kpi-label">Jours d'utilisation</span>
+            <strong
+                >{{ activeDays() }} <small>sur {{ days() }}</small></strong
+            >
+        </div>
+        <div class="card kpi">
+            <span class="kpi-icon tone-violet"><app-icon name="users" [size]="18" /></span>
+            <span class="kpi-label">Part des vendeurs</span>
+            <strong>{{ employeeShare() }} %</strong>
+        </div>
+        <div class="card kpi">
+            <span class="kpi-icon tone-orange"><app-icon name="trending-up" [size]="18" /></span>
+            <span class="kpi-label">Marge sur la période</span>
+            <strong>
+                @if (margin(); as m) {
+                    {{ m.margin | fcfa }}
+                } @else {
+                    —
+                }
+            </strong>
+            @if (margin(); as m) {
+                @if (m.margin_rate !== null) {
+                    <small class="muted"
+                        >{{ m.margin_rate | number: "1.0-1" }} % du chiffre d'affaires</small
+                    >
+                }
+            }
+        </div>
+    </section>
+
+    <section class="card block" aria-labelledby="chart-title">
+        <div class="block-head">
+            <h2 id="chart-title">Pages ouvertes par jour</h2>
+            @if (topPage(); as top) {
+                <span class="muted">Page la plus ouverte : {{ label(top.page) }}</span>
+            }
+        </div>
+        <app-usage-bars [bars]="bars()" [labels]="true" style="--bars-height: 120px" />
+    </section>
+
+    <div class="two">
+        <section class="card block" aria-labelledby="sections-title">
+            <h2 id="sections-title">Par rubrique</h2>
+            <ul class="sections">
+                @for (section of sections(); track section.name) {
+                    <li>
+                        <span class="name">{{ section.name }}</span>
+                        <span class="bar" aria-hidden="true"
+                            ><span [style.width.%]="section.width"></span
+                        ></span>
+                        <span class="count">{{ section.views }}</span>
+                    </li>
+                }
+            </ul>
+        </section>
+
+        <section class="card block" aria-labelledby="pages-title">
+            <h2 id="pages-title">Pages les plus ouvertes</h2>
+            <ul class="ranking">
+                @for (page of pages().slice(0, 10); track page.page; let i = $index) {
+                    <li>
+                        <span class="rank">{{ i + 1 }}</span>
+                        <span class="page-name">{{ label(page.page) }}</span>
+                        <span class="count">
+                            {{ page.views }}
+                            @if (page.employee_views) {
+                                <small class="muted">dont {{ page.employee_views }} vendeurs</small>
+                            }
+                        </span>
+                    </li>
+                }
+            </ul>
+        </section>
+    </div>
+
+    <section class="card block" aria-labelledby="never-title">
+        <h2 id="never-title">Jamais ouvertes sur la période</h2>
+        @if (neverOpened().length === 0) {
+            <p class="muted">Toutes les pages ont été ouvertes au moins une fois.</p>
+        } @else {
+            <p class="muted note">
+                Ce que cette boutique n'utilise pas : de quoi décider ce qui mérite d'être payant.
+            </p>
+            <ul class="chips">
+                @for (name of neverOpened(); track name) {
+                    <li>{{ name }}</li>
+                }
+            </ul>
+        }
+    </section>
+}

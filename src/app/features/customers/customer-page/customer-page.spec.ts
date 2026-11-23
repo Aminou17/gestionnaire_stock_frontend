@@ -98,7 +98,7 @@ describe("CustomerPage", () => {
         expect(text()).toContain("Total dépensé");
         expect(el.querySelectorAll(".month").length).toBe(2);
         expect(text()).toContain("Vente #24");
-        expect(text()).toContain("Reste 6 500 F");
+        expect(text()).toContain("6 500 F");
     });
 
     it("should offer a WhatsApp reminder with the message when something is due", async () => {
@@ -110,10 +110,27 @@ describe("CustomerPage", () => {
         expect(decodeURIComponent(link.href)).toContain("6 500 F");
     });
 
+    it("should show the debt inside the main card, in place of the call and WhatsApp buttons", async () => {
+        await render();
+
+        expect(el.querySelector(".hero .due-card")).not.toBeNull();
+        expect(el.querySelector(".due-label")!.textContent).toBe("Dette");
+        expect(el.querySelector(".contact")).toBeNull();
+        expect(text()).not.toContain("Appeler");
+    });
+
     it("should not show the reminder when nothing is due", async () => {
         await render({ customer: { ...awa, due_amount: 0 } });
 
         expect(el.querySelector(".due-card")).toBeNull();
+    });
+
+    it("should offer a button to write on WhatsApp to a customer without debt", async () => {
+        await render({ customer: { ...awa, due_amount: 0 } });
+        const link = el.querySelector<HTMLAnchorElement>(".write")!;
+
+        expect(link.textContent).toContain("Écrire sur WhatsApp");
+        expect(link.href).toBe("https://wa.me/242061234567");
     });
 
     it("should let only the admin deactivate", async () => {

@@ -3,6 +3,7 @@ import { ActivatedRoute, provideRouter, Router } from "@angular/router";
 import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
+import { HelpService } from "../../core/help/help.service";
 import { SupportThread, SupportThreadDetail } from "../../core/support/support.model";
 import { SupportService } from "../../core/support/support.service";
 import { SupportInbox } from "./support-inbox";
@@ -43,7 +44,11 @@ const detail: SupportThreadDetail = {
 describe("SupportInbox", () => {
     let service: Record<string, ReturnType<typeof vi.fn>>;
 
-    const render = async (data: Record<string, unknown>, id: string | null = null) => {
+    const render = async (
+        data: Record<string, unknown>,
+        id: string | null = null,
+        tab: string | null = null,
+    ) => {
         service = {
             getThreads: vi.fn(() =>
                 of([thread(), thread({ id: 2, status: "CLOSED", subject: "Ancienne question" })]),
@@ -61,6 +66,14 @@ describe("SupportInbox", () => {
                 provideRouter([]),
                 { provide: SupportService, useValue: service },
                 {
+                    provide: HelpService,
+                    useValue: {
+                        open: () => 2,
+                        refreshOpen: vi.fn(),
+                        getRequests: () => of([]),
+                    },
+                },
+                {
                     provide: AuthService,
                     useValue: {
                         user: () => ({ id: 1, name: "Fatou", role: "admin", firstName: "Fatou" }),
@@ -72,7 +85,11 @@ describe("SupportInbox", () => {
                 {
                     provide: ActivatedRoute,
                     useValue: {
-                        snapshot: { data, paramMap: { get: () => id } },
+                        snapshot: {
+                            data,
+                            paramMap: { get: () => id },
+                            queryParamMap: { get: () => tab },
+                        },
                         paramMap: of({ get: () => id }),
                     },
                 },
@@ -162,5 +179,26 @@ describe("SupportInbox", () => {
         button.click();
 
         expect(service["setStatus"]).toHaveBeenCalledWith(1, "CLOSED");
+    });
+
+    it("le propriétaire a un onglet Sans compte avec le nombre de demandes", async () => {
+        const fixture = await render({ side: "owner" });
+        const text = fixture.nativeElement.textContent;
+
+        expect(text).toContain("Sans compte");
+        expect(text).toContain("2");
+    });
+
+    it("l'adresse ?onglet=sans-compte ouvre les demandes sans compte", async () => {
+        const fixture = await render({ side: "owner" }, null, "sans-compte");
+
+        expect(fixture.nativeElement.querySelector("app-help-requests")).not.toBeNull();
+        expect(fixture.nativeElement.textContent).not.toContain("Problème de caisse");
+    });
+
+    it("l'administrateur d'une boutique n'a pas l'onglet Sans compte", async () => {
+        const fixture = await render({ side: "user" });
+
+        expect(fixture.nativeElement.textContent).not.toContain("Sans compte");
     });
 });

@@ -136,14 +136,10 @@
         </button>
     </form>
 
-    <div class="signup">
-        <p>Nouveau sur {{ productName }} ?</p>
-        <a routerLink="/register" class="btn btn-outline btn-block">
-            <app-icon name="store" [size]="18" />
-            Créer ma boutique
-        </a>
-        <small>Essai gratuit, sans carte bancaire.</small>
-    </div>
+    <p class="signup">
+        Pas encore de compte ?
+        <a routerLink="/register">Créer ma boutique</a>
+    </p>
 
     <a routerLink="/help" class="help-link">
         <app-icon name="help" [size]="16" />

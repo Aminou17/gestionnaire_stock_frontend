@@ -197,13 +197,7 @@
                     <div>
                         <dt>Rôle</dt>
                         <dd>
-                            {{
-                                event.user_role === "admin"
-                                    ? "Administrateur"
-                                    : event.user_role === "manager"
-                                      ? "Employé"
-                                      : event.user_role
-                            }}
+                            {{ roleLabel(event.user_role) }}
                         </dd>
                     </div>
                 }
@@ -225,8 +219,8 @@
                 }
                 @if (eventPath(event); as path) {
                     <div>
-                        <dt>Page demandée</dt>
-                        <dd class="mono">{{ path }}</dd>
+                        <dt>Tentative</dt>
+                        <dd>{{ path }}</dd>
                     </div>
                 }
                 <div>

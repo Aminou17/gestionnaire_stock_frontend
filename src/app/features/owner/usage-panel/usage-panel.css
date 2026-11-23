@@ -1,0 +1,82 @@
+:host {
+    display: block;
+}
+
+.panel {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+    padding: 18px;
+}
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+h2 {
+    margin: 0;
+    font-size: var(--fs-heading);
+}
+
+.note,
+.footnote,
+.empty {
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
+.empty {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.rows {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 200px);
+    align-items: center;
+    gap: 16px;
+    min-height: 56px;
+    padding: 8px;
+    border-radius: 10px;
+    color: var(--text);
+    text-decoration: none;
+}
+
+.row:hover {
+    background: var(--surface-hover);
+}
+
+.who {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+.who strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.row-skeleton {
+    height: 56px;
+}
+
+@media (max-width: 560px) {
+    .row {
+        grid-template-columns: minmax(0, 1fr) 96px;
+        gap: 10px;
+    }
+}

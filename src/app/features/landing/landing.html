@@ -1,0 +1,210 @@
+<header class="top">
+    <div class="wrap top-inner">
+        <a class="brand" routerLink="/" aria-label="{{ productName }}, accueil">
+            <img src="/icons/icon-192.png" alt="" width="36" height="36" />
+            <span>{{ productName }}</span>
+        </a>
+
+        <nav class="top-nav" aria-label="Sur cette page">
+            <button type="button" (click)="scrollTo('raisons')">Pourquoi {{ productName }}</button>
+            <button type="button" (click)="scrollTo('apercu')">Aperçu</button>
+            <button type="button" (click)="scrollTo('demarrer')">Démarrer</button>
+        </nav>
+
+        <div class="top-actions">
+            <a routerLink="/login" class="link-login">Se connecter</a>
+            <a routerLink="/register" class="btn-top">Créer ma boutique</a>
+        </div>
+    </div>
+</header>
+
+<main>
+    <section class="hero">
+        <div class="wrap hero-inner">
+            <div class="hero-text">
+                <span class="pill rise" style="--i: 0">
+                    <app-icon name="check" [size]="14" /> Totalement gratuit
+                </span>
+                <h1 class="rise" style="--i: 1">Gérez votre boutique, sans prise de tête.</h1>
+                <p class="lead rise" style="--i: 2">
+                    Ventes, caisse et stock au même endroit, avec des alertes avant la rupture.
+                </p>
+
+                <div class="cta rise" style="--i: 3">
+                    <a #heroCta routerLink="/register" class="cta-main">
+                        <app-icon name="store" [size]="20" />
+                        Créer ma boutique
+                    </a>
+                    <a routerLink="/login" class="cta-second">Se connecter</a>
+                </div>
+            </div>
+
+            <div class="hero-art rise" style="--i: 3">
+                <div class="browser">
+                    <div class="browser-bar" aria-hidden="true">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <img
+                        src="/landing/pc-accueil.webp"
+                        width="1800"
+                        height="1125"
+                        alt="Accueil de {{
+                            productName
+                        }} sur ordinateur : ventes du jour, caisse, bénéfice et graphique de la semaine"
+                    />
+                </div>
+                <div class="phone phone-hero">
+                    <img
+                        class="for-small"
+                        src="/landing/tel-accueil.webp"
+                        width="780"
+                        height="1688"
+                        alt="Accueil sur téléphone : ventes du jour, argent en caisse, bénéfice et graphique de la semaine"
+                    />
+                    <img
+                        class="for-large"
+                        src="/landing/tel-vente.webp"
+                        width="780"
+                        height="1688"
+                        alt="Panier de vente sur téléphone avec le total et le bouton Encaisser"
+                    />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="atouts" aria-label="Les points forts">
+        <ul class="wrap atouts-list">
+            @for (atout of atouts; track atout.title; let i = $index) {
+                <li class="atout reveal" [style.--i]="i">
+                    <span class="atout-icon"><app-icon [name]="atout.icon" [size]="20" /></span>
+                    <span class="atout-text">
+                        <strong>{{ atout.title }}</strong>
+                        <span>{{ atout.text }}</span>
+                    </span>
+                </li>
+            }
+        </ul>
+    </section>
+
+    <section id="raisons" class="section">
+        <div class="wrap">
+            <div class="head reveal">
+                <span class="kicker">Pourquoi {{ productName }}</span>
+                <h2>Tout ce qu'il faut pour tenir une boutique</h2>
+                <p>
+                    Pas de tableur à recopier, pas de cahier à relire le soir. Chaque vente met tout
+                    à jour.
+                </p>
+            </div>
+
+            <ul class="reasons">
+                @for (reason of reasons; track reason.title; let i = $index) {
+                    <li class="reason reveal" [style.--i]="i % 3">
+                        <span class="reason-icon"
+                            ><app-icon [name]="reason.icon" [size]="22"
+                        /></span>
+                        <h3>{{ reason.title }}</h3>
+                        <p>{{ reason.text }}</p>
+                    </li>
+                }
+            </ul>
+
+            <ul class="also reveal" aria-label="Et aussi">
+                @for (item of also; track item) {
+                    <li>{{ item }}</li>
+                }
+            </ul>
+        </div>
+    </section>
+
+    <section id="apercu" class="section band">
+        <div class="wrap">
+            <div class="head reveal">
+                <span class="kicker">Aperçu</span>
+                <h2>Voyez-le en action</h2>
+                <p>De vraies pages de {{ productName }}, sur téléphone.</p>
+            </div>
+
+            <ul class="shots" (scroll)="onShotsScroll($event)">
+                @for (shot of shots; track shot.src; let i = $index) {
+                    <li class="shot reveal" [style.--i]="i">
+                        <div class="phone">
+                            <img
+                                [src]="shot.src"
+                                width="780"
+                                height="1688"
+                                loading="lazy"
+                                [alt]="shot.alt"
+                            />
+                        </div>
+                        <strong>{{ shot.label }}</strong>
+                        <span>{{ shot.title }}</span>
+                    </li>
+                }
+            </ul>
+
+            <div class="dots" aria-hidden="true">
+                @for (shot of shots; track shot.src; let i = $index) {
+                    <span [class.on]="i === shotIndex()"></span>
+                }
+            </div>
+        </div>
+    </section>
+
+    <section id="demarrer" class="section">
+        <div class="wrap">
+            <div class="head reveal">
+                <span class="kicker">Démarrer</span>
+                <h2>Démarrez en trois étapes</h2>
+            </div>
+
+            <ol class="steps">
+                @for (step of steps; track step.title; let i = $index) {
+                    <li class="step reveal" [style.--i]="i">
+                        <span class="step-num">{{ i + 1 }}</span>
+                        <h3>{{ step.title }}</h3>
+                        <p>{{ step.text }}</p>
+                    </li>
+                }
+            </ol>
+        </div>
+    </section>
+
+    <section class="final">
+        <div class="wrap final-inner reveal">
+            <h2>Envie d'essayer ?</h2>
+            <p>Totalement gratuit, sans carte bancaire.</p>
+            <div #finalCta class="cta cta-center">
+                <a routerLink="/register" class="cta-main">
+                    <app-icon name="store" [size]="20" />
+                    Créer ma boutique
+                </a>
+                <a routerLink="/login" class="cta-second">Se connecter</a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="foot">
+    <div class="wrap foot-inner">
+        <span>© {{ year }} {{ productName }} · {{ companyName }}</span>
+        <nav class="legal" aria-label="Informations légales">
+            <a routerLink="/privacy">Confidentialité</a>
+            <a routerLink="/terms">Conditions</a>
+            <a routerLink="/contact">Contact</a>
+        </nav>
+    </div>
+</footer>
+
+<!-- bouton fixe sur téléphone, une fois le bouton du haut de page sorti de l'écran -->
+<a
+    routerLink="/register"
+    class="sticky-cta"
+    [class.visible]="showSticky()"
+    [attr.tabindex]="showSticky() ? null : -1"
+    [attr.aria-hidden]="showSticky() ? null : true"
+>
+    <app-icon name="store" [size]="20" />
+    Créer ma boutique
+</a>

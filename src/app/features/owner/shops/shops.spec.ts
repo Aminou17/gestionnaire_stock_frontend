@@ -74,10 +74,12 @@ describe("Shops", () => {
         const el = fixture.nativeElement as HTMLElement;
 
         expect(el.querySelectorAll(".shop").length).toBe(2);
-        expect(el.querySelector(".kpis")?.textContent).toContain("Suspendues1");
+        expect(el.querySelector(".chips")?.textContent?.replace(/\s/g, "")).toContain(
+            "Suspendues1",
+        );
         expect(el.textContent).toContain("Awa · Bobo-Dioulasso");
-        expect(el.querySelectorAll(".tag").length).toBe(1);
-        expect(el.querySelector(".tag")?.textContent).toContain("Suspendue");
+        expect(el.querySelectorAll(".tag").length).toBe(2);
+        expect(el.querySelectorAll(".tag")[1]?.textContent).toContain("Suspendue");
     });
 
     it("should filter the list with the summary tiles", async () => {
@@ -87,7 +89,7 @@ describe("Shops", () => {
         ]);
         const el = fixture.nativeElement as HTMLElement;
 
-        (el.querySelectorAll(".kpi")[2] as HTMLButtonElement).click();
+        (el.querySelectorAll(".chip")[2] as HTMLButtonElement).click();
         await fixture.whenStable();
 
         const names = [...el.querySelectorAll(".shop a strong")].map((e) => e.textContent);
@@ -168,7 +170,7 @@ describe("Shops", () => {
         const el = fixture.nativeElement as HTMLElement;
 
         expect(el.querySelectorAll(".shop").length).toBe(1);
-        expect(el.querySelector(".kpis")?.textContent).toContain("Toutes1");
+        expect(el.querySelector(".chips")?.textContent?.replace(/\s/g, "")).toContain("Toutes1");
 
         fixture.componentInstance.view.set("deleted");
         await fixture.whenStable();
@@ -198,10 +200,10 @@ describe("Shops", () => {
         expect(label.getAttribute("data-tone")).toBe("ended");
     });
 
-    it("should show nothing when the shop has no trial", async () => {
+    it("should show Active when the shop has no trial", async () => {
         const fixture = await render([shop({ trial_ends_at: null })]);
 
-        expect(fixture.nativeElement.querySelector(".tag")).toBeNull();
+        expect(fixture.nativeElement.querySelector(".tag")?.textContent).toContain("Active");
     });
 
     it("should open the trial dialog from the menu", async () => {
@@ -314,7 +316,7 @@ describe("Shops", () => {
         await fixture.whenStable();
 
         expect(fixture.nativeElement.textContent).toContain("Impossible de charger les boutiques");
-        expect(fixture.nativeElement.querySelector(".kpis")?.textContent).toContain("–");
+        expect(fixture.nativeElement.querySelector(".chips")?.textContent).toContain("–");
     });
 
     it("should keep the card short: name, administrator and city only", async () => {

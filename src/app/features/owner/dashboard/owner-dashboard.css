@@ -1,30 +1,6 @@
 :host {
     display: grid;
-    gap: 20px;
-}
-
-.head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
     gap: 16px;
-}
-
-h1 {
-    margin: 0;
-    font-size: var(--fs-title);
-    font-weight: var(--fw-bold);
-    letter-spacing: -0.02em;
-}
-
-.head p {
-    margin: 4px 0 0;
-}
-
-.kpis {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 12px;
 }
 
 .kpi {
@@ -43,57 +19,19 @@ a.kpi:hover {
     border-color: var(--primary);
 }
 
-.kpi strong {
-    font-size: var(--fs-kpi);
-    letter-spacing: -0.02em;
-}
-
 .kpi strong.warn {
     color: var(--warning);
-}
-
-.kpi-label {
-    color: var(--text-muted);
-    font-size: var(--fs-small);
 }
 
 .kpi-icon {
     width: 40px;
     height: 40px;
-    display: grid;
-    place-items: center;
     margin-bottom: 8px;
-    border-radius: 12px;
-}
-
-.tone-blue {
-    background: var(--primary-soft);
-    color: var(--primary-text);
-}
-
-.tone-orange {
-    background: var(--warning-soft);
-    color: var(--warning);
-}
-
-.tone-green {
-    background: var(--success-soft);
-    color: var(--success);
-}
-
-.tone-violet {
-    background: var(--violet-soft);
-    color: var(--violet);
 }
 
 .grid {
     display: grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
     gap: 16px;
-}
-
-.wide {
-    grid-column: 1 / -1;
 }
 
 .panel {
@@ -164,17 +102,15 @@ h2 {
     font-weight: var(--fw-semibold);
 }
 
-.safe {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 0;
-    color: var(--success);
-    font-weight: var(--fw-medium);
+/* lignes de sécurité et de messages dans « À suivre » */
+.avatar.alert-icon {
+    background: var(--warning-soft);
+    color: var(--warning);
 }
 
-.safe.warn {
-    color: var(--warning);
+.avatar.message-icon {
+    background: var(--violet-soft);
+    color: var(--violet);
 }
 
 .empty {
@@ -192,13 +128,5 @@ h2 {
 @media (max-width: 899px) {
     .kpis {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .grid {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
-    .head .btn {
-        display: none;
     }
 }

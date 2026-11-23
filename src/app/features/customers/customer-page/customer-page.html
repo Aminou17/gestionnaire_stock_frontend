@@ -1,6 +1,6 @@
 <app-page-header
     [title]="data()?.name ?? 'Client'"
-    section="Clients"
+    section="Dettes et clients"
     [back]="back.link"
     [backLabel]="back.label"
 >
@@ -57,23 +57,43 @@
                     <p class="note">{{ customer.note }}</p>
                 }
 
-                @if (customer.phone) {
-                    <div class="contact">
-                        <a class="btn btn-outline" [href]="telLink(customer.phone)">
-                            <app-icon name="phone" [size]="18" />
-                            Appeler
-                        </a>
-                        <a
-                            class="btn btn-outline"
-                            [href]="whatsAppLink(customer.phone)"
-                            target="_blank"
-                            rel="noopener"
-                            [attr.aria-label]="'Écrire sur WhatsApp à ' + customer.name"
-                        >
-                            <app-whatsapp-icon [size]="18" />
-                            WhatsApp
-                        </a>
-                    </div>
+                @if (customer.due_amount > 0) {
+                    <section class="due-card" aria-label="Dette">
+                        <div class="due-text">
+                            <span class="due-label">Dette</span>
+                            <strong class="due-amount">{{ customer.due_amount | fcfa }}</strong>
+                        </div>
+                        @if (reminder(); as link) {
+                            <a
+                                class="btn btn-primary remind"
+                                [href]="link"
+                                target="_blank"
+                                rel="noopener"
+                            >
+                                <app-whatsapp-icon [size]="18" />
+                                Relancer sur WhatsApp
+                            </a>
+                        } @else if (canManage()) {
+                            <button
+                                type="button"
+                                class="btn btn-outline remind"
+                                (click)="editCustomer()"
+                            >
+                                Ajouter un numéro pour le relancer
+                            </button>
+                        }
+                    </section>
+                } @else if (customer.phone) {
+                    <a
+                        class="btn btn-outline write"
+                        [href]="whatsAppLink(customer.phone)"
+                        target="_blank"
+                        rel="noopener"
+                        [attr.aria-label]="'Écrire sur WhatsApp à ' + customer.name"
+                    >
+                        <app-whatsapp-icon [size]="18" />
+                        Écrire sur WhatsApp
+                    </a>
                 } @else if (canManage()) {
                     <button type="button" class="link-btn" (click)="editCustomer()">
                         <app-icon name="plus" [size]="16" />
@@ -81,34 +101,6 @@
                     </button>
                 }
             </section>
-
-            @if (customer.due_amount > 0) {
-                <section class="due-card" aria-label="Reste à payer">
-                    <div class="due-text">
-                        <span class="due-label">Reste à payer</span>
-                        <strong class="due-amount">{{ customer.due_amount | fcfa }}</strong>
-                    </div>
-                    @if (reminder(); as link) {
-                        <a
-                            class="btn btn-primary remind"
-                            [href]="link"
-                            target="_blank"
-                            rel="noopener"
-                        >
-                            <app-whatsapp-icon [size]="18" />
-                            Relancer sur WhatsApp
-                        </a>
-                    } @else if (canManage()) {
-                        <button
-                            type="button"
-                            class="btn btn-outline remind"
-                            (click)="editCustomer()"
-                        >
-                            Ajouter un numéro pour le relancer
-                        </button>
-                    }
-                </section>
-            }
 
             <section class="card stats" aria-label="Résumé des achats">
                 <div>
@@ -193,9 +185,9 @@
                                             @if (sale.status === "CANCELLED") {
                                                 <span class="badge badge-danger">Remboursée</span>
                                             } @else if (due(sale) > 0) {
-                                                <span class="badge badge-warning"
-                                                    >Reste {{ due(sale) | fcfa }}</span
-                                                >
+                                                <span class="badge badge-warning">{{
+                                                    due(sale) | fcfa
+                                                }}</span>
                                             }
                                         </span>
                                     </a>

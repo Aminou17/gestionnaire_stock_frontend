@@ -5,9 +5,9 @@ import { adminGuard } from "./core/auth/admin.guard";
 import { authGuard } from "./core/auth/auth.guard";
 import { guestGuard } from "./core/auth/guest.guard";
 import { ownerGuard } from "./core/auth/owner.guard";
+import { moduleGuard, subscriptionGuard } from "./core/modules/module.guard";
 import { passwordChangeGuard } from "./core/auth/password-change.guard";
 import { shopGuard } from "./core/auth/shop.guard";
-import { welcomeGuard } from "./features/auth/welcome/welcome.guard";
 import { AuthLayout } from "./features/auth/auth-layout/auth-layout";
 import { unsavedChangesGuard } from "./features/settings/unsaved-changes.guard";
 import { MainLayout } from "./layout/main-layout/main-layout";
@@ -18,7 +18,14 @@ const comingSoon = () => import("./features/coming-soon/coming-soon").then((m) =
 const upcoming: [string, string, boolean][] = [];
 
 export const routes: Routes = [
-    { path: "", pathMatch: "full", redirectTo: "dashboard" },
+    {
+        // visiteur : la page d'accueil ; déjà connecté : directement le tableau de bord
+        path: "",
+        pathMatch: "full",
+        title: "Boutiki · Gérez votre boutique, sans prise de tête",
+        canActivate: [guestGuard],
+        loadComponent: () => import("./features/landing/landing").then((m) => m.Landing),
+    },
     {
         // le lien reçu par e-mail s'ouvre même si quelqu'un est déjà connecté sur cet appareil
         path: "reset-password",
@@ -51,12 +58,6 @@ export const routes: Routes = [
         loadComponent: () => import("./features/legal/contact/contact").then((m) => m.Contact),
     },
     {
-        path: "welcome",
-        title: "Bienvenue",
-        canActivate: [guestGuard],
-        loadComponent: () => import("./features/auth/welcome/welcome").then((m) => m.Welcome),
-    },
-    {
         path: "",
         component: AuthLayout,
         canActivate: [guestGuard],
@@ -64,13 +65,11 @@ export const routes: Routes = [
             {
                 path: "login",
                 title: "Connexion",
-                canActivate: [welcomeGuard],
                 loadComponent: () => import("./features/auth/login/login").then((m) => m.Login),
             },
             {
                 path: "register",
                 title: "Créer ma boutique",
-                canActivate: [welcomeGuard],
                 loadComponent: () =>
                     import("./features/auth/register/register").then((m) => m.Register),
             },
@@ -113,7 +112,7 @@ export const routes: Routes = [
         path: "",
         component: MainLayout,
         canActivate: [authGuard, shopGuard, accessGuard],
-        canActivateChild: [passwordChangeGuard],
+        canActivateChild: [passwordChangeGuard, moduleGuard],
         children: [
             {
                 path: "dashboard",
@@ -150,7 +149,7 @@ export const routes: Routes = [
             },
             {
                 path: "admin",
-                title: "Espace admin",
+                title: "Bilan",
                 canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/admin-space/admin-space").then((m) => m.AdminSpace),
@@ -218,7 +217,7 @@ export const routes: Routes = [
             {
                 path: "subscription",
                 title: "Abonnement",
-                canActivate: [adminGuard],
+                canActivate: [adminGuard, subscriptionGuard],
                 loadComponent: () =>
                     import("./features/subscription/subscription").then((m) => m.Subscription),
             },
@@ -282,7 +281,7 @@ export const routes: Routes = [
             },
             {
                 path: "customers",
-                title: "Clients",
+                title: "Dettes et clients",
                 loadComponent: () =>
                     import("./features/customers/customers").then((m) => m.Customers),
             },
@@ -302,6 +301,7 @@ export const routes: Routes = [
             {
                 path: "cash/sessions",
                 title: "Historique des caisses",
+                canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/cash/cash-sessions/cash-sessions").then(
                         (m) => m.CashSessions,
@@ -486,6 +486,20 @@ export const routes: Routes = [
                 loadComponent: () => import("./features/owner/shops/shops").then((m) => m.Shops),
             },
             {
+                path: "shops/:id/access",
+                title: "Accès de la boutique",
+                loadComponent: () =>
+                    import("./features/owner/shop-access/shop-access").then((m) => m.ShopAccess),
+            },
+            {
+                path: "shops/:id/activity",
+                title: "Activité de la boutique",
+                loadComponent: () =>
+                    import("./features/owner/shop-activity/shop-activity").then(
+                        (m) => m.ShopActivity,
+                    ),
+            },
+            {
                 path: "shops/:id",
                 title: "Boutique",
                 loadComponent: () =>
@@ -493,26 +507,20 @@ export const routes: Routes = [
             },
             {
                 path: "support",
-                title: "Messages des boutiques",
+                title: "Messages",
                 data: { side: "owner" },
                 loadComponent: () =>
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
-            },
-            {
-                path: "help",
-                title: "Demandes sans compte",
-                loadComponent: () =>
-                    import("./features/owner/help-requests/help-requests").then(
-                        (m) => m.HelpRequests,
-                    ),
             },
             {
                 path: "support/:id",
-                title: "Messages des boutiques",
+                title: "Messages",
                 data: { side: "owner" },
                 loadComponent: () =>
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
             },
+            // les demandes sans compte sont un onglet de la boîte de messages
+            { path: "help", redirectTo: "support?onglet=sans-compte" },
             {
                 path: "security",
                 title: "Sécurité",
@@ -590,9 +598,6 @@ export const routes: Routes = [
                         (m) => m.SettingsPassword,
                     ),
             },
-            // anciennes adresses
-            { path: "mail", redirectTo: "settings/mail" },
-            { path: "password", redirectTo: "settings/account" },
         ],
     },
     { path: "**", redirectTo: "dashboard" },

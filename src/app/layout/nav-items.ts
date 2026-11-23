@@ -17,19 +17,19 @@ export interface NavSection {
     items: NavItem[];
 }
 
-// Accueil, Ventes, Clients, Caisse et Dépenses en direct ; le reste est rangé en deux groupes qui
-// s'ouvrent seuls quand on est dans leurs pages, comme Shopify : peu de lignes à lire
+// Accueil, Ventes, Clients, Caisse, Dépenses et Bilan en direct ; le reste est rangé dans le groupe
+// Gestion, qui s'ouvre seul quand on est dans ses pages, comme Shopify : peu de lignes à lire
 export const SECTIONS: NavSection[] = [
     {
         items: [
             { label: "Accueil", path: "/dashboard", icon: "dashboard" },
             { label: "Ventes", path: "/sales", icon: "cart" },
-            { label: "Clients", path: "/customers", icon: "user" },
+            { label: "Dettes et clients", path: "/customers", icon: "user" },
             { label: "Caisse", path: "/cash", icon: "banknote" },
             { label: "Dépenses", path: "/expenses", icon: "receipt", adminOnly: true },
-            { label: "Espace admin", path: "/admin", icon: "shield", adminOnly: true },
+            { label: "Bilan", path: "/admin", icon: "shield", adminOnly: true },
             {
-                label: "Stock",
+                label: "Gestion",
                 icon: "package",
                 children: [
                     { label: "Produits", path: "/products", icon: "package" },
@@ -41,7 +41,7 @@ export const SECTIONS: NavSection[] = [
                         adminOnly: true,
                     },
                     {
-                        label: "Corriger le stock",
+                        label: "Corriger la quantité",
                         path: "/products",
                         queryParams: { adjust: "1" },
                         icon: "edit",
@@ -64,13 +64,7 @@ export const SECTIONS: NavSection[] = [
                         adminOnly: true,
                     },
                     { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
-                ],
-            },
-            {
-                label: "Équipe",
-                icon: "users",
-                adminOnly: true,
-                children: [
+                    // l'équipe : qui a accès, et ce qui a été fait
                     { label: "Utilisateurs", path: "/users", icon: "users", adminOnly: true },
                     {
                         label: "Historique des actions",
@@ -92,6 +86,7 @@ export const FOOTER_LINKS: NavItem[] = [
 // pages proposées par la recherche, selon le rôle
 export function searchablePages(
     isAdmin: boolean,
+    options: { subscriptions?: boolean; allowsPath?: (path: string) => boolean } = {},
 ): { label: string; hint: string; path: string; icon: IconName }[] {
     const pages = SECTIONS.flatMap((section) =>
         section.items.flatMap((item) =>
@@ -102,7 +97,16 @@ export function searchablePages(
         ),
     )
         .filter((page) => isAdmin || !page.adminOnly)
-        .map((page) => ({ label: page.label, hint: page.hint, path: page.path!, icon: page.icon }));
+        .map((page) => ({
+            label: page.label,
+            // une fonction hors de la formule reste proposée, avec la mention Abonnement
+            hint:
+                options.allowsPath?.(page.path!) === false
+                    ? `${page.hint} · Abonnement`
+                    : page.hint,
+            path: page.path!,
+            icon: page.icon,
+        }));
 
     return [
         { label: "Nouvelle vente", hint: "Action", path: "/sales/new", icon: "plus" },
@@ -118,7 +122,7 @@ export function searchablePages(
             : []),
         ...pages,
         { label: "Paramètres", hint: "Compte", path: "/settings", icon: "settings" },
-        ...(isAdmin
+        ...(isAdmin && options.subscriptions
             ? [
                   {
                       label: "Abonnement",

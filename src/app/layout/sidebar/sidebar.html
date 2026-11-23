@@ -77,6 +77,9 @@
                                 >
                                     <app-icon [name]="child.icon" />
                                     <span class="label">{{ child.label }}</span>
+                                    @if (access.isLocked(child.path)) {
+                                        <app-icon name="lock" [size]="14" class="lock" />
+                                    }
                                     @if (child.path === "/alerts" && alerts.count() > 0) {
                                         <span class="count">{{ alerts.count() }}</span>
                                     }
@@ -94,6 +97,9 @@
                         >
                             <app-icon [name]="item.icon" />
                             <span class="label">{{ item.label }}</span>
+                            @if (access.isLocked(item.path)) {
+                                <app-icon name="lock" [size]="14" class="lock" />
+                            }
                         </a>
                     }
                 }
@@ -208,6 +214,9 @@
                     >
                         <span class="tile-icon"><app-icon [name]="child.icon" [size]="22" /></span>
                         <span class="tile-label">{{ child.label }}</span>
+                        @if (access.isLocked(child.path)) {
+                            <app-icon name="lock" [size]="14" class="tile-lock" />
+                        }
                         @if (child.path === "/alerts" && alerts.count() > 0) {
                             <span class="count tile-count">{{ alerts.count() }}</span>
                         }

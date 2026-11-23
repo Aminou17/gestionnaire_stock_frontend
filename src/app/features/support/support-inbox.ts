@@ -9,21 +9,32 @@ import { map } from "rxjs";
 import { SupportSide, SupportThread } from "../../core/support/support.model";
 import { HelpService } from "../../core/help/help.service";
 import { SupportService } from "../../core/support/support.service";
+import { HelpRequests } from "../owner/help-requests/help-requests";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { BackLink } from "../../shared/back-link/back-link";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
 
-type Filter = "open" | "closed";
+// "nocount" : les demandes envoyées depuis la page de connexion (propriétaire seulement)
+type Filter = "open" | "closed" | "nocount";
 
 export const MAX_MESSAGE = 2000;
 
 // La messagerie d'assistance : liste des conversations à gauche, conversation à droite.
 // Les utilisateurs d'une boutique écrivent au support ; le propriétaire lit et répond.
 // Sur téléphone on voit l'un ou l'autre.
-import { BackLink } from "../../shared/back-link/back-link";
 @Component({
     selector: "app-support-inbox",
-    imports: [DatePipe, FormsModule, RouterLink, BackLink, PageHeader, Icon, EmptyState],
+    imports: [
+        DatePipe,
+        FormsModule,
+        RouterLink,
+        BackLink,
+        PageHeader,
+        Icon,
+        EmptyState,
+        HelpRequests,
+    ],
     templateUrl: "./support-inbox.html",
     styleUrl: "./support-inbox.css",
 })
@@ -49,7 +60,12 @@ export class SupportInbox {
         return Number.isInteger(id) && id > 0 ? id : null;
     });
 
-    protected filter = signal<Filter>("open");
+    // l'ancienne adresse /owner/help ouvre directement l'onglet « Sans compte »
+    protected filter = signal<Filter>(
+        this.isOwner && this.route.snapshot.queryParamMap.get("onglet") === "sans-compte"
+            ? "nocount"
+            : "open",
+    );
 
     protected threads = rxResource({ stream: () => this.support.getThreads(this.side) });
 
@@ -61,7 +77,7 @@ export class SupportInbox {
     protected list = computed(() => {
         const all = this.threads.hasValue() ? this.threads.value() : [];
         return all.filter((t) =>
-            this.filter() === "open" ? t.status === "OPEN" : t.status === "CLOSED",
+            this.filter() === "closed" ? t.status === "CLOSED" : t.status === "OPEN",
         );
     });
 
@@ -100,7 +116,7 @@ export class SupportInbox {
     }
 
     protected title() {
-        return this.isOwner ? "Messages des boutiques" : "Assistance";
+        return this.isOwner ? "Messages" : "Assistance";
     }
 
     protected subtitle() {

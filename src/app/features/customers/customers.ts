@@ -36,7 +36,7 @@ const SORTS: { value: CustomerSort; label: string }[] = [
     { value: "recent", label: "Récents" },
     { value: "name", label: "Nom" },
     { value: "spent", label: "Plus gros achats" },
-    { value: "due", label: "Plus gros restes" },
+    { value: "due", label: "Plus grosses dettes" },
 ];
 
 @Component({
@@ -124,7 +124,7 @@ export class Customers {
     }
     firstLoad = computed(() => this.customers.isLoading() && !this.last());
 
-    // le tri par défaut suit la puce : les plus gros restes d'abord quand on relance
+    // le tri par défaut suit la puce : les plus grosses dettes d'abord quand on relance
     defaultSort = computed<CustomerSort>(() => (this.unpaid() ? "due" : "recent"));
 
     // filtres choisis dans la fenêtre (hors recherche, puces et tri par défaut), en petites puces
@@ -182,7 +182,7 @@ export class Customers {
         this.page.set(1);
     }
 
-    // la fenêtre remet tout à zéro, la puce Reste à payer garde son choix
+    // la fenêtre remet tout à zéro, la puce Dettes garde son choix
     resetPanel() {
         this.status.set("active");
         this.sort.set(this.defaultSort());

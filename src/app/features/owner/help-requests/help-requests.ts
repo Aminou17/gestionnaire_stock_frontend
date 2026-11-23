@@ -6,15 +6,14 @@ import { FormsModule } from "@angular/forms";
 
 import { HelpRequest, helpReasonLabel } from "../../../core/help/help.model";
 import { HelpService } from "../../../core/help/help.service";
-import { PageHeader } from "../../../layout/page-header/page-header";
 import { EmptyState } from "../../../shared/empty-state/empty-state";
-import { Icon } from "../../../shared/icon/icon";
 
 // Demandes envoyées depuis la page de connexion par des personnes sans accès à leur compte.
 // On y répond ici : la réponse part par e-mail à l'adresse laissée.
+// Affichée dans l'onglet « Sans compte » de la boîte de messages.
 @Component({
     selector: "app-help-requests",
-    imports: [DatePipe, FormsModule, PageHeader, EmptyState, Icon],
+    imports: [DatePipe, FormsModule, EmptyState],
     templateUrl: "./help-requests.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./help-requests.css"],
 })

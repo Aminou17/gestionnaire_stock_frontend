@@ -127,88 +127,106 @@
                         </div>
                     }
 
-                    <div class="field">
-                        <div class="field-head">
-                            <label for="supplier">Fournisseur</label>
-                            <button type="button" class="add-link" (click)="openSupplierForm()">
-                                <app-icon name="plus" [size]="14" /> Nouveau
-                            </button>
-                        </div>
-                        <select id="supplier" class="input" formControlName="supplierId">
-                            <option [ngValue]="0">Aucun</option>
-                            @for (supplier of supplierList(); track supplier.id) {
-                                <option [ngValue]="supplier.id">{{ supplier.name }}</option>
-                            }
-                        </select>
-                    </div>
-
-                    @if (addingSupplier()) {
-                        <!-- pas de <form> imbriqué : Entrée ajoute le fournisseur, pas le produit -->
-                        <div
-                            class="new-supplier"
-                            [formGroup]="supplierForm"
-                            (keydown.enter)="$event.preventDefault(); addSupplier()"
-                        >
-                            <strong>Nouveau fournisseur</strong>
-                            @if (supplierError()) {
-                                <div class="alert alert-error" role="alert">
-                                    {{ supplierError() }}
-                                </div>
-                            }
-                            <label class="field">
-                                <span>Nom</span>
-                                <input
-                                    class="input"
-                                    type="text"
-                                    formControlName="name"
-                                    maxlength="100"
-                                    placeholder="Ex. Tissus du Faso"
-                                    [class.invalid]="
-                                        supplierForm.controls.name.touched &&
-                                        supplierForm.controls.name.invalid
-                                    "
-                                />
-                                @if (
-                                    supplierForm.controls.name.touched &&
-                                    supplierForm.controls.name.invalid
-                                ) {
-                                    <small class="field-error" role="alert"
-                                        >Le nom est obligatoire.</small
-                                    >
-                                }
-                            </label>
-                            <label class="field">
-                                <span>Téléphone</span>
-                                <input
-                                    class="input"
-                                    type="tel"
-                                    formControlName="telephone"
-                                    maxlength="50"
-                                    placeholder="Facultatif"
-                                />
-                            </label>
-                            <div class="inline-actions">
+                    @if (!access.allows("purchases")) {
+                        <div class="field">
+                            <div class="field-head">
+                                <label for="supplier-locked">Fournisseur</label>
                                 <button
                                     type="button"
-                                    class="btn btn-outline btn-sm"
-                                    [disabled]="savingSupplier()"
-                                    (click)="cancelSupplier()"
+                                    class="add-link"
+                                    (click)="showSupplierLocked()"
                                 >
-                                    Annuler
-                                </button>
-                                <button
-                                    type="button"
-                                    class="btn btn-primary btn-sm"
-                                    [disabled]="savingSupplier()"
-                                    (click)="addSupplier()"
-                                >
-                                    @if (savingSupplier()) {
-                                        <span class="spinner"></span>
-                                    }
-                                    Créer
+                                    <app-icon name="lock" [size]="14" /> Abonnement
                                 </button>
                             </div>
+                            <select id="supplier-locked" class="input" disabled>
+                                <option>Aucun</option>
+                            </select>
                         </div>
+                    } @else {
+                        <div class="field">
+                            <div class="field-head">
+                                <label for="supplier">Fournisseur</label>
+                                <button type="button" class="add-link" (click)="openSupplierForm()">
+                                    <app-icon name="plus" [size]="14" /> Nouveau
+                                </button>
+                            </div>
+                            <select id="supplier" class="input" formControlName="supplierId">
+                                <option [ngValue]="0">Aucun</option>
+                                @for (supplier of supplierList(); track supplier.id) {
+                                    <option [ngValue]="supplier.id">{{ supplier.name }}</option>
+                                }
+                            </select>
+                        </div>
+
+                        @if (addingSupplier()) {
+                            <!-- pas de <form> imbriqué : Entrée ajoute le fournisseur, pas le produit -->
+                            <div
+                                class="new-supplier"
+                                [formGroup]="supplierForm"
+                                (keydown.enter)="$event.preventDefault(); addSupplier()"
+                            >
+                                <strong>Nouveau fournisseur</strong>
+                                @if (supplierError()) {
+                                    <div class="alert alert-error" role="alert">
+                                        {{ supplierError() }}
+                                    </div>
+                                }
+                                <label class="field">
+                                    <span>Nom</span>
+                                    <input
+                                        class="input"
+                                        type="text"
+                                        formControlName="name"
+                                        maxlength="100"
+                                        placeholder="Ex. Tissus du Faso"
+                                        [class.invalid]="
+                                            supplierForm.controls.name.touched &&
+                                            supplierForm.controls.name.invalid
+                                        "
+                                    />
+                                    @if (
+                                        supplierForm.controls.name.touched &&
+                                        supplierForm.controls.name.invalid
+                                    ) {
+                                        <small class="field-error" role="alert"
+                                            >Le nom est obligatoire.</small
+                                        >
+                                    }
+                                </label>
+                                <label class="field">
+                                    <span>Téléphone</span>
+                                    <input
+                                        class="input"
+                                        type="tel"
+                                        formControlName="telephone"
+                                        maxlength="50"
+                                        placeholder="Facultatif"
+                                    />
+                                </label>
+                                <div class="inline-actions">
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline btn-sm"
+                                        [disabled]="savingSupplier()"
+                                        (click)="cancelSupplier()"
+                                    >
+                                        Annuler
+                                    </button>
+                                    <button
+                                        type="button"
+                                        class="btn btn-primary btn-sm"
+                                        [disabled]="savingSupplier()"
+                                        (click)="addSupplier()"
+                                    >
+                                        @if (savingSupplier()) {
+                                            <span class="spinner"></span>
+                                        }
+                                        Créer
+                                    </button>
+                                </div>
+                            </div>
+                        }
                     }
 
                     @if (categories.error() || suppliers.error()) {

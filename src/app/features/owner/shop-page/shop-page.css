@@ -22,11 +22,52 @@
     font-size: var(--fs-lead);
 }
 
+/* carte de tête : statut, menu, puis les quelques infos utiles */
+.hero {
+    display: grid;
+    gap: 16px;
+    padding: 20px;
+}
+
+.hero-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.hero-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--icon-bg);
+    color: var(--icon-color);
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+    text-transform: uppercase;
+}
+
+.hero-text {
+    display: grid;
+    flex: 1;
+    gap: 4px;
+    justify-items: start;
+    min-width: 0;
+}
+
+.hero app-action-menu {
+    --menu-btn-size: 44px;
+}
+
 .facts {
     margin: 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 14px 20px;
+    gap: 16px 24px;
 }
 
 .facts dt {
@@ -42,22 +83,6 @@
 
 .facts .wide {
     grid-column: 1 / -1;
-}
-
-.trial {
-    color: var(--primary-text);
-}
-
-.trial[data-tone="ok"] {
-    color: var(--success);
-}
-
-.trial[data-tone="warn"] {
-    color: var(--warning);
-}
-
-.trial[data-tone="ended"] {
-    color: var(--danger);
 }
 
 .deleted-banner {
@@ -114,12 +139,6 @@
     justify-content: flex-end;
 }
 
-.hint {
-    margin: 0;
-    font-size: var(--fs-small);
-    line-height: 1.5;
-}
-
 .trial-form {
     display: flex;
     align-items: flex-end;
@@ -128,21 +147,6 @@
 
 .trial-form .field {
     flex: 1;
-}
-
-.status-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-}
-
-.status-row p {
-    margin: 0;
-    font-size: var(--fs-body);
-    line-height: 1.5;
 }
 
 .empty {
@@ -169,8 +173,7 @@
 }
 
 @media (max-width: 640px) {
-    .account,
-    .status-row {
+    .account {
         flex-direction: column;
         align-items: stretch;
     }
@@ -180,7 +183,8 @@
     }
 
     .account-actions .btn {
-        flex: 1;
+        flex: 1 1 auto;
+        white-space: nowrap;
     }
 
     .trial-form {
@@ -249,22 +253,54 @@
     cursor: pointer;
 }
 
-.trial[data-tone="ok"] {
-    color: var(--success);
+/* accès directs : accès de la boutique et activité détaillée */
+.tools {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
 }
 
-.trial[data-tone="warn"] {
-    color: var(--warning);
+.tool {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 64px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    transition:
+        border-color 0.15s,
+        background 0.15s;
 }
 
-.trial[data-tone="ok"] {
-    color: var(--success);
+.tool:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
 }
 
-.trial[data-tone="warn"] {
-    color: var(--warning);
+.tool-icon {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--primary-soft);
+    color: var(--primary-text);
 }
 
-.trial[data-tone="ended"] {
-    color: var(--danger);
+.tool-text {
+    display: grid;
+    flex: 1;
+    gap: 2px;
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .tools {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }

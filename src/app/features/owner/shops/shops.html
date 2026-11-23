@@ -1,58 +1,49 @@
-<div class="head">
-    <h1>Boutiques</h1>
-    <button type="button" class="btn btn-primary new-shop" (click)="openNewShop()">
+<app-page-header title="Boutiques" section="Espace propriétaire">
+    <button type="button" class="btn btn-primary btn-sm new-shop" (click)="openNewShop()">
         <app-icon name="plus" [size]="18" />
-        <span>Nouvelle boutique</span>
+        <span>Nouvelle</span>
     </button>
-</div>
+</app-page-header>
 
-<!-- les chiffres du résumé servent aussi de filtres, comme chez Stripe -->
-<section class="kpis" role="group" aria-label="Afficher">
+<!-- les compteurs servent aussi de filtres -->
+<div class="chips" role="group" aria-label="Afficher">
     <button
         type="button"
-        class="card kpi"
-        [class.selected]="view() === 'all'"
+        class="chip"
         [attr.aria-pressed]="view() === 'all'"
         (click)="view.set('all')"
     >
-        <span class="kpi-label">Toutes</span>
-        <strong>{{ shops.hasValue() ? all().length : "–" }}</strong>
+        Toutes <span class="count">{{ shops.hasValue() ? all().length : "–" }}</span>
     </button>
     <button
         type="button"
-        class="card kpi"
-        [class.selected]="view() === 'ACTIVE'"
+        class="chip"
         [attr.aria-pressed]="view() === 'ACTIVE'"
         (click)="view.set('ACTIVE')"
     >
-        <span class="kpi-label"><i class="dot dot-success"></i>Actives</span>
-        <strong>{{ shops.hasValue() ? activeCount() : "–" }}</strong>
+        <i class="dot dot-success"></i>Actives
+        <span class="count">{{ shops.hasValue() ? activeCount() : "–" }}</span>
     </button>
     <button
         type="button"
-        class="card kpi"
-        [class.selected]="view() === 'SUSPENDED'"
+        class="chip"
         [attr.aria-pressed]="view() === 'SUSPENDED'"
         (click)="view.set('SUSPENDED')"
     >
-        <span class="kpi-label"><i class="dot dot-warning"></i>Suspendues</span>
-        <strong [class.warn]="suspendedCount() > 0">{{
-            shops.hasValue() ? suspendedCount() : "–"
-        }}</strong>
+        <i class="dot dot-warning"></i>Suspendues
+        <span class="count">{{ shops.hasValue() ? suspendedCount() : "–" }}</span>
     </button>
     @if (deletedCount() > 0 || view() === "deleted") {
         <button
             type="button"
-            class="card kpi"
-            [class.selected]="view() === 'deleted'"
+            class="chip"
             [attr.aria-pressed]="view() === 'deleted'"
             (click)="view.set('deleted')"
         >
-            <span class="kpi-label"><i class="dot dot-muted"></i>Supprimées</span>
-            <strong>{{ deletedCount() }}</strong>
+            <i class="dot dot-muted"></i>Supprimées <span class="count">{{ deletedCount() }}</span>
         </button>
     }
-</section>
+</div>
 
 <section class="card list-card">
     <div class="toolbar">
@@ -148,6 +139,8 @@
                                 <span class="tag" [attr.data-tone]="trial.tone">{{
                                     trial.label
                                 }}</span>
+                            } @else {
+                                <span class="tag" data-tone="ok">Active</span>
                             }
                             <app-action-menu
                                 [items]="actionsOf(shop)"
@@ -170,10 +163,6 @@
         />
     }
 </section>
-
-<button type="button" class="fab" (click)="openNewShop()" aria-label="Nouvelle boutique">
-    <app-icon name="plus" [size]="24" />
-</button>
 
 <app-new-shop-dialog (created)="shops.reload()" />
 

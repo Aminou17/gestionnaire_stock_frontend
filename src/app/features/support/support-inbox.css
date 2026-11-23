@@ -35,6 +35,7 @@
 /* la classe globale .tabs ajoute un trait et des marges : on les annule ici */
 .tabs {
     display: flex;
+    flex: 1;
     gap: 4px;
     padding: 0;
     border-bottom: 0;
@@ -47,10 +48,12 @@
 
 .tabs button {
     display: inline-flex;
+    flex: 1;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    min-height: 36px;
-    padding: 0 12px;
+    min-height: 40px;
+    padding: 0 8px;
     border: 0;
     border-radius: 999px;
     background: none;
@@ -300,6 +303,15 @@ textarea.input {
 .row-skeleton {
     height: 56px;
     border-radius: 10px;
+}
+
+/* onglet « Sans compte » : la liste prend toute la largeur, sans volet de conversation */
+.inbox.help-mode {
+    grid-template-columns: 1fr;
+}
+
+.inbox.help-mode .detail-pane {
+    display: none;
 }
 
 @media (max-width: 899px) {

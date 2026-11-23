@@ -1,11 +1,4 @@
-<app-page-header
-    title="Sans compte"
-    section="Espace propriétaire"
-    back="/owner/support"
-    backLabel="Messages"
-/>
-
-<div class="tabs" role="tablist">
+<div class="chips" role="tablist" aria-label="Statut des demandes">
     <button
         type="button"
         role="tab"
@@ -26,7 +19,7 @@
     </button>
 </div>
 
-<section class="card list">
+<section class="list">
     @if (requests.isLoading() && !requests.hasValue()) {
         <div class="skeleton row-skeleton"></div>
         <div class="skeleton row-skeleton"></div>

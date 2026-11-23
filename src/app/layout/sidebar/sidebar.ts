@@ -12,6 +12,7 @@ import { SupportService } from "../../core/support/support.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { Icon } from "../../shared/icon/icon";
 import { Avatar } from "../../shared/avatar/avatar";
+import { ModuleAccess } from "../../core/modules/module-access";
 import { LayoutService } from "../layout.service";
 import { FOOTER_LINKS, NavItem, SECTIONS } from "../nav-items";
 
@@ -34,6 +35,8 @@ export class Sidebar {
     protected alerts = inject(LowStockAlertService);
     protected shop = inject(ShopSettingsService);
     protected support = inject(SupportService);
+    // un cadenas marque ce qui ne fait pas partie de la formule de la boutique
+    protected access = inject(ModuleAccess);
 
     constructor() {
         // une réponse du support apparaît sans recharger la page

@@ -130,16 +130,6 @@ app-page-header {
     overflow-wrap: anywhere;
 }
 
-.contact {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.contact .btn {
-    min-height: 44px;
-}
-
 .link-btn {
     display: inline-flex;
     align-items: center;
@@ -186,7 +176,8 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-.remind {
+.remind,
+.write {
     min-height: 44px;
 }
 

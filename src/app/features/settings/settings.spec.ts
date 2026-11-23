@@ -18,6 +18,8 @@ describe("Settings", () => {
     const theme = signal("dark");
     const toggle = vi.fn();
 
+    let subscriptionsOpen = false;
+
     async function render(isAdmin = true) {
         await TestBed.configureTestingModule({
             imports: [Settings],
@@ -25,7 +27,10 @@ describe("Settings", () => {
                 provideRouter([]),
                 {
                     provide: ShopSettingsService,
-                    useValue: { getSettings: () => of({ name: "Chez Awa", logo: null }) },
+                    useValue: {
+                        getSettings: () => of({ name: "Chez Awa", logo: null }),
+                        subscriptionsEnabled: () => subscriptionsOpen,
+                    },
                 },
                 {
                     provide: StockSettingsService,
@@ -91,7 +96,6 @@ describe("Settings", () => {
             "/export",
             "/account",
             "/password",
-            "/subscription",
             "/contact",
             "/privacy",
             "/terms",
@@ -112,6 +116,15 @@ describe("Settings", () => {
         ]);
     });
 
+    it("should show the Abonnement page link only when the owner has opened the subscriptions", async () => {
+        subscriptionsOpen = true;
+        await render();
+
+        expect(el.textContent).toContain("Abonnement");
+        expect(el.querySelector("a[href='/subscription']")).not.toBeNull();
+        subscriptionsOpen = false;
+    });
+
     it("should show the state of the main settings for the administrator", async () => {
         await render();
 
@@ -120,7 +133,9 @@ describe("Settings", () => {
         expect(text).not.toContain("Chez Awa");
         expect(text).toContain("Seuil : 5");
         expect(text).toContain("Activé à 08:00");
-        expect(text).toContain("Essai gratuit");
+        // le logiciel est gratuit pendant le lancement : aucune trace d'abonnement
+        expect(text).not.toContain("Essai gratuit");
+        expect(text).not.toContain("Abonnement");
     });
 
     it("should not read the settings for the manager", async () => {

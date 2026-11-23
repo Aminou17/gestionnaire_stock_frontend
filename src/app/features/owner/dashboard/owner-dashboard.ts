@@ -1,21 +1,24 @@
-import { DatePipe } from "@angular/common";
 import { Component, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { SupportService } from "../../../core/support/support.service";
+import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
+import { MarginsPanel } from "../margins-panel/margins-panel";
 import { OwnerShopService } from "../owner-shop.service";
+import { UsagePanel } from "../usage-panel/usage-panel";
 import { SecurityService } from "../security/security.service";
 import { accessStateOf } from "../trial-state";
 
 // Page d'accueil du propriétaire : l'essentiel de toutes les boutiques en un coup d'œil
 @Component({
     selector: "app-owner-dashboard",
-    imports: [DatePipe, RouterLink, Icon],
+    imports: [RouterLink, PageHeader, Icon, FcfaPipe, MarginsPanel, UsagePanel],
     templateUrl: "./owner-dashboard.html",
-    styleUrl: "./owner-dashboard.css",
+    styleUrls: ["../owner-kpis.css", "./owner-dashboard.css"],
 })
 export class OwnerDashboard {
     protected auth = inject(AuthService);
@@ -26,10 +29,16 @@ export class OwnerDashboard {
 
     shops = rxResource({ stream: () => this.owner.getShops() });
     overview = rxResource({ stream: () => this.security.getOverview() });
+    marginReport = rxResource({ stream: () => this.owner.getMargins(30) });
 
     all = computed(() => (this.shops.hasValue() ? this.shops.value() : []));
     active = computed(() => this.all().filter((s) => s.status === "ACTIVE").length);
-    suspended = computed(() => this.all().filter((s) => s.status === "SUSPENDED").length);
+    trial = computed(
+        () =>
+            this.all().filter(
+                (s) => s.status === "ACTIVE" && accessStateOf(s)?.label.startsWith("Essai :"),
+            ).length,
+    );
     sales = computed(() => this.all().reduce((sum, s) => sum + s.sales_last_30_days, 0));
 
     // boutiques à regarder : suspendues, essai qui se termine ou accès terminé
@@ -45,8 +54,10 @@ export class OwnerDashboard {
             .slice(0, 5),
     );
 
-    latest = computed(() =>
-        [...this.all()].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 5),
+    margin = computed(() =>
+        this.marginReport.hasValue()
+            ? this.marginReport.value().rows.reduce((sum, row) => sum + row.margin, 0)
+            : 0,
     );
 
     // une phrase sur la sécurité, la même règle que la page Sécurité

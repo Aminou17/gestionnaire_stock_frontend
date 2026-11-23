@@ -30,36 +30,28 @@
     }
 }
 
-/* l'inscription doit se voir : bloc séparé, avec un vrai bouton */
+/* lien vers l'inscription, sous le formulaire */
 .signup {
-    display: grid;
-    gap: 10px;
-    margin-top: 8px;
+    margin: 4px 0 0;
     padding-top: 20px;
     border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: var(--fs-body);
     text-align: center;
 }
 
-.signup p {
-    margin: 0;
-    color: var(--text);
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-}
-
-.signup .btn {
-    border-color: var(--primary);
+.signup a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 4px;
     color: var(--primary-text);
+    font-weight: var(--fw-semibold);
     text-decoration: none;
 }
 
-.signup .btn:hover {
-    background: var(--primary-soft);
-}
-
-.signup small {
-    color: var(--text-muted);
-    font-size: var(--fs-small);
+.signup a:hover {
+    text-decoration: underline;
 }
 
 /* champ du code : gros chiffres espacés, comme dans les applications bancaires */

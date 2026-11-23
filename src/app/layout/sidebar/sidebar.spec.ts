@@ -6,6 +6,7 @@ import { Sidebar } from "./sidebar";
 import { AuthService } from "../../core/auth/auth.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 import { InstallService } from "../../core/pwa/install.service";
+import { ModuleStore } from "../../core/modules/module-access";
 
 describe("Sidebar", () => {
     const logoutAsked = signal(false);
@@ -17,7 +18,7 @@ describe("Sidebar", () => {
     let el: HTMLElement;
     let stable: () => Promise<unknown>;
 
-    async function render(isAdmin: boolean, alertCount = 0, pwa?: object) {
+    async function render(isAdmin: boolean, alertCount = 0, pwa?: object, lacking: string[] = []) {
         await TestBed.configureTestingModule({
             imports: [Sidebar],
             providers: [
@@ -37,6 +38,8 @@ describe("Sidebar", () => {
             ],
         }).compileComponents();
 
+        TestBed.inject(ModuleStore).disabled.set(lacking);
+
         const fixture = TestBed.createComponent(Sidebar);
         await fixture.whenStable();
         el = fixture.nativeElement as HTMLElement;
@@ -54,13 +57,28 @@ describe("Sidebar", () => {
         expect(el.querySelector(".count")?.textContent).toBe("5");
     });
 
+    it("should keep a page the shop does not have in the menu, with a padlock", async () => {
+        const el = await render(true, 0, undefined, ["team", "customers"]);
+
+        expect(labels(el)).toContain("Utilisateurs");
+        expect(labels(el)).toContain("Dettes et clients");
+        const link = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
+            a.textContent?.includes("Utilisateurs"),
+        )!;
+        expect(link.querySelector("app-icon.lock")).not.toBeNull();
+        const free = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
+            a.textContent?.includes("Ventes"),
+        )!;
+        expect(free.querySelector("app-icon.lock")).toBeNull();
+    });
+
     it("should hide admin-only pages from the manager", async () => {
         const el = await render(false);
 
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
-            "Clients",
+            "Dettes et clients",
             "Caisse",
             "Produits",
             "Catégories",
@@ -70,23 +88,23 @@ describe("Sidebar", () => {
         ]);
     });
 
-    it("should group the pages under Stock and Équipe", async () => {
+    it("should group the pages under Gestion", async () => {
         const el = await render(true, 2);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Stock", "Équipe"]);
+        expect(groups).toEqual(["Gestion"]);
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
-            "Clients",
+            "Dettes et clients",
             "Caisse",
             "Dépenses",
-            "Espace admin",
+            "Bilan",
             "Produits",
             "Catégories",
             "Inventaires",
-            "Corriger le stock",
+            "Corriger la quantité",
             "Historique du stock",
             "Alertes de stock",
             "Vitesse de vente",
@@ -97,7 +115,7 @@ describe("Sidebar", () => {
         ]);
         // l'ajustement du stock passe par la page Produits
         const adjust = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
-            a.textContent?.includes("Corriger le stock"),
+            a.textContent?.includes("Corriger la quantité"),
         )!;
         expect(adjust.getAttribute("href")).toBe("/products?adjust=1");
     });
@@ -115,14 +133,16 @@ describe("Sidebar", () => {
             "Produits",
             "Catégories",
             "Inventaires",
-            "Corriger le stock",
+            "Corriger la quantité",
             "Historique du stock",
             "Alertes de stock",
             "Vitesse de vente",
             "Entrées de stock",
             "Fournisseurs",
+            "Utilisateurs",
+            "Historique des actions",
         ]);
-        expect(el.querySelector(".launcher h2")?.textContent).toContain("Stock");
+        expect(el.querySelector(".launcher h2")?.textContent).toContain("Gestion");
         expect(el.querySelector(".tile .count")?.textContent).toBe("3");
 
         el.querySelector<HTMLButtonElement>(".launcher-close")!.click();
@@ -151,12 +171,12 @@ describe("Sidebar", () => {
         expect(el.querySelector("button.group .count")).toBeNull();
     });
 
-    it("should not show Équipe to the manager", async () => {
+    it("should show the manager the Gestion group without the admin pages", async () => {
         const el = await render(false);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Stock"]);
+        expect(groups).toEqual(["Gestion"]);
     });
 
     it("should show only Settings at the bottom, for everyone", async () => {

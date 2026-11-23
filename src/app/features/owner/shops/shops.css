@@ -3,69 +3,27 @@
     gap: 16px;
 }
 
-.head {
+.chips {
     display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
+    flex-wrap: wrap;
 }
 
-h1 {
-    margin: 0;
-    font-size: var(--fs-title);
-    font-weight: var(--fw-bold);
-    letter-spacing: -0.02em;
-}
-
-.head p {
-    margin: 4px 0 0;
-    font-size: var(--fs-body);
-}
-
-.kpis {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
-    gap: 12px;
-}
-
-/* tuile de résumé cliquable : elle filtre la liste */
-.kpi {
-    display: grid;
+.chips {
     gap: 6px;
-    padding: 16px 20px;
-    color: var(--text);
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    transition:
-        border-color 0.15s,
-        background-color 0.15s;
 }
 
-.kpi:hover {
-    background: var(--surface-hover);
+.chips .chip {
+    gap: 6px;
+    padding: 0 12px;
 }
 
-.kpi.selected {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-}
-
-.kpi:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.kpi-label {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    font-size: var(--fs-small);
+.count {
     color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
 }
 
-.kpi.selected .kpi-label {
-    color: var(--primary-text);
+.chip[aria-pressed="true"] .count {
+    color: inherit;
 }
 
 .dot {
@@ -84,17 +42,6 @@ h1 {
 
 .dot-muted {
     background: var(--text-muted);
-}
-
-.kpi strong {
-    font-size: var(--fs-kpi);
-    font-weight: var(--fw-bold);
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-}
-
-.kpi strong.warn {
-    color: var(--warning);
 }
 
 .list-card {
@@ -227,10 +174,6 @@ h1 {
     gap: 6px;
 }
 
-.fab {
-    display: none;
-}
-
 .shop-link {
     display: block;
     overflow: hidden;
@@ -266,35 +209,8 @@ h1 {
         gap: 12px;
     }
 
-    h1 {
-        font-size: var(--fs-kpi);
-    }
-
-    /* la création passe par le bouton + flottant */
-    .new-shop {
-        display: none;
-    }
-
-    .kpis {
-        gap: 8px;
-    }
-
-    .kpi {
-        gap: 4px;
-        padding: 12px;
-    }
-
-    .kpi-label {
-        gap: 6px;
-        font-size: var(--fs-caption);
-    }
-
-    .kpi strong {
-        font-size: var(--fs-figure);
-    }
-
     .list-card {
-        padding-bottom: 88px;
+        padding-bottom: 16px;
         background: transparent;
         border: 0;
     }
@@ -334,23 +250,6 @@ h1 {
 
     .shop-text strong {
         font-size: var(--fs-lead);
-    }
-
-    .fab {
-        display: grid;
-        place-items: center;
-        position: fixed;
-        right: 16px;
-        bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom));
-        z-index: 25;
-        width: 56px;
-        height: 56px;
-        border: 0;
-        border-radius: 16px;
-        background: var(--primary);
-        color: var(--on-primary);
-        box-shadow: var(--shadow-menu);
-        cursor: pointer;
     }
 
     /* l'état passe sous le nom, le menu reste à droite sur toute la hauteur */
@@ -412,4 +311,8 @@ h1 {
 .tag.tone-ended {
     background: var(--danger-soft);
     color: var(--danger);
+}
+
+.shop-status app-action-menu {
+    --menu-btn-size: 44px;
 }

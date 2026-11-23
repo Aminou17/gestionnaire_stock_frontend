@@ -15,6 +15,10 @@ export interface ShopSettings {
     updated_at: string | null;
     // fin de l'essai gratuit ; absent ou null : pas d'essai en cours
     trial_ends_at?: string | null;
+    // le propriétaire a activé les abonnements : la page Abonnement existe
+    subscriptions_enabled?: boolean;
+    // accès retirés à cette boutique par le propriétaire (clés)
+    disabled_modules?: string[];
 }
 
 export interface ShopSettingsInput {

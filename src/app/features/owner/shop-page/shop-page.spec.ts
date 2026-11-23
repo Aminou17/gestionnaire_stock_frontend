@@ -20,15 +20,7 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
     address: "Rue 12, Abidjan",
     country: "Côte d'Ivoire",
     city: "Abidjan",
-    tax_id: null,
-    rccm: null,
-    products_count: 42,
-    customers_count: 15,
-    suppliers_count: 4,
-    sales_total: 310,
     last_login_at: "2026-11-13T09:00:00.000Z",
-    sales_last_30_days: 28,
-    last_sale_at: "2026-11-14T09:00:00.000Z",
     users: [
         {
             id: 7,
@@ -129,13 +121,58 @@ describe("ShopPage", () => {
 
         expect(el.textContent).toContain("Chez Fatou");
         expect(el.textContent).toContain("Rue 12, Abidjan");
-        expect(el.textContent).toContain("42");
         expect(el.textContent).toContain("fatou@exemple.com");
         expect(el.textContent).toContain("moussa@exemple.com");
         expect(el.textContent).toContain("supprimé");
-        expect(el.textContent).toContain("Clients");
-        expect(el.textContent).toContain("310");
+        expect(el.textContent).toContain("Active");
+        expect(el.textContent).not.toContain("Clients");
         expect(el.textContent).not.toMatch(/FCFA|XOF|€|\$|chiffre d'affaires/i);
+    });
+
+    it("should hide the empty fields", async () => {
+        const fixture = await render(detail({ phone: null, address: null, city: null }));
+        const el = fixture.nativeElement as HTMLElement;
+
+        expect(el.textContent).not.toContain("Téléphone");
+        expect(el.textContent).not.toContain("Adresse");
+    });
+
+    it("should show a suspended shop as Suspendue", async () => {
+        const fixture = await render(detail({ status: "SUSPENDED" }));
+
+        expect(fixture.nativeElement.querySelector(".hero .badge")?.textContent).toContain(
+            "Suspendue",
+        );
+    });
+
+    it("should show a deleted shop as Supprimée, before its suspension", async () => {
+        const fixture = await render(
+            detail({ status: "SUSPENDED", deleted_at: "2026-11-20T10:00:00.000Z" }),
+        );
+
+        expect(fixture.nativeElement.querySelector(".hero .badge")?.textContent).toContain(
+            "Supprimée",
+        );
+    });
+
+    it("should show the trial days left with the primary badge", async () => {
+        const inDays = (days: number) => new Date(Date.now() + days * 86_400_000).toISOString();
+
+        const trial = await render(
+            detail({ trial_ends_at: inDays(20), access_ends_at: inDays(20) }),
+        );
+        const trialBadge = trial.nativeElement.querySelector(".hero .badge") as HTMLElement;
+        expect(trialBadge.textContent).toContain("Essai : 20 jours restants");
+        expect(trialBadge.classList.contains("badge-primary")).toBe(true);
+    });
+
+    it("should show an ended trial with the danger badge", async () => {
+        const past = new Date(Date.now() - 30 * 86_400_000).toISOString();
+        const fixture = await render(detail({ trial_ends_at: past, access_ends_at: past }));
+        const badge = fixture.nativeElement.querySelector(".hero .badge") as HTMLElement;
+
+        expect(badge.textContent).toContain("Essai terminé");
+        expect(badge.classList.contains("badge-danger")).toBe(true);
     });
 
     it("should offer the password actions only for active accounts", async () => {
@@ -267,7 +304,7 @@ describe("ShopPage", () => {
         const fixture = await render();
         const el = fixture.nativeElement as HTMLElement;
 
-        button(el, "Suspendre").click();
+        fixture.componentInstance.onMenu("suspend");
         await fixture.whenStable();
 
         expect(service.setStatus).not.toHaveBeenCalled();
@@ -287,7 +324,7 @@ describe("ShopPage", () => {
         const fixture = await render();
         const el = fixture.nativeElement as HTMLElement;
 
-        button(el, "Supprimer").click();
+        fixture.componentInstance.onMenu("delete");
         await fixture.whenStable();
         expect(service.deleteShop).not.toHaveBeenCalled();
 

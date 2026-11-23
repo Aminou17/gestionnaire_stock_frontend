@@ -1,0 +1,135 @@
+<app-page-header
+    title="Accès de la boutique"
+    [subtitle]="shop.hasValue() ? shop.value().name : undefined"
+    section="Espace propriétaire"
+    [back]="backLink"
+    backLabel="Retour à la boutique"
+/>
+
+@if (data.isLoading() && !data.hasValue()) {
+    <div class="card block">
+        <div class="skeleton line"></div>
+        <div class="skeleton line"></div>
+    </div>
+} @else if (data.error() && !data.hasValue()) {
+    <div class="card block empty" role="alert">
+        Impossible de charger les accès.
+        <button type="button" class="btn btn-outline btn-sm" (click)="data.reload()">
+            Réessayer
+        </button>
+    </div>
+} @else {
+    <section class="card intro">
+        <p>Ce qui est décoché disparaît tout de suite du menu de la boutique.</p>
+        <div class="quick">
+            <button type="button" class="btn btn-outline btn-sm" (click)="setAll(true)">
+                <app-icon name="check" [size]="16" /> Tout cocher
+            </button>
+            <button type="button" class="btn btn-outline btn-sm" (click)="setAll(false)">
+                L'essentiel seulement
+            </button>
+        </div>
+    </section>
+
+    @if (notice(); as message) {
+        <p
+            class="alert"
+            [class.alert-success]="message.ok"
+            [class.alert-error]="!message.ok"
+            role="status"
+        >
+            {{ message.text }}
+        </p>
+    }
+
+    <section class="card core" aria-labelledby="core-title">
+        <h2 id="core-title">Toujours inclus</h2>
+        <ul class="chips">
+            @for (item of core(); track item) {
+                <li><app-icon name="check" [size]="14" /> {{ item }}</li>
+            }
+        </ul>
+    </section>
+
+    @for (group of groups(); track group.name) {
+        <section class="group" [attr.aria-label]="group.name">
+            <h2 class="group-title">{{ group.name }}</h2>
+            <ul class="modules">
+                @for (module of group.modules; track module.key) {
+                    <li class="module" [class.on]="isOn(module)">
+                        <div class="module-text">
+                            <strong>{{ module.label }}</strong>
+                            <span>{{ module.description }}</span>
+                        </div>
+                        <button
+                            type="button"
+                            class="switch"
+                            role="switch"
+                            [attr.aria-checked]="isOn(module)"
+                            [attr.aria-label]="module.label"
+                            (click)="toggle(module)"
+                        >
+                            <span class="switch-dot"></span>
+                        </button>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    <div class="savebar" [class.visible]="dirty()" role="region" aria-label="Enregistrer les accès">
+        <span class="count">{{ enabledCount() }} accès sur {{ modules().length }} cochés</span>
+        <div class="save-actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                (click)="cancel()"
+                [disabled]="!dirty() || saving()"
+            >
+                Annuler
+            </button>
+            <button
+                type="button"
+                class="btn btn-primary"
+                (click)="save()"
+                [disabled]="!dirty() || saving()"
+            >
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Enregistrer
+            </button>
+        </div>
+    </div>
+}
+
+<dialog #dialog aria-labelledby="access-confirm-title" (click)="onBackdropClick($event)">
+    <div class="confirm">
+        <h2 id="access-confirm-title">
+            Retirer {{ removed().length }} accès à
+            {{ shop.hasValue() ? shop.value().name : "la boutique" }} ?
+        </h2>
+        <ul class="removed">
+            @for (module of removed(); track module.key) {
+                <li>{{ module.label }}</li>
+            }
+        </ul>
+        <p>Ils disparaissent tout de suite du menu de la boutique, et ses pages se ferment.</p>
+        <div class="actions">
+            <button
+                type="button"
+                class="btn btn-outline"
+                (click)="closeDialog()"
+                [disabled]="saving()"
+            >
+                Annuler
+            </button>
+            <button type="button" class="btn btn-danger" (click)="commit()" [disabled]="saving()">
+                @if (saving()) {
+                    <span class="spinner"></span>
+                }
+                Oui, retirer
+            </button>
+        </div>
+    </div>
+</dialog>

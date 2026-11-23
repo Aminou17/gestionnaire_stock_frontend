@@ -154,6 +154,18 @@
     opacity: 0.5;
 }
 
+.status[data-state="locked"]::before {
+    display: none;
+}
+
+.status[data-state="locked"] {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--primary-text);
+    font-weight: var(--fw-medium);
+}
+
 .status[data-state="ok"]::before {
     background: var(--success);
     opacity: 1;
