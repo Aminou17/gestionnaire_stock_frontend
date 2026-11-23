@@ -27,24 +27,7 @@
         <div class="resume-text">
             <p class="resume-label">Comptage en cours</p>
             <p class="resume-title">{{ title(current) }}</p>
-            <p class="muted resume-count">
-                {{ current.countedCount }} sur {{ current.itemsCount }} produits comptés
-            </p>
-            <span
-                class="gauge"
-                role="progressbar"
-                aria-label="Produits comptés"
-                aria-valuemin="0"
-                [attr.aria-valuenow]="current.countedCount"
-                [attr.aria-valuemax]="current.itemsCount"
-            >
-                <span
-                    class="gauge-fill"
-                    [style.width.%]="
-                        current.itemsCount ? (current.countedCount / current.itemsCount) * 100 : 0
-                    "
-                ></span>
-            </span>
+            <p class="muted resume-count">{{ result(current) }}</p>
         </div>
 
         <a [routerLink]="['/inventories', current.id, 'count']" class="btn btn-primary">

@@ -113,13 +113,9 @@ export class Inventories {
 
     result = (inventory: Inventory) => resultSentence(inventory, this.auth.isAdmin());
 
-    // qui l'a fait, quelle catégorie, et la date quand le titre est un nom choisi
+    // qui l'a fait, et la date quand le titre est un nom choisi
     details(inventory: Inventory) {
-        return [
-            inventory.name ? shortDate(inventory.startedAt) : null,
-            inventory.scope.categoryName,
-            inventory.createdBy.name,
-        ]
+        return [inventory.name ? shortDate(inventory.startedAt) : null, inventory.createdBy.name]
             .filter(Boolean)
             .join(" · ");
     }

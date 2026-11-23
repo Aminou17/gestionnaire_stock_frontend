@@ -3,10 +3,12 @@ import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ActivatedRoute, Router, convertToParamMap, provideRouter } from "@angular/router";
 import { of } from "rxjs";
 
-import { dbDelete } from "../../core/offline/local-db";
+import { dbDelete, dbGet } from "../../core/offline/local-db";
 import { NetworkService } from "../../core/offline/network.service";
 import { Inventory, InventoryDetail, InventoryItem } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
+import { Product } from "../../core/stock/product.model";
+import { ProductService } from "../../core/stock/product.service";
 import { ToastService } from "../../shared/toast/toast.service";
 import { InventoryCount } from "./inventory-count";
 
@@ -15,7 +17,6 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     name: null,
     status: "in_progress",
     statusLabel: "En cours",
-    scope: { type: "all", categoryId: null, categoryName: null },
     startedAt: "2026-11-23T10:00:00Z",
     countedAt: null,
     appliedAt: null,
@@ -24,9 +25,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedBy: null,
     appliedBy: null,
     cancelledBy: null,
-    itemsCount: 34,
-    countedCount: 3,
-    uncountedCount: 31,
+    itemsCount: 2,
     differenceCount: null,
     differenceValue: null,
     maxStock: 1000,
@@ -34,14 +33,13 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
 });
 
 // le serveur envoie le stock théorique à l'admin : l'écran ne doit jamais l'afficher
-const item = (id: number, name: string, actual: number | null = null): InventoryItem => ({
+const item = (id: number, name: string, actual: number, countedAt: string): InventoryItem => ({
     id,
     productId: id,
     productName: name,
     image: null,
-    counted: actual !== null,
     actualStock: actual,
-    countedAt: null,
+    countedAt,
     theoreticalStock: 41,
     difference: null,
     purchasePrice: 600,
@@ -55,10 +53,21 @@ const item = (id: number, name: string, actual: number | null = null): Inventory
 });
 
 const detail = (items: InventoryItem[], changes: Partial<Inventory> = {}): InventoryDetail => ({
-    ...inventory(changes),
+    ...inventory({ itemsCount: items.length, ...changes }),
     items,
-    pagination: { page: 1, limit: 50, total: items.length, totalPages: 1 },
+    pagination: { page: 1, limit: 500, total: items.length, totalPages: 1 },
 });
+
+const product = (id: number, name: string, barcode: string | null = null): Product =>
+    ({
+        id,
+        name,
+        category_name: "Céréales",
+        barcode,
+        image: null,
+        theoretical_stock: 41,
+        is_active: true,
+    }) as Product;
 
 describe("InventoryCount", () => {
     let fixture: ComponentFixture<InventoryCount>;
@@ -67,20 +76,31 @@ describe("InventoryCount", () => {
     let getInventory: ReturnType<typeof vi.fn>;
     let saveItems: ReturnType<typeof vi.fn>;
     let close: ReturnType<typeof vi.fn>;
+    let getProducts: ReturnType<typeof vi.fn>;
     const online = signal(true);
 
-    const lines = [
-        item(1, "Riz parfumé 5 kg"),
-        item(2, "Farine de blé 1 kg"),
-        item(3, "Sucre 1 kg"),
-    ];
+    const riz = product(1, "Riz parfumé 5 kg", "6001");
+    const farine = product(2, "Farine de blé 1 kg", "6002");
 
-    async function render(first: InventoryDetail = detail(lines), query = {}) {
+    // deux produits déjà comptés : le dernier compté arrive en haut
+    const counted = detail([
+        item(1, "Riz parfumé 5 kg", 12, "2026-11-23T10:05:00Z"),
+        item(2, "Farine de blé 1 kg", 7, "2026-11-23T10:10:00Z"),
+    ]);
+
+    async function render(first: InventoryDetail = counted) {
         await dbDelete("kv", "inventory-draft-7");
         online.set(true);
         getInventory = vi.fn(() => of(first));
-        saveItems = vi.fn(() => of({ saved: 1, inventory: inventory({ countedCount: 4 }) }));
+        saveItems = vi.fn(() => of({ saved: 1, inventory: inventory({ itemsCount: 3 }) }));
         close = vi.fn(() => of({ inventory: inventory({ status: "counted" }) }));
+        // la recherche et le scan trouvent le produit dont le nom ou le code correspond
+        getProducts = vi.fn(({ search }: { search: string }) => {
+            const data = [riz, farine, product(3, "Sucre 1 kg", "6003")].filter(
+                (p) => p.barcode === search || p.name.toLowerCase().includes(search.toLowerCase()),
+            );
+            return of({ data, total: data.length, counters: {} });
+        });
 
         // jsdom ne gère pas <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
@@ -95,15 +115,16 @@ describe("InventoryCount", () => {
                 {
                     provide: ActivatedRoute,
                     useValue: {
-                        snapshot: { queryParamMap: convertToParamMap(query) },
+                        snapshot: { queryParamMap: convertToParamMap({}) },
                         paramMap: of(convertToParamMap({ id: "7" })),
                     },
                 },
                 { provide: NetworkService, useValue: { online } },
                 {
                     provide: InventoryService,
-                    useValue: { getInventory, saveItems, uncount: vi.fn(), close },
+                    useValue: { getInventory, saveItems, removeItem: vi.fn(), close },
                 },
+                { provide: ProductService, useValue: { getProducts } },
             ],
         }).compileComponents();
 
@@ -112,13 +133,19 @@ describe("InventoryCount", () => {
         fixture = TestBed.createComponent(InventoryCount);
         el = fixture.nativeElement;
         await fixture.whenStable();
+        fixture.detectChanges();
     }
 
     const text = (node: Element | null = el) => node!.textContent!.replace(/\s+/g, " ");
     const inputs = () => [...el.querySelectorAll<HTMLInputElement>("input.count")];
+    const names = () => [...el.querySelectorAll(".lines .name")].map((n) => text(n).trim());
 
-    // laisse finir les scans, qui s'enchaînent en promesses
-    const settle = () => new Promise((resolve) => setTimeout(resolve));
+    // laisse finir les recherches et les scans, qui s'enchaînent en promesses
+    const settle = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        await fixture.whenStable();
+        fixture.detectChanges();
+    };
 
     const type = (field: HTMLInputElement, value: string) => {
         field.value = value;
@@ -126,37 +153,170 @@ describe("InventoryCount", () => {
         fixture.detectChanges();
     };
 
-    it("should show the server counts as the gauge and on the tabs", async () => {
+    const search = async (value: string) => {
+        type(el.querySelector<HTMLInputElement>(".search input")!, value);
+        await settle();
+    };
+
+    it("should list the chosen products, the last counted first, without any gauge or tab", async () => {
         await render();
 
-        expect(text(el.querySelector(".progress"))).toContain("3 sur 34 comptés");
-        const tabs = [...el.querySelectorAll(".tab")].map((tab) => text(tab).trim());
-        expect(tabs).toEqual(["À compter 31", "Comptés 3"]);
+        expect(text(el.querySelector(".list-title"))).toBe("Produits comptés (2)");
+        expect(names()).toEqual(["Farine de blé 1 kg", "Riz parfumé 5 kg"]);
+        expect(inputs().map((field) => field.value)).toEqual(["7", "12"]);
+        expect(el.querySelector(".tab, .tabs, .gauge, [role=progressbar]")).toBeNull();
+        expect(text()).not.toMatch(/non compt|sur \d+ compt/i);
+        expect(text()).not.toContain("À compter");
+        // aucun chargement de toute la boutique
+        expect(getProducts).not.toHaveBeenCalled();
+    });
+
+    it("should show a simple sentence and nothing else when no product is chosen", async () => {
+        await render(detail([]));
+
+        expect(text(el.querySelector(".empty"))).toContain(
+            "Cherchez ou scannez les produits à compter",
+        );
+        expect(el.querySelector(".lines")).toBeNull();
+        expect(el.querySelector<HTMLButtonElement>(".bar .btn")!.disabled).toBe(true);
     });
 
     it("should never show the theoretical stock while counting", async () => {
         await render();
+        await search("riz");
 
-        expect(text()).not.toContain("Attendu");
         expect(text()).not.toContain("41");
         expect(text()).not.toContain("600");
+        expect(text()).not.toContain("en stock");
     });
 
-    it("should count a typed entry in the gauge right away and keep only the digits", async () => {
+    it("should show the results under the bar and add the touched product with its field ready", async () => {
+        await render(detail([]));
+
+        await search("farine");
+        expect(el.querySelectorAll(".result").length).toBe(1);
+
+        el.querySelector<HTMLButtonElement>(".result")!.click();
+        await settle();
+
+        expect(names()).toEqual(["Farine de blé 1 kg"]);
+        // rien n'est envoyé tant que la quantité n'est pas saisie
+        expect(fixture.componentInstance.sync.pendingCount()).toBe(0);
+        expect(inputs()[0].value).toBe("");
+        expect(document.activeElement).toBe(inputs()[0]);
+        expect(el.querySelector(".results")).toBeNull();
+        expect(el.querySelector<HTMLButtonElement>(".bar .btn")!.disabled).toBe(true);
+
+        type(inputs()[0], "5");
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: 5 });
+        expect(text(el.querySelector(".list-title"))).toBe("Produits comptés (1)");
+        expect(el.querySelector<HTMLButtonElement>(".bar .btn")!.disabled).toBe(false);
+    });
+
+    it("should say when a product is already in the list instead of adding it twice", async () => {
+        await render();
+        await search("riz");
+
+        expect(text(el.querySelector(".result"))).toContain("Dans la liste");
+        el.querySelector<HTMLButtonElement>(".result")!.click();
+        await settle();
+
+        expect(names().length).toBe(2);
+    });
+
+    it("should add the product of a scan with 1, and add 1 more for each new scan", async () => {
+        await render(detail([]));
+
+        fixture.componentInstance.onScan("6001");
+        await settle();
+
+        expect(names()).toEqual(["Riz parfumé 5 kg"]);
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 1: 1 });
+
+        fixture.componentInstance.onScan("6001");
+        fixture.componentInstance.onScan("6001");
+        await settle();
+
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 1: 3 });
+        expect(names().length).toBe(1);
+        expect(inputs()[0].value).toBe("3");
+    });
+
+    it("should bring a product scanned again to the top of the list", async () => {
+        await render();
+        expect(names()[0]).toBe("Farine de blé 1 kg");
+
+        fixture.componentInstance.onScan("6001");
+        await settle();
+
+        expect(names()).toEqual(["Riz parfumé 5 kg", "Farine de blé 1 kg"]);
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 1: 13 });
+    });
+
+    it("should tell when a scanned code matches no product", async () => {
+        await render(detail([]));
+        const toast = TestBed.inject(ToastService);
+
+        fixture.componentInstance.onScan("0000");
+        await settle();
+
+        expect(toast.message()).toContain("Aucun produit ne porte ce code");
+        expect(names().length).toBe(0);
+    });
+
+    it("should add a product with Enter when its barcode is typed", async () => {
+        await render(detail([]));
+        await search("6003");
+
+        el.querySelector<HTMLInputElement>(".search input")!.dispatchEvent(
+            new KeyboardEvent("keydown", { key: "Enter" }),
+        );
+        await settle();
+
+        expect(names()).toEqual(["Sucre 1 kg"]);
+    });
+
+    it("should remove a product from the count, and tell the server when it knew it", async () => {
+        await render();
+
+        el.querySelectorAll<HTMLButtonElement>(".remove")[0].click();
+        fixture.detectChanges();
+
+        expect(names()).toEqual(["Riz parfumé 5 kg"]);
+        // le serveur connaît ce produit : sa ligne est retirée (null = suppression)
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: null });
+    });
+
+    it("should forget a product added but never sent when it is removed", async () => {
+        await render(detail([]));
+        await search("riz");
+        el.querySelector<HTMLButtonElement>(".result")!.click();
+        await settle();
+
+        el.querySelector<HTMLButtonElement>(".remove")!.click();
+        fixture.detectChanges();
+
+        expect(names().length).toBe(0);
+        expect(fixture.componentInstance.sync.pendingCount()).toBe(0);
+    });
+
+    it("should keep only the digits, count the entry right away and mark the line", async () => {
         await render();
 
         type(inputs()[0], "1a2");
 
         expect(inputs()[0].value).toBe("12");
-        expect(fixture.componentInstance.sync.pending()).toEqual({ 1: 12 });
-        expect(text(el.querySelector(".progress"))).toContain("4 sur 34 comptés");
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: 12 });
         expect(el.querySelector(".line.counted")).not.toBeNull();
     });
 
     it("should step with the buttons, start from 0 and stop at 0", async () => {
-        await render();
-        const plus = el.querySelectorAll<HTMLButtonElement>(".step")[1];
+        await render(detail([]));
+        fixture.componentInstance.onScan("6001");
+        await settle();
+        type(inputs()[0], "");
 
+        const plus = el.querySelectorAll<HTMLButtonElement>(".step")[1];
         plus.click();
         plus.click();
         fixture.detectChanges();
@@ -176,7 +336,7 @@ describe("InventoryCount", () => {
         el.querySelector<HTMLButtonElement>(".zero")!.click();
         fixture.detectChanges();
 
-        expect(fixture.componentInstance.sync.pending()).toEqual({ 1: 0 });
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: 0 });
         expect(el.querySelector(".zero")?.getAttribute("aria-pressed")).toBe("true");
     });
 
@@ -185,7 +345,7 @@ describe("InventoryCount", () => {
 
         type(inputs()[0], "999999");
 
-        expect(fixture.componentInstance.sync.pending()).toEqual({ 1: 1000 });
+        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: 1000 });
     });
 
     it("should move to the next product with Enter", async () => {
@@ -197,127 +357,51 @@ describe("InventoryCount", () => {
         expect(document.activeElement).toBe(inputs()[1]);
     });
 
-    it("should add 1 for each scan of the same product and put the line forward", async () => {
-        await render();
-        getInventory.mockReturnValue(of(detail([item(2, "Farine de blé 1 kg")])));
-
-        fixture.componentInstance.onScan("6001");
-        fixture.componentInstance.onScan("6001");
-        await settle();
-        fixture.detectChanges();
-
-        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: 2 });
-        expect(text(el.querySelector(".scanned"))).toContain("Farine de blé 1 kg");
-        // la liste n'est pas vidée, et le produit scanné n'y figure pas deux fois
-        expect(el.querySelectorAll(".lines li").length).toBe(2);
-    });
-
-    it("should tell when a scanned product is not in the counting", async () => {
-        await render();
-        getInventory.mockReturnValue(of(detail([])));
-        const toast = TestBed.inject(ToastService);
-
-        fixture.componentInstance.onScan("0000");
-        await settle();
-
-        expect(toast.message()).toContain("pas dans ce comptage");
-    });
-
-    describe("load more", () => {
-        const many = (from: number, to: number) =>
-            Array.from({ length: to - from + 1 }, (_, i) => item(from + i, `Produit ${from + i}`));
-        const page = (items: InventoryItem[], number: number): InventoryDetail => ({
-            ...detail(items),
-            pagination: { page: number, limit: 50, total: 80, totalPages: 2 },
-        });
-
-        it("should add the next page below the list, 50 products at a time", async () => {
-            await render(page(many(1, 50), 1));
-            expect(el.querySelectorAll(".lines li").length).toBe(50);
-
-            getInventory.mockReturnValue(of(page(many(51, 80), 2)));
-            await fixture.componentInstance.loadMore();
-            fixture.detectChanges();
-
-            expect(getInventory).toHaveBeenLastCalledWith(
-                7,
-                expect.objectContaining({ page: 2, limit: 50 }),
-            );
-            expect(el.querySelectorAll(".lines li").length).toBe(80);
-            expect(text()).not.toContain("Charger plus");
-        });
-
-        it("should not skip any product when some were counted since the first page", async () => {
-            await render(page(many(1, 50), 1));
-
-            // 12 produits de la première page sont comptés et déjà reçus par le serveur :
-            // ils ne sont plus « à compter », la suite de la liste commence 12 lignes plus tôt
-            fixture.componentInstance.sync.onSaved(
-                inventory({ countedCount: 15 }),
-                Object.fromEntries(many(1, 12).map((line) => [line.productId, 3])),
-            );
-
-            getInventory.mockReturnValue(of(page(many(39, 68), 1)));
-            await fixture.componentInstance.loadMore();
-
-            // 38 lignes sont encore à compter : la page 1 est redemandée, sans doublon
-            expect(getInventory).toHaveBeenLastCalledWith(7, expect.objectContaining({ page: 1 }));
-            expect(fixture.componentInstance.lines().length).toBe(68);
-        });
-    });
-
     it("should leave the counting to the page of the inventory when it is already closed", async () => {
-        await render(detail(lines, { status: "counted" }));
+        await render(detail(counted.items, { status: "counted" }));
 
         expect(router.navigate).toHaveBeenCalledWith(["/inventories", 7], { replaceUrl: true });
     });
 
-    it("should start from the search of the page that sent us here", async () => {
-        await render(detail(lines), { q: "Riz" });
-
-        expect(getInventory).toHaveBeenCalledWith(
-            7,
-            expect.objectContaining({ search: "Riz", filter: "uncounted" }),
-        );
-    });
-
-    it("should ask what to do with the products not counted, ignoring them by default", async () => {
-        await render();
-
-        await fixture.componentInstance.review();
-        fixture.detectChanges();
-
-        expect(text()).toContain("Il reste 31 produits non comptés");
-        const radios = el.querySelectorAll<HTMLInputElement>("input[type=radio]");
-        expect(radios[0].checked).toBe(true);
-        expect(text(el.querySelector(".choices"))).toContain("Les ignorer");
-        expect(text(el.querySelector(".choices"))).toContain("Les compter à 0");
-
-        fixture.componentInstance.close();
-        expect(close).toHaveBeenCalledWith(7, false);
-    });
-
-    it("should close with the products not counted at zero when the person chooses it", async () => {
-        await render();
-        await fixture.componentInstance.review();
-        fixture.detectChanges();
-
-        el.querySelectorAll<HTMLInputElement>("input[type=radio]")[1].click();
-        fixture.detectChanges();
-        el.querySelector<HTMLButtonElement>(".review-actions .btn-primary")!.click();
-        await fixture.whenStable();
-
-        expect(close).toHaveBeenCalledWith(7, true);
-        expect(router.navigate).toHaveBeenCalledWith(["/inventories", 7], { replaceUrl: true });
-    });
-
-    it("should not offer to finish before anything is counted", async () => {
-        await render(detail(lines, { countedCount: 0, uncountedCount: 34 }));
+    it("should not offer to finish before a product is counted", async () => {
+        await render(detail([]));
 
         expect(el.querySelector<HTMLButtonElement>(".bar .btn")!.disabled).toBe(true);
     });
 
-    it("should warn before leaving with entries not sent, and say they stay on the device", async () => {
+    it("should ask a short confirmation, then close straight away without any check of the rest", async () => {
+        await render();
+
+        await fixture.componentInstance.askFinish();
+        fixture.detectChanges();
+
+        expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
+        const dialog = el.querySelector("dialog[aria-labelledby=finish-title]");
+        expect(text(dialog)).toContain("2 produits comptés");
+        expect(text()).not.toMatch(/ignorer|compter à 0|non compt/i);
+
+        fixture.componentInstance.close();
+        await fixture.whenStable();
+
+        expect(close).toHaveBeenCalledWith(7);
+        expect(router.navigate).toHaveBeenCalledWith(["/inventories", 7], { replaceUrl: true });
+    });
+
+    it("should tell how many products without a quantity will not be counted", async () => {
+        await render();
+        await search("sucre");
+        el.querySelector<HTMLButtonElement>(".result")!.click();
+        await settle();
+
+        await fixture.componentInstance.askFinish();
+        fixture.detectChanges();
+
+        const dialog = el.querySelector("dialog[aria-labelledby=finish-title]");
+        expect(text(dialog)).toContain("2 produits comptés");
+        expect(text(dialog)).toContain("1 produit sans quantité ne sera pas compté");
+    });
+
+    it("should keep a draft on the device when offline, and warn before leaving", async () => {
         await render();
         online.set(false);
         saveItems.mockImplementation(() => {
@@ -325,14 +409,16 @@ describe("InventoryCount", () => {
         });
         type(inputs()[0], "5");
 
+        expect(await dbGet("kv", "inventory-draft-7")).toEqual({ 2: 5 });
+
         const leaving = fixture.componentInstance.canLeave();
         await new Promise((resolve) => setTimeout(resolve));
         fixture.detectChanges();
 
         expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
-        expect(
-            text(el.querySelector("dialog#leave, dialog[aria-labelledby=leave-title]")),
-        ).toContain("1 saisie pas encore envoyée");
+        expect(text(el.querySelector("dialog[aria-labelledby=leave-title]"))).toContain(
+            "1 saisie pas encore envoyée",
+        );
 
         fixture.componentInstance.answerLeave(true);
         expect(await leaving).toBe(true);

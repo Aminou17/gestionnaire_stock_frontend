@@ -12,7 +12,7 @@ import { InventoryService } from "../../core/stock/inventory.service";
 // error : le serveur a refusé
 export type SaveState = "saved" | "saving" | "offline" | "error";
 
-// quantité comptée, ou null pour remettre le produit à « non compté »
+// quantité comptée, ou null pour retirer le produit du comptage
 export type Counts = Record<number, number | null>;
 
 const DEBOUNCE_MS = 800;
@@ -80,7 +80,7 @@ export class CountSync {
         this.timer = setTimeout(() => void this.flush(), DEBOUNCE_MS);
     }
 
-    // annule une saisie qui n'a plus rien à envoyer (champ vidé sur un produit jamais compté)
+    // annule une saisie qui n'a plus rien à envoyer (produit que le serveur ne connaît pas encore)
     forget(productId: number) {
         this.pending.update(({ [productId]: _, ...rest }) => rest);
         void this.saveDraft();
@@ -128,10 +128,15 @@ export class CountSync {
             }
 
             for (const [productId] of entries.filter(([, value]) => value === null)) {
-                const result = await firstValueFrom(
-                    this.inventoryService.uncount(this.inventoryId, productId),
-                );
-                inventory = result.inventory;
+                try {
+                    const result = await firstValueFrom(
+                        this.inventoryService.removeItem(this.inventoryId, productId),
+                    );
+                    inventory = result.inventory;
+                } catch (err) {
+                    // le produit n'était déjà plus dans le comptage : rien à retirer
+                    if ((err as HttpErrorResponse).status !== 404) throw err;
+                }
             }
 
             // une valeur changée pendant l'envoi reste en attente

@@ -5,7 +5,6 @@ import { API_URL } from "../api.config";
 import { ExportFormat } from "../export-format";
 import {
     ApplyResult,
-    CloseResult,
     CountLine,
     Inventory,
     InventoryDetail,
@@ -57,17 +56,15 @@ export class InventoryService {
         );
     }
 
-    // remet un produit à « non compté »
-    uncount(id: number, productId: number) {
+    // retire un produit du comptage
+    removeItem(id: number, productId: number) {
         return this.http.delete<{ inventory: Inventory }>(
             `${API_URL}/inventories/${id}/items/${productId}`,
         );
     }
 
-    close(id: number, countMissingAsZero: boolean) {
-        return this.http.post<CloseResult>(`${API_URL}/inventories/${id}/close`, {
-            countMissingAsZero,
-        });
+    close(id: number) {
+        return this.http.post<{ inventory: Inventory }>(`${API_URL}/inventories/${id}/close`, {});
     }
 
     apply(id: number) {

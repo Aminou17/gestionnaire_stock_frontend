@@ -24,7 +24,7 @@ export class InventoryLineDialog {
 
     open(line: InventoryItem) {
         this.line.set(line);
-        this.value.set(line.actualStock === null ? "" : String(line.actualStock));
+        this.value.set(String(line.actualStock ?? ""));
         this.error.set("");
         this.dialog().nativeElement.showModal();
     }
@@ -62,15 +62,15 @@ export class InventoryLineDialog {
         );
     }
 
-    // remet le produit à « non compté »
-    uncount() {
+    // retire le produit du comptage
+    remove() {
         const line = this.line();
         if (!line || this.saving()) return;
 
-        this.run(this.inventoryService.uncount(this.inventory().id, line.productId));
+        this.run(this.inventoryService.removeItem(this.inventory().id, line.productId));
     }
 
-    private run(request: ReturnType<InventoryService["uncount"]>) {
+    private run(request: ReturnType<InventoryService["removeItem"]>) {
         this.saving.set(true);
         this.error.set("");
 

@@ -14,7 +14,6 @@ export interface Inventory {
     name: string | null;
     status: InventoryStatus;
     statusLabel: string;
-    scope: { type: "all" | "category"; categoryId: number | null; categoryName: string | null };
     startedAt: string;
     countedAt: string | null;
     appliedAt: string | null;
@@ -23,9 +22,8 @@ export interface Inventory {
     countedBy: InventoryPerson | null;
     appliedBy: InventoryPerson | null;
     cancelledBy: InventoryPerson | null;
+    // produits comptés (un inventaire ne contient que les produits choisis)
     itemsCount: number;
-    countedCount: number;
-    uncountedCount: number;
     // masqués (null) pour le gérant : écarts pendant le comptage, valeur en francs toujours
     differenceCount: number | null;
     differenceValue: number | null;
@@ -37,7 +35,6 @@ export interface InventoryItem {
     productId: number;
     productName: string;
     image: string | null;
-    counted: boolean;
     actualStock: number | null;
     countedAt: string | null;
     // null pour le gérant tant que le comptage est en cours, et pour lui toujours pour les prix
@@ -78,7 +75,7 @@ export interface InventoryFilters {
     limit: number;
 }
 
-export type ItemFilter = "all" | "counted" | "uncounted" | "differences";
+export type ItemFilter = "all" | "differences";
 
 export interface ItemQuery {
     filter: ItemFilter;
@@ -89,7 +86,6 @@ export interface ItemQuery {
 
 export interface NewInventory {
     name?: string;
-    categoryId?: number;
     // identifiant créé par l'appareil : un réessai ne crée pas un deuxième inventaire
     clientKey: string;
 }
@@ -97,12 +93,6 @@ export interface NewInventory {
 export interface CountLine {
     productId: number;
     actualStock: number;
-}
-
-export interface CloseResult {
-    inventory: Inventory;
-    uncounted: { count: number; items: { productId: number; productName: string }[] };
-    countedMissingAsZero: boolean;
 }
 
 export interface ApplyResult {

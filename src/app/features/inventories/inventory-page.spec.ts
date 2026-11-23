@@ -13,7 +13,6 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     name: null,
     status: "counted",
     statusLabel: "À valider",
-    scope: { type: "all", categoryId: null, categoryName: null },
     startedAt: new Date().toISOString(),
     countedAt: new Date().toISOString(),
     appliedAt: null,
@@ -22,9 +21,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedBy: { id: 1, name: "Awa Bazin", avatar: null },
     appliedBy: null,
     cancelledBy: null,
-    itemsCount: 34,
-    countedCount: 30,
-    uncountedCount: 4,
+    itemsCount: 30,
     differenceCount: 12,
     differenceValue: -45000,
     maxStock: 1000000,
@@ -36,7 +33,6 @@ const item = (changes: Partial<InventoryItem> = {}): InventoryItem => ({
     productId: 1,
     productName: "Riz parfumé 5 kg",
     image: null,
-    counted: true,
     actualStock: 37,
     countedAt: null,
     theoreticalStock: 38,
@@ -141,11 +137,12 @@ describe("InventoryPage", () => {
         await render({ status: "in_progress", statusLabel: "En cours" });
 
         expect(text(el)).not.toContain("Prévu");
-        expect(text(el.querySelector(".items"))).toContain("Compté 37");
-        expect([...el.querySelectorAll(".chip")].map((chip) => text(chip).trim())).toEqual([
-            "Tous",
-            "Non comptés",
-        ]);
+        // la quantité est dite une seule fois : en chiffre à droite, pas deux fois dans la ligne
+        expect(text(el.querySelector(".items"))).toContain("Quantité comptée");
+        expect(text(el.querySelector(".items .figure"))).toBe("37");
+        // pas d'écart à filtrer pendant le comptage : un seul choix, donc pas de puces
+        expect(el.querySelector(".chips")).toBeNull();
+        expect(text(el)).not.toMatch(/non compt/i);
     });
 
     it("should show only the gaps first when the counting is finished", async () => {
@@ -192,7 +189,6 @@ describe("InventoryPage", () => {
 
         const link = el.querySelector<HTMLAnchorElement>(".items a.item")!;
         expect(link.getAttribute("href")).toContain("/inventories/12/count");
-        expect(link.getAttribute("href")).toContain("q=Riz");
     });
 
     it("should offer to cancel only before the stock is corrected", async () => {

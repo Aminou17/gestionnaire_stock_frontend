@@ -48,11 +48,11 @@ describe("InventoryService", () => {
 
     it("should ask a page of lines with the filter and the search", () => {
         service
-            .getInventory(7, { filter: "uncounted", search: "riz", page: 3, limit: 50 })
+            .getInventory(7, { filter: "differences", search: "riz", page: 3, limit: 50 })
             .subscribe();
 
         const req = httpMock.expectOne((r) => r.url === `${API_URL}/inventories/7`);
-        expect(req.request.params.get("filter")).toBe("uncounted");
+        expect(req.request.params.get("filter")).toBe("differences");
         expect(req.request.params.get("search")).toBe("riz");
         expect(req.request.params.get("page")).toBe("3");
         req.flush({});
@@ -67,24 +67,25 @@ describe("InventoryService", () => {
         req.flush({});
     });
 
-    it("should send a packet of counts and reset a product to not counted", () => {
+    it("should send a packet of counts and remove a product from the count", () => {
         service.saveItems(7, [{ productId: 3, actualStock: 26 }]).subscribe();
         const put = httpMock.expectOne(`${API_URL}/inventories/7/items`);
         expect(put.request.method).toBe("PUT");
         expect(put.request.body).toEqual({ items: [{ productId: 3, actualStock: 26 }] });
         put.flush({});
 
-        service.uncount(7, 3).subscribe();
+        service.removeItem(7, 3).subscribe();
         const del = httpMock.expectOne(`${API_URL}/inventories/7/items/3`);
         expect(del.request.method).toBe("DELETE");
         del.flush({});
     });
 
-    it("should close with the choice for the products not counted", () => {
-        service.close(7, true).subscribe();
+    it("should close the count without any option", () => {
+        service.close(7).subscribe();
 
         const req = httpMock.expectOne(`${API_URL}/inventories/7/close`);
-        expect(req.request.body).toEqual({ countMissingAsZero: true });
+        expect(req.request.method).toBe("POST");
+        expect(req.request.body).toEqual({});
         req.flush({});
     });
 

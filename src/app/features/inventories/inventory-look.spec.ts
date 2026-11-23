@@ -12,7 +12,6 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     name: null,
     status: "counted",
     statusLabel: "À valider",
-    scope: { type: "all", categoryId: null, categoryName: null },
     startedAt: new Date().toISOString(),
     countedAt: null,
     appliedAt: null,
@@ -21,9 +20,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedBy: null,
     appliedBy: null,
     cancelledBy: null,
-    itemsCount: 34,
-    countedCount: 30,
-    uncountedCount: 4,
+    itemsCount: 30,
     differenceCount: 12,
     differenceValue: -45000,
     maxStock: 1000000,
@@ -63,16 +60,22 @@ describe("inventory look", () => {
     });
 
     it("should only tell the manager how many products were counted", () => {
-        const blind = inventory({ differenceCount: null, differenceValue: null, countedCount: 12 });
+        const blind = inventory({ differenceCount: null, differenceValue: null, itemsCount: 12 });
 
         expect(resultSentence(blind, false)).toBe("12 produits comptés");
         // même si le serveur envoyait les écarts, le gérant ne lit jamais d'argent
         expect(resultSentence(inventory(), false)).toBe("30 produits comptés");
     });
 
-    it("should give the progress of an open counting and a short word for a cancelled one", () => {
+    it("should give the number of products of an open counting and a short word for a cancelled one", () => {
         expect(resultSentence(inventory({ status: "in_progress" }), true)).toBe(
-            "30 sur 34 comptés",
+            "30 produits comptés",
+        );
+        expect(resultSentence(inventory({ status: "in_progress", itemsCount: 1 }), true)).toBe(
+            "1 produit compté",
+        );
+        expect(resultSentence(inventory({ status: "in_progress", itemsCount: 0 }), true)).toBe(
+            "Aucun produit pour l'instant",
         );
         expect(resultSentence(inventory({ status: "cancelled" }), true)).toBe("Comptage abandonné");
     });

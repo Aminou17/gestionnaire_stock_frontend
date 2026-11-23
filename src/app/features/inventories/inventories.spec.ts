@@ -13,7 +13,6 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     name: null,
     status: "counted",
     statusLabel: "À valider",
-    scope: { type: "all", categoryId: null, categoryName: null },
     startedAt: "2026-11-12T15:00:00Z",
     countedAt: "2026-11-12T16:00:00Z",
     appliedAt: null,
@@ -22,9 +21,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedBy: null,
     appliedBy: null,
     cancelledBy: null,
-    itemsCount: 34,
-    countedCount: 30,
-    uncountedCount: 4,
+    itemsCount: 30,
     differenceCount: 12,
     differenceValue: -45000,
     maxStock: 1000000,
@@ -106,13 +103,13 @@ describe("Inventories", () => {
             name: "Fin de mois",
             status: "in_progress",
             statusLabel: "En cours",
-            countedCount: 12,
+            itemsCount: 12,
         });
         await render([open, inventory()], true, [open]);
 
         const resume = el.querySelector(".resume");
         expect(text(resume)).toContain("Fin de mois");
-        expect(text(resume)).toContain("12 sur 34 produits comptés");
+        expect(text(resume)).toContain("12 produits comptés");
         expect(resume?.querySelector("a")?.getAttribute("href")).toBe("/inventories/12/count");
         expect(text(resume)).toContain("Reprendre le comptage");
         expect(el.querySelectorAll(".row").length).toBe(1);

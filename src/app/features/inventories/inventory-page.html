@@ -59,12 +59,7 @@
     <section class="card hero tinted" [attr.data-tone]="tone() === 'primary' ? null : tone()">
         <div class="hero-top">
             <app-inventory-status [inventory]="inv" />
-            <span class="muted hero-name">
-                {{ title() }}
-                @if (inv.scope.categoryName) {
-                    · {{ inv.scope.categoryName }}
-                }
-            </span>
+            <span class="muted hero-name">{{ title() }}</span>
         </div>
 
         @if (
@@ -86,22 +81,6 @@
             </div>
         } @else {
             <h2 class="sentence">{{ sentence() }}</h2>
-        }
-
-        @if (inv.status === "in_progress") {
-            <span
-                class="gauge"
-                role="progressbar"
-                aria-label="Produits comptés"
-                aria-valuemin="0"
-                [attr.aria-valuenow]="inv.countedCount"
-                [attr.aria-valuemax]="inv.itemsCount"
-            >
-                <span
-                    class="gauge-fill"
-                    [style.width.%]="inv.itemsCount ? (inv.countedCount / inv.itemsCount) * 100 : 0"
-                ></span>
-            </span>
         }
 
         @if (inv.status === "in_progress") {
@@ -206,18 +185,21 @@
             />
         </div>
 
-        <div class="chips" role="group" aria-label="Filtrer les produits">
-            @for (item of filters(); track item.value) {
-                <button
-                    type="button"
-                    class="chip"
-                    [attr.aria-pressed]="filter() === item.value"
-                    (click)="selectFilter(item.value)"
-                >
-                    {{ item.label }}
-                </button>
-            }
-        </div>
+        <!-- un seul choix n'est pas un filtre : les puces n'apparaissent qu'avec les écarts -->
+        @if (filters().length > 1) {
+            <div class="chips" role="group" aria-label="Filtrer les produits">
+                @for (item of filters(); track item.value) {
+                    <button
+                        type="button"
+                        class="chip"
+                        [attr.aria-pressed]="filter() === item.value"
+                        (click)="selectFilter(item.value)"
+                    >
+                        {{ item.label }}
+                    </button>
+                }
+            </div>
+        }
 
         @if ((detail.isLoading() && items().length === 0) || filter() === null) {
             <div class="loading" aria-busy="true">
@@ -239,7 +221,7 @@
                             ? 'Aucun produit trouvé'
                             : filter() === 'differences'
                               ? 'Aucun écart'
-                              : 'Aucun produit à afficher'
+                              : 'Aucun produit pour l\'instant'
                     "
                     [text]="
                         filter() === 'differences'
@@ -257,7 +239,6 @@
                                 <a
                                     class="item clickable"
                                     [routerLink]="['/inventories', inv.id, 'count']"
-                                    [queryParams]="{ q: line.productName }"
                                 >
                                     <ng-container
                                         *ngTemplateOutlet="itemBody; context: { $implicit: line }"
@@ -342,21 +323,19 @@
     <span class="info">
         <span class="name">{{ line.productName }}</span>
         <span class="sub muted">
-            @if (!line.counted) {
-                Non compté
-            } @else if (line.theoreticalStock !== null && !blind()) {
+            @if (line.theoreticalStock !== null && !blind()) {
                 Prévu {{ line.theoreticalStock }} · Compté {{ line.actualStock }}
             } @else {
-                Compté {{ line.actualStock }}
+                Quantité comptée
             }
         </span>
     </span>
 
-    @if (blind() && line.counted) {
+    @if (blind()) {
         <span class="figure"
             ><strong class="gap counted">{{ line.actualStock }}</strong></span
         >
-    } @else if (line.counted && line.difference !== null && !blind()) {
+    } @else if (line.difference !== null) {
         <span class="figure" title="Perte ou gain">
             <strong
                 class="gap"

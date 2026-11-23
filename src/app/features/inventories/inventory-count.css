@@ -1,29 +1,11 @@
 :host {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
 }
 
 app-page-header {
     margin-bottom: -4px;
-}
-
-/* progression : le chiffre qui compte et la jauge */
-.progress {
-    display: grid;
-    gap: 8px;
-    padding: 16px;
-}
-
-.progress p {
-    margin: 0;
-}
-
-.progress-text {
-    font-size: var(--fs-lead);
-}
-
-.progress .gauge {
-    margin-top: 0;
 }
 
 .save {
@@ -84,13 +66,101 @@ app-page-header {
     padding-left: 40px;
 }
 
-/* deux onglets de même largeur */
-.tabs {
-    padding: 0;
+/* résultats de la recherche, juste sous la barre */
+.results {
+    display: grid;
+    gap: 2px;
+    margin: 8px 0 0;
+    padding: 6px;
+    list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    box-shadow: var(--shadow-menu);
+    transition: opacity 0.15s;
 }
 
-.tabs .tab {
+.results.reloading {
+    opacity: 0.6;
+}
+
+.result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.result:hover,
+.result:focus-visible {
+    background: var(--surface-hover);
+    outline: none;
+}
+
+.result-text {
+    display: grid;
     flex: 1;
+    min-width: 0;
+}
+
+.result-text strong {
+    overflow: hidden;
+    font-weight: var(--fw-medium);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.result-text small {
+    font-size: var(--fs-small);
+}
+
+.result-add {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.no-result {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+}
+
+.link-btn {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    cursor: pointer;
+}
+
+/* le titre de l'état vide se coupe en deux lignes égales */
+.empty {
+    text-wrap: balance;
+}
+
+.list-title {
+    margin: 4px 0 -4px;
+    font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
+    color: var(--text-muted);
 }
 
 .lines {
@@ -100,10 +170,6 @@ app-page-header {
     padding: 0;
     list-style: none;
     transition: opacity 0.15s;
-}
-
-.lines.reloading {
-    opacity: 0.6;
 }
 
 /* une ligne : la photo et le nom en haut, la saisie en dessous */
@@ -122,6 +188,12 @@ app-page-header {
 
 .line.counted {
     border-left-color: var(--success);
+}
+
+/* produit ajouté, quantité à saisir : le champ est mis en avant */
+.line:not(.counted) .count {
+    border-color: var(--primary);
+    background: var(--primary-soft);
 }
 
 .line.flash {
@@ -148,15 +220,28 @@ app-page-header {
     line-height: 1.3;
 }
 
-.done {
+.remove {
     display: grid;
     flex-shrink: 0;
     place-items: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--success-soft);
-    color: var(--success);
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+}
+
+.remove:hover {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.remove:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .controls {
@@ -228,51 +313,13 @@ app-page-header {
     font-weight: var(--fw-regular);
 }
 
-/* dernier produit scanné, au-dessus de la liste */
-.scanned {
-    display: grid;
-    gap: 8px;
-    padding: 8px;
-    border-radius: var(--radius);
-    background: var(--primary-soft);
-}
-
-.scanned-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 0;
-    padding-left: 4px;
-    font-size: var(--fs-caption);
-    font-weight: var(--fw-semibold);
-    color: var(--primary-text);
-}
-
-.scanned-head span {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.scanned-close {
-    display: grid;
-    place-items: center;
-    width: 32px;
-    height: 32px;
-    border: 0;
-    border-radius: 8px;
-    background: transparent;
-    color: var(--primary-text);
-    cursor: pointer;
-}
-
 .loading {
     display: grid;
     gap: 8px;
 }
 
 .line-skeleton {
-    height: 120px;
+    height: 116px;
     border-radius: var(--radius);
 }
 
@@ -294,114 +341,24 @@ app-page-header {
     margin: 0;
 }
 
-/* vérification avant de terminer */
-.review {
-    display: grid;
-    justify-items: center;
-    gap: 16px;
-    width: 100%;
-    max-width: 480px;
-    margin: 0 auto;
-    padding: 24px 16px;
-    text-align: center;
-}
-
-.review p {
-    margin: 0;
-}
-
-.big {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-}
-
-.review-count {
-    font-size: var(--fs-lead);
-}
-
-.review-count strong {
-    font-size: var(--fs-hero);
-}
-
-.missing {
-    display: grid;
-    gap: 8px;
-    width: 100%;
-    text-align: left;
-}
-
-.missing-title {
-    font-weight: var(--fw-semibold);
-}
-
-.missing-names {
-    font-size: var(--fs-small);
-}
-
-.choices {
-    display: grid;
-    gap: 8px;
-    margin-top: 8px;
-}
-
-.choice {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    min-height: 44px;
-    padding: 12px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer;
-}
-
-.choice.selected {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-}
-
-.choice input {
-    width: 20px;
-    height: 20px;
-    margin: 0;
-    accent-color: var(--primary);
-}
-
-.choice span {
-    display: grid;
-    gap: 2px;
-}
-
-.choice small {
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-}
-
-.review-actions {
-    display: grid;
-    gap: 8px;
-    width: 100%;
-}
-
-.review .alert {
-    width: 100%;
-    text-align: left;
-}
-
 @media (max-width: 767px) {
+    /* la page remplit l'écran : la barre reste en bas même quand la liste est courte */
+    :host {
+        min-height: calc(100dvh - var(--bottom-nav-height) - 96px);
+    }
+
     /* au-dessus de la barre de navigation du bas */
     .bar {
+        margin-top: auto;
         bottom: calc(var(--bottom-nav-height) + 8px + env(safe-area-inset-bottom));
     }
 }
 
 @media (min-width: 768px) {
-    .progress,
-    .search,
-    .tabs,
+    .picker,
+    .list-title,
     .lines,
-    .scanned,
+    .empty,
     .bar,
     .loading {
         max-width: 640px;

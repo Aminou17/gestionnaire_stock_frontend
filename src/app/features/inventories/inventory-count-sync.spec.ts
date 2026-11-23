@@ -8,23 +8,23 @@ import { NetworkService } from "../../core/offline/network.service";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { CountSync } from "./inventory-count-sync";
 
-const inventory = { id: 7, countedCount: 1 };
+const inventory = { id: 7, itemsCount: 1 };
 
 describe("CountSync", () => {
     let sync: CountSync;
     const online = signal(true);
     let saveItems: ReturnType<typeof vi.fn>;
-    let uncount: ReturnType<typeof vi.fn>;
+    let removeItem: ReturnType<typeof vi.fn>;
 
     const setup = () => {
         saveItems = vi.fn(() => of({ saved: 1, inventory }));
-        uncount = vi.fn(() => of({ inventory }));
+        removeItem = vi.fn(() => of({ inventory }));
 
         TestBed.configureTestingModule({
             providers: [
                 CountSync,
                 { provide: NetworkService, useValue: { online } },
-                { provide: InventoryService, useValue: { saveItems, uncount } },
+                { provide: InventoryService, useValue: { saveItems, removeItem } },
             ],
         });
         sync = TestBed.inject(CountSync);
@@ -80,17 +80,27 @@ describe("CountSync", () => {
         await sync.start(7);
 
         expect(saveItems).toHaveBeenCalledWith(7, [{ productId: 4, actualStock: 12 }]);
-        expect(uncount).toHaveBeenCalledWith(7, 5);
+        expect(removeItem).toHaveBeenCalledWith(7, 5);
         expect(sync.pendingCount()).toBe(0);
         expect(await dbGet("kv", "inventory-draft-7")).toBeUndefined();
     });
 
-    it("should reset a counted product with a delete, not with a zero", async () => {
+    it("should remove a product from the count with a delete, not with a zero", async () => {
         sync.set(9, null);
         await vi.advanceTimersByTimeAsync(900);
 
-        expect(uncount).toHaveBeenCalledWith(7, 9);
+        expect(removeItem).toHaveBeenCalledWith(7, 9);
         expect(saveItems).not.toHaveBeenCalled();
+    });
+
+    it("should not fail when the product was already out of the count", async () => {
+        removeItem.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 404 })));
+
+        sync.set(9, null);
+        await vi.advanceTimersByTimeAsync(900);
+
+        expect(sync.state()).toBe("saved");
+        expect(sync.pendingCount()).toBe(0);
     });
 
     it("should keep a value changed while the packet was on its way", async () => {

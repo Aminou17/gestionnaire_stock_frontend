@@ -14,7 +14,6 @@ const inventory = { id: 7, status: "counted", differenceCount: 3 } as Inventory;
 const line = {
     productId: 4,
     productName: "Farine de blé 1 kg",
-    counted: true,
     actualStock: 37,
 } as InventoryItem;
 
@@ -68,7 +67,7 @@ describe("Inventory dialogs", () => {
             ),
             cancel: vi.fn(() => of({ inventory })),
             saveItems: vi.fn(() => of({ saved: 1, inventory })),
-            uncount: vi.fn(() => of({ inventory })),
+            removeItem: vi.fn(() => of({ inventory })),
         };
 
         await TestBed.configureTestingModule({
@@ -183,24 +182,23 @@ describe("Inventory dialogs", () => {
             expect(host.saved).toBeDefined();
         });
 
-        it("should put the product back to not counted", () => {
+        it("should remove the product from the count", () => {
             host.lineDialog().open(line);
             fixture.detectChanges();
 
-            el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .uncount")!.click();
+            el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .remove")!.click();
 
-            expect(service["uncount"]).toHaveBeenCalledWith(7, 4);
+            expect(service["removeItem"]).toHaveBeenCalledWith(7, 4);
         });
 
         it("should not send an empty count", () => {
-            host.lineDialog().open({ ...line, counted: false, actualStock: null });
+            host.lineDialog().open({ ...line, actualStock: null });
             fixture.detectChanges();
 
             const button = el.querySelector<HTMLButtonElement>(
                 "app-inventory-line-dialog .btn-primary",
             )!;
             expect(button.disabled).toBe(true);
-            expect(el.querySelector("app-inventory-line-dialog .uncount")).toBeNull();
         });
     });
 });

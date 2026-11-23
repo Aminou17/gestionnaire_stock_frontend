@@ -61,14 +61,14 @@ const plural = (count: number, one: string, many: string) => (count > 1 ? many :
 // Le résultat en une phrase. Le gérant ne voit jamais d'argent : il lit seulement ce qui a été compté.
 // long : forme de la fiche ("12 produits en écart"), sinon forme courte de la liste ("12 écarts").
 export const resultSentence = (inventory: Inventory, isAdmin: boolean, long = false) => {
-    const { status, itemsCount, countedCount, differenceCount, differenceValue } = inventory;
+    const { status, itemsCount, differenceCount, differenceValue } = inventory;
 
     if (status === "cancelled") return "Comptage abandonné";
 
-    if (status === "in_progress") return `${countedCount} sur ${itemsCount} comptés`;
+    if (status === "in_progress" && itemsCount === 0) return "Aucun produit pour l'instant";
 
-    if (!isAdmin || differenceCount === null) {
-        return `${countedCount} ${plural(countedCount, "produit compté", "produits comptés")}`;
+    if (status === "in_progress" || !isAdmin || differenceCount === null) {
+        return `${itemsCount} ${plural(itemsCount, "produit compté", "produits comptés")}`;
     }
 
     if (differenceCount === 0) return "Aucun écart";

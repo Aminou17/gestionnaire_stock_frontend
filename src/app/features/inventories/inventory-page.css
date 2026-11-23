@@ -54,10 +54,6 @@ app-page-header {
     letter-spacing: var(--ls-title);
 }
 
-.hero .gauge {
-    margin-top: 0;
-}
-
 .btn-main {
     width: 100%;
 }

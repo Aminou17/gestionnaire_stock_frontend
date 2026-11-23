@@ -138,7 +138,7 @@ export class InventoryPage {
         if (inventory && inventory.status !== "in_progress" && inventory.differenceCount !== null) {
             list.push({ value: "differences", label: "Écarts" });
         }
-        list.push({ value: "uncounted", label: "Non comptés" });
+
         return list;
     });
 
