@@ -241,6 +241,7 @@
                 <li>
                     <a
                         class="row"
+                        [class.has-due]="customer.is_active && customer.due_amount > 0"
                         [class.inactive]="!customer.is_active"
                         [routerLink]="['/customers', customer.id]"
                     >

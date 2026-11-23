@@ -439,6 +439,28 @@ li:last-child > .row {
         margin-top: 6px;
     }
 
+    /* un client qui doit : un seul montant à droite, la dette en orange (le total est dans sa fiche) */
+    .row.has-due,
+    li:last-child > .row.has-due {
+        grid-template-areas:
+            "avatar name due"
+            "avatar meta due";
+    }
+
+    .row.has-due .spent {
+        display: none;
+    }
+
+    .row.has-due .due {
+        justify-self: end;
+        margin-top: 0;
+        padding: 0;
+        background: none;
+        color: var(--warning);
+        font-size: var(--fs-body);
+        font-weight: var(--fw-semibold);
+    }
+
     .rows-head,
     .last {
         display: none;
