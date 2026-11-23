@@ -1,4 +1,4 @@
-<app-page-header title="Ventes">
+<app-page-header title="Ventes" [back]="backUrl ?? undefined" [backLabel]="backLabel">
     @if (auth.isAdmin()) {
         <app-export-menu
             class="icon-phone"

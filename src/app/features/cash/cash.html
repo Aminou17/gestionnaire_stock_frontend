@@ -90,51 +90,118 @@
                     }
 
                     @if (session.hasValue()) {
-                        <dl class="lines">
-                            <div>
-                                <dt>Ventes</dt>
-                                <dd appMoney class="in">{{ summary().sales | fcfa }}</dd>
-                            </div>
+                        <ul class="lines">
+                            <li>
+                                <span class="label">
+                                    <a
+                                        [routerLink]="['/sales']"
+                                        [queryParams]="{ period: 'today' }"
+                                        [state]="backState"
+                                        class="line-link"
+                                    >
+                                        Ventes
+                                        <app-icon name="chevron-right" [size]="14" />
+                                    </a>
+                                </span>
+                                <span class="amount"
+                                    ><span appMoney class="in">{{
+                                        summary().sales | fcfa
+                                    }}</span></span
+                                >
+                            </li>
                             @if (summary().deposits > 0) {
-                                <div>
-                                    <dt>Argent ajouté</dt>
-                                    <dd appMoney class="in">{{ summary().deposits | fcfa }}</dd>
-                                </div>
+                                <li>
+                                    <span class="label">
+                                        @if (hasSheet()) {
+                                            <a
+                                                [routerLink]="['/cash/sessions', cash.id]"
+                                                [state]="backState"
+                                                class="line-link"
+                                            >
+                                                Argent ajouté
+
+                                                <app-icon name="chevron-right" [size]="14" />
+                                            </a>
+                                        } @else {
+                                            Argent ajouté
+                                        }
+                                    </span>
+                                    <span class="amount"
+                                        ><span appMoney class="in">{{
+                                            summary().deposits | fcfa
+                                        }}</span></span
+                                    >
+                                </li>
                             }
                             @if (spent() > 0) {
-                                <div>
-                                    <dt>Sorti de la caisse</dt>
-                                    <dd appMoney class="out">−{{ spent() | fcfa }}</dd>
-                                </div>
+                                <li>
+                                    <span class="label">
+                                        @if (hasSheet()) {
+                                            <a
+                                                [routerLink]="['/cash/sessions', cash.id]"
+                                                [state]="backState"
+                                                class="line-link"
+                                            >
+                                                Sorti de la caisse
+
+                                                <app-icon name="chevron-right" [size]="14" />
+                                            </a>
+                                        } @else {
+                                            Sorti de la caisse
+                                        }
+                                    </span>
+                                    <span class="amount"
+                                        ><span appMoney class="out"
+                                            >−{{ spent() | fcfa }}</span
+                                        ></span
+                                    >
+                                </li>
                             }
                             @if (session.value().mobile_money_total) {
-                                <div>
-                                    <dt>Mobile Money, hors tiroir</dt>
-                                    <dd appMoney>
-                                        {{ session.value().mobile_money_total | fcfa }}
-                                    </dd>
-                                </div>
+                                <li>
+                                    <span class="label">
+                                        <a
+                                            [routerLink]="['/sales']"
+                                            [queryParams]="{ period: 'today' }"
+                                            [state]="backState"
+                                            class="line-link"
+                                        >
+                                            Mobile Money, hors tiroir
+                                            <app-icon name="chevron-right" [size]="14" />
+                                        </a>
+                                    </span>
+                                    <span class="amount"
+                                        ><span appMoney>
+                                            {{ session.value().mobile_money_total | fcfa }}
+                                        </span></span
+                                    >
+                                </li>
                             }
                             @if (isCounted()) {
-                                <div>
-                                    <dt>Montant compté</dt>
-                                    <dd appMoney>{{ session.value().actual_amount | fcfa }}</dd>
-                                </div>
-                                <div>
-                                    <dt>Écart</dt>
+                                <li>
+                                    <span class="label">Montant compté</span>
+                                    <span class="amount"
+                                        ><span appMoney>{{
+                                            session.value().actual_amount | fcfa
+                                        }}</span></span
+                                    >
+                                </li>
+                                <li>
+                                    <span class="label">Écart</span>
                                     @if (session.value().difference === 0) {
-                                        <dd>Aucun</dd>
+                                        <span class="amount">Aucun</span>
                                     } @else {
-                                        <dd
+                                        <span
+                                            class="amount"
                                             [class.in]="session.value().difference! > 0"
                                             [class.out]="session.value().difference! < 0"
                                         >
                                             {{ session.value().difference | fcfa: true }}
-                                        </dd>
+                                        </span>
                                     }
-                                </div>
+                                </li>
                             }
-                        </dl>
+                        </ul>
                         @if (isCounted() && session.value().closed_by_name; as name) {
                             <p class="note counted-by">Compté par {{ name }}</p>
                         }

@@ -168,25 +168,65 @@ app-page-header {
 .lines {
     display: grid;
     margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.lines > div {
+.lines > li {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     gap: 12px;
     padding: 10px 0;
     border-bottom: 1px solid var(--border);
     font-size: var(--fs-body);
 }
 
-.lines dt {
+.lines .label {
     color: var(--text-muted);
 }
 
-.lines dd {
-    margin: 0;
+.lines .amount {
     font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
+}
+
+/* seul le libellé est un lien, le montant reste du texte */
+/* le montant se masque d'un clic mais ne ressemble pas à un lien */
+.lines .money-zone {
+    cursor: default;
+}
+
+.line-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 24px;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 6px;
+}
+
+.line-link app-icon {
+    opacity: 0.5;
+    transition:
+        transform 0.15s,
+        opacity 0.15s;
+}
+
+.line-link:hover {
+    color: var(--text);
+}
+
+.line-link:hover app-icon {
+    opacity: 1;
+    transform: translateX(2px);
+}
+
+.line-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .lines .in {
@@ -198,7 +238,7 @@ app-page-header {
 }
 
 /* dans la carte d'état, le résumé suit le solde sans trait de fin */
-.status .lines > div:last-child {
+.status .lines > li:last-child {
     border-bottom: 0;
 }
 

@@ -76,6 +76,13 @@ export class Cash {
         return refunds + expenses + withdrawals;
     });
 
+    // la fiche de sa propre caisse ouverte renvoie ici : pas de lien dans ce cas
+    hasSheet = computed(() => {
+        if (!this.session.hasValue()) return false;
+        const { status, opened_by } = this.session.value();
+        return status !== "OPEN" || opened_by !== this.auth.user()?.id;
+    });
+
     reload() {
         this.today.reload();
         this.session.reload();

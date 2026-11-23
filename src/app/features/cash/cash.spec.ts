@@ -153,6 +153,56 @@ describe("Cash", () => {
         expect(buttons()).not.toContain("Clôturer la caisse");
     });
 
+    it("should make only the label of each summary line a link", async () => {
+        await render({ session: detail({ mobile_money_total: 42000 }) });
+
+        const links = [...el.querySelectorAll<HTMLAnchorElement>(".lines .label a")];
+        const hrefs = links.map((a) => a.getAttribute("href"));
+
+        expect(hrefs).toContain("/sales?period=today");
+        expect(links.length).toBeGreaterThanOrEqual(2);
+        // le montant n'est jamais un lien
+        expect(el.querySelectorAll(".lines .amount a").length).toBe(0);
+    });
+
+    it("should open the day's cash sheet from the money lines when someone else opened it", async () => {
+        await render({
+            userId: 2,
+            session: detail({
+                movements: [
+                    { ...detail().movements[0], id: 2, type: "EXPENSE", amount: -1000 },
+                    { ...detail().movements[0], id: 3, type: "DEPOSIT", amount: 2000 },
+                ],
+            }),
+        });
+
+        const hrefs = [...el.querySelectorAll(".lines .label a")].map((a) =>
+            a.getAttribute("href"),
+        );
+
+        expect(hrefs).toContain("/cash/sessions/4");
+    });
+
+    it("should not link to the sheet of one's own open cash, which redirects here", async () => {
+        await render({
+            session: detail({
+                movements: [{ ...detail().movements[0], id: 3, type: "DEPOSIT", amount: 2000 }],
+            }),
+        });
+
+        const hrefs = [...el.querySelectorAll(".lines .label a")].map((a) =>
+            a.getAttribute("href"),
+        );
+
+        expect(hrefs).toEqual(["/sales?period=today"]);
+    });
+
+    it("should give the manager the same links, as they can read the day's cash", async () => {
+        await render({ isAdmin: false, userId: 2 });
+
+        expect(el.querySelectorAll(".lines .label a").length).toBeGreaterThan(0);
+    });
+
     it("should show the Mobile Money total apart from the drawer", async () => {
         await render({ session: detail({ mobile_money_total: 42000 }) });
 

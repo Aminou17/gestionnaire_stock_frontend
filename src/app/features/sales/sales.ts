@@ -297,6 +297,14 @@ export class Sales {
         this.page.set(1);
     }
 
+    // flèche retour seulement si une page (ex. la caisse) a envoyé vers les ventes
+    private from = this.router.currentNavigation()?.extras.state ?? history.state;
+    protected backUrl: string | null =
+        typeof this.from?.backTo === "string" && this.from.backTo.startsWith("/")
+            ? this.from.backTo
+            : null;
+    protected backLabel: string = this.from?.backLabel ?? "Retour";
+
     // filtre demandé par le lien qui a ouvert la page (cartes du tableau de bord)
     constructor() {
         const params = inject(ActivatedRoute).snapshot.queryParamMap;
