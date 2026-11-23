@@ -190,13 +190,14 @@
                                     </span>
                                     <span class="row-text">
                                         <strong class="row-title">{{
-                                            item.created_at | date: "HH:mm"
+                                            item.reason || look(item.reason_category).short
                                         }}</strong>
-                                        @if (item.cancelled) {
-                                            <small
-                                                ><span class="cancelled-tag">Annulée</span></small
-                                            >
-                                        }
+                                        <small class="muted">
+                                            {{ item.created_at | date: "HH:mm" }}
+                                            @if (item.cancelled) {
+                                                · <span class="cancelled-tag">Annulée</span>
+                                            }
+                                        </small>
                                     </span>
                                     <strong class="row-amount">−{{ item.amount | fcfa }}</strong>
                                     <app-icon
