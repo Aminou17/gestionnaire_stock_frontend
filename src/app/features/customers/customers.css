@@ -67,20 +67,6 @@ app-page-header {
     height: 40px;
 }
 
-/* petites puces de tri de la vue Dettes */
-.sort-bar {
-    display: flex;
-    gap: 8px;
-    order: 3;
-    flex: 0 0 100%;
-}
-
-.chip-small {
-    height: 32px;
-    padding: 0 12px;
-    font-size: var(--fs-small);
-}
-
 .chip-count {
     color: var(--text-muted);
     font-variant-numeric: tabular-nums;
@@ -397,11 +383,6 @@ li:last-child > .row {
     .chip {
         padding: 0 10px;
         font-size: var(--fs-small);
-    }
-
-    .chip-small {
-        height: 32px;
-        padding: 0 12px;
     }
 
     .active-chip span {

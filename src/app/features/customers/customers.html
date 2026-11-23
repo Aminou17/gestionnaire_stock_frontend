@@ -127,27 +127,6 @@
             </button>
         </div>
 
-        @if (unpaid()) {
-            <div class="sort-bar" role="group" aria-label="Trier les dettes">
-                <button
-                    type="button"
-                    class="chip chip-small"
-                    [attr.aria-pressed]="sort() === 'due'"
-                    (click)="selectSort('due')"
-                >
-                    Plus grosses
-                </button>
-                <button
-                    type="button"
-                    class="chip chip-small"
-                    [attr.aria-pressed]="sort() === 'oldest_due'"
-                    (click)="selectSort('oldest_due')"
-                >
-                    Plus anciennes
-                </button>
-            </div>
-        }
-
         @if (activeFilters().length > 0) {
             <div class="active-bar">
                 @for (filter of activeFilters(); track filter.key) {

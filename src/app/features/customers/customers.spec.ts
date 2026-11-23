@@ -229,21 +229,17 @@ describe("Customers", () => {
         expect(el.querySelector(".head-last")!.textContent).toContain("Depuis");
     });
 
-    it("should offer two sort chips only in the debts view", async () => {
+    it("should keep the sorting inside the filter, without extra chips on the page", async () => {
         await render();
+        await pressDueChip();
         expect(el.querySelector(".sort-bar")).toBeNull();
 
-        await pressDueChip();
-        const chips = el.querySelectorAll<HTMLButtonElement>(".sort-bar .chip");
-        expect(chips[0].getAttribute("aria-pressed")).toBe("true");
-
-        chips[1].click();
+        fixture.componentInstance.selectSort("oldest_due");
         await fixture.whenStable();
 
         expect(getCustomers).toHaveBeenLastCalledWith(
             expect.objectContaining({ unpaid: true, sort: "oldest_due" }),
         );
-        expect(fixture.componentInstance.activeFilters()).toEqual([]);
     });
 
     it("should color the avatar orange only for customers who owe", async () => {
