@@ -61,7 +61,7 @@
                     <section class="due-card" aria-label="Crédit">
                         <div class="due-text">
                             <span class="due-label">Crédit</span>
-                            <strong class="due-amount">{{ customer.due_amount | fcfa }}</strong>
+                            <strong class="due-amount">−{{ customer.due_amount | fcfa }}</strong>
                         </div>
                         @if (reminder(); as link) {
                             <a
@@ -185,9 +185,9 @@
                                             @if (sale.status === "CANCELLED") {
                                                 <span class="badge badge-danger">Remboursée</span>
                                             } @else if (due(sale) > 0) {
-                                                <span class="badge badge-warning">{{
-                                                    due(sale) | fcfa
-                                                }}</span>
+                                                <span class="badge badge-warning"
+                                                    >−{{ due(sale) | fcfa }}</span
+                                                >
                                             }
                                         </span>
                                     </a>

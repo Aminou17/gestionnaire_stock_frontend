@@ -631,3 +631,30 @@ li:last-child > .row {
         padding-inline: 28px;
     }
 }
+
+/* ordinateur : textes de la liste plus grands et plus lisibles */
+@media (min-width: 768px) {
+    .name,
+    .spent strong,
+    .due-amount {
+        font-size: var(--fs-lead);
+    }
+
+    .meta,
+    .last {
+        font-size: var(--fs-body);
+    }
+
+    .spent small,
+    .rows-head {
+        font-size: var(--fs-small);
+    }
+
+    .chip {
+        font-size: var(--fs-body);
+    }
+
+    .due-summary strong {
+        font-size: var(--fs-heading);
+    }
+}

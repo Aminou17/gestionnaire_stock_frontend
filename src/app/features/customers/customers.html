@@ -111,7 +111,7 @@
                 [attr.aria-pressed]="!unpaid()"
                 (click)="selectUnpaid(false)"
             >
-                Tous
+                Tous :
                 <span class="chip-count">{{ totals.hasValue() ? totals.value() : "—" }}</span>
             </button>
             <button
@@ -120,7 +120,7 @@
                 [attr.aria-pressed]="unpaid()"
                 (click)="selectUnpaid(true)"
             >
-                Crédits
+                Crédits :
                 <span class="chip-count">{{
                     unpaidTotals.hasValue() ? unpaidTotals.value() : "—"
                 }}</span>
