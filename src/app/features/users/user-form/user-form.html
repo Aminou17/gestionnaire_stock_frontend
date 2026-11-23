@@ -7,7 +7,7 @@
 >
     <form class="confirm-body" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <h2 id="user-form-title">
-            {{ editing() ? "Modifier l'utilisateur" : "Nouvel utilisateur" }}
+            {{ editing() ? "Modifier l'employé" : "Nouvel employé" }}
         </h2>
 
         <div class="names">
@@ -130,7 +130,7 @@
                 @if (saving()) {
                     <span class="spinner"></span>
                 }
-                {{ editing() ? "Enregistrer" : "Créer l'utilisateur" }}
+                {{ editing() ? "Enregistrer" : "Créer l'employé" }}
             </button>
         </div>
     </form>

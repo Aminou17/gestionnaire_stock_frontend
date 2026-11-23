@@ -196,13 +196,13 @@ export const routes: Routes = [
             },
             {
                 path: "users",
-                title: "Utilisateurs",
+                title: "Employés",
                 canActivate: [adminGuard],
                 loadComponent: () => import("./features/users/users").then((m) => m.Users),
             },
             {
                 path: "users/:id",
-                title: "Utilisateur",
+                title: "Employé",
                 canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/users/user-page/user-page").then((m) => m.UserPage),

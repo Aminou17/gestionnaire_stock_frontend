@@ -150,7 +150,7 @@ export class Users {
     }
 
     onSaved() {
-        // l'utilisateur enregistré doit être visible, quelle que soit la recherche en cours
+        // l'employé enregistré doit être visible, quelle que soit la recherche en cours
         this.search.set("");
         this.view.set("active");
         this.users.reload();
@@ -194,7 +194,7 @@ export class Users {
                 error: (err: HttpErrorResponse) => {
                     this.deleting.set(false);
                     this.deleteError.set(
-                        err.error?.message ?? "Impossible de supprimer l'utilisateur.",
+                        err.error?.message ?? "Impossible de supprimer l'employé.",
                     );
                 },
             });
@@ -217,7 +217,7 @@ export class Users {
                 error: (err: HttpErrorResponse) => {
                     this.restoringId.set(null);
                     this.restoreError.set(
-                        err.error?.message ?? "Impossible de restaurer l'utilisateur.",
+                        err.error?.message ?? "Impossible de restaurer l'employé.",
                     );
                 },
             });

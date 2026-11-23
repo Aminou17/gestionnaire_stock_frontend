@@ -53,17 +53,17 @@ describe("Sidebar", () => {
     it("should show every page to the admin with the alert count", async () => {
         const el = await render(true, 5);
 
-        expect(labels(el)).toContain("Utilisateurs");
+        expect(labels(el)).toContain("Employés");
         expect(el.querySelector(".count")?.textContent).toBe("5");
     });
 
     it("should keep a page the shop does not have in the menu, with a padlock", async () => {
         const el = await render(true, 0, undefined, ["team", "customers"]);
 
-        expect(labels(el)).toContain("Utilisateurs");
+        expect(labels(el)).toContain("Employés");
         expect(labels(el)).toContain("Clients et crédits");
         const link = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
-            a.textContent?.includes("Utilisateurs"),
+            a.textContent?.includes("Employés"),
         )!;
         expect(link.querySelector("app-icon.lock")).not.toBeNull();
         const free = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
@@ -88,12 +88,12 @@ describe("Sidebar", () => {
         ]);
     });
 
-    it("should group the pages under Gestion", async () => {
+    it("should group the pages under Avancé", async () => {
         const el = await render(true, 2);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Gestion"]);
+        expect(groups).toEqual(["Avancé"]);
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
@@ -110,7 +110,7 @@ describe("Sidebar", () => {
             "Vitesse de vente",
             "Entrées de stock",
             "Fournisseurs",
-            "Utilisateurs",
+            "Employés",
             "Historique des actions",
         ]);
         // l'ajustement du stock passe par la page Produits
@@ -139,10 +139,10 @@ describe("Sidebar", () => {
             "Vitesse de vente",
             "Entrées de stock",
             "Fournisseurs",
-            "Utilisateurs",
+            "Employés",
             "Historique des actions",
         ]);
-        expect(el.querySelector(".launcher h2")?.textContent).toContain("Gestion");
+        expect(el.querySelector(".launcher h2")?.textContent).toContain("Avancé");
         expect(el.querySelector(".tile .count")?.textContent).toBe("3");
 
         el.querySelector<HTMLButtonElement>(".launcher-close")!.click();
@@ -171,12 +171,12 @@ describe("Sidebar", () => {
         expect(el.querySelector("button.group .count")).toBeNull();
     });
 
-    it("should show the manager the Gestion group without the admin pages", async () => {
+    it("should show the manager the Avancé group without the admin pages", async () => {
         const el = await render(false);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Gestion"]);
+        expect(groups).toEqual(["Avancé"]);
     });
 
     it("should show only Settings at the bottom, for everyone", async () => {

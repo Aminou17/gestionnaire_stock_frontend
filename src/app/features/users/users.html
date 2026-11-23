@@ -1,7 +1,7 @@
-<app-page-header title="Utilisateurs" section="Gestion">
+<app-page-header title="Employés" section="Avancé">
     <button type="button" class="btn btn-primary new-user" (click)="newUser()">
         <app-icon name="plus" [size]="18" />
-        <span class="long">Nouvel utilisateur</span><span class="short">Ajouter</span>
+        <span class="long">Nouvel employé</span><span class="short">Ajouter</span>
     </button>
 </app-page-header>
 
@@ -13,7 +13,7 @@
                 class="input"
                 type="search"
                 placeholder="Chercher…"
-                aria-label="Rechercher un utilisateur"
+                aria-label="Rechercher un employé"
                 [value]="search()"
                 (input)="search.set($any($event.target).value)"
             />
@@ -24,7 +24,7 @@
             <app-icon name="filter" [size]="18" />
             <span class="filter-word">Filtre</span>
             <select
-                aria-label="Afficher les utilisateurs"
+                aria-label="Afficher les employés"
                 (change)="selectView($any($event.target).value)"
             >
                 <option value="active" [selected]="view() === 'active'">
@@ -45,26 +45,22 @@
         </div>
     } @else if (users.error() && all().length === 0) {
         <div class="empty">
-            Impossible de charger les utilisateurs.
+            Impossible de charger les employés.
             <button type="button" class="btn btn-outline btn-sm" (click)="users.reload()">
                 Réessayer
             </button>
         </div>
     } @else if (list().length === 0) {
         @if (search()) {
-            <app-empty-state
-                icon="search"
-                title="Aucun utilisateur ne correspond à « {{ search() }} »"
-            >
+            <app-empty-state icon="search" title="Aucun employé ne correspond à « {{ search() }} »">
                 <button type="button" class="btn btn-outline btn-sm" (click)="search.set('')">
                     Effacer la recherche
                 </button>
             </app-empty-state>
         } @else if (view() === "deleted") {
-            <app-empty-state icon="trash" title="Aucun utilisateur supprimé" />
+            <app-empty-state icon="trash" title="Aucun employé supprimé" />
         } @else {
-            <app-empty-state icon="users" title="Aucun utilisateur pour le moment">
-            </app-empty-state>
+            <app-empty-state icon="users" title="Aucun employé pour le moment"> </app-empty-state>
         }
     } @else {
         @if (restoreError()) {
@@ -141,7 +137,7 @@
     (cancel)="onConfirmCancel($event)"
 >
     <div class="confirm-body">
-        <h2 id="user-delete-title">Supprimer cet utilisateur ?</h2>
+        <h2 id="user-delete-title">Supprimer cet employé ?</h2>
         <p class="muted">
             {{ toDelete()?.name }} ne pourra plus se connecter et sera déconnecté tout de suite. Ses
             ventes, ses caisses et tout son historique sont conservés. Vous pourrez le restaurer

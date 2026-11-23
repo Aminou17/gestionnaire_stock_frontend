@@ -1,6 +1,6 @@
 <app-page-header
-    [title]="data()?.name ?? 'Utilisateur'"
-    section="Gestion"
+    [title]="data()?.name ?? 'Employé'"
+    section="Avancé"
     [back]="back.link"
     [backLabel]="back.label"
 />
@@ -13,10 +13,10 @@
     } @else if (!data() && (user.error() || notFound())) {
         <div class="empty">
             @if (notFound()) {
-                Cet utilisateur est introuvable.
-                <a routerLink="/users" class="btn btn-outline btn-sm">Retour aux utilisateurs</a>
+                Cet employé est introuvable.
+                <a routerLink="/users" class="btn btn-outline btn-sm">Retour aux employés</a>
             } @else {
-                Impossible de charger l'utilisateur.
+                Impossible de charger l'employé.
                 <button type="button" class="btn btn-outline btn-sm" (click)="user.reload()">
                     Réessayer
                 </button>
@@ -182,7 +182,7 @@
         (cancel)="onConfirmCancel($event)"
     >
         <div class="confirm-body">
-            <h2 id="user-delete-title">Supprimer cet utilisateur ?</h2>
+            <h2 id="user-delete-title">Supprimer cet employé ?</h2>
             <p class="muted">
                 {{ data()?.name }} ne pourra plus se connecter et sera déconnecté tout de suite. Ses
                 ventes, ses caisses et tout son historique sont conservés. Vous pourrez le restaurer

@@ -32,7 +32,7 @@ const QUESTIONS: Question[] = [
     },
     {
         question: "Comment ajouter un employé ?",
-        answer: `Dans le menu, ouvrez « Utilisateurs » puis « Nouvel utilisateur ». Donnez son nom et son e-mail et choisissez son rôle : il reçoit ses accès et ne voit que ce que son rôle autorise. Cette page est réservée à l'administrateur.`,
+        answer: `Dans le menu, ouvrez « Employés » puis « Nouvel employé ». Donnez son nom et son e-mail et choisissez son rôle : il reçoit ses accès et ne voit que ce que son rôle autorise. Cette page est réservée à l'administrateur.`,
     },
 ];
 

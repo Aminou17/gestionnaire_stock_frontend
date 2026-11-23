@@ -18,7 +18,7 @@ export interface NavSection {
 }
 
 // Accueil, Ventes, Clients, Caisse, Dépenses et Bilan en direct ; le reste est rangé dans le groupe
-// Gestion, qui s'ouvre seul quand on est dans ses pages, comme Shopify : peu de lignes à lire
+// Avancé, qui s'ouvre seul quand on est dans ses pages, comme Shopify : peu de lignes à lire
 export const SECTIONS: NavSection[] = [
     {
         items: [
@@ -29,7 +29,7 @@ export const SECTIONS: NavSection[] = [
             { label: "Dépenses", path: "/expenses", icon: "receipt", adminOnly: true },
             { label: "Bilan", path: "/admin", icon: "shield", adminOnly: true },
             {
-                label: "Gestion",
+                label: "Avancé",
                 icon: "package",
                 children: [
                     { label: "Produits", path: "/products", icon: "package" },
@@ -64,8 +64,8 @@ export const SECTIONS: NavSection[] = [
                         adminOnly: true,
                     },
                     { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
-                    // l'équipe : qui a accès, et ce qui a été fait
-                    { label: "Utilisateurs", path: "/users", icon: "users", adminOnly: true },
+                    // les employés : qui a accès, et ce qui a été fait
+                    { label: "Employés", path: "/users", icon: "users", adminOnly: true },
                     {
                         label: "Historique des actions",
                         path: "/audit-logs",

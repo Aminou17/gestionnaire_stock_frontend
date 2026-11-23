@@ -135,14 +135,14 @@ describe("UserPage", () => {
     it("should say when the user does not exist", async () => {
         await render({ notFound: true });
 
-        expect(text()).toContain("Cet utilisateur est introuvable.");
+        expect(text()).toContain("Cet employé est introuvable.");
     });
 
     it("should not call the backend for an invalid id", async () => {
         await render({ id: "abc" });
 
         expect(TestBed.inject(UserService).getUser).not.toHaveBeenCalled();
-        expect(text()).toContain("Cet utilisateur est introuvable.");
+        expect(text()).toContain("Cet employé est introuvable.");
     });
 
     it("should keep the details when the activity fails", async () => {

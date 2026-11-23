@@ -53,7 +53,7 @@ export class UserForm {
         {
             value: "admin",
             label: "Administrateur",
-            hint: "Accès complet : stock, fournisseurs, caisse, utilisateurs et paramètres.",
+            hint: "Accès complet : stock, fournisseurs, caisse, employés et paramètres.",
         },
     ];
 
@@ -177,11 +177,11 @@ export class UserForm {
                 if (this.isSelf()) this.auth.refreshUser().subscribe({ error: () => {} });
                 this.close();
                 this.saved.emit(res.user);
-                this.toast.show(editing ? "Utilisateur enregistré" : "Utilisateur ajouté");
+                this.toast.show(editing ? "Employé enregistré" : "Employé ajouté");
             },
             error: (err: HttpErrorResponse) => {
                 this.saving.set(false);
-                this.formError.set(err.error?.message ?? "Impossible d'enregistrer l'utilisateur.");
+                this.formError.set(err.error?.message ?? "Impossible d'enregistrer l'employé.");
             },
         });
     }

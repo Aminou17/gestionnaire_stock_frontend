@@ -17,7 +17,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { ShopModule } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
 
-const GROUP_ORDER = ["Vente", "Caisse", "Stock", "Gestion"];
+const GROUP_ORDER = ["Vente", "Caisse", "Stock", "Avancé"];
 
 // Les accès d'une boutique : le propriétaire coche ce qu'elle peut utiliser (utile pour une formule payante)
 @Component({

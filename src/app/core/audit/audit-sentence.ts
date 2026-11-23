@@ -58,7 +58,7 @@ const RESOURCES: Record<string, [string, string]> = {
     products: ["un produit", "les produits"],
     suppliers: ["un fournisseur", "les fournisseurs"],
     customers: ["un client", "les clients"],
-    users: ["un utilisateur", "les utilisateurs"],
+    users: ["un employé", "les employés"],
     sales: ["une vente", "les ventes"],
     stock_entries: ["une entrée de stock", "les entrées de stock"],
     stock_movements: ["un mouvement de stock", "les mouvements de stock"],

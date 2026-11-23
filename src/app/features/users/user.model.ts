@@ -1,6 +1,6 @@
 import { User, UserRole } from "../../core/auth/auth.service";
 
-// compte vu par l'administrateur dans la gestion des utilisateurs
+// compte vu par l'administrateur dans la gestion des employés
 export interface UserAccount extends User {
     first_name: string;
     last_name: string;

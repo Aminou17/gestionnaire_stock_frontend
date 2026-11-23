@@ -33,7 +33,7 @@ describe("PasswordDialog", () => {
                       () =>
                           new HttpErrorResponse({
                               status: 409,
-                              error: { message: "Cet utilisateur est supprimé." },
+                              error: { message: "Cet employé est supprimé." },
                           }),
                   )
                 : of({ message: "ok", user: moussa }),
@@ -92,6 +92,6 @@ describe("PasswordDialog", () => {
         fixture.componentInstance.form.patchValue({ password: "nouveau-mdp" });
         await submit();
 
-        expect(text()).toContain("Cet utilisateur est supprimé.");
+        expect(text()).toContain("Cet employé est supprimé.");
     });
 });

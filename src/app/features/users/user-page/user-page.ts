@@ -36,7 +36,7 @@ import { injectGoBack } from "../../../shared/back-link/back-link";
 })
 export class UserPage {
     private goBack = injectGoBack();
-    protected back = getBackLink("/users", "Retour aux utilisateurs");
+    protected back = getBackLink("/users", "Retour aux employés");
     private userService = inject(UserService);
     private auth = inject(AuthService);
     private router = inject(Router);
@@ -157,7 +157,7 @@ export class UserPage {
                 error: (err: HttpErrorResponse) => {
                     this.deleting.set(false);
                     this.deleteError.set(
-                        err.error?.message ?? "Impossible de supprimer l'utilisateur.",
+                        err.error?.message ?? "Impossible de supprimer l'employé.",
                     );
                 },
             });
@@ -181,7 +181,7 @@ export class UserPage {
                 error: (err: HttpErrorResponse) => {
                     this.restoring.set(false);
                     this.restoreError.set(
-                        err.error?.message ?? "Impossible de restaurer l'utilisateur.",
+                        err.error?.message ?? "Impossible de restaurer l'employé.",
                     );
                 },
             });

@@ -59,7 +59,7 @@ describe("ShopAccess", () => {
     const modules = () => [
         module("customers", "Vente", "Clients et crédits"),
         module("expenses", "Caisse", "Dépenses"),
-        module("audit", "Gestion", "Historique des actions"),
+        module("audit", "Avancé", "Historique des actions"),
     ];
     const switches = (el: HTMLElement) => [
         ...el.querySelectorAll<HTMLButtonElement>("button.switch"),

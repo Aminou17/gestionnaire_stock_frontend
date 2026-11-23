@@ -34,7 +34,7 @@ export const MODULE_INFO: Record<ModuleKey, { label: string; description: string
             "Vitesse de vente, bons de commande par fournisseur et e-mail d'alerte chaque matin.",
     },
     team: {
-        label: "Équipe",
+        label: "Employés",
         description: "Créer des comptes pour les vendeurs et gérer leurs accès.",
     },
     audit: { label: "Historique des actions", description: "Voir qui a fait quoi, et quand." },

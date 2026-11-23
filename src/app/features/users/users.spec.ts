@@ -51,7 +51,7 @@ describe("Users", () => {
                       () =>
                           new HttpErrorResponse({
                               status: 409,
-                              error: { message: "Cet utilisateur est déjà supprimé." },
+                              error: { message: "Cet employé est déjà supprimé." },
                           }),
                   )
                 : of({ message: "ok", user: { ...moussa, is_active: false } }),
@@ -158,7 +158,7 @@ describe("Users", () => {
         await click(menuItem(1, "Supprimer"));
         await click(el.querySelector(".confirm .btn-danger"));
 
-        expect(text()).toContain("Cet utilisateur est déjà supprimé.");
+        expect(text()).toContain("Cet employé est déjà supprimé.");
     });
 
     it("should restore a deleted user", async () => {

@@ -18,7 +18,7 @@ const log = (patch: Partial<AuditLog>): AuditLog => ({
 describe("audit sentence", () => {
     it("should turn a denied request into words", () => {
         expect(describeRequest("PATCH", "/categories/4/restore")).toBe("restaurer une catégorie");
-        expect(describeRequest("GET", "/users")).toBe("consulter les utilisateurs");
+        expect(describeRequest("GET", "/users")).toBe("consulter les employés");
         expect(describeRequest("DELETE", "/products/3")).toBe("supprimer un produit");
         expect(describeRequest("GET", "/inconnu")).toBe("ouvrir une page réservée");
     });

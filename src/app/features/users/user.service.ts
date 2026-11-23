@@ -5,7 +5,7 @@ import { map } from "rxjs";
 import { API_URL } from "../../core/api.config";
 import { UserAccount, UserActivity, UserInput, UserResponse, UserStatus } from "./user.model";
 
-// Utilisateurs : réservés à l'administrateur, côté backend comme côté interface
+// Employés : réservés à l'administrateur, côté backend comme côté interface
 @Injectable({ providedIn: "root" })
 export class UserService {
     private http = inject(HttpClient);
