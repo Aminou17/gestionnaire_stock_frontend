@@ -114,7 +114,10 @@ export class CountCashDialog {
         this.saving.set(true);
         this.error.set(null);
 
-        this.cash.count(actualAmount, closingNote, this.target().sessionId).subscribe({
+        // montant exact : une raison tapée avant de corriger le montant ne doit pas partir
+        const note = this.difference() === 0 ? "" : closingNote;
+
+        this.cash.count(actualAmount, note, this.target().sessionId).subscribe({
             next: (session) => {
                 this.saving.set(false);
                 this.result.set(session);

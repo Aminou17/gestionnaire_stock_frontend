@@ -106,13 +106,13 @@ describe("CountCashDialog", () => {
         expect(text()).toContain("Attendudansletiroir61500F");
 
         await typeAmount("61000");
-        expect(text()).toContain("Ilmanque500F.");
+        expect(text()).toContain("Pertede500F");
 
         await typeAmount("62000");
-        expect(text()).toContain("500Fdeplusqueprévu.");
+        expect(text()).toContain("Surplusde500F");
 
         await typeAmount("61500");
-        expect(text()).toContain("correspondausoldeattendu");
+        expect(text()).toContain("Montantexact");
     });
 
     it("should show the gap in the same dialog right after the counting", async () => {
@@ -125,7 +125,7 @@ describe("CountCashDialog", () => {
 
         expect(dialog.open).toBe(true);
         expect(text()).toContain("Caissecomptée");
-        expect(text()).toContain("Ilmanque500Fdansletiroir.");
+        expect(text()).toContain("Pertede500F");
         expect(text()).toContain("Attendu61500F");
         expect(text()).toContain("Compté61000F");
         expect(el.querySelector("input")).toBeNull();
@@ -139,7 +139,19 @@ describe("CountCashDialog", () => {
         httpMock.expectOne("/api/cash_sessions/close").flush(countedSession("0.00"));
         await fixture.whenStable();
 
-        expect(text()).toContain("Aucunécart");
+        expect(text()).toContain("Montantexact");
+    });
+
+    it("should show the reason field only when there is a gap", async () => {
+        fixture.componentInstance.open({ expected: 61500 });
+        await typeAmount("61500");
+        expect(text()).not.toContain("Raisondel'écart");
+
+        await typeAmount("61000");
+        expect(text()).toContain("Raisondel'écart");
+
+        await typeAmount("61500");
+        expect(text()).not.toContain("Raisondel'écart");
     });
 
     it("should hide the expected amount and the gap when counting blind", async () => {

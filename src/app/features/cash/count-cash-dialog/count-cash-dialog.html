@@ -19,11 +19,12 @@
 
             <p class="verdict" role="status">
                 @if (done.difference === 0) {
-                    Aucun écart : le tiroir correspond au solde attendu.
+                    Montant exact : le tiroir correspond au solde attendu.
                 } @else if (done.difference! > 0) {
-                    Il y a {{ done.difference | fcfa }} de plus que prévu dans le tiroir.
+                    Surplus de {{ done.difference | fcfa }} : il y a plus d'argent que prévu dans le
+                    tiroir.
                 } @else {
-                    Il manque {{ -done.difference! | fcfa }} dans le tiroir.
+                    Perte de {{ -done.difference! | fcfa }} : il manque de l'argent dans le tiroir.
                 }
             </p>
 
@@ -108,26 +109,32 @@
                     aria-live="polite"
                 >
                     @if (difference() === 0) {
-                        Le montant correspond au solde attendu.
+                        <strong>Montant exact.</strong>
+                        <span>Le tiroir correspond au solde attendu.</span>
                     } @else if (difference()! > 0) {
-                        {{ difference() | fcfa }} de plus que prévu.
+                        <strong>Surplus de {{ difference() | fcfa }}</strong>
+                        <span>Il y a plus d'argent que prévu. Indiquez la raison ci-dessous.</span>
                     } @else {
-                        Il manque {{ -difference()! | fcfa }}.
+                        <strong>Perte de {{ -difference()! | fcfa }}</strong>
+                        <span>Il manque de l'argent. Indiquez la raison ci-dessous.</span>
                     }
                 </div>
             }
 
-            <label class="field">
-                <span>Raison (facultatif)</span>
-                <input
-                    class="input"
-                    type="text"
-                    maxlength="300"
-                    autocomplete="off"
-                    formControlName="closingNote"
-                    placeholder="Ex. erreur de monnaie rendue"
-                />
-            </label>
+            <!-- montant exact : pas de raison à donner ; en aveugle, l'écart est inconnu, la raison reste proposée -->
+            @if (difference() !== 0 && (difference() !== null || blind())) {
+                <label class="field">
+                    <span>Raison de l'écart</span>
+                    <input
+                        class="input"
+                        type="text"
+                        maxlength="300"
+                        autocomplete="off"
+                        formControlName="closingNote"
+                        placeholder="Ex. erreur de monnaie rendue"
+                    />
+                </label>
+            }
 
             <div class="actions">
                 <button
