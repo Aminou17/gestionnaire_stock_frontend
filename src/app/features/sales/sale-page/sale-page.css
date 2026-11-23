@@ -114,6 +114,10 @@
     font-variant-numeric: tabular-nums;
 }
 
+.summary-total.owed {
+    color: var(--warning);
+}
+
 .summary-total.cancelled {
     color: var(--text-muted);
     text-decoration: line-through;
@@ -773,12 +777,6 @@ app-page-header {
     height: 100%;
     border-radius: 999px;
     background: var(--success);
-}
-
-.progress-text {
-    margin: 8px 0 4px;
-    font-size: var(--fs-small);
-    color: var(--text-muted);
 }
 
 .paid-total dd {

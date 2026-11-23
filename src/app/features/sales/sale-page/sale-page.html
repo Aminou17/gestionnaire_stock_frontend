@@ -67,17 +67,19 @@
                         }}</span
                     >
 
-                    <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
-                        (due() > 0 ? due() : hasReturns() ? net() : sale.total) | fcfa
-                    }}</strong>
+                    <strong
+                        class="summary-total"
+                        [class.cancelled]="sale.status === 'CANCELLED'"
+                        [class.owed]="sale.status !== 'CANCELLED' && due() > 0"
+                        >{{ sale.status !== "CANCELLED" && due() > 0 ? "−" : ""
+                        }}{{
+                            (due() > 0 ? due() : hasReturns() ? net() : sale.total) | fcfa
+                        }}</strong
+                    >
                 </div>
 
                 <div class="summary-text">
-                    @if (due() > 0) {
-                        <small class="muted">
-                            <span>reste à payer sur {{ sale.total | fcfa }}</span>
-                        </small>
-                    } @else if (hasReturns()) {
+                    @if (due() <= 0 && hasReturns()) {
                         <small class="muted">
                             <span>sur {{ sale.total | fcfa }} ·</span>
                             <span>{{ returned() | fcfa }} rendus</span>
@@ -246,13 +248,16 @@
                     >
                         <span [style.width.%]="paidPercent()"></span>
                     </div>
-                    <p class="progress-text">
-                        <strong>{{ paidPercent() }} % payé</strong>
-                    </p>
                 }
 
                 <dl class="payment">
                     @if (showPayments()) {
+                        @if (!hasReturns()) {
+                            <div>
+                                <dt>Total de la vente</dt>
+                                <dd>{{ sale.total | fcfa }}</dd>
+                            </div>
+                        }
                         @for (payment of sale.payments; track payment.id) {
                             <div>
                                 <dt>
@@ -275,14 +280,10 @@
                                 <dd>{{ payment.amount | fcfa }}</dd>
                             </div>
                         }
-                        <div class="paid-total">
-                            <dt>Payé</dt>
-                            <dd>{{ sale.paid_amount | fcfa }}</dd>
-                        </div>
-                        @if (due() > 0) {
-                            <div class="due">
-                                <dt>Reste à payer sur {{ sale.total | fcfa }}</dt>
-                                <dd>{{ due() | fcfa }}</dd>
+                        @if (sale.payments.length > 1) {
+                            <div class="paid-total">
+                                <dt>Payé</dt>
+                                <dd>{{ sale.paid_amount | fcfa }}</dd>
                             </div>
                         }
                     } @else if (sale.payment_method === "MOBILE_MONEY") {
