@@ -243,7 +243,7 @@ export class SalePage {
         const items: ActionItem[] = [];
         const link = this.whatsAppReceipt();
         if (link) {
-            items.push({ id: "text", label: "Envoyer en texte", icon: "whatsapp", href: link });
+            items.push({ id: "text", label: "Ticket en texte", icon: "whatsapp", href: link });
         }
         items.push({
             id: "print",

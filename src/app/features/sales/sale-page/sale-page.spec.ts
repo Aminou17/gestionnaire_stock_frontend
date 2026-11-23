@@ -378,7 +378,7 @@ describe("SalePage", () => {
             (b) => b.textContent!.trim(),
         );
         expect(labels).toContain("Ticket");
-        expect(labels).toContain("WhatsApp");
+        expect(labels).toContain("Ticket WhatsApp");
     });
 
     it("should link the customer phone to WhatsApp when there is one", async () => {

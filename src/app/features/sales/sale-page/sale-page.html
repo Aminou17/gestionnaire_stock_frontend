@@ -75,8 +75,7 @@
                 <div class="summary-text">
                     @if (due() > 0) {
                         <small class="muted">
-                            <span>sur {{ sale.total | fcfa }} ·</span>
-                            <span>{{ sale.paid_amount | fcfa }} payés</span>
+                            <span>reste à payer sur {{ sale.total | fcfa }}</span>
                         </small>
                     } @else if (hasReturns()) {
                         <small class="muted">
@@ -150,7 +149,7 @@
                 }
                 @if (shareError()) {
                     <div class="alert alert-warning settings-alert" role="alert">
-                        Impossible de fabriquer l'image du reçu. Utilisez « Envoyer en texte » dans
+                        Impossible de fabriquer l'image du reçu. Utilisez « Ticket en texte » dans
                         le menu.
                     </div>
                 }
@@ -175,7 +174,7 @@
                             (click)="askPay()"
                         >
                             <app-icon name="banknote" [size]="18" />
-                            Encaisser
+                            Encaisser le reste : {{ due() | fcfa }}
                         </button>
                     }
                     <button
@@ -194,7 +193,7 @@
                         (click)="shareImage()"
                     >
                         <app-whatsapp-icon [size]="18" />
-                        WhatsApp
+                        Ticket WhatsApp
                     </button>
                     <app-action-menu
                         class="framed act-more"
@@ -216,6 +215,99 @@
                     </div>
                 </div>
             }
+
+            <section class="card sheet">
+                <h2 class="section-title">Paiement</h2>
+                @if (hasReturns()) {
+                    <dl class="subtotals recap">
+                        <div>
+                            <dt>Total de la vente</dt>
+                            <dd>{{ sale.total | fcfa }}</dd>
+                        </div>
+                        <div>
+                            <dt>Rendu</dt>
+                            <dd class="returned">−{{ returned() | fcfa }}</dd>
+                        </div>
+                    </dl>
+                    <div class="total">
+                        <span>Net</span>
+                        <strong>{{ net() | fcfa }}</strong>
+                    </div>
+                }
+
+                @if (showPayments() && sale.status === "ACTIVE") {
+                    <div
+                        class="progress"
+                        role="progressbar"
+                        aria-label="Part déjà payée"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        [attr.aria-valuenow]="paidPercent()"
+                    >
+                        <span [style.width.%]="paidPercent()"></span>
+                    </div>
+                    <p class="progress-text">
+                        <strong>{{ paidPercent() }} % payé</strong>
+                    </p>
+                }
+
+                <dl class="payment">
+                    @if (showPayments()) {
+                        @for (payment of sale.payments; track payment.id) {
+                            <div>
+                                <dt>
+                                    <app-icon
+                                        [name]="
+                                            payment.payment_method === 'MOBILE_MONEY'
+                                                ? 'phone'
+                                                : 'banknote'
+                                        "
+                                        [size]="16"
+                                    />
+                                    {{ payment.created_at | date: "d MMMM 'à' HH:mm" }}
+                                    ·
+                                    {{
+                                        payment.payment_method === "MOBILE_MONEY"
+                                            ? "Mobile Money"
+                                            : "Espèces"
+                                    }}
+                                </dt>
+                                <dd>{{ payment.amount | fcfa }}</dd>
+                            </div>
+                        }
+                        <div class="paid-total">
+                            <dt>Payé</dt>
+                            <dd>{{ sale.paid_amount | fcfa }}</dd>
+                        </div>
+                        @if (due() > 0) {
+                            <div class="due">
+                                <dt>Reste à payer sur {{ sale.total | fcfa }}</dt>
+                                <dd>{{ due() | fcfa }}</dd>
+                            </div>
+                        }
+                    } @else if (sale.payment_method === "MOBILE_MONEY") {
+                        <div>
+                            <dt>
+                                <app-icon name="phone" [size]="16" />
+                                Mobile Money
+                            </dt>
+                            <dd>{{ sale.total | fcfa }}</dd>
+                        </div>
+                    } @else {
+                        <div>
+                            <dt>
+                                <app-icon name="banknote" [size]="16" />
+                                Espèces reçues
+                            </dt>
+                            <dd>{{ sale.amount_received ?? sale.total | fcfa }}</dd>
+                        </div>
+                        <div>
+                            <dt>Monnaie rendue</dt>
+                            <dd>{{ (sale.amount_received ?? sale.total) - sale.total | fcfa }}</dd>
+                        </div>
+                    }
+                </dl>
+            </section>
 
             <section class="card sheet">
                 <h2 class="section-title">
@@ -319,99 +411,6 @@
                     </div>
                 </section>
             }
-
-            <section class="card sheet">
-                <h2 class="section-title">Paiement</h2>
-                @if (hasReturns()) {
-                    <dl class="subtotals recap">
-                        <div>
-                            <dt>Total de la vente</dt>
-                            <dd>{{ sale.total | fcfa }}</dd>
-                        </div>
-                        <div>
-                            <dt>Rendu</dt>
-                            <dd class="returned">−{{ returned() | fcfa }}</dd>
-                        </div>
-                    </dl>
-                    <div class="total">
-                        <span>Net</span>
-                        <strong>{{ net() | fcfa }}</strong>
-                    </div>
-                }
-
-                @if (showPayments() && sale.status === "ACTIVE") {
-                    <div
-                        class="progress"
-                        role="progressbar"
-                        aria-label="Part déjà payée"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                        [attr.aria-valuenow]="paidPercent()"
-                    >
-                        <span [style.width.%]="paidPercent()"></span>
-                    </div>
-                    <p class="progress-text">
-                        <strong>{{ paidPercent() }} % payé</strong>
-                    </p>
-                }
-
-                <dl class="payment">
-                    @if (showPayments()) {
-                        @for (payment of sale.payments; track payment.id) {
-                            <div>
-                                <dt>
-                                    <app-icon
-                                        [name]="
-                                            payment.payment_method === 'MOBILE_MONEY'
-                                                ? 'phone'
-                                                : 'banknote'
-                                        "
-                                        [size]="16"
-                                    />
-                                    {{ payment.created_at | date: "d MMMM 'à' HH:mm" }}
-                                    ·
-                                    {{
-                                        payment.payment_method === "MOBILE_MONEY"
-                                            ? "Mobile Money"
-                                            : "Espèces"
-                                    }}
-                                </dt>
-                                <dd>{{ payment.amount | fcfa }}</dd>
-                            </div>
-                        }
-                        <div class="paid-total">
-                            <dt>Payé</dt>
-                            <dd>{{ sale.paid_amount | fcfa }}</dd>
-                        </div>
-                        @if (due() > 0) {
-                            <div class="due">
-                                <dt>Reste à payer sur {{ sale.total | fcfa }}</dt>
-                                <dd>{{ due() | fcfa }}</dd>
-                            </div>
-                        }
-                    } @else if (sale.payment_method === "MOBILE_MONEY") {
-                        <div>
-                            <dt>
-                                <app-icon name="phone" [size]="16" />
-                                Mobile Money
-                            </dt>
-                            <dd>{{ sale.total | fcfa }}</dd>
-                        </div>
-                    } @else {
-                        <div>
-                            <dt>
-                                <app-icon name="banknote" [size]="16" />
-                                Espèces reçues
-                            </dt>
-                            <dd>{{ sale.amount_received ?? sale.total | fcfa }}</dd>
-                        </div>
-                        <div>
-                            <dt>Monnaie rendue</dt>
-                            <dd>{{ (sale.amount_received ?? sale.total) - sale.total | fcfa }}</dd>
-                        </div>
-                    }
-                </dl>
-            </section>
         </div>
 
         <aside class="side">
