@@ -12,6 +12,8 @@ export interface Customer {
     due_amount: number;
     // null tant que le client n'a rien acheté
     last_purchase_at: string | null;
+    // date de la plus ancienne vente non soldée, null sans dette
+    oldest_due_at?: string | null;
 }
 
 // champs envoyés à la création et à la modification (vide = null)
@@ -23,7 +25,7 @@ export interface CustomerInput {
 
 export type CustomerStatus = "active" | "inactive" | "all";
 
-export type CustomerSort = "recent" | "name" | "spent" | "due";
+export type CustomerSort = "recent" | "name" | "spent" | "due" | "oldest_due";
 
 export interface CustomerFilters {
     search: string;

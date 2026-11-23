@@ -21,6 +21,7 @@ const awa: Customer = {
     total_spent: 45000,
     due_amount: 6500,
     last_purchase_at: "2026-11-13T10:30:00Z",
+    oldest_due_at: "2026-11-10T10:30:00Z",
 };
 
 const jean: Customer = {
@@ -169,26 +170,87 @@ describe("Customers", () => {
         expect(text()).toContain("chez 2 clients");
     });
 
-    it("should offer the WhatsApp reminder only with the filter", async () => {
+    it("should offer the WhatsApp icon only with the filter", async () => {
         await render();
-        expect(el.querySelector(".remind-bar")).toBeNull();
+        expect(el.querySelector(".wa-chip")).toBeNull();
 
         await pressDueChip();
-        const link = el.querySelector<HTMLAnchorElement>(".remind-bar a")!;
+        const link = el.querySelector<HTMLAnchorElement>("a.wa-chip")!;
 
-        expect(el.querySelectorAll(".remind-bar").length).toBe(2);
+        expect(el.querySelector(".remind-bar")).toBeNull();
         expect(link.getAttribute("href")).toContain("wa.me");
         expect(link.getAttribute("href")).toContain("Awa");
+        expect(link.getAttribute("aria-label")).toBe("Relancer Awa Kouba sur WhatsApp");
     });
 
-    it("should ask to add a number when the customer has none", async () => {
+    it("should disable the icon when the customer has no number", async () => {
         await render({
             rows: [{ ...jean, due_amount: 3000 }],
             dueTotal: 3000,
         });
         await pressDueChip();
+        const chip = el.querySelector<HTMLElement>(".wa-chip")!;
 
-        expect(text()).toContain("Ajoutez son numéro pour le relancer");
-        expect(el.querySelector(".remind-bar a")).toBeNull();
+        expect(chip.tagName).toBe("SPAN");
+        expect(chip.classList).toContain("disabled");
+        expect(chip.getAttribute("title")).toBe("Ajoutez son numéro pour le relancer");
+        expect(el.querySelector("a.wa-chip")).toBeNull();
+    });
+
+    it("should show only the debt, without total or label, in the debts view", async () => {
+        await render({ rows: [awa] });
+        expect(el.querySelector(".spent")).not.toBeNull();
+        expect(el.querySelector(".badge.due")).not.toBeNull();
+
+        await pressDueChip();
+
+        expect(el.querySelector(".spent")).toBeNull();
+        expect(el.querySelector(".head-spent")).toBeNull();
+        expect(el.querySelector(".due-amount")!.textContent!.replace(/\s/g, " ")).toContain(
+            "6 500 F",
+        );
+        expect(el.querySelector(".row")!.textContent).not.toContain("45 000");
+        expect(el.querySelector(".row")!.textContent).not.toContain("Dette");
+    });
+
+    it("should say since when the debt exists", async () => {
+        await render({
+            rows: [
+                { ...awa, oldest_due_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+                { ...awa, id: 6, oldest_due_at: new Date(Date.now() - 86400000).toISOString() },
+                { ...awa, id: 7, oldest_due_at: new Date().toISOString() },
+            ],
+        });
+        await pressDueChip();
+
+        expect(text()).toContain("depuis 3 jours");
+        expect(text()).toContain("depuis 1 jour ");
+        expect(text()).toContain("depuis aujourd'hui");
+        expect(el.querySelector(".head-last")!.textContent).toContain("Depuis");
+    });
+
+    it("should offer two sort chips only in the debts view", async () => {
+        await render();
+        expect(el.querySelector(".sort-bar")).toBeNull();
+
+        await pressDueChip();
+        const chips = el.querySelectorAll<HTMLButtonElement>(".sort-bar .chip");
+        expect(chips[0].getAttribute("aria-pressed")).toBe("true");
+
+        chips[1].click();
+        await fixture.whenStable();
+
+        expect(getCustomers).toHaveBeenLastCalledWith(
+            expect.objectContaining({ unpaid: true, sort: "oldest_due" }),
+        );
+        expect(fixture.componentInstance.activeFilters()).toEqual([]);
+    });
+
+    it("should color the avatar orange only for customers who owe", async () => {
+        await render();
+        const avatars = el.querySelectorAll(".avatar");
+
+        expect(avatars[0].classList).toContain("owes");
+        expect(avatars[1].classList).not.toContain("owes");
     });
 });

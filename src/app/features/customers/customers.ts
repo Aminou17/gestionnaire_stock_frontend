@@ -37,6 +37,7 @@ const SORTS: { value: CustomerSort; label: string }[] = [
     { value: "name", label: "Nom" },
     { value: "spent", label: "Plus gros achats" },
     { value: "due", label: "Plus grosses dettes" },
+    { value: "oldest_due", label: "Dettes les plus anciennes" },
 ];
 
 @Component({
@@ -50,7 +51,6 @@ const SORTS: { value: CustomerSort; label: string }[] = [
         FcfaPipe,
         DatePipe,
         RouterLink,
-        Pagination,
         Pagination,
     ],
     templateUrl: "./customers.html",
@@ -122,6 +122,19 @@ export class Customers {
     remindLink(customer: Customer) {
         return reminderLink(customer, this.shop.shopName(), this.shop.defaultCountryCode());
     }
+
+    // "depuis N jours" : ancienneté de la plus vieille vente non soldée
+    dueSince(customer: Customer) {
+        if (!customer.oldest_due_at) return "";
+
+        const days = Math.floor(
+            (Date.now() - new Date(customer.oldest_due_at).getTime()) / 86400000,
+        );
+        if (days <= 0) return "depuis aujourd'hui";
+
+        return `depuis ${days} jour${days > 1 ? "s" : ""}`;
+    }
+
     firstLoad = computed(() => this.customers.isLoading() && !this.last());
 
     // le tri par défaut suit la puce : les plus grosses dettes d'abord quand on relance
@@ -131,7 +144,9 @@ export class Customers {
     activeFilters = computed(() => {
         const filters: { key: "status" | "sort"; label: string }[] = [];
         if (this.status() === "inactive") filters.push({ key: "status", label: "Supprimés" });
-        if (this.sort() !== this.defaultSort()) {
+        // en vue Dettes, les deux puces de tri montrent déjà le choix
+        const shownByChips = this.unpaid() && ["due", "oldest_due"].includes(this.sort());
+        if (this.sort() !== this.defaultSort() && !shownByChips) {
             filters.push({
                 key: "sort",
                 label: SORTS.find((sort) => sort.value === this.sort())!.label,
@@ -154,7 +169,8 @@ export class Customers {
 
     selectUnpaid(value: boolean) {
         // un tri choisi à la main est gardé, sinon on suit le tri par défaut de la puce
-        const wasDefault = this.sort() === this.defaultSort();
+        const wasDefault =
+            this.sort() === this.defaultSort() || (this.unpaid() && this.sort() === "oldest_due");
         this.unpaid.set(value);
         if (wasDefault) this.sort.set(this.defaultSort());
         this.page.set(1);

@@ -127,6 +127,27 @@
             </button>
         </div>
 
+        @if (unpaid()) {
+            <div class="sort-bar" role="group" aria-label="Trier les dettes">
+                <button
+                    type="button"
+                    class="chip chip-small"
+                    [attr.aria-pressed]="sort() === 'due'"
+                    (click)="selectSort('due')"
+                >
+                    Plus grosses
+                </button>
+                <button
+                    type="button"
+                    class="chip chip-small"
+                    [attr.aria-pressed]="sort() === 'oldest_due'"
+                    (click)="selectSort('oldest_due')"
+                >
+                    Plus anciennes
+                </button>
+            </div>
+        }
+
         @if (activeFilters().length > 0) {
             <div class="active-bar">
                 @for (filter of activeFilters(); track filter.key) {
@@ -206,29 +227,36 @@
             </div>
         }
 
-        <div class="rows-head" aria-hidden="true">
+        <div class="rows-head" [class.debts]="unpaid()" aria-hidden="true">
             <span class="head-client">Client</span>
-            <span class="head-last">Dernier achat</span>
+            <span class="head-last">{{ unpaid() ? "Depuis" : "Dernier achat" }}</span>
             <span class="head-due">Dette</span>
-            <span class="head-spent">Total dépensé</span>
+            @if (!unpaid()) {
+                <span class="head-spent">Total dépensé</span>
+            }
         </div>
 
-        <ul class="rows" [class.reloading]="customers.isLoading()">
+        <ul class="rows" [class.debts]="unpaid()" [class.reloading]="customers.isLoading()">
             @for (customer of list(); track customer.id) {
-                <li [class.with-remind]="unpaid()">
+                <li>
                     <a
                         class="row"
                         [class.inactive]="!customer.is_active"
                         [routerLink]="['/customers', customer.id]"
                     >
-                        <span class="avatar av-{{ customer.id % 4 }}" aria-hidden="true">{{
-                            initials(customer.name)
-                        }}</span>
+                        <span
+                            class="avatar"
+                            [class.owes]="customer.is_active && customer.due_amount > 0"
+                            aria-hidden="true"
+                            >{{ initials(customer.name) }}</span
+                        >
 
                         <span class="name">{{ customer.name }}</span>
 
                         <small class="meta muted">
-                            @if (customer.purchases_count > 0) {
+                            @if (unpaid() && customer.oldest_due_at) {
+                                {{ dueSince(customer) }}
+                            } @else if (customer.purchases_count > 0) {
                                 {{ customer.purchases_count }} achat{{
                                     customer.purchases_count > 1 ? "s" : ""
                                 }}
@@ -243,7 +271,9 @@
                         </small>
 
                         <small class="last muted">
-                            @if (customer.last_purchase_at) {
+                            @if (unpaid() && customer.oldest_due_at) {
+                                {{ dueSince(customer) }}
+                            } @else if (customer.last_purchase_at) {
                                 {{ customer.last_purchase_at | date: "d MMM y" }}
                             } @else {
                                 —
@@ -252,33 +282,39 @@
 
                         @if (!customer.is_active) {
                             <span class="badge badge-neutral due">Supprimé</span>
+                        } @else if (unpaid()) {
+                            <strong class="due due-amount">{{ customer.due_amount | fcfa }}</strong>
                         } @else if (customer.due_amount > 0) {
                             <span class="badge badge-warning due">
                                 {{ customer.due_amount | fcfa }}
                             </span>
                         }
 
-                        <strong class="spent">{{ customer.total_spent | fcfa }}</strong>
+                        @if (!unpaid()) {
+                            <strong class="spent">{{ customer.total_spent | fcfa }}</strong>
+                        }
                     </a>
                     @if (unpaid()) {
-                        <div class="remind-bar">
-                            @if (remindLink(customer); as link) {
-                                <a
-                                    class="btn btn-outline btn-sm"
-                                    [href]="link"
-                                    target="_blank"
-                                    rel="noopener"
-                                    [attr.aria-label]="
-                                        'Relancer ' + customer.name + ' sur WhatsApp'
-                                    "
-                                >
-                                    <app-whatsapp-icon [size]="16" />
-                                    Relancer sur WhatsApp
-                                </a>
-                            } @else {
-                                <span class="muted">Ajoutez son numéro pour le relancer</span>
-                            }
-                        </div>
+                        @if (remindLink(customer); as link) {
+                            <a
+                                class="wa-chip"
+                                [href]="link"
+                                target="_blank"
+                                rel="noopener"
+                                [attr.aria-label]="'Relancer ' + customer.name + ' sur WhatsApp'"
+                            >
+                                <app-whatsapp-icon [size]="20" />
+                            </a>
+                        } @else {
+                            <span
+                                class="wa-chip disabled"
+                                title="Ajoutez son numéro pour le relancer"
+                                role="img"
+                                aria-label="Ajoutez son numéro pour le relancer"
+                            >
+                                <app-whatsapp-icon [size]="20" />
+                            </span>
+                        }
                     }
                 </li>
             }
