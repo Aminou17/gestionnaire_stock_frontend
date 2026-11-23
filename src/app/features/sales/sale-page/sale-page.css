@@ -47,12 +47,12 @@
     background:
         radial-gradient(
             80% 90% at 100% 0%,
-            color-mix(in srgb, var(--tone) 22%, transparent),
-            transparent 75%
+            color-mix(in srgb, var(--tone) 38%, transparent),
+            transparent 78%
         ),
         radial-gradient(
             70% 80% at 0% 100%,
-            color-mix(in srgb, var(--violet) 10%, transparent),
+            color-mix(in srgb, var(--violet) 22%, transparent),
             transparent 75%
         ),
         var(--surface);
@@ -106,7 +106,7 @@
 }
 
 .summary-total {
-    font-size: var(--fs-hero);
+    font-size: var(--fs-kpi);
     line-height: 1.1;
     white-space: nowrap;
     font-weight: var(--fw-bold);
@@ -796,10 +796,6 @@ app-page-header {
     .summary {
         gap: 12px;
         padding: 16px;
-    }
-
-    .summary-total {
-        font-size: var(--fs-kpi);
     }
 
     .status {

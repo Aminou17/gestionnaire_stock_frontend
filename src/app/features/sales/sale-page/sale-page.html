@@ -66,12 +66,13 @@
                                   : "Payée"
                         }}</span
                     >
-                </div>
 
-                <div class="summary-text">
                     <strong class="summary-total" [class.cancelled]="sale.status === 'CANCELLED'">{{
                         (due() > 0 ? due() : hasReturns() ? net() : sale.total) | fcfa
                     }}</strong>
+                </div>
+
+                <div class="summary-text">
                     @if (due() > 0) {
                         <small class="muted">
                             <span>sur {{ sale.total | fcfa }} ·</span>
