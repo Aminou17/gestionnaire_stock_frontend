@@ -5,110 +5,12 @@
     backLabel="Retour aux inventaires"
 />
 
-@if (current.isLoading() && !existing()) {
-    <div class="card box" aria-busy="true">
-        <div class="skeleton sk-icon"></div>
-        <div class="skeleton sk-text"></div>
-        <div class="skeleton sk-button"></div>
-    </div>
-} @else if (existing(); as existing) {
-    <!-- un seul comptage à la fois : on propose de reprendre celui qui est ouvert -->
-    <section class="card box">
-        <span class="tone-icon big" aria-hidden="true"
-            ><app-icon name="clipboard" [size]="26"
-        /></span>
-
-        <div class="text">
-            <h2>Un comptage est déjà en cours</h2>
-            <p class="muted">
-                {{ existing.title }}
-                @if (existing.progress) {
-                    <span> · {{ existing.progress }}</span>
-                }
-            </p>
-        </div>
-
-        <a [routerLink]="['/inventories', existing.id, 'count']" class="btn btn-primary btn-block">
-            Reprendre le comptage
-        </a>
-        <a routerLink="/inventories" class="link">Retour aux inventaires</a>
-    </section>
-} @else if (current.error()) {
-    <section class="card box">
-        <app-load-error (retry)="current.reload()" />
-    </section>
-} @else {
-    <section class="card box">
-        <span class="tone-icon big" aria-hidden="true"
-            ><app-icon name="clipboard" [size]="26"
-        /></span>
-
-        <p class="intro">
-            Comptez ce que vous avez en rayon, produit par produit. Le stock du logiciel reste caché
-            pendant le comptage.
-        </p>
-
-        <div class="options">
-            <button
-                type="button"
-                class="options-toggle"
-                [attr.aria-expanded]="optionsOpen()"
-                aria-controls="options-panel"
-                (click)="optionsOpen.set(!optionsOpen())"
-            >
-                Nom et catégorie
-                <app-icon [name]="optionsOpen() ? 'chevron-down' : 'chevron-right'" [size]="16" />
-            </button>
-
-            @if (optionsOpen()) {
-                <div id="options-panel" class="fields">
-                    <label class="field">
-                        <span>Nom (facultatif)</span>
-                        <input
-                            class="input"
-                            type="text"
-                            maxlength="100"
-                            placeholder="Ex. Fin de mois"
-                            [value]="name()"
-                            (input)="name.set($any($event.target).value)"
-                        />
-                    </label>
-
-                    <label class="field">
-                        <span>Compter une seule catégorie</span>
-                        <select
-                            class="input"
-                            [value]="categoryId() ?? ''"
-                            (change)="
-                                categoryId.set(
-                                    $any($event.target).value ? +$any($event.target).value : null
-                                )
-                            "
-                        >
-                            <option value="">Toute la boutique</option>
-                            @for (category of activeCategories(); track category.id) {
-                                <option [value]="category.id">{{ category.name }}</option>
-                            }
-                        </select>
-                    </label>
-                </div>
-            }
-        </div>
-
-        @if (error()) {
-            <p class="alert alert-error" role="alert">{{ error() }}</p>
-        }
-
-        <button
-            type="button"
-            class="btn btn-primary btn-block"
-            [disabled]="saving()"
-            (click)="start()"
-        >
-            @if (saving()) {
-                <span class="spinner"></span>
-            }
-            Commencer le comptage
-        </button>
-    </section>
-}
+<section class="card box" aria-live="polite">
+    @if (error()) {
+        <p class="alert alert-error" role="alert">{{ error() }}</p>
+        <button type="button" class="btn btn-primary" (click)="start()">Réessayer</button>
+    } @else {
+        <span class="spinner" aria-hidden="true"></span>
+        <p class="muted">Ouverture du comptage…</p>
+    }
+</section>

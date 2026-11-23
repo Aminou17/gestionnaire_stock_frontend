@@ -10,100 +10,14 @@ app-page-header {
 .box {
     display: grid;
     justify-items: center;
-    gap: 16px;
+    gap: 12px;
     width: 100%;
     max-width: 480px;
     margin: 0 auto;
-    padding: 24px 16px;
+    padding: 32px 16px;
     text-align: center;
 }
 
-.big {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-}
-
-.intro,
-h2,
-.text p {
+.box p {
     margin: 0;
-}
-
-.intro {
-    font-size: var(--fs-body);
-    line-height: 1.5;
-    color: var(--text-muted);
-}
-
-h2 {
-    font-size: var(--fs-heading);
-}
-
-.text {
-    display: grid;
-    gap: 4px;
-    font-size: var(--fs-body);
-}
-
-.box .btn-block {
-    width: 100%;
-}
-
-.link {
-    font-size: var(--fs-body);
-}
-
-/* nom et catégorie : repliés, pour que le geste de départ reste un seul bouton */
-.options {
-    display: grid;
-    width: 100%;
-    text-align: left;
-}
-
-.options-toggle {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    min-height: 44px;
-    padding: 0 12px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    background: var(--surface);
-    color: var(--text);
-    font-size: var(--fs-body);
-    cursor: pointer;
-}
-
-.options-toggle:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
-.fields {
-    display: grid;
-    gap: 12px;
-    padding-top: 12px;
-}
-
-.alert {
-    width: 100%;
-    margin: 0;
-    text-align: left;
-}
-
-.sk-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-}
-
-.sk-text {
-    width: 80%;
-    height: 40px;
-}
-
-.sk-button {
-    width: 100%;
-    height: 44px;
 }
