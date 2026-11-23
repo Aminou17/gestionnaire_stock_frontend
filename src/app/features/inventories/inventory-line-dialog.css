@@ -19,3 +19,20 @@
     text-decoration: underline;
     cursor: pointer;
 }
+
+.reason {
+    display: grid;
+    gap: 8px;
+    margin: 0 0 16px;
+}
+
+.reason-title {
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}

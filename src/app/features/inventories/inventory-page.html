@@ -5,7 +5,7 @@
     [back]="'/inventories'"
     backLabel="Retour aux inventaires"
 >
-    @if (inventory()) {
+    @if (inventory() && menuItems().length > 0) {
         <app-action-menu
             [items]="menuItems()"
             label="Actions sur l'inventaire"
@@ -84,6 +84,16 @@
             </div>
             <app-inventory-status [inventory]="inv" />
         </div>
+
+        <p class="who muted">
+            @if (inv.cancelledBy) {
+                Annulé par {{ inv.cancelledBy.name }}
+            } @else if (inv.countedBy) {
+                Compté par {{ inv.countedBy.name }}, {{ inv.countedAt | date: "d MMM" }}
+            } @else {
+                Ouvert par {{ inv.createdBy.name }}, {{ inv.startedAt | date: "d MMM" }}
+            }
+        </p>
 
         @if (inv.status === "in_progress") {
             <a [routerLink]="['/inventories', inv.id, 'count']" class="btn btn-primary btn-main">
@@ -236,7 +246,6 @@
         }
     </section>
 
-    <app-inventory-details-dialog [inventory]="inv" />
     <app-inventory-apply-dialog [inventory]="inv" (applied)="onApplied($event)" />
     <app-inventory-cancel-dialog [inventory]="inv" (cancelled)="onCancelled($event)" />
     <app-inventory-line-dialog [inventory]="inv" (saved)="onLineSaved($event)" />
@@ -256,6 +265,9 @@
             @if (line.theoreticalStock !== null && !blind()) {
                 {{ line.theoreticalStock }} prévu{{ line.theoreticalStock > 1 ? "s" : "" }},
                 {{ line.actualStock }} compté{{ line.actualStock > 1 ? "s" : "" }}
+                @if (line.reason) {
+                    · {{ reasonText(line.reason) }}
+                }
             } @else {
                 Quantité comptée
             }

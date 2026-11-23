@@ -1,15 +1,12 @@
 import { NgTemplateOutlet } from "@angular/common";
-import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
-import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
+import { Component, computed, inject, signal } from "@angular/core";
+import { rxResource } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
-import { ExportFormat } from "../../core/export-format";
 import { Inventory } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { PageHeader } from "../../layout/page-header/page-header";
-import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
-import { downloadFile } from "../../shared/download-file";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
 import { LoadError } from "../../shared/load-error/load-error";
@@ -27,7 +24,6 @@ const PAGE_SIZE = 20;
         NgTemplateOutlet,
         RouterLink,
         PageHeader,
-        ActionMenu,
         Icon,
         EmptyState,
         Pagination,
@@ -39,7 +35,6 @@ const PAGE_SIZE = 20;
 })
 export class Inventories {
     private inventoryService = inject(InventoryService);
-    private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
 
     page = signal(1);
@@ -66,7 +61,12 @@ export class Inventories {
             }),
     });
 
-    todoRows = computed(() => (this.todo.hasValue() ? this.todo.value().data : []));
+    // un comptage ouvert sans aucun produit n'a rien à montrer : on ne l'affiche pas
+    todoRows = computed(() =>
+        (this.todo.hasValue() ? this.todo.value().data : []).filter(
+            (inventory) => inventory.status !== "in_progress" || inventory.itemsCount > 0,
+        ),
+    );
     historyRows = computed(() => (this.history.hasValue() ? this.history.value().data : []));
     historyTotal = computed(() =>
         this.history.hasValue() ? this.history.value().pagination.total : 0,
@@ -78,15 +78,6 @@ export class Inventories {
             (this.todo.isLoading() && !this.todo.hasValue()) ||
             (this.history.isLoading() && !this.history.hasValue()),
     );
-
-    // l'export est réservé à l'admin
-    menuItems: ActionItem[] = [
-        { id: "pdf", label: "Exporter en PDF", icon: "download" },
-        { id: "csv", label: "Exporter en CSV", icon: "download" },
-    ];
-
-    exporting = signal(false);
-    exportError = signal(false);
 
     title = inventoryTitle;
     icon = (inventory: Inventory) => STATUS_ICONS[inventory.status];
@@ -103,24 +94,5 @@ export class Inventories {
     reload() {
         this.todo.reload();
         this.history.reload();
-    }
-
-    exportFile(format: ExportFormat) {
-        this.exporting.set(true);
-        this.exportError.set(false);
-
-        this.inventoryService
-            .exportList(format)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (file) => {
-                    this.exporting.set(false);
-                    downloadFile(file, `inventaires.${format}`);
-                },
-                error: () => {
-                    this.exporting.set(false);
-                    this.exportError.set(true);
-                },
-            });
     }
 }

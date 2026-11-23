@@ -1,8 +1,9 @@
 import { HttpErrorResponse } from "@angular/common/http";
 import { Component, ElementRef, inject, input, output, signal, viewChild } from "@angular/core";
 
-import { Inventory, InventoryItem } from "../../core/stock/inventory.model";
+import { Inventory, InventoryItem, ItemReason } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
+import { REASONS } from "./inventory-look";
 
 // Corriger la quantité comptée d'un produit (administrateur, comptage à valider)
 @Component({
@@ -17,7 +18,10 @@ export class InventoryLineDialog {
     inventory = input.required<Inventory>();
     saved = output<Inventory>();
 
+    protected reasons = REASONS;
+
     line = signal<InventoryItem | null>(null);
+    reason = signal<ItemReason | null>(null);
     value = signal("");
     saving = signal(false);
     error = signal("");
@@ -25,6 +29,7 @@ export class InventoryLineDialog {
     open(line: InventoryItem) {
         this.line.set(line);
         this.value.set(String(line.actualStock ?? ""));
+        this.reason.set(line.reason);
         this.error.set("");
         this.dialog().nativeElement.showModal();
     }
@@ -51,15 +56,60 @@ export class InventoryLineDialog {
         this.value.set(digits);
     }
 
+    // la même raison touchée deux fois est effacée
+    pickReason(reason: ItemReason) {
+        this.reason.set(this.reason() === reason ? null : reason);
+    }
+
+    // la raison n'a de sens que sur un écart
+    hasGap = () => !!this.line()?.difference;
+
     save() {
         const line = this.line();
         if (!line || this.value() === "" || this.saving()) return;
 
-        this.run(
-            this.inventoryService.saveItems(this.inventory().id, [
-                { productId: line.productId, actualStock: Number(this.value()) },
-            ]),
-        );
+        const quantity = Number(this.value());
+        const reasonChanged = this.hasGap() && this.reason() !== line.reason;
+        const id = this.inventory().id;
+
+        const saveQuantity = quantity !== line.actualStock;
+        if (!saveQuantity && !reasonChanged) {
+            this.close();
+            return;
+        }
+
+        this.saving.set(true);
+        this.error.set("");
+
+        // la quantité d'abord, puis la raison ; la page se recharge ensuite
+        const quantity$ = saveQuantity
+            ? this.inventoryService.saveItems(id, [
+                  { productId: line.productId, actualStock: quantity },
+              ])
+            : null;
+        const reason$ = () => this.inventoryService.setReason(id, line.productId, this.reason());
+
+        const done = (inventory: Inventory) => {
+            this.saving.set(false);
+            this.dialog().nativeElement.close();
+            this.saved.emit(inventory);
+        };
+        const fail = (err: HttpErrorResponse) => {
+            this.saving.set(false);
+            this.error.set(err.error?.message ?? "Les changements n'ont pas pu être enregistrés.");
+        };
+
+        if (quantity$) {
+            quantity$.subscribe({
+                next: ({ inventory }) => {
+                    if (!reasonChanged) return done(inventory);
+                    reason$().subscribe({ next: () => done(inventory), error: fail });
+                },
+                error: fail,
+            });
+        } else {
+            reason$().subscribe({ next: () => done(this.inventory()), error: fail });
+        }
     }
 
     // retire le produit du comptage

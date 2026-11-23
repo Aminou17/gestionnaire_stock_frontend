@@ -11,6 +11,7 @@ import {
     InventoryFilters,
     InventoryList,
     ItemQuery,
+    ItemReason,
     MovementsSince,
     NewInventory,
 } from "./inventory.model";
@@ -53,6 +54,14 @@ export class InventoryService {
         return this.http.put<{ saved: number; inventory: Inventory }>(
             `${API_URL}/inventories/${id}/items`,
             { items },
+        );
+    }
+
+    // raison d'un écart (null l'efface), seulement quand le comptage est à valider
+    setReason(id: number, productId: number, reason: ItemReason | null) {
+        return this.http.put<{ productId: number; reason: ItemReason | null }>(
+            `${API_URL}/inventories/${id}/items/${productId}/reason`,
+            { reason },
         );
     }
 

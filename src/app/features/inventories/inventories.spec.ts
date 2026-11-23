@@ -78,7 +78,7 @@ describe("Inventories", () => {
         expect(text(row)).toContain("12 nov. à");
         expect(text(row)).toContain("12 écarts");
         expect(text(row)).toContain("45 000 F");
-        expect(row.querySelector(".result.loss")).not.toBeNull();
+        expect(row.querySelector(".title.loss")).not.toBeNull();
         expect(row.getAttribute("href")).toBe("/inventories/10");
     });
 
@@ -129,21 +129,27 @@ describe("Inventories", () => {
         expect(el.querySelector(".chip")).toBeNull();
     });
 
-    it("should offer the export in a menu, for the admin only", async () => {
+    it("should not clutter the list with an export menu", async () => {
         await render([done()]);
-        expect(el.querySelector("app-action-menu")).not.toBeNull();
 
-        TestBed.resetTestingModule();
-        await render([done()], false);
         expect(el.querySelector("app-action-menu")).toBeNull();
     });
 
-    it("should download the list in the chosen format", async () => {
+    it("should hide a counting in progress that has no product yet", async () => {
+        await render([], true, [
+            inventory({ id: 30, status: "in_progress", statusLabel: "En cours", itemsCount: 0 }),
+        ]);
+
+        expect(el.querySelector(".row")).toBeNull();
+        expect(text(el)).toContain("Aucun inventaire pour le moment");
+    });
+
+    it("should write the result first and the date under it", async () => {
         await render([done()]);
 
-        fixture.componentInstance.exportFile("csv");
-
-        expect(exportList).toHaveBeenCalledWith("csv");
+        const row = el.querySelector(".row")!;
+        expect(text(row.querySelector(".title"))).toContain("12 écarts");
+        expect(text(row.querySelector(".result"))).toContain("12 nov. à");
     });
 
     it("should invite to count when there is nothing yet", async () => {

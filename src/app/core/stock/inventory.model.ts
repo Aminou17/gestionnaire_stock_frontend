@@ -30,6 +30,9 @@ export interface Inventory {
     maxStock: number;
 }
 
+// raison d'un écart, choisie par l'administrateur
+export type ItemReason = "breakage" | "theft" | "expired" | "error" | "other";
+
 export interface InventoryItem {
     id: number;
     productId: number;
@@ -49,6 +52,7 @@ export interface InventoryItem {
     stockBefore: number | null;
     stockAfter: number | null;
     applyNote: string | null;
+    reason: ItemReason | null;
 }
 
 export interface PageInfo {

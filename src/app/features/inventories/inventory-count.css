@@ -246,12 +246,11 @@ app-page-header {
 
 .controls {
     display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) 44px 44px;
+    grid-template-columns: 44px minmax(0, 1fr) 44px;
     gap: 8px;
 }
 
-.step,
-.zero {
+.step {
     display: grid;
     place-items: center;
     height: 44px;
@@ -266,23 +265,12 @@ app-page-header {
 }
 
 .step:hover:not(:disabled),
-.zero:hover {
-    background: var(--surface-hover);
-}
-
 .step:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-.zero[aria-pressed="true"] {
-    border-color: var(--danger);
-    background: var(--danger-soft);
-    color: var(--danger);
-}
-
 .step:focus-visible,
-.zero:focus-visible,
 .count:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 2px;

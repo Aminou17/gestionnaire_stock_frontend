@@ -45,6 +45,7 @@ const item = (changes: Partial<InventoryItem> = {}): InventoryItem => ({
     stockBefore: null,
     stockAfter: null,
     applyNote: null,
+    reason: null,
     ...changes,
 });
 
@@ -123,7 +124,7 @@ describe("InventoryPage", () => {
         );
         expect(el.querySelector(".btn-main")).toBeNull();
         // le gérant a seulement les détails dans son menu : ni export ni annulation
-        expect(fixture.componentInstance.menuItems().map((i) => i.id)).toEqual(["details"]);
+        expect(fixture.componentInstance.menuItems()).toEqual([]);
         expect(text(el)).not.toMatch(/\d\sF\b/);
     });
 
@@ -171,12 +172,17 @@ describe("InventoryPage", () => {
         expect(el.querySelector(".items .chevron")).toBeNull();
     });
 
-    it("should open the details of who did what from the menu, for every role", async () => {
+    it("should write the reason of a gap under the line", async () => {
+        await render({}, [item({ reason: "breakage" })]);
+
+        expect(text(el.querySelector(".items .sub"))).toContain("· Casse");
+    });
+
+    it("should say who counted on one grey line, without any details window", async () => {
         await render();
 
-        expect(fixture.componentInstance.menuItems().map((i) => i.id)[0]).toBe("details");
-        expect(el.querySelector("app-inventory-details-dialog")).not.toBeNull();
-        expect(el.querySelector(".who")).toBeNull();
+        expect(el.querySelector(".who")).not.toBeNull();
+        expect(el.querySelector("app-inventory-details-dialog")).toBeNull();
     });
 
     it("should show every product when there is no gap to look at", async () => {
@@ -216,15 +222,11 @@ describe("InventoryPage", () => {
         await render();
         const ids = () => fixture.componentInstance.menuItems().map((i) => i.id);
 
-        expect(ids()).toEqual(["details", "pdf", "csv", "cancel"]);
+        expect(ids()).toEqual(["pdf", "csv", "cancel"]);
 
         const applied = TestBed.createComponent(InventoryPage);
         applied.componentInstance.inventory.set(inventory({ status: "applied" }));
-        expect(applied.componentInstance.menuItems().map((i) => i.id)).toEqual([
-            "details",
-            "pdf",
-            "csv",
-        ]);
+        expect(applied.componentInstance.menuItems().map((i) => i.id)).toEqual(["pdf", "csv"]);
     });
 
     it("should explain the detail of a corrected line", async () => {

@@ -1,31 +1,9 @@
 <app-page-header title="Inventaires" section="Avancé">
-    @if (auth.isAdmin()) {
-        <app-action-menu
-            [items]="menuItems"
-            label="Autres actions"
-            title="Inventaires"
-            (picked)="exportFile($any($event))"
-        />
-    }
     <a routerLink="/inventories/new" class="btn btn-primary new-count">
         <app-icon name="plus" [size]="18" />
         <span>Nouveau<span class="more"> comptage</span></span>
     </a>
 </app-page-header>
-
-@if (exportError()) {
-    <div class="alert alert-error alert-dismissible" role="alert">
-        <span>Impossible d'exporter les inventaires.</span>
-        <button
-            type="button"
-            class="alert-close"
-            aria-label="Fermer le message"
-            (click)="exportError.set(false)"
-        >
-            <app-icon name="close" [size]="16" />
-        </button>
-    </div>
-}
 
 @if (firstLoad()) {
     <div class="loading" aria-busy="true">
@@ -87,13 +65,13 @@
         </span>
 
         <span class="info">
-            <span class="title">{{ title(inventory) }}</span>
             <span
-                class="result"
+                class="title"
                 [class.gain]="result(inventory).tone === 'gain'"
                 [class.loss]="result(inventory).tone === 'loss'"
                 >{{ result(inventory).text }}</span
             >
+            <span class="result">{{ title(inventory) }}</span>
         </span>
 
         @if (todo) {

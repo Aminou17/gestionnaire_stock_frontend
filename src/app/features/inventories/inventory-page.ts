@@ -1,4 +1,4 @@
-import { NgTemplateOutlet } from "@angular/common";
+import { DatePipe, NgTemplateOutlet } from "@angular/common";
 import { HttpErrorResponse } from "@angular/common/http";
 import {
     Component,
@@ -29,9 +29,8 @@ import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { ToastService } from "../../shared/toast/toast.service";
 import { InventoryApplyDialog } from "./inventory-apply-dialog";
 import { InventoryCancelDialog } from "./inventory-cancel-dialog";
-import { InventoryDetailsDialog } from "./inventory-details-dialog";
 import { InventoryLineDialog } from "./inventory-line-dialog";
-import { STATUS_TONES, heroSentence } from "./inventory-look";
+import { STATUS_TONES, heroSentence, reasonLabel } from "./inventory-look";
 import { InventoryStatusBadge } from "./inventory-status";
 import { InventoryThumb } from "./inventory-thumb";
 
@@ -41,6 +40,7 @@ const MAX_LINES = 500;
 @Component({
     selector: "app-inventory-page",
     imports: [
+        DatePipe,
         NgTemplateOutlet,
         RouterLink,
         PageHeader,
@@ -54,7 +54,6 @@ const MAX_LINES = 500;
         InventoryThumb,
         InventoryApplyDialog,
         InventoryCancelDialog,
-        InventoryDetailsDialog,
         InventoryLineDialog,
     ],
     templateUrl: "./inventory-page.html",
@@ -72,7 +71,6 @@ export class InventoryPage {
 
     private applyDialog = viewChild(InventoryApplyDialog);
     private cancelDialog = viewChild(InventoryCancelDialog);
-    private detailsDialog = viewChild(InventoryDetailsDialog);
     private lineDialog = viewChild(InventoryLineDialog);
 
     // les lignes ; l'inventaire du haut vit à part pour ne pas sauter au rechargement
@@ -121,11 +119,11 @@ export class InventoryPage {
 
     // le menu « … » de l'en-tête : les détails pour tous, exports et annulation pour l'administrateur
     menuItems = computed<ActionItem[]>(() => {
-        const items: ActionItem[] = [{ id: "details", label: "Détails", icon: "clock" }];
+        const items: ActionItem[] = [];
 
         if (this.isAdmin()) {
             items.push(
-                { id: "pdf", label: "Exporter en PDF", icon: "download", separated: true },
+                { id: "pdf", label: "Exporter en PDF", icon: "download" },
                 { id: "csv", label: "Exporter en CSV", icon: "download" },
             );
         }
@@ -208,8 +206,7 @@ export class InventoryPage {
     }
 
     onMenu(action: string) {
-        if (action === "details") this.detailsDialog()?.open();
-        else if (action === "cancel") this.cancelDialog()?.open();
+        if (action === "cancel") this.cancelDialog()?.open();
         else this.exportFile(action as ExportFormat);
     }
 
@@ -231,6 +228,8 @@ export class InventoryPage {
                 },
             });
     }
+
+    reasonText = reasonLabel;
 
     // un produit ignoré, expliqué en mots simples
     skippedText(reason: string) {

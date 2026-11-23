@@ -1,4 +1,4 @@
-import { Inventory, InventoryStatus } from "../../core/stock/inventory.model";
+import { Inventory, InventoryStatus, ItemReason } from "../../core/stock/inventory.model";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import type { IconName } from "../../shared/icon/icons";
 
@@ -112,3 +112,15 @@ export const ageText = (inventory: Inventory) => {
     const days = ageInDays(inventory);
     return `${days} jour${days > 1 ? "s" : ""}`;
 };
+
+// les raisons proposées pour un écart, dans l'ordre d'affichage
+export const REASONS: { value: ItemReason; label: string }[] = [
+    { value: "breakage", label: "Casse" },
+    { value: "theft", label: "Vol" },
+    { value: "expired", label: "Périmé" },
+    { value: "error", label: "Erreur" },
+    { value: "other", label: "Autre" },
+];
+
+export const reasonLabel = (reason: ItemReason | null) =>
+    REASONS.find((item) => item.value === reason)?.label ?? "";

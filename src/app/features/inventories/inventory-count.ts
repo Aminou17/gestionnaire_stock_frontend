@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { firstValueFrom, map } from "rxjs";
 
 import { Inventory, InventoryItem } from "../../core/stock/inventory.model";
+import { AuthService } from "../../core/auth/auth.service";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { Product } from "../../core/stock/product.model";
 import { ProductService } from "../../core/stock/product.service";
@@ -59,6 +60,7 @@ export class InventoryCount {
     private productService = inject(ProductService);
     private router = inject(Router);
     private toast = inject(ToastService);
+    protected auth = inject(AuthService);
     sync = inject(CountSync);
 
     protected id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((p) => Number(p.get("id")))), {
@@ -68,7 +70,6 @@ export class InventoryCount {
     private inputs = viewChildren<ElementRef<HTMLInputElement>>("countInput");
     private searchBox = viewChild<ElementRef<HTMLInputElement>>("searchBox");
     private leaveDialog = viewChild.required<ElementRef<HTMLDialogElement>>("leave");
-    private finishDialog = viewChild.required<ElementRef<HTMLDialogElement>>("finish");
 
     // le brouillon de l'appareil est renvoyé avant de lire la liste, pour ne rien rater
     private ready = signal(false);
@@ -332,8 +333,9 @@ export class InventoryCount {
         else this.sync.forget(line.productId);
     }
 
-    // Terminer : on envoie d'abord les dernières saisies, puis une courte confirmation
-    async askFinish() {
+    // Terminer : on envoie d'abord les dernières saisies, puis on clôture sans autre question
+    async finish() {
+        if (this.closing()) return;
         this.closeError.set("");
 
         const sent = await this.sync.flush();
@@ -342,30 +344,17 @@ export class InventoryCount {
             return;
         }
 
-        this.finishDialog().nativeElement.showModal();
-    }
-
-    cancelFinish() {
-        this.finishDialog().nativeElement.close();
-    }
-
-    close() {
-        if (this.closing()) return;
-
         this.closing.set(true);
-        this.closeError.set("");
 
         this.inventoryService.close(this.id()).subscribe({
             next: async () => {
                 this.finished = true;
                 await this.sync.clearDraft();
-                this.finishDialog().nativeElement.close();
                 this.toast.show("Comptage terminé");
                 this.router.navigate(["/inventories", this.id()], { replaceUrl: true });
             },
             error: (err: HttpErrorResponse) => {
                 this.closing.set(false);
-                this.finishDialog().nativeElement.close();
                 this.closeError.set(err.error?.message ?? "Le comptage n'a pas pu être terminé.");
             },
         });

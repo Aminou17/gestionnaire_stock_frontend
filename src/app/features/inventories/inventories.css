@@ -78,23 +78,21 @@ app-page-header {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
+    font-size: var(--fs-lead);
+    font-weight: var(--fw-semibold);
+}
+
+.title.gain {
+    color: var(--success);
+}
+
+.title.loss {
+    color: var(--danger);
 }
 
 .result {
     font-size: var(--fs-small);
     color: var(--text-muted);
-}
-
-.result.gain {
-    color: var(--success);
-    font-weight: var(--fw-semibold);
-}
-
-.result.loss {
-    color: var(--danger);
-    font-weight: var(--fw-semibold);
 }
 
 .chevron {

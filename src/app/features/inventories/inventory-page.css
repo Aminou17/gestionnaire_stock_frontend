@@ -77,6 +77,11 @@ app-page-header {
     color: var(--success);
 }
 
+.who {
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
 .big-label {
     font-size: var(--fs-body);
     color: var(--text-muted);

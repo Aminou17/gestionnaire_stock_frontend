@@ -6,6 +6,7 @@ import { of } from "rxjs";
 import { dbDelete, dbGet } from "../../core/offline/local-db";
 import { NetworkService } from "../../core/offline/network.service";
 import { Inventory, InventoryDetail, InventoryItem } from "../../core/stock/inventory.model";
+import { AuthService } from "../../core/auth/auth.service";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { Product } from "../../core/stock/product.model";
 import { ProductService } from "../../core/stock/product.service";
@@ -50,6 +51,7 @@ const item = (id: number, name: string, actual: number, countedAt: string): Inve
     stockBefore: null,
     stockAfter: null,
     applyNote: null,
+    reason: null,
 });
 
 const detail = (items: InventoryItem[], changes: Partial<Inventory> = {}): InventoryDetail => ({
@@ -125,6 +127,10 @@ describe("InventoryCount", () => {
                     useValue: { getInventory, saveItems, removeItem: vi.fn(), close },
                 },
                 { provide: ProductService, useValue: { getProducts } },
+                {
+                    provide: AuthService,
+                    useValue: { isAdmin: signal(true), isOwner: signal(false), user: signal({}) },
+                },
             ],
         }).compileComponents();
 
@@ -178,7 +184,7 @@ describe("InventoryCount", () => {
             "Cherchez ou scannez les produits à compter",
         );
         expect(el.querySelector(".lines")).toBeNull();
-        expect(el.querySelector<HTMLButtonElement>(".bar .btn")!.disabled).toBe(true);
+        expect(el.querySelector(".bar")).toBeNull();
     });
 
     it("should never show the theoretical stock while counting", async () => {
@@ -330,14 +336,10 @@ describe("InventoryCount", () => {
         expect(minus.disabled).toBe(true);
     });
 
-    it("should put a product at zero with the explicit 0 button", async () => {
+    it("should not offer a separate 0 button: the quantity is simply typed", async () => {
         await render();
 
-        el.querySelector<HTMLButtonElement>(".zero")!.click();
-        fixture.detectChanges();
-
-        expect(fixture.componentInstance.sync.pending()).toEqual({ 2: 0 });
-        expect(el.querySelector(".zero")?.getAttribute("aria-pressed")).toBe("true");
+        expect(el.querySelector(".zero")).toBeNull();
     });
 
     it("should never go over the maximum stock of the server", async () => {
@@ -363,42 +365,27 @@ describe("InventoryCount", () => {
         expect(router.navigate).toHaveBeenCalledWith(["/inventories", 7], { replaceUrl: true });
     });
 
-    it("should not offer to finish before a product is counted", async () => {
-        await render(detail([]));
-
-        expect(el.querySelector<HTMLButtonElement>(".bar .btn")!.disabled).toBe(true);
-    });
-
-    it("should ask a short confirmation, then close straight away without any check of the rest", async () => {
+    it("should close straight away on the button, with no confirmation question", async () => {
         await render();
 
-        await fixture.componentInstance.askFinish();
-        fixture.detectChanges();
-
-        expect(HTMLDialogElement.prototype.showModal).toHaveBeenCalled();
-        const dialog = el.querySelector("dialog[aria-labelledby=finish-title]");
-        expect(text(dialog)).toContain("2 produits comptés");
-        expect(text()).not.toMatch(/ignorer|compter à 0|non compt/i);
-
-        fixture.componentInstance.close();
+        await fixture.componentInstance.finish();
         await fixture.whenStable();
 
+        expect(el.querySelector("dialog[aria-labelledby=finish-title]")).toBeNull();
         expect(close).toHaveBeenCalledWith(7);
         expect(router.navigate).toHaveBeenCalledWith(["/inventories", 7], { replaceUrl: true });
     });
 
-    it("should tell how many products without a quantity will not be counted", async () => {
+    it("should hide the bottom bar until a product is in the list", async () => {
+        await render(detail([]));
+
+        expect(el.querySelector(".bar")).toBeNull();
+    });
+
+    it("should tell the admin the next step on the button", async () => {
         await render();
-        await search("sucre");
-        el.querySelector<HTMLButtonElement>(".result")!.click();
-        await settle();
 
-        await fixture.componentInstance.askFinish();
-        fixture.detectChanges();
-
-        const dialog = el.querySelector("dialog[aria-labelledby=finish-title]");
-        expect(text(dialog)).toContain("2 produits comptés");
-        expect(text(dialog)).toContain("1 produit sans quantité ne sera pas compté");
+        expect(text(el.querySelector(".bar .btn")).trim()).toBe("Terminer et voir les écarts");
     });
 
     it("should keep a draft on the device when offline, and warn before leaving", async () => {

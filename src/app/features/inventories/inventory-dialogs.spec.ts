@@ -68,6 +68,9 @@ describe("Inventory dialogs", () => {
             cancel: vi.fn(() => of({ inventory })),
             saveItems: vi.fn(() => of({ saved: 1, inventory })),
             removeItem: vi.fn(() => of({ inventory })),
+            setReason: vi.fn((id: number, productId: number, reason: string | null) =>
+                of({ productId, reason }),
+            ),
         };
 
         await TestBed.configureTestingModule({
@@ -189,6 +192,47 @@ describe("Inventory dialogs", () => {
             el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .remove")!.click();
 
             expect(service["removeItem"]).toHaveBeenCalledWith(7, 4);
+        });
+
+        it("should offer the reasons only on a line with a gap, and save the one chosen", () => {
+            host.lineDialog().open({ ...line, difference: -3, reason: null });
+            fixture.detectChanges();
+
+            const chips = el.querySelectorAll<HTMLButtonElement>("app-inventory-line-dialog .chip");
+            expect([...chips].map((chip) => chip.textContent!.trim())).toEqual([
+                "Casse",
+                "Vol",
+                "Périmé",
+                "Erreur",
+                "Autre",
+            ]);
+
+            chips[1].click();
+            fixture.detectChanges();
+            el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .btn-primary")!.click();
+
+            // la quantité n'a pas changé : seule la raison part
+            expect(service["saveItems"]).not.toHaveBeenCalled();
+            expect(service["setReason"]).toHaveBeenCalledWith(7, 4, "theft");
+            expect(host.saved).toBeDefined();
+        });
+
+        it("should clear the reason when the same one is touched twice", () => {
+            host.lineDialog().open({ ...line, difference: -3, reason: "breakage" });
+            fixture.detectChanges();
+
+            el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .chip")!.click();
+            fixture.detectChanges();
+            el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .btn-primary")!.click();
+
+            expect(service["setReason"]).toHaveBeenCalledWith(7, 4, null);
+        });
+
+        it("should not ask a reason when the count is right", () => {
+            host.lineDialog().open({ ...line, difference: 0 });
+            fixture.detectChanges();
+
+            expect(el.querySelector("app-inventory-line-dialog .reason")).toBeNull();
         });
 
         it("should not send an empty count", () => {
