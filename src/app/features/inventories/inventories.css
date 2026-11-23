@@ -1,5 +1,6 @@
 :host {
     display: grid;
+    max-width: var(--page-width);
     gap: 16px;
 }
 

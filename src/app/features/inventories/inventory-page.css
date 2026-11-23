@@ -1,6 +1,7 @@
 :host {
     display: grid;
     gap: 16px;
+    max-width: var(--page-width);
 }
 
 app-page-header {
@@ -14,8 +15,21 @@ app-page-header {
 /* haut de page : le résultat en une phrase, puis le geste à faire */
 .hero {
     display: grid;
-    gap: 12px;
-    padding: 16px;
+    gap: 14px;
+    padding: 20px;
+    border-color: color-mix(in srgb, var(--tone, var(--primary)) 22%, var(--border));
+    background:
+        radial-gradient(
+            80% 90% at 100% 0%,
+            color-mix(in srgb, var(--tone, var(--primary)) 30%, transparent),
+            transparent 75%
+        ),
+        radial-gradient(
+            70% 80% at 0% 100%,
+            color-mix(in srgb, var(--violet) 14%, transparent),
+            transparent 75%
+        ),
+        var(--surface);
 }
 
 .hero-top {
@@ -48,38 +62,38 @@ app-page-header {
     width: 100%;
 }
 
-.facts {
+/* le résultat : un grand chiffre, puis ce qu'il veut dire */
+.result {
     display: grid;
-    gap: 8px;
-    margin: 4px 0 0;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
+    gap: 2px;
 }
 
-.facts div {
-    display: grid;
-    grid-template-columns: 104px minmax(0, 1fr);
-    align-items: center;
-    gap: 8px;
+.big {
+    font-size: var(--fs-hero);
+    line-height: 1.1;
+    font-weight: var(--fw-bold);
+    letter-spacing: var(--ls-title);
+    font-variant-numeric: tabular-nums;
 }
 
-.facts dt {
-    font-size: var(--fs-caption);
+.big.loss {
+    color: var(--danger);
+}
+
+.big.gain {
+    color: var(--success);
+}
+
+.big-label {
+    font-size: var(--fs-body);
     color: var(--text-muted);
 }
 
-.facts dd {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.who {
     margin: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
     font-size: var(--fs-small);
-}
-
-.facts app-avatar {
-    flex-shrink: 0;
-    width: 20px;
-    height: 20px;
 }
 
 /* compte rendu de la correction */
@@ -277,36 +291,15 @@ app-page-header {
     color: var(--text-muted);
 }
 
-/* détail d'une ligne corrigée */
+/* détail d'une ligne corrigée : une phrase */
 .detail {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px 16px;
     margin: -4px 0 0;
     padding: 16px 12px 12px;
     border: 1px solid var(--border);
     border-top: 0;
     border-radius: 0 0 var(--radius) var(--radius);
     background: var(--neutral-soft);
-}
-
-.detail dt {
-    font-size: var(--fs-caption);
-    color: var(--text-muted);
-}
-
-.detail dd {
-    margin: 0;
-    font-size: var(--fs-body);
-    font-weight: var(--fw-medium);
-    font-variant-numeric: tabular-nums;
-}
-
-.note {
-    grid-column: 1 / -1;
-    margin: 0;
     font-size: var(--fs-small);
-    color: var(--text-muted);
 }
 
 .back {
@@ -335,10 +328,6 @@ app-page-header {
     .btn-main {
         width: auto;
         justify-self: start;
-    }
-
-    .facts {
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     }
 
     .products {

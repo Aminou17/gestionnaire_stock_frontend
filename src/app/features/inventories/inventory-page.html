@@ -67,7 +67,26 @@
             </span>
         </div>
 
-        <h2 class="sentence">{{ sentence() }}</h2>
+        @if (
+            inv.differenceValue !== null &&
+            inv.differenceCount &&
+            (inv.status === "applied" || inv.status === "counted")
+        ) {
+            <div class="result">
+                <strong
+                    class="big"
+                    [class.loss]="inv.differenceValue < 0"
+                    [class.gain]="inv.differenceValue > 0"
+                    >{{ inv.differenceValue | fcfa: true }}</strong
+                >
+                <span class="big-label">
+                    {{ inv.differenceCount }} produit{{ inv.differenceCount > 1 ? "s" : "" }} en
+                    écart
+                </span>
+            </div>
+        } @else {
+            <h2 class="sentence">{{ sentence() }}</h2>
+        }
 
         @if (inv.status === "in_progress") {
             <span
@@ -95,42 +114,17 @@
             </button>
         }
 
-        <dl class="facts">
-            <div>
-                <dt>Ouvert par</dt>
-                <dd>
-                    <app-avatar [photo]="inv.createdBy.avatar" />
-                    {{ inv.createdBy.name }} · {{ longDate(inv.startedAt) }}
-                </dd>
-            </div>
-            @if (inv.countedBy && inv.countedAt) {
-                <div>
-                    <dt>Compté par</dt>
-                    <dd>
-                        <app-avatar [photo]="inv.countedBy.avatar" />
-                        {{ inv.countedBy.name }} · {{ longDate(inv.countedAt) }}
-                    </dd>
-                </div>
+        <p class="who muted">
+            @if (inv.cancelledBy) {
+                Annulé par {{ inv.cancelledBy.name }}
+            } @else if (inv.appliedBy && inv.countedBy) {
+                Compté par {{ inv.countedBy.name }} · stock corrigé par {{ inv.appliedBy.name }}
+            } @else if (inv.countedBy) {
+                Compté par {{ inv.countedBy.name }}
+            } @else {
+                Ouvert par {{ inv.createdBy.name }}
             }
-            @if (inv.appliedBy && inv.appliedAt) {
-                <div>
-                    <dt>Stock corrigé le</dt>
-                    <dd>
-                        <app-avatar [photo]="inv.appliedBy.avatar" />
-                        {{ longDate(inv.appliedAt) }} · {{ inv.appliedBy.name }}
-                    </dd>
-                </div>
-            }
-            @if (inv.cancelledBy && inv.cancelledAt) {
-                <div>
-                    <dt>Annulé le</dt>
-                    <dd>
-                        <app-avatar [photo]="inv.cancelledBy.avatar" />
-                        {{ longDate(inv.cancelledAt) }} · {{ inv.cancelledBy.name }}
-                    </dd>
-                </div>
-            }
-        </dl>
+        </p>
     </section>
 
     @if (showAge()) {
@@ -307,27 +301,13 @@
                                     />
                                 </button>
                                 @if (expanded() === line.id) {
-                                    <dl class="detail">
-                                        <div>
-                                            <dt>Stock à l'ouverture</dt>
-                                            <dd>{{ line.theoreticalStock }}</dd>
-                                        </div>
-                                        <div>
-                                            <dt>Mouvements depuis</dt>
-                                            <dd>{{ line.movementsSince }}</dd>
-                                        </div>
-                                        <div>
-                                            <dt>Stock avant</dt>
-                                            <dd>{{ line.stockBefore }}</dd>
-                                        </div>
-                                        <div>
-                                            <dt>Stock après</dt>
-                                            <dd>{{ line.stockAfter }}</dd>
-                                        </div>
+                                    <p class="detail">
+                                        Le stock est passé de {{ line.stockBefore }} à
+                                        {{ line.stockAfter }}.
                                         @if (line.applyNote) {
-                                            <p class="note">{{ line.applyNote }}</p>
+                                            <span class="muted">{{ line.applyNote }}</span>
                                         }
-                                    </dl>
+                                    </p>
                                 }
                             }
                             @default {
@@ -365,7 +345,7 @@
             @if (!line.counted) {
                 Non compté
             } @else if (line.theoreticalStock !== null && !blind()) {
-                Attendu {{ line.theoreticalStock }} · Compté {{ line.actualStock }}
+                Prévu {{ line.theoreticalStock }} · Compté {{ line.actualStock }}
             } @else {
                 Compté {{ line.actualStock }}
             }

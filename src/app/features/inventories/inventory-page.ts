@@ -25,7 +25,6 @@ import {
 import { InventoryService } from "../../core/stock/inventory.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
-import { Avatar } from "../../shared/avatar/avatar";
 import { downloadFile } from "../../shared/download-file";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
@@ -37,14 +36,7 @@ import { ToastService } from "../../shared/toast/toast.service";
 import { InventoryApplyDialog } from "./inventory-apply-dialog";
 import { InventoryCancelDialog } from "./inventory-cancel-dialog";
 import { InventoryLineDialog } from "./inventory-line-dialog";
-import {
-    STATUS_TONES,
-    ageText,
-    heroSentence,
-    inventoryTitle,
-    isOld,
-    longDate,
-} from "./inventory-look";
+import { STATUS_TONES, ageText, heroSentence, inventoryTitle, isOld } from "./inventory-look";
 import { InventoryStatusBadge } from "./inventory-status";
 import { InventoryThumb } from "./inventory-thumb";
 
@@ -62,7 +54,6 @@ const PAGE_SIZE = 25;
         RouterLink,
         PageHeader,
         ActionMenu,
-        Avatar,
         Icon,
         EmptyState,
         LoadError,
@@ -278,8 +269,6 @@ export class InventoryPage {
                 },
             });
     }
-
-    longDate = longDate;
 
     // un produit ignoré, expliqué en mots simples
     skippedText(reason: string) {

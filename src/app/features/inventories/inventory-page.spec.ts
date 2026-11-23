@@ -109,9 +109,8 @@ describe("InventoryPage", () => {
     it("should tell the admin the result in one sentence and offer to correct the stock", async () => {
         await render();
 
-        expect(text(el.querySelector(".sentence"))).toMatch(
-            /^12 produits en écart, perte de 45.000.F$/,
-        );
+        expect(text(el.querySelector(".big"))).toMatch(/^.45.000.F$/);
+        expect(text(el.querySelector(".big-label"))).toBe("12 produits en écart");
         expect(text(el.querySelector(".btn-main"))).toBe("Corriger le stock");
         expect(text(el.querySelector(".badge-warning"))).toBe("À valider");
     });
@@ -141,7 +140,7 @@ describe("InventoryPage", () => {
     it("should keep the theoretical stock hidden while counting, even for the admin", async () => {
         await render({ status: "in_progress", statusLabel: "En cours" });
 
-        expect(text(el)).not.toContain("Attendu");
+        expect(text(el)).not.toContain("Prévu");
         expect(text(el.querySelector(".items"))).toContain("Compté 37");
         expect([...el.querySelectorAll(".chip")].map((chip) => text(chip).trim())).toEqual([
             "Tous",
@@ -159,7 +158,7 @@ describe("InventoryPage", () => {
         expect(el.querySelector(".chip[aria-pressed=true]")?.textContent).toContain("Écarts");
         // l'écart est le plus grand chiffre de la ligne
         expect(text(el.querySelector(".gap"))).toBe("−1");
-        expect(text(el.querySelector(".items .item"))).toContain("Attendu 38 · Compté 37");
+        expect(text(el.querySelector(".items .item"))).toContain("Prévu 38 · Compté 37");
     });
 
     it("should show every product when there is no gap to look at", async () => {
@@ -225,8 +224,8 @@ describe("InventoryPage", () => {
         el.querySelector<HTMLButtonElement>(".items button.item")!.click();
         fixture.detectChanges();
 
-        expect(text(el.querySelector("dl.detail"))).toContain("Stock avant20");
-        expect(text(el.querySelector("dl.detail"))).toContain("38 à l'ouverture, 3 ventes depuis");
+        expect(text(el.querySelector("p.detail"))).toContain("Le stock est passé de 20 à 16");
+        expect(text(el.querySelector("p.detail"))).toContain("38 à l'ouverture, 3 ventes depuis");
     });
 
     it("should report what happened after the stock was corrected, in plain words", async () => {
