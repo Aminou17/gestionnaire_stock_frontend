@@ -39,29 +39,22 @@ export const shortDate = (value: string) => {
     return (sameYear ? dayFormat : dayYearFormat).format(date);
 };
 
-// "23 nov. à 16:32"
-export const longDate = (value: string) =>
-    `${shortDate(value)} à ${timeFormat.format(new Date(value))}`;
+// "17h09"
+const timeText = (value: string) => timeFormat.format(new Date(value)).replace(":", "h");
 
-// le nom donné à l'ouverture, sinon "Inventaire du 23 nov."
+// "23 nov. à 17h09"
+export const longDate = (value: string) => `${shortDate(value)} à ${timeText(value)}`;
+
+// le nom donné à l'ouverture, sinon la date et l'heure de début
 export const inventoryTitle = (inventory: Inventory) =>
-    inventory.name || `Inventaire du ${shortDate(inventory.startedAt)}`;
-
-// "perte de 45 000 F", "gain de 3 000 F" ou rien quand la valeur est nulle
-const valuePhrase = (value: number | null) => {
-    if (!value) return "";
-
-    // l'espace insécable garde le « F » avec son montant à la ligne
-    const amount = fcfa.transform(Math.abs(value)).replace(" F", "\u00a0F");
-    return value < 0 ? `perte de ${amount}` : `gain de ${amount}`;
-};
+    inventory.name || longDate(inventory.startedAt);
 
 const plural = (count: number, one: string, many: string) => (count > 1 ? many : one);
 
-// Le résultat en une phrase. Le gérant ne voit jamais d'argent : il lit seulement ce qui a été compté.
+// Le résultat en une phrase, sans argent. Le gérant lit seulement ce qui a été compté.
 // long : forme de la fiche ("12 produits en écart"), sinon forme courte de la liste ("12 écarts").
 export const resultSentence = (inventory: Inventory, isAdmin: boolean, long = false) => {
-    const { status, itemsCount, differenceCount, differenceValue } = inventory;
+    const { status, itemsCount, differenceCount } = inventory;
 
     if (status === "cancelled") return "Comptage abandonné";
 
@@ -73,12 +66,26 @@ export const resultSentence = (inventory: Inventory, isAdmin: boolean, long = fa
 
     if (differenceCount === 0) return "Aucun écart";
 
-    const count = long
+    return long
         ? `${differenceCount} ${plural(differenceCount, "produit en écart", "produits en écart")}`
         : `${differenceCount} ${plural(differenceCount, "écart", "écarts")}`;
-    const value = valuePhrase(differenceValue);
+};
 
-    return value ? `${count}, ${value}` : count;
+// La ligne de résultat d'une carte de la liste, colorée : vert pour un gain, rouge pour une perte
+export const listResult = (inventory: Inventory, isAdmin: boolean) => {
+    const text = resultSentence(inventory, isAdmin);
+    const value = inventory.differenceValue;
+    const showValue =
+        isAdmin && inventory.status !== "in_progress" && !!inventory.differenceCount && !!value;
+
+    if (!showValue) return { text, tone: "neutral" as const };
+
+    // l'espace insécable garde le « F » avec son montant à la ligne
+    const amount = fcfa.transform(value, true).replace(" F", "\u00a0F");
+    return {
+        text: `${text} · ${amount}`,
+        tone: value! > 0 ? ("gain" as const) : ("loss" as const),
+    };
 };
 
 // un comptage ouvert ou terminé depuis plus d'un jour : le stock a pu bouger depuis
@@ -100,7 +107,7 @@ export const heroSentence = (inventory: Inventory, isAdmin: boolean) => {
     return resultSentence(inventory, isAdmin, true);
 };
 
-// "il y a 3 jours" pour l'avertissement d'un vieux comptage
+// "3 jours" pour l'avertissement d'un vieux comptage
 export const ageText = (inventory: Inventory) => {
     const days = ageInDays(inventory);
     return `${days} jour${days > 1 ? "s" : ""}`;

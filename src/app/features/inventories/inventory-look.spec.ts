@@ -33,7 +33,7 @@ describe("inventory look", () => {
     it("should name an inventory by its name, else by its date", () => {
         expect(inventoryTitle(inventory({ name: "Fin de mois" }))).toBe("Fin de mois");
         expect(inventoryTitle(inventory({ startedAt: "2026-11-23T10:00:00Z" }))).toMatch(
-            /^Inventaire du 23 nov\./,
+            /^23 nov\. à \d{2}h\d{2}$/,
         );
     });
 
@@ -46,14 +46,9 @@ describe("inventory look", () => {
         });
     });
 
-    it("should tell the gap and the loss to the admin", () => {
-        expect(text(resultSentence(inventory(), true))).toBe("12 écarts, perte de 45 000 F");
-        expect(text(resultSentence(inventory(), true, true))).toBe(
-            "12 produits en écart, perte de 45 000 F",
-        );
-        expect(text(resultSentence(inventory({ differenceValue: 3000 }), true))).toBe(
-            "12 écarts, gain de 3 000 F",
-        );
+    it("should tell the number of gaps to the admin, without money in the sentence", () => {
+        expect(resultSentence(inventory(), true)).toBe("12 écarts");
+        expect(resultSentence(inventory(), true, true)).toBe("12 produits en écart");
         expect(resultSentence(inventory({ differenceCount: 0, differenceValue: 0 }), true)).toBe(
             "Aucun écart",
         );
@@ -81,9 +76,7 @@ describe("inventory look", () => {
     });
 
     it("should write the sentence at the top of the page for each role", () => {
-        expect(text(heroSentence(inventory(), true))).toBe(
-            "12 produits en écart, perte de 45 000 F",
-        );
+        expect(heroSentence(inventory(), true)).toBe("12 produits en écart");
         expect(heroSentence(inventory(), false)).toBe("Comptage terminé, en attente de validation");
         expect(heroSentence(inventory({ status: "applied" }), false)).toBe(
             "Comptage terminé, stock corrigé",

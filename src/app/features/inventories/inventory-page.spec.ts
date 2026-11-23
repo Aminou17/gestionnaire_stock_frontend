@@ -122,7 +122,8 @@ describe("InventoryPage", () => {
             "Comptage terminé, en attente de validation",
         );
         expect(el.querySelector(".btn-main")).toBeNull();
-        expect(el.querySelector("app-action-menu")).toBeNull();
+        // le gérant a seulement les détails dans son menu : ni export ni annulation
+        expect(fixture.componentInstance.menuItems().map((i) => i.id)).toEqual(["details"]);
         expect(text(el)).not.toMatch(/\d\sF\b/);
     });
 
@@ -145,17 +146,37 @@ describe("InventoryPage", () => {
         expect(text(el)).not.toMatch(/non compt/i);
     });
 
-    it("should show only the gaps first when the counting is finished", async () => {
-        await render();
+    it("should show every counted product, the biggest gaps first, without search or chips", async () => {
+        await render({}, [
+            item({ id: 1, productName: "Riz", difference: -1, actualStock: 37 }),
+            item({ id: 2, productName: "Mil", difference: 5, actualStock: 20 }),
+            item({ id: 3, productName: "Sel", difference: 0, actualStock: 10 }),
+        ]);
 
         expect(getInventory).toHaveBeenLastCalledWith(
             12,
-            expect.objectContaining({ filter: "differences" }),
+            expect.objectContaining({ filter: "all" }),
         );
-        expect(el.querySelector(".chip[aria-pressed=true]")?.textContent).toContain("Écarts");
-        // l'écart est le plus grand chiffre de la ligne
-        expect(text(el.querySelector(".gap"))).toBe("−1");
-        expect(text(el.querySelector(".items .item"))).toContain("Prévu 38 · Compté 37");
+        expect(el.querySelector("input[type=search]")).toBeNull();
+        expect(el.querySelector(".chip")).toBeNull();
+        const names = [...el.querySelectorAll(".items .name")].map((n) => text(n).trim());
+        expect(names).toEqual(["Mil", "Riz", "Sel"]);
+    });
+
+    it("should say prévus and comptés on a line, and no money under the gap", async () => {
+        await render();
+
+        expect(text(el.querySelector(".items .item"))).toContain("38 prévus, 37 comptés");
+        expect(el.querySelector(".figure small")).toBeNull();
+        expect(el.querySelector(".items .chevron")).toBeNull();
+    });
+
+    it("should open the details of who did what from the menu, for every role", async () => {
+        await render();
+
+        expect(fixture.componentInstance.menuItems().map((i) => i.id)[0]).toBe("details");
+        expect(el.querySelector("app-inventory-details-dialog")).not.toBeNull();
+        expect(el.querySelector(".who")).toBeNull();
     });
 
     it("should show every product when there is no gap to look at", async () => {
@@ -195,11 +216,15 @@ describe("InventoryPage", () => {
         await render();
         const ids = () => fixture.componentInstance.menuItems().map((i) => i.id);
 
-        expect(ids()).toEqual(["pdf", "csv", "cancel"]);
+        expect(ids()).toEqual(["details", "pdf", "csv", "cancel"]);
 
         const applied = TestBed.createComponent(InventoryPage);
         applied.componentInstance.inventory.set(inventory({ status: "applied" }));
-        expect(applied.componentInstance.menuItems().map((i) => i.id)).toEqual(["pdf", "csv"]);
+        expect(applied.componentInstance.menuItems().map((i) => i.id)).toEqual([
+            "details",
+            "pdf",
+            "csv",
+        ]);
     });
 
     it("should explain the detail of a corrected line", async () => {

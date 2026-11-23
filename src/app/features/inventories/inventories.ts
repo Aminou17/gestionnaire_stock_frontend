@@ -1,42 +1,35 @@
+import { NgTemplateOutlet } from "@angular/common";
 import { Component, DestroyRef, computed, inject, signal } from "@angular/core";
 import { rxResource, takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { ExportFormat } from "../../core/export-format";
-import { Inventory, InventoryStatus } from "../../core/stock/inventory.model";
+import { Inventory } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
 import { downloadFile } from "../../shared/download-file";
 import { EmptyState } from "../../shared/empty-state/empty-state";
-import { ExportMenu } from "../../shared/export-menu/export-menu";
 import { Icon } from "../../shared/icon/icon";
 import { LoadError } from "../../shared/load-error/load-error";
 import { Pagination } from "../../shared/pagination/pagination";
-import {
-    STATUS_ICONS,
-    STATUS_TONES,
-    inventoryTitle,
-    resultSentence,
-    shortDate,
-} from "./inventory-look";
+import { STATUS_ICONS, STATUS_TONES, inventoryTitle, listResult } from "./inventory-look";
 import { InventoryStatusBadge } from "./inventory-status";
-
-interface StatusFilter {
-    label: string;
-    statuses: InventoryStatus[];
-}
 
 const PAGE_SIZE = 20;
 
+// La liste a deux blocs : ce qu'il reste à faire (comptage en cours, à valider) puis l'historique.
+// Les inventaires annulés ne sont pas affichés.
 @Component({
     selector: "app-inventories",
     imports: [
+        NgTemplateOutlet,
         RouterLink,
         PageHeader,
+        ActionMenu,
         Icon,
         EmptyState,
-        ExportMenu,
         Pagination,
         LoadError,
         InventoryStatusBadge,
@@ -49,60 +42,48 @@ export class Inventories {
     private destroyRef = inject(DestroyRef);
     protected auth = inject(AuthService);
 
-    protected filters: StatusFilter[] = [
-        { label: "Tous", statuses: [] },
-        { label: "En cours", statuses: ["in_progress"] },
-        { label: "À valider", statuses: ["counted"] },
-        { label: "Terminés", statuses: ["applied"] },
-    ];
-
-    filter = signal(this.filters[0]);
-    // ce que la personne tape ; la recherche n'est envoyée qu'une fois la frappe terminée
-    query = signal("");
-    private typing: ReturnType<typeof setTimeout> | undefined;
     page = signal(1);
     pageSize = signal(PAGE_SIZE);
 
-    inventories = rxResource({
-        params: () => ({
-            statuses: this.filter().statuses,
-            search: this.query(),
-            page: this.page(),
-        }),
-        stream: ({ params }) =>
-            this.inventoryService.getInventories({ ...params, limit: PAGE_SIZE }),
-    });
-
-    // le comptage ouvert est mis en avant en haut de la page
-    current = rxResource({
+    todo = rxResource({
         stream: () =>
             this.inventoryService.getInventories({
-                statuses: ["in_progress"],
+                statuses: ["in_progress", "counted"],
                 search: "",
                 page: 1,
-                limit: 1,
+                limit: 20,
             }),
     });
 
-    inProgress = computed<Inventory | null>(
-        () => (this.current.hasValue() ? this.current.value().data[0] : null) ?? null,
-    );
-
-    // la carte du haut remplace sa ligne dans la liste complète
-    showCurrent = computed(() => this.inProgress() !== null && this.isUnfiltered());
-
-    rows = computed(() => {
-        const rows = this.inventories.hasValue() ? this.inventories.value().data : [];
-        const current = this.showCurrent() ? this.inProgress() : null;
-        return current ? rows.filter((row) => row.id !== current.id) : rows;
+    history = rxResource({
+        params: () => ({ page: this.page() }),
+        stream: ({ params }) =>
+            this.inventoryService.getInventories({
+                statuses: ["applied"],
+                search: "",
+                page: params.page,
+                limit: PAGE_SIZE,
+            }),
     });
 
-    total = computed(() =>
-        this.inventories.hasValue() ? this.inventories.value().pagination.total : 0,
+    todoRows = computed(() => (this.todo.hasValue() ? this.todo.value().data : []));
+    historyRows = computed(() => (this.history.hasValue() ? this.history.value().data : []));
+    historyTotal = computed(() =>
+        this.history.hasValue() ? this.history.value().pagination.total : 0,
     );
 
-    // première chargement : pas de liste à garder à l'écran
-    firstLoad = computed(() => this.inventories.isLoading() && !this.inventories.hasValue());
+    // premier chargement : pas de liste à garder à l'écran
+    firstLoad = computed(
+        () =>
+            (this.todo.isLoading() && !this.todo.hasValue()) ||
+            (this.history.isLoading() && !this.history.hasValue()),
+    );
+
+    // l'export est réservé à l'admin
+    menuItems: ActionItem[] = [
+        { id: "pdf", label: "Exporter en PDF", icon: "download" },
+        { id: "csv", label: "Exporter en CSV", icon: "download" },
+    ];
 
     exporting = signal(false);
     exportError = signal(false);
@@ -110,36 +91,18 @@ export class Inventories {
     title = inventoryTitle;
     icon = (inventory: Inventory) => STATUS_ICONS[inventory.status];
     tone = (inventory: Inventory) => STATUS_TONES[inventory.status];
+    result = (inventory: Inventory) => listResult(inventory, this.auth.isAdmin());
 
-    result = (inventory: Inventory) => resultSentence(inventory, this.auth.isAdmin());
-
-    // qui l'a fait, et la date quand le titre est un nom choisi
-    details(inventory: Inventory) {
-        return [inventory.name ? shortDate(inventory.startedAt) : null, inventory.createdBy.name]
-            .filter(Boolean)
-            .join(" · ");
-    }
-
-    private isUnfiltered() {
-        return this.filter().statuses.length === 0 && this.query() === "";
-    }
-
-    selectFilter(filter: StatusFilter) {
-        this.filter.set(filter);
-        this.page.set(1);
-    }
-
-    onSearch(value: string) {
-        clearTimeout(this.typing);
-        this.typing = setTimeout(() => {
-            this.query.set(value.trim());
-            this.page.set(1);
-        }, 300);
+    // un comptage en cours s'ouvre directement sur la saisie, les autres sur leur fiche
+    link(inventory: Inventory) {
+        return inventory.status === "in_progress"
+            ? ["/inventories", inventory.id, "count"]
+            : ["/inventories", inventory.id];
     }
 
     reload() {
-        this.inventories.reload();
-        this.current.reload();
+        this.todo.reload();
+        this.history.reload();
     }
 
     exportFile(format: ExportFormat) {

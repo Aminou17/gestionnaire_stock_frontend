@@ -39,10 +39,10 @@ describe("Inventories", () => {
     let getInventories: ReturnType<typeof vi.fn>;
     let exportList: ReturnType<typeof vi.fn>;
 
-    // la première requête est la liste, la seconde le comptage ouvert
-    async function render(rows: Inventory[], isAdmin = true, open: Inventory[] = []) {
+    // deux demandes : ce qu'il reste à faire (en cours, à valider) puis l'historique (terminés)
+    async function render(history: Inventory[], isAdmin = true, todo: Inventory[] = []) {
         getInventories = vi.fn((filters) =>
-            filters.limit === 1 ? of(list(open)) : of(list(rows)),
+            filters.statuses.includes("applied") ? of(list(history)) : of(list(todo)),
         );
         exportList = vi.fn(() => of(new Blob(["x"])));
 
@@ -68,119 +68,113 @@ describe("Inventories", () => {
     }
 
     const text = (node: Element | null = el) => node!.textContent!.replace(/\s+/g, " ");
+    const done = (changes: Partial<Inventory> = {}) =>
+        inventory({ status: "applied", statusLabel: "Terminé", ...changes });
 
-    it("should name an inventory by its date and tell the gap and the loss to the admin", async () => {
-        await render([inventory()]);
+    it("should show a finished inventory with its date and hour, and the loss in red for the admin", async () => {
+        await render([done()]);
 
-        expect(text(el.querySelector(".row"))).toContain("Inventaire du 12 nov.");
-        expect(text(el.querySelector(".row"))).toContain("12 écarts, perte de 45 000 F");
-        expect(el.querySelector(".row")?.getAttribute("href")).toBe("/inventories/10");
+        const row = el.querySelector(".history-block .row, #history-title ~ .rows .row")!;
+        expect(text(row)).toContain("12 nov. à");
+        expect(text(row)).toContain("12 écarts");
+        expect(text(row)).toContain("45 000 F");
+        expect(row.querySelector(".result.loss")).not.toBeNull();
+        expect(row.getAttribute("href")).toBe("/inventories/10");
+    });
+
+    it("should not write the status on a finished inventory", async () => {
+        await render([done()]);
+
+        expect(el.querySelector("app-inventory-status")).toBeNull();
+        expect(text(el)).not.toContain("Terminé");
+    });
+
+    it("should put what is left to do first, with its status", async () => {
+        await render([done({ id: 11 })], true, [inventory({ id: 12 })]);
+
+        const titles = [...el.querySelectorAll(".block-title")].map((node) => text(node).trim());
+        expect(titles).toEqual(["À faire", "Historique"]);
+        expect(text(el.querySelector("#todo-title ~ .rows"))).toContain("À valider");
+    });
+
+    it("should open a counting in progress directly on the counting screen", async () => {
+        await render([], true, [
+            inventory({ id: 20, status: "in_progress", statusLabel: "En cours", itemsCount: 3 }),
+        ]);
+
+        const row = el.querySelector(".row")!;
+        expect(row.getAttribute("href")).toBe("/inventories/20/count");
+        expect(text(row)).toContain("3 produits comptés");
+    });
+
+    it("should never ask for the cancelled ones", async () => {
+        await render([]);
+
+        const asked = getInventories.mock.calls.flatMap((call) => call[0].statuses);
+        expect(asked).not.toContain("cancelled");
     });
 
     it("should show the manager only how many products were counted, never money", async () => {
-        await render([inventory({ differenceCount: 12, differenceValue: null })], false);
+        await render([done()], false);
 
         expect(text(el.querySelector(".row"))).toContain("30 produits comptés");
-        expect(text(el)).not.toContain(" F");
-        expect(el.querySelector("app-export-menu")).toBeNull();
+        expect(text(el)).not.toContain("45 000");
+        expect(text(el)).not.toContain("écart");
     });
 
-    it("should show the status of each inventory in its own colour", async () => {
-        await render([
-            inventory({ id: 4, status: "applied", statusLabel: "Terminé" }),
-            inventory({ id: 3, status: "cancelled", statusLabel: "Annulé" }),
-            inventory({ id: 2 }),
-        ]);
+    it("should keep search and status chips out of the page", async () => {
+        await render([done()]);
 
-        expect(el.querySelector(".badge-success")?.textContent).toContain("Terminé");
-        expect(el.querySelector(".badge-neutral")?.textContent).toContain("Annulé");
-        expect(el.querySelector(".badge-warning")?.textContent).toContain("À valider");
+        expect(el.querySelector("input[type=search]")).toBeNull();
+        expect(el.querySelector(".chip")).toBeNull();
     });
 
-    it("should put the counting in progress at the top and take it out of the list", async () => {
-        const open = inventory({
-            id: 12,
-            name: "Fin de mois",
-            status: "in_progress",
-            statusLabel: "En cours",
-            itemsCount: 12,
-        });
-        await render([open, inventory()], true, [open]);
+    it("should offer the export in a menu, for the admin only", async () => {
+        await render([done()]);
+        expect(el.querySelector("app-action-menu")).not.toBeNull();
 
-        const resume = el.querySelector(".resume");
-        expect(text(resume)).toContain("Fin de mois");
-        expect(text(resume)).toContain("12 produits comptés");
-        expect(resume?.querySelector("a")?.getAttribute("href")).toBe("/inventories/12/count");
-        expect(text(resume)).toContain("Reprendre le comptage");
-        expect(el.querySelectorAll(".row").length).toBe(1);
+        TestBed.resetTestingModule();
+        await render([done()], false);
+        expect(el.querySelector("app-action-menu")).toBeNull();
     });
 
-    it("should filter by status with the chips and go back to the first page", async () => {
-        await render([inventory()]);
+    it("should download the list in the chosen format", async () => {
+        await render([done()]);
 
-        const chips = [...el.querySelectorAll<HTMLButtonElement>(".chips .chip")];
-        expect(chips.map((chip) => chip.textContent!.trim())).toEqual([
-            "Tous",
-            "En cours",
-            "À valider",
-            "Terminés",
-        ]);
+        fixture.componentInstance.exportFile("csv");
 
-        chips[2].click();
-        await fixture.whenStable();
-
-        expect(getInventories).toHaveBeenLastCalledWith(
-            expect.objectContaining({ statuses: ["counted"], page: 1 }),
-        );
-        expect(chips[2].getAttribute("aria-pressed")).toBe("true");
+        expect(exportList).toHaveBeenCalledWith("csv");
     });
 
-    it("should show an empty state with the main action when there is nothing", async () => {
+    it("should invite to count when there is nothing yet", async () => {
         await render([]);
 
         expect(text(el)).toContain("Aucun inventaire pour le moment");
-        expect(el.querySelector("app-empty-state a")?.getAttribute("href")).toBe(
-            "/inventories/new",
-        );
+        expect(el.querySelector("a[href='/inventories/new']")).not.toBeNull();
     });
 
-    it("should offer to retry when the list cannot be loaded", async () => {
-        getInventories = vi.fn(() => throwError(() => new Error("500")));
+    it("should offer a retry when the list cannot be loaded", async () => {
+        getInventories = vi.fn(() => throwError(() => new Error("down")));
         await TestBed.configureTestingModule({
             imports: [Inventories],
             providers: [
                 provideRouter([]),
-                { provide: InventoryService, useValue: { getInventories } },
+                { provide: InventoryService, useValue: { getInventories, exportList: vi.fn() } },
                 {
                     provide: AuthService,
-                    useValue: { isAdmin: signal(true), isOwner: signal(false), user: signal({}) },
+                    useValue: {
+                        isAdmin: signal(true),
+                        isOwner: signal(false),
+                        user: signal({ id: 1, name: "Test" }),
+                    },
                 },
             ],
         }).compileComponents();
+
         fixture = TestBed.createComponent(Inventories);
         el = fixture.nativeElement;
         await fixture.whenStable();
 
-        expect(text(el)).toContain("Impossible de charger les inventaires");
-        expect(el.querySelector("app-load-error button")).not.toBeNull();
-    });
-
-    it("should export in the chosen format and show a closable error when it fails", async () => {
-        URL.createObjectURL = vi.fn(() => "blob:test");
-        URL.revokeObjectURL = vi.fn();
-        await render([inventory()]);
-
-        fixture.componentInstance.exportFile("csv");
-        expect(exportList).toHaveBeenCalledWith("csv");
-        expect(fixture.componentInstance.exporting()).toBe(false);
-
-        exportList.mockReturnValue(throwError(() => new Error("500")));
-        fixture.componentInstance.exportFile("pdf");
-        fixture.detectChanges();
-
-        expect(el.querySelector(".alert")?.textContent).toContain("Impossible d'exporter");
-        el.querySelector<HTMLButtonElement>(".alert-close")!.click();
-        fixture.detectChanges();
-        expect(el.querySelector(".alert")).toBeNull();
+        expect(text(el)).toContain("Impossible de charger les inventaires.");
     });
 });

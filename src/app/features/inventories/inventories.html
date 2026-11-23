@@ -1,7 +1,15 @@
 <app-page-header title="Inventaires" section="Avancé">
+    @if (auth.isAdmin()) {
+        <app-action-menu
+            [items]="menuItems"
+            label="Autres actions"
+            title="Inventaires"
+            (picked)="exportFile($any($event))"
+        />
+    }
     <a routerLink="/inventories/new" class="btn btn-primary new-count">
         <app-icon name="plus" [size]="18" />
-        <span>Nouveau comptage</span>
+        <span>Nouveau<span class="more"> comptage</span></span>
     </a>
 </app-page-header>
 
@@ -19,116 +27,78 @@
     </div>
 }
 
-<!-- le comptage ouvert passe avant tout le reste -->
-@if (showCurrent() && inProgress(); as current) {
-    <section class="resume card tinted" aria-label="Comptage en cours">
-        <span class="tone-icon" aria-hidden="true"><app-icon name="clipboard" [size]="18" /></span>
-
-        <div class="resume-text">
-            <p class="resume-label">Comptage en cours</p>
-            <p class="resume-title">{{ title(current) }}</p>
-            <p class="muted resume-count">{{ result(current) }}</p>
-        </div>
-
-        <a [routerLink]="['/inventories', current.id, 'count']" class="btn btn-primary">
-            Reprendre le comptage
-        </a>
-    </section>
-}
-
-<section class="toolbar">
-    <div class="search-row">
-        <div class="search">
-            <app-icon name="search" [size]="18" />
-            <input
-                class="input"
-                type="search"
-                placeholder="Chercher un inventaire…"
-                aria-label="Rechercher un inventaire"
-                (input)="onSearch($any($event.target).value)"
-            />
-        </div>
-
-        @if (auth.isAdmin()) {
-            <!-- télécharger la liste : une icône, le format se choisit ensuite -->
-            <app-export-menu
-                class="icon-only"
-                ariaLabel="Télécharger la liste des inventaires"
-                title="Télécharger"
-                [busy]="exporting()"
-                [disabled]="total() === 0"
-                (picked)="exportFile($event)"
-            />
-        }
-    </div>
-
-    <div class="chips" role="group" aria-label="Filtrer par statut">
-        @for (item of filters; track item.label) {
-            <button
-                type="button"
-                class="chip"
-                [attr.aria-pressed]="filter() === item"
-                (click)="selectFilter(item)"
-            >
-                {{ item.label }}
-            </button>
-        }
-    </div>
-</section>
-
 @if (firstLoad()) {
     <div class="loading" aria-busy="true">
-        @for (i of [1, 2, 3, 4]; track i) {
+        @for (i of [1, 2, 3]; track i) {
             <div class="skeleton row-skeleton"></div>
         }
     </div>
-} @else if (!inventories.hasValue()) {
+} @else if (!todo.hasValue() || !history.hasValue()) {
     <app-load-error message="Impossible de charger les inventaires." (retry)="reload()" />
-} @else if (rows().length === 0 && !showCurrent()) {
+} @else if (todoRows().length === 0 && historyRows().length === 0) {
     <section class="card">
-        @if (query() || filter().statuses.length > 0) {
-            <app-empty-state
-                icon="search"
-                title="Aucun inventaire trouvé"
-                text="Essayez un autre mot ou un autre statut."
-            />
-        } @else {
-            <app-empty-state
-                icon="clipboard"
-                title="Aucun inventaire pour le moment"
-                text="Comptez ce que vous avez en rayon : les écarts avec le stock du logiciel apparaîtront ici."
-            >
-                <a routerLink="/inventories/new" class="btn btn-primary">Nouveau comptage</a>
-            </app-empty-state>
-        }
+        <app-empty-state
+            icon="clipboard"
+            title="Aucun inventaire pour le moment"
+            text="Choisissez quelques produits, comptez-les : les écarts avec le stock du logiciel apparaîtront ici."
+        >
+            <a routerLink="/inventories/new" class="btn btn-primary">Nouveau comptage</a>
+        </app-empty-state>
     </section>
 } @else {
-    <ul class="rows" [class.reloading]="inventories.isLoading()">
-        @for (inventory of rows(); track inventory.id) {
-            <li>
-                <a class="row" [routerLink]="['/inventories', inventory.id]">
-                    <span
-                        class="tone-icon tile"
-                        [attr.data-tone]="tone(inventory)"
-                        aria-hidden="true"
-                    >
-                        <app-icon [name]="icon(inventory)" [size]="20" />
-                    </span>
+    @if (todoRows().length > 0) {
+        <section class="block" aria-labelledby="todo-title">
+            <h2 id="todo-title" class="block-title">À faire</h2>
+            <ul class="rows">
+                @for (inventory of todoRows(); track inventory.id) {
+                    <li>
+                        <ng-container
+                            *ngTemplateOutlet="card; context: { $implicit: inventory, todo: true }"
+                        />
+                    </li>
+                }
+            </ul>
+        </section>
+    }
 
-                    <span class="info">
-                        <span class="title">{{ title(inventory) }}</span>
-                        <span class="result">{{ result(inventory) }}</span>
-                        <span class="meta">
-                            <app-inventory-status [inventory]="inventory" />
-                            <span class="muted details">{{ details(inventory) }}</span>
-                        </span>
-                    </span>
+    @if (historyRows().length > 0) {
+        <section class="block" aria-labelledby="history-title">
+            <h2 id="history-title" class="block-title">Historique</h2>
+            <ul class="rows" [class.reloading]="history.isLoading()">
+                @for (inventory of historyRows(); track inventory.id) {
+                    <li>
+                        <ng-container
+                            *ngTemplateOutlet="card; context: { $implicit: inventory, todo: false }"
+                        />
+                    </li>
+                }
+            </ul>
 
-                    <app-icon class="chevron" name="chevron-right" [size]="18" />
-                </a>
-            </li>
-        }
-    </ul>
-
-    <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
+            <app-pagination [total]="historyTotal()" [(page)]="page" [(pageSize)]="pageSize" />
+        </section>
+    }
 }
+
+<!-- une carte : le titre, le résultat, et le statut seulement quand il reste quelque chose à faire -->
+<ng-template #card let-inventory let-todo="todo">
+    <a class="row" [routerLink]="link(inventory)">
+        <span class="tone-icon tile" [attr.data-tone]="tone(inventory)" aria-hidden="true">
+            <app-icon [name]="icon(inventory)" [size]="20" />
+        </span>
+
+        <span class="info">
+            <span class="title">{{ title(inventory) }}</span>
+            <span
+                class="result"
+                [class.gain]="result(inventory).tone === 'gain'"
+                [class.loss]="result(inventory).tone === 'loss'"
+                >{{ result(inventory).text }}</span
+            >
+        </span>
+
+        @if (todo) {
+            <app-inventory-status [inventory]="inventory" />
+        }
+        <app-icon class="chevron" name="chevron-right" [size]="18" />
+    </a>
+</ng-template>

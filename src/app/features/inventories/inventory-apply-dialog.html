@@ -13,6 +13,12 @@
             }
         </p>
 
+        @if (old()) {
+            <p class="alert alert-warning" role="note">
+                Comptage commencé il y a {{ age() }} : le stock a pu bouger depuis.
+            </p>
+        }
+
         <div class="since" aria-live="polite">
             @if (movements(); as since) {
                 @if (movementLines().length > 0) {

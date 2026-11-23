@@ -5,7 +5,7 @@
     [back]="'/inventories'"
     backLabel="Retour aux inventaires"
 >
-    @if (isAdmin() && inventory()) {
+    @if (inventory()) {
         <app-action-menu
             [items]="menuItems()"
             label="Actions sur l'inventaire"
@@ -57,31 +57,33 @@
 } @else if (inventory(); as inv) {
     <!-- le résultat en une phrase, puis le geste à faire -->
     <section class="card hero tinted" [attr.data-tone]="tone() === 'primary' ? null : tone()">
-        <div class="hero-top">
-            <app-inventory-status [inventory]="inv" />
-            <span class="muted hero-name">{{ title() }}</span>
-        </div>
-
-        @if (
-            inv.differenceValue !== null &&
-            inv.differenceCount &&
-            (inv.status === "applied" || inv.status === "counted")
-        ) {
-            <div class="result">
-                <strong
-                    class="big"
-                    [class.loss]="inv.differenceValue < 0"
-                    [class.gain]="inv.differenceValue > 0"
-                    >{{ inv.differenceValue | fcfa: true }}</strong
-                >
-                <span class="big-label">
-                    {{ inv.differenceCount }} produit{{ inv.differenceCount > 1 ? "s" : "" }} en
-                    écart
-                </span>
+        <div class="hero-head">
+            <div class="hero-main">
+                @if (
+                    inv.differenceValue !== null &&
+                    inv.differenceCount &&
+                    (inv.status === "applied" || inv.status === "counted")
+                ) {
+                    <div class="result">
+                        <strong
+                            class="big"
+                            [class.loss]="inv.differenceValue < 0"
+                            [class.gain]="inv.differenceValue > 0"
+                            >{{ inv.differenceValue | fcfa: true }}</strong
+                        >
+                        <span class="big-label">
+                            {{ inv.differenceCount }} produit{{
+                                inv.differenceCount > 1 ? "s" : ""
+                            }}
+                            en écart
+                        </span>
+                    </div>
+                } @else {
+                    <h2 class="sentence">{{ sentence() }}</h2>
+                }
             </div>
-        } @else {
-            <h2 class="sentence">{{ sentence() }}</h2>
-        }
+            <app-inventory-status [inventory]="inv" />
+        </div>
 
         @if (inv.status === "in_progress") {
             <a [routerLink]="['/inventories', inv.id, 'count']" class="btn btn-primary btn-main">
@@ -92,26 +94,7 @@
                 Corriger le stock
             </button>
         }
-
-        <p class="who muted">
-            @if (inv.cancelledBy) {
-                Annulé par {{ inv.cancelledBy.name }}
-            } @else if (inv.appliedBy && inv.countedBy) {
-                Compté par {{ inv.countedBy.name }} · stock corrigé par {{ inv.appliedBy.name }}
-            } @else if (inv.countedBy) {
-                Compté par {{ inv.countedBy.name }}
-            } @else {
-                Ouvert par {{ inv.createdBy.name }}
-            }
-        </p>
     </section>
-
-    @if (showAge()) {
-        <div class="alert alert-warning" role="note">
-            Comptage commencé il y a {{ age() }} : le stock a pu bouger depuis. Les ventes faites
-            depuis sont prises en compte.
-        </div>
-    }
 
     <!-- compte rendu de la correction du stock -->
     @if (report(); as result) {
@@ -174,34 +157,7 @@
 
     <!-- les produits -->
     <section class="products">
-        <div class="search">
-            <app-icon name="search" [size]="18" />
-            <input
-                class="input"
-                type="search"
-                placeholder="Chercher un produit…"
-                aria-label="Rechercher un produit de l'inventaire"
-                (input)="onSearch($any($event.target).value)"
-            />
-        </div>
-
-        <!-- un seul choix n'est pas un filtre : les puces n'apparaissent qu'avec les écarts -->
-        @if (filters().length > 1) {
-            <div class="chips" role="group" aria-label="Filtrer les produits">
-                @for (item of filters(); track item.value) {
-                    <button
-                        type="button"
-                        class="chip"
-                        [attr.aria-pressed]="filter() === item.value"
-                        (click)="selectFilter(item.value)"
-                    >
-                        {{ item.label }}
-                    </button>
-                }
-            </div>
-        }
-
-        @if ((detail.isLoading() && items().length === 0) || filter() === null) {
+        @if (detail.isLoading() && items().length === 0) {
             <div class="loading" aria-busy="true">
                 @for (i of [1, 2, 3, 4]; track i) {
                     <div class="skeleton sk-line"></div>
@@ -214,25 +170,11 @@
             />
         } @else if (items().length === 0) {
             <section class="card">
-                <app-empty-state
-                    icon="search"
-                    [title]="
-                        query()
-                            ? 'Aucun produit trouvé'
-                            : filter() === 'differences'
-                              ? 'Aucun écart'
-                              : 'Aucun produit pour l\'instant'
-                    "
-                    [text]="
-                        filter() === 'differences'
-                            ? 'Tous les produits comptés sont justes.'
-                            : undefined
-                    "
-                />
+                <app-empty-state icon="search" title="Aucun produit pour l'instant" />
             </section>
         } @else {
             <ul class="items" [class.reloading]="detail.isLoading()">
-                @for (line of items(); track line.id) {
+                @for (line of sortedItems(); track line.id) {
                     <li>
                         @switch (lineMode(line)) {
                             @case ("recount") {
@@ -243,7 +185,6 @@
                                     <ng-container
                                         *ngTemplateOutlet="itemBody; context: { $implicit: line }"
                                     />
-                                    <app-icon class="chevron" name="chevron-right" [size]="18" />
                                 </a>
                             }
                             @case ("edit") {
@@ -258,7 +199,6 @@
                                     <ng-container
                                         *ngTemplateOutlet="itemBody; context: { $implicit: line }"
                                     />
-                                    <app-icon class="chevron" name="edit" [size]="18" />
                                 </button>
                             }
                             @case ("detail") {
@@ -270,15 +210,6 @@
                                 >
                                     <ng-container
                                         *ngTemplateOutlet="itemBody; context: { $implicit: line }"
-                                    />
-                                    <app-icon
-                                        class="chevron"
-                                        [name]="
-                                            expanded() === line.id
-                                                ? 'chevron-down'
-                                                : 'chevron-right'
-                                        "
-                                        [size]="18"
                                     />
                                 </button>
                                 @if (expanded() === line.id) {
@@ -302,11 +233,10 @@
                     </li>
                 }
             </ul>
-
-            <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
         }
     </section>
 
+    <app-inventory-details-dialog [inventory]="inv" />
     <app-inventory-apply-dialog [inventory]="inv" (applied)="onApplied($event)" />
     <app-inventory-cancel-dialog [inventory]="inv" (cancelled)="onCancelled($event)" />
     <app-inventory-line-dialog [inventory]="inv" (saved)="onLineSaved($event)" />
@@ -324,7 +254,8 @@
         <span class="name">{{ line.productName }}</span>
         <span class="sub muted">
             @if (line.theoreticalStock !== null && !blind()) {
-                Prévu {{ line.theoreticalStock }} · Compté {{ line.actualStock }}
+                {{ line.theoreticalStock }} prévu{{ line.theoreticalStock > 1 ? "s" : "" }},
+                {{ line.actualStock }} compté{{ line.actualStock > 1 ? "s" : "" }}
             } @else {
                 Quantité comptée
             }
@@ -344,9 +275,6 @@
                 >{{ line.difference > 0 ? "+" : line.difference < 0 ? "−" : ""
                 }}{{ line.difference < 0 ? -line.difference : line.difference }}</strong
             >
-            @if (line.differenceValue) {
-                <small class="muted">{{ line.differenceValue | fcfa: true }}</small>
-            }
         </span>
     }
 </ng-template>

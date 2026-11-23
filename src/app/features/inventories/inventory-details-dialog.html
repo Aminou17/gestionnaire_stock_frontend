@@ -1,0 +1,44 @@
+<dialog #box aria-labelledby="details-title" (click)="onBackdrop($event)">
+    <h2 id="details-title">Détails</h2>
+
+    <dl>
+        <div>
+            <dt>Ouvert par</dt>
+            <dd>
+                {{ inventory().createdBy.name }}
+                <span class="muted">{{ inventory().startedAt | date: "d MMM à HH:mm" }}</span>
+            </dd>
+        </div>
+        @if (inventory().countedBy && inventory().countedAt) {
+            <div>
+                <dt>Compté par</dt>
+                <dd>
+                    {{ inventory().countedBy!.name }}
+                    <span class="muted">{{ inventory().countedAt | date: "d MMM à HH:mm" }}</span>
+                </dd>
+            </div>
+        }
+        @if (inventory().appliedBy && inventory().appliedAt) {
+            <div>
+                <dt>Stock corrigé par</dt>
+                <dd>
+                    {{ inventory().appliedBy!.name }}
+                    <span class="muted">{{ inventory().appliedAt | date: "d MMM à HH:mm" }}</span>
+                </dd>
+            </div>
+        }
+        @if (inventory().cancelledBy && inventory().cancelledAt) {
+            <div>
+                <dt>Annulé par</dt>
+                <dd>
+                    {{ inventory().cancelledBy!.name }}
+                    <span class="muted">{{ inventory().cancelledAt | date: "d MMM à HH:mm" }}</span>
+                </dd>
+            </div>
+        }
+    </dl>
+
+    <div class="actions">
+        <button type="button" class="btn btn-primary" (click)="close()">Fermer</button>
+    </div>
+</dialog>

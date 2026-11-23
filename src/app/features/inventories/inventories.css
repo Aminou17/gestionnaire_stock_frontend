@@ -8,84 +8,17 @@ app-page-header {
     margin-bottom: -4px;
 }
 
-/* comptage en cours : une carte teintée, le bouton en dessous sur téléphone */
-.resume {
+/* un bloc : un petit titre puis ses cartes */
+.block {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: start;
-    gap: 12px 16px;
-    padding: 16px;
-}
-
-.resume-text {
-    display: grid;
-    gap: 4px;
-}
-
-.resume p {
-    margin: 0;
-}
-
-.resume-label {
-    font-size: var(--fs-caption);
-    font-weight: var(--fw-semibold);
-    color: var(--primary-text);
-}
-
-.resume-title {
-    font-size: var(--fs-lead);
-    font-weight: var(--fw-medium);
-}
-
-.resume-count {
-    font-size: var(--fs-small);
-}
-
-.resume .btn {
-    grid-column: 1 / -1;
-}
-
-.toolbar {
-    display: grid;
-    gap: 12px;
-}
-
-.search-row {
-    display: flex;
     gap: 8px;
 }
 
-.search {
-    position: relative;
-    flex: 1;
-    min-width: 0;
-}
-
-.search app-icon {
-    position: absolute;
-    top: 50%;
-    left: 14px;
-    transform: translateY(-50%);
+.block-title {
+    margin: 0 0 0 4px;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-semibold);
     color: var(--text-muted);
-    pointer-events: none;
-}
-
-.search .input {
-    padding-left: 40px;
-}
-
-/* quatre puces de même largeur : jamais de défilement sur le côté */
-.chips {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 4px;
-}
-
-.chips .chip {
-    justify-content: center;
-    min-width: 0;
-    height: 40px;
-    padding: 0 4px;
 }
 
 .rows {
@@ -105,7 +38,7 @@ app-page-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    min-height: 84px;
+    min-height: 72px;
     padding: 12px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -154,19 +87,14 @@ app-page-header {
     color: var(--text-muted);
 }
 
-.meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
-    margin-top: 4px;
+.result.gain {
+    color: var(--success);
+    font-weight: var(--fw-semibold);
 }
 
-.details {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: var(--fs-caption);
+.result.loss {
+    color: var(--danger);
+    font-weight: var(--fw-semibold);
 }
 
 .chevron {
@@ -180,33 +108,17 @@ app-page-header {
 }
 
 .row-skeleton {
-    height: 84px;
+    height: 72px;
     border-radius: var(--radius);
 }
 
-@media (min-width: 768px) {
-    .toolbar {
-        grid-template-columns: minmax(0, 1fr) 420px;
-        align-items: center;
-    }
-
-    .toolbar .chips {
-        order: 2;
-    }
-
-    .resume {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        align-items: center;
-    }
-
-    .resume .btn {
-        grid-column: auto;
-    }
+/* téléphone : « + Nouveau » seulement, pour que le titre tienne sur une ligne */
+.more {
+    display: none;
 }
 
-/* très petit écran : le bouton perd son « + » pour que le titre tienne sur une ligne */
-@media (max-width: 400px) {
-    .new-count app-icon {
-        display: none;
+@media (min-width: 520px) {
+    .more {
+        display: inline;
     }
 }

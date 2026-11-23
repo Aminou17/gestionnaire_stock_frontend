@@ -32,18 +32,15 @@ app-page-header {
         var(--surface);
 }
 
-.hero-top {
+.hero-head {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
 }
 
-.hero-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    font-size: var(--fs-small);
+.hero-main {
+    min-width: 0;
 }
 
 .sentence {
@@ -83,13 +80,6 @@ app-page-header {
 .big-label {
     font-size: var(--fs-body);
     color: var(--text-muted);
-}
-
-.who {
-    margin: 0;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-    font-size: var(--fs-small);
 }
 
 /* compte rendu de la correction */
@@ -153,37 +143,6 @@ app-page-header {
 .products {
     display: grid;
     gap: 12px;
-}
-
-.search {
-    position: relative;
-}
-
-.search app-icon {
-    position: absolute;
-    top: 50%;
-    left: 14px;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-}
-
-.search .input {
-    padding-left: 40px;
-}
-
-.chips {
-    display: grid;
-    grid-auto-flow: column;
-    grid-auto-columns: minmax(0, 1fr);
-    gap: 4px;
-}
-
-.chips .chip {
-    justify-content: center;
-    min-width: 0;
-    height: 40px;
-    padding: 0 4px;
 }
 
 .items {
@@ -282,11 +241,6 @@ app-page-header {
     white-space: nowrap;
 }
 
-.chevron {
-    flex-shrink: 0;
-    color: var(--text-muted);
-}
-
 /* détail d'une ligne corrigée : une phrase */
 .detail {
     margin: -4px 0 0;
@@ -324,18 +278,5 @@ app-page-header {
     .btn-main {
         width: auto;
         justify-self: start;
-    }
-
-    .products {
-        grid-template-columns: minmax(0, 1fr) 420px;
-    }
-
-    .products > :not(.search):not(.chips) {
-        grid-column: 1 / -1;
-    }
-
-    .products .chips {
-        grid-column: 2;
-        grid-row: 1;
     }
 }

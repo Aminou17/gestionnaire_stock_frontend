@@ -3,6 +3,7 @@ import { Component, ElementRef, inject, input, output, signal, viewChild } from 
 
 import { ApplyResult, Inventory, MovementsSince } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
+import { ageText, isOld } from "./inventory-look";
 
 const plural = (count: number, one: string, many: string) => (count > 1 ? many : one);
 
@@ -36,6 +37,10 @@ export class InventoryApplyDialog {
             error: () => this.movementsFailed.set(true),
         });
     }
+
+    // un comptage de plus d'un jour : on le dit au moment de corriger
+    old = () => isOld(this.inventory());
+    age = () => ageText(this.inventory());
 
     // un clic à côté de la fenêtre la ferme
     onBackdrop(event: MouseEvent) {

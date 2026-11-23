@@ -16,12 +16,7 @@ import { map } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { ExportFormat } from "../../core/export-format";
-import {
-    ApplyResult,
-    Inventory,
-    InventoryItem,
-    ItemFilter,
-} from "../../core/stock/inventory.model";
+import { ApplyResult, Inventory, InventoryItem } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 import { ActionItem, ActionMenu } from "../../shared/action-menu/action-menu";
@@ -29,23 +24,19 @@ import { downloadFile } from "../../shared/download-file";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
 import { LoadError } from "../../shared/load-error/load-error";
-import { Pagination } from "../../shared/pagination/pagination";
 import { PhotoZoom } from "../../shared/photo-zoom/photo-zoom";
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { ToastService } from "../../shared/toast/toast.service";
 import { InventoryApplyDialog } from "./inventory-apply-dialog";
 import { InventoryCancelDialog } from "./inventory-cancel-dialog";
+import { InventoryDetailsDialog } from "./inventory-details-dialog";
 import { InventoryLineDialog } from "./inventory-line-dialog";
-import { STATUS_TONES, ageText, heroSentence, inventoryTitle, isOld } from "./inventory-look";
+import { STATUS_TONES, heroSentence } from "./inventory-look";
 import { InventoryStatusBadge } from "./inventory-status";
 import { InventoryThumb } from "./inventory-thumb";
 
-interface LineFilter {
-    value: ItemFilter;
-    label: string;
-}
-
-const PAGE_SIZE = 25;
+// un inventaire ne contient que les produits choisis : une seule page suffit
+const MAX_LINES = 500;
 
 @Component({
     selector: "app-inventory-page",
@@ -57,13 +48,13 @@ const PAGE_SIZE = 25;
         Icon,
         EmptyState,
         LoadError,
-        Pagination,
         PhotoZoom,
         FcfaPipe,
         InventoryStatusBadge,
         InventoryThumb,
         InventoryApplyDialog,
         InventoryCancelDialog,
+        InventoryDetailsDialog,
         InventoryLineDialog,
     ],
     templateUrl: "./inventory-page.html",
@@ -81,31 +72,32 @@ export class InventoryPage {
 
     private applyDialog = viewChild(InventoryApplyDialog);
     private cancelDialog = viewChild(InventoryCancelDialog);
+    private detailsDialog = viewChild(InventoryDetailsDialog);
     private lineDialog = viewChild(InventoryLineDialog);
 
-    // choisi à l'arrivée selon l'état de l'inventaire : les écarts d'abord quand il y en a
-    filter = signal<ItemFilter | null>(null);
-    // ce que la personne tape ; la recherche n'est envoyée qu'une fois la frappe terminée
-    query = signal("");
-    private typing: ReturnType<typeof setTimeout> | undefined;
-    page = signal(1);
-    pageSize = signal(PAGE_SIZE);
-
-    // les lignes de la page affichée ; l'inventaire du haut vit à part pour ne pas sauter au rechargement
+    // les lignes ; l'inventaire du haut vit à part pour ne pas sauter au rechargement
     detail = rxResource({
-        params: () => ({
-            id: this.id(),
-            filter: this.filter() ?? "all",
-            search: this.query(),
-            page: this.page(),
-        }),
+        params: () => ({ id: this.id() }),
         stream: ({ params }) =>
-            this.inventoryService.getInventory(params.id, { ...params, limit: PAGE_SIZE }),
+            this.inventoryService.getInventory(params.id, {
+                filter: "all",
+                search: "",
+                page: 1,
+                limit: MAX_LINES,
+            }),
     });
 
     inventory = signal<Inventory | null>(null);
     items = computed(() => (this.detail.hasValue() ? this.detail.value().items : []));
-    total = computed(() => (this.detail.hasValue() ? this.detail.value().pagination.total : 0));
+
+    // les plus gros écarts d'abord, puis l'ordre alphabétique
+    sortedItems = computed(() =>
+        [...this.items()].sort(
+            (a, b) =>
+                Math.abs(b.difference ?? 0) - Math.abs(a.difference ?? 0) ||
+                a.productName.localeCompare(b.productName, "fr"),
+        ),
+    );
 
     // détail de la correction : un compte rendu juste après l'avoir faite
     report = signal<ApplyResult | null>(null);
@@ -120,34 +112,23 @@ export class InventoryPage {
 
     isAdmin = this.auth.isAdmin;
 
-    title = computed(() => (this.inventory() ? inventoryTitle(this.inventory()!) : ""));
     tone = computed(() => (this.inventory() ? STATUS_TONES[this.inventory()!.status] : "primary"));
     sentence = computed(() =>
         this.inventory() ? heroSentence(this.inventory()!, this.isAdmin()) : "",
     );
     // le stock du logiciel reste caché tant que le comptage est ouvert, même pour l'administrateur
     blind = computed(() => this.inventory()?.status === "in_progress");
-    showAge = computed(() => !!this.inventory() && isOld(this.inventory()!));
-    age = computed(() => (this.inventory() ? ageText(this.inventory()!) : ""));
 
-    // Les écarts n'existent pas tant que le comptage est ouvert, et le gérant ne les voit pas alors
-    filters = computed<LineFilter[]>(() => {
-        const inventory = this.inventory();
-        const list: LineFilter[] = [{ value: "all", label: "Tous" }];
-
-        if (inventory && inventory.status !== "in_progress" && inventory.differenceCount !== null) {
-            list.push({ value: "differences", label: "Écarts" });
-        }
-
-        return list;
-    });
-
-    // le menu « … » de l'en-tête : exports et annulation, réservés à l'administrateur
+    // le menu « … » de l'en-tête : les détails pour tous, exports et annulation pour l'administrateur
     menuItems = computed<ActionItem[]>(() => {
-        const items: ActionItem[] = [
-            { id: "pdf", label: "Exporter en PDF", icon: "download" },
-            { id: "csv", label: "Exporter en CSV", icon: "download" },
-        ];
+        const items: ActionItem[] = [{ id: "details", label: "Détails", icon: "clock" }];
+
+        if (this.isAdmin()) {
+            items.push(
+                { id: "pdf", label: "Exporter en PDF", icon: "download", separated: true },
+                { id: "csv", label: "Exporter en CSV", icon: "download" },
+            );
+        }
 
         if (this.canCancel()) {
             items.push({
@@ -181,28 +162,8 @@ export class InventoryPage {
 
             untracked(() => {
                 this.inventory.set(detail);
-                if (this.filter() === null) this.filter.set(this.firstFilter(detail));
             });
         });
-    }
-
-    // « Seulement les écarts » dès que le comptage est terminé et qu'il y en a
-    private firstFilter(inventory: Inventory): ItemFilter {
-        const hasGaps = inventory.status !== "in_progress" && !!inventory.differenceCount;
-        return hasGaps ? "differences" : "all";
-    }
-
-    selectFilter(filter: ItemFilter) {
-        this.filter.set(filter);
-        this.page.set(1);
-    }
-
-    onSearch(value: string) {
-        clearTimeout(this.typing);
-        this.typing = setTimeout(() => {
-            this.query.set(value.trim());
-            this.page.set(1);
-        }, 300);
     }
 
     // comment une ligne réagit au clic : recompter, corriger ou voir le détail
@@ -247,7 +208,8 @@ export class InventoryPage {
     }
 
     onMenu(action: string) {
-        if (action === "cancel") this.cancelDialog()?.open();
+        if (action === "details") this.detailsDialog()?.open();
+        else if (action === "cancel") this.cancelDialog()?.open();
         else this.exportFile(action as ExportFormat);
     }
 
