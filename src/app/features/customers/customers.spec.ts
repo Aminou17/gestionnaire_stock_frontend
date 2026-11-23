@@ -162,11 +162,11 @@ describe("Customers", () => {
 
     it("should show the amount to collect only with the filter", async () => {
         await render({ dueTotal: 125000 });
-        expect(text()).not.toContain("Dette totale");
+        expect(text()).not.toContain("Crédit total");
 
         await pressDueChip();
 
-        expect(text()).toContain("Dette totale");
+        expect(text()).toContain("Crédit total");
         expect(text()).toContain("125 000 F");
         expect(text()).toContain("chez 2 clients");
     });
@@ -211,7 +211,7 @@ describe("Customers", () => {
             "−6 500 F",
         );
         expect(el.querySelector(".row")!.textContent).not.toContain("45 000");
-        expect(el.querySelector(".row")!.textContent).not.toContain("Dette");
+        expect(el.querySelector(".row")!.textContent).not.toContain("Crédit");
     });
 
     it("should say since when the debt exists", async () => {

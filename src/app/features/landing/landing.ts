@@ -96,7 +96,7 @@ export class Landing {
         },
         {
             icon: "users",
-            title: "Vos clients et leurs dettes",
+            title: "Vos clients et leurs crédits",
             text: "Qui doit quoi, acomptes et ventes à payer plus tard, avec le téléphone du client pour le relancer.",
         },
         {

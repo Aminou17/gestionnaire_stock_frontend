@@ -96,7 +96,7 @@ describe("ShopActivity", () => {
         const { el } = await render(usage());
 
         const sections = [...el.querySelectorAll(".sections li .name")].map((n) => n.textContent);
-        expect(sections).toEqual(["Ventes", "Accueil", "Dettes et clients"]);
+        expect(sections).toEqual(["Ventes", "Accueil", "Clients et crédits"]);
         expect(text(el)).toContain("Nouvelle vente");
         expect(text(el)).toContain("dont 10 vendeurs");
     });

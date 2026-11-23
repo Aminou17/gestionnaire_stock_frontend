@@ -24,7 +24,7 @@ export const SECTIONS: NavSection[] = [
         items: [
             { label: "Accueil", path: "/dashboard", icon: "dashboard" },
             { label: "Ventes", path: "/sales", icon: "cart" },
-            { label: "Dettes et clients", path: "/customers", icon: "user" },
+            { label: "Clients et crédits", path: "/customers", icon: "user" },
             { label: "Caisse", path: "/cash", icon: "banknote" },
             { label: "Dépenses", path: "/expenses", icon: "receipt", adminOnly: true },
             { label: "Bilan", path: "/admin", icon: "shield", adminOnly: true },

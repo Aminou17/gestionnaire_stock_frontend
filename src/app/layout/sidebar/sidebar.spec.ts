@@ -61,7 +61,7 @@ describe("Sidebar", () => {
         const el = await render(true, 0, undefined, ["team", "customers"]);
 
         expect(labels(el)).toContain("Utilisateurs");
-        expect(labels(el)).toContain("Dettes et clients");
+        expect(labels(el)).toContain("Clients et crédits");
         const link = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
             a.textContent?.includes("Utilisateurs"),
         )!;
@@ -78,7 +78,7 @@ describe("Sidebar", () => {
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
-            "Dettes et clients",
+            "Clients et crédits",
             "Caisse",
             "Produits",
             "Catégories",
@@ -97,7 +97,7 @@ describe("Sidebar", () => {
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
-            "Dettes et clients",
+            "Clients et crédits",
             "Caisse",
             "Dépenses",
             "Bilan",

@@ -1,4 +1,4 @@
-<app-page-header title="Dettes et clients" section="Ventes">
+<app-page-header title="Clients et crédits" section="Ventes">
     <button
         type="button"
         class="btn btn-primary new-customer"
@@ -120,7 +120,7 @@
                 [attr.aria-pressed]="unpaid()"
                 (click)="selectUnpaid(true)"
             >
-                Dettes
+                Crédits
                 <span class="chip-count">{{
                     unpaidTotals.hasValue() ? unpaidTotals.value() : "—"
                 }}</span>
@@ -200,7 +200,7 @@
 
         @if (unpaid()) {
             <div class="due-summary" role="status">
-                <span>Dette totale :</span>
+                <span>Crédit total :</span>
                 <strong>{{ dueTotal() | fcfa }}</strong>
                 <span class="muted"
                     >à récupérer chez {{ total() }} client{{ total() > 1 ? "s" : "" }}</span
@@ -211,7 +211,7 @@
         <div class="rows-head" [class.debts]="unpaid()" aria-hidden="true">
             <span class="head-client">Client</span>
             <span class="head-last">{{ unpaid() ? "Depuis" : "Dernier achat" }}</span>
-            <span class="head-due">{{ unpaid() ? "Dette" : "" }}</span>
+            <span class="head-due">{{ unpaid() ? "Crédit" : "" }}</span>
             @if (!unpaid()) {
                 <span class="head-spent">Total dépensé</span>
             }

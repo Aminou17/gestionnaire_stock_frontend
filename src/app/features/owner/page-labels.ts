@@ -5,7 +5,7 @@ const LABELS: Record<string, string> = {
     "/sales": "Ventes",
     "/sales/new": "Nouvelle vente",
     "/sales/:id": "Fiche d'une vente",
-    "/customers": "Dettes et clients",
+    "/customers": "Clients et crédits",
     "/customers/:id": "Fiche d'un client",
     "/cash": "Caisse",
     "/cash/sessions": "Suivi des caisses",
@@ -41,7 +41,7 @@ export const pageLabel = (page: string) => LABELS[page] ?? page;
 export const pageSection = (page: string) => {
     const rules: [string, string][] = [
         ["/sales", "Ventes"],
-        ["/customers", "Dettes et clients"],
+        ["/customers", "Clients et crédits"],
         ["/cash", "Caisse"],
         ["/expenses", "Caisse"],
         ["/products", "Produits"],
@@ -80,7 +80,7 @@ const API_LABELS: Record<string, string> = {
     cash_movements: "Mouvements de caisse",
     cash_sessions: "Suivi des caisses",
     suppliers: "Fournisseurs",
-    customers: "Dettes et clients",
+    customers: "Clients et crédits",
     users: "Utilisateurs",
     "audit-logs": "Historique des actions",
     "stock-settings": "Réglages du stock",

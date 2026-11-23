@@ -281,7 +281,7 @@ export const routes: Routes = [
             },
             {
                 path: "customers",
-                title: "Dettes et clients",
+                title: "Clients et crédits",
                 loadComponent: () =>
                     import("./features/customers/customers").then((m) => m.Customers),
             },

@@ -3,7 +3,7 @@ import { accessAttempt, pageLabel, roleLabel } from "./page-labels";
 describe("page labels", () => {
     it("should name the pages the way the menu does", () => {
         expect(pageLabel("/sales/new")).toBe("Nouvelle vente");
-        expect(pageLabel("/customers")).toBe("Dettes et clients");
+        expect(pageLabel("/customers")).toBe("Clients et crédits");
         expect(pageLabel("/customers/:id")).toBe("Fiche d'un client");
     });
 

@@ -1,6 +1,6 @@
 <app-page-header
     [title]="data()?.name ?? 'Client'"
-    section="Dettes et clients"
+    section="Clients et crédits"
     [back]="back.link"
     [backLabel]="back.label"
 >
@@ -58,9 +58,9 @@
                 }
 
                 @if (customer.due_amount > 0) {
-                    <section class="due-card" aria-label="Dette">
+                    <section class="due-card" aria-label="Crédit">
                         <div class="due-text">
-                            <span class="due-label">Dette</span>
+                            <span class="due-label">Crédit</span>
                             <strong class="due-amount">{{ customer.due_amount | fcfa }}</strong>
                         </div>
                         @if (reminder(); as link) {

@@ -15,7 +15,7 @@ export type ModuleKey =
 // ce que la boutique lit quand une fonction n'est pas dans sa formule (mêmes noms que côté API)
 export const MODULE_INFO: Record<ModuleKey, { label: string; description: string }> = {
     customers: {
-        label: "Dettes et clients",
+        label: "Clients et crédits",
         description: "Suivre les clients, leurs achats et ce qu'ils doivent.",
     },
     expenses: {

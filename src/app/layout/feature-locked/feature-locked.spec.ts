@@ -47,7 +47,7 @@ describe("FeatureLocked", () => {
         await show("customers");
 
         expect(dialog.open).toBe(true);
-        expect(dialog.textContent).toContain("Dettes et clients");
+        expect(dialog.textContent).toContain("Clients et crédits");
         expect(dialog.textContent).toContain("Disponible avec l'abonnement");
         expect(dialog.textContent).toContain("ne fait pas partie de votre formule actuelle");
         expect(dialog.textContent).toContain("contactez-nous");

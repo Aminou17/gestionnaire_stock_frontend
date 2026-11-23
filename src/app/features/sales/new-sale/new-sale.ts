@@ -278,7 +278,7 @@ export class NewSale {
     }
 
     openCredit() {
-        // sans l'accès Dettes et clients : le message d'abonnement, la vente en cours reste intacte
+        // sans l'accès Clients et crédits : le message d'abonnement, la vente en cours reste intacte
         if (!this.access.allows("customers")) {
             this.access.showLocked("customers");
             return;

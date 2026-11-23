@@ -274,7 +274,7 @@ describe("Dashboard", () => {
     it("should show how much customers still owe", async () => {
         await render();
 
-        expect(text()).toContain("Dettes clients");
+        expect(text()).toContain("Crédits clients");
         expect(text()).toContain("12 000 F");
         expect(text()).toContain("2 ventes non réglées");
     });
@@ -369,7 +369,7 @@ describe("Dashboard", () => {
 
         expect(text()).not.toContain("Valeur du stock");
         expect(text()).not.toContain("Bénéfice du jour");
-        expect(text()).not.toContain("Dettes clients");
+        expect(text()).not.toContain("Crédits clients");
         expect(text()).not.toContain("À surveiller");
         expect(text()).not.toContain("null");
         expect(el.querySelector("app-stock-alerts")).toBeNull();
@@ -469,7 +469,7 @@ describe("Dashboard", () => {
 
         expect(text()).toContain("Mes ventes du jour");
         expect(text()).not.toContain("En caisse");
-        expect(text()).not.toContain("Dettes clients");
+        expect(text()).not.toContain("Crédits clients");
         expect(text()).not.toContain("Mon bénéfice du jour");
     });
 

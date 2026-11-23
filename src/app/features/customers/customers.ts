@@ -36,8 +36,8 @@ const SORTS: { value: CustomerSort; label: string }[] = [
     { value: "recent", label: "Récents" },
     { value: "name", label: "Nom" },
     { value: "spent", label: "Plus gros achats" },
-    { value: "due", label: "Plus grosses dettes" },
-    { value: "oldest_due", label: "Dettes les plus anciennes" },
+    { value: "due", label: "Plus gros crédits" },
+    { value: "oldest_due", label: "Crédits les plus anciens" },
 ];
 
 @Component({
@@ -144,7 +144,7 @@ export class Customers {
     activeFilters = computed(() => {
         const filters: { key: "status" | "sort"; label: string }[] = [];
         if (this.status() === "inactive") filters.push({ key: "status", label: "Supprimés" });
-        // en vue Dettes, les deux puces de tri montrent déjà le choix
+        // en vue Crédits, les deux puces de tri montrent déjà le choix
         const shownByChips = this.unpaid() && ["due", "oldest_due"].includes(this.sort());
         if (this.sort() !== this.defaultSort() && !shownByChips) {
             filters.push({
@@ -198,7 +198,7 @@ export class Customers {
         this.page.set(1);
     }
 
-    // la fenêtre remet tout à zéro, la puce Dettes garde son choix
+    // la fenêtre remet tout à zéro, la puce Crédits garde son choix
     resetPanel() {
         this.status.set("active");
         this.sort.set(this.defaultSort());

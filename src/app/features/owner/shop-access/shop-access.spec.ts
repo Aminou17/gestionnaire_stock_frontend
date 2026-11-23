@@ -57,7 +57,7 @@ describe("ShopAccess", () => {
     };
 
     const modules = () => [
-        module("customers", "Vente", "Dettes et clients"),
+        module("customers", "Vente", "Clients et crédits"),
         module("expenses", "Caisse", "Dépenses"),
         module("audit", "Gestion", "Historique des actions"),
     ];
@@ -74,7 +74,7 @@ describe("ShopAccess", () => {
         expect(el.textContent).toContain("Toujours inclus");
         expect(el.textContent).toContain("Ventes et encaissements");
         expect(el.querySelectorAll(".group").length).toBe(3);
-        expect(el.textContent).toContain("Dettes et clients : explication");
+        expect(el.textContent).toContain("Clients et crédits : explication");
         expect(switches(el).every((s) => s.getAttribute("aria-checked") === "true")).toBe(true);
         expect(saveBar(el).classList.contains("visible")).toBe(false);
     });
@@ -119,7 +119,7 @@ describe("ShopAccess", () => {
 
     it("should save straight away, without asking, when an access is given back", async () => {
         const { fixture, el } = await render([
-            module("customers", "Vente", "Dettes et clients", false),
+            module("customers", "Vente", "Clients et crédits", false),
             module("expenses", "Caisse", "Dépenses"),
         ]);
 
@@ -135,7 +135,7 @@ describe("ShopAccess", () => {
 
     it("should tick everything, or keep only the essentials", async () => {
         const { fixture, el } = await render([
-            module("customers", "Vente", "Dettes et clients", false),
+            module("customers", "Vente", "Clients et crédits", false),
             module("expenses", "Caisse", "Dépenses"),
         ]);
         const [all, essentials] = [...el.querySelectorAll<HTMLButtonElement>(".quick .btn")];

@@ -114,7 +114,7 @@ describe("CustomerPage", () => {
         await render();
 
         expect(el.querySelector(".hero .due-card")).not.toBeNull();
-        expect(el.querySelector(".due-label")!.textContent).toBe("Dette");
+        expect(el.querySelector(".due-label")!.textContent).toBe("Crédit");
         expect(el.querySelector(".contact")).toBeNull();
         expect(text()).not.toContain("Appeler");
     });
