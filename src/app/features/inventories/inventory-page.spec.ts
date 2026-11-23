@@ -1,208 +1,301 @@
-import { HttpErrorResponse } from "@angular/common/http";
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { ActivatedRoute, convertToParamMap, provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
-import { InventoryPage } from "./inventory-page";
-import { InventoryDetail } from "../../core/stock/inventory.model";
+import { AuthService } from "../../core/auth/auth.service";
+import { Inventory, InventoryDetail, InventoryItem } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
-import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
+import { InventoryPage } from "./inventory-page";
 
-const detail: InventoryDetail = {
-    id: 10,
-    user_id: 1,
-    user_name: "Awa Bazin",
-    created_at: "2026-11-12T15:00:00",
-    applied_at: null,
-    applied_by_name: null,
-    items_count: 2,
-    difference_value: -27600,
-    items: [
-        {
-            id: 1,
-            product_id: 3,
-            product_name: "Riz parfumé 1 kg",
-            theoretical_stock: 28,
-            actual_stock: 26,
-            difference: -2,
-            purchase_price: 2500,
-            image: "data:image/webp;base64,AAA",
-        },
-        {
-            id: 2,
-            product_id: 13,
-            product_name: "Bazin riche Getzner qualité 1 (5 m)",
-            theoretical_stock: 14,
-            actual_stock: 15,
-            difference: 1,
-            purchase_price: 18000,
-        },
-    ],
-};
+const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
+    id: 12,
+    name: null,
+    status: "counted",
+    statusLabel: "À valider",
+    scope: { type: "all", categoryId: null, categoryName: null },
+    startedAt: new Date().toISOString(),
+    countedAt: new Date().toISOString(),
+    appliedAt: null,
+    cancelledAt: null,
+    createdBy: { id: 1, name: "Awa Bazin", avatar: null },
+    countedBy: { id: 1, name: "Awa Bazin", avatar: null },
+    appliedBy: null,
+    cancelledBy: null,
+    itemsCount: 34,
+    countedCount: 30,
+    uncountedCount: 4,
+    differenceCount: 12,
+    differenceValue: -45000,
+    maxStock: 1000000,
+    ...changes,
+});
+
+const item = (changes: Partial<InventoryItem> = {}): InventoryItem => ({
+    id: 1,
+    productId: 1,
+    productName: "Riz parfumé 5 kg",
+    image: null,
+    counted: true,
+    actualStock: 37,
+    countedAt: null,
+    theoreticalStock: 38,
+    difference: -1,
+    purchasePrice: 600,
+    differenceValue: -600,
+    adjustment: null,
+    movementsSince: null,
+    expectedStock: null,
+    stockBefore: null,
+    stockAfter: null,
+    applyNote: null,
+    ...changes,
+});
 
 describe("InventoryPage", () => {
     let fixture: ComponentFixture<InventoryPage>;
     let el: HTMLElement;
+    let getInventory: ReturnType<typeof vi.fn>;
+    let exportInventory: ReturnType<typeof vi.fn>;
 
-    const applyInventory = vi.fn();
-    const exportInventory = vi.fn();
+    async function render(
+        head: Partial<Inventory> = {},
+        items: InventoryItem[] = [item()],
+        isAdmin = true,
+    ) {
+        const detail: InventoryDetail = {
+            ...inventory(head),
+            items,
+            pagination: { page: 1, limit: 25, total: items.length, totalPages: 1 },
+        };
+        getInventory = vi.fn(() => of(detail));
+        exportInventory = vi.fn(() => of(new Blob(["x"])));
 
-    async function render(getInventory: () => unknown) {
+        // jsdom ne gère pas <dialog>
+        HTMLDialogElement.prototype.showModal = vi.fn();
+        HTMLDialogElement.prototype.close = vi.fn();
+
         await TestBed.configureTestingModule({
             imports: [InventoryPage],
             providers: [
                 provideRouter([]),
                 {
                     provide: ActivatedRoute,
-                    useValue: { paramMap: of(convertToParamMap({ id: "10" })) },
+                    useValue: {
+                        snapshot: { queryParamMap: convertToParamMap({}) },
+                        paramMap: of(convertToParamMap({ id: "12" })),
+                    },
                 },
+                { provide: InventoryService, useValue: { getInventory, exportInventory } },
                 {
-                    provide: InventoryService,
-                    useValue: { getInventory, applyInventory, exportInventory },
+                    provide: AuthService,
+                    useValue: {
+                        isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
+                        user: signal({ id: 1, name: "Test" }),
+                    },
                 },
-                { provide: LowStockAlertService, useValue: { count: () => 0 } },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(InventoryPage);
         el = fixture.nativeElement;
         await fixture.whenStable();
+        fixture.detectChanges();
     }
 
-    it("should sum the missing and surplus units", async () => {
-        await render(() => of(detail));
+    const text = (node: Element | null = el) => node!.textContent!.replace(/\s+/g, " ").trim();
 
-        expect(fixture.componentInstance.missing()).toBe(2);
-        expect(fixture.componentInstance.surplus()).toBe(1);
-        expect(el.textContent).toContain("Riz parfumé 1 kg");
+    it("should tell the admin the result in one sentence and offer to correct the stock", async () => {
+        await render();
+
+        expect(text(el.querySelector(".sentence"))).toMatch(
+            /^12 produits en écart, perte de 45.000.F$/,
+        );
+        expect(text(el.querySelector(".btn-main"))).toBe("Corriger le stock");
+        expect(text(el.querySelector(".badge-warning"))).toBe("À valider");
     });
 
-    it("should show the gap summary once and the photo of the products", async () => {
-        await render(() => of(detail));
-
-        expect(el.textContent).toContain("Manquants");
-        expect(el.textContent).toContain("Valeur de l'écart");
-        expect(el.textContent?.split("Valeur de l'écart").length).toBe(2);
-        expect(el.querySelectorAll(".panel .table-wrap .thumb-zoom").length).toBe(1);
-    });
-
-    it("should put the products with a gap first, the most costly on top", async () => {
-        await render(() =>
-            of({
-                ...detail,
-                items: [
-                    { ...detail.items[0], id: 7, product_name: "Conforme", difference: 0 },
-                    ...detail.items,
-                ],
-            }),
+    it("should only tell the manager that the counting waits for validation, without money", async () => {
+        await render(
+            { differenceValue: null },
+            [item({ purchasePrice: null, differenceValue: null })],
+            false,
         );
 
-        const names = fixture.componentInstance.sortedItems().map((i) => i.product_name);
-        expect(names).toEqual([
-            "Bazin riche Getzner qualité 1 (5 m)",
-            "Riz parfumé 1 kg",
-            "Conforme",
+        expect(text(el.querySelector(".sentence"))).toBe(
+            "Comptage terminé, en attente de validation",
+        );
+        expect(el.querySelector(".btn-main")).toBeNull();
+        expect(el.querySelector("app-action-menu")).toBeNull();
+        expect(text(el)).not.toMatch(/\d\sF\b/);
+    });
+
+    it("should continue the counting from the page of an open inventory, for both roles", async () => {
+        await render({ status: "in_progress", statusLabel: "En cours", differenceCount: null });
+
+        expect(text(el.querySelector(".btn-main"))).toBe("Continuer le comptage");
+        expect(el.querySelector(".btn-main")?.getAttribute("href")).toBe("/inventories/12/count");
+    });
+
+    it("should keep the theoretical stock hidden while counting, even for the admin", async () => {
+        await render({ status: "in_progress", statusLabel: "En cours" });
+
+        expect(text(el)).not.toContain("Attendu");
+        expect(text(el.querySelector(".items"))).toContain("Compté 37");
+        expect([...el.querySelectorAll(".chip")].map((chip) => text(chip).trim())).toEqual([
+            "Tous",
+            "Non comptés",
         ]);
-        expect(fixture.componentInstance.conformCount()).toBe(1);
     });
 
-    it("should count the short, surplus and conform products", async () => {
-        await render(() =>
-            of({
-                ...detail,
-                items: [{ ...detail.items[0], id: 7, difference: 0 }, ...detail.items],
-            }),
+    it("should show only the gaps first when the counting is finished", async () => {
+        await render();
+
+        expect(getInventory).toHaveBeenLastCalledWith(
+            12,
+            expect.objectContaining({ filter: "differences" }),
+        );
+        expect(el.querySelector(".chip[aria-pressed=true]")?.textContent).toContain("Écarts");
+        // l'écart est le plus grand chiffre de la ligne
+        expect(text(el.querySelector(".gap"))).toBe("−1");
+        expect(text(el.querySelector(".items .item"))).toContain("Attendu 38 · Compté 37");
+    });
+
+    it("should show every product when there is no gap to look at", async () => {
+        await render({ differenceCount: 0, differenceValue: 0 }, [
+            item({ difference: 0, differenceValue: 0 }),
+        ]);
+
+        expect(getInventory).toHaveBeenLastCalledWith(
+            12,
+            expect.objectContaining({ filter: "all" }),
+        );
+        expect(text(el.querySelector(".sentence"))).toBe("Aucun écart");
+    });
+
+    it("should let the admin correct a line of an inventory to validate", async () => {
+        await render();
+
+        const line = el.querySelector<HTMLButtonElement>(".items button.item");
+        expect(line?.getAttribute("aria-label")).toBe("Corriger le comptage de Riz parfumé 5 kg");
+    });
+
+    it("should not let the manager correct a line of a closed inventory", async () => {
+        await render({}, [item()], false);
+
+        expect(el.querySelector(".items button.item")).toBeNull();
+        expect(el.querySelector(".items a.item")).toBeNull();
+    });
+
+    it("should send the manager from a line of an open inventory to the counting screen", async () => {
+        await render({ status: "in_progress", statusLabel: "En cours" }, [item()], false);
+
+        const link = el.querySelector<HTMLAnchorElement>(".items a.item")!;
+        expect(link.getAttribute("href")).toContain("/inventories/12/count");
+        expect(link.getAttribute("href")).toContain("q=Riz");
+    });
+
+    it("should offer to cancel only before the stock is corrected", async () => {
+        await render();
+        const ids = () => fixture.componentInstance.menuItems().map((i) => i.id);
+
+        expect(ids()).toEqual(["pdf", "csv", "cancel"]);
+
+        const applied = TestBed.createComponent(InventoryPage);
+        applied.componentInstance.inventory.set(inventory({ status: "applied" }));
+        expect(applied.componentInstance.menuItems().map((i) => i.id)).toEqual(["pdf", "csv"]);
+    });
+
+    it("should explain the detail of a corrected line", async () => {
+        await render(
+            { status: "applied", statusLabel: "Terminé", appliedAt: new Date().toISOString() },
+            [
+                item({
+                    adjustment: -4,
+                    movementsSince: -3,
+                    stockBefore: 20,
+                    stockAfter: 16,
+                    applyNote: "38 à l'ouverture, 3 ventes depuis",
+                }),
+            ],
         );
 
-        expect(fixture.componentInstance.shortCount()).toBe(1);
-        expect(fixture.componentInstance.overCount()).toBe(1);
-        expect(fixture.componentInstance.conformCount()).toBe(1);
-    });
-
-    it("should count nothing when the inventory has no product", async () => {
-        await render(() => of({ ...detail, items: [] }));
-
-        expect(fixture.componentInstance.shortCount()).toBe(0);
-        expect(fixture.componentInstance.conformCount()).toBe(0);
-    });
-
-    it("should show the author and the tiles in the order short, conform, surplus", async () => {
-        await render(() => of({ ...detail, user_avatar: "data:image/png;base64,AAA" }));
-
-        const facts = el.querySelector(".facts")?.textContent ?? "";
-        expect(facts).toContain("Auteur");
-        expect(facts).toContain("Awa Bazin");
-        expect(el.querySelector(".facts app-avatar img")?.getAttribute("src")).toContain("data:");
-
-        const labels = [...el.querySelectorAll(".stat-label")].map((l) => l.textContent?.trim());
-        expect(labels).toEqual(["Manquants", "Conformes", "En trop"]);
-    });
-
-    it("should export this inventory in the chosen format", async () => {
-        exportInventory.mockReturnValue(of(new Blob(["x"])));
-        URL.createObjectURL = vi.fn(() => "blob:test");
-        URL.revokeObjectURL = vi.fn();
-        await render(() => of(detail));
-
-        fixture.componentInstance.exportFile("csv");
-
-        expect(exportInventory).toHaveBeenCalledWith(10, "csv");
-        expect(fixture.componentInstance.exporting()).toBe(false);
-    });
-
-    it("should offer to apply the gaps only when some product is off", async () => {
-        await render(() => of(detail));
-        expect(fixture.componentInstance.canApply()).toBe(true);
-        expect(el.textContent).toContain("Appliquer au stock");
-    });
-
-    it("should not offer to apply an inventory without gap or already applied", async () => {
-        await render(() =>
-            of({ ...detail, items: detail.items.map((i) => ({ ...i, difference: 0 })) }),
-        );
-        expect(fixture.componentInstance.canApply()).toBe(false);
-    });
-
-    it("should show the date once the stock was corrected", async () => {
-        await render(() =>
-            of({ ...detail, applied_at: "2026-11-12T16:00:00", applied_by_name: "Awa Bazin" }),
-        );
-
-        expect(fixture.componentInstance.canApply()).toBe(false);
-        expect(el.textContent).toContain("Appliqué");
-    });
-
-    it("should show the message of the server when applying fails", async () => {
-        applyInventory.mockReturnValue(
-            throwError(
-                () =>
-                    new HttpErrorResponse({
-                        status: 409,
-                        error: { message: "Cet inventaire a déjà été appliqué." },
-                    }),
-            ),
-        );
-        await render(() => of(detail));
-        // jsdom ne connaît pas dialog.close()
-        const dialog = el.querySelector("dialog") as HTMLDialogElement;
-        dialog.close = vi.fn();
-
-        fixture.componentInstance.apply();
+        expect(el.querySelector(".btn-main")).toBeNull();
+        el.querySelector<HTMLButtonElement>(".items button.item")!.click();
         fixture.detectChanges();
 
-        expect(el.textContent).toContain("Cet inventaire a déjà été appliqué.");
-        expect(fixture.componentInstance.applying()).toBe(false);
+        expect(text(el.querySelector("dl.detail"))).toContain("Stock avant20");
+        expect(text(el.querySelector("dl.detail"))).toContain("38 à l'ouverture, 3 ventes depuis");
     });
 
-    it("should give a way back to the list", async () => {
-        await render(() => of(detail));
+    it("should report what happened after the stock was corrected, in plain words", async () => {
+        await render();
 
-        expect(el.querySelector('a[href="/inventories"]')).not.toBeNull();
+        fixture.componentInstance.onApplied({
+            inventory: inventory({ status: "applied", statusLabel: "Terminé" }),
+            applied: 9,
+            unchanged: 2,
+            skipped: [{ productId: 5, productName: "Chemise", reason: "Produit désactivé" }],
+            limitedToZero: [{ productId: 6, productName: "Riz", wanted: -10, applied: -2 }],
+        });
+        fixture.detectChanges();
+
+        const report = text(el.querySelector(".report"));
+        expect(report).toContain("9 produits corrigés");
+        expect(report).toContain("2 déjà justes");
+        expect(report).toContain("Chemise");
+        expect(report).toContain("Produit désactivé. Son stock n'a pas été modifié.");
+        expect(report).toContain("devait baisser de 10, mais il n'en restait que 2");
+        expect(el.querySelector(".alert-error")).toBeNull();
+        expect(text(el)).not.toMatch(/Appliqu/);
     });
 
-    it("should say when the inventory does not exist", async () => {
-        await render(() => throwError(() => new HttpErrorResponse({ status: 404 })));
+    it("should warn about an inventory older than one day", async () => {
+        await render({ startedAt: new Date(Date.now() - 3 * 86_400_000).toISOString() });
 
-        expect(el.textContent).toContain("Cet inventaire est introuvable.");
+        expect(text(el.querySelector(".alert-warning"))).toContain("il y a 3 jours");
+    });
+
+    it("should not warn about a recent inventory", async () => {
+        await render();
+
+        expect(el.querySelector(".alert-warning")).toBeNull();
+    });
+
+    it("should keep the export error apart from the correction error", async () => {
+        await render();
+        exportInventory.mockReturnValue(throwError(() => new Error("500")));
+
+        fixture.componentInstance.exportFile("pdf");
+        fixture.detectChanges();
+
+        expect(text(el.querySelector(".alert-dismissible"))).toContain("Impossible d'exporter");
+        expect(fixture.componentInstance.actionError()).toBe("");
+    });
+
+    it("should say when the inventory cannot be found", async () => {
+        getInventory = vi.fn(() => throwError(() => ({ status: 404 })));
+        await TestBed.configureTestingModule({
+            imports: [InventoryPage],
+            providers: [
+                provideRouter([]),
+                {
+                    provide: ActivatedRoute,
+                    useValue: { paramMap: of(convertToParamMap({ id: "99" })) },
+                },
+                { provide: InventoryService, useValue: { getInventory } },
+                {
+                    provide: AuthService,
+                    useValue: { isAdmin: signal(true), isOwner: signal(false), user: signal({}) },
+                },
+            ],
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(InventoryPage);
+        await fixture.whenStable();
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.textContent).toContain("Impossible de charger cet inventaire");
     });
 });

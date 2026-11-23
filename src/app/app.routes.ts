@@ -224,21 +224,25 @@ export const routes: Routes = [
             {
                 path: "inventories",
                 title: "Inventaires",
-                canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/inventories/inventories").then((m) => m.Inventories),
             },
             {
                 path: "inventories/new",
-                title: "Nouvel inventaire",
-                canActivate: [adminGuard],
+                title: "Nouveau comptage",
                 loadComponent: () =>
                     import("./features/inventories/new-inventory").then((m) => m.NewInventory),
             },
             {
+                path: "inventories/:id/count",
+                title: "Comptage",
+                canDeactivate: [unsavedChangesGuard],
+                loadComponent: () =>
+                    import("./features/inventories/inventory-count").then((m) => m.InventoryCount),
+            },
+            {
                 path: "inventories/:id",
                 title: "Inventaire",
-                canActivate: [adminGuard],
                 loadComponent: () =>
                     import("./features/inventories/inventory-page").then((m) => m.InventoryPage),
             },

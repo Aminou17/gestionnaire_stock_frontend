@@ -1,29 +1,89 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
-import { map } from "rxjs";
 
 import { API_URL } from "../api.config";
 import { ExportFormat } from "../export-format";
-import { Inventory, InventoryDetail, NewInventoryItem } from "./inventory.model";
+import {
+    ApplyResult,
+    CloseResult,
+    CountLine,
+    Inventory,
+    InventoryDetail,
+    InventoryFilters,
+    InventoryList,
+    ItemQuery,
+    MovementsSince,
+    NewInventory,
+} from "./inventory.model";
 
 @Injectable({ providedIn: "root" })
 export class InventoryService {
     private http = inject(HttpClient);
 
-    getInventories() {
-        // difference_value est un BIGINT : PostgreSQL le renvoie en texte
-        return this.http.get<Inventory[]>(`${API_URL}/inventories`).pipe(
-            map((inventories) =>
-                inventories.map((inventory) => ({
-                    ...inventory,
-                    difference_value: Number(inventory.difference_value),
-                })),
-            ),
+    getInventories(filters: InventoryFilters) {
+        const params: Record<string, string | number> = {
+            page: filters.page,
+            limit: filters.limit,
+        };
+
+        if (filters.statuses.length > 0) params["status"] = filters.statuses.join(",");
+        if (filters.search) params["search"] = filters.search;
+
+        return this.http.get<InventoryList>(`${API_URL}/inventories`, { params });
+    }
+
+    // l'inventaire et une page de ses lignes
+    getInventory(id: number, query: ItemQuery) {
+        const params: Record<string, string | number> = {
+            filter: query.filter,
+            page: query.page,
+            limit: query.limit,
+        };
+
+        if (query.search) params["search"] = query.search;
+
+        return this.http.get<InventoryDetail>(`${API_URL}/inventories/${id}`, { params });
+    }
+
+    // 201 à l'ouverture, 200 si la clientKey est déjà connue ; 409 si un comptage est déjà en cours
+    start(body: NewInventory) {
+        return this.http.post<Inventory>(`${API_URL}/inventories`, body);
+    }
+
+    saveItems(id: number, items: CountLine[]) {
+        return this.http.put<{ saved: number; inventory: Inventory }>(
+            `${API_URL}/inventories/${id}/items`,
+            { items },
         );
     }
 
+    // remet un produit à « non compté »
+    uncount(id: number, productId: number) {
+        return this.http.delete<{ inventory: Inventory }>(
+            `${API_URL}/inventories/${id}/items/${productId}`,
+        );
+    }
+
+    close(id: number, countMissingAsZero: boolean) {
+        return this.http.post<CloseResult>(`${API_URL}/inventories/${id}/close`, {
+            countMissingAsZero,
+        });
+    }
+
+    apply(id: number) {
+        return this.http.post<ApplyResult>(`${API_URL}/inventories/${id}/apply`, {});
+    }
+
+    cancel(id: number) {
+        return this.http.post<{ inventory: Inventory }>(`${API_URL}/inventories/${id}/cancel`, {});
+    }
+
+    getMovementsSince(id: number) {
+        return this.http.get<MovementsSince>(`${API_URL}/inventories/${id}/movements-since`);
+    }
+
     // fichier de la liste des inventaires
-    exportFile(format: ExportFormat) {
+    exportList(format: ExportFormat) {
         return this.http.get(`${API_URL}/inventories/export`, {
             params: { format },
             responseType: "blob",
@@ -36,30 +96,5 @@ export class InventoryService {
             params: { format },
             responseType: "blob",
         });
-    }
-
-    createInventory(items: NewInventoryItem[]) {
-        return this.http.post<{ id: number }>(`${API_URL}/inventories`, { items });
-    }
-
-    applyInventory(id: number) {
-        return this.http.post<{ id: number; applied_at: string; adjustments: number }>(
-            `${API_URL}/inventories/${id}/apply`,
-            {},
-        );
-    }
-
-    getInventory(id: number) {
-        // PostgreSQL renvoie les prix en texte ("2500.00")
-        return this.http.get<InventoryDetail>(`${API_URL}/inventories/${id}`).pipe(
-            map((inventory) => ({
-                ...inventory,
-                difference_value: Number(inventory.difference_value),
-                items: inventory.items.map((item) => ({
-                    ...item,
-                    purchase_price: Number(item.purchase_price),
-                })),
-            })),
-        );
     }
 }

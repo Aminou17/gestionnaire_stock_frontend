@@ -97,8 +97,20 @@ describe("audit sentence", () => {
             log({ action: "INVENTORY_APPLIED", details: { adjustments: [{}, {}] } }),
         );
 
-        expect(sentence.verb).toBe("a appliqué un inventaire au stock");
+        expect(sentence.verb).toBe("a corrigé le stock d'après un inventaire");
         expect(sentence.note).toBe("2 produits corrigés");
+    });
+
+    it("should describe the steps of a counting", () => {
+        expect(getAuditSentence(log({ action: "INVENTORY_STARTED" })).verb).toBe(
+            "a commencé un comptage de stock",
+        );
+        expect(getAuditSentence(log({ action: "INVENTORY_COUNTED" })).verb).toBe(
+            "a terminé un comptage de stock",
+        );
+        expect(getAuditSentence(log({ action: "INVENTORY_CANCELLED" })).verb).toBe(
+            "a annulé un inventaire",
+        );
     });
 
     it("should tell an imported batch of products", () => {

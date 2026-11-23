@@ -1,155 +1,142 @@
 import { HttpErrorResponse } from "@angular/common/http";
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Router, provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
-import { NewInventory } from "./new-inventory";
+import { AuthService } from "../../core/auth/auth.service";
 import { CategoryService } from "../../core/stock/category.service";
 import { InventoryService } from "../../core/stock/inventory.service";
-import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
-import { ProductService } from "../../core/stock/product.service";
+import { NewInventory } from "./new-inventory";
 
-const products = [
-    { id: 3, name: "Riz parfumé 1 kg", category_name: "Épicerie", theoretical_stock: 28 },
-    {
-        id: 13,
-        name: "Bazin riche Getzner qualité 1 (5 m)",
-        category_name: "Bazin",
-        theoretical_stock: 14,
-    },
-];
+const openInventory = {
+    id: 5,
+    name: "Fin de mois",
+    startedAt: "2026-11-20T10:00:00Z",
+    countedCount: 3,
+    itemsCount: 20,
+};
 
 describe("NewInventory", () => {
     let fixture: ComponentFixture<NewInventory>;
-    let component: NewInventory;
     let el: HTMLElement;
-    const createInventory = vi.fn();
+    let router: Router;
+    let start: ReturnType<typeof vi.fn>;
 
-    async function render() {
+    async function render(open: unknown[] = [], startResult = of({ id: 9 })) {
+        start = vi.fn(() => startResult);
+
         await TestBed.configureTestingModule({
             imports: [NewInventory],
             providers: [
                 provideRouter([]),
-                { provide: InventoryService, useValue: { createInventory } },
                 {
-                    provide: ProductService,
-                    useValue: { getProducts: () => of({ data: products, total: 2 }) },
+                    provide: InventoryService,
+                    useValue: {
+                        start,
+                        getInventories: () => of({ data: open, pagination: {} }),
+                    },
                 },
                 {
                     provide: CategoryService,
                     useValue: {
-                        getCategories: () => of([{ id: 1, name: "Bazin", is_active: true }]),
+                        getCategories: () =>
+                            of([
+                                { id: 3, name: "Boissons", is_active: true },
+                                { id: 4, name: "Vieux", is_active: false },
+                            ]),
                     },
                 },
-                { provide: LowStockAlertService, useValue: { count: () => 0 } },
+                {
+                    provide: AuthService,
+                    useValue: { isAdmin: signal(false), isOwner: signal(false), user: signal({}) },
+                },
             ],
         }).compileComponents();
 
+        router = TestBed.inject(Router);
+        vi.spyOn(router, "navigate").mockResolvedValue(true);
         fixture = TestBed.createComponent(NewInventory);
-        component = fixture.componentInstance;
         el = fixture.nativeElement;
         await fixture.whenStable();
     }
 
-    beforeEach(() => createInventory.mockReset());
-
-    it("should not show the theoretical stock while counting", async () => {
+    it("should open the counting with one gesture and go to the counting screen", async () => {
         await render();
 
-        expect(el.textContent).toContain("Riz parfumé 1 kg");
-        expect(el.textContent).not.toContain("28");
+        el.querySelector<HTMLButtonElement>(".btn-primary")!.click();
+
+        expect(start).toHaveBeenCalledTimes(1);
+        // ni nom ni catégorie : seulement la clé qui évite un doublon
+        expect(start.mock.calls[0][0]).toEqual({ clientKey: expect.any(String) });
+        expect(router.navigate).toHaveBeenCalledWith(["/inventories", 9, "count"], {
+            replaceUrl: true,
+        });
     });
 
-    it("should start a product at zero with the plus button", async () => {
+    it("should keep the name and the category folded until asked", async () => {
         await render();
 
-        component.step(3, 1);
-        component.step(13, -1);
+        expect(el.querySelector("input[type=text]")).toBeNull();
 
-        expect(component.counts()).toEqual({ 3: 1, 13: 0 });
-        expect(component.countedTotal()).toBe(2);
-    });
-
-    it("should uncount a product when its field is emptied", async () => {
-        await render();
-
-        component.setCount(3, "26");
-        component.setCount(3, "");
-
-        expect(component.counts()).toEqual({});
-    });
-
-    it("should keep a typed count between 0 and 1 000 000", async () => {
-        await render();
-
-        component.setCount(3, "-4");
-        component.setCount(13, "5000000");
-
-        expect(component.counts()).toEqual({ 3: 0, 13: 1000000 });
-    });
-
-    it("should fill the gauge with the counted products", async () => {
-        await render();
-
-        component.setCount(3, "26");
+        el.querySelector<HTMLButtonElement>(".options-toggle")!.click();
         fixture.detectChanges();
 
-        expect(component.countedInList()).toBe(1);
-        expect(component.progressPercent()).toBe(50);
-        expect(el.querySelector(".progress-text")?.textContent).toContain("1 / 2");
+        expect(el.querySelector("input[type=text]")).not.toBeNull();
+        // une catégorie désactivée ne se compte pas
+        expect(el.querySelectorAll("select option").length).toBe(2);
     });
 
-    it("should show the product photo or its initials", async () => {
+    it("should send the name and the category when they are filled", async () => {
         await render();
+        fixture.componentInstance.name.set("  Rayon du fond ");
+        fixture.componentInstance.categoryId.set(3);
 
-        expect(el.querySelector(".avatar")?.textContent).toContain("RP");
+        fixture.componentInstance.start();
+
+        expect(start.mock.calls[0][0]).toMatchObject({ name: "Rayon du fond", categoryId: 3 });
     });
 
-    it("should filter the products by name", async () => {
-        await render();
+    it("should propose to resume the counting already in progress", async () => {
+        await render([openInventory]);
 
-        component.search.set("bazin");
-
-        expect(component.visible().map((p) => p.id)).toEqual([13]);
-    });
-
-    it("should send only the counted products then open the inventory", async () => {
-        createInventory.mockReturnValue(of({ id: 11 }));
-        await render();
-        const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
-
-        component.setCount(3, "26");
-        component.save();
-
-        expect(createInventory).toHaveBeenCalledWith([{ productId: 3, actualStock: 26 }]);
-        expect(navigate).toHaveBeenCalledWith(["/inventories", 11], { replaceUrl: true });
-    });
-
-    it("should not send anything when no product is counted", async () => {
-        await render();
-
-        component.save();
-
-        expect(createInventory).not.toHaveBeenCalled();
-    });
-
-    it("should show the message of the server when saving fails", async () => {
-        createInventory.mockReturnValue(
-            throwError(
-                () =>
-                    new HttpErrorResponse({
-                        status: 400,
-                        error: { message: "Un produit désactivé ne peut pas être compté." },
-                    }),
-            ),
+        expect(el.textContent).toContain("Un comptage est déjà en cours");
+        expect(el.textContent).toContain("Fin de mois");
+        expect(el.querySelector("a.btn-primary")?.getAttribute("href")).toBe(
+            "/inventories/5/count",
         );
-        await render();
+        expect(el.querySelector("button.btn-primary")).toBeNull();
+    });
 
-        component.setCount(3, "26");
-        component.save();
+    it("should propose to resume when the server answers that one is in progress", async () => {
+        const conflict = new HttpErrorResponse({
+            status: 409,
+            error: {
+                code: "INVENTORY_IN_PROGRESS",
+                existing: { id: 8, name: "Test", status: "in_progress" },
+            },
+        });
+        await render([], throwError(() => conflict) as never);
+
+        fixture.componentInstance.start();
         fixture.detectChanges();
 
-        expect(el.textContent).toContain("Un produit désactivé ne peut pas être compté.");
-        expect(component.saving()).toBe(false);
+        expect(el.querySelector("a.btn-primary")?.getAttribute("href")).toBe(
+            "/inventories/8/count",
+        );
+        expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it("should show the message of any other refusal", async () => {
+        const refusal = new HttpErrorResponse({
+            status: 400,
+            error: { message: "Aucun produit à compter." },
+        });
+        await render([], throwError(() => refusal) as never);
+
+        fixture.componentInstance.start();
+        fixture.detectChanges();
+
+        expect(el.querySelector("[role=alert]")?.textContent).toContain("Aucun produit à compter.");
     });
 });

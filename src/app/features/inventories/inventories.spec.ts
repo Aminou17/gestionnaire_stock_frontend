@@ -1,34 +1,67 @@
+import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
 import { of, throwError } from "rxjs";
 
-import { Inventories } from "./inventories";
-import { Inventory } from "../../core/stock/inventory.model";
+import { AuthService } from "../../core/auth/auth.service";
+import { Inventory, InventoryList } from "../../core/stock/inventory.model";
 import { InventoryService } from "../../core/stock/inventory.service";
-import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
+import { Inventories } from "./inventories";
 
-const inventory: Inventory = {
+const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     id: 10,
-    user_id: 1,
-    user_name: "Awa Bazin",
-    created_at: "2026-11-12T15:00:00",
-    applied_at: null,
-    applied_by_name: null,
-    items_count: 4,
-    difference_value: -27600,
-};
+    name: null,
+    status: "counted",
+    statusLabel: "À valider",
+    scope: { type: "all", categoryId: null, categoryName: null },
+    startedAt: "2026-11-12T15:00:00Z",
+    countedAt: "2026-11-12T16:00:00Z",
+    appliedAt: null,
+    cancelledAt: null,
+    createdBy: { id: 1, name: "Awa Bazin", avatar: null },
+    countedBy: null,
+    appliedBy: null,
+    cancelledBy: null,
+    itemsCount: 34,
+    countedCount: 30,
+    uncountedCount: 4,
+    differenceCount: 12,
+    differenceValue: -45000,
+    maxStock: 1000000,
+    ...changes,
+});
+
+const list = (data: Inventory[], total = data.length): InventoryList => ({
+    data,
+    pagination: { page: 1, limit: 20, total, totalPages: Math.ceil(total / 20) },
+});
 
 describe("Inventories", () => {
     let fixture: ComponentFixture<Inventories>;
     let el: HTMLElement;
+    let getInventories: ReturnType<typeof vi.fn>;
+    let exportList: ReturnType<typeof vi.fn>;
 
-    async function render(getInventories: () => unknown, exportFile = vi.fn()) {
+    // la première requête est la liste, la seconde le comptage ouvert
+    async function render(rows: Inventory[], isAdmin = true, open: Inventory[] = []) {
+        getInventories = vi.fn((filters) =>
+            filters.limit === 1 ? of(list(open)) : of(list(rows)),
+        );
+        exportList = vi.fn(() => of(new Blob(["x"])));
+
         await TestBed.configureTestingModule({
             imports: [Inventories],
             providers: [
                 provideRouter([]),
-                { provide: InventoryService, useValue: { getInventories, exportFile } },
-                { provide: LowStockAlertService, useValue: { count: () => 0 } },
+                { provide: InventoryService, useValue: { getInventories, exportList } },
+                {
+                    provide: AuthService,
+                    useValue: {
+                        isAdmin: signal(isAdmin),
+                        isOwner: signal(false),
+                        user: signal({ id: 1, name: "Test" }),
+                    },
+                },
             ],
         }).compileComponents();
 
@@ -37,82 +70,120 @@ describe("Inventories", () => {
         await fixture.whenStable();
     }
 
-    it("should show who did the inventory and the value of the gap", async () => {
-        await render(() => of([inventory]));
+    const text = (node: Element | null = el) => node!.textContent!.replace(/\s+/g, " ");
 
-        expect(el.textContent).toContain("Awa Bazin");
-        // Intl met des espaces insécables dans les milliers
-        expect(el.textContent?.replace(/\s/g, " ")).toContain("−27 600 F");
-        expect(el.querySelector("a.inventory-link")?.getAttribute("href")).toBe("/inventories/10");
-        expect(el.textContent).toContain("Inventaire #10");
+    it("should name an inventory by its date and tell the gap and the loss to the admin", async () => {
+        await render([inventory()]);
+
+        expect(text(el.querySelector(".row"))).toContain("Inventaire du 12 nov.");
+        expect(text(el.querySelector(".row"))).toContain("12 écarts, perte de 45 000 F");
+        expect(el.querySelector(".row")?.getAttribute("href")).toBe("/inventories/10");
     });
 
-    it("should export the list in the chosen format", async () => {
-        const exportFile = vi.fn(() => of(new Blob(["x"])));
+    it("should show the manager only how many products were counted, never money", async () => {
+        await render([inventory({ differenceCount: 12, differenceValue: null })], false);
+
+        expect(text(el.querySelector(".row"))).toContain("30 produits comptés");
+        expect(text(el)).not.toContain(" F");
+        expect(el.querySelector("app-export-menu")).toBeNull();
+    });
+
+    it("should show the status of each inventory in its own colour", async () => {
+        await render([
+            inventory({ id: 4, status: "applied", statusLabel: "Terminé" }),
+            inventory({ id: 3, status: "cancelled", statusLabel: "Annulé" }),
+            inventory({ id: 2 }),
+        ]);
+
+        expect(el.querySelector(".badge-success")?.textContent).toContain("Terminé");
+        expect(el.querySelector(".badge-neutral")?.textContent).toContain("Annulé");
+        expect(el.querySelector(".badge-warning")?.textContent).toContain("À valider");
+    });
+
+    it("should put the counting in progress at the top and take it out of the list", async () => {
+        const open = inventory({
+            id: 12,
+            name: "Fin de mois",
+            status: "in_progress",
+            statusLabel: "En cours",
+            countedCount: 12,
+        });
+        await render([open, inventory()], true, [open]);
+
+        const resume = el.querySelector(".resume");
+        expect(text(resume)).toContain("Fin de mois");
+        expect(text(resume)).toContain("12 sur 34 produits comptés");
+        expect(resume?.querySelector("a")?.getAttribute("href")).toBe("/inventories/12/count");
+        expect(text(resume)).toContain("Reprendre le comptage");
+        expect(el.querySelectorAll(".row").length).toBe(1);
+    });
+
+    it("should filter by status with the chips and go back to the first page", async () => {
+        await render([inventory()]);
+
+        const chips = [...el.querySelectorAll<HTMLButtonElement>(".chips .chip")];
+        expect(chips.map((chip) => chip.textContent!.trim())).toEqual([
+            "Tous",
+            "En cours",
+            "À valider",
+            "Terminés",
+        ]);
+
+        chips[2].click();
+        await fixture.whenStable();
+
+        expect(getInventories).toHaveBeenLastCalledWith(
+            expect.objectContaining({ statuses: ["counted"], page: 1 }),
+        );
+        expect(chips[2].getAttribute("aria-pressed")).toBe("true");
+    });
+
+    it("should show an empty state with the main action when there is nothing", async () => {
+        await render([]);
+
+        expect(text(el)).toContain("Aucun inventaire pour le moment");
+        expect(el.querySelector("app-empty-state a")?.getAttribute("href")).toBe(
+            "/inventories/new",
+        );
+    });
+
+    it("should offer to retry when the list cannot be loaded", async () => {
+        getInventories = vi.fn(() => throwError(() => new Error("500")));
+        await TestBed.configureTestingModule({
+            imports: [Inventories],
+            providers: [
+                provideRouter([]),
+                { provide: InventoryService, useValue: { getInventories } },
+                {
+                    provide: AuthService,
+                    useValue: { isAdmin: signal(true), isOwner: signal(false), user: signal({}) },
+                },
+            ],
+        }).compileComponents();
+        fixture = TestBed.createComponent(Inventories);
+        el = fixture.nativeElement;
+        await fixture.whenStable();
+
+        expect(text(el)).toContain("Impossible de charger les inventaires");
+        expect(el.querySelector("app-load-error button")).not.toBeNull();
+    });
+
+    it("should export in the chosen format and show a closable error when it fails", async () => {
         URL.createObjectURL = vi.fn(() => "blob:test");
         URL.revokeObjectURL = vi.fn();
-        await render(() => of([inventory]), exportFile);
+        await render([inventory()]);
 
         fixture.componentInstance.exportFile("csv");
-
-        expect(exportFile).toHaveBeenCalledWith("csv");
+        expect(exportList).toHaveBeenCalledWith("csv");
         expect(fixture.componentInstance.exporting()).toBe(false);
-        expect(el.querySelector("app-export-menu")).not.toBeNull();
-    });
 
-    it("should show an error when the export fails", async () => {
-        const exportFile = vi.fn(() => throwError(() => new Error("500")));
-        await render(() => of([inventory]), exportFile);
-
+        exportList.mockReturnValue(throwError(() => new Error("500")));
         fixture.componentInstance.exportFile("pdf");
         fixture.detectChanges();
 
         expect(el.querySelector(".alert")?.textContent).toContain("Impossible d'exporter");
-    });
-
-    it("should tell which inventories already corrected the stock", async () => {
-        await render(() =>
-            of([inventory, { ...inventory, id: 9, applied_at: "2026-11-12T16:00:00" }]),
-        );
-
-        expect(el.querySelectorAll("tbody .badge-success").length).toBe(1);
-        expect(el.querySelector("tbody .badge-success")?.textContent).toContain("Appliqué");
-        expect(el.querySelectorAll("tbody .badge-warning").length).toBe(1);
-        expect(el.querySelector("tbody .badge-warning")?.textContent).toContain("À appliquer");
-    });
-
-    it("should remind the inventories still to apply and open the oldest", async () => {
-        await render(() =>
-            of([
-                inventory,
-                { ...inventory, id: 7, created_at: "2026-11-10T09:00:00" },
-                { ...inventory, id: 9, applied_at: "2026-11-12T16:00:00" },
-            ]),
-        );
-
-        const reminder = el.querySelector(".pending")!;
-        expect(reminder.textContent?.replace(/\s+/g, " ")).toContain(
-            "2 inventaires attendent d'être appliqués",
-        );
-        expect(reminder.querySelector("a")?.getAttribute("href")).toBe("/inventories/7");
-    });
-
-    it("should not remind anything when every inventory is applied", async () => {
-        await render(() => of([{ ...inventory, applied_at: "2026-11-12T16:00:00" }]));
-        expect(el.querySelector(".pending")).toBeNull();
-    });
-
-    it("should say when there is no inventory yet", async () => {
-        await render(() => of([]));
-
-        expect(el.textContent).toContain("Aucun inventaire pour le moment");
-        expect(el.textContent).toContain("Nouvel inventaire");
-    });
-
-    it("should offer to retry when the loading fails", async () => {
-        await render(() => throwError(() => new Error("boom")));
-
-        expect(el.textContent).toContain("Impossible de charger les inventaires.");
-        expect(el.textContent).toContain("Réessayer");
+        el.querySelector<HTMLButtonElement>(".alert-close")!.click();
+        fixture.detectChanges();
+        expect(el.querySelector(".alert")).toBeNull();
     });
 });

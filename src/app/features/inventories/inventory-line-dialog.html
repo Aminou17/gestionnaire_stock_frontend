@@ -1,0 +1,49 @@
+<dialog #box aria-labelledby="line-title" (click)="onBackdrop($event)">
+    @if (line(); as line) {
+        <form (submit)="$event.preventDefault(); save()">
+            <h2 id="line-title">{{ line.productName }}</h2>
+
+            <label class="field">
+                <span>Quantité comptée</span>
+                <input
+                    class="input count"
+                    type="text"
+                    inputmode="numeric"
+                    pattern="[0-9]*"
+                    autocomplete="off"
+                    placeholder="?"
+                    [value]="value()"
+                    (input)="onInput($event)"
+                />
+            </label>
+
+            @if (error()) {
+                <p class="alert alert-error" role="alert">{{ error() }}</p>
+            }
+
+            <div class="actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [disabled]="saving()"
+                    (click)="close()"
+                >
+                    Annuler
+                </button>
+                <button
+                    type="submit"
+                    class="btn btn-primary"
+                    [disabled]="saving() || value() === ''"
+                >
+                    Enregistrer
+                </button>
+            </div>
+
+            @if (line.counted) {
+                <button type="button" class="uncount" [disabled]="saving()" (click)="uncount()">
+                    Remettre à non compté
+                </button>
+            }
+        </form>
+    }
+</dialog>

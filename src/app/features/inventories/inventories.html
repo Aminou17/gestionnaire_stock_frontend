@@ -1,170 +1,151 @@
 <app-page-header title="Inventaires" section="Avancé">
-    <app-export-menu
-        class="icon-phone"
-        ariaLabel="Exporter les inventaires"
-        [busy]="exporting()"
-        [disabled]="!inventories.hasValue() || inventories.value().length === 0"
-        (picked)="exportFile($event)"
-    />
-    <a routerLink="/inventories/new" class="btn btn-primary new-inventory">
+    <a routerLink="/inventories/new" class="btn btn-primary new-count">
         <app-icon name="plus" [size]="18" />
-        <span class="long">Nouvel inventaire</span><span class="short">Nouveau</span>
+        <span>Nouveau comptage</span>
     </a>
 </app-page-header>
 
 @if (exportError()) {
-    <div class="alert alert-error" role="alert">Impossible d'exporter les inventaires.</div>
-}
-
-@if (pending(); as pending) {
-    <div class="alert alert-warning pending" role="status">
-        <app-icon name="clipboard" [size]="18" />
-        <span>
-            {{ pending.count }}
-            {{ pending.count > 1 ? "inventaires attendent" : "inventaire attend" }} d'être
-            appliqué{{ pending.count > 1 ? "s" : "" }} : le stock n'est pas encore corrigé.
-        </span>
-        <a class="pending-link" [routerLink]="['/inventories', pending.oldest]">
-            {{ pending.count > 1 ? "Voir le plus ancien" : "Ouvrir" }}
-        </a>
+    <div class="alert alert-error alert-dismissible" role="alert">
+        <span>Impossible d'exporter les inventaires.</span>
+        <button
+            type="button"
+            class="alert-close"
+            aria-label="Fermer le message"
+            (click)="exportError.set(false)"
+        >
+            <app-icon name="close" [size]="16" />
+        </button>
     </div>
 }
 
-@if (inventories.isLoading()) {
-    <div class="card loading" aria-busy="true">
+<!-- le comptage ouvert passe avant tout le reste -->
+@if (showCurrent() && inProgress(); as current) {
+    <section class="resume card tinted" aria-label="Comptage en cours">
+        <span class="tone-icon" aria-hidden="true"><app-icon name="clipboard" [size]="18" /></span>
+
+        <div class="resume-text">
+            <p class="resume-label">Comptage en cours</p>
+            <p class="resume-title">{{ title(current) }}</p>
+            <p class="muted resume-count">
+                {{ current.countedCount }} sur {{ current.itemsCount }} produits comptés
+            </p>
+            <span
+                class="gauge"
+                role="progressbar"
+                aria-label="Produits comptés"
+                aria-valuemin="0"
+                [attr.aria-valuenow]="current.countedCount"
+                [attr.aria-valuemax]="current.itemsCount"
+            >
+                <span
+                    class="gauge-fill"
+                    [style.width.%]="
+                        current.itemsCount ? (current.countedCount / current.itemsCount) * 100 : 0
+                    "
+                ></span>
+            </span>
+        </div>
+
+        <a [routerLink]="['/inventories', current.id, 'count']" class="btn btn-primary">
+            Reprendre le comptage
+        </a>
+    </section>
+}
+
+<section class="toolbar">
+    <div class="search-row">
+        <div class="search">
+            <app-icon name="search" [size]="18" />
+            <input
+                class="input"
+                type="search"
+                placeholder="Chercher un inventaire…"
+                aria-label="Rechercher un inventaire"
+                (input)="onSearch($any($event.target).value)"
+            />
+        </div>
+
+        @if (auth.isAdmin()) {
+            <!-- télécharger la liste : une icône, le format se choisit ensuite -->
+            <app-export-menu
+                class="icon-only"
+                ariaLabel="Télécharger la liste des inventaires"
+                title="Télécharger"
+                [busy]="exporting()"
+                [disabled]="total() === 0"
+                (picked)="exportFile($event)"
+            />
+        }
+    </div>
+
+    <div class="chips" role="group" aria-label="Filtrer par statut">
+        @for (item of filters; track item.label) {
+            <button
+                type="button"
+                class="chip"
+                [attr.aria-pressed]="filter() === item"
+                (click)="selectFilter(item)"
+            >
+                {{ item.label }}
+            </button>
+        }
+    </div>
+</section>
+
+@if (firstLoad()) {
+    <div class="loading" aria-busy="true">
         @for (i of [1, 2, 3, 4]; track i) {
             <div class="skeleton row-skeleton"></div>
         }
     </div>
 } @else if (!inventories.hasValue()) {
-    <section class="card empty">
-        <p>Impossible de charger les inventaires.</p>
-        <button type="button" class="btn btn-outline btn-sm" (click)="inventories.reload()">
-            Réessayer
-        </button>
-    </section>
-} @else if (inventories.value().length === 0) {
+    <app-load-error message="Impossible de charger les inventaires." (retry)="reload()" />
+} @else if (rows().length === 0 && !showCurrent()) {
     <section class="card">
-        <app-empty-state
-            icon="clipboard"
-            title="Aucun inventaire pour le moment"
-            text="Comptez le stock du rayon : les écarts avec le stock du logiciel apparaîtront ici."
-        >
-            <a routerLink="/inventories/new" class="btn btn-primary"> Nouvel inventaire </a>
-        </app-empty-state>
+        @if (query() || filter().statuses.length > 0) {
+            <app-empty-state
+                icon="search"
+                title="Aucun inventaire trouvé"
+                text="Essayez un autre mot ou un autre statut."
+            />
+        } @else {
+            <app-empty-state
+                icon="clipboard"
+                title="Aucun inventaire pour le moment"
+                text="Comptez ce que vous avez en rayon : les écarts avec le stock du logiciel apparaîtront ici."
+            >
+                <a routerLink="/inventories/new" class="btn btn-primary">Nouveau comptage</a>
+            </app-empty-state>
+        }
     </section>
 } @else {
-    <section class="card list-card table-card">
-        <div class="table-wrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Inventaire</th>
-                        <th>Fait par</th>
-                        <th class="num">Produits</th>
-                        <th class="num">Valeur de l'écart</th>
-                        <th>Statut</th>
-                        <th class="chevron-col"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (inventory of paging.visible(); track inventory.id) {
-                        <tr (click)="openInventory(inventory)">
-                            <td>
-                                <a
-                                    [routerLink]="['/inventories', inventory.id]"
-                                    class="inventory-link"
-                                    (click)="$event.stopPropagation()"
-                                    >Inventaire #{{ inventory.id }}</a
-                                >
-                                <span class="muted date">{{
-                                    inventory.created_at | date: "d MMM y, HH:mm"
-                                }}</span>
-                            </td>
-                            <td>{{ inventory.user_name ?? "—" }}</td>
-                            <td class="num">{{ inventory.items_count }}</td>
-                            <td
-                                class="num strong"
-                                [class.in]="inventory.difference_value > 0"
-                                [class.out]="inventory.difference_value < 0"
-                            >
-                                {{ inventory.difference_value | fcfa: true }}
-                            </td>
-                            <td>
-                                @if (inventory.applied_at) {
-                                    <span class="badge badge-success">Appliqué</span>
-                                } @else {
-                                    <span class="badge badge-warning">À appliquer</span>
-                                }
-                            </td>
-                            <td class="chevron-col">
-                                <app-icon name="chevron-right" [size]="16" />
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-
-        <app-pagination
-            [total]="paging.total()"
-            [(page)]="paging.page"
-            [(pageSize)]="paging.pageSize"
-            [attached]="true"
-        />
-    </section>
-
-    <!-- version téléphone : une carte par inventaire -->
-    <ul class="cards">
-        @for (inventory of paging.visible(); track inventory.id) {
+    <ul class="rows" [class.reloading]="inventories.isLoading()">
+        @for (inventory of rows(); track inventory.id) {
             <li>
-                <a
-                    class="inventory-card"
-                    [routerLink]="['/inventories', inventory.id]"
-                    [attr.aria-label]="'Ouvrir l\'inventaire ' + inventory.id"
-                >
-                    <span class="tile" [class.done]="inventory.applied_at" aria-hidden="true">
-                        <app-icon
-                            [name]="inventory.applied_at ? 'check' : 'clipboard'"
-                            [size]="20"
-                        />
+                <a class="row" [routerLink]="['/inventories', inventory.id]">
+                    <span
+                        class="tone-icon tile"
+                        [attr.data-tone]="tone(inventory)"
+                        aria-hidden="true"
+                    >
+                        <app-icon [name]="icon(inventory)" [size]="20" />
                     </span>
 
                     <span class="info">
-                        <span class="title">Inventaire #{{ inventory.id }}</span>
-                        <span class="muted meta">{{
-                            inventory.created_at | date: "d MMM y, HH:mm"
-                        }}</span>
-                        <span class="badges">
-                            @if (inventory.applied_at) {
-                                <span class="badge badge-success">Appliqué</span>
-                            } @else {
-                                <span class="badge badge-warning">À appliquer</span>
-                            }
-                            <span class="muted meta"
-                                >{{ inventory.items_count }} produit{{
-                                    inventory.items_count > 1 ? "s" : ""
-                                }}</span
-                            >
+                        <span class="title">{{ title(inventory) }}</span>
+                        <span class="result">{{ result(inventory) }}</span>
+                        <span class="meta">
+                            <app-inventory-status [inventory]="inventory" />
+                            <span class="muted details">{{ details(inventory) }}</span>
                         </span>
                     </span>
 
-                    <span
-                        class="gap"
-                        [class.in]="inventory.difference_value > 0"
-                        [class.out]="inventory.difference_value < 0"
-                        >{{ inventory.difference_value | fcfa: true }}</span
-                    >
                     <app-icon class="chevron" name="chevron-right" [size]="18" />
                 </a>
             </li>
         }
     </ul>
 
-    <app-pagination
-        class="cards-pager"
-        [total]="paging.total()"
-        [(page)]="paging.page"
-        [(pageSize)]="paging.pageSize"
-    />
+    <app-pagination [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
 }

@@ -1,0 +1,32 @@
+.since {
+    display: grid;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--neutral-soft);
+}
+
+.since p {
+    margin: 0;
+    font-size: var(--fs-small);
+}
+
+.since-title {
+    font-weight: var(--fw-semibold);
+}
+
+.since ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding-left: 20px;
+    font-size: var(--fs-body);
+}
+
+.sk-line {
+    height: 40px;
+}
+
+.alert {
+    margin: 0;
+}

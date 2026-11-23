@@ -8,6 +8,7 @@ import { NewSaleItem, NewSalePayment } from "../sales/sale.model";
 import { ToastService } from "../../shared/toast/toast.service";
 import { dbAll, dbDelete, dbSet } from "./local-db";
 import { NetworkService } from "./network.service";
+import { newRef } from "./new-ref";
 import { OfflineCatalogService } from "./offline-catalog.service";
 
 // waiting : en attente du réseau ; error : refusée, à vérifier
@@ -32,14 +33,6 @@ export interface PendingSale {
 }
 
 const RETRY_MS = 30_000;
-
-// identifiant unique créé par l'appareil : le serveur s'en sert pour ne jamais créer deux fois la même vente
-const newRef = () =>
-    typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : "10000000-1000-4000-8000-100000000000".replace(/[018]/g, (c) =>
-              (Number(c) ^ ((Math.random() * 16) >> (Number(c) / 4))).toString(16),
-          );
 
 // Ventes faites sans internet, gardées sur l'appareil et envoyées une par une dès que le serveur répond
 @Injectable({ providedIn: "root" })

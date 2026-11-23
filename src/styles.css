@@ -390,6 +390,36 @@ a {
     border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
 }
 
+/* message avec une croix pour le fermer (erreur d'export, rapport) */
+.alert-dismissible {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.alert-dismissible > span {
+    flex: 1;
+    padding-top: 6px;
+}
+
+.alert-close {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin: -6px -8px -6px 0;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.alert-close:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+}
+
 .btn {
     height: 44px;
     padding: 0 18px;
@@ -406,6 +436,11 @@ a {
     transition:
         background 0.15s,
         border-color 0.15s;
+}
+
+.btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .btn:disabled {
@@ -559,6 +594,24 @@ a {
     to {
         background-position: -200% 0;
     }
+}
+
+/* jauge fine, progression d'un comptage */
+.gauge {
+    display: block;
+    height: 6px;
+    margin-top: 8px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+}
+
+.gauge-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary);
+    transition: width 0.3s ease;
 }
 
 .empty {

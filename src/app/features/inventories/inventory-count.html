@@ -1,0 +1,343 @@
+<app-page-header
+    [title]="screen() === 'review' ? 'Terminer le comptage' : 'Comptage'"
+    section="Avancé"
+    [back]="'/inventories/' + id()"
+    backLabel="Retour à l'inventaire"
+/>
+
+@if (first.error() && !inventory()) {
+    <section class="card">
+        <app-load-error message="Impossible de charger le comptage." (retry)="first.reload()" />
+    </section>
+} @else if (screen() === "review") {
+    <!-- vérification : le résultat est visible avant de valider -->
+    <section class="card review">
+        <span class="tone-icon big" aria-hidden="true"><app-icon name="check" [size]="26" /></span>
+
+        <p class="review-count">
+            <strong>{{ counted() }}</strong> produit{{ counted() > 1 ? "s" : "" }} compté{{
+                counted() > 1 ? "s" : ""
+            }}
+            sur {{ total() }}
+        </p>
+
+        @if (remaining() > 0) {
+            <div class="missing">
+                <p class="missing-title">
+                    Il reste {{ remaining() }} produit{{ remaining() > 1 ? "s" : "" }} non compté{{
+                        remaining() > 1 ? "s" : ""
+                    }}
+                </p>
+                @if (previewNames().length > 0) {
+                    <p class="muted missing-names">
+                        {{ previewNames().join(", ") }}
+                        @if (remaining() > previewNames().length) {
+                            <span>
+                                et {{ remaining() - previewNames().length }} autre{{
+                                    remaining() - previewNames().length > 1 ? "s" : ""
+                                }}</span
+                            >
+                        }
+                    </p>
+                }
+
+                <div class="choices" role="radiogroup" aria-label="Produits non comptés">
+                    <label class="choice" [class.selected]="!countZero()">
+                        <input
+                            type="radio"
+                            name="missing"
+                            [checked]="!countZero()"
+                            (change)="countZero.set(false)"
+                        />
+                        <span>
+                            <strong>Les ignorer</strong>
+                            <small>Leur stock ne change pas.</small>
+                        </span>
+                    </label>
+
+                    <label class="choice" [class.selected]="countZero()">
+                        <input
+                            type="radio"
+                            name="missing"
+                            [checked]="countZero()"
+                            (change)="countZero.set(true)"
+                        />
+                        <span>
+                            <strong>Les compter à 0</strong>
+                            <small>Ils sont considérés en rupture.</small>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        } @else {
+            <p class="muted">Tous les produits sont comptés.</p>
+        }
+
+        @if (closeError()) {
+            <p class="alert alert-error" role="alert">{{ closeError() }}</p>
+        }
+
+        <div class="review-actions">
+            <button type="button" class="btn btn-primary" [disabled]="closing()" (click)="close()">
+                @if (closing()) {
+                    <span class="spinner"></span>
+                }
+                Terminer le comptage
+            </button>
+            <button type="button" class="btn btn-outline" (click)="backToCount()">
+                Retour au comptage
+            </button>
+        </div>
+    </section>
+} @else {
+    <section class="card progress">
+        <p class="progress-text">
+            <strong>{{ counted() }}</strong> sur {{ total() }} comptés
+        </p>
+
+        <span
+            class="gauge"
+            role="progressbar"
+            aria-label="Produits comptés"
+            aria-valuemin="0"
+            [attr.aria-valuenow]="counted()"
+            [attr.aria-valuemax]="total()"
+        >
+            <span class="gauge-fill" [style.width.%]="percent()"></span>
+        </span>
+    </section>
+
+    @if (sync.state() === "error") {
+        <div class="alert alert-error" role="alert">
+            {{ sync.error() }}
+            <button type="button" class="btn btn-outline btn-sm" (click)="sync.flush()">
+                Réessayer
+            </button>
+        </div>
+    }
+
+    <div class="search has-scan">
+        <app-icon name="search" [size]="18" />
+        <input
+            class="input"
+            type="search"
+            placeholder="Chercher ou scanner…"
+            aria-label="Rechercher un produit"
+            [value]="initialQuery"
+            (input)="onSearch($any($event.target).value)"
+        />
+        <app-scan-button (scanned)="onScan($event)" />
+    </div>
+
+    <div class="tabs" role="tablist">
+        <button
+            type="button"
+            role="tab"
+            class="tab"
+            [class.selected]="tab() === 'uncounted'"
+            [attr.aria-selected]="tab() === 'uncounted'"
+            (click)="selectTab('uncounted')"
+        >
+            À compter <span>{{ remaining() }}</span>
+        </button>
+        <button
+            type="button"
+            role="tab"
+            class="tab"
+            [class.selected]="tab() === 'counted'"
+            [attr.aria-selected]="tab() === 'counted'"
+            (click)="selectTab('counted')"
+        >
+            Comptés <span>{{ counted() }}</span>
+        </button>
+    </div>
+
+    @if (scanned(); as line) {
+        <section #scannedBox class="scanned" aria-label="Dernier produit scanné">
+            <p class="scanned-head">
+                <span><app-icon name="scan" [size]="14" /> Dernier scan</span>
+                <button
+                    type="button"
+                    class="scanned-close"
+                    aria-label="Fermer"
+                    (click)="dismissScan()"
+                >
+                    <app-icon name="close" [size]="16" />
+                </button>
+            </p>
+            <ng-container *ngTemplateOutlet="row; context: { $implicit: line }" />
+        </section>
+    }
+
+    @if (first.isLoading() && visibleLines().length === 0) {
+        <div class="loading" aria-busy="true">
+            @for (i of [1, 2, 3, 4]; track i) {
+                <div class="skeleton line-skeleton"></div>
+            }
+        </div>
+    } @else if (first.error()) {
+        <app-load-error message="Impossible de charger les produits." (retry)="first.reload()" />
+    } @else if (visibleLines().length === 0) {
+        <section class="card">
+            @if (query()) {
+                <app-empty-state
+                    icon="search"
+                    title="Aucun produit trouvé"
+                    text="Essayez un autre nom ou scannez le code-barres."
+                />
+            } @else if (tab() === "uncounted") {
+                <app-empty-state
+                    icon="check"
+                    title="Tout est compté"
+                    text="Vous pouvez terminer le comptage."
+                />
+            } @else {
+                <app-empty-state
+                    icon="clipboard"
+                    title="Rien n'est compté pour le moment"
+                    text="Saisissez la quantité de chaque produit dans l'onglet À compter."
+                />
+            }
+        </section>
+    } @else {
+        <ul class="lines" [class.reloading]="first.isLoading()">
+            @for (line of visibleLines(); track line.productId) {
+                <li>
+                    <ng-container *ngTemplateOutlet="row; context: { $implicit: line }" />
+                </li>
+            }
+        </ul>
+
+        @if (hasMore()) {
+            <button
+                type="button"
+                class="btn btn-outline btn-block"
+                [disabled]="loadingMore()"
+                (click)="loadMore()"
+            >
+                {{ loadingMore() ? "Chargement…" : "Charger plus" }}
+            </button>
+            @if (moreError()) {
+                <p class="field-error" role="alert">Impossible de charger la suite. Réessayez.</p>
+            }
+        }
+    }
+
+    <div class="bar">
+        <p class="save" [attr.data-state]="sync.state()" role="status" aria-live="polite">
+            @switch (sync.state()) {
+                @case ("saved") {
+                    <app-icon name="check" [size]="14" />
+                }
+                @case ("saving") {
+                    <span class="dot"></span>
+                }
+                @case ("offline") {
+                    <app-icon name="clock" [size]="14" />
+                }
+                @case ("error") {
+                    <app-icon name="alert" [size]="14" />
+                }
+            }
+            {{ saveLabel() }}
+        </p>
+
+        @if (closeError()) {
+            <p class="field-error" role="alert">{{ closeError() }}</p>
+        }
+        <button
+            type="button"
+            class="btn btn-primary btn-block"
+            [disabled]="counted() === 0"
+            (click)="review()"
+        >
+            Terminer le comptage
+        </button>
+    </div>
+}
+
+<!-- une ligne de produit : photo, nom, puis la saisie -->
+<ng-template #row let-line>
+    <div class="line" [class.counted]="isCounted(line)" [class.flash]="flash() === line.productId">
+        <div class="line-head">
+            <app-inventory-thumb
+                [name]="line.productName"
+                [image]="line.image"
+                (zoomed)="zoom.set({ src: line.image, name: line.productName })"
+            />
+            <span class="name">{{ line.productName }}</span>
+            @if (isCounted(line)) {
+                <span class="done" role="img" aria-label="Compté"
+                    ><app-icon name="check" [size]="16"
+                /></span>
+            }
+        </div>
+
+        <div
+            class="controls"
+            role="group"
+            [attr.aria-label]="'Quantité comptée de ' + line.productName"
+        >
+            <button
+                type="button"
+                class="step"
+                aria-label="Retirer 1"
+                [disabled]="!(value(line) ?? 0)"
+                (click)="stepBy(line, -1)"
+            >
+                <app-icon name="minus" [size]="20" />
+            </button>
+
+            <input
+                #countInput
+                class="count"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                autocomplete="off"
+                placeholder="?"
+                [attr.aria-label]="'Stock compté de ' + line.productName"
+                [value]="value(line) ?? ''"
+                (focus)="selectAll($event)"
+                (input)="onInput(line, $event)"
+                (keydown.enter)="focusNext($event)"
+            />
+
+            <button type="button" class="step" aria-label="Ajouter 1" (click)="stepBy(line, 1)">
+                <app-icon name="plus" [size]="20" />
+            </button>
+
+            <button
+                type="button"
+                class="zero"
+                aria-label="Mettre à 0, produit en rupture"
+                [attr.aria-pressed]="value(line) === 0"
+                (click)="setCount(line, 0)"
+            >
+                0
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+@if (zoom(); as photo) {
+    <app-photo-zoom [src]="photo.src" [name]="photo.name" (closed)="zoom.set(null)" />
+}
+
+<dialog #leave aria-labelledby="leave-title" (cancel)="answerLeave(false)">
+    <form (submit)="$event.preventDefault(); answerLeave(true)">
+        <h2 id="leave-title">Quitter le comptage ?</h2>
+        <p class="muted">
+            {{ sync.pendingCount() }} saisie{{ sync.pendingCount() > 1 ? "s" : "" }} pas encore
+            envoyée{{ sync.pendingCount() > 1 ? "s" : "" }}. Elles restent sur cet appareil et
+            partiront dès que la connexion revient, si vous rouvrez ce comptage.
+        </p>
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" (click)="answerLeave(false)">
+                Rester sur la page
+            </button>
+            <button type="submit" class="btn btn-primary">Quitter</button>
+        </div>
+    </form>
+</dialog>

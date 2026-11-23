@@ -1,0 +1,23 @@
+<dialog #box aria-labelledby="cancel-title" (click)="onBackdrop($event)">
+    <form (submit)="$event.preventDefault(); confirm()">
+        <h2 id="cancel-title">Annuler cet inventaire ?</h2>
+
+        <p>Le stock ne sera pas modifié. Le comptage reste dans l'historique, marqué « Annulé ».</p>
+
+        @if (error()) {
+            <p class="alert alert-error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="busy()" (click)="close()">
+                Garder l'inventaire
+            </button>
+            <button type="submit" class="btn btn-danger" [disabled]="busy()">
+                @if (busy()) {
+                    <span class="spinner"></span>
+                }
+                Annuler l'inventaire
+            </button>
+        </div>
+    </form>
+</dialog>

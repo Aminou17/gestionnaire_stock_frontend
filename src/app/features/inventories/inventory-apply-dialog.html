@@ -1,0 +1,52 @@
+<dialog #box aria-labelledby="apply-title" (click)="onBackdrop($event)" (cancel)="onCancel($event)">
+    <form (submit)="$event.preventDefault(); confirm()">
+        <h2 id="apply-title">Corriger le stock ?</h2>
+
+        <p>
+            @if (inventory().differenceCount) {
+                Le stock de {{ inventory().differenceCount }} produit{{
+                    inventory().differenceCount! > 1 ? "s" : ""
+                }}
+                sera corrigé d'après ce comptage.
+            } @else {
+                Aucun produit n'est en écart : le stock ne changera pas.
+            }
+        </p>
+
+        <div class="since" aria-live="polite">
+            @if (movements(); as since) {
+                @if (movementLines().length > 0) {
+                    <p class="since-title">Depuis le comptage, le stock a bougé :</p>
+                    <ul>
+                        @for (line of movementLines(); track line) {
+                            <li>{{ line }}</li>
+                        }
+                    </ul>
+                    <p class="muted">Ils sont pris en compte : le stock final reste juste.</p>
+                } @else {
+                    <p class="muted">Aucune vente ni entrée depuis le comptage.</p>
+                }
+            } @else if (movementsFailed()) {
+                <p class="muted">Les mouvements depuis le comptage n'ont pas pu être lus.</p>
+            } @else {
+                <div class="skeleton sk-line"></div>
+            }
+        </div>
+
+        @if (error()) {
+            <p class="alert alert-error" role="alert">{{ error() }}</p>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="applying()" (click)="close()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="applying()">
+                @if (applying()) {
+                    <span class="spinner"></span>
+                }
+                Corriger le stock
+            </button>
+        </div>
+    </form>
+</dialog>

@@ -34,7 +34,7 @@
                                 (click)="$event.stopPropagation()"
                                 [routerLink]="['/inventories', movement.reference_id]"
                                 [state]="backState()"
-                                >Inventaire #{{ movement.reference_id }}</a
+                                >Inventaire</a
                             >
                         } @else if (isManual(movement)) {
                             · {{ reasonLabel(movement) }}

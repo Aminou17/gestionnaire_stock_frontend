@@ -229,10 +229,17 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
                     : undefined,
             };
         }
+        case "INVENTORY_STARTED":
+            return { verb: "a commencé un comptage de stock" };
+        case "INVENTORY_COUNTED":
+            return { verb: "a terminé un comptage de stock" };
+        case "INVENTORY_CANCELLED":
+            return { verb: "a annulé un inventaire" };
         case "INVENTORY_APPLIED": {
+            // l'ancien format listait les corrections, le nouveau donne le nombre de lignes
             const count = Array.isArray(d["adjustments"]) ? d["adjustments"].length : 0;
             return {
-                verb: "a appliqué un inventaire au stock",
+                verb: "a corrigé le stock d'après un inventaire",
                 note: count
                     ? `${count} produit${count > 1 ? "s" : ""} corrigé${count > 1 ? "s" : ""}`
                     : undefined,

@@ -76,7 +76,7 @@ describe("MovementDetail", () => {
         await render(movement("INVENTORY_GAIN", 12, "inventory"));
 
         expect(origins().length).toBe(1);
-        expect(el.querySelector("dl")?.textContent).toContain("Inventaire #12");
+        expect(el.querySelector("dl")?.textContent).toContain("Voir l'inventaire");
     });
 
     it("should show the reason and no Origine line for a manual adjustment", async () => {

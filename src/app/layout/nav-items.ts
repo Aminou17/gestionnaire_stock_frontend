@@ -34,12 +34,7 @@ export const SECTIONS: NavSection[] = [
                 children: [
                     { label: "Produits", path: "/products", icon: "package" },
                     { label: "Catégories", path: "/categories", icon: "tag" },
-                    {
-                        label: "Inventaires",
-                        path: "/inventories",
-                        icon: "clipboard",
-                        adminOnly: true,
-                    },
+                    { label: "Inventaires", path: "/inventories", icon: "clipboard" },
                     {
                         label: "Corriger la quantité",
                         path: "/products",

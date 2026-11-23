@@ -82,6 +82,7 @@ describe("Sidebar", () => {
             "Caisse",
             "Produits",
             "Catégories",
+            "Inventaires",
             "Historique du stock",
             "Alertes de stock",
             "Vitesse de vente",

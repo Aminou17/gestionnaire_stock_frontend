@@ -378,7 +378,7 @@
                                         [state]="backState()"
                                         class="sale-link"
                                         (click)="$event.stopPropagation()"
-                                        >Inventaire #{{ movement.reference_id }}</a
+                                        >Inventaire</a
                                     >
                                 } @else if (isManual(movement)) {
                                     <span class="origin">{{ reasonLabel(movement) }}</span>
@@ -468,7 +468,7 @@
                                                 [state]="backState()"
                                                 class="sale-link"
                                                 (click)="$event.stopPropagation()"
-                                                >Inventaire #{{ movement.reference_id }}</a
+                                                >Inventaire</a
                                             >
                                         } @else if (isManual(movement)) {
                                             · {{ reasonLabel(movement) }}
