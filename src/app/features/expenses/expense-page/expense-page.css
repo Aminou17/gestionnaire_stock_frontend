@@ -47,12 +47,6 @@ app-page-header {
     font-variant-numeric: tabular-nums;
 }
 
-.hero-reason {
-    max-width: 44ch;
-    margin: 0;
-    font-size: var(--fs-lead);
-}
-
 .details {
     padding: 4px 20px;
 }

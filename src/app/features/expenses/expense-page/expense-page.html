@@ -23,13 +23,16 @@
         @if (item.cancelled) {
             <span class="badge badge-danger">Annulée : l'argent est revenu dans la caisse</span>
         }
-        @if (item.reason) {
-            <p class="hero-reason">{{ item.reason }}</p>
-        }
     </section>
 
     <section class="card details">
         <dl>
+            @if (item.reason) {
+                <div>
+                    <dt><app-icon name="receipt" [size]="16" /> Raison</dt>
+                    <dd>{{ item.reason }}</dd>
+                </div>
+            }
             <div>
                 <dt><app-icon name="clock" [size]="16" /> Date</dt>
                 <dd>{{ item.created_at | date: "EEEE d MMMM y 'à' HH:mm" }}</dd>

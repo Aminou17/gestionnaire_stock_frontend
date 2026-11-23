@@ -170,9 +170,7 @@
                 <div class="day">
                     <div class="day-head">
                         <span class="day-name">{{ dayLabel(group.day) }}</span>
-                        <span class="day-total"
-                            ><small>Total du jour</small> {{ group.total | fcfa }}</span
-                        >
+                        <span class="day-total">{{ group.total | fcfa }}</span>
                     </div>
                     <ul class="rows">
                         @for (item of group.items; track item.id) {
@@ -192,19 +190,12 @@
                                     </span>
                                     <span class="row-text">
                                         <strong class="row-title">{{
-                                            item.reason || look(item.reason_category).short
+                                            look(item.reason_category).short
                                         }}</strong>
                                         <small class="muted">
-                                            {{ look(item.reason_category).short }} ·
                                             {{ item.created_at | date: "HH:mm" }}
-                                            @if (item.user_name) {
-                                                · {{ item.user_name }}
-                                            }
                                             @if (item.cancelled) {
                                                 · <span class="cancelled-tag">Annulée</span>
-                                            }
-                                            @if (item.has_receipt) {
-                                                · <app-icon name="camera" [size]="12" /> Reçu
                                             }
                                         </small>
                                     </span>
