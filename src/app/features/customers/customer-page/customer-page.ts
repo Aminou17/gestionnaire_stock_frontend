@@ -13,21 +13,25 @@ import {
 } from "@angular/core";
 import { rxResource, takeUntilDestroyed, toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { map } from "rxjs";
+import { firstValueFrom, map } from "rxjs";
 
 import { BackState, getBackLink } from "../../../core/back-link";
 import { AuthService } from "../../../core/auth/auth.service";
-import { CustomerSale, Paged } from "../../../core/customers/customer.model";
+import { CustomerPaymentRecord, CustomerSale, Paged } from "../../../core/customers/customer.model";
 import { CustomerService } from "../../../core/customers/customer.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { PageHeader } from "../../../layout/page-header/page-header";
 import { Icon } from "../../../shared/icon/icon";
+import { PayChoice, PayDialog } from "../../../shared/pay-dialog/pay-dialog";
 import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { Pagination, storedPageSize } from "../../../shared/pagination/pagination";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { formatPhone, toWhatsAppLink } from "../../../shared/phone";
 import { productInitials } from "../../products/product-look";
 import { CustomerForm } from "../customer-form/customer-form";
+import { PaymentReceipt } from "../payment-receipt/payment-receipt";
+import { shareReceiptImage } from "../../sales/sale-receipt/receipt-image";
+import { ticketUrlLink } from "../../sales/sale-receipt/receipt-message";
 import { reminderLink } from "../customer-reminder";
 
 type LoadedSales = Paged<CustomerSale> & { customerId: number };
@@ -43,13 +47,15 @@ type LoadedSales = Paged<CustomerSale> & { customerId: number };
         CustomerForm,
         FcfaPipe,
         Pagination,
+        PayDialog,
+        PaymentReceipt,
     ],
     templateUrl: "./customer-page.html",
     styleUrl: "./customer-page.css",
 })
 export class CustomerPage {
     private customerService = inject(CustomerService);
-    private shop = inject(ShopSettingsService);
+    protected shop = inject(ShopSettingsService);
     private router = inject(Router);
     private destroyRef = inject(DestroyRef);
     private locale = inject(LOCALE_ID);
@@ -120,6 +126,104 @@ export class CustomerPage {
         },
     });
 
+    // historique des paiements encaissés : les 5 derniers, puis 10 de plus à chaque « Voir plus »
+    paymentsLimit = linkedSignal({ source: () => this.id(), computation: () => 5 });
+
+    payments = rxResource({
+        params: () =>
+            this.validId() ? { id: this.id()!, limit: this.paymentsLimit() } : undefined,
+        stream: ({ params }) => this.customerService.getCustomerPayments(params.id, params.limit),
+    });
+
+    paymentList = computed(() => (this.payments.hasValue() ? this.payments.value().rows : []));
+    paymentsTotal = computed(() => (this.payments.hasValue() ? this.payments.value().total : 0));
+
+    // liste des paiements dans une fenêtre : un clic sur un paiement ouvre son détail et son ticket
+    paymentsDialog = viewChild.required<ElementRef<HTMLDialogElement>>("paymentsBox");
+    selectedPayment = signal<CustomerPaymentRecord | null>(null);
+    showTicket = signal(false);
+
+    // « Paiement enregistré » : affiché quand on arrive ici juste après un encaissement
+    justPaid = signal(false);
+    sharing = signal(false);
+    shareNotice = signal("");
+    shareError = signal(false);
+
+    private captureBox = viewChild<ElementRef<HTMLElement>>("captureBox");
+
+    // ouvre la conversation du client avec l'adresse du ticket, qui s'affiche en image dans WhatsApp.
+    // sans réseau, l'image du ticket est copiée à la place
+    async sendTicket() {
+        const payment = this.selectedPayment();
+        if (!payment) return;
+
+        this.sharing.set(true);
+        this.shareNotice.set("");
+        this.shareError.set(false);
+        try {
+            const { url } = await firstValueFrom(
+                this.customerService.getPaymentTicketLink(payment.id),
+            );
+            window.open(
+                ticketUrlLink(this.data()?.phone, this.shop.defaultCountryCode(), url),
+                "_blank",
+                "noopener",
+            );
+        } catch {
+            await this.sendTicketImage(payment);
+        } finally {
+            this.sharing.set(false);
+        }
+    }
+
+    private async sendTicketImage(payment: CustomerPaymentRecord) {
+        // on photographie le ticket, pas le bloc qui le décale hors de l'écran
+        const box = this.captureBox()?.nativeElement.firstElementChild as HTMLElement | null;
+        if (!box) return;
+
+        try {
+            const result = await shareReceiptImage(
+                box,
+                `Ticket-paiement-${payment.id}.png`,
+                this.data()?.phone,
+                this.shop.defaultCountryCode(),
+            );
+            if (result === "copied") {
+                this.shareNotice.set(
+                    "Image copiée, conversation du client ouverte. Collez l'image (Ctrl+V, ou appui long puis Coller).",
+                );
+            } else if (result === "downloaded") {
+                this.shareNotice.set(
+                    "Image téléchargée. Glissez-la dans la conversation WhatsApp.",
+                );
+            }
+        } catch {
+            this.shareError.set(true);
+        }
+    }
+
+    openPayments() {
+        this.justPaid.set(false);
+        this.selectedPayment.set(null);
+        this.payments.reload();
+        this.paymentsDialog().nativeElement.showModal();
+    }
+
+    selectPayment(payment: CustomerPaymentRecord) {
+        this.showTicket.set(false);
+        this.shareNotice.set("");
+        this.shareError.set(false);
+        this.selectedPayment.set(payment);
+    }
+
+    backToPayments() {
+        this.selectedPayment.set(null);
+    }
+
+    onPaymentsBackdrop(event: MouseEvent) {
+        if (event.target === event.currentTarget) this.paymentsDialog().nativeElement.close();
+    }
+
     saleList = computed(() => this.lastSales()?.rows ?? []);
 
     salesTotal = computed(() => this.lastSales()?.total ?? 0);
@@ -154,6 +258,77 @@ export class CustomerPage {
     // dette d'une vente non annulée
     due(sale: CustomerSale) {
         return sale.status === "ACTIVE" ? Math.max(sale.total - sale.paid_amount, 0) : 0;
+    }
+
+    // encaisser le crédit : un paiement réparti sur les ventes impayées
+    payDialog = viewChild.required<PayDialog>("payBox");
+    paying = signal(false);
+    payError = signal<string | null>(null);
+
+    askPay() {
+        this.payError.set(null);
+        this.payDialog().open();
+    }
+
+    pay(choice: PayChoice) {
+        const customer = this.data();
+        if (!customer) return;
+
+        this.paying.set(true);
+        this.payError.set(null);
+
+        this.customerService
+            .payCustomer(customer.id, {
+                paymentMethod: choice.method,
+                amountPaid: choice.amount,
+                ...(choice.method === "CASH"
+                    ? { amountReceived: choice.received ?? choice.amount }
+                    : {}),
+            })
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+                next: () => {
+                    this.paying.set(false);
+                    this.payDialog().close();
+                    this.customer.reload();
+                    this.sales.reload();
+                    void this.showNewPayment(customer.id);
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.paying.set(false);
+                    this.payError.set(
+                        err.error?.message ?? "Impossible d'enregistrer le paiement.",
+                    );
+                },
+            });
+    }
+
+    // "Crédit (Depuis N jours)" : ancienneté de la plus vieille vente non soldée
+    dueAge = computed(() => {
+        const since = this.data()?.oldest_due_at;
+        if (!since) return "";
+
+        const days = Math.floor((Date.now() - new Date(since).getTime()) / 86400000);
+        if (days <= 0) return "Depuis aujourd'hui";
+
+        return `Depuis ${days} jour${days > 1 ? "s" : ""}`;
+    });
+
+    // après l'encaissement : le paiement tout juste enregistré s'ouvre avec son ticket
+    private async showNewPayment(customerId: number) {
+        try {
+            const { rows } = await firstValueFrom(
+                this.customerService.getCustomerPayments(customerId, this.paymentsLimit()),
+            );
+            this.payments.reload();
+            if (rows.length === 0) return;
+
+            this.selectPayment(rows[0]);
+            this.justPaid.set(true);
+            this.paymentsDialog().nativeElement.showModal();
+        } catch {
+            this.payments.reload();
+        }
     }
 
     editCustomer() {

@@ -5,7 +5,11 @@ import { BehaviorSubject, of } from "rxjs";
 
 import { CustomerPage } from "./customer-page";
 import { AuthService } from "../../../core/auth/auth.service";
-import { Customer, CustomerSale } from "../../../core/customers/customer.model";
+import {
+    Customer,
+    CustomerPaymentRecord,
+    CustomerSale,
+} from "../../../core/customers/customer.model";
 import { CustomerService } from "../../../core/customers/customer.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
@@ -48,6 +52,7 @@ describe("CustomerPage", () => {
         admin = true,
         sales = [sale(24), sale(14, { paid_amount: 11500, created_at: "2026-10-02T10:00:00Z" })],
         total = 0,
+        payments = [] as CustomerPaymentRecord[],
     } = {}) {
         params = new BehaviorSubject(new Map([["id", "4"]]));
         getCustomerSales = vi.fn(() =>
@@ -66,11 +71,20 @@ describe("CustomerPage", () => {
                     useValue: {
                         getCustomer: vi.fn(() => of(customer)),
                         getCustomerSales,
+                        getPaymentTicketLink: vi.fn(() => of({ url: "https://api.test/t/p1.abc" })),
+                        getCustomerPayments: vi.fn(() =>
+                            of({ rows: payments, total: payments.length, page: 1, limit: 5 }),
+                        ),
+                        payCustomer: vi.fn(() => of({ amount: 2000, remaining: 4500, sales: [] })),
                     },
                 },
                 {
                     provide: ShopSettingsService,
-                    useValue: { shopName: signal("Awa Bazin"), defaultCountryCode: signal("242") },
+                    useValue: {
+                        shopName: signal("Awa Bazin"),
+                        defaultCountryCode: signal("242"),
+                        info: signal(null),
+                    },
                 },
                 {
                     provide: AuthService,
@@ -114,9 +128,80 @@ describe("CustomerPage", () => {
         await render();
 
         expect(el.querySelector(".hero .due-card")).not.toBeNull();
-        expect(el.querySelector(".due-label")!.textContent).toBe("Crédit");
+        expect(el.querySelector(".due-label")!.textContent!.trim()).toBe("Crédit");
         expect(el.querySelector(".contact")).toBeNull();
         expect(text()).not.toContain("Appeler");
+    });
+
+    it("should show how long the debt has been open", async () => {
+        const eightDaysAgo = new Date(Date.now() - 8 * 86400000).toISOString();
+        await render({ customer: { ...awa, oldest_due_at: eightDaysAgo } });
+
+        expect(el.querySelector(".due-label")!.textContent).toContain("(Depuis 8 jours)");
+    });
+
+    const oldPayment: CustomerPaymentRecord = {
+        id: 1,
+        amount: 2500,
+        remaining_after: 4000,
+        payment_method: "CASH",
+        created_at: "2026-11-20T10:00:00Z",
+        user_name: "Awa",
+        sales: [{ id: 24, number: 24, amount: 2500 }],
+    };
+
+    it("should open the payment list from a single button, then the ticket of a payment", async () => {
+        await render({ payments: [oldPayment] });
+
+        const button = el.querySelector<HTMLButtonElement>(".payments-btn")!;
+        expect(button.textContent).toContain("Paiements de crédit (1)");
+        button.click();
+        fixture.detectChanges();
+
+        const row = el.querySelector<HTMLButtonElement>(".payment-row")!;
+        expect(row.textContent!.replace(/\s/g, " ")).toContain("2 500 F");
+        row.click();
+        fixture.detectChanges();
+
+        expect(el.querySelector(".ticket-paper")).toBeNull();
+        const buttons = [
+            ...el.querySelectorAll<HTMLElement>("#payments-title ~ .confirm-actions .btn"),
+        ];
+        buttons.find((item) => item.textContent?.includes("Voir le ticket"))!.click();
+        fixture.detectChanges();
+
+        const paper = el.querySelector(".ticket-paper")!.textContent!.replace(/\s/g, " ");
+        expect(paper).toContain("Reçu de paiement");
+        expect(paper).toContain("Reste à payer");
+        expect(paper).toContain("Vente #24");
+        expect(buttons.some((item) => item.textContent?.includes("Envoyer le ticket"))).toBe(true);
+    });
+
+    it("should open WhatsApp with the public ticket link of the payment", async () => {
+        const open = vi.spyOn(window, "open").mockReturnValue(null);
+        await render({ payments: [oldPayment] });
+        fixture.componentInstance.selectPayment(oldPayment);
+
+        await fixture.componentInstance.sendTicket();
+
+        const link = decodeURIComponent(open.mock.calls[0][0] as string);
+        expect(link).toContain("wa.me/242061234567");
+        expect(link).toContain("https://api.test/t/p1.abc");
+        open.mockRestore();
+    });
+
+    it("should not show the payments button when there is no payment", async () => {
+        await render();
+        expect(el.querySelector(".payments-btn")).toBeNull();
+    });
+
+    it("should offer to collect the debt when something is due", async () => {
+        await render();
+
+        const button = [...el.querySelectorAll<HTMLButtonElement>(".due-actions button")].find(
+            (item) => item.textContent?.includes("Encaisser"),
+        );
+        expect(button).toBeDefined();
     });
 
     it("should not show the reminder when nothing is due", async () => {

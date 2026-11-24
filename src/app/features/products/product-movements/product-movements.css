@@ -11,15 +11,15 @@ ul {
 li {
     display: flex;
     align-items: center;
-    gap: 12px;
-    min-height: 52px;
+    gap: 16px;
+    min-height: 64px;
     border-top: 1px solid var(--border);
 }
 
 .when {
     flex: 1;
     min-width: 0;
-    font-size: var(--fs-small);
+    font-size: var(--fs-body);
 }
 
 .when a {
@@ -27,7 +27,17 @@ li {
 }
 
 .quantity {
+    font-size: var(--fs-body);
+    font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
+}
+
+.quantity.in {
+    color: var(--success);
+}
+
+.quantity.out {
+    color: var(--danger);
 }
 
 .row-skeleton {
@@ -69,6 +79,11 @@ li.empty {
     .when {
         order: 3;
         flex-basis: 100%;
+        font-size: var(--fs-small);
+    }
+
+    .after {
+        font-size: var(--fs-small);
     }
 
     .quantity {
@@ -77,8 +92,8 @@ li.empty {
 }
 
 .after {
-    min-width: 72px;
-    font-size: var(--fs-small);
+    min-width: 88px;
+    font-size: var(--fs-body);
     text-align: right;
     font-variant-numeric: tabular-nums;
 }

@@ -1,0 +1,40 @@
+@let p = payment();
+
+<section class="receipt">
+    <header>
+        @if (shop()?.logo; as logo) {
+            <img class="receipt-logo" [src]="logo" alt="" width="160" height="80" />
+        }
+        <strong class="receipt-shop">{{ shop()?.name }}</strong>
+        <span class="receipt-meta">Reçu de paiement</span>
+        <span class="receipt-meta">{{ p.created_at | date: "dd/MM/y 'à' HH:mm" }}</span>
+        @if (customerName()) {
+            <span class="receipt-client">Client : {{ customerName() }}</span>
+        }
+    </header>
+
+    <div class="receipt-items">
+        @for (sale of p.sales; track sale.id) {
+            <p class="receipt-line">
+                <span>Vente #{{ sale.number }}</span
+                ><span>{{ sale.amount | fcfa }}</span>
+            </p>
+        }
+    </div>
+
+    <div class="receipt-sums">
+        <p class="receipt-line receipt-total">
+            <span>ENCAISSÉ</span><span>{{ p.amount | fcfa }}</span>
+        </p>
+        <p class="receipt-line">
+            <span>Payé en</span><span>{{ method() }}</span>
+        </p>
+        <p class="receipt-line receipt-due">
+            <span>Reste à payer</span><span>{{ p.remaining_after | fcfa }}</span>
+        </p>
+    </div>
+
+    @if (shop()?.receipt_footer?.trim(); as footer) {
+        <footer class="receipt-thanks">{{ footer }}</footer>
+    }
+</section>

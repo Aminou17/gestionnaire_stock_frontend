@@ -55,6 +55,8 @@ export class ShopSettingsService {
     disabledModules = computed(() =>
         this.current.hasValue() ? (this.current.value().disabled_modules ?? []) : [],
     );
+    // fiche complète de la boutique (nom, logo, bas du ticket), pour dessiner un ticket
+    info = computed(() => (this.current.hasValue() ? this.current.value() : null));
     shopLogo = computed(() => (this.current.hasValue() ? this.current.value().logo : null));
 
     // indicatif des numéros saisis sans "+" : une seule source pour WhatsApp, l'appel et l'affichage

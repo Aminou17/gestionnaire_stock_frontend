@@ -50,11 +50,19 @@ export const receiptMessage = (
 // (WhatsApp écrit toujours l'adresse elle-même, elle ne peut pas être cachée)
 export const ticketLinkMessage = (url: string) => url;
 
-export const ticketLinkLink = (sale: SaleDetail, defaultCode: string, url: string) => {
+// ouvre la conversation du client avec l'adresse du ticket, vente ou paiement ; sans numéro, WhatsApp laisse choisir
+export const ticketUrlLink = (
+    phone: string | null | undefined,
+    defaultCode: string,
+    url: string,
+) => {
     const text = ticketLinkMessage(url);
-    if (sale.customer_phone) return toWhatsAppLink(sale.customer_phone, defaultCode, text);
+    if (phone) return toWhatsAppLink(phone, defaultCode, text);
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
 };
+
+export const ticketLinkLink = (sale: SaleDetail, defaultCode: string, url: string) =>
+    ticketUrlLink(sale.customer_phone, defaultCode, url);
 
 // sans numéro de client, WhatsApp laisse choisir la conversation
 export const receiptLink = (

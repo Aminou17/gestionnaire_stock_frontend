@@ -52,7 +52,11 @@
                             >
                         }
                     </span>
-                    <strong class="quantity">
+                    <strong
+                        class="quantity"
+                        [class.in]="types[movement.type].sign === '+'"
+                        [class.out]="types[movement.type].sign !== '+'"
+                    >
                         {{ types[movement.type].sign }}{{ movement.quantity | number }}
                     </strong>
                     <span class="after muted">Stock {{ movement.stock_after | number }}</span>

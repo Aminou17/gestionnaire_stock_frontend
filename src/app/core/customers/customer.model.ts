@@ -65,3 +65,21 @@ export interface DuplicatePhone {
     name: string;
     is_active: boolean;
 }
+
+// ce que le serveur a réparti après un paiement : une part par vente soldée ou entamée
+export interface CustomerPayment {
+    amount: number;
+    remaining: number;
+    sales: { id: number; amount: number }[];
+}
+
+// un paiement encaissé depuis la fiche, avec les ventes qu'il a payées
+export interface CustomerPaymentRecord {
+    id: number;
+    amount: number;
+    remaining_after: number;
+    payment_method: "CASH" | "MOBILE_MONEY";
+    created_at: string;
+    user_name: string | null;
+    sales: { id: number; number: number; amount: number }[];
+}

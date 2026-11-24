@@ -90,22 +90,6 @@ textarea.input {
     gap: 8px;
 }
 
-.pay-methods {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-}
-
-.pay-methods .btn {
-    min-height: 44px;
-}
-
-.pay-methods .active {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-    color: var(--primary-text);
-}
-
 .customer {
     display: inline-flex;
     align-items: center;

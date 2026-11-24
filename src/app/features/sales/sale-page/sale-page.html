@@ -607,107 +607,14 @@
     </form>
 </dialog>
 
-<dialog
+<app-pay-dialog
     #payBox
-    class="confirm"
-    aria-labelledby="pay-title"
-    (click)="onPayBackdrop($event)"
-    (cancel)="onPayCancel($event)"
->
-    <form class="confirm-body" novalidate (submit)="$event.preventDefault(); pay()">
-        <h2 id="pay-title">Encaisser sur la vente #{{ data()?.number }}</h2>
-        <p class="muted">Reste à payer : {{ due() | fcfa }}.</p>
-
-        <div class="pay-methods">
-            <button
-                type="button"
-                class="btn btn-outline"
-                [class.active]="payMethod() === 'CASH'"
-                [attr.aria-pressed]="payMethod() === 'CASH'"
-                (click)="payMethod.set('CASH')"
-            >
-                <app-icon name="banknote" [size]="18" />
-                Espèces
-            </button>
-            <button
-                type="button"
-                class="btn btn-outline"
-                [class.active]="payMethod() === 'MOBILE_MONEY'"
-                [attr.aria-pressed]="payMethod() === 'MOBILE_MONEY'"
-                (click)="payMethod.set('MOBILE_MONEY')"
-            >
-                <app-icon name="phone" [size]="18" />
-                Mobile Money
-            </button>
-        </div>
-
-        <label class="field">
-            <span>Montant payé</span>
-            <input
-                #payAmountInput
-                class="input"
-                type="number"
-                inputmode="numeric"
-                min="1"
-                step="1"
-                [value]="payAmount() ?? ''"
-                (input)="payAmount.set(readNumber(payAmountInput))"
-            />
-        </label>
-        <div class="quick-amounts" aria-label="Montants rapides">
-            @for (amount of quickAmounts(); track amount) {
-                <button type="button" class="chip" (click)="payQuick(amount)">
-                    {{ amount | fcfa }}
-                </button>
-            }
-            <button type="button" class="chip chip-balance" (click)="payQuick(due())">
-                Solde · {{ due() | fcfa }}
-            </button>
-        </div>
-
-        @if (payMethod() === "CASH") {
-            <label class="field">
-                <span>Montant reçu <small class="muted">(facultatif)</small></span>
-                <input
-                    #payReceivedInput
-                    class="input"
-                    type="number"
-                    inputmode="numeric"
-                    min="0"
-                    step="1"
-                    [value]="payReceived() ?? ''"
-                    (input)="payReceived.set(readNumber(payReceivedInput))"
-                />
-            </label>
-            @if (payChange(); as change) {
-                @if (change > 0) {
-                    <p class="muted">Monnaie à rendre : {{ change | fcfa }}</p>
-                }
-            }
-        } @else {}
-
-        @if (payError()) {
-            <div class="alert alert-error" role="alert">{{ payError() }}</div>
-        }
-
-        <div class="confirm-actions">
-            <button
-                type="button"
-                class="btn btn-outline"
-                [disabled]="paying()"
-                (click)="closePay()"
-            >
-                Annuler
-            </button>
-            <button type="submit" class="btn btn-primary" [disabled]="paying()">
-                @if (paying()) {
-                    <span class="spinner"></span>
-                }
-                Encaisser
-            </button>
-        </div>
-    </form>
-</dialog>
+    [title]="'Encaisser sur la vente #' + (data()?.number ?? '')"
+    [due]="due()"
+    [busy]="paying()"
+    [error]="payError()"
+    (confirmed)="pay($event)"
+/>
 
 <dialog
     #returnBox

@@ -15,7 +15,7 @@ import { firstValueFrom, map } from "rxjs";
 
 import { AuthService } from "../../../core/auth/auth.service";
 import { BackState, getBackLink } from "../../../core/back-link";
-import { PaymentMethod, SaleItem, SalePayment, SaleReturn } from "../../../core/sales/sale.model";
+import { SaleItem, SalePayment, SaleReturn } from "../../../core/sales/sale.model";
 import { SaleService } from "../../../core/sales/sale.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { SalesSettingsService } from "../../../core/sales/sales-settings.service";
@@ -30,6 +30,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Avatar } from "../../../shared/avatar/avatar";
 import { Icon } from "../../../shared/icon/icon";
+import { PayChoice, PayDialog } from "../../../shared/pay-dialog/pay-dialog";
 import { WhatsappIcon } from "../../../shared/icon/whatsapp-icon";
 import { formatInternational, toWhatsAppLink } from "../../../shared/phone";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
@@ -57,6 +58,7 @@ interface TimelineEvent {
         Avatar,
         FcfaPipe,
         MovementDetail,
+        PayDialog,
         SaleReceipt,
         ActionMenu,
     ],
@@ -375,18 +377,6 @@ export class SalePage {
         const sale = this.data();
         return sale && sale.total > 0 ? Math.floor((sale.paid_amount / sale.total) * 100) : 0;
     });
-    // remplit le montant avec une part du reste à payer
-    // en Afrique on pense en billets, pas en pourcentages : les coupures sous le reste, puis le solde
-    quickAmounts = computed(() => {
-        const due = this.due();
-        const notes = [500, 1000, 2000, 5000, 10000, 25000, 50000, 100000];
-        return notes.filter((note) => note < due).slice(-3);
-    });
-
-    payQuick(amount: number) {
-        this.payAmount.set(Math.max(1, amount));
-    }
-
     customerPhone = computed(() => {
         const phone = this.data()?.customer_phone;
         return phone ? formatInternational(phone, this.shopService.defaultCountryCode()) : "";
@@ -408,32 +398,13 @@ export class SalePage {
     showPayments = computed(() => (this.data()?.payments.length ?? 0) > 1 || this.due() > 0);
     canPay = computed(() => this.due() > 0);
 
-    payDialog = viewChild.required<ElementRef<HTMLDialogElement>>("payBox");
-    payMethod = signal<PaymentMethod>("CASH");
-    payAmount = signal<number | null>(null);
-    payReceived = signal<number | null>(null);
+    payDialog = viewChild.required<PayDialog>("payBox");
     paying = signal(false);
     payError = signal<string | null>(null);
 
     askPay() {
-        this.payMethod.set("CASH");
-        this.payAmount.set(this.due());
-        this.payReceived.set(null);
         this.payError.set(null);
-        this.payDialog().nativeElement.showModal();
-    }
-
-    closePay() {
-        if (this.paying()) return;
-        this.payDialog().nativeElement.close();
-    }
-
-    onPayBackdrop(event: MouseEvent) {
-        if (event.target === this.payDialog().nativeElement) this.closePay();
-    }
-
-    onPayCancel(event: Event) {
-        if (this.paying()) event.preventDefault();
+        this.payDialog().open();
     }
 
     readNumber(input: HTMLInputElement) {
@@ -441,42 +412,23 @@ export class SalePage {
         return Number.isFinite(value) && value > 0 ? value : null;
     }
 
-    payChange = computed(() => {
-        const received = this.payReceived();
-        const amount = this.payAmount();
-        if (this.payMethod() !== "CASH" || received === null || amount === null) return null;
-        return received - amount;
-    });
-
-    pay() {
-        const amount = this.payAmount();
-        if (amount === null || amount > this.due()) {
-            this.payError.set(`Le montant doit être compris entre 1 et ${this.due()} F.`);
-            return;
-        }
-
-        const method = this.payMethod();
-        const received = this.payReceived();
-
-        if (method === "CASH" && received !== null && received < amount) {
-            this.payError.set(`Le montant reçu est inférieur à ${amount} F.`);
-            return;
-        }
-
+    pay(choice: PayChoice) {
         this.paying.set(true);
         this.payError.set(null);
 
         this.saleService
             .addPayment(this.id()!, {
-                paymentMethod: method,
-                amountPaid: amount,
-                ...(method === "CASH" ? { amountReceived: received ?? amount } : {}),
+                paymentMethod: choice.method,
+                amountPaid: choice.amount,
+                ...(choice.method === "CASH"
+                    ? { amountReceived: choice.received ?? choice.amount }
+                    : {}),
             })
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
                 next: () => {
                     this.paying.set(false);
-                    this.closePay();
+                    this.payDialog().close();
                     this.sale.reload();
                 },
                 error: (err: HttpErrorResponse) => {

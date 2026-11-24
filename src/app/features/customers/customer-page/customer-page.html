@@ -4,6 +4,15 @@
     [back]="back.link"
     [backLabel]="back.label"
 >
+    <app-pay-dialog
+        #payBox
+        title="Encaisser le crédit"
+        [due]="data()?.due_amount ?? 0"
+        [busy]="paying()"
+        [error]="payError()"
+        (confirmed)="pay($event)"
+    />
+
     @if (canManage()) {
         <button type="button" class="btn btn-outline edit-btn" (click)="editCustomer()">
             <app-icon name="edit" [size]="18" />
@@ -60,28 +69,39 @@
                 @if (customer.due_amount > 0) {
                     <section class="due-card" aria-label="Crédit">
                         <div class="due-text">
-                            <span class="due-label">Crédit</span>
+                            <span class="due-label"
+                                >Crédit
+                                @if (dueAge()) {
+                                    ({{ dueAge() }})
+                                }
+                            </span>
                             <strong class="due-amount">−{{ customer.due_amount | fcfa }}</strong>
                         </div>
-                        @if (reminder(); as link) {
-                            <a
-                                class="btn btn-primary remind"
-                                [href]="link"
-                                target="_blank"
-                                rel="noopener"
-                            >
-                                <app-whatsapp-icon [size]="18" />
-                                Relancer sur WhatsApp
-                            </a>
-                        } @else if (canManage()) {
-                            <button
-                                type="button"
-                                class="btn btn-outline remind"
-                                (click)="editCustomer()"
-                            >
-                                Ajouter un numéro pour le relancer
+                        <div class="due-actions">
+                            <button type="button" class="btn btn-primary" (click)="askPay()">
+                                <app-icon name="banknote" [size]="18" />
+                                Encaisser
                             </button>
-                        }
+                            @if (reminder(); as link) {
+                                <a
+                                    class="btn btn-outline remind"
+                                    [href]="link"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    <app-whatsapp-icon [size]="18" />
+                                    Relancer sur WhatsApp
+                                </a>
+                            } @else if (canManage()) {
+                                <button
+                                    type="button"
+                                    class="btn btn-outline remind"
+                                    (click)="editCustomer()"
+                                >
+                                    Ajouter un numéro pour le relancer
+                                </button>
+                            }
+                        </div>
                     </section>
                 } @else if (customer.phone) {
                     <a
@@ -122,6 +142,13 @@
                     <span>Dernier achat</span>
                 </div>
             </section>
+
+            @if (paymentsTotal() > 0) {
+                <button type="button" class="btn btn-outline payments-btn" (click)="openPayments()">
+                    <app-icon name="receipt" [size]="18" />
+                    Paiements de crédit ({{ paymentsTotal() }})
+                </button>
+            }
         </div>
 
         <div class="history">
@@ -253,6 +280,109 @@
     </div>
 }
 
+<dialog
+    #paymentsBox
+    class="confirm"
+    aria-labelledby="payments-title"
+    (click)="onPaymentsBackdrop($event)"
+>
+    <div class="confirm-body">
+        @if (selectedPayment(); as payment) {
+            <button type="button" class="back-link" (click)="backToPayments()">
+                <app-icon name="chevron-left" [size]="16" />
+                Paiements
+            </button>
+            <h2 id="payments-title">
+                {{ justPaid() ? "Paiement enregistré" : (payment.amount | fcfa) }}
+            </h2>
+            <p class="muted">
+                {{ justPaid() ? (payment.amount | fcfa) + " · " : ""
+                }}{{ payment.created_at | date: "d MMM y, HH:mm" }}
+                @if (payment.user_name) {
+                    · {{ payment.user_name }}
+                }
+            </p>
+            @if (showTicket()) {
+                <div class="ticket-paper">
+                    <app-payment-receipt
+                        [payment]="payment"
+                        [customerName]="data()?.name ?? ''"
+                        [shop]="shop.info()"
+                    />
+                </div>
+            }
+            @if (shareNotice()) {
+                <p class="alert alert-info" role="status">{{ shareNotice() }}</p>
+            }
+            @if (shareError()) {
+                <div class="alert alert-error" role="alert">
+                    Impossible de fabriquer l'image du ticket.
+                </div>
+            }
+            <div class="confirm-actions">
+                <button
+                    type="button"
+                    class="btn btn-outline"
+                    [attr.aria-pressed]="showTicket()"
+                    (click)="showTicket.set(!showTicket())"
+                >
+                    <app-icon name="receipt" [size]="18" />
+                    {{ showTicket() ? "Masquer le ticket" : "Voir le ticket" }}
+                </button>
+                <button
+                    type="button"
+                    class="btn btn-primary"
+                    [disabled]="sharing()"
+                    (click)="sendTicket()"
+                >
+                    @if (sharing()) {
+                        <span class="spinner"></span>
+                    } @else {
+                        <app-whatsapp-icon [size]="18" />
+                    }
+                    Envoyer le ticket
+                </button>
+            </div>
+        } @else {
+            <h2 id="payments-title">Paiements de crédit</h2>
+            <ul class="payments">
+                @for (payment of paymentList(); track payment.id) {
+                    <li>
+                        <button type="button" class="payment-row" (click)="selectPayment(payment)">
+                            <span class="payment-text">
+                                <strong>{{ payment.amount | fcfa }}</strong>
+                                <small class="muted">
+                                    {{ payment.created_at | date: "d MMM, HH:mm" }} ·
+                                    {{
+                                        payment.payment_method === "CASH"
+                                            ? "Espèces"
+                                            : "Mobile Money"
+                                    }}
+                                </small>
+                            </span>
+                            <app-icon name="chevron-right" [size]="18" />
+                        </button>
+                    </li>
+                }
+            </ul>
+            @if (paymentsTotal() > paymentList().length) {
+                <button
+                    type="button"
+                    class="btn btn-outline btn-sm more"
+                    (click)="paymentsLimit.set(paymentsLimit() + 10)"
+                >
+                    Voir plus
+                </button>
+            }
+            <div class="confirm-actions">
+                <button type="button" class="btn btn-outline" (click)="paymentsBox.close()">
+                    Fermer
+                </button>
+            </div>
+        }
+    </div>
+</dialog>
+
 @if (canManage()) {
     <app-customer-form (saved)="onSaved()" />
 }
@@ -299,4 +429,15 @@
             </div>
         </div>
     </dialog>
+}
+
+<!-- copie hors de l'écran, photographiée pour l'image du ticket -->
+@if (selectedPayment(); as payment) {
+    <div #captureBox class="capture" aria-hidden="true">
+        <app-payment-receipt
+            [payment]="payment"
+            [customerName]="data()?.name ?? ''"
+            [shop]="shop.info()"
+        />
+    </div>
 }

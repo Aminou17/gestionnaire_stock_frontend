@@ -170,7 +170,7 @@
                 <div class="day">
                     <div class="day-head">
                         <span class="day-name">{{ dayLabel(group.day) }}</span>
-                        <span class="day-total">{{ group.total | fcfa }}</span>
+                        <span class="day-total">(Total : {{ group.total | fcfa }})</span>
                     </div>
                     <ul class="rows">
                         @for (item of group.items; track item.id) {

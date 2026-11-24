@@ -108,8 +108,7 @@ app-page-header {
 
 .split-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 4px 16px;
+    gap: 4px;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -152,10 +151,6 @@ app-page-header {
 .split-amount {
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-}
-
-.split-skeleton {
-    height: 32px;
 }
 
 .split-empty {
@@ -256,18 +251,23 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
+/* chaque jour est un bloc séparé : son titre est au-dessus de la carte, les lignes dedans */
 .days {
     display: grid;
+    gap: 24px;
+    padding: 8px 16px 16px;
 }
 
 .day-head {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 16px;
-    background: var(--surface-hover);
-    color: var(--text-muted);
-    font-size: var(--fs-small);
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    padding: 0 4px 8px;
+}
+
+.day-name {
+    font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
 }
 
@@ -276,13 +276,19 @@ app-page-header {
 }
 
 .day-total {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
     font-variant-numeric: tabular-nums;
 }
 
 .rows {
     margin: 0;
     padding: 0;
+    overflow: hidden;
     list-style: none;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
 }
 
 .rows li + li {
@@ -332,8 +338,10 @@ app-page-header {
 }
 
 .row-amount {
+    min-width: 88px;
     color: var(--danger);
     font-variant-numeric: tabular-nums;
+    text-align: right;
     white-space: nowrap;
 }
 
@@ -382,10 +390,6 @@ app-page-header {
         font-size: var(--fs-small);
     }
 
-    .split-list {
-        grid-template-columns: minmax(0, 1fr);
-    }
-
     .row-chevron {
         display: none;
     }
@@ -403,46 +407,4 @@ app-page-header {
     .list-card {
         margin-bottom: 72px;
     }
-}
-
-/* chaque jour est un bloc séparé : le nom du jour et son total sont AU-DESSUS de la carte, les lignes dedans */
-.days {
-    gap: 24px;
-    padding: 8px 16px 16px;
-}
-
-.day-head {
-    padding: 0 4px 8px;
-    background: none;
-}
-
-.day-name {
-    font-size: var(--fs-body);
-    font-weight: var(--fw-semibold);
-    color: var(--text);
-}
-
-.day-total {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 6px;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-    font-variant-numeric: tabular-nums;
-}
-
-.day-total small {
-    font-size: var(--fs-caption);
-}
-
-.rows {
-    overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface);
-}
-
-.row-amount {
-    min-width: 88px;
-    text-align: right;
 }

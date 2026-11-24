@@ -85,4 +85,21 @@ describe("CustomerService", () => {
         const patch = httpMock.expectOne("/api/customers/5/restore");
         expect(patch.request.method).toBe("PATCH");
     });
+
+    it("should post a payment to the customer", () => {
+        service.payCustomer(7, { paymentMethod: "CASH", amountPaid: 2500 }).subscribe();
+
+        const req = httpMock.expectOne("/api/customers/7/payments");
+        expect(req.request.method).toBe("POST");
+        expect(req.request.body).toEqual({ paymentMethod: "CASH", amountPaid: 2500 });
+        req.flush({ amount: 2500, remaining: 0, sales: [] });
+    });
+
+    it("should ask for the public ticket link of a payment", () => {
+        service.getPaymentTicketLink(5).subscribe();
+
+        const req = httpMock.expectOne("/api/tickets/customer-payments/5/link");
+        expect(req.request.method).toBe("POST");
+        req.flush({ url: "https://api.test/t/p5.abc" });
+    });
 });

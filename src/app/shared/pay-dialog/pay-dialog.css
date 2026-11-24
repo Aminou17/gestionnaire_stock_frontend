@@ -1,0 +1,25 @@
+.methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.methods .btn {
+    min-height: 44px;
+}
+
+.methods .active {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-text);
+}
+
+.quick-amounts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip-balance {
+    font-weight: var(--fw-semibold);
+}

@@ -1,0 +1,90 @@
+<dialog #box aria-labelledby="pay-title" (click)="onBackdrop($event)" (cancel)="onCancel($event)">
+    <form novalidate (submit)="$event.preventDefault(); submit()">
+        <h2 id="pay-title">{{ title() }}</h2>
+        <p class="muted">Reste à payer : {{ due() | fcfa }}.</p>
+
+        <div class="methods">
+            <button
+                type="button"
+                class="btn btn-outline"
+                [class.active]="method() === 'CASH'"
+                [attr.aria-pressed]="method() === 'CASH'"
+                (click)="method.set('CASH')"
+            >
+                <app-icon name="banknote" [size]="18" />
+                Espèces
+            </button>
+            <button
+                type="button"
+                class="btn btn-outline"
+                [class.active]="method() === 'MOBILE_MONEY'"
+                [attr.aria-pressed]="method() === 'MOBILE_MONEY'"
+                (click)="method.set('MOBILE_MONEY')"
+            >
+                <app-icon name="phone" [size]="18" />
+                Mobile Money
+            </button>
+        </div>
+
+        <label class="field">
+            <span>Montant payé</span>
+            <input
+                #amountInput
+                class="input"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                step="1"
+                [value]="amount() ?? ''"
+                (input)="amount.set(readNumber(amountInput))"
+            />
+        </label>
+        <div class="quick-amounts" aria-label="Montants rapides">
+            @for (note of quickAmounts(); track note) {
+                <button type="button" class="chip" (click)="amount.set(note)">
+                    {{ note | fcfa }}
+                </button>
+            }
+            <button type="button" class="chip chip-balance" (click)="amount.set(due())">
+                Solde · {{ due() | fcfa }}
+            </button>
+        </div>
+
+        @if (method() === "CASH") {
+            <label class="field">
+                <span>Montant reçu <small class="muted">(facultatif)</small></span>
+                <input
+                    #receivedInput
+                    class="input"
+                    type="number"
+                    inputmode="numeric"
+                    min="0"
+                    step="1"
+                    [value]="received() ?? ''"
+                    (input)="received.set(readNumber(receivedInput))"
+                />
+            </label>
+            @if (change(); as change) {
+                @if (change > 0) {
+                    <p class="muted">Monnaie à rendre : {{ change | fcfa }}</p>
+                }
+            }
+        }
+
+        @if (formError() || error()) {
+            <div class="alert alert-error" role="alert">{{ formError() || error() }}</div>
+        }
+
+        <div class="actions">
+            <button type="button" class="btn btn-outline" [disabled]="busy()" (click)="cancel()">
+                Annuler
+            </button>
+            <button type="submit" class="btn btn-primary" [disabled]="busy()">
+                @if (busy()) {
+                    <span class="spinner"></span>
+                }
+                Encaisser
+            </button>
+        </div>
+    </form>
+</dialog>

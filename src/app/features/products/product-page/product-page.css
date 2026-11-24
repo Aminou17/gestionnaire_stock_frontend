@@ -194,6 +194,7 @@ dd {
 
 .actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 24px;
     padding-top: 24px;
@@ -211,6 +212,11 @@ dd {
 
 .add-stock {
     flex-grow: 1.5;
+}
+
+/* Vendre prend toute la largeur, les autres actions passent en dessous */
+.sell {
+    flex-basis: 100%;
 }
 
 .sell:disabled {
@@ -262,16 +268,6 @@ dd {
 
     .kpi-value {
         font-size: var(--fs-kpi);
-    }
-
-    /* Vendre prend toute la largeur, les autres actions passent en dessous */
-    .actions {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .sell {
-        flex-basis: 100%;
     }
 
     .confirm-actions {

@@ -188,10 +188,6 @@
     background: #d3f1e0;
 }
 
-.chip-balance {
-    font-weight: var(--fw-semibold);
-}
-
 /* trois actions de même hauteur : Ticket et Envoyer en image côte à côte */
 .summary-actions {
     display: grid;
@@ -781,12 +777,6 @@ app-page-header {
 
 .paid-total dd {
     color: var(--success);
-}
-
-.quick-amounts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
 }
 
 /* téléphone : carte plus compacte, boutons plus bas, aucun mot ni montant coupé */

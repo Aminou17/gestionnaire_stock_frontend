@@ -148,11 +148,8 @@ app-page-header {
 
 /* reste à payer : la seule zone colorée de la fiche, avec l'action qui va avec */
 .due-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px 16px;
+    display: grid;
+    gap: 14px;
     padding: 16px 20px;
     border: 1px solid var(--warning);
     border-radius: var(--radius);
@@ -176,7 +173,12 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-.remind,
+.due-actions {
+    display: grid;
+    gap: 8px;
+}
+
+.due-actions .btn,
 .write {
     min-height: 44px;
 }
@@ -236,6 +238,88 @@ app-page-header {
 
 .month-card li + li {
     border-top: 1px solid var(--border);
+}
+
+.payments-btn {
+    width: 100%;
+}
+
+/* fenêtre des paiements : lignes simples, un clic ouvre le détail */
+.payments {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    max-height: 50vh;
+    overflow-y: auto;
+    list-style: none;
+}
+
+.payments li + li {
+    border-top: 1px solid var(--border);
+}
+
+.payment-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    padding: 8px 4px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.payment-row:hover {
+    background: var(--surface-hover);
+}
+
+.payment-text {
+    display: grid;
+    gap: 2px;
+}
+
+.more {
+    justify-self: start;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    justify-self: start;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--primary);
+    font: inherit;
+    font-size: var(--fs-small);
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+}
+
+/* le papier du ticket reste blanc en thème sombre */
+.ticket-paper {
+    max-height: 50vh;
+    padding: 16px 12px 20px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #fff;
+    overflow: auto;
+}
+
+/* hors de l'écran mais bien dessiné, pour la photo du ticket */
+.capture {
+    position: fixed;
+    top: 0;
+    left: -10000px;
+    width: 80mm;
+    background: #fff;
+    pointer-events: none;
 }
 
 .sale-row {
@@ -388,11 +472,6 @@ app-page-header {
 
     .hero {
         padding: 16px;
-    }
-
-    .due-card {
-        flex-direction: column;
-        align-items: stretch;
     }
 
     .stats > div {

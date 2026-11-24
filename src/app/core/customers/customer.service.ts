@@ -2,11 +2,14 @@ import { HttpClient } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 
 import { API_URL } from "../api.config";
+import { NewSalePayment } from "../sales/sale.model";
 import {
     Customer,
     CustomerFilters,
     CustomerInput,
     CustomerPage,
+    CustomerPayment,
+    CustomerPaymentRecord,
     CustomerSale,
     Paged,
 } from "./customer.model";
@@ -40,12 +43,31 @@ export class CustomerService {
         });
     }
 
+    // adresse publique du ticket d'un paiement, à joindre au message WhatsApp
+    getPaymentTicketLink(paymentId: number) {
+        return this.http.post<{ url: string }>(
+            `${API_URL}/tickets/customer-payments/${paymentId}/link`,
+            {},
+        );
+    }
+
+    getCustomerPayments(id: number, limit = 5) {
+        return this.http.get<Paged<CustomerPaymentRecord>>(`${API_URL}/customers/${id}/payments`, {
+            params: { page: 1, limit },
+        });
+    }
+
     createCustomer(input: CustomerInput) {
         return this.http.post<Customer>(`${API_URL}/customers`, input);
     }
 
     updateCustomer(id: number, input: CustomerInput) {
         return this.http.put<Customer>(`${API_URL}/customers/${id}`, input);
+    }
+
+    // un seul paiement, réparti par le serveur sur les ventes impayées, les plus anciennes d'abord
+    payCustomer(id: number, payment: NewSalePayment & { amountPaid: number }) {
+        return this.http.post<CustomerPayment>(`${API_URL}/customers/${id}/payments`, payment);
     }
 
     deleteCustomer(id: number) {
