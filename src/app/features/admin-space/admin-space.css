@@ -79,12 +79,17 @@ app-page-header {
     border: 0;
     border-radius: 8px;
     background: transparent;
-    color: var(--text-muted);
+    color: var(--text);
     font: inherit;
     font-size: var(--fs-body);
     font-weight: var(--fw-semibold);
     white-space: nowrap;
     cursor: pointer;
+    transition: background 0.15s;
+}
+
+.period:hover:not([aria-pressed="true"]) {
+    background: var(--bg);
 }
 
 .period[aria-pressed="true"] {
@@ -208,6 +213,18 @@ app-page-header {
         flex: 1 0 auto;
         padding: 0 10px;
         font-size: var(--fs-small);
+    }
+}
+
+/* très petit écran : les cinq choix doivent tenir sans défiler */
+@media (max-width: 380px) {
+    .periods {
+        gap: 2px;
+    }
+
+    .period {
+        padding: 0 6px;
+        font-size: var(--fs-caption);
     }
 }
 
