@@ -178,8 +178,9 @@ app-page-header {
 }
 
 .figure dt {
-    color: var(--text-muted);
+    color: var(--text);
     font-size: var(--fs-body);
+    font-weight: var(--fw-medium);
 }
 
 .figure dd {
