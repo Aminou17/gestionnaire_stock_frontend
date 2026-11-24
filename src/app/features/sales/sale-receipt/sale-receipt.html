@@ -101,6 +101,13 @@
                     </p>
                 }
             }
+        } @else if (s.paid_amount === 0) {
+            <!-- vente entièrement à crédit : rien n'a été payé -->
+            @if (s.status === "ACTIVE") {
+                <p class="receipt-line receipt-due">
+                    <span>Reste à payer</span><span>{{ due() | fcfa }}</span>
+                </p>
+            }
         } @else if (s.payment_method === "MOBILE_MONEY") {
             <p class="receipt-line">
                 <span>Payé par Mobile Money</span><span>{{ s.total | fcfa }}</span>

@@ -299,16 +299,18 @@ export class NewSale {
         this.customer.set(null);
     }
 
-    // acompte : montant payé maintenant, vide = la vente est payée en totalité
+    // paiement partiel : montant payé maintenant, vide ou 0 = toute la vente reste à crédit
     showDeposit = signal(false);
     deposit = signal<number | null>(null);
-    toPay = computed(() => this.deposit() ?? this.total());
+    toPay = computed(() => (this.showDeposit() ? (this.deposit() ?? 0) : this.total()));
     remaining = computed(() => Math.max(0, this.total() - this.toPay()));
+    // sans client, personne ne pourrait réclamer le reste
+    needsClient = computed(() => this.toPay() < this.total() && !this.canChase());
     depositError = computed(() => {
         const deposit = this.deposit();
         if (deposit === null) return null;
         if (deposit > this.total()) return "L'acompte dépasse le total de la vente.";
-        if (deposit < this.total() && !this.canChase())
+        if (this.needsClient())
             return "Indiquez le nom et le téléphone du client, ou choisissez sa fiche.";
         return null;
     });
@@ -360,7 +362,7 @@ export class NewSale {
 
     onDepositChange(input: HTMLInputElement) {
         const value = Math.round(input.valueAsNumber);
-        this.deposit.set(Number.isFinite(value) && value > 0 ? value : null);
+        this.deposit.set(Number.isFinite(value) && value >= 0 ? value : null);
         this.amountReceived.set(null);
     }
 
@@ -371,8 +373,7 @@ export class NewSale {
             !this.hasInvalidLine() &&
             this.missingAmount() === 0 &&
             this.depositError() === null &&
-            // un paiement partiel demande le montant payé
-            !(this.showDeposit() && this.deposit() === null) &&
+            !this.needsClient() &&
             !this.saving(),
     );
     constructor() {
@@ -581,7 +582,7 @@ export class NewSale {
         const customer = this.customer();
         const { name, phone } = this.typed();
         const method = this.paymentMethod();
-        const deposit = this.deposit();
+        const toPay = this.toPay();
 
         const items = this.cart().map((line) => ({
             productId: line.product.id,
@@ -592,8 +593,10 @@ export class NewSale {
         const payment = {
             paymentMethod: method,
             // montant non saisi : le client a donné le compte juste
-            ...(method === "CASH" ? { amountReceived: this.amountReceived() ?? this.toPay() } : {}),
-            ...(deposit !== null && deposit < this.total() ? { amountPaid: deposit } : {}),
+            ...(method === "CASH" && toPay > 0
+                ? { amountReceived: this.amountReceived() ?? toPay }
+                : {}),
+            ...(toPay < this.total() ? { amountPaid: toPay } : {}),
             ...(customer ? { customerId: customer.id } : {}),
             ...(!customer && name ? { customerName: name } : {}),
             ...(!customer && phone ? { customerPhone: phone } : {}),

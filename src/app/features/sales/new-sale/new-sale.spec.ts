@@ -508,6 +508,32 @@ describe("NewSale", () => {
         );
     });
 
+    it("should sell fully on credit when the deposit is left empty", async () => {
+        await render();
+        await add(0);
+        await toggleDeposit();
+        await type(clientInput, "Fatou Ndiaye");
+        await type("input[aria-label='Téléphone du client']", "06 61 23 456");
+
+        expect(submitBtn().disabled).toBe(false);
+        expect(submitBtn().textContent).toContain("Vendre à crédit");
+        submitBtn().click();
+
+        const payment = createSale.mock.calls[0][1];
+        expect(payment.amountPaid).toBe(0);
+        expect(payment.amountReceived).toBeUndefined();
+    });
+
+    it("should accept 0 as the deposit, still asking for a customer", async () => {
+        await render();
+        await add(0);
+        await toggleDeposit();
+        await type("input[placeholder^='Sur ']", "0");
+
+        expect(submitBtn().disabled).toBe(true);
+        expect(text()).toContain("Indiquez le nom et le téléphone du client");
+    });
+
     it("should send a typed number as the customer phone", async () => {
         await render();
         await add(0);

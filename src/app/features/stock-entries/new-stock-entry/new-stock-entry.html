@@ -29,6 +29,7 @@
                         aria-label="Chercher le produit reçu"
                         (input)="onSearch($any($event.target).value)"
                         (focus)="searchFocused.set(true)"
+                        (blur)="onSearchBlur()"
                         (keydown.escape)="$any($event.target).value = ''; onSearch('')"
                     />
                     <app-scan-button (scanned)="onScanned($event)" />

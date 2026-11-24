@@ -65,13 +65,16 @@ export class Search {
         return [...pages, ...this.foundProducts()];
     });
 
+    // la recherche n'interroge les produits que fenêtre ouverte : à l'ouverture, des produits sont déjà proposés
+    private searchText = computed(() => (this.layout.searchOpen() ? this.query() : null));
+
     constructor() {
-        toObservable(this.query)
+        toObservable(this.searchText)
             .pipe(
                 debounceTime(250),
                 distinctUntilChanged(),
                 switchMap((text) =>
-                    text.trim().length < 2
+                    text === null || text.trim().length === 1
                         ? of([])
                         : this.products
                               .getProducts({

@@ -69,8 +69,9 @@ export class NewStockEntry implements AfterViewInit {
     // message après un scan sans résultat : on propose de créer le produit
     unknownCode = signal<string | null>(null);
 
+    // à la prise de focus, des produits sont proposés avant même de taper
     products = rxResource({
-        params: () => (this.search().trim() ? this.search().trim() : undefined),
+        params: () => (this.showResults() ? this.search().trim() : undefined),
         stream: ({ params }) =>
             this.productService.getProducts({
                 search: params,
@@ -82,7 +83,12 @@ export class NewStockEntry implements AfterViewInit {
             }),
     });
     results = computed(() => (this.products.hasValue() ? this.products.value().data : []));
-    showResults = computed(() => this.search().trim().length > 0);
+    showResults = computed(() => this.searchFocused() || this.search().trim().length > 0);
+
+    // le délai laisse passer le clic sur un résultat avant de replier la liste
+    onSearchBlur() {
+        setTimeout(() => this.searchFocused.set(false), 150);
+    }
 
     units = computed(() => this.lines().reduce((sum, line) => sum + line.quantity, 0));
 

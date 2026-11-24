@@ -533,14 +533,10 @@
                                 customer()?.name || customerText().trim() || "Sans client"
                             }}</strong>
                             @if (showDeposit()) {
-                                @if (deposit() === null) {
-                                    <small class="muted">Montant payé à indiquer</small>
-                                } @else {
-                                    <small class="muted"
-                                        >Payé maintenant {{ toPay() | fcfa }} · reste
-                                        {{ remaining() | fcfa }}</small
-                                    >
-                                }
+                                <small class="muted"
+                                    >Payé maintenant {{ toPay() | fcfa }} · reste
+                                    {{ remaining() | fcfa }}</small
+                                >
                             }
                         </div>
                         <button type="button" class="btn btn-outline btn-sm" (click)="openCredit()">
@@ -562,7 +558,11 @@
                     @if (saving()) {
                         <span class="spinner"></span>
                     }
-                    Encaisser {{ payNow() | fcfa }}
+                    @if (payNow() > 0) {
+                        Encaisser {{ payNow() | fcfa }}
+                    } @else {
+                        Vendre à crédit
+                    }
                     <kbd class="btn-key" aria-hidden="true">Entrée</kbd>
                 </button>
             </div>
@@ -803,9 +803,9 @@
                     class="input"
                     type="number"
                     inputmode="numeric"
-                    min="1"
+                    min="0"
                     step="1"
-                    [placeholder]="'Sur ' + (total() | fcfa)"
+                    [placeholder]="'Sur ' + (total() | fcfa) + ' (vide : tout à crédit)'"
                     [value]="deposit() ?? ''"
                     [class.invalid]="depositError() !== null"
                     (input)="onDepositChange(depositInput)"
