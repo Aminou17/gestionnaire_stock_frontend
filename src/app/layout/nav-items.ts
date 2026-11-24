@@ -31,7 +31,7 @@ export const SECTIONS: NavSection[] = [
             { label: "Bilan", path: "/admin", icon: "shield", adminOnly: true },
             {
                 label: "Plus d'outils",
-                icon: "grid",
+                icon: "more",
                 children: [
                     {
                         label: "Entrées de stock",
