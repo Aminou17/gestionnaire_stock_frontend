@@ -2,27 +2,27 @@
 
 :host {
     /* hauteur d'un champ : confortable au doigt sur téléphone, plus compacte avec une souris */
-    --field-h: 52px;
+    --field-h: 44px;
     --field-font: 16px;
     --field-label: var(--fs-body);
     display: grid;
-    gap: 24px;
+    gap: 20px;
     animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @media (min-width: 1024px) {
     :host {
-        --field-h: 48px;
+        --field-h: 42px;
     }
 
     .heading h1 {
-        font-size: 30px;
+        font-size: 26px;
     }
 }
 
 form {
     display: grid;
-    gap: 16px;
+    gap: 12px;
 }
 
 /* petit logo au-dessus du titre, sur ordinateur seulement (le bandeau de marque couvre le téléphone) */
@@ -48,7 +48,7 @@ form {
 
 .heading h1 {
     margin: 0 0 8px;
-    font-size: 24px;
+    font-size: 22px;
     font-weight: var(--fw-semibold);
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -91,14 +91,14 @@ form {
 
 .float {
     position: relative;
-    padding-top: 28px;
+    padding-top: 24px;
 }
 
 .float > app-icon {
     display: block;
     position: absolute;
-    left: 16px;
-    top: calc(28px + var(--field-h) / 2);
+    left: 14px;
+    top: calc(24px + var(--field-h) / 2);
     transform: translateY(-50%);
     color: var(--text-muted);
     pointer-events: none;
@@ -112,7 +112,7 @@ form {
 /* champ en creux : fond teinté, filet très léger, anneau bleu au focus */
 .float .input {
     height: var(--field-h);
-    padding: 0 16px;
+    padding: 0 14px;
     border-radius: 10px;
     border-color: var(--border);
     background: var(--surface);
@@ -126,7 +126,7 @@ form {
 
 /* un champ avec icône laisse la place à l'icône */
 .float:has(> app-icon) .input {
-    padding-left: 46px;
+    padding-left: 42px;
 }
 
 .float .input:hover:not(:focus) {
@@ -175,7 +175,7 @@ form {
 .valid-mark {
     position: absolute;
     right: 16px;
-    top: calc(28px + var(--field-h) / 2);
+    top: calc(24px + var(--field-h) / 2);
     width: 20px;
     height: 20px;
     display: grid;
@@ -191,7 +191,7 @@ form {
 .toggle {
     position: absolute;
     right: 2px;
-    top: 28px;
+    top: 24px;
     width: var(--field-h);
     height: var(--field-h);
     display: grid;
@@ -236,9 +236,9 @@ form {
 
 /* boutons larges, plus hauts que les boutons de l'application */
 .btn.btn-block {
-    height: 52px;
-    border-radius: 12px;
-    font-size: var(--fs-lead);
+    height: 46px;
+    border-radius: 10px;
+    font-size: var(--fs-body);
 }
 
 .btn-primary.btn-block {

@@ -1,6 +1,6 @@
 /* connexion, inscription et pages de mot de passe :
-   téléphone et tablette, une feuille blanche arrondie sous le bandeau de la marque ;
-   ordinateur, deux colonnes : la marque et un aperçu à gauche, le formulaire à droite */
+   fond sombre de la marque avec le formulaire dans une carte flottante ;
+   sur ordinateur, deux colonnes : la marque et un aperçu à gauche, la carte à droite */
 
 .shell {
     position: relative;
@@ -122,30 +122,30 @@
     flex-direction: column;
 }
 
-/* la feuille blanche du formulaire */
+/* le formulaire flotte dans une carte, le fond sombre reste visible tout autour */
 .content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: center;
     width: 100%;
-    padding: 28px 22px calc(20px + env(safe-area-inset-bottom));
-    border-radius: 28px 28px 0 0;
-    background: var(--surface);
-    color: var(--text);
-    box-shadow: 0 -24px 48px -24px rgba(2, 6, 23, 0.5);
-    animation: sheet-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    padding: 8px 16px calc(20px + env(safe-area-inset-bottom));
 }
 
-/* le formulaire se pose directement sur la feuille : on retire le cadre de la carte globale */
 .card {
     width: 100%;
-    max-width: 440px;
-    margin: 0 auto;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    max-width: 420px;
+    margin: 0;
+    padding: 24px 20px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow:
+        0 2px 4px rgba(2, 6, 23, 0.12),
+        0 12px 24px rgba(2, 6, 23, 0.2),
+        0 32px 64px -16px rgba(2, 6, 23, 0.45);
+    animation: card-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 footer {
@@ -155,8 +155,8 @@ footer {
     justify-content: center;
     gap: 4px 20px;
     margin-top: auto;
-    padding-top: 20px;
-    color: var(--text-muted);
+    padding-top: 24px;
+    color: rgba(226, 232, 240, 0.7);
     font-size: var(--fs-small);
     text-align: center;
 }
@@ -177,25 +177,15 @@ footer {
 }
 
 .legal-links a:hover {
-    color: var(--text);
+    color: #fff;
     text-decoration: underline;
 }
 
-/* tablette : la feuille devient une carte centrée sous le bandeau */
+/* tablette : carte un peu plus large et plus aérée */
 @media (min-width: 640px) and (max-width: 1023px) {
-    .panel {
-        align-items: center;
-        padding: 0 24px 40px;
-    }
-
-    .content {
-        flex: none;
-        max-width: 520px;
-        padding: 40px 40px 24px;
-        border-radius: 28px;
-        box-shadow:
-            0 0 0 1px rgba(255, 255, 255, 0.08),
-            0 32px 64px -16px rgba(2, 6, 23, 0.5);
+    .card {
+        max-width: 480px;
+        padding: 36px 36px 28px;
     }
 }
 
@@ -216,16 +206,6 @@ footer {
     .brand,
     .home {
         pointer-events: auto;
-    }
-
-    /* le lien « Accueil » est à droite, sur la partie claire */
-    .home {
-        color: var(--text-muted);
-    }
-
-    .home:hover {
-        background: var(--bg);
-        color: var(--text);
     }
 
     .showcase {
@@ -371,20 +351,14 @@ footer {
         border-radius: 20px;
     }
 
-    .panel {
-        background: var(--surface);
-    }
-
     .content {
         justify-content: center;
-        padding: 96px 56px 28px;
-        border-radius: 0;
-        box-shadow: none;
-        animation: none;
+        padding: 96px 48px 24px;
     }
 
     .card {
-        animation: card-in 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        max-width: 440px;
+        padding: 36px 36px 28px;
     }
 }
 
@@ -412,13 +386,6 @@ footer {
     }
 }
 
-@keyframes sheet-in {
-    from {
-        opacity: 0;
-        transform: translateY(24px);
-    }
-}
-
 @keyframes card-in {
     from {
         opacity: 0;
@@ -428,7 +395,6 @@ footer {
 
 @media (prefers-reduced-motion: reduce) {
     .shell::before,
-    .content,
     .card,
     .d-browser,
     .d-phone {
