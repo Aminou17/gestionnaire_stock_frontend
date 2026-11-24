@@ -80,7 +80,7 @@ describe("AdminSpace", () => {
         expect(query.from).toBe(query.to);
 
         expect(text()).toContain("Stock actuel");
-        expect(text()).toContain("Ventes encaissées");
+        expect(text()).toContain("Ventes de la période");
         expect(text()).toContain("Dépenses");
         expect(text()).toContain("Bénéfice net");
     });

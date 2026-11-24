@@ -214,8 +214,8 @@ export class Landing {
             pc: "/landing/pc-bilan.webp",
             tel: "/landing/tel-bilan.webp",
             title: "Votre bénéfice du jour, du mois ou de la période",
-            pcAlt: "Bilan sur ordinateur : bénéfice net, ventes encaissées, dépenses et valeur du stock",
-            telAlt: "Bilan sur téléphone : bénéfice net, ventes encaissées, dépenses et valeur du stock",
+            pcAlt: "Bilan sur ordinateur : bénéfice net, ventes de la période, dépenses et valeur du stock",
+            telAlt: "Bilan sur téléphone : bénéfice net, ventes de la période, dépenses et valeur du stock",
         },
         {
             label: "Alertes",
@@ -248,6 +248,7 @@ export class Landing {
             if (this.animated) {
                 this.watchSections();
                 this.rotateTabs();
+                this.watchMotion();
             }
             this.watchButtons();
         });
@@ -285,6 +286,63 @@ export class Landing {
             if (button) observer.observe(button.nativeElement);
         }
         this.destroyRef.onDestroy(() => observer.disconnect());
+    }
+
+    // Les appareils s'inclinent vers la souris (--mx, --my) et prennent de la profondeur
+    // quand on fait défiler la page, y compris au doigt sur téléphone (--p)
+    private watchMotion() {
+        const stages = Array.from(
+            this.host.nativeElement.querySelectorAll<HTMLElement>(".hero-devices, .pair"),
+        );
+        const cleanups: Array<() => void> = [];
+
+        for (const stage of stages) {
+            const move = (event: PointerEvent) => {
+                // seule la souris incline : au doigt, c'est le défilement qui anime
+                if (event.pointerType !== "mouse") return;
+
+                const box = stage.getBoundingClientRect();
+                const x = ((event.clientX - box.left) / box.width) * 2 - 1;
+                const y = ((event.clientY - box.top) / box.height) * 2 - 1;
+                stage.style.setProperty("--mx", x.toFixed(3));
+                stage.style.setProperty("--my", y.toFixed(3));
+            };
+            const leave = () => {
+                stage.style.setProperty("--mx", "0");
+                stage.style.setProperty("--my", "0");
+            };
+
+            stage.addEventListener("pointermove", move);
+            stage.addEventListener("pointerleave", leave);
+            cleanups.push(() => {
+                stage.removeEventListener("pointermove", move);
+                stage.removeEventListener("pointerleave", leave);
+            });
+        }
+
+        let waiting = false;
+        const update = () => {
+            waiting = false;
+            for (const stage of stages) {
+                const box = stage.getBoundingClientRect();
+                const middle = box.top + box.height / 2;
+                const progress = (middle - window.innerHeight / 2) / window.innerHeight;
+                stage.style.setProperty("--p", Math.max(-1, Math.min(1, progress)).toFixed(3));
+            }
+        };
+        const onScroll = () => {
+            if (waiting) return;
+            waiting = true;
+            requestAnimationFrame(update);
+        };
+
+        window.addEventListener("scroll", onScroll, { passive: true });
+        update();
+
+        this.destroyRef.onDestroy(() => {
+            window.removeEventListener("scroll", onScroll);
+            for (const cleanup of cleanups) cleanup();
+        });
     }
 
     selectTab(index: number) {

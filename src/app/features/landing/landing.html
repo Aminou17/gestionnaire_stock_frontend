@@ -41,35 +41,37 @@
             </div>
 
             <div class="hero-art rise" style="--i: 3">
-                <div class="browser">
-                    <div class="browser-bar" aria-hidden="true">
-                        <span></span><span></span><span></span>
+                <div class="hero-devices">
+                    <div class="browser">
+                        <div class="browser-bar" aria-hidden="true">
+                            <span></span><span></span><span></span>
+                        </div>
+                        <div class="stack slides slides-pc">
+                            @for (slide of heroPc; track slide.src; let i = $index) {
+                                <img
+                                    [src]="slide.src"
+                                    width="1800"
+                                    height="1125"
+                                    [alt]="slide.alt"
+                                    [style.--i]="i"
+                                    [attr.loading]="i === 0 ? null : 'lazy'"
+                                />
+                            }
+                        </div>
                     </div>
-                    <div class="stack slides slides-pc">
-                        @for (slide of heroPc; track slide.src; let i = $index) {
-                            <img
-                                [src]="slide.src"
-                                width="1800"
-                                height="1125"
-                                [alt]="slide.alt"
-                                [style.--i]="i"
-                                [attr.loading]="i === 0 ? null : 'lazy'"
-                            />
-                        }
-                    </div>
-                </div>
-                <div class="phone phone-hero">
-                    <div class="stack slides slides-tel">
-                        @for (slide of heroTel; track slide.src; let i = $index) {
-                            <img
-                                [src]="slide.src"
-                                width="780"
-                                height="1688"
-                                [alt]="slide.alt"
-                                [style.--i]="i"
-                                [attr.loading]="i === 0 ? null : 'lazy'"
-                            />
-                        }
+                    <div class="phone phone-hero">
+                        <div class="stack slides slides-tel">
+                            @for (slide of heroTel; track slide.src; let i = $index) {
+                                <img
+                                    [src]="slide.src"
+                                    width="780"
+                                    height="1688"
+                                    [alt]="slide.alt"
+                                    [style.--i]="i"
+                                    [attr.loading]="i === 0 ? null : 'lazy'"
+                                />
+                            }
+                        </div>
                     </div>
                 </div>
             </div>

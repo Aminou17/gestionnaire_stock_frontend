@@ -14,6 +14,10 @@
     :host {
         --field-h: 48px;
     }
+
+    .heading h1 {
+        font-size: 30px;
+    }
 }
 
 form {
@@ -91,7 +95,7 @@ form {
 }
 
 .float > app-icon {
-    display: none;
+    display: block;
     position: absolute;
     left: 16px;
     top: calc(28px + var(--field-h) / 2);
@@ -118,6 +122,11 @@ form {
         background 0.15s,
         border-color 0.15s,
         box-shadow 0.15s;
+}
+
+/* un champ avec icône laisse la place à l'icône */
+.float:has(> app-icon) .input {
+    padding-left: 46px;
 }
 
 .float .input:hover:not(:focus) {
