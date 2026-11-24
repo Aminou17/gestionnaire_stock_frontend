@@ -29,6 +29,7 @@ import { PaymentMethod } from "../../../core/sales/sale.model";
 import { SaleService } from "../../../core/sales/sale.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { CategoryService } from "../../../core/stock/category.service";
+import { CartLine, SaleDraft } from "../../../core/sales/sale-draft";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 import { Product } from "../../../core/stock/product.model";
 import { ProductService } from "../../../core/stock/product.service";
@@ -39,13 +40,6 @@ import { formatPhone } from "../../../shared/phone";
 import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
 import { BarcodeScanner } from "../../../shared/barcode-scanner/barcode-scanner";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
-
-interface CartLine {
-    product: Product;
-    quantity: number;
-    // prix accordé : modifiable seulement pour un produit négociable
-    unitPrice: number;
-}
 
 // tout le catalogue tient sur une seule liste : la recherche et les catégories suffisent à s'y retrouver
 const CATALOG_LIMIT = 500;
@@ -107,7 +101,8 @@ export class NewSale {
 
     search = signal("");
     categoryId = signal<number | null>(null);
-    cart = signal<CartLine[]>([]);
+    // le panier est gardé hors de la page : il reste quand on change d'écran puis qu'on revient
+    cart = inject(SaleDraft).cart;
     saving = signal(false);
     // photo agrandie au centre de l'écran
     zoom = signal<{ src: string; name: string } | null>(null);
