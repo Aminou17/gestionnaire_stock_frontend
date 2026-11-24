@@ -1,16 +1,18 @@
-import { TestBed } from "@angular/core/testing";
+import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
 
 import { Landing } from "./landing";
 
 describe("Landing", () => {
+    let fixture: ComponentFixture<Landing>;
+
     async function render() {
         await TestBed.configureTestingModule({
             imports: [Landing],
             providers: [provideRouter([])],
         }).compileComponents();
 
-        const fixture = TestBed.createComponent(Landing);
+        fixture = TestBed.createComponent(Landing);
         await fixture.whenStable();
 
         return fixture.nativeElement as HTMLElement;
@@ -47,8 +49,47 @@ describe("Landing", () => {
         const page = await render();
         const images = Array.from(page.querySelectorAll<HTMLImageElement>("main img"));
 
-        expect(images.length).toBe(7);
+        expect(images.length).toBe(30);
         for (const image of images) expect(image.alt.length).toBeGreaterThan(20);
+    });
+
+    it("should show the sale step by step on the phone and four pages on the computer", async () => {
+        const page = await render();
+
+        expect(page.querySelectorAll(".slides-tel img").length).toBe(4);
+        expect(page.querySelectorAll(".slides-pc img").length).toBe(4);
+    });
+
+    it("should show the same page on a computer and a phone, and switch with the tabs", async () => {
+        const page = await render();
+        const tabs = page.querySelectorAll<HTMLButtonElement>(".tab");
+
+        expect(tabs.length).toBe(7);
+        expect(page.querySelector(".stack-pc img.on")!.getAttribute("src")).toBe("/landing/pc-vente.webp");
+        expect(page.querySelector(".stack-tel img.on")!.getAttribute("src")).toBe("/landing/tel-vente-3.webp");
+
+        tabs[2].click();
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(page.querySelector(".stack-pc img.on")!.getAttribute("src")).toBe("/landing/pc-produits.webp");
+        expect(page.querySelector(".stack-tel img.on")!.getAttribute("src")).toBe("/landing/tel-produits.webp");
+        expect(tabs[2].getAttribute("aria-pressed")).toBe("true");
+        expect(page.querySelector(".pair-caption")!.textContent).toContain("photo");
+    });
+
+    it("should explain what the administrator and the employee see, with both screens", async () => {
+        const page = await render();
+        const who = page.querySelectorAll(".who");
+
+        expect(who.length).toBe(2);
+        expect(who[0].textContent).toContain("administrateur");
+        expect(who[1].textContent).toContain("Ni bénéfices");
+        for (const card of Array.from(who)) {
+            expect(card.querySelectorAll(".browser").length).toBe(1);
+            expect(card.querySelectorAll(".phone").length).toBe(1);
+        }
+        expect(page.querySelectorAll(".feature").length).toBe(2);
     });
 
     it("should link to the legal pages in the footer", async () => {

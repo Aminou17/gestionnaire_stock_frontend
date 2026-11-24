@@ -7,6 +7,7 @@ import {
     signal,
     viewChild,
 } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
 import { RouterLink } from "@angular/router";
 
 import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
@@ -25,11 +26,20 @@ interface Atout {
     text: string;
 }
 
-interface Shot {
+interface Slide {
     src: string;
-    label: string;
-    title: string;
     alt: string;
+}
+
+// une page montrée sur ordinateur et sur téléphone
+interface Tab {
+    label: string;
+    icon: IconName;
+    pc: string;
+    tel: string;
+    title: string;
+    pcAlt: string;
+    telAlt: string;
 }
 
 interface Step {
@@ -40,7 +50,7 @@ interface Step {
 // Page d'accueil publique : choisir entre se connecter et créer sa boutique
 @Component({
     selector: "app-landing",
-    imports: [RouterLink, Icon],
+    imports: [RouterLink, Icon, NgTemplateOutlet],
     templateUrl: "./landing.html",
     styleUrl: "./landing.css",
     host: { "[class.animated]": "animated" },
@@ -62,8 +72,9 @@ export class Landing {
     // Les sections ne sont cachées avant leur apparition que si le navigateur sait les révéler
     animated = canAnimate();
 
-    // Photo affichée dans l'aperçu sur téléphone, pour les points sous le carrousel
-    shotIndex = signal(0);
+    // Page montrée dans l'aperçu ; elle change seule tant que le visiteur n'a pas choisi
+    tabIndex = signal(0);
+    private picked = false;
 
     also = [
         "Plusieurs boutiques dans un compte",
@@ -111,30 +122,109 @@ export class Landing {
         },
     ];
 
-    shots: Shot[] = [
+    // En-tête sur ordinateur : les pages défilent dans le navigateur
+    heroPc: Slide[] = [
         {
-            src: "/landing/tel-vente.webp",
+            src: "/landing/pc-accueil.webp",
+            alt: "Accueil sur ordinateur : ventes du jour, argent en caisse, bénéfice et graphique de la semaine",
+        },
+        {
+            src: "/landing/pc-vente.webp",
+            alt: "Nouvelle vente sur ordinateur : produits en images, panier, total et bouton Encaisser",
+        },
+        {
+            src: "/landing/pc-produits.webp",
+            alt: "Liste des produits sur ordinateur avec photo, prix, marge et stock de chaque produit",
+        },
+        {
+            src: "/landing/pc-caisse.webp",
+            alt: "Caisse du jour sur ordinateur : solde du tiroir et mouvements de la journée",
+        },
+    ];
+
+    // En-tête sur téléphone : une vente, du premier produit à l'encaissement
+    heroTel: Slide[] = [
+        {
+            src: "/landing/tel-vente-1.webp",
+            alt: "Vente sur téléphone, étape 1 : le catalogue avec la photo et le prix de chaque produit",
+        },
+        {
+            src: "/landing/tel-vente-2.webp",
+            alt: "Vente sur téléphone, étape 2 : les produits touchés s'ajoutent, avec le total en bas",
+        },
+        {
+            src: "/landing/tel-vente-3.webp",
+            alt: "Vente sur téléphone, étape 3 : le panier, le mode de paiement et le bouton Encaisser",
+        },
+        {
+            src: "/landing/tel-vente-4.webp",
+            alt: "Vente sur téléphone, étape 4 : la vente est encaissée, le ticket part par WhatsApp",
+        },
+    ];
+
+    tabs: Tab[] = [
+        {
             label: "Vendre",
+            icon: "cart",
+            pc: "/landing/pc-vente.webp",
+            tel: "/landing/tel-vente-3.webp",
             title: "Un panier clair, le paiement en un geste",
-            alt: "Panier de vente sur téléphone : deux produits, total, choix espèces ou Mobile Money, bouton Encaisser",
+            pcAlt: "Nouvelle vente sur ordinateur : catalogue en images, panier, total et bouton Encaisser",
+            telAlt: "Panier de vente sur téléphone : produits, total, espèces ou Mobile Money, bouton Encaisser",
         },
         {
-            src: "/landing/tel-accueil.webp",
-            label: "Suivre",
+            label: "Accueil",
+            icon: "dashboard",
+            pc: "/landing/pc-accueil.webp",
+            tel: "/landing/tel-accueil.webp",
             title: "Vos ventes, votre bénéfice, votre caisse",
-            alt: "Accueil sur téléphone : ventes du jour, argent en caisse, bénéfice et graphique des 7 derniers jours",
+            pcAlt: "Accueil sur ordinateur : ventes du jour, caisse, crédits clients, bénéfice et graphique de la semaine",
+            telAlt: "Accueil sur téléphone : ventes du jour, caisse, crédits, bénéfice et graphique de la semaine",
         },
         {
-            src: "/landing/tel-caisse.webp",
-            label: "Encaisser",
+            label: "Produits",
+            icon: "package",
+            pc: "/landing/pc-produits.webp",
+            tel: "/landing/tel-produits.webp",
+            title: "Chaque produit avec sa photo, son prix et son stock",
+            pcAlt: "Liste des produits sur ordinateur avec photo, catégorie, prix, marge et stock",
+            telAlt: "Liste des produits sur téléphone avec photo, catégorie, prix et niveau de stock",
+        },
+        {
+            label: "Caisse",
+            icon: "banknote",
+            pc: "/landing/pc-caisse.webp",
+            tel: "/landing/tel-caisse.webp",
             title: "L'argent du tiroir, mouvement par mouvement",
-            alt: "Page Caisse sur téléphone : solde du tiroir, ajouts, dépenses, retraits et liste des mouvements du jour",
+            pcAlt: "Caisse du jour sur ordinateur : solde du tiroir, ajouts, dépenses, retraits et mouvements",
+            telAlt: "Caisse du jour sur téléphone : solde du tiroir, ajout, dépense, retrait et mouvements",
         },
         {
-            src: "/landing/tel-alertes.webp",
-            label: "Réapprovisionner",
+            label: "Clients",
+            icon: "user",
+            pc: "/landing/pc-clients.webp",
+            tel: "/landing/tel-clients.webp",
+            title: "Qui vous doit de l'argent, et depuis quand",
+            pcAlt: "Clients et crédits sur ordinateur : la liste des clients avec le total dépensé de chacun",
+            telAlt: "Clients et crédits sur téléphone : la liste des clients avec le total dépensé de chacun",
+        },
+        {
+            label: "Bilan",
+            icon: "shield",
+            pc: "/landing/pc-bilan.webp",
+            tel: "/landing/tel-bilan.webp",
+            title: "Votre bénéfice du jour, du mois ou de la période",
+            pcAlt: "Bilan sur ordinateur : bénéfice net, ventes encaissées, dépenses et valeur du stock",
+            telAlt: "Bilan sur téléphone : bénéfice net, ventes encaissées, dépenses et valeur du stock",
+        },
+        {
+            label: "Alertes",
+            icon: "alert",
+            pc: "/landing/pc-alertes.webp",
+            tel: "/landing/tel-alertes.webp",
             title: "Les produits à commander, par fournisseur",
-            alt: "Alertes de stock sur téléphone : produits en rupture ou presque, regroupés par fournisseur",
+            pcAlt: "Alertes de stock sur ordinateur : produits presque épuisés, regroupés par fournisseur",
+            telAlt: "Alertes de stock sur téléphone : produits presque épuisés, regroupés par fournisseur",
         },
     ];
 
@@ -155,7 +245,10 @@ export class Landing {
 
     constructor() {
         afterNextRender(() => {
-            if (this.animated) this.watchSections();
+            if (this.animated) {
+                this.watchSections();
+                this.rotateTabs();
+            }
             this.watchButtons();
         });
     }
@@ -194,12 +287,31 @@ export class Landing {
         this.destroyRef.onDestroy(() => observer.disconnect());
     }
 
-    onShotsScroll(event: Event) {
-        const list = event.target as HTMLElement;
-        const max = list.scrollWidth - list.clientWidth;
-        if (max <= 0) return;
+    selectTab(index: number) {
+        this.picked = true;
+        this.tabIndex.set(index);
+    }
 
-        this.shotIndex.set(Math.round((list.scrollLeft / max) * (this.shots.length - 1)));
+    // L'aperçu passe à la page suivante toutes les 5 secondes, seulement s'il est à l'écran
+    private rotateTabs() {
+        const stage = this.host.nativeElement.querySelector("#apercu .pair");
+        if (!stage) return;
+
+        let visible = false;
+        const observer = new IntersectionObserver((entries) => {
+            visible = entries.some((entry) => entry.isIntersecting);
+        });
+        observer.observe(stage);
+
+        const timer = setInterval(() => {
+            if (!visible || this.picked) return;
+            this.tabIndex.update((index) => (index + 1) % this.tabs.length);
+        }, 5000);
+
+        this.destroyRef.onDestroy(() => {
+            clearInterval(timer);
+            observer.disconnect();
+        });
     }
 
     scrollTo(id: string) {

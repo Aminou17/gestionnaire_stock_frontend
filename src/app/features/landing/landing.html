@@ -8,6 +8,7 @@
         <nav class="top-nav" aria-label="Sur cette page">
             <button type="button" (click)="scrollTo('raisons')">Pourquoi {{ productName }}</button>
             <button type="button" (click)="scrollTo('apercu')">Aperçu</button>
+            <button type="button" (click)="scrollTo('equipe')">Votre équipe</button>
             <button type="button" (click)="scrollTo('demarrer')">Démarrer</button>
         </nav>
 
@@ -44,30 +45,32 @@
                     <div class="browser-bar" aria-hidden="true">
                         <span></span><span></span><span></span>
                     </div>
-                    <img
-                        src="/landing/pc-accueil.webp"
-                        width="1800"
-                        height="1125"
-                        alt="Accueil de {{
-                            productName
-                        }} sur ordinateur : ventes du jour, caisse, bénéfice et graphique de la semaine"
-                    />
+                    <div class="stack slides slides-pc">
+                        @for (slide of heroPc; track slide.src; let i = $index) {
+                            <img
+                                [src]="slide.src"
+                                width="1800"
+                                height="1125"
+                                [alt]="slide.alt"
+                                [style.--i]="i"
+                                [attr.loading]="i === 0 ? null : 'lazy'"
+                            />
+                        }
+                    </div>
                 </div>
                 <div class="phone phone-hero">
-                    <img
-                        class="for-small"
-                        src="/landing/tel-accueil.webp"
-                        width="780"
-                        height="1688"
-                        alt="Accueil sur téléphone : ventes du jour, argent en caisse, bénéfice et graphique de la semaine"
-                    />
-                    <img
-                        class="for-large"
-                        src="/landing/tel-vente.webp"
-                        width="780"
-                        height="1688"
-                        alt="Panier de vente sur téléphone avec le total et le bouton Encaisser"
-                    />
+                    <div class="stack slides slides-tel">
+                        @for (slide of heroTel; track slide.src; let i = $index) {
+                            <img
+                                [src]="slide.src"
+                                width="780"
+                                height="1688"
+                                [alt]="slide.alt"
+                                [style.--i]="i"
+                                [attr.loading]="i === 0 ? null : 'lazy'"
+                            />
+                        }
+                    </div>
                 </div>
             </div>
         </div>
@@ -122,32 +125,164 @@
         <div class="wrap">
             <div class="head reveal">
                 <span class="kicker">Aperçu</span>
-                <h2>Voyez-le en action</h2>
-                <p>De vraies pages de {{ productName }}, sur téléphone.</p>
+                <h2>Sur ordinateur comme sur téléphone</h2>
+                <p>
+                    Le même logiciel s'adapte à l'écran : un ordinateur au comptoir, un téléphone
+                    dans la poche.
+                </p>
             </div>
 
-            <ul class="shots" (scroll)="onShotsScroll($event)">
-                @for (shot of shots; track shot.src; let i = $index) {
-                    <li class="shot reveal" [style.--i]="i">
-                        <div class="phone">
+            <div class="tabs reveal" role="group" aria-label="Pages de l'application">
+                @for (tab of tabs; track tab.label; let i = $index) {
+                    <button
+                        type="button"
+                        class="tab"
+                        [class.on]="i === tabIndex()"
+                        [attr.aria-pressed]="i === tabIndex()"
+                        (click)="selectTab(i)"
+                    >
+                        <app-icon [name]="tab.icon" [size]="16" />
+                        {{ tab.label }}
+                    </button>
+                }
+            </div>
+
+            <div class="pair reveal">
+                <div class="browser">
+                    <div class="browser-bar" aria-hidden="true">
+                        <span></span><span></span><span></span>
+                    </div>
+                    <div class="stack stack-pc">
+                        @for (tab of tabs; track tab.label; let i = $index) {
                             <img
-                                [src]="shot.src"
+                                [src]="tab.pc"
+                                width="1800"
+                                height="1125"
+                                [alt]="tab.pcAlt"
+                                [class.on]="i === tabIndex()"
+                                [attr.loading]="i === 0 ? null : 'lazy'"
+                            />
+                        }
+                    </div>
+                </div>
+                <div class="phone">
+                    <div class="stack stack-tel">
+                        @for (tab of tabs; track tab.label; let i = $index) {
+                            <img
+                                [src]="tab.tel"
                                 width="780"
                                 height="1688"
-                                loading="lazy"
-                                [alt]="shot.alt"
+                                [alt]="tab.telAlt"
+                                [class.on]="i === tabIndex()"
+                                [attr.loading]="i === 0 ? null : 'lazy'"
                             />
-                        </div>
-                        <strong>{{ shot.label }}</strong>
-                        <span>{{ shot.title }}</span>
-                    </li>
-                }
-            </ul>
+                        }
+                    </div>
+                </div>
+            </div>
+            <p class="pair-caption" aria-live="polite">{{ tabs[tabIndex()].title }}</p>
+        </div>
+    </section>
 
-            <div class="dots" aria-hidden="true">
-                @for (shot of shots; track shot.src; let i = $index) {
-                    <span [class.on]="i === shotIndex()"></span>
-                }
+    <section id="equipe" class="section">
+        <div class="wrap">
+            <div class="head reveal">
+                <span class="kicker">Votre équipe</span>
+                <h2>Chacun voit ce qu'il doit voir</h2>
+                <p>
+                    Vous gardez les chiffres sensibles pour vous. Vos employés vendent et
+                    encaissent, sans voir vos bénéfices ni vos prix d'achat.
+                </p>
+            </div>
+
+            <div class="compare">
+                <article class="who reveal">
+                    <h3><app-icon name="shield" [size]="20" /> Vous, l'administrateur</h3>
+                    <ng-container
+                        *ngTemplateOutlet="
+                            device;
+                            context: {
+                                pc: '/landing/pc-accueil.webp',
+                                tel: '/landing/tel-accueil.webp',
+                                label: 'Accueil de l’administrateur : ventes, bénéfice, caisse et crédits'
+                            }
+                        "
+                    />
+                    <ul class="ticks">
+                        <li>Les ventes, le bénéfice et la valeur du stock</li>
+                        <li>Les crédits clients, le bilan et les dépenses</li>
+                        <li>Les employés, les fournisseurs et les réglages</li>
+                    </ul>
+                </article>
+
+                <article class="who reveal" [style.--i]="1">
+                    <h3><app-icon name="user" [size]="20" /> Votre employé</h3>
+                    <ng-container
+                        *ngTemplateOutlet="
+                            device;
+                            context: {
+                                pc: '/landing/pc-employe-accueil.webp',
+                                tel: '/landing/tel-employe-accueil.webp',
+                                label: 'Accueil de l’employé : ses ventes du jour et sa caisse, sans les chiffres sensibles'
+                            }
+                        "
+                    />
+                    <ul class="ticks">
+                        <li>Il vend et encaisse, simplement</li>
+                        <li>Il ne voit que ses propres ventes</li>
+                        <li>Ni bénéfices, ni prix d'achat, ni réglages</li>
+                    </ul>
+                </article>
+            </div>
+
+            <div class="feature reveal">
+                <div class="feature-text">
+                    <h3>Ajoutez un employé en un instant</h3>
+                    <p>
+                        Un nom, une adresse e-mail et un rôle : c'est tout. Un mot de passe
+                        provisoire est préparé pour vous, à donner à la personne.
+                    </p>
+                    <ul class="ticks">
+                        <li>Employé ou administrateur, au choix</li>
+                        <li>Vous retirez ou rétablissez son accès quand vous voulez</li>
+                        <li>Un journal garde la trace de chaque action</li>
+                    </ul>
+                </div>
+                <ng-container
+                    *ngTemplateOutlet="
+                        device;
+                        context: {
+                            pc: '/landing/pc-employe-nouveau.webp',
+                            tel: '/landing/tel-employe-nouveau.webp',
+                            label: 'Création d’un employé : prénom, nom, e-mail, rôle et mot de passe provisoire'
+                        }
+                    "
+                />
+            </div>
+
+            <div class="feature flip reveal">
+                <div class="feature-text">
+                    <h3>Plus d'outils, à un geste</h3>
+                    <p>
+                        Entrées de stock, inventaires, fournisseurs, historique : tout le reste est
+                        rangé dans un seul menu, en grosses touches faciles à toucher.
+                    </p>
+                    <ul class="ticks">
+                        <li>Un menu clair, pour ne pas se perdre</li>
+                        <li>Chaque employé n'y trouve que ce qui le concerne</li>
+                        <li>Le même menu sur ordinateur et sur téléphone</li>
+                    </ul>
+                </div>
+                <ng-container
+                    *ngTemplateOutlet="
+                        device;
+                        context: {
+                            pc: '/landing/pc-outils.webp',
+                            tel: '/landing/tel-outils.webp',
+                            label: 'Le menu Plus d’outils : entrées de stock, alertes, inventaires, fournisseurs et employés'
+                        }
+                    "
+                />
             </div>
         </div>
     </section>
@@ -208,3 +343,18 @@
     <app-icon name="store" [size]="20" />
     Créer ma boutique
 </a>
+
+<!-- ordinateur et téléphone côte à côte, pour une même page -->
+<ng-template #device let-pc="pc" let-tel="tel" let-label="label">
+    <div class="pair">
+        <div class="browser">
+            <div class="browser-bar" aria-hidden="true">
+                <span></span><span></span><span></span>
+            </div>
+            <img [src]="pc" width="1800" height="1125" loading="lazy" [alt]="label + ' (ordinateur)'" />
+        </div>
+        <div class="phone">
+            <img [src]="tel" width="780" height="1688" loading="lazy" [alt]="label + ' (téléphone)'" />
+        </div>
+    </div>
+</ng-template>
