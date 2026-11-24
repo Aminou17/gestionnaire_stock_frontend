@@ -17,23 +17,30 @@ export interface NavSection {
     items: NavItem[];
 }
 
-// Accueil, Ventes, Clients, Caisse, Dépenses et Bilan en direct ; le reste est rangé dans le groupe
-// Avancé, qui s'ouvre seul quand on est dans ses pages, comme Shopify : peu de lignes à lire
+// Les pages de tous les jours en direct ; le reste est rangé dans le groupe « Plus d'outils »,
+// du plus utilisé au moins utilisé, qui s'ouvre seul quand on est dans ses pages
 export const SECTIONS: NavSection[] = [
     {
         items: [
             { label: "Accueil", path: "/dashboard", icon: "dashboard" },
             { label: "Ventes", path: "/sales", icon: "cart" },
+            { label: "Produits", path: "/products", icon: "package" },
             { label: "Clients et crédits", path: "/customers", icon: "user" },
             { label: "Caisse", path: "/cash", icon: "banknote" },
             { label: "Dépenses", path: "/expenses", icon: "receipt", adminOnly: true },
             { label: "Bilan", path: "/admin", icon: "shield", adminOnly: true },
             {
-                label: "Avancé",
-                icon: "package",
+                label: "Plus d'outils",
+                icon: "grid",
                 children: [
-                    { label: "Produits", path: "/products", icon: "package" },
-                    { label: "Catégories", path: "/categories", icon: "tag" },
+                    {
+                        label: "Entrées de stock",
+                        path: "/stock-entries",
+                        icon: "stock-entry",
+                        adminOnly: true,
+                    },
+                    // la rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
+                    { label: "Alertes de stock", path: "/alerts", icon: "alert", exact: true },
                     { label: "Inventaires", path: "/inventories", icon: "clipboard" },
                     {
                         label: "Corriger la quantité",
@@ -43,23 +50,14 @@ export const SECTIONS: NavSection[] = [
                         exact: true,
                         adminOnly: true,
                     },
+                    { label: "Catégories", path: "/categories", icon: "tag" },
+                    { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
                     { label: "Historique du stock", path: "/stock-movements", icon: "movements" },
-                    // la rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
-                    { label: "Alertes de stock", path: "/alerts", icon: "alert", exact: true },
                     {
                         label: "Vitesse de vente",
                         path: "/alerts/rotation",
                         icon: "trending-up",
                     },
-                    // les achats sont rangés ici : entrées de marchandise et fournisseurs
-                    {
-                        label: "Entrées de stock",
-                        path: "/stock-entries",
-                        icon: "stock-entry",
-                        adminOnly: true,
-                    },
-                    { label: "Fournisseurs", path: "/suppliers", icon: "truck", adminOnly: true },
-                    // les employés : qui a accès, et ce qui a été fait
                     { label: "Employés", path: "/users", icon: "users", adminOnly: true },
                     {
                         label: "Historique des actions",

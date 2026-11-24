@@ -78,39 +78,39 @@ describe("Sidebar", () => {
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
+            "Produits",
             "Clients et crédits",
             "Caisse",
-            "Produits",
-            "Catégories",
-            "Inventaires",
-            "Historique du stock",
             "Alertes de stock",
+            "Inventaires",
+            "Catégories",
+            "Historique du stock",
             "Vitesse de vente",
         ]);
     });
 
-    it("should group the pages under Avancé", async () => {
+    it("should group the pages under Plus d'outils", async () => {
         const el = await render(true, 2);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Avancé"]);
+        expect(groups).toEqual(["Plus d'outils"]);
         expect(labels(el)).toEqual([
             "Accueil",
             "Ventes",
+            "Produits",
             "Clients et crédits",
             "Caisse",
             "Dépenses",
             "Bilan",
-            "Produits",
-            "Catégories",
+            "Entrées de stock",
+            "Alertes de stock",
             "Inventaires",
             "Corriger la quantité",
-            "Historique du stock",
-            "Alertes de stock",
-            "Vitesse de vente",
-            "Entrées de stock",
+            "Catégories",
             "Fournisseurs",
+            "Historique du stock",
+            "Vitesse de vente",
             "Employés",
             "Historique des actions",
         ]);
@@ -131,19 +131,18 @@ describe("Sidebar", () => {
 
         const tiles = [...el.querySelectorAll(".tile .tile-label")].map((t) => t.textContent);
         expect(tiles).toEqual([
-            "Produits",
-            "Catégories",
+            "Entrées de stock",
+            "Alertes de stock",
             "Inventaires",
             "Corriger la quantité",
-            "Historique du stock",
-            "Alertes de stock",
-            "Vitesse de vente",
-            "Entrées de stock",
+            "Catégories",
             "Fournisseurs",
+            "Historique du stock",
+            "Vitesse de vente",
             "Employés",
             "Historique des actions",
         ]);
-        expect(el.querySelector(".launcher h2")?.textContent).toContain("Avancé");
+        expect(el.querySelector(".launcher h2")?.textContent).toContain("Plus d'outils");
         expect(el.querySelector(".tile .count")?.textContent).toBe("3");
 
         el.querySelector<HTMLButtonElement>(".launcher-close")!.click();
@@ -172,12 +171,12 @@ describe("Sidebar", () => {
         expect(el.querySelector("button.group .count")).toBeNull();
     });
 
-    it("should show the manager the Avancé group without the admin pages", async () => {
+    it("should show the manager the Plus d'outils group without the admin pages", async () => {
         const el = await render(false);
 
         const groups = [...el.querySelectorAll("button.group .label")].map((g) => g.textContent);
 
-        expect(groups).toEqual(["Avancé"]);
+        expect(groups).toEqual(["Plus d'outils"]);
     });
 
     it("should show only Settings at the bottom, for everyone", async () => {
