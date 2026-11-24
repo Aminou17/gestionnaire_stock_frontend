@@ -65,15 +65,23 @@ describe("Landing", () => {
         const tabs = page.querySelectorAll<HTMLButtonElement>(".tab");
 
         expect(tabs.length).toBe(7);
-        expect(page.querySelector(".stack-pc img.on")!.getAttribute("src")).toBe("/landing/pc-vente.webp");
-        expect(page.querySelector(".stack-tel img.on")!.getAttribute("src")).toBe("/landing/tel-vente-3.webp");
+        expect(page.querySelector(".stack-pc img.on")!.getAttribute("src")).toBe(
+            "/landing/pc-vente.webp",
+        );
+        expect(page.querySelector(".stack-tel img.on")!.getAttribute("src")).toBe(
+            "/landing/tel-vente-3.webp",
+        );
 
         tabs[2].click();
         fixture.detectChanges();
         await fixture.whenStable();
 
-        expect(page.querySelector(".stack-pc img.on")!.getAttribute("src")).toBe("/landing/pc-produits.webp");
-        expect(page.querySelector(".stack-tel img.on")!.getAttribute("src")).toBe("/landing/tel-produits.webp");
+        expect(page.querySelector(".stack-pc img.on")!.getAttribute("src")).toBe(
+            "/landing/pc-produits.webp",
+        );
+        expect(page.querySelector(".stack-tel img.on")!.getAttribute("src")).toBe(
+            "/landing/tel-produits.webp",
+        );
         expect(tabs[2].getAttribute("aria-pressed")).toBe("true");
         expect(page.querySelector(".pair-caption")!.textContent).toContain("photo");
     });

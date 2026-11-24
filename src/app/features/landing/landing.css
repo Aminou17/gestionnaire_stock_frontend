@@ -171,7 +171,7 @@ ol {
     z-index: -2;
     background:
         radial-gradient(38% 32% at 18% 10%, rgba(59, 130, 246, 0.5), transparent 70%),
-        radial-gradient(34% 30% at 82% 22%, rgba(124, 58, 237, 0.38), transparent 70%),
+        radial-gradient(34% 30% at 82% 22%, rgba(37, 99, 235, 0.45), transparent 70%),
         radial-gradient(40% 30% at 55% 100%, rgba(14, 165, 233, 0.24), transparent 70%);
     animation: aurora 20s ease-in-out infinite alternate;
     pointer-events: none;
@@ -353,7 +353,6 @@ h1 {
     max-width: 250px;
 }
 
-
 /* sections */
 .section {
     padding: 64px 0;
@@ -485,12 +484,12 @@ h1 {
 
 .stack-pc,
 .slides-pc {
-    aspect-ratio: 1800 / 1125;
+    aspect-ratio: 2000 / 1250;
 }
 
 .stack-tel,
 .slides-tel {
-    aspect-ratio: 780 / 1688;
+    aspect-ratio: 900 / 1948;
     border-radius: 30px;
 }
 
@@ -1126,7 +1125,6 @@ h1 {
     transform: perspective(1400px) rotateY(calc(var(--mx) * 5deg)) rotateX(calc(var(--my) * -3deg))
         translateY(calc(var(--p) * -14px));
     transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
-    will-change: transform;
 }
 
 .pair {
@@ -1140,8 +1138,12 @@ h1 {
     inset: -10% -8% -4%;
     z-index: -1;
     background:
-        radial-gradient(45% 55% at 30% 45%, color-mix(in srgb, var(--primary) 26%, transparent), transparent 72%),
-        radial-gradient(35% 45% at 78% 70%, rgba(124, 58, 237, 0.2), transparent 72%);
+        radial-gradient(
+            45% 55% at 30% 45%,
+            color-mix(in srgb, var(--primary) 26%, transparent),
+            transparent 72%
+        ),
+        radial-gradient(35% 45% at 78% 70%, rgba(14, 165, 233, 0.18), transparent 72%);
     filter: blur(28px);
     pointer-events: none;
 }
@@ -1150,7 +1152,6 @@ h1 {
     transform: perspective(1200px) rotateY(calc(var(--mx) * 4deg)) rotateX(calc(var(--my) * -3deg))
         translateY(calc(var(--p) * 10px));
     transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
-    will-change: transform;
 }
 
 .pair .phone {
@@ -1158,7 +1159,6 @@ h1 {
         translate3d(calc(var(--mx) * -12px), calc(var(--my) * -8px + var(--p) * -26px), 0)
         rotateY(calc(var(--mx) * 8deg)) rotateX(calc(var(--my) * -5deg));
     transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
-    will-change: transform;
 }
 
 /* cartes : léger soulèvement (la propriété translate laisse la transform de l'apparition tranquille) */

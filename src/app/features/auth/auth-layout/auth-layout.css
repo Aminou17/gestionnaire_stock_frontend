@@ -22,7 +22,7 @@
     z-index: -2;
     background:
         radial-gradient(40% 30% at 20% 8%, rgba(59, 130, 246, 0.55), transparent 70%),
-        radial-gradient(35% 28% at 85% 18%, rgba(124, 58, 237, 0.4), transparent 70%),
+        radial-gradient(35% 28% at 85% 18%, rgba(37, 99, 235, 0.45), transparent 70%),
         radial-gradient(45% 30% at 60% 100%, rgba(14, 165, 233, 0.25), transparent 70%);
     animation: drift 18s ease-in-out infinite alternate;
 }
@@ -135,7 +135,7 @@
 .card {
     width: 100%;
     max-width: 420px;
-    margin: 0;
+    margin: auto 0;
     padding: 24px 20px 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -154,7 +154,6 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 4px 20px;
-    margin-top: auto;
     padding-top: 24px;
     color: rgba(226, 232, 240, 0.7);
     font-size: var(--fs-small);
@@ -189,23 +188,38 @@ footer {
     }
 }
 
-/* ordinateur : deux colonnes */
+/* ordinateur : deux colonnes, la carte est centrée dans la hauteur */
 @media (min-width: 1024px) {
     .shell {
+        --gutter: 56px;
         display: grid;
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     }
 
+    /* l'en-tête suit les deux colonnes : la marque à gauche, « Accueil » au bord droit de la carte */
     .bar {
         position: absolute;
         inset: 0 0 auto 0;
-        padding: 28px 40px;
+        display: grid;
+        grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+        padding: 28px 0;
         pointer-events: none;
     }
 
     .brand,
     .home {
         pointer-events: auto;
+    }
+
+    .brand {
+        margin-left: var(--gutter);
+    }
+
+    .home {
+        justify-self: center;
+        justify-content: flex-end;
+        width: min(440px, calc(100% - 2 * var(--gutter)));
+        padding-right: 0;
     }
 
     .showcase {
@@ -216,7 +230,7 @@ footer {
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        padding: 128px 48px 0 56px;
+        padding: 128px 0 0 var(--gutter);
         overflow: hidden;
     }
 
@@ -243,7 +257,7 @@ footer {
     }
 
     .pitch h2 span {
-        background: linear-gradient(90deg, #93c5fd, #c4b5fd);
+        background: linear-gradient(90deg, #bfdbfe, #60a5fa);
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
@@ -286,26 +300,25 @@ footer {
         backdrop-filter: blur(6px);
     }
 
-    /* l'ordinateur et le téléphone dépassent du bas de la colonne */
+    /* l'ordinateur déborde du bas et de la droite ; le téléphone se pose sur son coin, sans cacher le contenu.
+       Pas de rotation 3D : elle rend le texte des captures flou. */
     .devices {
         position: relative;
-        height: 330px;
-        margin-right: -48px;
-        perspective: 1600px;
+        flex: none;
+        height: 340px;
+        margin-top: 24px;
     }
 
     .d-browser {
         position: absolute;
         left: 0;
-        bottom: -70px;
-        width: 92%;
+        bottom: -80px;
+        width: 96%;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.16);
         border-radius: 14px 14px 0 0;
         background: #fff;
         box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.7);
-        transform: rotateY(-9deg) rotateX(4deg);
-        transform-origin: left bottom;
         animation: hover-a 8s ease-in-out infinite;
     }
 
@@ -331,16 +344,15 @@ footer {
 
     .d-phone {
         position: absolute;
-        left: 58%;
-        bottom: -110px;
-        width: 29%;
+        right: 6%;
+        bottom: -150px;
+        width: 24%;
         padding: 6px;
         border-radius: 26px;
         background: #0f172a;
         box-shadow:
             0 0 0 1.5px rgba(255, 255, 255, 0.18),
             0 30px 60px -12px rgba(0, 0, 0, 0.7);
-        transform: rotateY(-9deg) rotateX(4deg);
         animation: hover-b 8s ease-in-out infinite;
     }
 
@@ -353,18 +365,27 @@ footer {
 
     .content {
         justify-content: center;
-        padding: 96px 48px 24px;
+        padding: 0 var(--gutter);
     }
 
     .card {
+        margin: 0;
         max-width: 440px;
         padding: 36px 36px 28px;
+    }
+
+    footer {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        padding: 0 var(--gutter);
     }
 }
 
 @media (min-width: 1500px) {
-    .showcase {
-        padding-left: 96px;
+    .shell {
+        --gutter: 96px;
     }
 }
 

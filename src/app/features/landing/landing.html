@@ -50,8 +50,8 @@
                             @for (slide of heroPc; track slide.src; let i = $index) {
                                 <img
                                     [src]="slide.src"
-                                    width="1800"
-                                    height="1125"
+                                    width="2000"
+                                    height="1250"
                                     [alt]="slide.alt"
                                     [style.--i]="i"
                                     [attr.loading]="i === 0 ? null : 'lazy'"
@@ -64,8 +64,8 @@
                             @for (slide of heroTel; track slide.src; let i = $index) {
                                 <img
                                     [src]="slide.src"
-                                    width="780"
-                                    height="1688"
+                                    width="900"
+                                    height="1948"
                                     [alt]="slide.alt"
                                     [style.--i]="i"
                                     [attr.loading]="i === 0 ? null : 'lazy'"
@@ -158,8 +158,8 @@
                         @for (tab of tabs; track tab.label; let i = $index) {
                             <img
                                 [src]="tab.pc"
-                                width="1800"
-                                height="1125"
+                                width="2000"
+                                height="1250"
                                 [alt]="tab.pcAlt"
                                 [class.on]="i === tabIndex()"
                                 [attr.loading]="i === 0 ? null : 'lazy'"
@@ -172,8 +172,8 @@
                         @for (tab of tabs; track tab.label; let i = $index) {
                             <img
                                 [src]="tab.tel"
-                                width="780"
-                                height="1688"
+                                width="900"
+                                height="1948"
                                 [alt]="tab.telAlt"
                                 [class.on]="i === tabIndex()"
                                 [attr.loading]="i === 0 ? null : 'lazy'"
@@ -206,7 +206,7 @@
                             context: {
                                 pc: '/landing/pc-accueil.webp',
                                 tel: '/landing/tel-accueil.webp',
-                                label: 'Accueil de l’administrateur : ventes, bénéfice, caisse et crédits'
+                                label: 'Accueil de l’administrateur : ventes, bénéfice, caisse et crédits',
                             }
                         "
                     />
@@ -225,7 +225,7 @@
                             context: {
                                 pc: '/landing/pc-employe-accueil.webp',
                                 tel: '/landing/tel-employe-accueil.webp',
-                                label: 'Accueil de l’employé : ses ventes du jour et sa caisse, sans les chiffres sensibles'
+                                label: 'Accueil de l’employé : ses ventes du jour et sa caisse, sans les chiffres sensibles',
                             }
                         "
                     />
@@ -256,7 +256,7 @@
                         context: {
                             pc: '/landing/pc-employe-nouveau.webp',
                             tel: '/landing/tel-employe-nouveau.webp',
-                            label: 'Création d’un employé : prénom, nom, e-mail, rôle et mot de passe provisoire'
+                            label: 'Création d’un employé : prénom, nom, e-mail, rôle et mot de passe provisoire',
                         }
                     "
                 />
@@ -281,7 +281,7 @@
                         context: {
                             pc: '/landing/pc-outils.webp',
                             tel: '/landing/tel-outils.webp',
-                            label: 'Le menu Plus d’outils : entrées de stock, alertes, inventaires, fournisseurs et employés'
+                            label: 'Le menu Plus d’outils : entrées de stock, alertes, inventaires, fournisseurs et employés',
                         }
                     "
                 />
@@ -353,10 +353,22 @@
             <div class="browser-bar" aria-hidden="true">
                 <span></span><span></span><span></span>
             </div>
-            <img [src]="pc" width="1800" height="1125" loading="lazy" [alt]="label + ' (ordinateur)'" />
+            <img
+                [src]="pc"
+                width="2000"
+                height="1250"
+                loading="lazy"
+                [alt]="label + ' (ordinateur)'"
+            />
         </div>
         <div class="phone">
-            <img [src]="tel" width="780" height="1688" loading="lazy" [alt]="label + ' (téléphone)'" />
+            <img
+                [src]="tel"
+                width="900"
+                height="1948"
+                loading="lazy"
+                [alt]="label + ' (téléphone)'"
+            />
         </div>
     </div>
 </ng-template>
