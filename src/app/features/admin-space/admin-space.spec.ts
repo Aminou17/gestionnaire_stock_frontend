@@ -106,6 +106,28 @@ describe("AdminSpace", () => {
         expect(text()).not.toContain("Pertes de stock");
     });
 
+    it("should name the period and say what the stock measures, next to their titles", async () => {
+        await render(of(balance()));
+        const notes = () =>
+            [...fixture.nativeElement.querySelectorAll("h2 .note")].map((n) =>
+                (n as HTMLElement).textContent?.trim(),
+            );
+
+        expect(notes()).toEqual(["Aujourd'hui", "Actuellement disponible en boutique"]);
+
+        fixture.componentInstance.selectPeriod("week");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(notes()[0]).toBe("7 derniers jours");
+
+        fixture.componentInstance.selectPeriod("month");
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(notes()[0]).toBe("Ce mois");
+    });
+
     it("should ask for everything when Tous is chosen", async () => {
         await render(of(balance()));
 

@@ -74,7 +74,10 @@
     </section>
 
     <section class="card block" aria-labelledby="period-title">
-        <h2 id="period-title">Sur la période</h2>
+        <h2 id="period-title">
+            Sur la période
+            <span class="note">{{ periodName() }}</span>
+        </h2>
         <dl class="figures">
             <div class="figure">
                 <dt>Ventes de la période</dt>
@@ -101,7 +104,10 @@
     </section>
 
     <section class="card block" aria-labelledby="stock-title">
-        <h2 id="stock-title">{{ stockLabel() }}</h2>
+        <h2 id="stock-title">
+            {{ stockLabel() }}
+            <span class="note">{{ stockNote() }}</span>
+        </h2>
         <dl class="figures">
             <div class="figure">
                 <dt>Valeur d'achat</dt>

@@ -65,6 +65,19 @@ export class AdminSpace {
         return from === to ? short(from) : `${short(from)} au ${short(to)}`;
     });
 
+    // nom de la période, écrit à côté du titre « Sur la période »
+    periodName = computed(() => {
+        const names = {
+            today: "Aujourd'hui",
+            week: "7 derniers jours",
+            month: "Ce mois",
+            all: "Depuis le début",
+        };
+        const period = this.period();
+
+        return period === "custom" ? this.periodLabel() : names[period];
+    });
+
     // le stock est compté à la fin de la période : actuel tant que la période va jusqu'à aujourd'hui
     stockLabel = computed(() => {
         const { to } = this.range();
@@ -72,6 +85,13 @@ export class AdminSpace {
             ? "Stock actuel"
             : `Stock au ${formatDate(to, "d MMM", this.locale)}`;
     });
+
+    // ce que représente le stock affiché sous le titre du stock
+    stockNote = computed(() =>
+        this.range().to === this.today
+            ? "Actuellement disponible en boutique"
+            : "Quantités en boutique à cette date",
+    );
 
     netPositive = computed(() => (this.data()?.netProfit ?? 0) >= 0);
 

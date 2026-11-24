@@ -15,9 +15,20 @@ app-page-header {
 }
 
 .block h2 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 10px;
     margin: 0;
     font-size: var(--fs-heading);
     font-weight: var(--fw-semibold);
+}
+
+/* précision à côté du titre : la période ou ce que mesure le stock */
+.block h2 .note {
+    color: var(--text-muted);
+    font-size: var(--fs-small);
+    font-weight: var(--fw-regular, 400);
 }
 
 /* choix de la date et de la période */
