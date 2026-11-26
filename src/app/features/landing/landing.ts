@@ -31,7 +31,7 @@ interface Slide {
     alt: string;
 }
 
-// une page montrée sur ordinateur et sur téléphone
+// Une page montrée sur ordinateur et sur téléphone
 interface Tab {
     label: string;
     icon: IconName;
@@ -298,7 +298,7 @@ export class Landing {
 
         for (const stage of stages) {
             const move = (event: PointerEvent) => {
-                // seule la souris incline : au doigt, c'est le défilement qui anime
+                // Seule la souris incline : au doigt, c'est le défilement qui anime
                 if (event.pointerType !== "mouse") return;
 
                 const box = stage.getBoundingClientRect();

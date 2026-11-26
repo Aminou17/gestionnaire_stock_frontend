@@ -6,7 +6,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
 export const isoDay = (date: Date) =>
     `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
-// les N derniers jours, du plus ancien à aujourd'hui, avec le nombre de pages ouvertes (0 sans activité)
+// Les N derniers jours, du plus ancien à aujourd'hui, avec le nombre de pages ouvertes (0 sans activité)
 export const lastDays = (rows: UsageDay[], days: number, today = new Date()) => {
     const byDay = new Map(rows.map((row) => [row.day, row.views]));
 
@@ -21,6 +21,6 @@ export const lastDays = (rows: UsageDay[], days: number, today = new Date()) => 
     });
 };
 
-// hauteur d'une barre en pourcentage du plus grand jour, avec un minimum visible quand il y a de l'activité
+// Hauteur d'une barre en pourcentage du plus grand jour, avec un minimum visible quand il y a de l'activité
 export const barHeight = (views: number, max: number) =>
     max <= 0 || views <= 0 ? 0 : Math.max(8, Math.round((views / max) * 100));

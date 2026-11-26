@@ -31,7 +31,7 @@
     );
 }
 
-/* poignée, croix, retour et titre du paiement : seulement sur la feuille du téléphone */
+/* Poignée, croix, retour et titre du paiement : seulement sur la feuille du téléphone */
 .grip,
 .sheet-close {
     display: none;
@@ -106,7 +106,7 @@
     overscroll-behavior: contain;
 }
 
-/* lignes du panier */
+/* Lignes du panier */
 .lines {
     display: grid;
     gap: 10px;
@@ -269,7 +269,7 @@
     margin: 0;
 }
 
-/* suppression discrète : grise, rouge seulement au survol */
+/* Suppression discrète : grise, rouge seulement au survol */
 .icon-btn {
     width: 44px;
     height: 44px;
@@ -293,7 +293,7 @@
     color: var(--danger);
 }
 
-/* sections du panier : client, paiement */
+/* Sections du panier : client, paiement */
 .section {
     display: grid;
     gap: 12px;
@@ -301,13 +301,13 @@
     border-top: 1px solid var(--border);
 }
 
-/* paiement : un bloc compact dans le pied du panier */
+/* Paiement : un bloc compact dans le pied du panier */
 .pay {
     display: grid;
     gap: 8px;
 }
 
-/* modes de paiement en segments */
+/* Modes de paiement en segments */
 .methods {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -395,7 +395,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* monnaie à rendre : le chiffre le plus lisible du pied */
+/* Monnaie à rendre : le chiffre le plus lisible du pied */
 .change {
     align-items: center;
 }
@@ -429,7 +429,7 @@
     color: var(--primary-text, var(--primary));
 }
 
-/* pied du panier : total, paiement et bouton d'encaissement */
+/* Pied du panier : total, paiement et bouton d'encaissement */
 .cart-footer {
     display: grid;
     gap: 12px;
@@ -465,7 +465,7 @@
     color: var(--success);
 }
 
-/* le total : une carte dégradée, le chiffre le plus lisible du pied */
+/* Le total : une carte dégradée, le chiffre le plus lisible du pied */
 .total {
     align-items: center;
     padding: 12px 16px;
@@ -488,7 +488,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* désactivé : bien distinct d'un bouton actif (même règle que la fiche produit) */
+/* Désactivé : bien distinct d'un bouton actif (même règle que la fiche produit) */
 .submit {
     min-height: 52px;
     font-size: var(--fs-lead);
@@ -500,7 +500,7 @@
     background: var(--primary);
 }
 
-/* rappel du raccourci dans le bouton, seulement avec un clavier */
+/* Rappel du raccourci dans le bouton, seulement avec un clavier */
 .btn-key {
     display: none;
 }
@@ -535,7 +535,7 @@
     display: none;
 }
 
-/* sélecteur de client : recherche, résultats, fiche choisie */
+/* Sélecteur de client : recherche, résultats, fiche choisie */
 .picker {
     position: relative;
 }
@@ -553,7 +553,7 @@
     padding-left: 40px;
 }
 
-/* la liste s'ouvre sous le champ avec un petit écart */
+/* La liste s'ouvre sous le champ avec un petit écart */
 .picker-zone {
     display: grid;
     gap: 8px;
@@ -672,7 +672,7 @@
     font-size: var(--fs-small);
 }
 
-/* lien discret : la fiche client reste le chemin conseillé */
+/* Lien discret : la fiche client reste le chemin conseillé */
 .free-link {
     display: inline-flex;
     align-items: center;
@@ -694,7 +694,7 @@
 }
 
 @media (max-width: 1023px) {
-    /* le panier est une feuille qui monte du bas : lignes, client, paiement et bouton Encaisser au même endroit */
+    /* Le panier est une feuille qui monte du bas : lignes, client, paiement et bouton Encaisser au même endroit */
     .cart {
         position: fixed;
         right: 0;
@@ -781,7 +781,7 @@
         background: rgba(15, 23, 42, 0.35);
     }
 
-    /* barre fixe : résumé du panier et bouton, aux couleurs de l'accent */
+    /* Barre fixe : résumé du panier et bouton, aux couleurs de l'accent */
     .cart-bar {
         position: fixed;
         right: 12px;
@@ -877,7 +877,7 @@
 }
 
 @media (max-width: 767px) {
-    /* la barre se pose au-dessus de la navigation du bas */
+    /* La barre se pose au-dessus de la navigation du bas */
     .cart-bar {
         bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 8px);
     }
@@ -887,20 +887,20 @@
     }
 }
 
-/* petit téléphone : le total et les deux boutons doivent tenir sur la barre */
+/* Petit téléphone : le total et les deux boutons doivent tenir sur la barre */
 @media (max-width: 400px) {
     .bar-icon {
         display: none;
     }
 }
 
-/* une seule couleur d'accent dans le panier : les vignettes ne changent plus de couleur d'un produit à l'autre */
+/* Une seule couleur d'accent dans le panier : les vignettes ne changent plus de couleur d'un produit à l'autre */
 .line .thumb {
     background: color-mix(in srgb, var(--primary) 14%, var(--surface));
     color: var(--primary-text, var(--primary));
 }
 
-/* résumé du client et du paiement partiel dans le pied du panier */
+/* Résumé du client et du paiement partiel dans le pied du panier */
 .credit-recap {
     display: flex;
     align-items: center;
@@ -923,7 +923,7 @@
     white-space: nowrap;
 }
 
-/* fenêtre : client, paiement partiel */
+/* Fenêtre : client, paiement partiel */
 .credit-dialog {
     width: min(460px, calc(100% - 32px));
     max-height: calc(100dvh - 32px);
@@ -979,7 +979,7 @@
     gap: 12px;
 }
 
-/* interrupteur : le texte ne change jamais, seule la pastille bouge */
+/* Interrupteur : le texte ne change jamais, seule la pastille bouge */
 .switch {
     display: flex;
     align-items: center;

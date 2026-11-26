@@ -13,7 +13,7 @@ describe("UnsavedDialog", () => {
         el = fixture.nativeElement;
         await fixture.whenStable();
 
-        // jsdom ne gère pas showModal et close
+        // Jsdom ne gère pas showModal et close
         const dialog = el.querySelector("dialog")!;
         dialog.showModal = vi.fn();
         dialog.close = vi.fn();

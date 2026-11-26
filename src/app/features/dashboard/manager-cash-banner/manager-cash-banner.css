@@ -103,7 +103,7 @@
     margin-top: 4px;
 }
 
-/* sur téléphone, le bouton passe sous l'état de la caisse, sur toute la largeur */
+/* Sur téléphone, le bouton passe sous l'état de la caisse, sur toute la largeur */
 @media (max-width: 767px) {
     .banner {
         flex-direction: column;

@@ -12,7 +12,7 @@ const PERIODS = [
     { days: 90, label: "90 jours" },
 ];
 
-// pourcentages de la marge proposés comme repères de tarif
+// Pourcentages de la marge proposés comme repères de tarif
 const RATES = [1, 2, 3, 5];
 
 const median = (values: number[]) => {
@@ -40,12 +40,12 @@ export class MarginsPanel {
         stream: ({ params }) => this.owner.getMargins(params),
     });
 
-    // seulement les boutiques qui ont vendu sur la période
+    // Seulement les boutiques qui ont vendu sur la période
     rows = computed(() =>
         this.report.hasValue() ? this.report.value().rows.filter((row) => row.sales_count > 0) : [],
     );
 
-    // marge d'un mois pour la boutique du milieu : une période de 7 ou 90 jours est ramenée à 30 jours
+    // Marge d'un mois pour la boutique du milieu : une période de 7 ou 90 jours est ramenée à 30 jours
     monthlyMedian = computed(() => {
         const margins = this.rows()
             .map((row) => row.margin)

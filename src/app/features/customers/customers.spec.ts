@@ -10,9 +10,9 @@ import { CustomerService } from "../../core/customers/customer.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
 import { LowStockAlertService } from "../../core/stock/low-stock-alert.service";
 
-const awa: Customer = {
+const adam: Customer = {
     id: 4,
-    name: "Awa Kouba",
+    name: "Adam Kouba",
     phone: "06 123 45 67",
     note: null,
     is_active: true,
@@ -25,7 +25,7 @@ const awa: Customer = {
 };
 
 const jean: Customer = {
-    ...awa,
+    ...adam,
     id: 5,
     name: "Jean Okemba",
     phone: null,
@@ -40,7 +40,7 @@ describe("Customers", () => {
     let el: HTMLElement;
     let getCustomers: ReturnType<typeof vi.fn>;
 
-    async function render({ admin = true, rows = [awa, jean], dueTotal = 0 } = {}) {
+    async function render({ admin = true, rows = [adam, jean], dueTotal = 0 } = {}) {
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
 
@@ -63,7 +63,7 @@ describe("Customers", () => {
                 },
                 {
                     provide: ShopSettingsService,
-                    useValue: { shopName: signal("Chez Awa"), defaultCountryCode: signal("242") },
+                    useValue: { shopName: signal("Chez Adam"), defaultCountryCode: signal("242") },
                 },
                 { provide: LowStockAlertService, useValue: { count: signal(0) } },
             ],
@@ -80,12 +80,12 @@ describe("Customers", () => {
         await render();
 
         expect(el.querySelectorAll(".row").length).toBe(2);
-        expect(text()).toContain("Awa Kouba");
+        expect(text()).toContain("Adam Kouba");
         expect(text()).toContain("3 achats");
         expect(text()).toContain("45 000 F");
         expect(text()).toContain("dépensé");
         expect(text()).not.toContain("6 500 F");
-        // le numéro reste dans la fiche, pas sur les lignes de la liste
+        // Le numéro reste dans la fiche, pas sur les lignes de la liste
         expect(text()).not.toContain("123 45 67");
     });
 
@@ -180,8 +180,8 @@ describe("Customers", () => {
 
         expect(el.querySelector(".remind-bar")).toBeNull();
         expect(link.getAttribute("href")).toContain("wa.me");
-        expect(link.getAttribute("href")).toContain("Awa");
-        expect(link.getAttribute("aria-label")).toBe("Relancer Awa Kouba sur WhatsApp");
+        expect(link.getAttribute("href")).toContain("Adam");
+        expect(link.getAttribute("aria-label")).toBe("Relancer Adam Kouba sur WhatsApp");
     });
 
     it("should disable the icon when the customer has no number", async () => {
@@ -199,7 +199,7 @@ describe("Customers", () => {
     });
 
     it("should show only the debt, without total or label, in the debts view", async () => {
-        await render({ rows: [awa] });
+        await render({ rows: [adam] });
         expect(el.querySelector(".spent")).not.toBeNull();
         expect(el.querySelector(".due-amount")).toBeNull();
 
@@ -217,9 +217,9 @@ describe("Customers", () => {
     it("should say since when the debt exists", async () => {
         await render({
             rows: [
-                { ...awa, oldest_due_at: new Date(Date.now() - 3 * 86400000).toISOString() },
-                { ...awa, id: 6, oldest_due_at: new Date(Date.now() - 86400000).toISOString() },
-                { ...awa, id: 7, oldest_due_at: new Date().toISOString() },
+                { ...adam, oldest_due_at: new Date(Date.now() - 3 * 86400000).toISOString() },
+                { ...adam, id: 6, oldest_due_at: new Date(Date.now() - 86400000).toISOString() },
+                { ...adam, id: 7, oldest_due_at: new Date().toISOString() },
             ],
         });
         await pressDueChip();

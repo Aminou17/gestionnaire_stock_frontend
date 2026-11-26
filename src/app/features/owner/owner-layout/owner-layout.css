@@ -1,7 +1,7 @@
 :host {
     --side-width: 248px;
 
-    /* textes de cet espace seulement : trois niveaux pleins, jamais d'opacité sur l'écriture */
+    /* Textes de cet espace seulement : trois niveaux pleins, jamais d'opacité sur l'écriture */
     --text: #0b1325;
     --text-muted: #475167;
     --owner-line: color-mix(in srgb, var(--border) 92%, var(--text) 8%);

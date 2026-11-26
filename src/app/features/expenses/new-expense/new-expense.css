@@ -31,7 +31,7 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-/* montant : grand chiffre centré, comme sur les applis de paiement */
+/* Montant : grand chiffre centré, comme sur les applis de paiement */
 .amount {
     display: flex;
     align-items: baseline;
@@ -56,7 +56,7 @@ app-page-header {
 }
 
 .amount-input {
-    /* le champ suit la longueur du chiffre : le F reste collé au montant */
+    /* Le champ suit la longueur du chiffre : le F reste collé au montant */
     field-sizing: content;
     width: auto;
     min-width: 1ch;
@@ -96,7 +96,7 @@ app-page-header {
     font-variant-numeric: tabular-nums;
 }
 
-/* motifs : carreaux à la couleur de chacun */
+/* Motifs : carreaux à la couleur de chacun */
 .tiles {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -174,7 +174,7 @@ app-page-header {
     outline-offset: 2px;
 }
 
-/* résumé : la carte prend la couleur du motif choisi */
+/* Résumé : la carte prend la couleur du motif choisi */
 .side {
     position: sticky;
     top: 16px;
@@ -294,7 +294,7 @@ app-page-header {
     }
 }
 
-/* photo du reçu */
+/* Photo du reçu */
 .receipt {
     display: flex;
     flex-wrap: wrap;

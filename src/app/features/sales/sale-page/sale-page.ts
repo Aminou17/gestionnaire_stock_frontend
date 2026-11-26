@@ -66,7 +66,7 @@ interface TimelineEvent {
     styleUrls: ["./sale-page.css", "./sale-page-dialogs.css"],
 })
 export class SalePage {
-    // pastille de l'article quand le produit n'a pas de photo
+    // Pastille de l'article quand le produit n'a pas de photo
     protected initials = productInitials;
     protected tone = categoryTone;
 
@@ -77,7 +77,7 @@ export class SalePage {
 
     back = getBackLink("/sales", "Ventes");
 
-    // la page ouverte depuis ici sait revenir sur cette vente
+    // La page ouverte depuis ici sait revenir sur cette vente
     private router = inject(Router);
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Vente" };
@@ -89,7 +89,7 @@ export class SalePage {
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
-    // un identifiant qui n'est pas un entier n'est même pas demandé au backend
+    // Un identifiant qui n'est pas un entier n'est même pas demandé au backend
     validId = computed(() => {
         const id = this.id();
         return id !== undefined && Number.isInteger(id) && id > 0;
@@ -102,7 +102,7 @@ export class SalePage {
 
     data = computed(() => (this.sale.hasValue() ? this.sale.value() : undefined));
 
-    // le backend répond 404 pour une vente inexistante ou celle d'un autre employé
+    // Le backend répond 404 pour une vente inexistante ou celle d'un autre employé
     notFound = computed(
         () =>
             !this.validId() || (this.sale.error() as HttpErrorResponse | undefined)?.status === 404,
@@ -113,7 +113,7 @@ export class SalePage {
         return err?.error?.message ?? "Impossible de charger la vente.";
     });
 
-    // total avant remises, et remises accordées sur la vente
+    // Total avant remises, et remises accordées sur la vente
     subtotal = computed(() =>
         (this.data()?.items ?? []).reduce(
             (sum, item) => sum + item.quantity * item.reference_price,
@@ -129,12 +129,12 @@ export class SalePage {
 
     saleMoves = computed(() => (this.data()?.movements ?? []).filter((m) => m.type === "SALE"));
 
-    // montant gardé par la boutique : le total moins ce qui a été rendu
+    // Montant gardé par la boutique : le total moins ce qui a été rendu
     returned = computed(() => this.data()?.returned_amount ?? 0);
     net = computed(() => (this.data()?.total ?? 0) - this.returned());
     hasReturns = computed(() => this.returned() > 0 && this.data()?.status !== "CANCELLED");
 
-    // journal : du plus récent au plus ancien, avec le stock rattaché à chaque événement
+    // Journal : du plus récent au plus ancien, avec le stock rattaché à chaque événement
     timeline = computed<TimelineEvent[]>(() => {
         const sale = this.data();
         if (!sale) return [];
@@ -155,7 +155,7 @@ export class SalePage {
             });
         }
 
-        // chaque retour reprend son mouvement de stock (même produit et même quantité)
+        // Chaque retour reprend son mouvement de stock (même produit et même quantité)
         for (const row of sale.returns) {
             const index = adjustments.findIndex(
                 (m) => m.product_id === row.product_id && m.quantity === row.quantity,
@@ -184,7 +184,7 @@ export class SalePage {
         return events.sort((a, b) => Date.parse(b.at) - Date.parse(a.at) || b.rank - a.rank);
     });
 
-    // stock replié quand un événement touche plusieurs produits
+    // Stock replié quand un événement touche plusieurs produits
     openStock = signal<string[]>([]);
 
     toggleStock(key: string) {
@@ -193,7 +193,7 @@ export class SalePage {
         );
     }
 
-    // détail d'un mouvement dans la même fenêtre que la page Mouvements
+    // Détail d'un mouvement dans la même fenêtre que la page Mouvements
     private moveDetail = viewChild<MovementDetail>("moveDetail");
     selectedMove = signal<StockMovement | null>(null);
 
@@ -207,7 +207,7 @@ export class SalePage {
     private shop = rxResource({ stream: () => this.shopService.getSettings() });
     shopInfo = computed(() => (this.shop.hasValue() ? this.shop.value() : null));
 
-    // préfixe du numéro de ticket, choisi dans les réglages de vente
+    // Préfixe du numéro de ticket, choisi dans les réglages de vente
     private salesSettingsService = inject(SalesSettingsService);
     private salesSettings = rxResource({ stream: () => this.salesSettingsService.getSettings() });
     ticketPrefix = computed(() =>
@@ -218,7 +218,7 @@ export class SalePage {
         formatTicketNumber(this.data()?.number ?? "", this.ticketPrefix()),
     );
 
-    // lien WhatsApp du reçu en texte, prêt dès que le nom de la boutique et le préfixe sont connus
+    // Lien WhatsApp du reçu en texte, prêt dès que le nom de la boutique et le préfixe sont connus
     whatsAppReceipt = computed(() => {
         const sale = this.data();
         const shop = this.shopInfo();
@@ -232,13 +232,13 @@ export class SalePage {
         );
     });
 
-    // ouvre la conversation WhatsApp du client, sans message écrit
+    // Ouvre la conversation WhatsApp du client, sans message écrit
     customerWhatsApp = computed(() => {
         const phone = this.data()?.customer_phone;
         return phone ? toWhatsAppLink(phone, this.shopService.defaultCountryCode()) : null;
     });
 
-    // menu des trois points : envoyer en texte, imprimer, et rembourser pour le propriétaire
+    // Menu des trois points : envoyer en texte, imprimer, et rembourser pour le propriétaire
     returnMode = signal(false);
 
     menuItems = computed<ActionItem[]>(() => {
@@ -253,7 +253,7 @@ export class SalePage {
             icon: "printer",
             disabled: !this.settingsReady(),
         });
-        // rendre un seul article : les boutons "Rendre" n'apparaissent sur les lignes qu'à ce moment
+        // Rendre un seul article : les boutons "Rendre" n'apparaissent sur les lignes qu'à ce moment
         if (this.canReturn()) {
             items.push({
                 id: "return-mode",
@@ -286,7 +286,7 @@ export class SalePage {
     shareNotice = signal("");
     shareError = signal(false);
 
-    // ouvre la conversation WhatsApp du client avec l'adresse du ticket, prête à envoyer.
+    // Ouvre la conversation WhatsApp du client avec l'adresse du ticket, prête à envoyer.
     // sans réseau, l'image du ticket est copiée à la place
     async shareImage() {
         const sale = this.data();
@@ -308,7 +308,7 @@ export class SalePage {
     }
 
     private async shareImageFallback() {
-        // on photographie le ticket, pas le bloc qui le décale hors de l'écran
+        // On photographie le ticket, pas le bloc qui le décale hors de l'écran
         const box = this.captureBox()?.nativeElement.firstElementChild as HTMLElement | null;
         const sale = this.data();
         if (!box || !sale) return;
@@ -334,7 +334,7 @@ export class SalePage {
         }
     }
 
-    // un ticket sans son en-tête ni son préfixe serait faux : on bloque l'impression plutôt que de l'imprimer
+    // Un ticket sans son en-tête ni son préfixe serait faux : on bloque l'impression plutôt que de l'imprimer
     settingsReady = computed(() => this.shop.hasValue() && this.salesSettings.hasValue());
     settingsFailed = computed(() => !!(this.shop.error() || this.salesSettings.error()));
 
@@ -343,7 +343,7 @@ export class SalePage {
         this.salesSettings.reload();
     }
 
-    // le titre de la page sert de nom au fichier quand on enregistre en PDF
+    // Le titre de la page sert de nom au fichier quand on enregistre en PDF
     private ticketDialog = viewChild.required<ElementRef<HTMLDialogElement>>("ticketBox");
 
     openTicket() {
@@ -368,11 +368,11 @@ export class SalePage {
     itemsCount = computed(() =>
         (this.data()?.items ?? []).reduce((sum, item) => sum + item.quantity, 0),
     );
-    // pendant le rechargement, la vente affichée peut déjà être remboursée
+    // Pendant le rechargement, la vente affichée peut déjà être remboursée
     reloading = computed(() => this.sale.isLoading());
     canRefund = computed(() => this.auth.isAdmin() && this.data()?.status === "ACTIVE");
 
-    // part du total déjà encaissée, pour la barre de progression
+    // Part du total déjà encaissée, pour la barre de progression
     paidPercent = computed(() => {
         const sale = this.data();
         return sale && sale.total > 0 ? Math.floor((sale.paid_amount / sale.total) * 100) : 0;
@@ -382,19 +382,19 @@ export class SalePage {
         return phone ? formatInternational(phone, this.shopService.defaultCountryCode()) : "";
     });
 
-    // reste à payer d'une vente validée (acompte)
+    // Reste à payer d'une vente validée (acompte)
     due = computed(() => {
         const sale = this.data();
         return sale && sale.status === "ACTIVE" ? sale.total - sale.paid_amount : 0;
     });
-    // ce qui sera rendu au client : la part payée en espèces sort du tiroir, le reste se rend hors caisse
+    // Ce qui sera rendu au client : la part payée en espèces sort du tiroir, le reste se rend hors caisse
     cashPaid = computed(() =>
         (this.data()?.payments ?? [])
             .filter((payment) => payment.payment_method === "CASH")
             .reduce((sum, payment) => sum + payment.amount, 0),
     );
     otherPaid = computed(() => (this.data()?.paid_amount ?? 0) - this.cashPaid());
-    // plusieurs paiements ou un reste : on détaille, sinon le résumé habituel suffit
+    // Plusieurs paiements ou un reste : on détaille, sinon le résumé habituel suffit
     showPayments = computed(() => (this.data()?.payments.length ?? 0) > 1 || this.due() > 0);
     canPay = computed(() => this.due() > 0);
 
@@ -440,7 +440,7 @@ export class SalePage {
             });
     }
 
-    // retour partiel d'un article d'une vente soldée
+    // Retour partiel d'un article d'une vente soldée
     canReturn = computed(
         () => this.auth.isAdmin() && this.data()?.status === "ACTIVE" && this.due() === 0,
     );

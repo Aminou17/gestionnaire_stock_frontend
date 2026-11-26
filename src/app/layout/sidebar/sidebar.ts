@@ -35,11 +35,11 @@ export class Sidebar {
     protected alerts = inject(LowStockAlertService);
     protected shop = inject(ShopSettingsService);
     protected support = inject(SupportService);
-    // un cadenas marque ce qui ne fait pas partie de la formule de la boutique
+    // Un cadenas marque ce qui ne fait pas partie de la formule de la boutique
     protected access = inject(ModuleAccess);
 
     constructor() {
-        // une réponse du support apparaît sans recharger la page
+        // Une réponse du support apparaît sans recharger la page
         const refresh = () => this.support.refreshUnread("user");
         refresh();
 
@@ -47,7 +47,7 @@ export class Sidebar {
         inject(DestroyRef).onDestroy(() => clearInterval(timer));
     }
 
-    // la page affichée est dans ce groupe
+    // La page affichée est dans ce groupe
     holdsUrl(group: NavItem) {
         const path = this.url().split("?")[0];
         return (group.children ?? []).some(
@@ -55,7 +55,7 @@ export class Sidebar {
         );
     }
 
-    // nom de la page affichée dans ce groupe, montré sous le nom du groupe
+    // Nom de la page affichée dans ce groupe, montré sous le nom du groupe
     activeChild(group: NavItem) {
         const path = this.url().split("?")[0];
         return (
@@ -69,7 +69,7 @@ export class Sidebar {
         );
     }
 
-    // rubrique ouverte en carreaux ; le menu réduit garde ses icônes à plat
+    // Rubrique ouverte en carreaux ; le menu réduit garde ses icônes à plat
     panel = signal<string | null>(null);
 
     private outsideClick = closeOnOutsideClick(
@@ -87,7 +87,7 @@ export class Sidebar {
         );
     });
 
-    // sur téléphone, le tiroir se range : la fenêtre des carreaux prend toute la place
+    // Sur téléphone, le tiroir se range : la fenêtre des carreaux prend toute la place
     openPanel(group: NavItem) {
         this.profileOpen.set(false);
         this.layout.sidebarOpen.set(false);
@@ -98,7 +98,7 @@ export class Sidebar {
         this.panel.set(null);
     }
 
-    // pastille d'alertes sur le groupe quand il est fermé, pour ne pas la perdre
+    // Pastille d'alertes sur le groupe quand il est fermé, pour ne pas la perdre
     // le manager ne voit que les pages auxquelles il a accès ; un groupe sans page disparaît
     sections = computed(() => {
         const isAdmin = this.auth.isAdmin();
@@ -130,7 +130,7 @@ export class Sidebar {
 
     profileOpen = signal(false);
 
-    // après un choix, on revient à la liste : le groupe montre la page choisie
+    // Après un choix, on revient à la liste : le groupe montre la page choisie
     close() {
         this.panel.set(null);
         this.profileOpen.set(false);

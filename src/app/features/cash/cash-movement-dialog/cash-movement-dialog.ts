@@ -73,14 +73,14 @@ export class CashMovementDialog {
         if (this.saving()) event.preventDefault();
     }
 
-    // ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
+    // Ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
     onBackdropClick(event: MouseEvent) {
         if (event.target === this.dialog().nativeElement) {
             this.close();
         }
     }
 
-    // seul l'ajout d'argent exige une précision
+    // Seul l'ajout d'argent exige une précision
     reasonRequired = computed(() => this.type() === "DEPOSIT");
 
     reasonMissing() {

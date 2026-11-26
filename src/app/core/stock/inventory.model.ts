@@ -5,7 +5,7 @@ export type InventoryStatus = "in_progress" | "counted" | "applied" | "cancelled
 export interface InventoryPerson {
     id: number;
     name: string;
-    // la photo n'est envoyée que par le détail
+    // La photo n'est envoyée que par le détail
     avatar: string | null;
 }
 
@@ -22,15 +22,15 @@ export interface Inventory {
     countedBy: InventoryPerson | null;
     appliedBy: InventoryPerson | null;
     cancelledBy: InventoryPerson | null;
-    // produits comptés (un inventaire ne contient que les produits choisis)
+    // Produits comptés (un inventaire ne contient que les produits choisis)
     itemsCount: number;
-    // masqués (null) pour le gérant : écarts pendant le comptage, valeur en francs toujours
+    // Masqués (null) pour le gérant : écarts pendant le comptage, valeur en francs toujours
     differenceCount: number | null;
     differenceValue: number | null;
     maxStock: number;
 }
 
-// raison d'un écart, choisie par l'administrateur
+// Raison d'un écart, choisie par l'administrateur
 export type ItemReason = "breakage" | "theft" | "expired" | "error" | "other";
 
 export interface InventoryItem {
@@ -45,7 +45,7 @@ export interface InventoryItem {
     difference: number | null;
     purchasePrice: number | null;
     differenceValue: number | null;
-    // remplis seulement après la correction du stock
+    // Remplis seulement après la correction du stock
     adjustment: number | null;
     movementsSince: number | null;
     expectedStock: number | null;
@@ -90,7 +90,7 @@ export interface ItemQuery {
 
 export interface NewInventory {
     name?: string;
-    // identifiant créé par l'appareil : un réessai ne crée pas un deuxième inventaire
+    // Identifiant créé par l'appareil : un réessai ne crée pas un deuxième inventaire
     clientKey: string;
 }
 
@@ -124,7 +124,7 @@ export interface MovementsSince {
     products: { productId: number; productName: string; movements: number; netChange: number }[];
 }
 
-// réponse du serveur quand un comptage est déjà ouvert
+// Réponse du serveur quand un comptage est déjà ouvert
 export interface InProgressConflict {
     code: "INVENTORY_IN_PROGRESS";
     existing: { id: number; name: string | null; status: InventoryStatus };

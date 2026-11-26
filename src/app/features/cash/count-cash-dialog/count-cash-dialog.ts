@@ -15,11 +15,11 @@ import { SaleOutboxService } from "../../../core/offline/sale-outbox.service";
 import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
-// ce qu'il faut savoir pour ouvrir la fenêtre
+// Ce qu'il faut savoir pour ouvrir la fenêtre
 export interface CountTarget {
-    // attendu dans le tiroir ; null quand le comptage est à l'aveugle
+    // Attendu dans le tiroir ; null quand le comptage est à l'aveugle
     expected: number | null;
-    // caisse précise (jour passé non compté, ou comptage à rectifier) ; sans id : la caisse du jour
+    // Caisse précise (jour passé non compté, ou comptage à rectifier) ; sans id : la caisse du jour
     sessionId?: number;
     // YYYY-MM-DD, pour dire de quelle journée il s'agit
     sessionDate?: string;
@@ -33,17 +33,17 @@ export interface CountTarget {
 })
 export class CountCashDialog {
     private cash = inject(CashSessionService);
-    // des ventes faites sans internet et pas encore envoyées fausseraient le solde attendu
+    // Des ventes faites sans internet et pas encore envoyées fausseraient le solde attendu
     protected outbox = inject(SaleOutboxService);
     private fb = inject(NonNullableFormBuilder);
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
 
-    // émis quand la caisse vient d'être comptée
+    // Émis quand la caisse vient d'être comptée
     counted = output();
 
     form = this.fb.group({
-        // vide au départ : pas de 0 à effacer avant de taper
+        // Vide au départ : pas de 0 à effacer avant de taper
         actualAmount: new FormControl<number | null>(null, {
             validators: [Validators.required, Validators.min(0), Validators.pattern(/^\d+$/)],
         }),
@@ -51,18 +51,18 @@ export class CountCashDialog {
     });
 
     target = signal<CountTarget>({ expected: null });
-    // la session renvoyée par le serveur : affichée comme résultat
+    // La session renvoyée par le serveur : affichée comme résultat
     result = signal<CashSession | null>(null);
     saving = signal(false);
     error = signal<string | null>(null);
 
-    // l'écart ne s'affiche qu'une fois le montant saisi, pas sur le champ vide
+    // L'écart ne s'affiche qu'une fois le montant saisi, pas sur le champ vide
     protected edited = signal(false);
     private typed = toSignal(this.form.controls.actualAmount.valueChanges, { initialValue: null });
 
     blind = computed(() => this.target().expected === null);
 
-    // écart prévu avant d'enregistrer, quand le solde attendu est connu
+    // Écart prévu avant d'enregistrer, quand le solde attendu est connu
     difference = computed(() => {
         const expected = this.target().expected;
         const typed = this.typed();
@@ -84,7 +84,7 @@ export class CountCashDialog {
     }
 
     close() {
-        // pendant l'envoi, la réponse doit arriver sur cette fenêtre ouverte
+        // Pendant l'envoi, la réponse doit arriver sur cette fenêtre ouverte
         if (this.saving()) return;
         this.dialog().nativeElement.close();
     }
@@ -94,7 +94,7 @@ export class CountCashDialog {
         if (this.saving()) event.preventDefault();
     }
 
-    // ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
+    // Ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
     onBackdropClick(event: MouseEvent) {
         if (event.target === this.dialog().nativeElement) {
             this.close();
@@ -114,7 +114,7 @@ export class CountCashDialog {
         this.saving.set(true);
         this.error.set(null);
 
-        // montant exact : une raison tapée avant de corriger le montant ne doit pas partir
+        // Montant exact : une raison tapée avant de corriger le montant ne doit pas partir
         const note = this.difference() === 0 ? "" : closingNote;
 
         this.cash.count(actualAmount, note, this.target().sessionId).subscribe({

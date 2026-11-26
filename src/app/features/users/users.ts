@@ -64,7 +64,7 @@ export class Users {
     activeCount = computed(() => this.all().filter((u) => u.is_active).length);
     deletedCount = computed(() => this.all().filter((u) => !u.is_active).length);
 
-    // quelques comptes seulement : on filtre dans le navigateur
+    // Quelques comptes seulement : on filtre dans le navigateur
     list = computed(() => {
         const search = this.search().trim().toLowerCase();
         const showDeleted = this.view() === "deleted";
@@ -150,7 +150,7 @@ export class Users {
     }
 
     onSaved() {
-        // l'employé enregistré doit être visible, quelle que soit la recherche en cours
+        // L'employé enregistré doit être visible, quelle que soit la recherche en cours
         this.search.set("");
         this.view.set("active");
         this.users.reload();

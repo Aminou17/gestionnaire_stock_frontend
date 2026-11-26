@@ -25,7 +25,7 @@ import { ToastService } from "../../../shared/toast/toast.service";
 import { ProductForm } from "../../products/product-form/product-form";
 import { categoryTone, productInitials } from "../../products/product-look";
 
-// une ligne de la livraison : un produit et la quantité reçue
+// Une ligne de la livraison : un produit et la quantité reçue
 interface EntryLine {
     product: Product;
     quantity: number;
@@ -66,10 +66,10 @@ export class NewStockEntry implements AfterViewInit {
     searchFocused = signal(false);
     private searchTimer?: ReturnType<typeof setTimeout>;
 
-    // message après un scan sans résultat : on propose de créer le produit
+    // Message après un scan sans résultat : on propose de créer le produit
     unknownCode = signal<string | null>(null);
 
-    // à la prise de focus, des produits sont proposés avant même de taper
+    // À la prise de focus, des produits sont proposés avant même de taper
     products = rxResource({
         params: () => (this.showResults() ? this.search().trim() : undefined),
         stream: ({ params }) =>
@@ -85,7 +85,7 @@ export class NewStockEntry implements AfterViewInit {
     results = computed(() => (this.products.hasValue() ? this.products.value().data : []));
     showResults = computed(() => this.searchFocused() || this.search().trim().length > 0);
 
-    // le délai laisse passer le clic sur un résultat avant de replier la liste
+    // Le délai laisse passer le clic sur un résultat avant de replier la liste
     onSearchBlur() {
         setTimeout(() => this.searchFocused.set(false), 150);
     }
@@ -120,13 +120,13 @@ export class NewStockEntry implements AfterViewInit {
     constructor() {
         this.destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
 
-        // depuis la fiche d'un fournisseur : il est déjà choisi
+        // Depuis la fiche d'un fournisseur : il est déjà choisi
         const supplierId = toId(this.route.snapshot.queryParamMap.get("supplierId"));
         if (supplierId) this.supplierId.set(supplierId);
     }
 
     ngAfterViewInit() {
-        // depuis la fiche d'un produit ou les alertes : /stock-entries/new?productId=3&quantity=12
+        // Depuis la fiche d'un produit ou les alertes : /stock-entries/new?productId=3&quantity=12
         const productId = toId(this.route.snapshot.queryParamMap.get("productId"));
         if (!productId) return;
 
@@ -140,7 +140,7 @@ export class NewStockEntry implements AfterViewInit {
         this.searchTimer = setTimeout(() => this.search.set(value), 250);
     }
 
-    // un produit déjà dans la liste prend une unité de plus au lieu d'une deuxième ligne
+    // Un produit déjà dans la liste prend une unité de plus au lieu d'une deuxième ligne
     addProduct(product: Product, quantity = 1) {
         const lines = this.lines();
         const existing = lines.find((line) => line.product.id === product.id);
@@ -167,7 +167,7 @@ export class NewStockEntry implements AfterViewInit {
         if (box) box.value = "";
     }
 
-    // le fournisseur habituel du premier produit est proposé
+    // Le fournisseur habituel du premier produit est proposé
     private suggestSupplier(productId: number) {
         if (this.supplierId() !== null) return;
 
@@ -202,7 +202,7 @@ export class NewStockEntry implements AfterViewInit {
             });
     }
 
-    // code scanné : le produit qui le porte est ajouté, sinon on propose de le créer
+    // Code scanné : le produit qui le porte est ajouté, sinon on propose de le créer
     onScanned(code: string) {
         this.unknownCode.set(null);
 
@@ -230,7 +230,7 @@ export class NewStockEntry implements AfterViewInit {
         this.productForm().openNew(null, barcode);
     }
 
-    // le produit créé arrive directement dans la livraison
+    // Le produit créé arrive directement dans la livraison
     onProductCreated(id: number) {
         this.unknownCode.set(null);
         this.addById(id);
@@ -265,7 +265,7 @@ export class NewStockEntry implements AfterViewInit {
             return;
         }
 
-        // déjà dans la liste : on le choisit au lieu de créer un doublon
+        // Déjà dans la liste : on le choisit au lieu de créer un doublon
         const existing = this.supplierList().find(
             (s) => s.name.toLowerCase() === name.toLowerCase(),
         );
@@ -297,7 +297,7 @@ export class NewStockEntry implements AfterViewInit {
             });
     }
 
-    // une entrée par produit, l'une après l'autre ; en cas d'erreur, les lignes déjà
+    // Une entrée par produit, l'une après l'autre ; en cas d'erreur, les lignes déjà
     // enregistrées sortent de la liste pour ne pas les compter deux fois
     submit() {
         if (this.saving()) return;
@@ -324,7 +324,7 @@ export class NewStockEntry implements AfterViewInit {
                             supplierId,
                             quantity: line.quantity,
                         })
-                        // la ligne est comptée comme enregistrée dès la réponse
+                        // La ligne est comptée comme enregistrée dès la réponse
                         .pipe(tap(() => done.push(line))),
                 ),
                 toArray(),
@@ -338,7 +338,7 @@ export class NewStockEntry implements AfterViewInit {
                     this.toast.show(
                         `Entrée enregistrée : ${units} unité${units > 1 ? "s" : ""} reçue${units > 1 ? "s" : ""}`,
                     );
-                    // le formulaire quitte l'historique : la touche retour ne le rouvre pas
+                    // Le formulaire quitte l'historique : la touche retour ne le rouvre pas
                     this.goBack(this.back.link);
                 },
                 error: (err: HttpErrorResponse) => {

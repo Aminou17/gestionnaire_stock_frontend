@@ -67,7 +67,7 @@ describe("AuditLogs", () => {
                     useValue: {
                         isAdmin: signal(true),
                         isOwner: signal(false),
-                        user: signal({ id: 1, name: "Awa", email: "a@test.com", role: "admin" }),
+                        user: signal({ id: 1, name: "Adam", email: "a@test.com", role: "admin" }),
                         roleLabel: signal("Administrateur"),
                     },
                 },
@@ -173,7 +173,7 @@ describe("AuditLogs", () => {
         expect(getLogs).toHaveBeenCalledWith(
             expect.objectContaining({ category: "security", limit: 25 }),
         );
-        // plus de rangée de compteurs : les filtres de l'onglet sont visibles tout de suite
+        // Plus de rangée de compteurs : les filtres de l'onglet sont visibles tout de suite
         expect(el.querySelector(".summary")).toBeNull();
         expect(el.querySelectorAll(".filters select").length).toBe(2);
     });

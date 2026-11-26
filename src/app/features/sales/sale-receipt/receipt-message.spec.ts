@@ -19,9 +19,9 @@ const sale = (changes: Partial<SaleDetail> = {}) =>
 
 describe("receipt message", () => {
     it("should list the items, the total and the amount left to pay", () => {
-        const message = receiptMessage(sale(), "Awa Bazin", "AB");
+        const message = receiptMessage(sale(), "Adam Ouédraogo", "AB");
 
-        expect(message).toContain("Awa Bazin");
+        expect(message).toContain("Adam Ouédraogo");
         expect(message).toContain("Ticket n° AB-000128");
         expect(message).toContain("2 x Pagne wax : 20 000 F");
         expect(message).toContain("Total : 35 000 F");
@@ -29,36 +29,36 @@ describe("receipt message", () => {
     });
 
     it("should not show a rest to pay on a fully paid sale", () => {
-        const message = receiptMessage(sale({ paid_amount: 35000 }), "Awa Bazin");
+        const message = receiptMessage(sale({ paid_amount: 35000 }), "Adam Ouédraogo");
 
         expect(message).toContain("Payé : 35 000 F");
         expect(message).not.toContain("Reste à payer");
     });
 
     it("should end with the footer written by the shop, and nothing of its own", () => {
-        const message = receiptMessage(sale(), "Awa Bazin", "", "Fermé lundi");
+        const message = receiptMessage(sale(), "Adam Ouédraogo", "", "Fermé lundi");
 
         expect(message.endsWith("Fermé lundi")).toBe(true);
         expect(message).not.toContain("Merci");
-        expect(receiptMessage(sale(), "Awa Bazin")).not.toContain("Merci");
+        expect(receiptMessage(sale(), "Adam Ouédraogo")).not.toContain("Merci");
     });
 
     it("should say when the sale is refunded", () => {
-        const message = receiptMessage(sale({ status: "CANCELLED" }), "Awa Bazin");
+        const message = receiptMessage(sale({ status: "CANCELLED" }), "Adam Ouédraogo");
 
         expect(message).toContain("Vente remboursée");
         expect(message).not.toContain("Reste à payer");
     });
 
     it("should write to the customer when there is a phone number", () => {
-        expect(receiptLink(sale(), "Awa Bazin", "242")).toMatch(/^https:\/\/wa\.me\/242\d+\?text=/);
-        expect(receiptLink(sale({ customer_phone: "66 09 90 60" }), "Awa Bazin", "226")).toMatch(
+        expect(receiptLink(sale(), "Adam Ouédraogo", "242")).toMatch(/^https:\/\/wa\.me\/242\d+\?text=/);
+        expect(receiptLink(sale({ customer_phone: "66 09 90 60" }), "Adam Ouédraogo", "226")).toMatch(
             /^https:\/\/wa\.me\/22666099060\?text=/,
         );
     });
 
     it("should let WhatsApp pick the chat without a phone number", () => {
-        expect(receiptLink(sale({ customer_phone: null }), "Awa Bazin", "242")).toMatch(
+        expect(receiptLink(sale({ customer_phone: null }), "Adam Ouédraogo", "242")).toMatch(
             /^https:\/\/wa\.me\/\?text=/,
         );
     });

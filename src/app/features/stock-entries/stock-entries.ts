@@ -61,13 +61,13 @@ export class StockEntries {
     private router = inject(Router);
 
     zoomImage(event: Event, src: string, name: string) {
-        // la photo ne doit pas ouvrir la fiche produit ni fermer la fenêtre
+        // La photo ne doit pas ouvrir la fiche produit ni fermer la fenêtre
         event.preventDefault();
         event.stopPropagation();
         this.zoom.set({ src, name });
     }
 
-    // la fiche produit ouverte sait ainsi revenir ici
+    // La fiche produit ouverte sait ainsi revenir ici
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Entrées de stock" };
     }
@@ -78,19 +78,19 @@ export class StockEntries {
     protected initials = productInitials;
     protected tone = categoryTone;
 
-    // menu des trois points d'une entrée
+    // Menu des trois points d'une entrée
     protected rowActions: ActionItem[] = [
         { id: "product", label: "Voir le produit", icon: "package" },
         { id: "correct", label: "Corriger la quantité", icon: "edit" },
     ];
 
-    // photo agrandie au centre de la page
+    // Photo agrandie au centre de la page
     protected zoom = signal<{ src: string; name: string } | null>(null);
 
     // Liste
 
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
-    // arrivée depuis la fiche d'un fournisseur : /stock-entries?supplierId=4
+    // Arrivée depuis la fiche d'un fournisseur : /stock-entries?supplierId=4
     supplierId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("supplierId")));
     page = signal(1);
     pageSize = storedPageSize("entries");
@@ -106,7 +106,7 @@ export class StockEntries {
         stream: ({ params }) => this.entryService.getEntries(params),
     });
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<StockEntryPage | undefined, StockEntryPage | undefined>({
         source: () => (this.entries.hasValue() ? this.entries.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -117,7 +117,7 @@ export class StockEntries {
     total = computed(() => this.last()?.total ?? 0);
     counters = computed(() => this.last()?.counters);
 
-    // cartes du haut : une couleur et une icône par chiffre, comme les cartes de l'Accueil
+    // Cartes du haut : une couleur et une icône par chiffre, comme les cartes de l'Accueil
     stats = computed(() => {
         const counters = this.counters();
         return [
@@ -141,7 +141,7 @@ export class StockEntries {
     );
 
     constructor() {
-        // anciens liens (?productId=3, ?new=1) : la saisie a maintenant sa propre page
+        // Anciens liens (?productId=3, ?new=1) : la saisie a maintenant sa propre page
         const params = this.route.snapshot.queryParamMap;
         if (params.has("productId") || params.get("new") === "1") {
             this.router.navigate(["/stock-entries/new"], {
@@ -154,7 +154,7 @@ export class StockEntries {
             });
         }
 
-        // fournisseur de l'adresse inconnu ou supprimé : on montre toutes les entrées
+        // Fournisseur de l'adresse inconnu ou supprimé : on montre toutes les entrées
         effect(() => {
             const id = this.supplierId();
             if (id === null || !this.suppliers.hasValue()) return;
@@ -179,7 +179,7 @@ export class StockEntries {
         this.supplierId.set(value ? Number(value) : null);
         this.page.set(1);
 
-        // l'adresse ne doit plus imposer l'ancien fournisseur au rechargement
+        // L'adresse ne doit plus imposer l'ancien fournisseur au rechargement
         if (this.route.snapshot.queryParamMap.has("supplierId")) {
             this.router.navigate([], {
                 relativeTo: this.route,
@@ -202,10 +202,10 @@ export class StockEntries {
         }
     }
 
-    // message de confirmation après un ajustement du stock
+    // Message de confirmation après un ajustement du stock
     private toast = inject(ToastService);
 
-    // erreur de saisie : la fenêtre d'ajustement s'ouvre déjà réglée pour retirer cette quantité
+    // Erreur de saisie : la fenêtre d'ajustement s'ouvre déjà réglée pour retirer cette quantité
     correctError = signal<string | null>(null);
 
     correct(entry: StockEntry) {

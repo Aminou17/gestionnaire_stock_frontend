@@ -28,7 +28,7 @@ export class ExportMenu {
 
     label = input("Exporter");
     ariaLabel = input<string>();
-    // chip : puce de filtre, button : bouton de l'en-tête ou d'un formulaire
+    // Chip : puce de filtre, button : bouton de l'en-tête ou d'un formulaire
     variant = input<"chip" | "button">("button");
     busy = input(false);
     disabled = input(false);
@@ -51,7 +51,7 @@ export class ExportMenu {
             return;
         }
 
-        // sur ordinateur le CSS aligne le panneau sous le bouton, sur téléphone il se pose en bas
+        // Sur ordinateur le CSS aligne le panneau sous le bouton, sur téléphone il se pose en bas
         const rect = this.trigger().nativeElement.getBoundingClientRect();
         panel.style.setProperty("--top", `${rect.bottom + 4}px`);
         panel.style.setProperty("--right", `${window.innerWidth - rect.right}px`);
@@ -61,11 +61,11 @@ export class ExportMenu {
         this.stopSwallowing = swallowNextOutsideClick(
             (target) => panel.contains(target) || this.trigger().nativeElement.contains(target),
         );
-        // le clavier arrive directement sur le premier choix
+        // Le clavier arrive directement sur le premier choix
         panel.querySelector<HTMLElement>(".item")?.focus();
     }
 
-    // le navigateur ferme le popover lui-même (clic à côté, Échap) : on suit son état
+    // Le navigateur ferme le popover lui-même (clic à côté, Échap) : on suit son état
     onToggle(event: Event) {
         this.open.set((event as ToggleEvent).newState === "open");
     }

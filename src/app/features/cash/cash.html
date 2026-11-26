@@ -28,7 +28,7 @@
         </button>
     </section>
 } @else {
-    <!-- rappel doux : une caisse d'un jour passé n'a pas été comptée -->
+    <!-- Rappel doux : une caisse d'un jour passé n'a pas été comptée -->
     @if (uncounted(); as old) {
         <app-uncounted-cash-notice
             class="reminder"
@@ -45,7 +45,7 @@
 
     <div class="layout">
         <div class="main">
-            <!-- la couleur suit l'état : vert en cours, gris comptée, bleu pas encore ouverte -->
+            <!-- La couleur suit l'état : vert en cours, gris comptée, bleu pas encore ouverte -->
             <section
                 class="card status tinted"
                 [attr.data-tone]="isOpen() ? 'success' : cash() ? 'neutral' : 'primary'"
@@ -212,7 +212,7 @@
 
                     <div class="actions">
                         @if (isOpen()) {
-                            <!-- le soir, le bouton se met en avant au lieu d'ajouter un message -->
+                            <!-- Le soir, le bouton se met en avant au lieu d'ajouter un message -->
                             <button
                                 type="button"
                                 class="btn"
@@ -231,7 +231,7 @@
                             >
                                 Voir le détail de la journée
                             </a>
-                            <!-- seul l'admin rectifie un comptage ; une nouvelle vente rouvre la caisse -->
+                            <!-- Seul l'admin rectifie un comptage ; une nouvelle vente rouvre la caisse -->
                             @if (auth.isAdmin()) {
                                 <button
                                     type="button"
@@ -283,8 +283,8 @@
                 }
             </section>
 
-            <!-- un mouvement ouvre ou rouvre la caisse du jour tout seul -->
-            <!-- carreaux colorés : vert l'argent qui entre, rouge et violet celui qui sort -->
+            <!-- Un mouvement ouvre ou rouvre la caisse du jour tout seul -->
+            <!-- Carreaux colorés : vert l'argent qui entre, rouge et violet celui qui sort -->
             <section class="quick" aria-label="Mouvements de caisse">
                 <button
                     type="button"
@@ -299,7 +299,7 @@
                     </span>
                 </button>
 
-                <!-- l'admin garde la page complète (reçu en photo), le gérant passe par la fenêtre -->
+                <!-- L'admin garde la page complète (reçu en photo), le gérant passe par la fenêtre -->
                 @if (auth.isAdmin()) {
                     <a
                         routerLink="/expenses/new"

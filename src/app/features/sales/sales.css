@@ -43,7 +43,7 @@ app-page-header {
     color: var(--primary-text);
 }
 
-/* une vente remboursée ne compte plus dans la caisse */
+/* Une vente remboursée ne compte plus dans la caisse */
 .cancelled .amount {
     color: var(--text-muted);
     text-decoration: line-through;
@@ -147,7 +147,7 @@ app-page-header {
     outline-offset: 2px;
 }
 
-/* ordinateur : petit panneau sous le bouton */
+/* Ordinateur : petit panneau sous le bouton */
 .filters {
     display: none;
     position: absolute;
@@ -286,7 +286,7 @@ app-page-header {
     padding: 40px 16px;
 }
 
-/* très petit téléphone : les trois pastilles doivent tenir sur la ligne sans défiler */
+/* Très petit téléphone : les trois pastilles doivent tenir sur la ligne sans défiler */
 @media (max-width: 400px) {
     .status-chips {
         gap: 4px;
@@ -298,7 +298,7 @@ app-page-header {
     }
 }
 
-/* recherche et bouton Filtre sur une ligne, puis pastilles actives, puis statuts */
+/* Recherche et bouton Filtre sur une ligne, puis pastilles actives, puis statuts */
 .list-card {
     display: flex;
     flex-direction: column;
@@ -373,7 +373,7 @@ app-page-header {
     color: var(--on-primary);
 }
 
-/* résumé en haut de la liste, comme les rapports de Square et Shopify */
+/* Résumé en haut de la liste, comme les rapports de Square et Shopify */
 .summary {
     order: 0;
     display: flex;
@@ -382,7 +382,7 @@ app-page-header {
     gap: 12px;
     margin-top: 12px;
     padding: 16px;
-    /* la couleur du contour vient de la carte teintée */
+    /* La couleur du contour vient de la carte teintée */
     border-width: 1px;
     border-style: solid;
     border-radius: var(--radius);
@@ -530,7 +530,7 @@ app-page-header {
         min-height: 40px;
     }
 
-    /* la fenêtre des filtres monte du bas, comme sur la page Produits */
+    /* La fenêtre des filtres monte du bas, comme sur la page Produits */
     .filters {
         position: fixed;
         inset: auto 0 0;
@@ -569,7 +569,7 @@ app-page-header {
     }
 }
 
-/* période : pastilles groupées, comme sur Dépenses */
+/* Période : pastilles groupées, comme sur Dépenses */
 .periods {
     display: flex;
     gap: 4px;
@@ -620,12 +620,12 @@ app-page-header {
     }
 }
 
-/* la carte du haut est maintenant seule, au-dessus de la liste */
+/* La carte du haut est maintenant seule, au-dessus de la liste */
 .summary {
     margin-top: 0;
 }
 
-/* ligne de vente légère : un titre, une ligne grise, le montant */
+/* Ligne de vente légère : un titre, une ligne grise, le montant */
 .sale-row {
     min-height: 64px;
     padding: 10px 16px;
@@ -636,12 +636,12 @@ app-page-header {
     height: 36px;
 }
 
-/* la carte du haut a la même largeur que la liste */
+/* La carte du haut a la même largeur que la liste */
 .summary {
     max-width: 920px;
 }
 
-/* la carte porte aussi les trois vues : pastilles en haut, montant dessous */
+/* La carte porte aussi les trois vues : pastilles en haut, montant dessous */
 .summary {
     flex-direction: column;
     align-items: stretch;
@@ -674,7 +674,7 @@ app-page-header {
     border-color: var(--primary);
 }
 
-/* paiement et vendeur : toujours visibles sous la recherche, plus de panneau caché */
+/* Paiement et vendeur : toujours visibles sous la recherche, plus de panneau caché */
 .filters {
     position: static;
     display: flex;
@@ -748,7 +748,7 @@ app-page-header {
     outline-offset: 2px;
 }
 
-/* la période se change dans la carte du haut, sans champ de plus */
+/* La période se change dans la carte du haut, sans champ de plus */
 .period-pill {
     flex: none;
     height: 32px;
@@ -767,12 +767,12 @@ app-page-header {
     align-items: center;
 }
 
-/* pas de traits entre les ventes : l'espace suffit */
+/* Pas de traits entre les ventes : l'espace suffit */
 .sale-row {
     border-bottom: 0;
 }
 
-/* téléphone : le libellé, le montant et la période restent chacun sur une seule ligne */
+/* Téléphone : le libellé, le montant et la période restent chacun sur une seule ligne */
 @media (max-width: 767px) {
     .summary-label {
         overflow: hidden;

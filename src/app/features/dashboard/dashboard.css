@@ -111,7 +111,7 @@ app-page-header {
     grid-column: 1 / -1;
 }
 
-/* ordinateur large : la grande carte à gauche, les quatre autres en carré à droite */
+/* Ordinateur large : la grande carte à gauche, les quatre autres en carré à droite */
 @media (min-width: 1200px) {
     .stats {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -154,7 +154,7 @@ app-page-header {
     }
 }
 
-/* tablette : ce qu'il faut surveiller passe avant le graphique */
+/* Tablette : ce qu'il faut surveiller passe avant le graphique */
 @media (min-width: 768px) and (max-width: 1199px) {
     app-stock-alerts {
         order: -1;
@@ -203,7 +203,7 @@ app-page-header {
     }
 }
 
-/* mode sombre : bouton rond dans la barre du haut, à côté des notifications */
+/* Mode sombre : bouton rond dans la barre du haut, à côté des notifications */
 .theme-btn {
     display: grid;
     flex: none;

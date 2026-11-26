@@ -19,7 +19,7 @@ describe("BarcodeScanner", () => {
         const scanned: string[] = [];
         fixture.componentInstance.scanned.subscribe((code) => scanned.push(code));
 
-        // jsdom n'a pas de caméra
+        // Jsdom n'a pas de caméra
         await fixture.componentInstance.start();
         await fixture.whenStable();
         expect(el.querySelector(".bs-error")?.textContent).toContain("Saisissez le code");
@@ -47,7 +47,7 @@ describe("BarcodeScanner", () => {
 
         expect(el.querySelector(".bs-flash")).not.toBeNull();
         expect(el.querySelector(".bs-ok")?.textContent).toContain("611");
-        // pas encore rendu : le flash se voit d'abord
+        // Pas encore rendu : le flash se voit d'abord
         expect(scanned).toEqual([]);
 
         vi.advanceTimersByTime(700);

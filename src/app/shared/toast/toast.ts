@@ -3,7 +3,7 @@ import { Component, inject } from "@angular/core";
 import { Icon } from "../icon/icon";
 import { ToastService } from "./toast.service";
 
-// la zone reste dans la page (vide) pour que les lecteurs d'écran annoncent chaque message
+// La zone reste dans la page (vide) pour que les lecteurs d'écran annoncent chaque message
 @Component({
     selector: "app-toast",
     imports: [Icon],

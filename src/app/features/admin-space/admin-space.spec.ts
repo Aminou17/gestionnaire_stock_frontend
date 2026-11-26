@@ -9,7 +9,7 @@ import { Balance } from "../../core/reports/report.model";
 import { ReportService } from "../../core/reports/report.service";
 import { PageHeader } from "../../layout/page-header/page-header";
 
-// l'en-tête a ses propres dépendances (cloche, profil) : inutiles ici
+// L'en-tête a ses propres dépendances (cloche, profil) : inutiles ici
 @Component({ selector: "app-page-header", template: "" })
 class PageHeaderStub {
     title = input("");

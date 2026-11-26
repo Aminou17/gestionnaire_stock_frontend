@@ -51,7 +51,7 @@
     --warning: #c2410c;
     --warning-soft: #fff1e6;
     --neutral-soft: #eef1f6;
-    /* violet : réservé au badge "Négociable" */
+    /* Violet : réservé au badge "Négociable" */
     --violet: #6d28d9;
     --violet-soft: #f1ebfe;
     --danger-strong: #dc2626;
@@ -80,7 +80,7 @@
 
     /* Échelle typographique (modèle : Tableau de bord) */
     --fs-title: 28px;
-    /* le plus gros chiffre d'une page (montant d'une vente, d'une dépense, première carte de l'accueil) */
+    /* Le plus gros chiffre d'une page (montant d'une vente, d'une dépense, première carte de l'accueil) */
     --fs-hero: 32px;
     --fs-kpi: 28px;
     --fs-figure: 22px;
@@ -187,7 +187,7 @@ body {
     overflow-x: clip;
 }
 
-/* pas de zoom au double appui sur les boutons et les listes */
+/* Pas de zoom au double appui sur les boutons et les listes */
 button,
 a,
 select,
@@ -208,7 +208,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* le navigateur met strong en 700 et small en taille relative (11,7 px) : on reste sur l'échelle de l'app */
+/* Le navigateur met strong en 700 et small en taille relative (11,7 px) : on reste sur l'échelle de l'app */
 strong,
 b {
     font-weight: var(--fw-semibold);
@@ -290,7 +290,7 @@ app-sale-page {
     width: 36px;
     height: 36px;
     border-radius: 11px;
-    /* sans couleur reçue de la carte, la pastille prend le bleu de la marque */
+    /* Sans couleur reçue de la carte, la pastille prend le bleu de la marque */
     background: linear-gradient(
         145deg,
         var(--tone, var(--primary)),
@@ -390,7 +390,7 @@ a {
     border: 1px solid color-mix(in srgb, var(--warning) 25%, transparent);
 }
 
-/* message avec une croix pour le fermer (erreur d'export, rapport) */
+/* Message avec une croix pour le fermer (erreur d'export, rapport) */
 .alert-dismissible {
     display: flex;
     align-items: flex-start;
@@ -448,7 +448,7 @@ a {
     cursor: not-allowed;
 }
 
-/* le spinner indique un envoi en cours, pas un bouton interdit */
+/* Le spinner indique un envoi en cours, pas un bouton interdit */
 .btn:disabled:has(.spinner) {
     opacity: 0.7;
     cursor: progress;
@@ -596,7 +596,7 @@ a {
     }
 }
 
-/* jauge fine, progression d'un comptage */
+/* Jauge fine, progression d'un comptage */
 .gauge {
     display: block;
     height: 6px;
@@ -621,7 +621,7 @@ a {
     color: var(--text-muted);
 }
 
-/* onglets soulignés : un seul trait sous celui qui est choisi */
+/* Onglets soulignés : un seul trait sous celui qui est choisi */
 .tabs {
     display: flex;
     gap: 4px;
@@ -663,7 +663,7 @@ a {
     outline-offset: -2px;
 }
 
-/* sur téléphone, les onglets deviennent des tuiles de compteurs, trois par ligne */
+/* Sur téléphone, les onglets deviennent des tuiles de compteurs, trois par ligne */
 @media (max-width: 767px) {
     .tabs.tiles {
         display: grid;
@@ -715,13 +715,13 @@ a {
         display: none !important;
     }
 
-    /* pas de fond gris de l'application sur le papier */
+    /* Pas de fond gris de l'application sur le papier */
     html,
     body {
         background: #fff !important;
     }
 
-    /* le papier reste clair même si l'écran est en thème sombre */
+    /* Le papier reste clair même si l'écran est en thème sombre */
     :root[data-theme="dark"] {
         color-scheme: light;
         --bg: #fff;
@@ -748,7 +748,7 @@ a {
     margin: 8mm;
 }
 
-/* filtre en forme de pastille (Journal d'audit) */
+/* Filtre en forme de pastille (Journal d'audit) */
 .chip {
     display: inline-flex;
     align-items: center;
@@ -808,7 +808,7 @@ select.chip {
     }
 }
 
-/* montants masquables d'un clic (directive appMoney) */
+/* Montants masquables d'un clic (directive appMoney) */
 .money {
     position: relative;
 }
@@ -831,7 +831,7 @@ select.chip {
     letter-spacing: 1px;
 }
 
-/* vignette d'un carreau : proche de la miniature enregistrée (80 à 160 px) pour rester nette */
+/* Vignette d'un carreau : proche de la miniature enregistrée (80 à 160 px) pour rester nette */
 .gphoto {
     display: grid;
     flex-shrink: 0;
@@ -893,7 +893,7 @@ select.chip {
     }
 }
 
-/* champ de recherche avec le bouton de scan au bout (app-scan-button) */
+/* Champ de recherche avec le bouton de scan au bout (app-scan-button) */
 .has-scan {
     position: relative;
 }
@@ -902,7 +902,7 @@ select.chip {
     padding-right: 48px;
 }
 
-/* téléphone : un bouton d'en-tête garde son verbe et son « + », le complément passe en second plan */
+/* Téléphone : un bouton d'en-tête garde son verbe et son « + », le complément passe en second plan */
 .btn .short {
     display: none;
 }
@@ -924,7 +924,7 @@ app-owner-layout .card {
     border-color: color-mix(in srgb, var(--border) 92%, var(--text) 8%);
 }
 
-/* police de caisse du ticket (Liberation Mono, licence libre) : même rendu sur tous les appareils */
+/* Police de caisse du ticket (Liberation Mono, licence libre) : même rendu sur tous les appareils */
 @font-face {
     font-family: "Ticket Mono";
     font-weight: 400;

@@ -65,7 +65,7 @@ describe("Rotation", () => {
         TestBed.configureTestingModule({
             providers: [
                 provideRouter([]),
-                // la cloche de l'en-tête lit ce service, on évite ses requêtes
+                // La cloche de l'en-tête lit ce service, on évite ses requêtes
                 {
                     provide: LowStockAlertService,
                     useValue: {
@@ -93,8 +93,8 @@ describe("Rotation", () => {
                         isOwner: signal(false),
                         user: signal({
                             id: 1,
-                            name: "Awa Bazin",
-                            email: "awa@test.com",
+                            name: "Adam Ouédraogo",
+                            email: "adam@test.com",
                             role: "admin",
                         }),
                         roleLabel: signal("Administrateur"),

@@ -1,7 +1,7 @@
 import { inject } from "@angular/core";
 import { Router } from "@angular/router";
 
-// état transmis par la page d'origine avec [state] ou avec navigate et son option state
+// État transmis par la page d'origine avec [state] ou avec navigate et son option state
 export interface BackState {
     backTo: string;
     backLabel: string;
@@ -12,7 +12,7 @@ export interface BackState {
 // À appeler dans le constructeur ou un champ du composant.
 export const getBackLink = (fallbackUrl: string, fallbackLabel: string) => {
     const router = inject(Router);
-    // pendant la navigation l'état est dans la navigation en cours, après un rechargement dans l'historique
+    // Pendant la navigation l'état est dans la navigation en cours, après un rechargement dans l'historique
     const state = router.currentNavigation()?.extras.state ?? history.state;
     const fromState = typeof state?.backTo === "string" && state.backTo.startsWith("/");
 
@@ -29,11 +29,11 @@ export const getBackLink = (fallbackUrl: string, fallbackLabel: string) => {
     };
 };
 
-// la page d'où l'on vient est la liste habituelle : on garde son libellé précis
+// La page d'où l'on vient est la liste habituelle : on garde son libellé précis
 const isSamePage = (url: string, fallbackUrl: string) =>
     url.split("?")[0] === fallbackUrl.split("?")[0];
 
-// la page visitée juste avant, sauf un formulaire de création, l'accueil ou la page elle-même
+// La page visitée juste avant, sauf un formulaire de création, l'accueil ou la page elle-même
 const previousPage = (router: Router) => {
     const navigation = router.currentNavigation();
     const previous = navigation?.previousNavigation?.finalUrl;

@@ -136,7 +136,7 @@ describe("NewStockEntry", () => {
             { product: expect.objectContaining({ id: 3 }), quantity: 12 },
         ]);
         expect(component().supplierId()).toBe(1);
-        // stock actuel et stock après l'entrée
+        // Stock actuel et stock après l'entrée
         expect(text()).toContain("57 en stock");
     });
 

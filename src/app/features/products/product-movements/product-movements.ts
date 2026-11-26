@@ -27,7 +27,7 @@ export class ProductMovements {
 
     productId = input.required<number>();
 
-    // la vente ouverte revient sur la fiche de ce produit
+    // La vente ouverte revient sur la fiche de ce produit
     private router = inject(Router);
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Produit" };

@@ -30,11 +30,11 @@ describe("SettingsHistory", () => {
 
     it("should show who changed the setting and when", async () => {
         await render(
-            vi.fn(() => of({ user_name: "Awa Traoré", created_at: "2026-11-12T15:40:00" })),
+            vi.fn(() => of({ user_name: "Adam Traoré", created_at: "2026-11-12T15:40:00" })),
         );
 
         expect(el.textContent).toContain("12 novembre 2026 à 15:40");
-        expect(el.textContent).toContain("par Awa Traoré");
+        expect(el.textContent).toContain("par Adam Traoré");
     });
 
     it("should say so when the setting was never changed", async () => {

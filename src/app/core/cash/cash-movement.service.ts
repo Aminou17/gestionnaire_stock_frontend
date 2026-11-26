@@ -16,7 +16,7 @@ import {
 export class CashMovementService {
     private http = inject(HttpClient);
 
-    // category vient de CASH_REASONS et reste facultatif ; reason est toujours obligatoire
+    // Category vient de CASH_REASONS et reste facultatif ; reason est toujours obligatoire
     create(
         type: ManualMovementType,
         amount: number,
@@ -33,7 +33,7 @@ export class CashMovementService {
         });
     }
 
-    // l'argent revient dans le tiroir ; la ligne reste, marquée annulée
+    // L'argent revient dans le tiroir ; la ligne reste, marquée annulée
     cancelExpense(id: number) {
         return this.http.post(`${API_URL}/cash_movements/${id}/cancel`, {});
     }
@@ -78,7 +78,7 @@ export class CashMovementService {
         );
     }
 
-    // dépenses d'une période, au total et par motif
+    // Dépenses d'une période, au total et par motif
     getExpenseSummary(from: string | null, to: string | null) {
         const params: Record<string, string> = {};
         if (from) params["from"] = from;

@@ -19,7 +19,7 @@ p {
     font-size: var(--fs-heading);
 }
 
-/* formule actuelle */
+/* Formule actuelle */
 .current {
     display: grid;
     gap: 16px;
@@ -64,7 +64,7 @@ p {
     line-height: 1.6;
 }
 
-/* jours d'essai restants : le chiffre en grand, la date en dessous */
+/* Jours d'essai restants : le chiffre en grand, la date en dessous */
 .trial {
     display: flex;
     align-items: center;
@@ -92,7 +92,7 @@ p {
     color: var(--warning);
 }
 
-/* formules à venir : volontairement atténuées */
+/* Formules à venir : volontairement atténuées */
 .plans {
     display: grid;
     gap: 12px;
@@ -157,7 +157,7 @@ p {
     font-size: var(--fs-small);
 }
 
-/* moyens de paiement */
+/* Moyens de paiement */
 .payments {
     padding: 16px;
     box-shadow: var(--shadow-card);
@@ -185,7 +185,7 @@ p {
     font-weight: var(--fw-medium);
 }
 
-/* aide */
+/* Aide */
 .help {
     display: grid;
     gap: 16px;

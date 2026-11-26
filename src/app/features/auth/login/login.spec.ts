@@ -34,7 +34,7 @@ describe("Login", () => {
         await fixture.whenStable();
     });
 
-    function fillForm(email = "awa@test.com", password = "secret") {
+    function fillForm(email = "adam@test.com", password = "secret") {
         component.form.patchValue({ email, password });
     }
 
@@ -68,7 +68,7 @@ describe("Login", () => {
         fillForm();
         await submit();
 
-        expect(auth.login).toHaveBeenCalledWith("awa@test.com", "secret", true);
+        expect(auth.login).toHaveBeenCalledWith("adam@test.com", "secret", true);
         expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
     });
 
@@ -78,7 +78,7 @@ describe("Login", () => {
         fillForm();
         await submit();
 
-        expect(auth.login).toHaveBeenCalledWith("awa@test.com", "secret", true);
+        expect(auth.login).toHaveBeenCalledWith("adam@test.com", "secret", true);
         expect(router.navigate).toHaveBeenCalledWith(["/owner"]);
     });
 
@@ -88,7 +88,7 @@ describe("Login", () => {
         component.form.controls.remember.setValue(false);
         await submit();
 
-        expect(auth.login).toHaveBeenCalledWith("awa@test.com", "secret", false);
+        expect(auth.login).toHaveBeenCalledWith("adam@test.com", "secret", false);
     });
 
     it("should display the error message returned by the API", async () => {

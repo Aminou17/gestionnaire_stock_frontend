@@ -25,9 +25,9 @@ export class PageViewService {
     private record(url: string) {
         if (!this.auth.isLoggedIn() || this.auth.isOwner()) return;
 
-        // sans les paramètres de l'adresse : ils peuvent contenir un nom ou un numéro
+        // Sans les paramètres de l'adresse : ils peuvent contenir un nom ou un numéro
         const page = url.split(/[?#]/)[0];
-        // un rafraîchissement de la même page ne compte pas deux fois de suite
+        // Un rafraîchissement de la même page ne compte pas deux fois de suite
         if (page === this.last) return;
         this.last = page;
 

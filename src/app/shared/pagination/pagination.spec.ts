@@ -47,7 +47,7 @@ describe("Pagination", () => {
 
     it("should show the range and the page count", async () => {
         await setup(248, 2);
-        // l'écran ne montre que les numéros ; le détail est pour les lecteurs d'écran
+        // L'écran ne montre que les numéros ; le détail est pour les lecteurs d'écran
         expect(text(".sr-only")).toBe("Page 2 sur 10, 26 à 50 sur 248");
         expect(el.querySelector(".range")).toBeNull();
         expect(el.querySelector("nav")?.getAttribute("aria-label")).toBe("Pagination");

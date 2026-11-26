@@ -14,7 +14,7 @@ export class ShopSettingsService {
     private http = inject(HttpClient);
     private auth = inject(AuthService);
 
-    // boutique de la personne connectée, pour le menu et le titre de l'onglet ;
+    // Boutique de la personne connectée, pour le menu et le titre de l'onglet ;
     // rechargée à chaque connexion, le propriétaire n'en a pas
     private current = rxResource({
         params: () => {
@@ -25,14 +25,14 @@ export class ShopSettingsService {
     });
 
     shopName = computed(() => (this.current.hasValue() ? this.current.value().name : ""));
-    // fin de l'essai gratuit, pour la page Abonnement
+    // Fin de l'essai gratuit, pour la page Abonnement
     trialEndsAt = computed(() =>
         this.current.hasValue() ? (this.current.value().trial_ends_at ?? null) : null,
     );
     private modules = inject(ModuleStore);
 
     constructor() {
-        // les accès de la boutique sont publiés pour les menus et les gardes, sans qu'ils dépendent de ce service
+        // Les accès de la boutique sont publiés pour les menus et les gardes, sans qu'ils dépendent de ce service
         effect(() => {
             if (this.current.hasValue()) {
                 const settings = this.current.value();
@@ -55,11 +55,11 @@ export class ShopSettingsService {
     disabledModules = computed(() =>
         this.current.hasValue() ? (this.current.value().disabled_modules ?? []) : [],
     );
-    // fiche complète de la boutique (nom, logo, bas du ticket), pour dessiner un ticket
+    // Fiche complète de la boutique (nom, logo, bas du ticket), pour dessiner un ticket
     info = computed(() => (this.current.hasValue() ? this.current.value() : null));
     shopLogo = computed(() => (this.current.hasValue() ? this.current.value().logo : null));
 
-    // indicatif des numéros saisis sans "+" : une seule source pour WhatsApp, l'appel et l'affichage
+    // Indicatif des numéros saisis sans "+" : une seule source pour WhatsApp, l'appel et l'affichage
     defaultCountryCode = computed(() =>
         this.current.hasValue()
             ? (this.current.value().default_country_code ?? DEFAULT_COUNTRY_CODE)

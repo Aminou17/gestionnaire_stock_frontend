@@ -6,7 +6,7 @@
 />
 
 @if (sale.isLoading() && !data()) {
-    <!-- même forme que la page chargée, pour qu'elle ne saute pas -->
+    <!-- Même forme que la page chargée, pour qu'elle ne saute pas -->
     <div class="layout" aria-busy="true">
         <div class="main">
             <section class="card summary">
@@ -313,7 +313,7 @@
             <section class="card sheet">
                 <h2 class="section-title">
                     Produits vendus
-                    <!-- tout sur une seule interpolation : sinon un espace s'invite avant la parenthèse -->
+                    <!-- Tout sur une seule interpolation : sinon un espace s'invite avant la parenthèse -->
                     <span class="muted"
                         >({{ sale.items.length }} {{ sale.items.length > 1 ? "produits" : "produit"
                         }}{{
@@ -534,14 +534,14 @@
     }
 </dialog>
 
-<!-- copie hors de l'écran, photographiée pour l'image du reçu -->
+<!-- Copie hors de l'écran, photographiée pour l'image du reçu -->
 @if (data(); as sale) {
     <div #captureBox class="capture" aria-hidden="true">
         <app-sale-receipt [sale]="sale" [shop]="shopInfo()" [ticketPrefix]="ticketPrefix()" />
     </div>
 }
 
-<!-- copie imprimée, cachée à l'écran -->
+<!-- Copie imprimée, cachée à l'écran -->
 @if (data(); as sale) {
     <app-sale-receipt
         class="print-only"

@@ -13,10 +13,10 @@ import { SettingsHistoryService } from "./settings-history.service";
 export class SettingsHistory {
     private historyService = inject(SettingsHistoryService);
 
-    // actions du journal d'audit qui modifient ce réglage
+    // Actions du journal d'audit qui modifient ce réglage
     actions = input.required<string[]>();
 
-    // la page l'augmente après chaque enregistrement pour relire la dernière modification
+    // La page l'augmente après chaque enregistrement pour relire la dernière modification
     version = input(0);
 
     change = rxResource({

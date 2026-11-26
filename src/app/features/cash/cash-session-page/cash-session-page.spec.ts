@@ -22,7 +22,7 @@ const closed: CashSessionDetail = {
     closed_at: "2026-11-10T19:00:00",
     opened_by: 1,
     opened_by_name: "Yabre M.",
-    closed_by_name: "Awa K.",
+    closed_by_name: "Adam K.",
     closing_note: null,
     closed_by: null,
     movements: [
@@ -31,7 +31,7 @@ const closed: CashSessionDetail = {
             type: "SALE",
             amount: 7000,
             user_id: 2,
-            user_name: "Awa K.",
+            user_name: "Adam K.",
             reference_type: "sale",
             reference_id: 8,
             sale_number: 108,
@@ -89,7 +89,7 @@ describe("CashSessionPage", () => {
         expect(text()).toContain("−500F");
         expect(text()).toContain("Montantattendu12000F");
         expect(text()).toContain("Montantcompté11500F");
-        expect(text()).toContain("ComptageHeure19:00ParAwaK.");
+        expect(text()).toContain("ComptageHeure19:00ParAdamK.");
         expect(text()).toContain("Vente#108");
     });
 

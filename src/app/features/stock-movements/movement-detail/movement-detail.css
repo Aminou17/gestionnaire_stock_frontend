@@ -8,7 +8,7 @@
     box-shadow: var(--shadow-dialog);
 }
 
-/* le focus automatique de la fenêtre ne doit pas dessiner de contour */
+/* Le focus automatique de la fenêtre ne doit pas dessiner de contour */
 .detail:focus,
 .detail:focus-visible {
     outline: none;
@@ -36,7 +36,7 @@
     font-size: var(--fs-lead);
 }
 
-/* la variation en grand, et le stock avant puis après */
+/* La variation en grand, et le stock avant puis après */
 .change {
     display: flex;
     align-items: center;
@@ -120,7 +120,7 @@
     font-size: var(--fs-body);
 }
 
-/* un nom de produit long passe à la ligne au lieu de pousser le libellé */
+/* Un nom de produit long passe à la ligne au lieu de pousser le libellé */
 .detail dd {
     min-width: 0;
     margin: 0;

@@ -1,6 +1,6 @@
 header {
     display: flex;
-    /* la cloche reste sur la première ligne, que le titre ait un sous-titre ou non */
+    /* La cloche reste sur la première ligne, que le titre ait un sous-titre ou non */
     align-items: flex-start;
     gap: 16px;
     margin-bottom: 24px;
@@ -27,7 +27,7 @@ header {
     min-width: 0;
 }
 
-/* flèche retour collée au titre : zone de clic de 44px malgré l'icône discrète */
+/* Flèche retour collée au titre : zone de clic de 44px malgré l'icône discrète */
 .back-btn {
     display: grid;
     place-items: center;
@@ -70,7 +70,7 @@ h1 {
     gap: 12px;
 }
 
-/* zone de clic de 44px autour d'une photo de 36px */
+/* Zone de clic de 44px autour d'une photo de 36px */
 .me {
     display: grid;
     place-items: center;
@@ -95,7 +95,7 @@ h1 {
     outline-offset: 0;
 }
 
-/* sur ordinateur, le profil est déjà en bas du menu : pas de deuxième avatar en haut */
+/* Sur ordinateur, le profil est déjà en bas du menu : pas de deuxième avatar en haut */
 @media (min-width: 1024px) {
     .me {
         display: none;
@@ -164,12 +164,12 @@ h1 {
         height: 32px;
     }
 
-    /* même barre pour toutes les pages : menu, titre sur une ou deux lignes, cloche, profil */
+    /* Même barre pour toutes les pages : menu, titre sur une ou deux lignes, cloche, profil */
     .titles {
         flex: 1;
     }
 
-    /* le sous-titre n'est qu'une description : il reste sur ordinateur */
+    /* Le sous-titre n'est qu'une description : il reste sur ordinateur */
     .titles p:not(.breadcrumb) {
         display: none;
     }
@@ -178,7 +178,7 @@ h1 {
         display: none;
     }
 
-    /* fiche (nom de produit, de fournisseur) : le titre tient sur une ligne */
+    /* Fiche (nom de produit, de fournisseur) : le titre tient sur une ligne */
     .detail h1 {
         overflow: hidden;
         text-overflow: ellipsis;
@@ -186,7 +186,7 @@ h1 {
     }
 }
 
-/* téléphone : la cloche et le profil ne sont que sur l'Accueil, le menu du bas et le tiroir les donnent ailleurs */
+/* Téléphone : la cloche et le profil ne sont que sur l'Accueil, le menu du bas et le tiroir les donnent ailleurs */
 @media (max-width: 767px) {
     header:not(.home) app-notifications,
     header:not(.home) .me {

@@ -35,14 +35,14 @@ export class InstallService {
         });
     }
 
-    // visible tant que Boutiki n'est pas déjà ouvert comme une application installée
+    // Visible tant que Boutiki n'est pas déjà ouvert comme une application installée
     get available() {
         return !this.installed();
     }
 
     readonly isInstalled$ = this.installed.asReadonly();
 
-    // l'appareil, pour montrer les bons gestes
+    // L'appareil, pour montrer les bons gestes
     get platform(): "android" | "ios" | "desktop" {
         const ua = window.navigator.userAgent;
         if (/iphone|ipad|ipod/i.test(ua)) return "ios";
@@ -58,7 +58,7 @@ export class InstallService {
         );
     }
 
-    // le geste à faire quand le navigateur ne propose pas sa propre fenêtre
+    // Le geste à faire quand le navigateur ne propose pas sa propre fenêtre
     get hint() {
         const ua = window.navigator.userAgent;
         if (this.platform === "ios") {
@@ -73,7 +73,7 @@ export class InstallService {
         return "Cliquez sur l'icône d'installation à droite de la barre d'adresse";
     }
 
-    // vrai si l'utilisateur a accepté la fenêtre d'installation du navigateur
+    // Vrai si l'utilisateur a accepté la fenêtre d'installation du navigateur
     async install() {
         if (!this.prompt) return false;
         this.prompt.prompt();

@@ -31,7 +31,7 @@ describe("ProductForm", () => {
                 product_count: 0,
             }),
         );
-        // jsdom ne gère pas encore <dialog>
+        // Jsdom ne gère pas encore <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
 
@@ -178,7 +178,7 @@ describe("ProductForm", () => {
         component.submit();
 
         expect(createProduct).toHaveBeenCalledWith(expect.objectContaining({ minStock: null }));
-        // le code-barres part sans espaces autour
+        // Le code-barres part sans espaces autour
         expect(createProduct).toHaveBeenCalledWith(
             expect.objectContaining({ barcode: "6111245781234" }),
         );

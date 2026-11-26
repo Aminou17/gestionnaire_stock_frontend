@@ -1,4 +1,4 @@
-/* au centre sur ordinateur, feuille collée en bas sur téléphone */
+/* Au centre sur ordinateur, feuille collée en bas sur téléphone */
 .sheet {
     width: min(460px, calc(100% - 32px));
     padding: 0;

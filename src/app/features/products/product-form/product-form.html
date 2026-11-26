@@ -15,7 +15,7 @@
             }
 
             @if (loadFailed()) {
-                <!-- rien à modifier : on n'affiche pas un formulaire vide -->
+                <!-- Rien à modifier : on n'affiche pas un formulaire vide -->
             } @else if (loading()) {
                 @for (i of [1, 2, 3, 4]; track i) {
                     <div class="skeleton field-skeleton"></div>
@@ -59,7 +59,7 @@
                     </div>
 
                     @if (addingCategory()) {
-                        <!-- pas de <form> imbriqué : Entrée crée la catégorie, pas le produit -->
+                        <!-- Pas de <form> imbriqué : Entrée crée la catégorie, pas le produit -->
                         <div
                             class="new-supplier"
                             [formGroup]="categoryForm"
@@ -160,7 +160,7 @@
                         </div>
 
                         @if (addingSupplier()) {
-                            <!-- pas de <form> imbriqué : Entrée ajoute le fournisseur, pas le produit -->
+                            <!-- Pas de <form> imbriqué : Entrée ajoute le fournisseur, pas le produit -->
                             <div
                                 class="new-supplier"
                                 [formGroup]="supplierForm"
@@ -323,7 +323,7 @@
                 </button>
 
                 @if (moreOpen()) {
-                    <!-- tout le facultatif est ici, en bas, séparé de ce qui est obligatoire -->
+                    <!-- Tout le facultatif est ici, en bas, séparé de ce qui est obligatoire -->
                     <section class="group extras">
                         <div class="field">
                             <label for="product-barcode">Code-barres</label>

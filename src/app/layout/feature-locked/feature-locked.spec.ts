@@ -5,7 +5,7 @@ import { ModuleStore } from "../../core/modules/module-access";
 import { FeatureLocked } from "./feature-locked";
 
 describe("FeatureLocked", () => {
-    // jsdom ne connaît pas showModal : on imite l'ouverture et la fermeture
+    // Jsdom ne connaît pas showModal : on imite l'ouverture et la fermeture
     beforeEach(() => {
         HTMLDialogElement.prototype.showModal = function () {
             this.setAttribute("open", "");

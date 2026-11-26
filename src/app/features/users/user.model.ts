@@ -1,13 +1,13 @@
 import { User, UserRole } from "../../core/auth/auth.service";
 
-// compte vu par l'administrateur dans la gestion des employés
+// Compte vu par l'administrateur dans la gestion des employés
 export interface UserAccount extends User {
     first_name: string;
     last_name: string;
     is_active: boolean;
     created_at: string;
     last_login_at: string | null;
-    // renseignés seulement pour un compte supprimé
+    // Renseignés seulement pour un compte supprimé
     deleted_at?: string | null;
     deleted_by_name?: string | null;
 }
@@ -17,7 +17,7 @@ export interface UserInput {
     lastName: string;
     email: string;
     role: UserRole;
-    // seulement à la création
+    // Seulement à la création
     password?: string;
 }
 
@@ -28,7 +28,7 @@ export interface UserResponse {
     user: UserAccount;
 }
 
-// une ligne du journal d'audit
+// Une ligne du journal d'audit
 export interface UserActivity {
     id: number;
     action: string;

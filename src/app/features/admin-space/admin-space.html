@@ -1,6 +1,6 @@
 <app-page-header title="Bilan" subtitle="Le bilan de votre boutique" />
 
-<!-- une seule période pour toute la page -->
+<!-- Une seule période pour toute la page -->
 <div class="period-bar">
     <div class="periods" role="group" aria-label="Période">
         @for (choice of periodPills; track choice.value) {
@@ -52,7 +52,7 @@
 @if (failed()) {
     <ng-container *ngTemplateOutlet="errorTpl" />
 } @else {
-    <!-- bénéfice net : le chiffre à retenir -->
+    <!-- Bénéfice net : le chiffre à retenir -->
     <section
         class="card tinted net"
         [attr.data-tone]="netPositive() ? 'success' : 'danger'"

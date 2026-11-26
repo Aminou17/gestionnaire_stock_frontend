@@ -1,4 +1,4 @@
-/* carte d'identité : bandeau en dégradé, grande photo qui le chevauche, nom et rôle */
+/* Carte d'identité : bandeau en dégradé, grande photo qui le chevauche, nom et rôle */
 .identity {
     overflow: hidden;
     max-width: 720px;
@@ -116,7 +116,7 @@
     padding: 0 24px 16px;
 }
 
-/* titre de groupe, au-dessus de chaque carte */
+/* Titre de groupe, au-dessus de chaque carte */
 .group-title {
     margin: 8px 4px -8px;
     color: var(--text-muted);
@@ -179,7 +179,7 @@
     }
 }
 
-/* téléphone : photo centrée au-dessus du nom, boutons d'action sur toute la largeur */
+/* Téléphone : photo centrée au-dessus du nom, boutons d'action sur toute la largeur */
 @media (max-width: 599px) {
     .identity-body {
         grid-template-columns: 1fr;

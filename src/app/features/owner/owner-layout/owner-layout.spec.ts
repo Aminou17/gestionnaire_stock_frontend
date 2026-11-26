@@ -29,7 +29,7 @@ describe("OwnerLayout", () => {
         expect(settings?.textContent).toContain("Réglages");
         expect(el.querySelectorAll(".nav-link").length).toBe(5);
         (el.querySelector(".foot-btn.logout") as HTMLButtonElement).click();
-        // un seul clic ouvre la confirmation, il ne déconnecte pas
+        // Un seul clic ouvre la confirmation, il ne déconnecte pas
         expect(logoutAsked()).toBe(true);
     });
 });

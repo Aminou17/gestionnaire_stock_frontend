@@ -87,7 +87,7 @@
     background: var(--surface-hover);
 }
 
-/* le lien du nom couvre toute la ligne ; la photo reste au-dessus */
+/* Le lien du nom couvre toute la ligne ; la photo reste au-dessus */
 .name::after {
     content: "";
     position: absolute;
@@ -188,7 +188,7 @@
     font-weight: var(--fw-semibold);
 }
 
-/* pastille de vitesse : vert rapide, bleu normal, orange lent, rouge dormant */
+/* Pastille de vitesse : vert rapide, bleu normal, orange lent, rouge dormant */
 .speed {
     display: inline-flex;
     align-items: center;

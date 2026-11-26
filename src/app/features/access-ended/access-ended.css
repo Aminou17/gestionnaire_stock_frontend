@@ -17,7 +17,7 @@
     line-height: 1.5;
 }
 
-/* l'étape suivante, en teinte douce comme les cartes de l'accueil */
+/* L'étape suivante, en teinte douce comme les cartes de l'accueil */
 .next {
     border-color: color-mix(in srgb, var(--success) 25%, var(--border));
     background: linear-gradient(

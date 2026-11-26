@@ -1,4 +1,4 @@
-/* plein écran sombre, comme l'appareil photo du téléphone */
+/* Plein écran sombre, comme l'appareil photo du téléphone */
 .bs-scanner {
     width: 100%;
     max-width: 520px;
@@ -65,7 +65,7 @@ video {
     object-fit: cover;
 }
 
-/* viseur : coins lumineux et une ligne qui balaie */
+/* Viseur : coins lumineux et une ligne qui balaie */
 .bs-frame {
     position: relative;
     width: min(78%, 340px);
@@ -111,7 +111,7 @@ video {
     }
 }
 
-/* lecture réussie : les coins se resserrent et passent au vert, un flash traverse l'image */
+/* Lecture réussie : les coins se resserrent et passent au vert, un flash traverse l'image */
 .bs-frame {
     transition:
         width 0.25s ease,

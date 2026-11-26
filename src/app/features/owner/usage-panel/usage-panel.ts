@@ -40,7 +40,7 @@ export class UsagePanel {
             .sort((a, b) => b.total - a.total || a.shop.name.localeCompare(b.shop.name));
     });
 
-    // boutiques qui n'ont rien ouvert de la semaine : elles ne s'affichent que dans le compte final
+    // Boutiques qui n'ont rien ouvert de la semaine : elles ne s'affichent que dans le compte final
     active = computed(() => this.rows().filter((row) => row.total > 0));
     silent = computed(() => this.rows().length - this.active().length);
 }

@@ -1,7 +1,7 @@
 import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { AuditLog } from "./audit-log.model";
 
-// Phrase lisible par la boutique : "Awa a créé la catégorie Tissus".
+// Phrase lisible par la boutique : "Adam a créé la catégorie Tissus".
 // verb suit le nom de l'auteur, object est mis en gras, note complète la phrase.
 export interface AuditSentence {
     verb: string;
@@ -38,7 +38,7 @@ const part = (log: AuditLog, key: "before" | "after") => {
     return value && typeof value === "object" ? (value as Record<string, unknown>) : null;
 };
 
-// le nom enregistré au moment de l'action, sinon le nom actuel renvoyé par l'API
+// Le nom enregistré au moment de l'action, sinon le nom actuel renvoyé par l'API
 const objectName = (log: AuditLog) => {
     const name =
         text(part(log, "after")?.["name"]) ??
@@ -46,13 +46,13 @@ const objectName = (log: AuditLog) => {
         log.entity_name ??
         (log.entity_id ? `n° ${log.entity_id}` : undefined);
 
-    // une vente se nomme par son numéro, comme dans la liste des ventes
+    // Une vente se nomme par son numéro, comme dans la liste des ventes
     return log.entity_type === "sale" ? name?.replace(/^n° /, "#") : name;
 };
 
 const PAYMENT: Record<string, string> = { CASH: "en espèces", MOBILE_MONEY: "par Mobile Money" };
 
-// les pages de l'API, au singulier et au pluriel
+// Les pages de l'API, au singulier et au pluriel
 const RESOURCES: Record<string, [string, string]> = {
     categories: ["une catégorie", "les catégories"],
     products: ["un produit", "les produits"],
@@ -236,7 +236,7 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
         case "INVENTORY_CANCELLED":
             return { verb: "a annulé un inventaire" };
         case "INVENTORY_APPLIED": {
-            // l'ancien format listait les corrections, le nouveau donne le nombre de lignes
+            // L'ancien format listait les corrections, le nouveau donne le nombre de lignes
             const count = Array.isArray(d["adjustments"]) ? d["adjustments"].length : 0;
             return {
                 verb: "a corrigé le stock d'après un inventaire",
@@ -328,7 +328,7 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
         case "ALERT_EMAIL_TEST_SENT":
             return { verb: "a envoyé un e-mail d'essai des alertes" };
 
-        // actions du propriétaire de Boutiki, visibles dans son propre journal
+        // Actions du propriétaire de Boutiki, visibles dans son propre journal
         case "SHOP_REGISTERED":
             return { verb: "a créé sa boutique", object: text(d["name"]) ?? name };
         case "SHOP_CREATED":
@@ -362,12 +362,12 @@ export const getAuditSentence = (log: AuditLog): AuditSentence => {
             return { verb: "a envoyé un e-mail d'essai" };
     }
 
-    // une action ajoutée plus tard au backend reste affichée, sans phrase inventée
+    // Une action ajoutée plus tard au backend reste affichée, sans phrase inventée
     // ni code technique en majuscules
     return { verb: "a fait une action" };
 };
 
-// champs suivis dans le détail d'une modification ; les autres (dates, id) sont ignorés
+// Champs suivis dans le détail d'une modification ; les autres (dates, id) sont ignorés
 const FIELDS: Record<string, string> = {
     name: "Nom",
     description: "Description",
@@ -407,7 +407,7 @@ const formatValue = (key: string, value: unknown) => {
     return VALUES[String(value)] ?? String(value);
 };
 
-// ce qui a changé entre avant et après, pour le détail d'une ligne
+// Ce qui a changé entre avant et après, pour le détail d'une ligne
 export const getAuditChanges = (log: AuditLog): AuditChange[] => {
     const before = part(log, "before");
     const after = part(log, "after");

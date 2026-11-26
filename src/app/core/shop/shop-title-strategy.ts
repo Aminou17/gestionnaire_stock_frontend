@@ -25,7 +25,7 @@ export class ShopTitleStrategy extends TitleStrategy {
     }
 
     override updateTitle(snapshot: RouterStateSnapshot) {
-        // cherché ici et pas à la création : ShopSettingsService dépend du Router,
+        // Cherché ici et pas à la création : ShopSettingsService dépend du Router,
         // qui crée lui-même cette stratégie (dépendance circulaire sinon)
         if (!this.shop()) this.shop.set(this.injector.get(ShopSettingsService));
         this.page.set(this.buildTitle(snapshot));

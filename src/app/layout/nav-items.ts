@@ -5,9 +5,9 @@ export interface NavItem {
     path?: string;
     icon: IconName;
     adminOnly?: boolean;
-    // paramètres d'adresse, par exemple ?adjust=1 pour ouvrir une fenêtre à l'arrivée
+    // Paramètres d'adresse, par exemple ?adjust=1 pour ouvrir une fenêtre à l'arrivée
     queryParams?: Record<string, string>;
-    // allumé seulement sur sa propre URL, pas sur ses sous-pages
+    // Allumé seulement sur sa propre URL, pas sur ses sous-pages
     exact?: boolean;
     children?: NavItem[];
 }
@@ -39,7 +39,7 @@ export const SECTIONS: NavSection[] = [
                         icon: "stock-entry",
                         adminOnly: true,
                     },
-                    // la rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
+                    // La rotation a sa propre ligne : les alertes ne doivent pas s'allumer dessus
                     { label: "Alertes de stock", path: "/alerts", icon: "alert", exact: true },
                     { label: "Inventaires", path: "/inventories", icon: "clipboard" },
                     {
@@ -71,12 +71,12 @@ export const SECTIONS: NavSection[] = [
     },
 ];
 
-// lien fixe en bas du menu ; l'abonnement se trouve dans les paramètres
+// Lien fixe en bas du menu ; l'abonnement se trouve dans les paramètres
 export const FOOTER_LINKS: NavItem[] = [
     { label: "Paramètres", path: "/settings", icon: "settings" },
 ];
 
-// pages proposées par la recherche, selon le rôle
+// Pages proposées par la recherche, selon le rôle
 export function searchablePages(
     isAdmin: boolean,
     options: { subscriptions?: boolean; allowsPath?: (path: string) => boolean } = {},
@@ -92,7 +92,7 @@ export function searchablePages(
         .filter((page) => isAdmin || !page.adminOnly)
         .map((page) => ({
             label: page.label,
-            // une fonction hors de la formule reste proposée, avec la mention Abonnement
+            // Une fonction hors de la formule reste proposée, avec la mention Abonnement
             hint:
                 options.allowsPath?.(page.path!) === false
                     ? `${page.hint} · Abonnement`

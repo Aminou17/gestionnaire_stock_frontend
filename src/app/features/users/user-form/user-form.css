@@ -1,4 +1,4 @@
-/* même fenêtre que les fournisseurs */
+/* Même fenêtre que les fournisseurs */
 .confirm {
     width: min(480px, calc(100% - 32px));
     padding: 0;
@@ -24,7 +24,7 @@
     font-size: var(--fs-heading);
 }
 
-/* prénom et nom côte à côte, l'un sous l'autre sur un petit écran */
+/* Prénom et nom côte à côte, l'un sous l'autre sur un petit écran */
 .names {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -37,7 +37,7 @@
     }
 }
 
-/* rôle : deux cartes à cocher, avec ce que chaque rôle permet */
+/* Rôle : deux cartes à cocher, avec ce que chaque rôle permet */
 .roles {
     display: grid;
     gap: 8px;
@@ -113,7 +113,7 @@
     outline-offset: 2px;
 }
 
-/* champ mot de passe avec le bouton afficher dans le champ */
+/* Champ mot de passe avec le bouton afficher dans le champ */
 .password {
     position: relative;
 }

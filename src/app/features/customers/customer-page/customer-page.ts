@@ -61,7 +61,7 @@ export class CustomerPage {
     private locale = inject(LOCALE_ID);
     protected auth = inject(AuthService);
 
-    // un client ouvert depuis une vente ou la caisse revient à cette page
+    // Un client ouvert depuis une vente ou la caisse revient à cette page
     protected back = getBackLink("/customers", "Retour aux clients");
 
     private customerForm = viewChild(CustomerForm);
@@ -72,7 +72,7 @@ export class CustomerPage {
         toWhatsAppLink(phone, this.shop.defaultCountryCode());
     protected initials = productInitials;
 
-    // la vente ouverte sait ainsi revenir ici
+    // La vente ouverte sait ainsi revenir ici
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Client" };
     }
@@ -81,7 +81,7 @@ export class CustomerPage {
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
-    // un identifiant qui n'est pas un entier n'est même pas demandé au backend
+    // Un identifiant qui n'est pas un entier n'est même pas demandé au backend
     validId = computed(() => {
         const id = this.id();
         return id !== undefined && Number.isInteger(id) && id > 0;
@@ -100,7 +100,7 @@ export class CustomerPage {
             (this.customer.error() as HttpErrorResponse | undefined)?.status === 404,
     );
 
-    // la fiche peut être réutilisée pour un autre client : on repart de la page 1
+    // La fiche peut être réutilisée pour un autre client : on repart de la page 1
     salesPage = linkedSignal({ source: () => this.id(), computation: () => 1 });
 
     salesPageSize = storedPageSize("customer-sales", 10);
@@ -118,7 +118,7 @@ export class CustomerPage {
 
     lastSales = linkedSignal<LoadedSales | undefined, LoadedSales | undefined>({
         source: () => (this.sales.hasValue() ? this.sales.value() : undefined),
-        // les ventes de l'ancien client ne servent pas de repli pour le nouveau
+        // Les ventes de l'ancien client ne servent pas de repli pour le nouveau
         computation: (next, previous) => {
             if (next) return next;
 
@@ -126,7 +126,7 @@ export class CustomerPage {
         },
     });
 
-    // historique des paiements encaissés : les 5 derniers, puis 10 de plus à chaque « Voir plus »
+    // Historique des paiements encaissés : les 5 derniers, puis 10 de plus à chaque « Voir plus »
     paymentsLimit = linkedSignal({ source: () => this.id(), computation: () => 5 });
 
     payments = rxResource({
@@ -138,7 +138,7 @@ export class CustomerPage {
     paymentList = computed(() => (this.payments.hasValue() ? this.payments.value().rows : []));
     paymentsTotal = computed(() => (this.payments.hasValue() ? this.payments.value().total : 0));
 
-    // liste des paiements dans une fenêtre : un clic sur un paiement ouvre son détail et son ticket
+    // Liste des paiements dans une fenêtre : un clic sur un paiement ouvre son détail et son ticket
     paymentsDialog = viewChild.required<ElementRef<HTMLDialogElement>>("paymentsBox");
     selectedPayment = signal<CustomerPaymentRecord | null>(null);
     showTicket = signal(false);
@@ -151,7 +151,7 @@ export class CustomerPage {
 
     private captureBox = viewChild<ElementRef<HTMLElement>>("captureBox");
 
-    // ouvre la conversation du client avec l'adresse du ticket, qui s'affiche en image dans WhatsApp.
+    // Ouvre la conversation du client avec l'adresse du ticket, qui s'affiche en image dans WhatsApp.
     // sans réseau, l'image du ticket est copiée à la place
     async sendTicket() {
         const payment = this.selectedPayment();
@@ -177,7 +177,7 @@ export class CustomerPage {
     }
 
     private async sendTicketImage(payment: CustomerPaymentRecord) {
-        // on photographie le ticket, pas le bloc qui le décale hors de l'écran
+        // On photographie le ticket, pas le bloc qui le décale hors de l'écran
         const box = this.captureBox()?.nativeElement.firstElementChild as HTMLElement | null;
         if (!box) return;
 
@@ -228,7 +228,7 @@ export class CustomerPage {
 
     salesTotal = computed(() => this.lastSales()?.total ?? 0);
 
-    // historique groupé par mois, du plus récent au plus ancien
+    // Historique groupé par mois, du plus récent au plus ancien
     months = computed(() => {
         const months: { key: string; label: string; items: CustomerSale[] }[] = [];
 
@@ -245,7 +245,7 @@ export class CustomerPage {
         return months;
     });
 
-    // lien WhatsApp du rappel, vide sans numéro ou sans dette
+    // Lien WhatsApp du rappel, vide sans numéro ou sans dette
     reminder = computed(() => {
         const customer = this.data();
         return customer
@@ -255,12 +255,12 @@ export class CustomerPage {
 
     canManage = computed(() => !!this.data()?.is_active);
 
-    // dette d'une vente non annulée
+    // Dette d'une vente non annulée
     due(sale: CustomerSale) {
         return sale.status === "ACTIVE" ? Math.max(sale.total - sale.paid_amount, 0) : 0;
     }
 
-    // encaisser le crédit : un paiement réparti sur les ventes impayées
+    // Encaisser le crédit : un paiement réparti sur les ventes impayées
     payDialog = viewChild.required<PayDialog>("payBox");
     paying = signal(false);
     payError = signal<string | null>(null);
@@ -314,7 +314,7 @@ export class CustomerPage {
         return `Depuis ${days} jour${days > 1 ? "s" : ""}`;
     });
 
-    // après l'encaissement : le paiement tout juste enregistré s'ouvre avec son ticket
+    // Après l'encaissement : le paiement tout juste enregistré s'ouvre avec son ticket
     private async showNewPayment(customerId: number) {
         try {
             const { rows } = await firstValueFrom(
@@ -342,7 +342,7 @@ export class CustomerPage {
         this.sales.reload();
     }
 
-    // désactivation (administrateur)
+    // Désactivation (administrateur)
     deleting = signal(false);
     deleteError = signal<string | null>(null);
 
@@ -389,7 +389,7 @@ export class CustomerPage {
             });
     }
 
-    // réactivation (administrateur)
+    // Réactivation (administrateur)
     restoring = signal(false);
     restoreError = signal<string | null>(null);
 

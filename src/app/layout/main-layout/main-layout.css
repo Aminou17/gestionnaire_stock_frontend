@@ -20,13 +20,13 @@ main {
 }
 
 @media (max-width: 767px) {
-    /* place pour la barre de navigation du bas */
+    /* Place pour la barre de navigation du bas */
     main {
         padding: 16px 16px calc(var(--bottom-nav-height) + 28px + env(safe-area-inset-bottom));
     }
 }
 
-/* à l'impression on ne garde que le contenu de la page */
+/* À l'impression on ne garde que le contenu de la page */
 @media print {
     main {
         margin: 0;

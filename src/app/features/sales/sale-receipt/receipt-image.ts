@@ -2,7 +2,7 @@ import { toBlob } from "html-to-image";
 
 import { toWhatsAppLink } from "../../../shared/phone";
 
-// le ticket est dessiné en grand pour rester net sur un écran de téléphone
+// Le ticket est dessiné en grand pour rester net sur un écran de téléphone
 export const receiptBlob = async (element: HTMLElement) => {
     const blob = await toBlob(element, {
         pixelRatio: 3,
@@ -24,7 +24,7 @@ const download = (blob: Blob, fileName: string) => {
     URL.revokeObjectURL(url);
 };
 
-// client avec un numéro : image copiée et conversation WhatsApp du client ouverte, à coller (Ctrl+V ou appui long).
+// Client avec un numéro : image copiée et conversation WhatsApp du client ouverte, à coller (Ctrl+V ou appui long).
 // sans numéro, sur téléphone : menu de partage, où l'on choisit la personne.
 // à appeler directement depuis le clic : le navigateur refuse la copie et l'ouverture sinon
 export const shareReceiptImage = async (
@@ -35,7 +35,7 @@ export const shareReceiptImage = async (
 ): Promise<ShareResult> => {
     const pending = receiptBlob(element);
 
-    // le menu de partage n'existe que sur téléphone et tablette, et ne sait pas viser un client
+    // Le menu de partage n'existe que sur téléphone et tablette, et ne sait pas viser un client
     const isTouch =
         navigator.maxTouchPoints > 0 && /android|iphone|ipad/i.test(navigator.userAgent);
     if (isTouch && navigator.share && !phone) {
@@ -57,7 +57,7 @@ export const shareReceiptImage = async (
             if (phone) window.open(toWhatsAppLink(phone, defaultCode), "_blank", "noopener");
             return "copied";
         } catch {
-            // copie refusée : on retombe sur le téléchargement
+            // Copie refusée : on retombe sur le téléchargement
         }
     }
 

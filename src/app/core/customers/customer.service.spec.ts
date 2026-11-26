@@ -26,7 +26,7 @@ describe("CustomerService", () => {
     it("should send only the filters that differ from the defaults", () => {
         service
             .getCustomers({
-                search: " awa ",
+                search: " adam ",
                 status: "active",
                 unpaid: true,
                 sort: "spent",
@@ -36,7 +36,7 @@ describe("CustomerService", () => {
             .subscribe();
 
         const req = httpMock.expectOne((r) => r.url === "/api/customers");
-        expect(req.request.params.get("search")).toBe("awa");
+        expect(req.request.params.get("search")).toBe("adam");
         expect(req.request.params.get("unpaid")).toBe("true");
         expect(req.request.params.get("sort")).toBe("spent");
         expect(req.request.params.get("page")).toBe("2");
@@ -63,7 +63,7 @@ describe("CustomerService", () => {
     });
 
     it("should create and update a customer", () => {
-        const input = { name: "Awa", phone: "06 123 45 67", note: null };
+        const input = { name: "Adam", phone: "06 123 45 67", note: null };
 
         service.createCustomer(input).subscribe();
         const post = httpMock.expectOne("/api/customers");

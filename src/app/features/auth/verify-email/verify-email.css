@@ -20,7 +20,7 @@
     overflow-wrap: anywhere;
 }
 
-/* six cases séparées, comme les codes de Stripe ou de Shopify */
+/* Six cases séparées, comme les codes de Stripe ou de Shopify */
 .code {
     display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));

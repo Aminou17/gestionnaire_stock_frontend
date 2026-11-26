@@ -29,7 +29,7 @@ dialog {
     color: var(--success);
 }
 
-/* les accès se lisent et se recopient tels quels */
+/* Les accès se lisent et se recopient tels quels */
 .credentials {
     margin: 0;
     padding: 12px 14px;

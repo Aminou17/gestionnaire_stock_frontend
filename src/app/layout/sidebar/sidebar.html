@@ -15,7 +15,7 @@
                 <div class="brand-name" [attr.title]="shop.shopName() || null">
                     {{ shop.shopName() || productName }}
                 </div>
-                <!-- avec le nom de la boutique, pas de sous-titre : il serait coupé sur téléphone -->
+                <!-- Avec le nom de la boutique, pas de sous-titre : il serait coupé sur téléphone -->
                 @if (!shop.shopName()) {
                     <div class="brand-sub">par {{ companyName }}</div>
                 }
@@ -57,14 +57,14 @@
                             <app-icon [name]="item.icon" />
                             <span class="group-text">
                                 <span class="label">{{ item.label }}</span>
-                                <!-- la page affichée, pour savoir où l'on est sans ouvrir -->
+                                <!-- La page affichée, pour savoir où l'on est sans ouvrir -->
                                 @if (activeChild(item); as current) {
                                     <small class="group-current">{{ current }}</small>
                                 }
                             </span>
                             <app-icon class="arrow" name="chevron-right" [size]="16" />
                         </button>
-                        <!-- menu réduit sur ordinateur : les pages s'affichent à plat -->
+                        <!-- Menu réduit sur ordinateur : les pages s'affichent à plat -->
                         <div class="children">
                             @for (child of children; track child.label) {
                                 <a
@@ -187,7 +187,7 @@
     <div class="overlay" (click)="close()"></div>
 }
 
-<!-- une rubrique touchée : ses fonctionnalités en carreaux, dans une fenêtre au milieu de l'écran -->
+<!-- Une rubrique touchée : ses fonctionnalités en carreaux, dans une fenêtre au milieu de l'écran -->
 @if (panelGroup(); as group) {
     <div class="launcher-backdrop" (click)="closePanel()"></div>
     <section class="launcher" role="dialog" aria-modal="true" aria-labelledby="launcher-title">

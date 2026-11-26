@@ -21,7 +21,7 @@ export class SettingsInstall {
     protected back = getBackLink("/settings", "Retour aux paramètres");
     protected productName = PRODUCT_NAME;
 
-    // l'application Android, servie par le site lui-même (voir public/boutiki.apk)
+    // L'application Android, servie par le site lui-même (voir public/boutiki.apk)
     protected apk = { url: "/boutiki.apk", version: "1.0.0", size: "5 Mo" };
 
     protected platform = this.pwa.platform;
@@ -29,10 +29,10 @@ export class SettingsInstall {
     protected installed = this.pwa.isInstalled$;
     protected busy = signal(false);
 
-    // adresse à ouvrir dans le navigateur
+    // Adresse à ouvrir dans le navigateur
     protected address = window.location.origin;
 
-    // les gestes selon l'appareil, quand la fenêtre d'installation n'est pas proposée
+    // Les gestes selon l'appareil, quand la fenêtre d'installation n'est pas proposée
     protected steps = computed(() => {
         if (this.platform === "ios") {
             return [

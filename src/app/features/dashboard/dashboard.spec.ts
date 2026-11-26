@@ -41,7 +41,7 @@ const uncounted: DashboardSummary["uncountedSession"] = {
     sessionDate: "2026-11-10",
     openedAt: "2026-11-10T08:00:00",
     openedBy: 2,
-    openedByName: "Awa",
+    openedByName: "Adam",
     balance: 25000,
     count: 1,
 };
@@ -172,7 +172,7 @@ describe("Dashboard", () => {
         expect(text()).toContain("Bénéfice du jour");
         expect(text()).toContain("86 000 F");
         expect(text()).not.toContain("%");
-        // la valeur du stock reste masquée tant que le mot de passe n'est pas redonné
+        // La valeur du stock reste masquée tant que le mot de passe n'est pas redonné
         expect(text()).not.toContain("4 860 000 F");
         TestBed.inject(SecretValues).revealed.set(true);
         fixture.detectChanges();

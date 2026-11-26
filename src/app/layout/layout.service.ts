@@ -6,7 +6,7 @@ export class LayoutService {
     sidebarOpen = signal(false);
     searchOpen = signal(false);
 
-    // menu réduit en icônes sur ordinateur, le choix est gardé dans le navigateur
+    // Menu réduit en icônes sur ordinateur, le choix est gardé dans le navigateur
     collapsed = signal(readCollapsed());
 
     constructor() {
@@ -14,7 +14,7 @@ export class LayoutService {
             try {
                 localStorage.setItem("sidebarCollapsed", String(this.collapsed()));
             } catch {
-                // navigateur en navigation privée : on garde le choix pour la session seulement
+                // Navigateur en navigation privée : on garde le choix pour la session seulement
             }
         });
     }

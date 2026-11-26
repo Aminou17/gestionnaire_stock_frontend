@@ -21,7 +21,7 @@ const openCash: NonNullable<CashToday["cash"]> = {
     difference: null,
 };
 
-// la veille, calculée pour que "d'hier" reste vrai quel que soit le jour du test
+// La veille, calculée pour que "d'hier" reste vrai quel que soit le jour du test
 const yesterday = new Date(Date.now() - 24 * 3600 * 1000).toISOString().slice(0, 10);
 
 const uncounted = {
@@ -29,7 +29,7 @@ const uncounted = {
     sessionDate: yesterday,
     openedAt: `${yesterday}T08:00:00`,
     openedBy: 1,
-    openedByName: "Awa",
+    openedByName: "Adam",
     balance: 12000,
     count: 1,
 };
@@ -55,7 +55,7 @@ const detail = (overrides: Partial<CashSessionDetail> = {}): CashSessionDetail =
             type: "SALE",
             amount: 4500,
             user_id: 2,
-            user_name: "Awa K.",
+            user_name: "Adam K.",
             reference_type: "sale",
             reference_id: 12,
             sale_number: 112,
@@ -124,7 +124,7 @@ describe("Cash", () => {
     const text = () => el.textContent!.replace(/\s+/g, "");
     const buttons = () =>
         [...el.querySelectorAll("button, a.btn")]
-            // les boutons des boîtes de dialogue sont toujours dans la page, cachés
+            // Les boutons des boîtes de dialogue sont toujours dans la page, cachés
             .filter((b) => !b.closest("dialog"))
             .map((b) => b.textContent!.trim());
 
@@ -148,7 +148,7 @@ describe("Cash", () => {
         expect(text()).toContain("Vente#112");
         expect(text()).toContain("Ventes4500F");
         expect(buttons()).toContain("Compter la caisse");
-        // plus d'ouverture ni de clôture à faire à la main
+        // Plus d'ouverture ni de clôture à faire à la main
         expect(buttons()).not.toContain("Ouvrir la caisse");
         expect(buttons()).not.toContain("Clôturer la caisse");
     });
@@ -161,7 +161,7 @@ describe("Cash", () => {
 
         expect(hrefs).toContain("/sales?period=today");
         expect(links.length).toBeGreaterThanOrEqual(2);
-        // le montant n'est jamais un lien
+        // Le montant n'est jamais un lien
         expect(el.querySelectorAll(".lines .amount a").length).toBe(0);
     });
 
@@ -243,7 +243,7 @@ describe("Cash", () => {
 
         const tiles = [...el.querySelectorAll(".quick-tile strong")].map((t) => t.textContent);
         expect(tiles).toEqual(["Ajout", "Dépense", "Retrait"]);
-        // la dépense se saisit sur sa propre page
+        // La dépense se saisit sur sa propre page
         expect(el.querySelector(".quick-tile[href='/expenses/new']")).not.toBeNull();
     });
 
@@ -323,7 +323,7 @@ describe("Cash", () => {
         expect(text()).toContain("Caissed'hiernoncomptée");
         expect(text()).toContain("Attendu12000F");
         expect(buttons()).toContain("Compter");
-        // la caisse du jour reste utilisable
+        // La caisse du jour reste utilisable
         expect(buttons()).toContain("Compter la caisse");
         expect(el.querySelector(".quick-tile")).not.toBeNull();
     });
@@ -400,7 +400,7 @@ describe("Cash", () => {
 
         expect(text()).toContain("ComptéparKevinBakala");
         expect(text()).not.toContain("Suividescaisses");
-        expect(text()).toContain("AwaK.");
+        expect(text()).toContain("AdamK.");
     });
 
     it("should show an error with a retry button instead of a fake closed cash", async () => {

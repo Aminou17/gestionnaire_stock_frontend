@@ -16,7 +16,7 @@ const detail = (overrides: Partial<SaleDetail> = {}): SaleDetail => ({
     id: 6,
     number: 106,
     user_id: 6,
-    user_name: "Awa K.",
+    user_name: "Adam K.",
     user_role: "manager",
     total: 11000,
     paid_amount: 11000,
@@ -110,7 +110,7 @@ describe("SalePage", () => {
                         defaultCountryCode: signal("242"),
                         getSettings: () =>
                             of({
-                                name: "Awa Bazin",
+                                name: "Adam Ouédraogo",
                                 address: "Grand marché",
                                 phone: "70 00 00 00",
                                 tax_id: "IFU123",
@@ -157,7 +157,7 @@ describe("SalePage", () => {
 
     const text = () => el.textContent!.replace(/\s/g, " ");
 
-    // les actions secondaires sont dans le menu des trois points
+    // Les actions secondaires sont dans le menu des trois points
     const openMenu = async () => {
         el.querySelector<HTMLButtonElement>(".more-btn")!.click();
         fixture.detectChanges();
@@ -171,7 +171,7 @@ describe("SalePage", () => {
         expect(text()).toContain("Bazin riche");
         expect(text()).toContain("au lieu de 10 000 F");
         expect(text()).toContain("11 000 F");
-        expect(text()).toContain("Awa K.");
+        expect(text()).toContain("Adam K.");
     });
 
     it("should let only the owner refund an active sale", async () => {
@@ -207,7 +207,7 @@ describe("SalePage", () => {
     const returnButtons = () =>
         Array.from(el.querySelectorAll<HTMLButtonElement>(".items .link-btn"));
 
-    // les boutons "Rendre" n'apparaissent qu'après "Rendre un article" dans le menu
+    // Les boutons "Rendre" n'apparaissent qu'après "Rendre un article" dans le menu
     const startReturns = async () => {
         fixture.componentInstance.onPick("return-mode");
         await fixture.whenStable();
@@ -288,11 +288,11 @@ describe("SalePage", () => {
         await startReturns();
         expect(text()).toContain("1 × Riz");
         expect(returnButtons().length).toBe(1);
-        // le net remplace le total en haut et dans la carte Paiement
+        // Le net remplace le total en haut et dans la carte Paiement
         expect(text()).toContain("Net");
         expect(text()).toContain("rendus");
         expect(el.querySelector(".total strong")!.textContent!.replace(/\s/g, " ")).not.toBe("");
-        // le retour apparaît aussi dans l'activité, avec son motif
+        // Le retour apparaît aussi dans l'activité, avec son motif
         expect(el.querySelector(".timeline")!.textContent).toContain("Rendu : 1 × Riz");
         expect(el.querySelector(".timeline")!.textContent).toContain("Couleur non conforme");
     });

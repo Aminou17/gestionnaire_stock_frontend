@@ -46,7 +46,7 @@ export class Notifications {
 
     open = signal(false);
 
-    // deux échecs identiques à la suite deviennent une ligne avec x2
+    // Deux échecs identiques à la suite deviennent une ligne avec x2
     latest = computed(() => {
         const groups: { key: string; text: string; time: string; count: number }[] = [];
         for (const log of this.security.latest()) {
@@ -60,7 +60,7 @@ export class Notifications {
 
     total = computed(() => this.stock.count() + this.security.count());
 
-    // les produits les plus urgents d'abord : ruptures, puis stock faible
+    // Les produits les plus urgents d'abord : ruptures, puis stock faible
     products = computed(() =>
         [...this.stock.list()]
             .sort(
@@ -69,7 +69,7 @@ export class Notifications {
             .slice(0, MAX_PRODUCTS),
     );
 
-    // rien à afficher tant que l'une des deux sources charge ou échoue : on ne dit pas "tout est à jour" à tort
+    // Rien à afficher tant que l'une des deux sources charge ou échoue : on ne dit pas "tout est à jour" à tort
     allClear = computed(
         () =>
             this.total() === 0 &&
@@ -79,7 +79,7 @@ export class Notifications {
             !this.security.failed(),
     );
 
-    // temps relatif discret : "à l'instant", "il y a 5 min", puis l'heure
+    // Temps relatif discret : "à l'instant", "il y a 5 min", puis l'heure
     ago(time: string) {
         const minutes = Math.floor((Date.now() - new Date(time).getTime()) / 60000);
         if (minutes < 1) return "à l'instant";
@@ -90,7 +90,7 @@ export class Notifications {
 
     toggle() {
         this.open.update((open) => !open);
-        // les échecs ont pu arriver depuis le chargement de la page
+        // Les échecs ont pu arriver depuis le chargement de la page
         if (this.open()) this.security.reload();
     }
 
@@ -104,7 +104,7 @@ export class Notifications {
         this.button().nativeElement.focus();
     }
 
-    // le clavier sort du panneau avec Tab : on le ferme
+    // Le clavier sort du panneau avec Tab : on le ferme
     onFocusOut(event: FocusEvent) {
         const next = event.relatedTarget as Node | null;
         if (next && !this.el.nativeElement.contains(next)) this.open.set(false);

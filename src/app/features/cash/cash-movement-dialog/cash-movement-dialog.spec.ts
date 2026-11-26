@@ -21,7 +21,7 @@ describe("CashMovementDialog", () => {
         httpMock = TestBed.inject(HttpTestingController);
         await fixture.whenStable();
 
-        // jsdom n'implémente pas showModal / close
+        // Jsdom n'implémente pas showModal / close
         dialog = el.querySelector("dialog")!;
         dialog.showModal = function () {
             this.open = true;

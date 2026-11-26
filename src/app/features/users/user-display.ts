@@ -2,7 +2,7 @@ import { formatDate } from "@angular/common";
 
 import { UserAccount } from "./user.model";
 
-// sans 0, O, 1, l ni I, qu'on confond quand on dicte ou recopie le mot de passe
+// Sans 0, O, 1, l ni I, qu'on confond quand on dicte ou recopie le mot de passe
 const PASSWORD_CHARS = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
 export const generatePassword = (length = 10) => {

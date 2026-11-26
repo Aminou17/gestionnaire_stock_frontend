@@ -100,7 +100,7 @@
     list-style: none;
 }
 
-/* une carte cliquable par boutique : nom, une ligne, état et menu */
+/* Une carte cliquable par boutique : nom, une ligne, état et menu */
 .shop {
     position: relative;
     display: grid;
@@ -183,7 +183,7 @@
     white-space: nowrap;
 }
 
-/* le lien s'étend sur toute la carte */
+/* Le lien s'étend sur toute la carte */
 .shop-link::after {
     content: "";
     position: absolute;
@@ -252,7 +252,7 @@
         font-size: var(--fs-lead);
     }
 
-    /* l'état passe sous le nom, le menu reste à droite sur toute la hauteur */
+    /* L'état passe sous le nom, le menu reste à droite sur toute la hauteur */
     .shop-status {
         display: contents;
     }

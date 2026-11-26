@@ -55,7 +55,7 @@ export class ShopActivity {
     activeDays = computed(() => this.bars().filter((bar) => bar.views > 0).length);
     pages = computed(() => (this.usage.hasValue() ? this.usage.value().pages : []));
 
-    // part des pages ouvertes par les vendeurs, en pourcentage
+    // Part des pages ouvertes par les vendeurs, en pourcentage
     employeeShare = computed(() => {
         const total = this.total();
         if (total === 0) return null;
@@ -66,7 +66,7 @@ export class ShopActivity {
     topPage = computed(() => this.pages()[0] ?? null);
     maxViews = computed(() => Math.max(1, ...this.pages().map((page) => page.views)));
 
-    // pages regroupées par rubrique, de la plus utilisée à la moins utilisée
+    // Pages regroupées par rubrique, de la plus utilisée à la moins utilisée
     sections = computed(() => {
         const totals = new Map<string, number>();
         for (const page of this.pages()) {
@@ -79,7 +79,7 @@ export class ShopActivity {
             .sort((a, b) => b.views - a.views);
     });
 
-    // pages jamais ouvertes sur la période : de quoi savoir ce qui ne sert pas
+    // Pages jamais ouvertes sur la période : de quoi savoir ce qui ne sert pas
     neverOpened = computed(() => {
         const opened = new Set(this.pages().map((page) => page.page));
         return OPENABLE_PAGES.filter((page) => !opened.has(page)).map((page) => pageLabel(page));

@@ -36,7 +36,7 @@ describe("NewShopDialog", () => {
         dialog.form.setValue({
             shopName: " Chez Fatou ",
             firstName: "Fatou",
-            lastName: " Diallo ",
+            lastName: " Ouédraogo ",
             phone: "+226 70 12 34 56",
             country: "Burkina Faso",
             city: "Ouagadougou",
@@ -54,7 +54,7 @@ describe("NewShopDialog", () => {
                 status: "ACTIVE",
                 created_at: "",
                 trial_ends_at: null,
-                admin: { id: 9, name: "Fatou Diallo", email: "fatou@exemple.com", role: "admin" },
+                admin: { id: 9, name: "Fatou Ouédraogo", email: "fatou@exemple.com", role: "admin" },
             }),
         );
         const fixture = await render();
@@ -67,7 +67,7 @@ describe("NewShopDialog", () => {
 
         expect(createShop).toHaveBeenCalledWith({
             shopName: "Chez Fatou",
-            adminName: "Fatou Diallo",
+            adminName: "Fatou Ouédraogo",
             phone: "+226 70 12 34 56",
             country: "Burkina Faso",
             city: "Ouagadougou",
@@ -128,7 +128,7 @@ describe("NewShopDialog", () => {
                 status: "ACTIVE",
                 created_at: "",
                 trial_ends_at: null,
-                admin: { id: 9, name: "Fatou Diallo", email: "fatou@exemple.com", role: "admin" },
+                admin: { id: 9, name: "Fatou Ouédraogo", email: "fatou@exemple.com", role: "admin" },
             }),
         );
         const fixture = await render();
@@ -136,7 +136,7 @@ describe("NewShopDialog", () => {
         fixture.componentInstance.submit();
         await fixture.whenStable();
 
-        // adresse en http : le navigateur ne donne pas de presse-papiers
+        // Adresse en http : le navigateur ne donne pas de presse-papiers
         Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
         const execCommand = vi.fn(() => false);
         document.execCommand = execCommand;

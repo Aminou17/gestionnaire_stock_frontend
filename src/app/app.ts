@@ -14,14 +14,14 @@ import { PageViewService } from "./core/usage/page-view.service";
     styleUrl: "./app.css",
 })
 export class App {
-    // applique le thème enregistré dès le démarrage
+    // Applique le thème enregistré dès le démarrage
     private theme = inject(ThemeService);
 
     constructor() {
         guardNumberInputs(inject(DOCUMENT));
-        // une nouvelle version mise en ligne s'affiche sans avoir à vider le cache
+        // Une nouvelle version mise en ligne s'affiche sans avoir à vider le cache
         inject(AppUpdateService).start();
-        // pages ouvertes par la boutique, comptées pour le propriétaire du logiciel
+        // Pages ouvertes par la boutique, comptées pour le propriétaire du logiciel
         inject(PageViewService).start();
     }
 }

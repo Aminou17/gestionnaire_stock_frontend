@@ -6,7 +6,7 @@ import { filter, firstValueFrom, of, take, timeout } from "rxjs";
 import { ShopSettingsService } from "../shop/shop-settings.service";
 import { ModuleAccess, ModuleStore, moduleOfPath } from "./module-access";
 
-// les réglages de la boutique arrivent après la connexion : on les attend un instant avant de décider
+// Les réglages de la boutique arrivent après la connexion : on les attend un instant avant de décider
 // (injecter le service des réglages suffit à lancer leur chargement)
 const settingsReady = () => {
     inject(ShopSettingsService);

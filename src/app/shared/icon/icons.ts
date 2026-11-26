@@ -217,7 +217,7 @@ export const ICONS = {
         "M16 13H8",
         "M16 17H8",
     ],
-    // motifs de dépense : repas, factures, réparation
+    // Motifs de dépense : repas, factures, réparation
     utensils: [
         "M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2",
         "M7 2v20",

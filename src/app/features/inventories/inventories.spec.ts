@@ -17,7 +17,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedAt: "2026-11-12T16:00:00Z",
     appliedAt: null,
     cancelledAt: null,
-    createdBy: { id: 1, name: "Awa Bazin", avatar: null },
+    createdBy: { id: 1, name: "Adam Ouédraogo", avatar: null },
     countedBy: null,
     appliedBy: null,
     cancelledBy: null,
@@ -39,7 +39,7 @@ describe("Inventories", () => {
     let getInventories: ReturnType<typeof vi.fn>;
     let exportList: ReturnType<typeof vi.fn>;
 
-    // deux demandes : ce qu'il reste à faire (en cours, à valider) puis l'historique (terminés)
+    // Deux demandes : ce qu'il reste à faire (en cours, à valider) puis l'historique (terminés)
     async function render(history: Inventory[], isAdmin = true, todo: Inventory[] = []) {
         getInventories = vi.fn((filters) =>
             filters.statuses.includes("applied") ? of(list(history)) : of(list(todo)),

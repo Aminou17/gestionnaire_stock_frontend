@@ -18,7 +18,7 @@ const thread = (overrides: Partial<SupportThread> = {}): SupportThread => ({
     updated_at: "2026-11-16T09:00:00.000Z",
     last_message: "Bonjour, la caisse ne s'ouvre pas",
     shop_name: "Chez Fatou",
-    user_name: "Fatou Diallo",
+    user_name: "Fatou Ouédraogo",
     user_email: "fatou@exemple.com",
     ...overrides,
 });

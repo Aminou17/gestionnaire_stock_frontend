@@ -8,7 +8,7 @@ app-page-header {
     margin-bottom: -4px;
 }
 
-/* un bloc : un petit titre puis ses cartes */
+/* Un bloc : un petit titre puis ses cartes */
 .block {
     display: grid;
     gap: 8px;
@@ -57,7 +57,7 @@ app-page-header {
     outline-offset: 2px;
 }
 
-/* tuile douce : la couleur du statut en fond léger, comme les initiales de la page Produits */
+/* Tuile douce : la couleur du statut en fond léger, comme les initiales de la page Produits */
 .tile {
     width: 48px;
     height: 48px;
@@ -110,7 +110,7 @@ app-page-header {
     border-radius: var(--radius);
 }
 
-/* téléphone : « + Nouveau » seulement, pour que le titre tienne sur une ligne */
+/* Téléphone : « + Nouveau » seulement, pour que le titre tienne sur une ligne */
 .more {
     display: none;
 }

@@ -20,7 +20,7 @@ import { CreatedShop } from "../owned-shop.model";
 import { OwnerShopService } from "../owner-shop.service";
 import { copyText } from "../../../shared/copy-text";
 
-// lettres et chiffres faciles à recopier : ni 0/O ni 1/l/I
+// Lettres et chiffres faciles à recopier : ni 0/O ni 1/l/I
 const PASSWORD_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
 
 @Component({
@@ -49,7 +49,7 @@ export class NewShopDialog {
         address: ["", [Validators.maxLength(500)]],
         email: ["", [Validators.required, Validators.email]],
         password: ["", [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
-        // vide : pas d'essai
+        // Vide : pas d'essai
         trialDays: [null as number | null, [Validators.min(1), Validators.max(365)]],
     });
 
@@ -57,7 +57,7 @@ export class NewShopDialog {
 
     saving = signal(false);
     error = signal<string | null>(null);
-    // après la création : les accès à transmettre à la commerçante, affichés une seule fois
+    // Après la création : les accès à transmettre à la commerçante, affichés une seule fois
     done = signal<{ shop: CreatedShop; password: string } | null>(null);
     copied = signal(false);
     copyFailed = signal(false);
@@ -75,7 +75,7 @@ export class NewShopDialog {
     });
 
     constructor() {
-        // le pays suit l'indicatif tant qu'il n'a pas été saisi à la main
+        // Le pays suit l'indicatif tant qu'il n'a pas été saisi à la main
         this.form.controls.phone.valueChanges.subscribe((phone) => {
             const country = this.form.controls.country;
             if (country.dirty || !phone) return;
@@ -104,7 +104,7 @@ export class NewShopDialog {
         if (this.saving()) event.preventDefault();
     }
 
-    // ne rien renvoyer : un gestionnaire qui renvoie false bloque le clic
+    // Ne rien renvoyer : un gestionnaire qui renvoie false bloque le clic
     onBackdropClick(event: MouseEvent) {
         if (event.target === this.dialog().nativeElement) {
             this.close();
@@ -163,7 +163,7 @@ export class NewShopDialog {
                     this.saving.set(false);
                     this.done.set({ shop, password });
                     this.created.emit(shop);
-                    // le bouton Créer disparaît : le focus passe sur la copie des accès
+                    // Le bouton Créer disparaît : le focus passe sur la copie des accès
                     afterNextRender(() => this.copyButton()?.nativeElement.focus(), {
                         injector: this.injector,
                     });

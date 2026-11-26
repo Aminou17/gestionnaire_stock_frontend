@@ -1,4 +1,4 @@
-// l'e-mail part du compte d'envoi de l'application : la boutique ne règle aucun compte
+// L'e-mail part du compte d'envoi de l'application : la boutique ne règle aucun compte
 export interface AlertEmailSettings {
     enabled: boolean;
     recipient: string | null;

@@ -41,7 +41,7 @@ import { Icon } from "../../shared/icon/icon";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 import { PeriodFilter, PeriodRange } from "../../shared/period-filter/period-filter";
 
-// petite icône de type dans le coin de la miniature (téléphone)
+// Petite icône de type dans le coin de la miniature (téléphone)
 const TYPE_ICONS = {
     ENTRY: "arrow-down",
     SALE: "cart",
@@ -107,16 +107,16 @@ export class StockMovements {
 
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     type = signal<StockMovementFilter | null>(null);
-    // arrivée depuis la fiche d'un produit : /stock-movements?productId=3
+    // Arrivée depuis la fiche d'un produit : /stock-movements?productId=3
     productId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("productId")));
     page = signal(1);
     pageSize = storedPageSize("movements");
-    // mouvement dont le détail est ouvert
+    // Mouvement dont le détail est ouvert
     selected = signal<StockMovement | null>(null);
     success = signal<string | null>(null);
     exporting = signal(false);
     exportError = signal<string | null>(null);
-    // téléphone : fenêtre Filtres et menu des exports de l'en-tête
+    // Téléphone : fenêtre Filtres et menu des exports de l'en-tête
     filtersOpen = signal(false);
     menuOpen = signal(false);
 
@@ -132,7 +132,7 @@ export class StockMovements {
         stream: ({ params }) => this.movementService.getMovements(params),
     });
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<StockMovementPage | undefined, StockMovementPage | undefined>({
         source: () => (this.movements.hasValue() ? this.movements.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -145,7 +145,7 @@ export class StockMovements {
     firstLoad = computed(() => this.movements.isLoading() && !this.last());
     filtered = computed(() => this.range().period !== "all" || this.productId() !== null);
 
-    // le nom vient des mouvements chargés ; sans mouvement on ne le connaît pas
+    // Le nom vient des mouvements chargés ; sans mouvement on ne le connaît pas
     productName = computed(() => {
         const id = this.productId();
         if (id === null) return null;
@@ -158,7 +158,7 @@ export class StockMovements {
         return "Impossible de charger les mouvements.";
     });
 
-    // la liste est triée par date : on regroupe les mouvements consécutifs du même jour
+    // La liste est triée par date : on regroupe les mouvements consécutifs du même jour
     // chaque jour porte aussi son bilan en unités : + pour ce qui entre, - pour ce qui sort
     days = computed(() =>
         groupByDay(this.list(), this.locale).map((day) => ({
@@ -223,12 +223,12 @@ export class StockMovements {
             },
         ] as const;
 
-        // le manager ne voit que ses ventes et leurs remboursements
+        // Le manager ne voit que ses ventes et leurs remboursements
         if (this.auth.isAdmin()) return tabs;
         return tabs.filter((tab) => [null, "SALE", "ADJUSTMENT"].includes(tab.value));
     });
 
-    // téléphone : les trois puces du haut, par sens du mouvement (le manager ne voit que ses sorties)
+    // Téléphone : les trois puces du haut, par sens du mouvement (le manager ne voit que ses sorties)
     phoneTabs = computed(() => {
         const counters = this.counters();
         const tabs = [
@@ -246,7 +246,7 @@ export class StockMovements {
         return this.type();
     });
 
-    // filtres de la fenêtre (et le produit), affichés en puces sous la ligne du haut
+    // Filtres de la fenêtre (et le produit), affichés en puces sous la ligne du haut
     activeFilters = computed(() => {
         const filters: { key: "period" | "type" | "product"; label: string }[] = [];
         const { period, from, to } = this.range();
@@ -275,7 +275,7 @@ export class StockMovements {
         });
     }
 
-    // part de ce type parmi tous les mouvements de la période, pour la barre des cartes
+    // Part de ce type parmi tous les mouvements de la période, pour la barre des cartes
     share(count: number | undefined): number {
         const all = this.counters()?.movements;
         if (!count || !all) return 0;
@@ -307,7 +307,7 @@ export class StockMovements {
         else this.clearProduct();
     }
 
-    // photo agrandie au clic, sans quitter la liste
+    // Photo agrandie au clic, sans quitter la liste
     zoom = signal<{ src: string; name: string } | null>(null);
 
     zoomImage(event: Event, movement: StockMovement) {
@@ -340,12 +340,12 @@ export class StockMovements {
         });
     }
 
-    // la fiche ouverte sait ainsi revenir ici, avec les mêmes filtres
+    // La fiche ouverte sait ainsi revenir ici, avec les mêmes filtres
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Historique du stock" };
     }
 
-    // une vente ou un inventaire ouvre directement sa page ; les autres mouvements (entrée, ajustement)
+    // Une vente ou un inventaire ouvre directement sa page ; les autres mouvements (entrée, ajustement)
     // n'ont pas de page à eux : leur détail s'affiche dans une fenêtre, sans quitter la liste
     open(movement: StockMovement) {
         const sale = saleId(movement);
@@ -366,14 +366,14 @@ export class StockMovements {
         this.detailDialog().show();
     }
 
-    // la barre espace ouvre la ligne, mais pas quand elle sert à un lien ou un bouton dedans
+    // La barre espace ouvre la ligne, mais pas quand elle sert à un lien ou un bouton dedans
     openWithSpace(event: Event, movement: StockMovement) {
         if (event.target !== event.currentTarget) return;
         event.preventDefault();
         this.open(movement);
     }
 
-    // ajustement manuel du stock (admin)
+    // Ajustement manuel du stock (admin)
     openAdjust() {
         this.success.set(null);
         this.adjustDialog().show();
@@ -381,7 +381,7 @@ export class StockMovements {
 
     onAdjusted(message: string) {
         this.success.set(message);
-        // le message s'efface seul au bout de quelques secondes
+        // Le message s'efface seul au bout de quelques secondes
         clearTimeout(this.successTimer);
         this.successTimer = setTimeout(() => this.success.set(null), 6000);
         if (this.page() === 1) {

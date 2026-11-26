@@ -95,7 +95,7 @@ export class CashSessions {
         });
     }
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<CashSessionPage | undefined, CashSessionPage | undefined>({
         source: () => (this.sessions.hasValue() ? this.sessions.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -105,7 +105,7 @@ export class CashSessions {
     total = computed(() => this.last()?.pagination.total ?? 0);
     firstLoad = computed(() => this.sessions.isLoading() && !this.last());
 
-    // pastille d'état : écart du comptage, caisse en cours ou jamais comptée
+    // Pastille d'état : écart du comptage, caisse en cours ou jamais comptée
     state(session: CashSession) {
         if (session.status === "OPEN") return { tone: "primary", label: "En cours" };
         if (session.status === "UNCOUNTED") return { tone: "warning", label: "Non comptée" };
@@ -117,7 +117,7 @@ export class CashSessions {
         return { tone: gap < 0 ? "danger" : "warning", label };
     }
 
-    // horaires : "08:00 - 18:30", ou "Ouverte à 08:00" tant qu'elle n'est pas comptée
+    // Horaires : "08:00 - 18:30", ou "Ouverte à 08:00" tant qu'elle n'est pas comptée
     hours(session: CashSession) {
         const start = formatDate(session.opened_at, "HH:mm", this.locale);
         const end = session.closed_at ? formatDate(session.closed_at, "HH:mm", this.locale) : "";

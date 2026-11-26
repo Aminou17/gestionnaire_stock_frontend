@@ -29,7 +29,7 @@ import { ToastService } from "../../shared/toast/toast.service";
 import { CountSync, SaveState } from "./inventory-count-sync";
 import { InventoryThumb } from "./inventory-thumb";
 
-// un produit du comptage : actualStock est ce que le serveur connaît (null : pas encore saisi)
+// Un produit du comptage : actualStock est ce que le serveur connaît (null : pas encore saisi)
 type CountLine = Pick<InventoryItem, "productId" | "productName" | "image" | "actualStock">;
 
 const RESULTS_LIMIT = 8;
@@ -51,7 +51,7 @@ const SAVE_LABELS: Record<SaveState, string> = {
     templateUrl: "./inventory-count.html",
     styleUrls: ["../../shared/dialog/dialog.css", "./inventory-count.css"],
     host: {
-        // fermer l'onglet avec des saisies non envoyées : le navigateur prévient
+        // Fermer l'onglet avec des saisies non envoyées : le navigateur prévient
         "(window:beforeunload)": "warnBeforeUnload($event)",
     },
 })
@@ -71,12 +71,12 @@ export class InventoryCount {
     private searchBox = viewChild<ElementRef<HTMLInputElement>>("searchBox");
     private leaveDialog = viewChild.required<ElementRef<HTMLDialogElement>>("leave");
 
-    // le brouillon de l'appareil est renvoyé avant de lire la liste, pour ne rien rater
+    // Le brouillon de l'appareil est renvoyé avant de lire la liste, pour ne rien rater
     private ready = signal(false);
 
     inventory = signal<Inventory | null>(null);
 
-    // les produits déjà choisis, lus une seule fois : un petit panier, jamais toute la boutique
+    // Les produits déjà choisis, lus une seule fois : un petit panier, jamais toute la boutique
     first = rxResource({
         params: () => (this.ready() ? { id: this.id() } : undefined),
         stream: ({ params }) =>
@@ -88,10 +88,10 @@ export class InventoryCount {
             }),
     });
 
-    // la liste affichée : le dernier produit ajouté est en haut
+    // La liste affichée : le dernier produit ajouté est en haut
     lines = signal<CountLine[]>([]);
 
-    // recherche : ce que la personne tape, envoyé une fois la frappe terminée
+    // Recherche : ce que la personne tape, envoyé une fois la frappe terminée
     query = signal("");
     private typing: ReturnType<typeof setTimeout> | undefined;
 
@@ -113,13 +113,13 @@ export class InventoryCount {
     flash = signal<number | null>(null);
     zoom = signal<{ src: string; name: string } | null>(null);
 
-    // fenêtres « quitter ? » et « terminer ? »
+    // Fenêtres « quitter ? » et « terminer ? »
     private leaving: ((leave: boolean) => void) | null = null;
     private finished = false;
     closing = signal(false);
     closeError = signal("");
 
-    // seuls les produits dont la quantité est saisie comptent
+    // Seuls les produits dont la quantité est saisie comptent
     counted = computed(() => this.lines().filter((line) => this.value(line) !== null).length);
     withoutQuantity = computed(() => this.lines().length - this.counted());
 
@@ -129,7 +129,7 @@ export class InventoryCount {
         this.sync.onSaved = (inventory, sent) => {
             this.inventory.set(inventory);
 
-            // les lignes affichées prennent ce que le serveur sait maintenant
+            // Les lignes affichées prennent ce que le serveur sait maintenant
             this.lines.update((lines) =>
                 lines.map((line) =>
                     sent[line.productId] === undefined
@@ -148,14 +148,14 @@ export class InventoryCount {
             untracked(() => {
                 this.inventory.set(detail);
 
-                // les produits ajoutés depuis l'ouverture de la page restent en haut
+                // Les produits ajoutés depuis l'ouverture de la page restent en haut
                 const known = new Set(this.lines().map((line) => line.productId));
                 const loaded = [...detail.items]
                     .sort((a, b) => (b.countedAt ?? "").localeCompare(a.countedAt ?? ""))
                     .filter((item) => !known.has(item.productId));
                 this.lines.update((lines) => [...lines, ...loaded]);
 
-                // un comptage clos ne se saisit plus : on va à la fiche
+                // Un comptage clos ne se saisit plus : on va à la fiche
                 if (detail.status !== "in_progress" && !this.finished) {
                     this.finished = true;
                     this.router.navigate(["/inventories", detail.id], { replaceUrl: true });
@@ -164,7 +164,7 @@ export class InventoryCount {
         });
     }
 
-    // valeur affichée : la saisie en attente, sinon ce que le serveur a
+    // Valeur affichée : la saisie en attente, sinon ce que le serveur a
     value(line: CountLine): number | null {
         const pending = this.sync.pending()[line.productId];
         return pending !== undefined ? pending : line.actualStock;
@@ -174,7 +174,7 @@ export class InventoryCount {
         const max = this.inventory()?.maxStock ?? 1_000_000;
 
         if (value === null) {
-            // un produit que le serveur ne connaît pas n'a rien à retirer
+            // Un produit que le serveur ne connaît pas n'a rien à retirer
             if (line.actualStock !== null) this.sync.set(line.productId, null);
             else this.sync.forget(line.productId);
             return;
@@ -191,7 +191,7 @@ export class InventoryCount {
         const field = event.target as HTMLInputElement;
         const digits = field.value.replace(/\D/g, "").slice(0, 7);
 
-        // seuls les chiffres sont gardés
+        // Seuls les chiffres sont gardés
         if (digits !== field.value) field.value = digits;
         this.setCount(line, digits === "" ? null : Number(digits));
     }
@@ -245,7 +245,7 @@ export class InventoryCount {
         return this.lines().some((line) => line.productId === product.id);
     }
 
-    // toucher un résultat : le produit entre dans la liste, sa quantité est prête à saisir
+    // Toucher un résultat : le produit entre dans la liste, sa quantité est prête à saisir
     pick(product: Product) {
         const exists = this.isListed(product);
 
@@ -302,7 +302,7 @@ export class InventoryCount {
         let line: CountLine;
 
         if (known) {
-            // le produit déjà dans la liste remonte en haut
+            // Le produit déjà dans la liste remonte en haut
             line = known;
             this.lines.update((lines) => [known, ...lines.filter((l) => l !== known)]);
         } else {
@@ -313,7 +313,7 @@ export class InventoryCount {
         this.highlight(product.id, false);
     }
 
-    // met la ligne en avant ; après une recherche, le curseur arrive dans sa quantité
+    // Met la ligne en avant ; après une recherche, le curseur arrive dans sa quantité
     private highlight(productId: number, focus: boolean) {
         this.flash.set(productId);
         setTimeout(() => this.flash.set(null), 1200);
@@ -360,7 +360,7 @@ export class InventoryCount {
         });
     }
 
-    // quitter la page : les saisies sont d'abord envoyées ; s'il en reste, on demande
+    // Quitter la page : les saisies sont d'abord envoyées ; s'il en reste, on demande
     async canLeave() {
         if (this.finished) return true;
 

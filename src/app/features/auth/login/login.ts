@@ -26,7 +26,7 @@ export class Login {
 
     productName = PRODUCT_NAME;
 
-    // propriétaire avec la double authentification : deuxième étape avec un code
+    // Propriétaire avec la double authentification : deuxième étape avec un code
     step = signal<"password" | "code">("password");
     useBackupCode = signal(false);
     codeControl = this.fb.control("", Validators.required);
@@ -64,7 +64,7 @@ export class Login {
             },
             error: (err: HttpErrorResponse) => {
                 this.loading.set(false);
-                // inscription jamais confirmée : un nouveau code vient de partir
+                // Inscription jamais confirmée : un nouveau code vient de partir
                 if (err.error?.code === "EMAIL_NOT_VERIFIED") {
                     this.router.navigate(["/verify-email"], {
                         queryParams: { email: err.error.email ?? email.trim() },
@@ -76,7 +76,7 @@ export class Login {
         });
     }
 
-    // un code de 6 chiffres complet part tout seul, sans appuyer sur le bouton
+    // Un code de 6 chiffres complet part tout seul, sans appuyer sur le bouton
     onCodeInput() {
         const value = this.codeControl.value;
         if (!this.useBackupCode() && /^\d{6}$/.test(value)) this.submitCode();
@@ -95,7 +95,7 @@ export class Login {
                 next: () => this.enterApp(),
                 error: (err: HttpErrorResponse) => {
                     this.loading.set(false);
-                    // le jeton dure 5 minutes : au-delà, on repart du mot de passe en gardant le message
+                    // Le jeton dure 5 minutes : au-delà, on repart du mot de passe en gardant le message
                     if (err.status === 401 && err.error?.message?.includes("expiré")) {
                         this.backToPassword(this.messageFor(err));
                         return;
@@ -112,7 +112,7 @@ export class Login {
         this.error.set(null);
     }
 
-    // message : affiché sur l'écran du mot de passe (par exemple "étape expirée")
+    // Message : affiché sur l'écran du mot de passe (par exemple "étape expirée")
     backToPassword(message: string | null = null) {
         this.step.set("password");
         this.useBackupCode.set(false);

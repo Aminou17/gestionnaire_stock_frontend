@@ -13,7 +13,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 import { ToastService } from "../../../shared/toast/toast.service";
 
-// exemples de précision selon le motif choisi
+// Exemples de précision selon le motif choisi
 const PLACEHOLDERS: Record<string, string> = {
     SUPPLIES: "Ex. Sachets et rouleau de ticket",
     TRANSPORT: "Ex. Taxi pour livrer un client",
@@ -44,17 +44,17 @@ export class NewExpense {
     protected quickAmounts = [500, 1000, 2000, 5000];
 
     amount = signal<number | null>(null);
-    // pas de motif choisi d'office : une dépense mal classée fausserait le relevé
+    // Pas de motif choisi d'office : une dépense mal classée fausserait le relevé
     category = signal<string | null>(null);
     receipt = signal<string | null>(null);
     receiptError = signal<string | null>(null);
     reason = signal("");
     saving = signal(false);
     error = signal<string | null>(null);
-    // les messages de champ ne s'affichent qu'après un premier essai
+    // Les messages de champ ne s'affichent qu'après un premier essai
     tried = signal(false);
 
-    // la dépense sort du tiroir de sa propre caisse du jour (elle s'ouvre toute seule)
+    // La dépense sort du tiroir de sa propre caisse du jour (elle s'ouvre toute seule)
     today = rxResource({ stream: () => this.cashService.getToday() });
     cash = computed(() => (this.today.hasValue() ? this.today.value().cash : null));
 
@@ -66,7 +66,7 @@ export class NewExpense {
         return amount !== null && Number.isInteger(amount) && amount >= 1;
     });
 
-    // solde du tiroir après la dépense, quand il est connu
+    // Solde du tiroir après la dépense, quand il est connu
     balanceAfter = computed(() => {
         const balance = this.cash()?.balance;
         const amount = this.amount();
@@ -118,13 +118,13 @@ export class NewExpense {
                 next: () => {
                     this.saving.set(false);
                     this.toast.show("Dépense enregistrée");
-                    // le formulaire quitte l'historique : la touche retour ne le rouvre pas
+                    // Le formulaire quitte l'historique : la touche retour ne le rouvre pas
                     this.goBack(this.back.link);
                 },
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);
                     this.error.set(err.error?.message ?? "Impossible d'enregistrer la dépense.");
-                    // la caisse a pu être clôturée entre-temps
+                    // La caisse a pu être clôturée entre-temps
                     if (err.status === 409) this.today.reload();
                 },
             });

@@ -31,7 +31,7 @@ describe("Subscription", () => {
                 },
             ],
         })
-            // l'en-tête (cloche, menu) a ses propres tests
+            // L'en-tête (cloche, menu) a ses propres tests
             .overrideComponent(Subscription, {
                 remove: { imports: [PageHeader] },
                 add: { imports: [HeaderStub] },

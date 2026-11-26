@@ -9,7 +9,7 @@ export interface SupportThread {
     created_at: string;
     updated_at: string;
     last_message: string | null;
-    // seulement dans la vue du propriétaire
+    // Seulement dans la vue du propriétaire
     shop_name?: string;
     user_name?: string;
     user_email?: string;
@@ -26,5 +26,5 @@ export interface SupportThreadDetail extends SupportThread {
     messages: SupportMessage[];
 }
 
-// qui regarde l'écran : l'utilisateur d'une boutique ou le propriétaire du logiciel
+// Qui regarde l'écran : l'utilisateur d'une boutique ou le propriétaire du logiciel
 export type SupportSide = "user" | "owner";

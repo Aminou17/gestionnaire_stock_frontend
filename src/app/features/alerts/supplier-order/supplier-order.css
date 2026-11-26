@@ -225,7 +225,7 @@ textarea.input {
 }
 
 @media (max-width: 767px) {
-    /* le bouton WhatsApp reste sous le pouce, au-dessus de la barre du bas */
+    /* Le bouton WhatsApp reste sous le pouce, au-dessus de la barre du bas */
     .actions {
         position: sticky;
         bottom: calc(var(--bottom-nav-height) + 8px);

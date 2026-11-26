@@ -7,7 +7,7 @@
         }
         <strong class="receipt-shop">{{ shop()?.name }}</strong>
         @if (shop(); as info) {
-            <!-- coordonnées de la boutique : sur le papier seulement, l'écran et l'image restent sobres -->
+            <!-- Coordonnées de la boutique : sur le papier seulement, l'écran et l'image restent sobres -->
             @if (info.address) {
                 <span class="on-paper">{{ info.address }}</span>
             }
@@ -23,7 +23,7 @@
         }
         <span class="receipt-meta">Ticket n° {{ ticketNumber() }}</span>
         <span class="receipt-meta">{{ s.created_at | date: "dd/MM/y 'à' HH:mm" }}</span>
-        <!-- le manager ne voit que ses ventes : son propre nom peut figurer sur son ticket -->
+        <!-- Le manager ne voit que ses ventes : son propre nom peut figurer sur son ticket -->
         @if (s.user_name) {
             <span class="receipt-meta on-paper">Servi par {{ s.user_name }}</span>
         }
@@ -102,7 +102,7 @@
                 }
             }
         } @else if (s.paid_amount === 0) {
-            <!-- vente entièrement à crédit : rien n'a été payé -->
+            <!-- Vente entièrement à crédit : rien n'a été payé -->
             @if (s.status === "ACTIVE") {
                 <p class="receipt-line receipt-due">
                     <span>Reste à payer</span><span>{{ due() | fcfa }}</span>
@@ -113,7 +113,7 @@
                 <span>Payé par Mobile Money</span><span>{{ s.total | fcfa }}</span>
             </p>
         } @else {
-            <!-- anciennes ventes sans montant saisi : le client a donné le compte juste -->
+            <!-- Anciennes ventes sans montant saisi : le client a donné le compte juste -->
             <p class="receipt-line">
                 <span>Espèces reçues</span><span>{{ s.amount_received ?? s.total | fcfa }}</span>
             </p>
@@ -124,7 +124,7 @@
         }
     </div>
 
-    <!-- le bas du ticket est écrit par l'administrateur dans Paramètres -->
+    <!-- Le bas du ticket est écrit par l'administrateur dans Paramètres -->
     @if (shop()?.receipt_footer?.trim(); as footer) {
         <footer class="receipt-thanks">{{ footer }}</footer>
     }

@@ -2,7 +2,7 @@
     display: block;
 }
 
-/* petites puces de statut, au-dessus de la liste */
+/* Petites puces de statut, au-dessus de la liste */
 .chips {
     display: flex;
     gap: 8px;

@@ -95,7 +95,7 @@
                     }
                 </dd>
             </div>
-            <!-- une adresse longue passe sous l'intitulé, une courte reste à droite -->
+            <!-- Une adresse longue passe sous l'intitulé, une courte reste à droite -->
             <div [class.block]="(supplier.address?.length ?? 0) > 40">
                 <dt>Adresse</dt>
                 <dd>
@@ -111,7 +111,7 @@
                     }
                 </dd>
             </div>
-            <!-- fournisseur créé avant que la date soit enregistrée : la ligne n'apprendrait rien -->
+            <!-- Fournisseur créé avant que la date soit enregistrée : la ligne n'apprendrait rien -->
             @if (supplier.created_at) {
                 <div>
                     <dt>Ajouté le</dt>
@@ -203,7 +203,7 @@
             }
         }
 
-        <!-- le filtre des entrées ne propose que les fournisseurs actifs -->
+        <!-- Le filtre des entrées ne propose que les fournisseurs actifs -->
         @if (supplier.is_active && (deliveries()?.total ?? 0) > 0) {
             <div class="actions">
                 <a

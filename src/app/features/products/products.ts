@@ -92,25 +92,25 @@ export class Products {
     private exportService = inject(ExportService);
     protected auth = inject(AuthService);
 
-    // le formulaire n'existe que pour l'admin
+    // Le formulaire n'existe que pour l'admin
     private form = viewChild(ProductForm);
     private adjustDialog = viewChild(AdjustDialog);
     private confirmDialog = viewChild.required<ElementRef<HTMLDialogElement>>("confirm");
 
-    // le menu Stock > Ajuster le stock demande d'ouvrir la fenêtre dès que la page est affichée
+    // Le menu Stock > Ajuster le stock demande d'ouvrir la fenêtre dès que la page est affichée
     private adjustAsked = signal(false);
 
     search = signal("");
     private route = inject(ActivatedRoute);
 
-    // la catégorie filtrée vit dans l'URL (/products?categoryId=3) : lien partageable,
+    // La catégorie filtrée vit dans l'URL (/products?categoryId=3) : lien partageable,
     // et le retour arrière ou le menu "Produits" remettent le bon filtre
     categoryId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("categoryId")));
-    // l'état du stock vit aussi dans l'URL : la fiche catégorie y mène directement
+    // L'état du stock vit aussi dans l'URL : la fiche catégorie y mène directement
     stockStatus = signal<StockStatus | null>(
         toStockStatus(this.route.snapshot.queryParamMap.get("stockStatus")),
     );
-    // arrivée depuis la fiche d'un fournisseur : /products?supplierId=4
+    // Arrivée depuis la fiche d'un fournisseur : /products?supplierId=4
     supplierId = signal<number | null>(toId(this.route.snapshot.queryParamMap.get("supplierId")));
     status = signal<ProductStatus>("active");
     sort = signal<ProductSort>("default");
@@ -133,7 +133,7 @@ export class Products {
 
     filtersOpen = signal(false);
 
-    // nombre de filtres actifs, affiché sur le bouton Filtre
+    // Nombre de filtres actifs, affiché sur le bouton Filtre
     filterCount = computed(
         () =>
             (this.categoryId() ? 1 : 0) +
@@ -141,7 +141,7 @@ export class Products {
             (this.sort() !== "default" ? 1 : 0),
     );
 
-    // vue tableau ou grille sur ordinateur, le choix est gardé d'une visite à l'autre
+    // Vue tableau ou grille sur ordinateur, le choix est gardé d'une visite à l'autre
     protected secret = inject(SecretValues);
 
     view = signal<"list" | "grid">(readView());
@@ -166,14 +166,14 @@ export class Products {
     });
     categories = rxResource({ stream: () => this.categoryService.getCategories() });
 
-    // seul l'administrateur voit les fournisseurs
+    // Seul l'administrateur voit les fournisseurs
     supplier = rxResource({
         params: () => (this.auth.isAdmin() ? (this.supplierId() ?? undefined) : undefined),
         stream: ({ params }) => this.supplierService.getSupplier(params),
     });
     supplierName = computed(() => (this.supplier.hasValue() ? this.supplier.value()?.name : null));
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<ProductPage | undefined, ProductPage | undefined>({
         source: () => (this.products.hasValue() ? this.products.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -182,17 +182,17 @@ export class Products {
     list = computed(() => this.last()?.data ?? []);
 
     total = computed(() => this.last()?.total ?? 0);
-    // les compteurs viennent du résumé du backend, pas de la page chargée
+    // Les compteurs viennent du résumé du backend, pas de la page chargée
     counters = computed(() => this.last()?.counters);
-    // catégories supprimées hors du filtre, sauf celle qui est déjà choisie
+    // Catégories supprimées hors du filtre, sauf celle qui est déjà choisie
     categoryList = computed(() =>
         (this.categories.hasValue() ? this.categories.value() : []).filter(
             (c) => c.is_active || c.id === this.categoryId(),
         ),
     );
-    // les ventes ne s'affichent sur la carte que lorsque le tri les concerne
+    // Les ventes ne s'affichent sur la carte que lorsque le tri les concerne
     soldView = computed(() => this.sort().startsWith("sold"));
-    // valeur au prix d'achat : le backend ne l'envoie qu'à l'admin
+    // Valeur au prix d'achat : le backend ne l'envoie qu'à l'admin
     stockValue = computed(() => this.counters()?.stock_value);
     firstLoad = computed(() => this.products.isLoading() && !this.last());
 
@@ -238,7 +238,7 @@ export class Products {
         const destroyRef = inject(DestroyRef);
         destroyRef.onDestroy(() => clearTimeout(this.searchTimer));
 
-        // la fenêtre n'existe qu'après le premier affichage, et seulement pour l'admin
+        // La fenêtre n'existe qu'après le premier affichage, et seulement pour l'admin
         effect(() => {
             const dialog = this.adjustDialog();
             if (!this.adjustAsked() || !dialog) return;
@@ -246,7 +246,7 @@ export class Products {
             untracked(() => {
                 this.adjustAsked.set(false);
                 dialog.show();
-                // sans ça, un rechargement rouvrirait la fenêtre
+                // Sans ça, un rechargement rouvrirait la fenêtre
                 this.router.navigate([], {
                     relativeTo: this.route,
                     queryParams: { adjust: null },
@@ -258,7 +258,7 @@ export class Products {
 
         // Suivre la catégorie et l'état du stock de l'URL
         this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((params) => {
-            // le menu Stock > Ajuster le stock arrive ici avec ?adjust=1
+            // Le menu Stock > Ajuster le stock arrive ici avec ?adjust=1
             if (params.get("adjust") === "1") this.adjustAsked.set(true);
 
             const categoryId = toId(params.get("categoryId"));
@@ -351,11 +351,11 @@ export class Products {
         try {
             localStorage.setItem(VIEW_KEY, view);
         } catch {
-            // navigation privée : le choix ne sera pas gardé
+            // Navigation privée : le choix ne sera pas gardé
         }
     }
 
-    // menu des trois points d'un produit : vendre seulement s'il en reste, le reste pour l'admin
+    // Menu des trois points d'un produit : vendre seulement s'il en reste, le reste pour l'admin
     rowItems(product: Product): ActionItem[] {
         const items: ActionItem[] = [];
         if (product.theoretical_stock > 0) {
@@ -365,7 +365,7 @@ export class Products {
             items.push(
                 { id: "stock", label: "Ajouter du stock", icon: "stock-entry" },
                 { id: "edit", label: "Modifier", icon: "edit" },
-                // corriger une erreur de comptage : rare, donc après les gestes de tous les jours
+                // Corriger une erreur de comptage : rare, donc après les gestes de tous les jours
                 { id: "adjust", label: "Corriger la quantité", icon: "edit", separated: true },
                 { id: "delete", label: "Supprimer", icon: "ban", danger: true },
             );
@@ -392,7 +392,7 @@ export class Products {
         });
     }
 
-    // message de confirmation après un ajustement du stock
+    // Message de confirmation après un ajustement du stock
     private toast = inject(ToastService);
 
     adjustProduct(product: Product) {

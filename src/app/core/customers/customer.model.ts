@@ -5,18 +5,18 @@ export interface Customer {
     note: string | null;
     is_active: boolean;
     created_at: string;
-    // ventes non annulées
+    // Ventes non annulées
     purchases_count: number;
-    // chiffre d'affaires du client : ventes moins retours, jamais de marge
+    // Chiffre d'affaires du client : ventes moins retours, jamais de marge
     total_spent: number;
     due_amount: number;
     // null tant que le client n'a rien acheté
     last_purchase_at: string | null;
-    // date de la plus ancienne vente non soldée, null sans dette
+    // Date de la plus ancienne vente non soldée, null sans dette
     oldest_due_at?: string | null;
 }
 
-// champs envoyés à la création et à la modification (vide = null)
+// Champs envoyés à la création et à la modification (vide = null)
 export interface CustomerInput {
     name: string;
     phone: string | null;
@@ -59,21 +59,21 @@ export interface CustomerSale {
     items_count: number;
 }
 
-// le numéro est déjà pris : la fiche qui le porte est jointe à l'erreur 409
+// Le numéro est déjà pris : la fiche qui le porte est jointe à l'erreur 409
 export interface DuplicatePhone {
     id: number;
     name: string;
     is_active: boolean;
 }
 
-// ce que le serveur a réparti après un paiement : une part par vente soldée ou entamée
+// Ce que le serveur a réparti après un paiement : une part par vente soldée ou entamée
 export interface CustomerPayment {
     amount: number;
     remaining: number;
     sales: { id: number; amount: number }[];
 }
 
-// un paiement encaissé depuis la fiche, avec les ventes qu'il a payées
+// Un paiement encaissé depuis la fiche, avec les ventes qu'il a payées
 export interface CustomerPaymentRecord {
     id: number;
     amount: number;

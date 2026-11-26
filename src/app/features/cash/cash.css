@@ -84,7 +84,7 @@ app-page-header {
     gap: 12px;
 }
 
-/* un carreau par mouvement, teinté de sa couleur */
+/* Un carreau par mouvement, teinté de sa couleur */
 .quick-tile {
     --tone: var(--primary);
     display: flex;
@@ -191,8 +191,8 @@ app-page-header {
     font-variant-numeric: tabular-nums;
 }
 
-/* seul le libellé est un lien, le montant reste du texte */
-/* le montant se masque d'un clic mais ne ressemble pas à un lien */
+/* Seul le libellé est un lien, le montant reste du texte */
+/* Le montant se masque d'un clic mais ne ressemble pas à un lien */
 .lines .money-zone {
     cursor: default;
 }
@@ -237,7 +237,7 @@ app-page-header {
     color: var(--danger);
 }
 
-/* dans la carte d'état, le résumé suit le solde sans trait de fin */
+/* Dans la carte d'état, le résumé suit le solde sans trait de fin */
 .status .lines > li:last-child {
     border-bottom: 0;
 }
@@ -298,7 +298,7 @@ app-page-header {
         white-space: nowrap;
     }
 
-    /* téléphone : icône au-dessus du nom, trois carreaux côte à côte */
+    /* Téléphone : icône au-dessus du nom, trois carreaux côte à côte */
     .quick {
         gap: 8px;
     }
@@ -338,7 +338,7 @@ app-page-header {
     color: var(--danger);
 }
 
-/* le soir, "Compter la caisse" bat doucement pour qu'on ne l'oublie pas */
+/* Le soir, "Compter la caisse" bat doucement pour qu'on ne l'oublie pas */
 .late {
     animation: late-pulse 2s ease-in-out infinite;
 }
@@ -355,7 +355,7 @@ app-page-header {
     }
 }
 
-/* carte principale : dégradé doux de la couleur de l'état (vert en cours, bleu pas encore ouverte, gris comptée) */
+/* Carte principale : dégradé doux de la couleur de l'état (vert en cours, bleu pas encore ouverte, gris comptée) */
 .status {
     --tone: var(--primary);
     border-color: color-mix(in srgb, var(--tone) 30%, var(--border));

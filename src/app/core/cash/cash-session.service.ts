@@ -40,7 +40,7 @@ const toMovement = (movement: CashMovement): CashMovement => ({
 export class CashSessionService {
     private http = inject(HttpClient);
 
-    // compte la caisse : sans sessionId, celle du jour (le serveur l'ouvre si besoin)
+    // Compte la caisse : sans sessionId, celle du jour (le serveur l'ouvre si besoin)
     // sessionId : une caisse passée non comptée, ou une caisse à rectifier (admin)
     // le serveur renvoie la session comptée, avec l'écart (compté moins attendu)
     count(actualAmount: number, closingNote = "", sessionId?: number) {
@@ -55,7 +55,7 @@ export class CashSessionService {
             .pipe(map(toSession));
     }
 
-    // état de la caisse du jour, caisse non comptée d'un jour passé et fond de départ
+    // État de la caisse du jour, caisse non comptée d'un jour passé et fond de départ
     getToday() {
         return this.http.get<CashToday>(`${API_URL}/dashboard/summary`);
     }
@@ -68,7 +68,7 @@ export class CashSessionService {
             .pipe(map((res) => ({ ...res, data: res.data.map(toSession) })));
     }
 
-    // fichier de l'historique selon les mêmes filtres
+    // Fichier de l'historique selon les mêmes filtres
     exportSessions(filters: CashSessionFilters, format: ExportFormat) {
         return this.http.get(`${API_URL}/cash_sessions/export`, {
             params: { ...this.filterParams(filters), format },

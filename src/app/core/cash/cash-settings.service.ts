@@ -4,7 +4,7 @@ import { Injectable, inject } from "@angular/core";
 import { API_URL } from "../api.config";
 
 export interface CashSettings {
-    // l'employé clôture sans connaître le solde attendu
+    // L'employé clôture sans connaître le solde attendu
     blind_close: boolean;
     updated_at: string | null;
 }

@@ -25,10 +25,10 @@ describe("security list config", () => {
         const rows = LIST_CONFIGS.locked.toRows("", [
             {
                 id: 1,
-                name: "Awa",
-                email: "awa@x.com",
+                name: "Adam",
+                email: "adam@x.com",
                 role: "manager",
-                shop_name: "Chez Awa",
+                shop_name: "Chez Adam",
                 failed_logins: 5,
                 locked_until: until,
             },

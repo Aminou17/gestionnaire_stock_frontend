@@ -12,7 +12,7 @@ import { SettingsAlertEmail } from "./settings-alert-email";
 
 const saved: AlertEmailSettings = {
     enabled: false,
-    recipient: "awa@test.com",
+    recipient: "adam@test.com",
     sendHour: 8,
     onlyIfAlerts: true,
     lastSentOn: null,
@@ -76,7 +76,7 @@ describe("SettingsAlertEmail", () => {
     it("affiche les réglages enregistrés, sans aucun compte Gmail à régler", async () => {
         await render();
 
-        expect(field("recipient").value).toBe("awa@test.com");
+        expect(field("recipient").value).toBe("adam@test.com");
         expect(el.textContent).not.toContain("Gmail");
         expect(el.querySelector("input[type=password]")).toBeNull();
     });

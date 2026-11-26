@@ -13,7 +13,7 @@ export function guardNumberInputs(doc: Document): void {
         }
     });
 
-    // la molette sur un champ actif ferait varier le chiffre : on le quitte, la page défile normalement
+    // La molette sur un champ actif ferait varier le chiffre : on le quitte, la page défile normalement
     doc.addEventListener(
         "wheel",
         (event) => {
@@ -24,7 +24,7 @@ export function guardNumberInputs(doc: Document): void {
         { passive: true },
     );
 
-    // sur téléphone : clavier à chiffres seuls, sans la virgule ni le signe moins
+    // Sur téléphone : clavier à chiffres seuls, sans la virgule ni le signe moins
     doc.addEventListener("focusin", (event) => {
         if (isNumberInput(event.target) && !event.target.hasAttribute("inputmode")) {
             event.target.setAttribute("inputmode", "numeric");

@@ -17,8 +17,8 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedAt: new Date().toISOString(),
     appliedAt: null,
     cancelledAt: null,
-    createdBy: { id: 1, name: "Awa Bazin", avatar: null },
-    countedBy: { id: 1, name: "Awa Bazin", avatar: null },
+    createdBy: { id: 1, name: "Adam Ouédraogo", avatar: null },
+    countedBy: { id: 1, name: "Adam Ouédraogo", avatar: null },
     appliedBy: null,
     cancelledBy: null,
     itemsCount: 30,
@@ -68,7 +68,7 @@ describe("InventoryPage", () => {
         getInventory = vi.fn(() => of(detail));
         exportInventory = vi.fn(() => of(new Blob(["x"])));
 
-        // jsdom ne gère pas <dialog>
+        // Jsdom ne gère pas <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
 
@@ -123,7 +123,7 @@ describe("InventoryPage", () => {
             "Comptage terminé, en attente de validation",
         );
         expect(el.querySelector(".btn-main")).toBeNull();
-        // le gérant a seulement les détails dans son menu : ni export ni annulation
+        // Le gérant a seulement les détails dans son menu : ni export ni annulation
         expect(fixture.componentInstance.menuItems()).toEqual([]);
         expect(text(el)).not.toMatch(/\d\sF\b/);
     });
@@ -139,10 +139,10 @@ describe("InventoryPage", () => {
         await render({ status: "in_progress", statusLabel: "En cours" });
 
         expect(text(el)).not.toContain("Prévu");
-        // la quantité est dite une seule fois : en chiffre à droite, pas deux fois dans la ligne
+        // La quantité est dite une seule fois : en chiffre à droite, pas deux fois dans la ligne
         expect(text(el.querySelector(".items"))).toContain("Quantité comptée");
         expect(text(el.querySelector(".items .figure"))).toBe("37");
-        // pas d'écart à filtrer pendant le comptage : un seul choix, donc pas de puces
+        // Pas d'écart à filtrer pendant le comptage : un seul choix, donc pas de puces
         expect(el.querySelector(".chips")).toBeNull();
         expect(text(el)).not.toMatch(/non compt/i);
     });

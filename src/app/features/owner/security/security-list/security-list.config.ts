@@ -7,9 +7,9 @@ export type ListKind = "logins" | "locked" | "events" | "history";
 export type FilterName = "shop" | "email" | "ip" | "period";
 
 export interface ListConfig {
-    // route de l'API sous /security
+    // Route de l'API sous /security
     path: string;
-    // nom du paramètre qui choisit la vue (view ou type), et les vues possibles
+    // Nom du paramètre qui choisit la vue (view ou type), et les vues possibles
     viewParam?: "view" | "type";
     views?: { value: string; label: string }[];
     filters: FilterName[];
@@ -19,7 +19,7 @@ export interface ListConfig {
     toRows: (view: string, data: unknown[]) => SecurityRow[];
 }
 
-// libellés courts : ceux du journal des boutiques sont des phrases entières
+// Libellés courts : ceux du journal des boutiques sont des phrases entières
 export const EVENT_LABELS: Record<string, string> = {
     ACCESS_DENIED: "Accès refusé",
     PASSWORD_CHANGED: "Mot de passe changé",
@@ -79,7 +79,7 @@ const ipRows = (data: FailedLoginIp[]): SecurityRow[] =>
         when: group.last_attempt_at,
     }));
 
-// temps restant avant la fin du blocage, en mots courts
+// Temps restant avant la fin du blocage, en mots courts
 const remaining = (until: string) => {
     const minutes = Math.max(1, Math.ceil((new Date(until).getTime() - Date.now()) / 60000));
     if (minutes < 60) return `dans ${minutes} min`;
@@ -130,7 +130,7 @@ const eventRows = (data: SecurityEvent[]): SecurityRow[] =>
                 [event.email ?? event.user_name, path ? apiLabel(path) : ""]
                     .filter(Boolean)
                     .join(" · ") || null,
-            // les actions du propriétaire sur une boutique n'ont pas de boutique liée : on lit son nom dans le détail
+            // Les actions du propriétaire sur une boutique n'ont pas de boutique liée : on lit son nom dans le détail
             shop:
                 event.shop_name ??
                 (typeof event.details?.["name"] === "string" ? event.details["name"] : null),

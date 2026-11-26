@@ -19,7 +19,7 @@ export class RecentSales {
     error = input(false);
     retry = output();
 
-    // reste à payer d'une vente validée avec acompte
+    // Reste à payer d'une vente validée avec acompte
     due(sale: Sale) {
         return sale.status === "ACTIVE" ? sale.total - sale.paid_amount : 0;
     }

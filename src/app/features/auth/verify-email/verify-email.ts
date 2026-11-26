@@ -35,7 +35,7 @@ export class VerifyEmail {
     loading = signal(false);
     error = signal<string | null>(null);
     notice = signal<string | null>(null);
-    // secondes avant de pouvoir redemander un code
+    // Secondes avant de pouvoir redemander un code
     wait = signal(RESEND_SECONDS);
 
     private boxes = viewChildren<ElementRef<HTMLInputElement>>("box");
@@ -43,14 +43,14 @@ export class VerifyEmail {
 
     constructor() {
         this.destroyRef.onDestroy(() => clearInterval(this.timer));
-        // sans adresse, on ne sait pas à qui renvoyer le code
+        // Sans adresse, on ne sait pas à qui renvoyer le code
         if (!this.email) this.router.navigate(["/login"]);
     }
 
     protected onInput(index: number, input: HTMLInputElement) {
         const typed = input.value.replace(/\D/g, "");
 
-        // un code collé ou proposé par le clavier remplit toutes les cases
+        // Un code collé ou proposé par le clavier remplit toutes les cases
         if (typed.length > 1) {
             this.fill(typed);
             return;
@@ -122,7 +122,7 @@ export class VerifyEmail {
                             ? "Impossible de joindre le serveur. Vérifiez votre connexion."
                             : (err.error?.message ?? "Code incorrect."),
                     );
-                    // on recommence la saisie depuis la première case
+                    // On recommence la saisie depuis la première case
                     this.digits.set(Array(6).fill(""));
                     this.boxes().forEach((box) => (box.nativeElement.value = ""));
                     this.focus(0);

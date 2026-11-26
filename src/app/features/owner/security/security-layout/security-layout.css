@@ -3,7 +3,7 @@
     gap: 16px;
 }
 
-/* onglets soulignés sur ordinateur, cinq parts égales sur téléphone (pas de défilement) */
+/* Onglets soulignés sur ordinateur, cinq parts égales sur téléphone (pas de défilement) */
 .tabs {
     display: flex;
     gap: 8px;

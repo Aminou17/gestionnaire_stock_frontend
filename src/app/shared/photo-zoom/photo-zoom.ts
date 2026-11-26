@@ -2,7 +2,7 @@ import { Component, ElementRef, afterNextRender, inject, input, output } from "@
 
 import { Icon } from "../icon/icon";
 
-// photo agrandie en fenêtre modale, fermée par un clic, la croix ou Échap
+// Photo agrandie en fenêtre modale, fermée par un clic, la croix ou Échap
 @Component({
     selector: "app-photo-zoom",
     imports: [Icon],

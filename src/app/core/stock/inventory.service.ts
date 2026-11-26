@@ -32,7 +32,7 @@ export class InventoryService {
         return this.http.get<InventoryList>(`${API_URL}/inventories`, { params });
     }
 
-    // l'inventaire et une page de ses lignes
+    // L'inventaire et une page de ses lignes
     getInventory(id: number, query: ItemQuery) {
         const params: Record<string, string | number> = {
             filter: query.filter,
@@ -57,7 +57,7 @@ export class InventoryService {
         );
     }
 
-    // raison d'un écart (null l'efface), seulement quand le comptage est à valider
+    // Raison d'un écart (null l'efface), seulement quand le comptage est à valider
     setReason(id: number, productId: number, reason: ItemReason | null) {
         return this.http.put<{ productId: number; reason: ItemReason | null }>(
             `${API_URL}/inventories/${id}/items/${productId}/reason`,
@@ -65,7 +65,7 @@ export class InventoryService {
         );
     }
 
-    // retire un produit du comptage
+    // Retire un produit du comptage
     removeItem(id: number, productId: number) {
         return this.http.delete<{ inventory: Inventory }>(
             `${API_URL}/inventories/${id}/items/${productId}`,
@@ -88,7 +88,7 @@ export class InventoryService {
         return this.http.get<MovementsSince>(`${API_URL}/inventories/${id}/movements-since`);
     }
 
-    // fichier de la liste des inventaires
+    // Fichier de la liste des inventaires
     exportList(format: ExportFormat) {
         return this.http.get(`${API_URL}/inventories/export`, {
             params: { format },
@@ -96,7 +96,7 @@ export class InventoryService {
         });
     }
 
-    // fichier du détail d'un inventaire, une ligne par produit
+    // Fichier du détail d'un inventaire, une ligne par produit
     exportInventory(id: number, format: ExportFormat) {
         return this.http.get(`${API_URL}/inventories/${id}/export`, {
             params: { format },

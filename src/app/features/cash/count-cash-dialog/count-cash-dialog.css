@@ -35,7 +35,7 @@
     color: var(--warning);
 }
 
-/* résultat du comptage */
+/* Résultat du comptage */
 .done {
     display: grid;
     gap: 16px;

@@ -28,7 +28,7 @@ const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
 export class ResetPassword {
     private auth = inject(AuthService);
 
-    // le lien reçu par e-mail : /reset-password?token
+    // Le lien reçu par e-mail : /reset-password?token
     private token = inject(ActivatedRoute).snapshot.queryParamMap.get("token") ?? "";
 
     form = inject(NonNullableFormBuilder).group(
@@ -45,7 +45,7 @@ export class ResetPassword {
     hasToken = this.token.length > 0;
     loading = signal(false);
     error = signal<string | null>(null);
-    // le lien est refusé : on propose d'en demander un autre
+    // Le lien est refusé : on propose d'en demander un autre
     expired = signal(false);
     done = signal(false);
     showPassword = signal(false);
@@ -67,7 +67,7 @@ export class ResetPassword {
         this.auth.resetPassword(this.token, this.form.getRawValue().newPassword).subscribe({
             next: () => {
                 this.loading.set(false);
-                // le mot de passe a changé : une session ouverte sur cet appareil ne vaut plus rien
+                // Le mot de passe a changé : une session ouverte sur cet appareil ne vaut plus rien
                 this.auth.endSession();
                 this.done.set(true);
             },

@@ -3,15 +3,15 @@ import { Injectable } from "@angular/core";
 const MAX_WIDTH = 240;
 const MAX_HEIGHT = 120;
 
-// une photo de plusieurs mégaoctets serait décodée en entier pour rien
+// Une photo de plusieurs mégaoctets serait décodée en entier pour rien
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-// le backend refuse au-delà de 70 000 caractères, on garde une marge
+// Le backend refuse au-delà de 70 000 caractères, on garde une marge
 const MAX_LENGTH = 60000;
 
 @Injectable({ providedIn: "root" })
 export class LogoResizerService {
-    // réduit l'image choisie et la renvoie en data URL PNG, ou JPEG si le PNG reste trop lourd
+    // Réduit l'image choisie et la renvoie en data URL PNG, ou JPEG si le PNG reste trop lourd
     resize(file: File) {
         return new Promise<string>((resolve, reject) => {
             if (!["image/png", "image/jpeg"].includes(file.type)) {
@@ -41,7 +41,7 @@ export class LogoResizerService {
                 let logo = canvas.toDataURL("image/png");
 
                 if (logo.length > MAX_LENGTH) {
-                    // le JPEG n'a pas de transparence : le fond blanc est celui du papier
+                    // Le JPEG n'a pas de transparence : le fond blanc est celui du papier
                     context.globalCompositeOperation = "destination-over";
                     context.fillStyle = "#ffffff";
                     context.fillRect(0, 0, canvas.width, canvas.height);

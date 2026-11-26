@@ -3,7 +3,7 @@ import { DEFAULT_COUNTRY_CODE, toWhatsAppLink } from "../../shared/phone";
 
 const formatter = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
 
-// espaces ordinaires : le message se copie et se lit partout
+// Espaces ordinaires : le message se copie et se lit partout
 const amount = (value: number) => `${formatter.format(value).replace(/\s/g, " ")} F`;
 
 export const reminderMessage = (customer: Customer, shopName: string) => {

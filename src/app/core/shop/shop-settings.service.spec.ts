@@ -28,10 +28,10 @@ describe("ShopSettingsService", () => {
 
     it("should read and save the shop settings", () => {
         service.getSettings().subscribe();
-        httpMock.expectOne("/api/shop-settings").flush({ name: "Awa Bazin" });
+        httpMock.expectOne("/api/shop-settings").flush({ name: "Adam Ouédraogo" });
 
         const input = {
-            name: "Awa Bazin",
+            name: "Adam Ouédraogo",
             address: "Marché Total",
             phone: "",
             taxId: "",
@@ -42,7 +42,7 @@ describe("ShopSettingsService", () => {
         const req = httpMock.expectOne("/api/shop-settings");
         expect(req.request.method).toBe("PUT");
         expect(req.request.body).toEqual(input);
-        req.flush({ name: "Awa Bazin" });
+        req.flush({ name: "Adam Ouédraogo" });
     });
 
     it("should send and remove the logo on its own route", () => {
@@ -50,12 +50,12 @@ describe("ShopSettingsService", () => {
         const put = httpMock.expectOne("/api/shop-settings/logo");
         expect(put.request.method).toBe("PUT");
         expect(put.request.body).toEqual({ logo: "data:image/png;base64,AAAA" });
-        put.flush({ name: "Awa Bazin" });
+        put.flush({ name: "Adam Ouédraogo" });
 
         service.removeLogo().subscribe();
         const del = httpMock.expectOne("/api/shop-settings/logo");
         expect(del.request.method).toBe("DELETE");
-        del.flush({ name: "Awa Bazin" });
+        del.flush({ name: "Adam Ouédraogo" });
     });
 
     it("should load the shop of the signed-in user and keep its name up to date", async () => {

@@ -4,7 +4,7 @@ import { toWhatsAppLink } from "../../../shared/phone";
 
 const formatter = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
 
-// espaces ordinaires : le message se copie et se lit partout
+// Espaces ordinaires : le message se copie et se lit partout
 const amount = (value: number) => `${formatter.format(value).replace(/\s/g, " ")} F`;
 
 const dateOf = (iso: string) =>
@@ -40,17 +40,17 @@ export const receiptMessage = (
         if (due > 0) lines.push(`Reste à payer : ${amount(due)}`);
     }
 
-    // le bas du ticket est écrit par l'administrateur dans Paramètres
+    // Le bas du ticket est écrit par l'administrateur dans Paramètres
     if (announce.trim()) lines.push("", announce.trim());
 
     return lines.join("\n");
 };
 
-// le message ne contient que l'adresse du ticket : WhatsApp la remplace par l'image du ticket en aperçu
+// Le message ne contient que l'adresse du ticket : WhatsApp la remplace par l'image du ticket en aperçu
 // (WhatsApp écrit toujours l'adresse elle-même, elle ne peut pas être cachée)
 export const ticketLinkMessage = (url: string) => url;
 
-// ouvre la conversation du client avec l'adresse du ticket, vente ou paiement ; sans numéro, WhatsApp laisse choisir
+// Ouvre la conversation du client avec l'adresse du ticket, vente ou paiement ; sans numéro, WhatsApp laisse choisir
 export const ticketUrlLink = (
     phone: string | null | undefined,
     defaultCode: string,
@@ -64,7 +64,7 @@ export const ticketUrlLink = (
 export const ticketLinkLink = (sale: SaleDetail, defaultCode: string, url: string) =>
     ticketUrlLink(sale.customer_phone, defaultCode, url);
 
-// sans numéro de client, WhatsApp laisse choisir la conversation
+// Sans numéro de client, WhatsApp laisse choisir la conversation
 export const receiptLink = (
     sale: SaleDetail,
     shopName: string,

@@ -5,7 +5,7 @@ import { ThemeService } from "./theme.service";
 describe("ThemeService", () => {
     beforeEach(() => localStorage.clear());
 
-    // le système de l'utilisateur est en sombre, mais l'app doit démarrer en clair
+    // Le système de l'utilisateur est en sombre, mais l'app doit démarrer en clair
     it("should start in light mode when nothing is saved", () => {
         window.matchMedia = (() => ({ matches: true })) as any;
         const service = TestBed.inject(ThemeService);

@@ -62,7 +62,7 @@ describe("MarginsPanel", () => {
     it("should suggest monthly prices from the middle shop's margin", async () => {
         const fixture = await render();
 
-        // marge de 100 000 et 40 000 : la médiane est 70 000 sur 30 jours ; 1 % = 700 F, 5 % = 3 500 F
+        // Marge de 100 000 et 40 000 : la médiane est 70 000 sur 30 jours ; 1 % = 700 F, 5 % = 3 500 F
         expect(fixture.componentInstance.monthlyMedian()).toBe(70000);
         expect(fixture.componentInstance.hints().map((h) => h.amount)).toEqual([
             700, 1400, 2100, 3500,

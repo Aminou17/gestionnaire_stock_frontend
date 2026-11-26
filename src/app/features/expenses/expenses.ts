@@ -47,7 +47,7 @@ export class Expenses {
     protected categories = EXPENSE_CATEGORIES;
     protected look = expenseCategory;
 
-    // la fiche d'une dépense ramène ici
+    // La fiche d'une dépense ramène ici
     protected backState = { backTo: "/expenses", backLabel: "Dépenses" };
 
     periods: { key: PeriodKey; label: string }[] = [
@@ -59,7 +59,7 @@ export class Expenses {
     ];
 
     period = signal<PeriodKey>("month");
-    // dates choisies à la main (YYYY-MM-DD), valables quand la période est Dates
+    // Dates choisies à la main (YYYY-MM-DD), valables quand la période est Dates
     customFrom = signal("");
     customTo = signal("");
     search = signal("");
@@ -68,7 +68,7 @@ export class Expenses {
     page = signal(1);
     pageSize = storedPageSize("expenses");
 
-    // bornes de la période choisie, au format YYYY-MM-DD
+    // Bornes de la période choisie, au format YYYY-MM-DD
     range = computed(() => {
         const today = new Date();
         const day = (date: Date) => formatDate(date, "yyyy-MM-dd", this.locale);
@@ -90,7 +90,7 @@ export class Expenses {
                 return { from: day(start), to: day(today) };
             }
             case "custom":
-                // pas de requête tant que les deux dates ne sont pas valides
+                // Pas de requête tant que les deux dates ne sont pas valides
                 return this.customError()
                     ? { from: null, to: null }
                     : { from: this.customFrom(), to: this.customTo() };
@@ -128,7 +128,7 @@ export class Expenses {
         stream: ({ params }) => this.movements.getMovements(params),
     });
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     private last = linkedSignal<CashMovementPage | undefined, CashMovementPage | undefined>({
         source: () => (this.expenses.hasValue() ? this.expenses.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -138,7 +138,7 @@ export class Expenses {
     total = computed(() => this.last()?.pagination.total ?? 0);
     firstLoad = computed(() => this.expenses.isLoading() && !this.last());
 
-    // répartition par motif
+    // Répartition par motif
     breakdown = computed(() => {
         if (!this.summary.hasValue()) return [];
         const { categories } = this.summary.value();
@@ -148,13 +148,13 @@ export class Expenses {
         }));
     });
 
-    // dépenses rangées par jour, comme un relevé de banque
+    // Dépenses rangées par jour, comme un relevé de banque
     groups = computed<DayGroup[]>(() => {
         const groups: DayGroup[] = [];
         for (const item of this.list()) {
             const day = item.created_at.slice(0, 10);
             const group = groups.at(-1);
-            // une dépense annulée reste visible mais ne compte pas dans le total du jour
+            // Une dépense annulée reste visible mais ne compte pas dans le total du jour
             const amount = item.cancelled ? 0 : item.amount;
             if (group?.day === day) {
                 group.items.push(item);
@@ -178,7 +178,7 @@ export class Expenses {
 
     selectPeriod(key: PeriodKey) {
         if (key === "custom" && !this.customFrom()) {
-            // on part des 7 derniers jours : il ne reste qu'à ajuster
+            // On part des 7 derniers jours : il ne reste qu'à ajuster
             const today = new Date();
             const start = new Date(today);
             start.setDate(today.getDate() - 6);
@@ -203,13 +203,13 @@ export class Expenses {
         }, 300);
     }
 
-    // un second clic sur le motif choisi le retire
+    // Un second clic sur le motif choisi le retire
     selectCategory(value: string | null) {
         this.category.set(this.category() === value ? null : value);
         this.page.set(1);
     }
 
-    // part de chaque motif dans le total, pour la barre de couleurs
+    // Part de chaque motif dans le total, pour la barre de couleurs
     share(total: number) {
         const all = this.summary.hasValue() ? this.summary.value().total : 0;
         return all > 0 ? (total / all) * 100 : 0;

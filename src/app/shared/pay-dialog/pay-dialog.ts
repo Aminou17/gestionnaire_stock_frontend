@@ -7,7 +7,7 @@ import { FcfaPipe } from "../pipes/fcfa.pipe";
 export interface PayChoice {
     method: PaymentMethod;
     amount: number;
-    // espèces seulement : ce que le client a tendu, pour la monnaie
+    // Espèces seulement : ce que le client a tendu, pour la monnaie
     received: number | null;
 }
 
@@ -33,13 +33,13 @@ export class PayDialog {
     received = signal<number | null>(null);
     formError = signal<string | null>(null);
 
-    // en Afrique on pense en billets, pas en pourcentages : les coupures sous le reste, puis le solde
+    // En Afrique on pense en billets, pas en pourcentages : les coupures sous le reste, puis le solde
     quickAmounts = computed(() => {
         const notes = [500, 1000, 2000, 5000, 10000, 25000, 50000, 100000];
         return notes.filter((note) => note < this.due()).slice(-3);
     });
 
-    // monnaie à rendre, seulement quand le client a donné un montant en espèces
+    // Monnaie à rendre, seulement quand le client a donné un montant en espèces
     change = computed(() => {
         const received = this.received();
         const amount = this.amount();
@@ -55,7 +55,7 @@ export class PayDialog {
         this.dialog().nativeElement.showModal();
     }
 
-    // fermeture demandée par l'appelant, une fois le paiement enregistré
+    // Fermeture demandée par l'appelant, une fois le paiement enregistré
     close() {
         this.dialog().nativeElement.close();
     }

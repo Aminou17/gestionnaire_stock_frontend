@@ -27,7 +27,7 @@ const trimmedEmail = (control: AbstractControl) =>
 export class HelpForm {
     private help = inject(HelpService);
     private fb = inject(NonNullableFormBuilder);
-    // temps passé sur le formulaire : un robot l'envoie en quelques instants
+    // Temps passé sur le formulaire : un robot l'envoie en quelques instants
     private openedAt = Date.now();
 
     reasons = HELP_REASONS;
@@ -38,7 +38,7 @@ export class HelpForm {
         email: ["", [Validators.required, trimmedEmail, Validators.maxLength(100)]],
         shopName: ["", [Validators.maxLength(80)]],
         message: ["", [Validators.required, Validators.minLength(10), Validators.maxLength(2000)]],
-        // champ caché : seuls les robots le remplissent
+        // Champ caché : seuls les robots le remplissent
         website: [""],
     });
 

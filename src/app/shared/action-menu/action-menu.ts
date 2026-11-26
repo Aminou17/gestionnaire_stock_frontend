@@ -23,11 +23,11 @@ export interface ActionItem {
     icon: IconName | "whatsapp";
     danger?: boolean;
     disabled?: boolean;
-    // lien interne : l'entrée devient un lien au lieu d'un bouton
+    // Lien interne : l'entrée devient un lien au lieu d'un bouton
     link?: string;
-    // adresse externe : s'ouvre dans un nouvel onglet (WhatsApp, par exemple)
+    // Adresse externe : s'ouvre dans un nouvel onglet (WhatsApp, par exemple)
     href?: string;
-    // l'entrée est séparée des autres par un trait (action à part, comme rembourser)
+    // L'entrée est séparée des autres par un trait (action à part, comme rembourser)
     separated?: boolean;
 }
 
@@ -40,7 +40,7 @@ export interface ActionItem {
     templateUrl: "./action-menu.html",
     styleUrl: "./action-menu.css",
     host: {
-        // la ligne parente est cliquable : le menu ne doit pas la déclencher
+        // La ligne parente est cliquable : le menu ne doit pas la déclencher
         "(click)": "$event.stopPropagation()",
     },
 })
@@ -49,9 +49,9 @@ export class ActionMenu {
     private panel = viewChild.required<ElementRef<HTMLElement>>("panel");
 
     items = input.required<ActionItem[]>();
-    // nom lu par les lecteurs d'écran, par exemple "Actions pour Awa"
+    // Nom lu par les lecteurs d'écran, par exemple "Actions pour Adam"
     label = input("Actions");
-    // titre de la feuille sur téléphone
+    // Titre de la feuille sur téléphone
     title = input<string>();
     icon = input<IconName>("more");
     disabled = input(false);
@@ -75,7 +75,7 @@ export class ActionMenu {
             return;
         }
 
-        // sur ordinateur le CSS aligne le panneau sous le bouton, sur téléphone il se pose en bas
+        // Sur ordinateur le CSS aligne le panneau sous le bouton, sur téléphone il se pose en bas
         const rect = this.trigger().nativeElement.getBoundingClientRect();
         panel.style.setProperty("--top", `${rect.bottom + 4}px`);
         panel.style.setProperty("--right", `${window.innerWidth - rect.right}px`);
@@ -88,7 +88,7 @@ export class ActionMenu {
         panel.querySelector<HTMLElement>(".item:not(:disabled)")?.focus();
     }
 
-    // le navigateur ferme le popover lui-même (clic à côté, Échap) : on suit son état
+    // Le navigateur ferme le popover lui-même (clic à côté, Échap) : on suit son état
     onToggle(event: Event) {
         this.open.set((event as ToggleEvent).newState === "open");
     }

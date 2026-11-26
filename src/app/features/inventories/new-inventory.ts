@@ -19,7 +19,7 @@ export class NewInventory {
     private inventoryService = inject(InventoryService);
     private router = inject(Router);
 
-    // créée une fois pour la page : un réessai ne crée pas deux inventaires
+    // Créée une fois pour la page : un réessai ne crée pas deux inventaires
     private clientKey = newRef();
 
     error = signal("");

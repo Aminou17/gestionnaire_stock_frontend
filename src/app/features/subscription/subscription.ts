@@ -18,7 +18,7 @@ interface PaymentMethod {
     icon: IconName;
 }
 
-// aperçu seulement : aucun prix ni limite n'est encore décidé
+// Aperçu seulement : aucun prix ni limite n'est encore décidé
 const PLANS: Plan[] = [
     {
         name: "Essentiel",
@@ -50,14 +50,14 @@ import { getBackLink } from "../../core/back-link";
     styleUrl: "./subscription.css",
 })
 export class Subscription {
-    // ouverte depuis les Paramètres ou le bandeau de fin d'essai
+    // Ouverte depuis les Paramètres ou le bandeau de fin d'essai
     protected back = getBackLink("/settings", "Paramètres");
     protected plans = PLANS;
     protected payments = PAYMENTS;
 
     private auth = inject(AuthService);
 
-    // état de l'accès donné par le serveur : essai, payé, délai de grâce ; null sans date de fin
+    // État de l'accès donné par le serveur : essai, payé, délai de grâce ; null sans date de fin
     protected status = computed(() => {
         const access = this.auth.access();
         if (!access?.endsAt) return null;

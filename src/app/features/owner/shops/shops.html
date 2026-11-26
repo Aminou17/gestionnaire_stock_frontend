@@ -5,7 +5,7 @@
     </button>
 </app-page-header>
 
-<!-- les compteurs servent aussi de filtres -->
+<!-- Les compteurs servent aussi de filtres -->
 <div class="chips" role="group" aria-label="Afficher">
     <button
         type="button"
@@ -108,7 +108,7 @@
                     <span class="shop-icon" aria-hidden="true">{{ shop.name.charAt(0) }}</span>
 
                     <div class="shop-text">
-                        <!-- le lien couvre toute la carte ; les boutons passent au-dessus -->
+                        <!-- Le lien couvre toute la carte ; les boutons passent au-dessus -->
                         <a class="shop-link" [routerLink]="['/owner/shops', shop.id]"
                             ><strong>{{ shop.name }}</strong></a
                         >

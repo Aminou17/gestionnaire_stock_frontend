@@ -5,7 +5,7 @@
     (cancel)="onCancel($event)"
 >
     @if (result(); as done) {
-        <!-- résultat tout de suite : l'écart se lit ici, sans autre étape -->
+        <!-- Résultat tout de suite : l'écart se lit ici, sans autre étape -->
         <div class="done">
             <span
                 class="result-icon"
@@ -121,7 +121,7 @@
                 </div>
             }
 
-            <!-- montant exact : pas de raison à donner ; en aveugle, l'écart est inconnu, la raison reste proposée -->
+            <!-- Montant exact : pas de raison à donner ; en aveugle, l'écart est inconnu, la raison reste proposée -->
             @if (difference() !== 0 && (difference() !== null || blind())) {
                 <label class="field">
                     <span>Raison de l'écart</span>

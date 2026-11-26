@@ -1,4 +1,4 @@
-/* gabarit des pages publiques : en-tête fin, titre, sommaire et document */
+/* Gabarit des pages publiques : en-tête fin, titre, sommaire et document */
 
 :host {
     display: flex;
@@ -117,7 +117,7 @@ h1 {
     align-items: start;
 }
 
-/* sommaire : repliable sur téléphone, colonne collante sur ordinateur */
+/* Sommaire : repliable sur téléphone, colonne collante sur ordinateur */
 .toc {
     border: 1px solid var(--border);
     border-radius: var(--radius);
@@ -217,7 +217,7 @@ h1 {
     color: var(--primary-text);
 }
 
-/* document */
+/* Document */
 .doc {
     padding: 8px 16px;
     box-shadow: var(--shadow-card);
@@ -284,7 +284,7 @@ h2 {
     margin-bottom: 0;
 }
 
-/* pied de page */
+/* Pied de page */
 .foot {
     display: grid;
     justify-items: center;

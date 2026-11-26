@@ -40,7 +40,7 @@ describe("SaleOutboxService", () => {
         httpMock = TestBed.inject(HttpTestingController);
     });
 
-    // la mémoire de secours est partagée entre les tests : on la vide
+    // La mémoire de secours est partagée entre les tests : on la vide
     afterEach(async () => {
         for (const sale of service.pending()) await service.remove(sale.clientRef);
     });

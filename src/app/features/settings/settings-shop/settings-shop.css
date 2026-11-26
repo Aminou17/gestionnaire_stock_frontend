@@ -15,7 +15,7 @@
     height: 180px;
 }
 
-/* une section : titre et phrase d'aide au-dessus de la carte, comme dans Shopify */
+/* Une section : titre et phrase d'aide au-dessus de la carte, comme dans Shopify */
 .block {
     display: grid;
     gap: 12px;
@@ -40,7 +40,7 @@
         align-items: start;
     }
 
-    /* l'aperçu reste visible pendant la saisie */
+    /* L'aperçu reste visible pendant la saisie */
     .preview-col {
         position: sticky;
         top: 24px;
@@ -125,7 +125,7 @@
     width: 112px;
 }
 
-/* le + est dessiné, l'utilisateur ne tape que les chiffres */
+/* Le + est dessiné, l'utilisateur ne tape que les chiffres */
 .plus {
     position: absolute;
     top: 50%;
@@ -170,7 +170,7 @@
     outline-offset: 2px;
 }
 
-/* barre d'enregistrement : n'existe que lorsqu'il y a des changements */
+/* Barre d'enregistrement : n'existe que lorsqu'il y a des changements */
 .savebar {
     position: sticky;
     bottom: 16px;

@@ -80,7 +80,7 @@ export class HelpRequests {
         });
     }
 
-    // clore sans répondre, ou rouvrir une demande close
+    // Clore sans répondre, ou rouvrir une demande close
     toggle() {
         const request = this.selected();
         if (!request) return;

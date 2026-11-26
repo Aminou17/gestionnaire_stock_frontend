@@ -8,15 +8,15 @@ import { Shops } from "./shops";
 
 const shop = (overrides: Partial<OwnedShop> = {}): OwnedShop => ({
     id: 1,
-    name: "Awa Bazin",
+    name: "Adam Ouédraogo",
     status: "ACTIVE",
     created_at: "2026-11-01T10:00:00.000Z",
     deleted_at: null,
     trial_ends_at: null,
     paid_until: null,
     access_ends_at: null,
-    admin_name: "Awa",
-    admin_email: "awa@exemple.com",
+    admin_name: "Adam",
+    admin_email: "adam@exemple.com",
     phone: "+226 70 12 34 56",
     country: "Burkina Faso",
     city: "Bobo-Dioulasso",
@@ -57,7 +57,7 @@ describe("Shops", () => {
     };
 
     beforeAll(() => {
-        // jsdom n'implémente pas les fenêtres <dialog>
+        // Jsdom n'implémente pas les fenêtres <dialog>
         HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
             this.open = true;
         };
@@ -77,7 +77,7 @@ describe("Shops", () => {
         expect(el.querySelector(".chips")?.textContent?.replace(/\s/g, "")).toContain(
             "Suspendues1",
         );
-        expect(el.textContent).toContain("Awa · Bobo-Dioulasso");
+        expect(el.textContent).toContain("Adam · Bobo-Dioulasso");
         expect(el.querySelectorAll(".tag").length).toBe(2);
         expect(el.querySelectorAll(".tag")[1]?.textContent).toContain("Suspendue");
     });
@@ -122,7 +122,7 @@ describe("Shops", () => {
         suspendItem!.click();
         await fixture.whenStable();
         expect(service.setStatus).not.toHaveBeenCalled();
-        expect(el.querySelector("#suspend-title")?.textContent).toContain("Suspendre Awa Bazin");
+        expect(el.querySelector("#suspend-title")?.textContent).toContain("Suspendre Adam Ouédraogo");
 
         fixture.componentInstance.confirmSuspend();
         expect(service.setStatus).toHaveBeenCalledWith(1, "SUSPENDED");
@@ -155,7 +155,7 @@ describe("Shops", () => {
         fixture.componentInstance.askDelete(shop());
         await fixture.whenStable();
         expect(service.deleteShop).not.toHaveBeenCalled();
-        expect(el.querySelector("#delete-title")?.textContent).toContain("Supprimer Awa Bazin");
+        expect(el.querySelector("#delete-title")?.textContent).toContain("Supprimer Adam Ouédraogo");
 
         fixture.componentInstance.confirmDelete();
         expect(service.deleteShop).toHaveBeenCalledWith(1);
@@ -218,7 +218,7 @@ describe("Shops", () => {
         trialItem!.click();
         await fixture.whenStable();
 
-        expect(el.querySelector("#trial-title")?.textContent).toContain("Essai de Awa Bazin");
+        expect(el.querySelector("#trial-title")?.textContent).toContain("Essai de Adam Ouédraogo");
         expect(fixture.componentInstance.trialShop()?.id).toBe(1);
     });
 
@@ -323,9 +323,9 @@ describe("Shops", () => {
         const fixture = await render([shop()]);
         const text = fixture.nativeElement.querySelector(".shop").textContent;
 
-        expect(text).toContain("Awa Bazin");
-        expect(text).toContain("Awa · Bobo-Dioulasso");
-        expect(text).not.toContain("awa@exemple.com");
+        expect(text).toContain("Adam Ouédraogo");
+        expect(text).toContain("Adam · Bobo-Dioulasso");
+        expect(text).not.toContain("adam@exemple.com");
         expect(text).not.toContain("+226 70 12 34 56");
         expect(text).not.toContain("employé");
     });

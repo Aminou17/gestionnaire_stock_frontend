@@ -8,7 +8,7 @@ import { HelpRequest, HelpRequestInput } from "./help.model";
 export class HelpService {
     private http = inject(HttpClient);
 
-    // demandes sans réponse, pour la pastille du propriétaire
+    // Demandes sans réponse, pour la pastille du propriétaire
     open = signal(0);
 
     // page publique : aucune connexion nécessaire

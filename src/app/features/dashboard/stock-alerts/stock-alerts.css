@@ -29,7 +29,7 @@ li + li {
     background: var(--surface-hover);
 }
 
-/* le stock restant dans une pastille : orange quand il baisse, rouge à zéro */
+/* Le stock restant dans une pastille : orange quand il baisse, rouge à zéro */
 .qty {
     flex: none;
     width: 36px;

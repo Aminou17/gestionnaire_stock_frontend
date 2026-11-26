@@ -20,7 +20,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { ScanButton } from "../../../shared/scan-button/scan-button";
 import { productInitials } from "../../products/product-look";
 
-// couleur de la pastille de chaque motif
+// Couleur de la pastille de chaque motif
 const REASON_TONES: Record<string, string> = {
     breakage: "warning",
     expired: "warning",
@@ -44,7 +44,7 @@ export class AdjustDialog {
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
 
-    // message prêt à afficher dans la page, par exemple : Stock ajusté, -2 Savon
+    // Message prêt à afficher dans la page, par exemple : Stock ajusté, -2 Savon
     saved = output<string>();
 
     protected reasons = ADJUSTMENT_REASONS;
@@ -53,7 +53,7 @@ export class AdjustDialog {
 
     product = signal<Product | null>(null);
     search = signal("");
-    // vide au départ : c'est l'utilisateur qui choisit retirer ou ajouter
+    // Vide au départ : c'est l'utilisateur qui choisit retirer ou ajouter
     direction = signal<AdjustmentDirection | null>(null);
     quantity = signal<number | null>(null);
     reason = signal("");
@@ -83,7 +83,7 @@ export class AdjustDialog {
         return quantity !== null && Number.isInteger(quantity) && quantity >= 1;
     });
 
-    // une perte ne peut pas dépasser le stock
+    // Une perte ne peut pas dépasser le stock
     tooMany = computed(() => {
         const product = this.product();
         return (
@@ -101,7 +101,7 @@ export class AdjustDialog {
         return product.theoretical_stock + change;
     });
 
-    // un motif ou une note suffit pour enregistrer
+    // Un motif ou une note suffit pour enregistrer
     hasWhy = computed(() => !!this.reason() || !!this.note().trim());
 
     reasonLabel = computed(() => {
@@ -123,7 +123,7 @@ export class AdjustDialog {
             !this.saving(),
     );
 
-    // ce qui manque encore, affiché au-dessus du bouton tant qu'il est inactif
+    // Ce qui manque encore, affiché au-dessus du bouton tant qu'il est inactif
     missing = computed(() => {
         if (this.saving() || this.canSubmit()) return "";
         if (!this.product()) return "Choisissez un produit";
@@ -133,7 +133,7 @@ export class AdjustDialog {
         return "Choisissez un motif ou écrivez une note";
     });
 
-    // texte du bouton principal : dit exactement ce qui va se passer
+    // Texte du bouton principal : dit exactement ce qui va se passer
     submitLabel = computed(() => {
         if (!this.direction()) return "Enregistrer";
         const gain = this.direction() === "gain";
@@ -166,7 +166,7 @@ export class AdjustDialog {
         this.reasonOpen.set(false);
         this.error.set(null);
         this.open.set(true);
-        // la page derrière ne doit plus défiler
+        // La page derrière ne doit plus défiler
         document.body.style.overflow = "hidden";
         this.dialog().nativeElement.showModal();
     }
@@ -196,7 +196,7 @@ export class AdjustDialog {
         if (this.saving()) event.preventDefault();
     }
 
-    // un clic en dehors du menu des motifs le referme
+    // Un clic en dehors du menu des motifs le referme
     @HostListener("document:click", ["$event"])
     onDocumentClick(event: Event) {
         if (!this.reasonOpen()) return;
@@ -213,7 +213,7 @@ export class AdjustDialog {
     setDirection(direction: AdjustmentDirection) {
         if (this.direction() === direction) return;
         this.direction.set(direction);
-        // les motifs ne sont pas les mêmes pour une perte et un gain
+        // Les motifs ne sont pas les mêmes pour une perte et un gain
         this.reason.set("");
         this.reasonOpen.set(false);
     }
@@ -223,7 +223,7 @@ export class AdjustDialog {
         this.reasonOpen.set(false);
     }
 
-    // boutons moins et plus : la quantité part de 1 et ne descend pas en dessous
+    // Boutons moins et plus : la quantité part de 1 et ne descend pas en dessous
     step(change: number) {
         this.quantity.set(Math.max(1, (this.quantity() ?? 0) + change));
     }
@@ -248,7 +248,7 @@ export class AdjustDialog {
                 productId: product.id,
                 direction,
                 quantity,
-                // sans motif choisi, la note seule suffit : le motif est alors Autre
+                // Sans motif choisi, la note seule suffit : le motif est alors Autre
                 reason: this.reason() || "other",
                 ...(note ? { note } : {}),
             })

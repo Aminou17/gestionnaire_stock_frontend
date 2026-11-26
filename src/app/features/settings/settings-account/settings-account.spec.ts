@@ -12,20 +12,20 @@ describe("SettingsAccount", () => {
     let updateProfile: ReturnType<typeof vi.fn>;
     const user = signal<Record<string, unknown>>({
         id: 1,
-        name: "Awa Traoré",
-        firstName: "Awa",
+        name: "Adam Traoré",
+        firstName: "Adam",
         lastName: "Traoré",
-        email: "awa@test.com",
+        email: "adam@test.com",
         role: "manager",
     });
 
     async function render() {
         user.set({
             id: 1,
-            name: "Awa Traoré",
-            firstName: "Awa",
+            name: "Adam Traoré",
+            firstName: "Adam",
             lastName: "Traoré",
-            email: "awa@test.com",
+            email: "adam@test.com",
             role: "manager",
         });
         updateProfile = vi.fn((firstName: string, lastName: string, email: string) => {
@@ -72,21 +72,21 @@ describe("SettingsAccount", () => {
     it("should show the current profile and the role", async () => {
         await render();
 
-        expect(field("firstName").value).toBe("Awa");
+        expect(field("firstName").value).toBe("Adam");
         expect(field("lastName").value).toBe("Traoré");
-        expect(field("email").value).toBe("awa@test.com");
+        expect(field("email").value).toBe("adam@test.com");
         expect(el.textContent).toContain("Employé");
     });
 
     it("should save the profile with the email in lowercase", async () => {
         await render();
 
-        await type("firstName", " Awa ");
-        await type("lastName", "Bazin");
-        await type("email", "Awa.B@Test.com");
+        await type("firstName", " Adam ");
+        await type("lastName", "Ouédraogo");
+        await type("email", "Adam.B@Test.com");
         await submit(0);
 
-        expect(updateProfile).toHaveBeenCalledWith("Awa", "Bazin", "awa.b@test.com");
+        expect(updateProfile).toHaveBeenCalledWith("Adam", "Ouédraogo", "adam.b@test.com");
         expect(el.textContent).toContain("Enregistré.");
     });
 
@@ -143,7 +143,7 @@ describe("SettingsAccount", () => {
         el.querySelector<HTMLButtonElement>("form .btn-outline")!.click();
         await fixture.whenStable();
 
-        expect(field("firstName").value).toBe("Awa");
+        expect(field("firstName").value).toBe("Adam");
     });
 
     it("should leave without question when nothing changed", async () => {

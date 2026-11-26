@@ -46,17 +46,17 @@ import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
 export class MainLayout implements OnInit {
     private auth = inject(AuthService);
     protected layout = inject(LayoutService);
-    // démarre l'envoi automatique des ventes faites sans internet
+    // Démarre l'envoi automatique des ventes faites sans internet
     private outbox = inject(SaleOutboxService);
 
     private catalog = inject(OfflineCatalogService);
     private network = inject(NetworkService);
 
     ngOnInit() {
-        // une 401 est déjà gérée par l'intercepteur
+        // Une 401 est déjà gérée par l'intercepteur
         this.auth.refreshUser().subscribe({ error: () => {} });
 
-        // catalogue gardé dès l'ouverture : la vente marche même si la coupure arrive avant
+        // Catalogue gardé dès l'ouverture : la vente marche même si la coupure arrive avant
         if (!this.auth.isOwner() && this.network.online()) {
             void this.catalog.load().then(() => {
                 this.catalog.refresh().catch(() => {});

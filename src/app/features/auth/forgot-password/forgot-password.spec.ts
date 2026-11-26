@@ -55,15 +55,15 @@ describe("ForgotPassword", () => {
     it("should send the email in lowercase", async () => {
         auth.forgotPassword.mockReturnValue(of({ message: "ok" }));
 
-        await submit("Awa@Test.COM");
+        await submit("Adam@Test.COM");
 
-        expect(auth.forgotPassword).toHaveBeenCalledWith("awa@test.com");
+        expect(auth.forgotPassword).toHaveBeenCalledWith("adam@test.com");
     });
 
     it("should show the neutral message after success", async () => {
         auth.forgotPassword.mockReturnValue(of({ message: "ok" }));
 
-        await submit("awa@test.com");
+        await submit("adam@test.com");
 
         expect(el.textContent).toContain("Vérifiez votre boîte mail");
         expect(el.querySelector("form")).toBeNull();
@@ -80,7 +80,7 @@ describe("ForgotPassword", () => {
             ),
         );
 
-        await submit("awa@test.com");
+        await submit("adam@test.com");
 
         expect(el.textContent).toContain("Trop de demandes, réessayez dans une heure.");
         expect(el.textContent).not.toContain("Vérifiez votre boîte mail");
@@ -89,7 +89,7 @@ describe("ForgotPassword", () => {
     it("should show a network message when the server is unreachable", async () => {
         auth.forgotPassword.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 0 })));
 
-        await submit("awa@test.com");
+        await submit("adam@test.com");
 
         expect(el.textContent).toContain("Impossible de joindre le serveur");
     });

@@ -36,16 +36,16 @@ export class CustomerForm {
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
     private nameInput = viewChild.required<ElementRef<HTMLInputElement>>("nameInput");
 
-    // le client enregistré, pour que la page se mette à jour
+    // Le client enregistré, pour que la page se mette à jour
     saved = output<Customer>();
 
     editing = signal<Customer | null>(null);
     saving = signal(false);
     formError = signal<string | null>(null);
-    // la fiche qui porte déjà ce numéro
+    // La fiche qui porte déjà ce numéro
     duplicate = signal<DuplicatePhone | null>(null);
 
-    // mêmes tailles que les colonnes de la base
+    // Mêmes tailles que les colonnes de la base
     form = inject(NonNullableFormBuilder).group({
         name: ["", [Validators.required, Validators.maxLength(100)]],
         phone: ["", Validators.maxLength(30)],
@@ -74,7 +74,7 @@ export class CustomerForm {
         this.nameInput().nativeElement.focus();
     }
 
-    // le numéro tapé à la caisse passe au format international avec l'indicatif de la boutique
+    // Le numéro tapé à la caisse passe au format international avec l'indicatif de la boutique
     private prefillPhone(phone?: string) {
         return phone ? normalizePhone(phone, this.shop.defaultCountryCode()) : "";
     }
@@ -118,7 +118,7 @@ export class CustomerForm {
         }
 
         const editing = this.editing();
-        // rien n'a changé : inutile d'appeler le backend
+        // Rien n'a changé : inutile d'appeler le backend
         if (
             editing &&
             editing.name === input.name &&

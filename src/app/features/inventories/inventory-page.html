@@ -1,4 +1,4 @@
-<!-- le titre ne change jamais : il ne saute pas pendant le chargement -->
+<!-- Le titre ne change jamais : il ne saute pas pendant le chargement -->
 <app-page-header
     title="Inventaire"
     section="Plus d'outils"
@@ -55,7 +55,7 @@
         }
     </section>
 } @else if (inventory(); as inv) {
-    <!-- le résultat en une phrase, puis le geste à faire -->
+    <!-- Le résultat en une phrase, puis le geste à faire -->
     <section class="card hero tinted" [attr.data-tone]="tone() === 'primary' ? null : tone()">
         <div class="hero-head">
             <div class="hero-main">
@@ -106,7 +106,7 @@
         }
     </section>
 
-    <!-- compte rendu de la correction du stock -->
+    <!-- Compte rendu de la correction du stock -->
     @if (report(); as result) {
         <section class="card report" aria-label="Compte rendu de la correction">
             <header>
@@ -165,7 +165,7 @@
         </section>
     }
 
-    <!-- les produits -->
+    <!-- Les produits -->
     <section class="products">
         @if (detail.isLoading() && items().length === 0) {
             <div class="loading" aria-busy="true">
@@ -251,7 +251,7 @@
     <app-inventory-line-dialog [inventory]="inv" (saved)="onLineSaved($event)" />
 }
 
-<!-- le contenu d'une ligne : photo, nom, l'écart en grand -->
+<!-- Le contenu d'une ligne : photo, nom, l'écart en grand -->
 <ng-template #itemBody let-line>
     <app-inventory-thumb
         [name]="line.productName"

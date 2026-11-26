@@ -60,7 +60,7 @@ export class SupportInbox {
         return Number.isInteger(id) && id > 0 ? id : null;
     });
 
-    // l'ancienne adresse /owner/help ouvre directement l'onglet « Sans compte »
+    // L'ancienne adresse /owner/help ouvre directement l'onglet « Sans compte »
     protected filter = signal<Filter>(
         this.isOwner && this.route.snapshot.queryParamMap.get("onglet") === "sans-compte"
             ? "nocount"
@@ -96,7 +96,7 @@ export class SupportInbox {
     private scroller = viewChild<ElementRef<HTMLElement>>("scroller");
 
     constructor() {
-        // la conversation s'ouvre sur le dernier message
+        // La conversation s'ouvre sur le dernier message
         effect(() => {
             if (!this.thread.hasValue()) return;
             setTimeout(() => {
@@ -165,7 +165,7 @@ export class SupportInbox {
                 this.subject.set("");
                 this.newMessage.set("");
                 this.threads.reload();
-                // la conversation créée prend la place du formulaire dans l'historique
+                // La conversation créée prend la place du formulaire dans l'historique
                 this.router.navigate([this.base, thread.id], { replaceUrl: true });
             },
             error: (err: HttpErrorResponse) => this.fail(err),

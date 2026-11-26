@@ -17,7 +17,7 @@ const module = (key: string, group: string, label: string, enabled = true): Shop
 describe("ShopAccess", () => {
     let setShopModules: ReturnType<typeof vi.fn>;
 
-    // jsdom ne connaît pas showModal : on imite l'ouverture et la fermeture
+    // Jsdom ne connaît pas showModal : on imite l'ouverture et la fermeture
     beforeEach(() => {
         HTMLDialogElement.prototype.showModal = function () {
             this.setAttribute("open", "");

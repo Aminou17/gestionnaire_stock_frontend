@@ -10,7 +10,7 @@ export type StockMovementType =
     | "MANUAL_GAIN"
     | "MANUAL_LOSS";
 
-// valeurs acceptées pour filtrer ; INVENTORY et MANUAL regroupent les gains et les pertes,
+// Valeurs acceptées pour filtrer ; INVENTORY et MANUAL regroupent les gains et les pertes,
 // IN et OUT regroupent tout ce qui fait monter ou baisser le stock
 export type StockMovementFilter = StockMovementType | "INVENTORY" | "MANUAL" | "IN" | "OUT";
 
@@ -20,13 +20,13 @@ export const isInventoryMovement = (movement: { type: StockMovementType }) =>
 export const isManualMovement = (movement: { type: StockMovementType }) =>
     movement.type === "MANUAL_GAIN" || movement.type === "MANUAL_LOSS";
 
-// une entrée, un inventaire ou un ajustement ne mènent à aucune vente : seule la vente a une fiche
+// Une entrée, un inventaire ou un ajustement ne mènent à aucune vente : seule la vente a une fiche
 export const saleId = (movement: StockMovement) =>
     movement.type === "ENTRY" || isInventoryMovement(movement) || isManualMovement(movement)
         ? null
         : movement.reference_id;
 
-// le stock baisse pour une vente, une perte d'inventaire et une perte saisie à la main
+// Le stock baisse pour une vente, une perte d'inventaire et une perte saisie à la main
 export const isOutgoingMovement = (movement: { type: StockMovementType }) =>
     movement.type === "SALE" ||
     movement.type === "INVENTORY_LOSS" ||
@@ -34,7 +34,7 @@ export const isOutgoingMovement = (movement: { type: StockMovementType }) =>
 
 export type AdjustmentDirection = "gain" | "loss";
 
-// motifs proposés dans la fenêtre d'ajustement, par sens ; la clé est celle du backend
+// Motifs proposés dans la fenêtre d'ajustement, par sens ; la clé est celle du backend
 export const ADJUSTMENT_REASONS: Record<AdjustmentDirection, { value: string; label: string }[]> = {
     loss: [
         { value: "breakage", label: "Endommagé" },
@@ -51,7 +51,7 @@ export const ADJUSTMENT_REASONS: Record<AdjustmentDirection, { value: string; la
     ],
 };
 
-// motif d'un ajustement manuel, pour l'afficher à la place d'une référence
+// Motif d'un ajustement manuel, pour l'afficher à la place d'une référence
 export const adjustmentReasonLabel = (movement: StockMovement) =>
     ADJUSTMENT_REASONS[movement.type === "MANUAL_GAIN" ? "gain" : "loss"].find(
         (reason) => reason.value === movement.reference_type,
@@ -65,7 +65,7 @@ export interface StockAdjustmentInput {
     note?: string;
 }
 
-// affichage commun à la page Mouvements et à la fiche produit
+// Affichage commun à la page Mouvements et à la fiche produit
 export const MOVEMENT_TYPES = {
     ENTRY: { label: "Entrée", sign: "+", tone: "primary" },
     SALE: { label: "Vente", sign: "−", tone: "success" },
@@ -80,28 +80,28 @@ export interface StockMovement {
     id: number;
     product_id: number;
     product_name: string;
-    // miniature en data URL, null sans photo
+    // Miniature en data URL, null sans photo
     image?: string | null;
     type: StockMovementType;
-    // toujours positive, c'est le type qui dit si le stock monte ou descend
+    // Toujours positive, c'est le type qui dit si le stock monte ou descend
     quantity: number;
-    // absents pour l'employé
+    // Absents pour l'employé
     user_id?: number;
     user_name?: string | null;
     reference_type: string | null;
     // null pour l'employé quand la vente est celle d'un autre vendeur
     reference_id: number | null;
-    // numéro de la vente dans la boutique, masqué comme reference_id
+    // Numéro de la vente dans la boutique, masqué comme reference_id
     sale_number?: number | null;
-    // stock du produit juste après ce mouvement
+    // Stock du produit juste après ce mouvement
     stock_after: number;
     created_at: string;
 }
 
-// totaux de la période et du produit choisis, tous types confondus
+// Totaux de la période et du produit choisis, tous types confondus
 export interface StockMovementCounters {
     movements: number;
-    // mouvements qui font monter le stock, et ceux qui le font baisser
+    // Mouvements qui font monter le stock, et ceux qui le font baisser
     incoming: number;
     outgoing: number;
     entries: number;

@@ -22,7 +22,7 @@
     font-size: var(--fs-lead);
 }
 
-/* carte de tête : statut, menu, puis les quelques infos utiles */
+/* Carte de tête : statut, menu, puis les quelques infos utiles */
 .hero {
     display: grid;
     gap: 16px;
@@ -193,7 +193,7 @@
     }
 }
 
-/* paiement enregistré à la main, en attendant le paiement en ligne */
+/* Paiement enregistré à la main, en attendant le paiement en ligne */
 .paid {
     display: grid;
     gap: 12px;
@@ -253,7 +253,7 @@
     cursor: pointer;
 }
 
-/* accès directs : accès de la boutique et activité détaillée */
+/* Accès directs : accès de la boutique et activité détaillée */
 .tools {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

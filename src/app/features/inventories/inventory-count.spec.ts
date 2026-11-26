@@ -22,7 +22,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedAt: null,
     appliedAt: null,
     cancelledAt: null,
-    createdBy: { id: 1, name: "Awa", avatar: null },
+    createdBy: { id: 1, name: "Adam", avatar: null },
     countedBy: null,
     appliedBy: null,
     cancelledBy: null,
@@ -33,7 +33,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     ...changes,
 });
 
-// le serveur envoie le stock théorique à l'admin : l'écran ne doit jamais l'afficher
+// Le serveur envoie le stock théorique à l'admin : l'écran ne doit jamais l'afficher
 const item = (id: number, name: string, actual: number, countedAt: string): InventoryItem => ({
     id,
     productId: id,
@@ -84,7 +84,7 @@ describe("InventoryCount", () => {
     const riz = product(1, "Riz parfumé 5 kg", "6001");
     const farine = product(2, "Farine de blé 1 kg", "6002");
 
-    // deux produits déjà comptés : le dernier compté arrive en haut
+    // Deux produits déjà comptés : le dernier compté arrive en haut
     const counted = detail([
         item(1, "Riz parfumé 5 kg", 12, "2026-11-23T10:05:00Z"),
         item(2, "Farine de blé 1 kg", 7, "2026-11-23T10:10:00Z"),
@@ -96,7 +96,7 @@ describe("InventoryCount", () => {
         getInventory = vi.fn(() => of(first));
         saveItems = vi.fn(() => of({ saved: 1, inventory: inventory({ itemsCount: 3 }) }));
         close = vi.fn(() => of({ inventory: inventory({ status: "counted" }) }));
-        // la recherche et le scan trouvent le produit dont le nom ou le code correspond
+        // La recherche et le scan trouvent le produit dont le nom ou le code correspond
         getProducts = vi.fn(({ search }: { search: string }) => {
             const data = [riz, farine, product(3, "Sucre 1 kg", "6003")].filter(
                 (p) => p.barcode === search || p.name.toLowerCase().includes(search.toLowerCase()),
@@ -104,7 +104,7 @@ describe("InventoryCount", () => {
             return of({ data, total: data.length, counters: {} });
         });
 
-        // jsdom ne gère pas <dialog>
+        // Jsdom ne gère pas <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
         window.scrollTo = vi.fn();
@@ -146,7 +146,7 @@ describe("InventoryCount", () => {
     const inputs = () => [...el.querySelectorAll<HTMLInputElement>("input.count")];
     const names = () => [...el.querySelectorAll(".lines .name")].map((n) => text(n).trim());
 
-    // laisse finir les recherches et les scans, qui s'enchaînent en promesses
+    // Laisse finir les recherches et les scans, qui s'enchaînent en promesses
     const settle = async () => {
         await new Promise((resolve) => setTimeout(resolve, 350));
         await fixture.whenStable();
@@ -173,7 +173,7 @@ describe("InventoryCount", () => {
         expect(el.querySelector(".tab, .tabs, .gauge, [role=progressbar]")).toBeNull();
         expect(text()).not.toMatch(/non compt|sur \d+ compt/i);
         expect(text()).not.toContain("À compter");
-        // aucun chargement de toute la boutique
+        // Aucun chargement de toute la boutique
         expect(getProducts).not.toHaveBeenCalled();
     });
 
@@ -206,7 +206,7 @@ describe("InventoryCount", () => {
         await settle();
 
         expect(names()).toEqual(["Farine de blé 1 kg"]);
-        // rien n'est envoyé tant que la quantité n'est pas saisie
+        // Rien n'est envoyé tant que la quantité n'est pas saisie
         expect(fixture.componentInstance.sync.pendingCount()).toBe(0);
         expect(inputs()[0].value).toBe("");
         expect(document.activeElement).toBe(inputs()[0]);
@@ -289,7 +289,7 @@ describe("InventoryCount", () => {
         fixture.detectChanges();
 
         expect(names()).toEqual(["Riz parfumé 5 kg"]);
-        // le serveur connaît ce produit : sa ligne est retirée (null = suppression)
+        // Le serveur connaît ce produit : sa ligne est retirée (null = suppression)
         expect(fixture.componentInstance.sync.pending()).toEqual({ 2: null });
     });
 

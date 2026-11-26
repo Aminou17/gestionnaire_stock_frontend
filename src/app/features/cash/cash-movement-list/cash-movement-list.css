@@ -53,7 +53,7 @@
     cursor: pointer;
 }
 
-/* le lien ou le bouton couvre toute la ligne : zone de toucher de 56 px sans espace en trop */
+/* Le lien ou le bouton couvre toute la ligne : zone de toucher de 56 px sans espace en trop */
 .label::after {
     content: "";
     position: absolute;

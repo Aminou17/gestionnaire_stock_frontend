@@ -10,7 +10,7 @@ const overview = (failedLogins24h: number, lockedAccounts: number) => ({
     failedLogins7d: 9,
     accessDenied7d: 2,
     lockedAccounts,
-    topShops: [{ id: 1, name: "Chez Awa", failed_logins: 4, access_denied: 1 }],
+    topShops: [{ id: 1, name: "Chez Adam", failed_logins: 4, access_denied: 1 }],
     daily: [{ day: "2026-11-20", failed_logins: 4, access_denied: 1 }],
 });
 
@@ -43,6 +43,6 @@ describe("SecurityOverview", () => {
         expect(text).toContain("3 connexions échouées");
         expect(text).toContain("1 compte bloqué");
         expect(el.querySelectorAll(".kpi").length).toBe(4);
-        expect(el.querySelector(".shop-name")?.textContent).toContain("Chez Awa");
+        expect(el.querySelector(".shop-name")?.textContent).toContain("Chez Adam");
     });
 });

@@ -26,10 +26,10 @@ import { ProductForm } from "../../products/product-form/product-form";
 import { categoryTone, productInitials } from "../../products/product-look";
 import { BackState, getBackLink } from "../../../core/back-link";
 
-// nombre de produits montrés directement sur la fiche
+// Nombre de produits montrés directement sur la fiche
 const PREVIEW_SIZE = 5;
 
-// libellé de la dernière action du journal d'audit
+// Libellé de la dernière action du journal d'audit
 const CHANGE_LABELS: Record<string, string> = {
     CATEGORY_CREATED: "Créée",
     CATEGORY_UPDATED: "Modifiée",
@@ -53,7 +53,7 @@ const CHANGE_LABELS: Record<string, string> = {
     styleUrl: "./category-page.css",
 })
 export class CategoryPage {
-    // pastille du produit, comme dans la liste Produits
+    // Pastille du produit, comme dans la liste Produits
     protected initials = productInitials;
     protected tone = categoryTone;
 
@@ -63,7 +63,7 @@ export class CategoryPage {
     private productService = inject(ProductService);
     private router = inject(Router);
 
-    // la fiche produit ouverte sait ainsi revenir ici
+    // La fiche produit ouverte sait ainsi revenir ici
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Catégorie" };
     }
@@ -80,7 +80,7 @@ export class CategoryPage {
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
-    // un identifiant qui n'est pas un entier n'est même pas demandé au backend
+    // Un identifiant qui n'est pas un entier n'est même pas demandé au backend
     validId = computed(() => {
         const id = this.id();
         return id !== undefined && Number.isInteger(id) && id > 0;
@@ -93,7 +93,7 @@ export class CategoryPage {
 
     data = computed(() => (this.category.hasValue() ? this.category.value() : undefined));
 
-    // premiers produits de la catégorie : rechargés quand leur nombre change (produit ajouté)
+    // Premiers produits de la catégorie : rechargés quand leur nombre change (produit ajouté)
     products = rxResource({
         params: () => {
             const category = this.data();
@@ -115,7 +115,7 @@ export class CategoryPage {
 
     preview = computed(() => (this.products.hasValue() ? this.products.value() : []));
 
-    // produits à surveiller : faible ou en rupture
+    // Produits à surveiller : faible ou en rupture
     stockAlerts = computed(() => {
         const category = this.data();
         return (category?.low_stock_count ?? 0) + (category?.out_of_stock_count ?? 0);
@@ -127,17 +127,17 @@ export class CategoryPage {
         return action ? (CHANGE_LABELS[action] ?? action) : "";
     });
 
-    // le backend répond 404 pour une catégorie inexistante (ou supprimée, pour l'employé)
+    // Le backend répond 404 pour une catégorie inexistante (ou supprimée, pour l'employé)
     notFound = computed(
         () =>
             !this.validId() ||
             (this.category.error() as HttpErrorResponse | undefined)?.status === 404,
     );
 
-    // seul l'admin modifie une catégorie, et seulement si elle n'est pas supprimée
+    // Seul l'admin modifie une catégorie, et seulement si elle n'est pas supprimée
     canManage = computed(() => this.auth.isAdmin() && !!this.data()?.is_active);
 
-    // formulaire de modification
+    // Formulaire de modification
     saving = signal(false);
     formError = signal<string | null>(null);
     form = inject(NonNullableFormBuilder).group({
@@ -145,12 +145,12 @@ export class CategoryPage {
         description: ["", Validators.maxLength(500)],
     });
 
-    // suppression : le backend refuse si la catégorie contient des produits
+    // Suppression : le backend refuse si la catégorie contient des produits
     deleteBlocked = computed(() => (this.data()?.product_count ?? 0) > 0);
     deleting = signal(false);
     deleteError = signal<string | null>(null);
 
-    // restauration d'une catégorie supprimée (admin)
+    // Restauration d'une catégorie supprimée (admin)
     canRestore = computed(() => this.auth.isAdmin() && this.data()?.is_active === false);
     restoring = signal(false);
     restoreError = signal<string | null>(null);
@@ -189,7 +189,7 @@ export class CategoryPage {
             return;
         }
 
-        // rien n'a changé : inutile d'appeler le backend
+        // Rien n'a changé : inutile d'appeler le backend
         if (category.name === name && category.description === description) {
             this.closeForm();
             return;

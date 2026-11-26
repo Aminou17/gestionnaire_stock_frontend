@@ -1,6 +1,6 @@
 import { Component, input } from "@angular/core";
 
-// logo de marque : plein, donc à part des icônes en traits
+// Logo de marque : plein, donc à part des icônes en traits
 @Component({
     selector: "app-whatsapp-icon",
     template: `

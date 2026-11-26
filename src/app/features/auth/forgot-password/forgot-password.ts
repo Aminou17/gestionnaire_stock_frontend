@@ -22,7 +22,7 @@ export class ForgotPassword {
 
     loading = signal(false);
     error = signal<string | null>(null);
-    // la réponse est la même que l'adresse ait un compte ou non
+    // La réponse est la même que l'adresse ait un compte ou non
     sent = signal(false);
 
     hasError(code: string) {

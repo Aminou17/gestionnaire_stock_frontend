@@ -56,7 +56,7 @@ ol {
     text-decoration: none;
 }
 
-/* petit écran : le logo seul, pour laisser la place aux deux boutons */
+/* Petit écran : le logo seul, pour laisser la place aux deux boutons */
 @media (max-width: 479px) {
     .brand span {
         display: none;
@@ -67,7 +67,7 @@ ol {
     }
 }
 
-/* téléphone : le bouton fixe du bas et celui du haut de page suffisent, pas de triple doublon */
+/* Téléphone : le bouton fixe du bas et celui du haut de page suffisent, pas de triple doublon */
 @media (max-width: 639px) {
     .top .btn-top {
         display: none;
@@ -153,7 +153,7 @@ ol {
     outline-offset: 2px;
 }
 
-/* présentation : fond sombre avec des lueurs qui dérivent et une fine grille */
+/* Présentation : fond sombre avec des lueurs qui dérivent et une fine grille */
 .hero {
     position: relative;
     overflow: hidden;
@@ -282,7 +282,7 @@ h1 {
     background: rgba(255, 255, 255, 0.14);
 }
 
-/* ordinateur et téléphone côte à côte */
+/* Ordinateur et téléphone côte à côte */
 .hero-art {
     position: relative;
     display: grid;
@@ -291,7 +291,7 @@ h1 {
     overflow-y: clip;
 }
 
-/* le bas des appareils s'efface doucement dans le fond, sans bande de couleur */
+/* Le bas des appareils s'efface doucement dans le fond, sans bande de couleur */
 .hero-art {
     mask-image: linear-gradient(180deg, #000 55%, transparent 98%);
 }
@@ -328,7 +328,7 @@ h1 {
     height: auto;
 }
 
-/* cadre de téléphone */
+/* Cadre de téléphone */
 .phone {
     position: relative;
     width: 100%;
@@ -353,7 +353,7 @@ h1 {
     max-width: 250px;
 }
 
-/* sections */
+/* Sections */
 .section {
     padding: 64px 0;
 }
@@ -393,7 +393,7 @@ h1 {
     line-height: 1.55;
 }
 
-/* raisons */
+/* Raisons */
 .reasons {
     display: grid;
     gap: 16px;
@@ -475,7 +475,7 @@ h1 {
     font-size: var(--fs-body);
 }
 
-/* images empilées : une seule se voit à la fois, les autres s'effacent */
+/* Images empilées : une seule se voit à la fois, les autres s'effacent */
 .stack {
     position: relative;
     overflow: hidden;
@@ -538,7 +538,7 @@ h1 {
     }
 }
 
-/* ordinateur et téléphone côte à côte, pour une même page */
+/* Ordinateur et téléphone côte à côte, pour une même page */
 .pair {
     position: relative;
     width: 100%;
@@ -590,7 +590,7 @@ h1 {
     text-align: center;
 }
 
-/* choix de la page montrée */
+/* Choix de la page montrée */
 .tabs {
     display: flex;
     flex-wrap: wrap;
@@ -630,7 +630,7 @@ h1 {
     color: #fff;
 }
 
-/* équipe : administrateur et employé côte à côte, puis deux blocs texte et images */
+/* Équipe : administrateur et employé côte à côte, puis deux blocs texte et images */
 .compare {
     display: grid;
     gap: 20px;
@@ -709,7 +709,7 @@ h1 {
     line-height: 1.6;
 }
 
-/* étapes */
+/* Étapes */
 .steps {
     display: grid;
     gap: 16px;
@@ -749,7 +749,7 @@ h1 {
     line-height: 1.6;
 }
 
-/* appel final */
+/* Appel final */
 .final {
     position: relative;
     overflow: hidden;
@@ -818,7 +818,7 @@ h1 {
     text-decoration: underline;
 }
 
-/* bandeau d'atouts */
+/* Bandeau d'atouts */
 .atouts {
     position: relative;
     z-index: 1;
@@ -871,7 +871,7 @@ h1 {
     color: var(--text-muted);
 }
 
-/* appareils légèrement flottants */
+/* Appareils légèrement flottants */
 .browser,
 .phone-hero {
     animation: float 7s ease-in-out infinite;
@@ -887,7 +887,7 @@ h1 {
     }
 }
 
-/* entrée du haut de page, en cascade */
+/* Entrée du haut de page, en cascade */
 .rise {
     animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
     animation-delay: calc(var(--i, 0) * 90ms);
@@ -900,7 +900,7 @@ h1 {
     }
 }
 
-/* apparition au défilement : cachés seulement si le script peut les révéler */
+/* Apparition au défilement : cachés seulement si le script peut les révéler */
 :host(.animated) .reveal {
     opacity: 0;
     transform: translateY(20px);
@@ -915,7 +915,7 @@ h1 {
     transform: none;
 }
 
-/* bouton fixe du téléphone */
+/* Bouton fixe du téléphone */
 .sticky-cta {
     position: fixed;
     right: 16px;
@@ -953,7 +953,7 @@ h1 {
     outline-offset: 2px;
 }
 
-/* tablette */
+/* Tablette */
 @media (min-width: 640px) {
     .foot {
         padding-bottom: calc(24px + env(safe-area-inset-bottom));
@@ -1052,7 +1052,7 @@ h1 {
     }
 }
 
-/* ordinateur : texte à gauche, appareils à droite */
+/* Ordinateur : texte à gauche, appareils à droite */
 @media (min-width: 1024px) {
     .hero {
         padding: 72px 0 56px;
@@ -1064,7 +1064,7 @@ h1 {
         gap: 48px;
     }
 
-    /* la maquette est montrée en entier : plus de découpe ni de fondu */
+    /* La maquette est montrée en entier : plus de découpe ni de fondu */
     .hero-art {
         max-height: none;
         justify-items: end;
@@ -1079,7 +1079,7 @@ h1 {
         width: 100%;
     }
 
-    /* sur ordinateur, la maquette seule : le téléphone chargeait le haut de page */
+    /* Sur ordinateur, la maquette seule : le téléphone chargeait le haut de page */
     .phone-hero {
         display: none;
     }
@@ -1131,7 +1131,7 @@ h1 {
     isolation: isolate;
 }
 
-/* halo de couleur derrière les appareils */
+/* Halo de couleur derrière les appareils */
 .pair::before {
     content: "";
     position: absolute;
@@ -1161,7 +1161,7 @@ h1 {
     transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* cartes : léger soulèvement (la propriété translate laisse la transform de l'apparition tranquille) */
+/* Cartes : léger soulèvement (la propriété translate laisse la transform de l'apparition tranquille) */
 .who,
 .reason,
 .step {
@@ -1207,7 +1207,7 @@ h1 {
         transition: none;
     }
 
-    /* sans animation : la première page, et le panier pour la démonstration de vente */
+    /* Sans animation : la première page, et le panier pour la démonstration de vente */
     .slides img {
         animation: none;
     }

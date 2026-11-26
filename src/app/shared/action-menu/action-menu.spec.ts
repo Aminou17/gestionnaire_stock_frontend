@@ -22,7 +22,7 @@ describe("ActionMenu", () => {
         el = fixture.nativeElement;
         picked = [];
         fixture.componentRef.setInput("items", items);
-        fixture.componentRef.setInput("label", "Actions pour Awa");
+        fixture.componentRef.setInput("label", "Actions pour Adam");
         fixture.componentInstance.picked.subscribe((id) => picked.push(id));
         await fixture.whenStable();
     });
@@ -34,12 +34,12 @@ describe("ActionMenu", () => {
     it("should list the actions in a popover", () => {
         expect(entries().map((i) => i.textContent?.trim())).toEqual(["Modifier", "Supprimer"]);
         expect(panel().hasAttribute("popover")).toBe(true);
-        expect(trigger().getAttribute("aria-label")).toBe("Actions pour Awa");
+        expect(trigger().getAttribute("aria-label")).toBe("Actions pour Adam");
         expect(entries()[1].classList).toContain("danger");
     });
 
     it("should open the popover when the button is pressed", () => {
-        // jsdom ne connaît pas l'API popover
+        // Jsdom ne connaît pas l'API popover
         panel().showPopover = vi.fn();
 
         trigger().click();

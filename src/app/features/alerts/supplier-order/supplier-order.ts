@@ -40,7 +40,7 @@ export class SupplierOrder {
 
     id = toSignal(inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))));
 
-    // une erreur réseau ne veut pas dire que le fournisseur n'existe pas
+    // Une erreur réseau ne veut pas dire que le fournisseur n'existe pas
     notFound = computed(
         () => (this.supplier.error() as HttpErrorResponse | undefined)?.status === 404,
     );
@@ -50,11 +50,11 @@ export class SupplierOrder {
         stream: ({ params }) => this.supplierService.getSupplier(params),
     });
 
-    // le nom de la boutique signe le message
+    // Le nom de la boutique signe le message
     private shop = rxResource({ stream: () => this.shopService.getSettings() });
     private shopName = computed(() => (this.shop.hasValue() ? this.shop.value().name : ""));
 
-    // mêmes alertes que la liste : une seule requête partagée
+    // Mêmes alertes que la liste : une seule requête partagée
     alerts = this.alertService.alerts;
     items = computed<LowStockAlert[]>(() =>
         (this.alerts.hasValue() ? this.alerts.value() : []).filter(
@@ -62,7 +62,7 @@ export class SupplierOrder {
         ),
     );
 
-    // chaque produit part avec la quantité conseillée ; les choix de l'admin survivent à un rechargement
+    // Chaque produit part avec la quantité conseillée ; les choix de l'admin survivent à un rechargement
     private lines = linkedSignal<LowStockAlert[], Record<number, Line>>({
         source: this.items,
         computation: (items, previous) =>
@@ -81,7 +81,7 @@ export class SupplierOrder {
     chosen = computed(() => this.rows().filter((row) => row.selected && row.quantity > 0));
     units = computed(() => this.chosen().reduce((sum, row) => sum + row.quantity, 0));
 
-    // message modifiable à la main ; changer une quantité le recompose
+    // Message modifiable à la main ; changer une quantité le recompose
     private custom = signal<string | null>(null);
     edited = computed(() => this.custom() !== null);
 

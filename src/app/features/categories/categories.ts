@@ -53,7 +53,7 @@ export class Categories {
     activeCount = computed(() => this.all().filter((c) => c.is_active).length);
     deletedCount = computed(() => this.all().filter((c) => !c.is_active).length);
 
-    // la liste est courte : recherche et filtre se font dans le navigateur
+    // La liste est courte : recherche et filtre se font dans le navigateur
     list = computed(() => {
         const search = this.search().trim().toLowerCase();
         const showDeleted = this.view() === "deleted";
@@ -68,7 +68,7 @@ export class Categories {
         () => this.search() + this.view(),
     );
 
-    // formulaire de création / modification
+    // Formulaire de création / modification
     editing = signal<Category | null>(null);
     saving = signal(false);
     formError = signal<string | null>(null);
@@ -77,14 +77,14 @@ export class Categories {
         description: ["", Validators.maxLength(500)],
     });
 
-    // suppression
+    // Suppression
     toDelete = signal<Category | null>(null);
-    // le backend refuserait : la fenêtre l'explique au lieu de proposer "Supprimer"
+    // Le backend refuserait : la fenêtre l'explique au lieu de proposer "Supprimer"
     deleteBlocked = computed(() => (this.toDelete()?.product_count ?? 0) > 0);
     deleting = signal(false);
     deleteError = signal<string | null>(null);
 
-    // restauration : une seule à la fois
+    // Restauration : une seule à la fois
     restoringId = signal<number | null>(null);
     restoreError = signal<string | null>(null);
 
@@ -139,7 +139,7 @@ export class Categories {
         }
 
         const editing = this.editing();
-        // rien n'a changé : inutile d'appeler le backend
+        // Rien n'a changé : inutile d'appeler le backend
         if (editing && editing.name === name && editing.description === description) {
             this.closeForm();
             return;
@@ -156,7 +156,7 @@ export class Categories {
             next: () => {
                 this.saving.set(false);
                 this.closeForm();
-                // la catégorie créée doit être visible, quelle que soit la recherche en cours
+                // La catégorie créée doit être visible, quelle que soit la recherche en cours
                 this.search.set("");
                 this.view.set("active");
                 this.categories.reload();

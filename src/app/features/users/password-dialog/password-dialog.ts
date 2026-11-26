@@ -27,7 +27,7 @@ export class PasswordDialog {
     saving = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
-    // mot de passe enregistré, montré une dernière fois pour le transmettre
+    // Mot de passe enregistré, montré une dernière fois pour le transmettre
     savedPassword = signal<string | null>(null);
     copied = signal(false);
 
@@ -51,7 +51,7 @@ export class PasswordDialog {
         this.dialog().nativeElement.close();
     }
 
-    // aussi appelé quand Échap ferme la fenêtre : le mot de passe ne reste pas dans la page
+    // Aussi appelé quand Échap ferme la fenêtre : le mot de passe ne reste pas dans la page
     onClosed() {
         this.savedPassword.set(null);
         this.form.reset({ password: "" });

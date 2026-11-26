@@ -52,7 +52,7 @@ export class ShopAccess {
             ),
     );
 
-    // accès retirés dans le formulaire ; repart de l'état enregistré à chaque rechargement
+    // Accès retirés dans le formulaire ; repart de l'état enregistré à chaque rechargement
     draft = linkedSignal(() => new Set(this.baseline()));
 
     modules = computed(() => (this.data.hasValue() ? this.data.value().modules : []));
@@ -75,7 +75,7 @@ export class ShopAccess {
         return draft.size !== base.size || [...draft].some((key) => !base.has(key));
     });
 
-    // accès qui vont être retirés par cet enregistrement
+    // Accès qui vont être retirés par cet enregistrement
     removed = computed(() =>
         this.modules().filter(
             (module) => this.draft().has(module.key) && !this.baseline().has(module.key),
@@ -94,7 +94,7 @@ export class ShopAccess {
         });
     }
 
-    // tout cocher, ou ne garder que ce qui est toujours inclus
+    // Tout cocher, ou ne garder que ce qui est toujours inclus
     setAll(on: boolean) {
         this.notice.set(null);
         this.draft.set(on ? new Set() : new Set(this.modules().map((module) => module.key)));
@@ -105,7 +105,7 @@ export class ShopAccess {
         this.draft.set(new Set(this.baseline()));
     }
 
-    // retirer un accès demande une confirmation : la boutique le perd tout de suite
+    // Retirer un accès demande une confirmation : la boutique le perd tout de suite
     save() {
         if (this.removed().length > 0) this.dialog().nativeElement.showModal();
         else void this.commit();

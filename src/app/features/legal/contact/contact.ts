@@ -50,7 +50,7 @@ export class Contact {
     protected contact = CONTACT;
     protected mailto = mailtoLink();
 
-    // seuls l'administrateur et les employés écrivent au support dans l'application
+    // Seuls l'administrateur et les employés écrivent au support dans l'application
     protected canWriteSupport = computed(() => {
         const user = this.auth.user();
         return this.auth.isLoggedIn() && (user?.role === "admin" || user?.role === "manager");

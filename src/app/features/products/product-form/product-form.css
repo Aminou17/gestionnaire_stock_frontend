@@ -32,7 +32,7 @@ h2 {
     font-size: var(--fs-heading);
 }
 
-/* la flèche retour ne sert que sur téléphone, où le formulaire prend tout l'écran */
+/* La flèche retour ne sert que sur téléphone, où le formulaire prend tout l'écran */
 .back {
     display: none;
     width: 44px;
@@ -54,7 +54,7 @@ h2 {
     background: var(--bg);
 }
 
-/* trois blocs : informations, prix, alerte de stock */
+/* Trois blocs : informations, prix, alerte de stock */
 .group {
     display: grid;
     gap: 16px;
@@ -264,7 +264,7 @@ footer {
     }
 }
 
-/* cibles tactiles de 44 px pour les petits formulaires (catégorie, fournisseur) */
+/* Cibles tactiles de 44 px pour les petits formulaires (catégorie, fournisseur) */
 @media (max-width: 767px) {
     .inline-actions .btn,
     .photo-actions .btn {
@@ -279,7 +279,7 @@ footer {
     outline-offset: 2px;
 }
 
-/* photo du produit en tête du premier bloc */
+/* Photo du produit en tête du premier bloc */
 .photo-row {
     display: flex;
     align-items: center;
@@ -322,14 +322,14 @@ footer {
     cursor: pointer;
 }
 
-/* champs de prix plus grands : c'est le coeur du formulaire */
+/* Champs de prix plus grands : c'est le coeur du formulaire */
 .money .input {
     height: 48px;
     font-size: var(--fs-lead);
     font-weight: var(--fw-semibold);
 }
 
-/* la zone défile : le navigateur la focalise à l'ouverture, sans cadre */
+/* La zone défile : le navigateur la focalise à l'ouverture, sans cadre */
 .content:focus {
     outline: none;
 }
@@ -338,7 +338,7 @@ h2:focus {
     outline: none;
 }
 
-/* ce qu'il reste à remplir : bandeau collé en haut, champs vides mis en évidence */
+/* Ce qu'il reste à remplir : bandeau collé en haut, champs vides mis en évidence */
 .field .input.todo,
 .money .input.todo {
     border-color: var(--primary);
@@ -380,7 +380,7 @@ h2:focus {
     gap: 6px;
 }
 
-/* les champs facultatifs restent repliés : le formulaire du premier jour ne demande que l'essentiel */
+/* Les champs facultatifs restent repliés : le formulaire du premier jour ne demande que l'essentiel */
 .more-toggle {
     display: flex;
     flex-wrap: wrap;
@@ -405,7 +405,7 @@ h2:focus {
     font-weight: var(--fw-regular, 400);
 }
 
-/* titre du champ et lien d'ajout visible à droite, comme dans les grands logiciels */
+/* Titre du champ et lien d'ajout visible à droite, comme dans les grands logiciels */
 .field-head {
     display: flex;
     align-items: center;

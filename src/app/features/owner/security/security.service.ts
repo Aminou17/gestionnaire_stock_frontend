@@ -13,14 +13,14 @@ export class SecurityService {
         return this.http.get<SecurityOverview>(`${API_URL}/security/overview`);
     }
 
-    // une page d'une liste (failed-logins, locked-accounts ou events)
+    // Une page d'une liste (failed-logins, locked-accounts ou events)
     getList<T>(path: string, query: ListQuery) {
         return this.http.get<Page<T>>(`${API_URL}/security/${path}`, {
             params: this.toParams(query),
         });
     }
 
-    // même liste en fichier CSV, avec les filtres affichés
+    // Même liste en fichier CSV, avec les filtres affichés
     getCsv(path: string, query: ListQuery) {
         return this.http.get(`${API_URL}/security/${path}`, {
             params: this.toParams({ ...query, format: "csv" }),
@@ -42,7 +42,7 @@ export class SecurityService {
             format,
         };
 
-        // un filtre vide ne part pas dans l'adresse
+        // Un filtre vide ne part pas dans l'adresse
         let params = new HttpParams();
         for (const [key, value] of Object.entries(values)) {
             if (value !== null && value !== undefined && value !== "") {
@@ -55,7 +55,7 @@ export class SecurityService {
 
 export interface ListQuery {
     filters: SecurityFilters;
-    // paramètres propres à la liste (view, type)
+    // Paramètres propres à la liste (view, type)
     extra?: Record<string, string>;
     page?: number;
     limit?: number;

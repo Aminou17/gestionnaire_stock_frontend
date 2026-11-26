@@ -20,7 +20,7 @@ export class FeatureLocked {
         return key ? MODULE_INFO[key] : null;
     };
 
-    // la page Abonnement existe seulement quand le propriétaire l'a ouverte
+    // La page Abonnement existe seulement quand le propriétaire l'a ouverte
     protected subscriptions = this.store.subscriptions;
 
     constructor() {

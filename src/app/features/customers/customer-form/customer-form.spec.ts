@@ -7,9 +7,9 @@ import { CustomerForm } from "./customer-form";
 import { Customer } from "../../../core/customers/customer.model";
 import { CustomerService } from "../../../core/customers/customer.service";
 
-const awa: Customer = {
+const adam: Customer = {
     id: 4,
-    name: "Awa Kouba",
+    name: "Adam Kouba",
     phone: "06 123 45 67",
     note: null,
     is_active: true,
@@ -37,12 +37,12 @@ describe("CustomerForm", () => {
                           new HttpErrorResponse({
                               status: 409,
                               error: {
-                                  message: "Ce numéro est déjà celui de Awa Kouba.",
-                                  existing: { id: 4, name: "Awa Kouba", is_active: true },
+                                  message: "Ce numéro est déjà celui de Adam Kouba.",
+                                  existing: { id: 4, name: "Adam Kouba", is_active: true },
                               },
                           }),
                   )
-                : of(awa);
+                : of(adam);
         createCustomer = vi.fn(answer);
         updateCustomer = vi.fn(answer);
 
@@ -97,14 +97,14 @@ describe("CustomerForm", () => {
     it("should save the phone in international format and keep letters out", async () => {
         await render();
         fixture.componentInstance.openNew();
-        form().controls.name.setValue("Awa");
+        form().controls.name.setValue("Adam");
         await type(numberInput(), "06 12ab3 4567");
         numberInput().dispatchEvent(new Event("blur"));
         await submit();
 
         expect(numberInput().value).toBe("06 123 45 67");
         expect(createCustomer).toHaveBeenCalledWith({
-            name: "Awa",
+            name: "Adam",
             phone: "+242 06 123 45 67",
             note: null,
         });
@@ -132,7 +132,7 @@ describe("CustomerForm", () => {
 
     it("should fill the fields of a saved international number", async () => {
         await render();
-        fixture.componentInstance.openEdit({ ...awa, phone: "+226 66 09 90 60" });
+        fixture.componentInstance.openEdit({ ...adam, phone: "+226 66 09 90 60" });
         await fixture.whenStable();
 
         expect(codeInput().value).toBe("226");
@@ -144,16 +144,16 @@ describe("CustomerForm", () => {
         const saved = vi.fn();
         fixture.componentInstance.saved.subscribe(saved);
         fixture.componentInstance.openNew();
-        form().controls.name.setValue("  Awa Kouba ");
+        form().controls.name.setValue("  Adam Kouba ");
         await submit();
 
-        expect(createCustomer).toHaveBeenCalledWith({ name: "Awa Kouba", phone: null, note: null });
-        expect(saved).toHaveBeenCalledWith(awa);
+        expect(createCustomer).toHaveBeenCalledWith({ name: "Adam Kouba", phone: null, note: null });
+        expect(saved).toHaveBeenCalledWith(adam);
     });
 
     it("should not call the API when nothing changed", async () => {
         await render();
-        fixture.componentInstance.openEdit(awa);
+        fixture.componentInstance.openEdit(adam);
         await submit();
 
         expect(updateCustomer).not.toHaveBeenCalled();
@@ -167,7 +167,7 @@ describe("CustomerForm", () => {
         await submit();
         await fixture.whenStable();
 
-        expect(text()).toContain("Ce numéro est déjà celui de Awa Kouba");
+        expect(text()).toContain("Ce numéro est déjà celui de Adam Kouba");
 
         const navigate = vi.spyOn(TestBed.inject(Router), "navigate").mockResolvedValue(true);
         el.querySelector<HTMLButtonElement>(".duplicate button")!.click();

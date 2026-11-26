@@ -15,7 +15,7 @@ import { accessStateOf } from "../trial-state";
 
 type View = "all" | ShopStatus | "deleted";
 
-// une boutique supprimée est effacée pour de bon après ce délai
+// Une boutique supprimée est effacée pour de bon après ce délai
 const KEPT_DAYS = 90;
 const DAY = 86_400_000;
 
@@ -49,7 +49,7 @@ export class Shops {
     view = signal<View>("all");
 
     private every = computed(() => (this.shops.hasValue() ? this.shops.value() : []));
-    // les boutiques supprimées ne comptent que dans leur propre liste
+    // Les boutiques supprimées ne comptent que dans leur propre liste
     all = computed(() => this.every().filter((s) => !s.deleted_at));
     deletedCount = computed(() => this.every().filter((s) => s.deleted_at).length);
     activeCount = computed(() => this.all().filter((s) => s.status === "ACTIVE").length);
@@ -82,12 +82,12 @@ export class Shops {
         () => this.search() + this.view(),
     );
 
-    // boutique en cours de suspension, en attente de confirmation
+    // Boutique en cours de suspension, en attente de confirmation
     pending = signal<OwnedShop | null>(null);
     updating = signal<number | null>(null);
     actionError = signal<string | null>(null);
 
-    // sous le nom : l'administrateur et la ville, rien de plus
+    // Sous le nom : l'administrateur et la ville, rien de plus
     subtitle(shop: OwnedShop) {
         return [shop.admin_name, shop.city].filter(Boolean).join(" · ") || "Aucun administrateur";
     }
@@ -103,7 +103,7 @@ export class Shops {
         return accessStateOf(shop);
     }
 
-    // boutique dont on change l'essai, et la durée saisie (vide : retirer l'essai)
+    // Boutique dont on change l'essai, et la durée saisie (vide : retirer l'essai)
     trialShop = signal<OwnedShop | null>(null);
     trialDays = signal<number | null>(null);
     trialError = signal<string | null>(null);
@@ -204,7 +204,7 @@ export class Shops {
         });
     }
 
-    // boutique en cours de suppression, en attente de confirmation
+    // Boutique en cours de suppression, en attente de confirmation
     deleting = signal<OwnedShop | null>(null);
 
     askDelete(shop: OwnedShop) {

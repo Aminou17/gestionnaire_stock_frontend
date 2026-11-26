@@ -16,7 +16,7 @@ const alert = (over: Partial<LowStockAlert>): LowStockAlert => ({
     category_id: 1,
     category_name: "Tissus",
     supplier_id: 4,
-    supplier_name: "Ets Diallo",
+    supplier_name: "Ets Ouédraogo",
     supplier_contact: "Mireille Mavoungou",
     supplier_phone: "06 612 34 56",
     last_entry_at: null,
@@ -68,13 +68,13 @@ describe("SupplierOrder", () => {
                     provide: SupplierService,
                     useValue: {
                         getSupplier: () =>
-                            of({ id: 4, name: "Ets Diallo", contact: null, ...supplier }),
+                            of({ id: 4, name: "Ets Ouédraogo", contact: null, ...supplier }),
                     },
                 },
                 {
                     provide: ShopSettingsService,
                     useValue: {
-                        getSettings: () => of({ name: "Awa Bazin" }),
+                        getSettings: () => of({ name: "Adam Ouédraogo" }),
                         defaultCountryCode: signal("242"),
                     },
                 },
@@ -105,7 +105,7 @@ describe("SupplierOrder", () => {
 
         expect(link.href).toContain("https://wa.me/242066123456?text=");
         expect(message).toContain("Bonjour Mireille Mavoungou,");
-        expect(message).toContain("Ici la boutique Awa Bazin.");
+        expect(message).toContain("Ici la boutique Adam Ouédraogo.");
         expect(message).toContain("- Bazin riche bleu : 10");
         expect(message).toContain("- Foulard : 6");
     });

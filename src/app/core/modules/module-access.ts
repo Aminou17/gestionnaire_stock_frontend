@@ -12,7 +12,7 @@ export type ModuleKey =
     | "audit"
     | "exports";
 
-// ce que la boutique lit quand une fonction n'est pas dans sa formule (mêmes noms que côté API)
+// Ce que la boutique lit quand une fonction n'est pas dans sa formule (mêmes noms que côté API)
 export const MODULE_INFO: Record<ModuleKey, { label: string; description: string }> = {
     customers: {
         label: "Clients et crédits",
@@ -44,7 +44,7 @@ export const MODULE_INFO: Record<ModuleKey, { label: string; description: string
     },
 };
 
-// pages de l'application liées à un accès ; les plus précises d'abord
+// Pages de l'application liées à un accès ; les plus précises d'abord
 const ROUTE_MODULES: [string, ModuleKey][] = [
     ["/customers", "customers"],
     ["/expenses", "expenses"],
@@ -60,7 +60,7 @@ const ROUTE_MODULES: [string, ModuleKey][] = [
     ["/settings/export", "exports"],
 ];
 
-// l'accès dont dépend une page, ou null si la page est toujours incluse
+// L'accès dont dépend une page, ou null si la page est toujours incluse
 export const moduleOfPath = (path: string): ModuleKey | null => {
     const clean = path.split(/[?#]/)[0];
     return (
@@ -73,13 +73,13 @@ export const moduleOfPath = (path: string): ModuleKey | null => {
 // Séparé du service des réglages pour que les écrans qui testent un accès n'aient rien à charger.
 @Injectable({ providedIn: "root" })
 export class ModuleStore {
-    // accès retirés à la boutique
+    // Accès retirés à la boutique
     disabled = signal<string[]>([]);
-    // la page Abonnement est ouverte
+    // La page Abonnement est ouverte
     subscriptions = signal(false);
-    // les réglages sont arrivés (ou ont échoué) : les gardes peuvent décider
+    // Les réglages sont arrivés (ou ont échoué) : les gardes peuvent décider
     ready = signal(false);
-    // fonction que la personne vient d'essayer d'ouvrir sans l'avoir : le message d'abonnement s'affiche
+    // Fonction que la personne vient d'essayer d'ouvrir sans l'avoir : le message d'abonnement s'affiche
     locked = signal<ModuleKey | null>(null);
 }
 
@@ -94,7 +94,7 @@ export class ModuleAccess {
         return !this.disabled().has(key);
     }
 
-    // la fonction à laquelle une page donne accès quand la boutique ne l'a pas, sinon null
+    // La fonction à laquelle une page donne accès quand la boutique ne l'a pas, sinon null
     lockedKey(path: string | undefined): ModuleKey | null {
         if (!path) return null;
         const key = moduleOfPath(path.startsWith("/") ? path : `/settings/${path}`);
@@ -105,12 +105,12 @@ export class ModuleAccess {
         return this.lockedKey(path) !== null;
     }
 
-    // affiche le message « disponible avec l'abonnement » pour cette fonction
+    // Affiche le message « disponible avec l'abonnement » pour cette fonction
     showLocked(key: ModuleKey) {
         this.store.locked.set(key);
     }
 
-    // une page sans accès particulier est toujours permise ; avec une adresse relative des réglages
+    // Une page sans accès particulier est toujours permise ; avec une adresse relative des réglages
     // ("export"), on la complète
     allowsPath(path: string | undefined) {
         if (!path) return true;

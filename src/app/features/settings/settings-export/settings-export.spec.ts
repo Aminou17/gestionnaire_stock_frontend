@@ -23,7 +23,7 @@ describe("SettingsExport", () => {
         salesFile = vi.fn(() => (salesError ? throwError(() => salesError) : of(file)));
         exportFile = vi.fn(() => of(file));
 
-        // jsdom ne sait pas créer d'adresse de fichier ni cliquer sur un lien de téléchargement
+        // Jsdom ne sait pas créer d'adresse de fichier ni cliquer sur un lien de téléchargement
         URL.createObjectURL = vi.fn(() => "blob:test");
         URL.revokeObjectURL = vi.fn();
         click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
@@ -53,7 +53,7 @@ describe("SettingsExport", () => {
 
     const menus = () => [...el.querySelectorAll<HTMLElement>(".export-item > app-export-menu")];
 
-    // ouvre le menu de la ligne puis choisit le format
+    // Ouvre le menu de la ligne puis choisit le format
     function pick(index: number, format: "pdf" | "csv" = "pdf") {
         menus()[index].querySelector<HTMLButtonElement>(".trigger")!.click();
         fixture.detectChanges();

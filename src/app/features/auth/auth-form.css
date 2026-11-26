@@ -1,7 +1,7 @@
 /* Styles communs : connexion, inscription, mot de passe oublié et nouveau mot de passe */
 
 :host {
-    /* hauteur d'un champ : confortable au doigt sur téléphone, plus compacte avec une souris */
+    /* Hauteur d'un champ : confortable au doigt sur téléphone, plus compacte avec une souris */
     --field-h: 44px;
     --field-font: 16px;
     --field-label: var(--fs-body);
@@ -25,7 +25,7 @@ form {
     gap: 12px;
 }
 
-/* petit logo au-dessus du titre, sur ordinateur seulement (le bandeau de marque couvre le téléphone) */
+/* Petit logo au-dessus du titre, sur ordinateur seulement (le bandeau de marque couvre le téléphone) */
 .mark {
     display: none;
     width: 44px;
@@ -61,7 +61,7 @@ form {
     line-height: 1.5;
 }
 
-/* pastille d'état en haut des pages de mot de passe */
+/* Pastille d'état en haut des pages de mot de passe */
 .status {
     width: 56px;
     height: 56px;
@@ -83,7 +83,7 @@ form {
     color: var(--warning);
 }
 
-/* champ : libellé fixe au-dessus, icône dans le champ (le libellé suit l'input dans le HTML) */
+/* Champ : libellé fixe au-dessus, icône dans le champ (le libellé suit l'input dans le HTML) */
 .group {
     display: grid;
     gap: 6px;
@@ -109,7 +109,7 @@ form {
     color: var(--primary);
 }
 
-/* champ en creux : fond teinté, filet très léger, anneau bleu au focus */
+/* Champ en creux : fond teinté, filet très léger, anneau bleu au focus */
 .float .input {
     height: var(--field-h);
     padding: 0 14px;
@@ -124,7 +124,7 @@ form {
         box-shadow 0.15s;
 }
 
-/* un champ avec icône laisse la place à l'icône */
+/* Un champ avec icône laisse la place à l'icône */
 .float:has(> app-icon) .input {
     padding-left: 42px;
 }
@@ -171,7 +171,7 @@ form {
     padding-right: calc(var(--field-h) + 4px);
 }
 
-/* pastille verte quand le champ est valide */
+/* Pastille verte quand le champ est valide */
 .valid-mark {
     position: absolute;
     right: 16px;
@@ -234,7 +234,7 @@ form {
     line-height: 1.45;
 }
 
-/* boutons larges, plus hauts que les boutons de l'application */
+/* Boutons larges, plus hauts que les boutons de l'application */
 .btn.btn-block {
     height: 46px;
     border-radius: 10px;
@@ -301,7 +301,7 @@ form {
     text-decoration: none;
 }
 
-/* séparateur avec un mot au milieu */
+/* Séparateur avec un mot au milieu */
 .or {
     display: flex;
     align-items: center;

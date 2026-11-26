@@ -12,10 +12,10 @@ import { UserService } from "./user.service";
 
 const me: UserAccount = {
     id: 1,
-    name: "Awa Bazin",
-    first_name: "Awa",
-    last_name: "Bazin",
-    email: "awa@test.com",
+    name: "Adam Ouédraogo",
+    first_name: "Adam",
+    last_name: "Ouédraogo",
+    email: "adam@test.com",
     role: "admin",
     is_active: true,
     created_at: "2026-01-10T10:00:00Z",
@@ -94,7 +94,7 @@ describe("Users", () => {
         (target as HTMLElement).click();
         await fixture.whenStable();
     };
-    // les entrées du menu d'une ligne (le panneau reste dans la page, fermé)
+    // Les entrées du menu d'une ligne (le panneau reste dans la page, fermé)
     const menuItem = (row: number, label: string) =>
         Array.from(rows()[row].querySelectorAll("app-action-menu .item")).find((item) =>
             item.textContent!.includes(label),

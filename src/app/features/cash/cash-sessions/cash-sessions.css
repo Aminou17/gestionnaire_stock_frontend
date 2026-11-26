@@ -143,7 +143,7 @@ app-page-header {
     cursor: not-allowed;
 }
 
-/* très petit écran : sans pastille d'icône, la date tient sur une ligne */
+/* Très petit écran : sans pastille d'icône, la date tient sur une ligne */
 @media (max-width: 359px) {
     .session-icon {
         display: none;

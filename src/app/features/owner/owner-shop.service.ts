@@ -28,12 +28,12 @@ export class OwnerShopService {
         return this.http.get<SubscriptionsState>(`${API_URL}/platform/subscriptions`);
     }
 
-    // active ou désactive la page Abonnement pour toutes les boutiques
+    // Active ou désactive la page Abonnement pour toutes les boutiques
     setSubscriptions(enabled: boolean) {
         return this.http.put<SubscriptionsState>(`${API_URL}/platform/subscriptions`, { enabled });
     }
 
-    // les accès d'une boutique, chacun avec son état
+    // Les accès d'une boutique, chacun avec son état
     getShopModules(id: number) {
         return this.http.get<ShopModules>(`${API_URL}/shops/${id}/modules`);
     }
@@ -43,17 +43,17 @@ export class OwnerShopService {
         return this.http.put<ShopModules>(`${API_URL}/shops/${id}/modules`, { disabled });
     }
 
-    // marge de chaque boutique sur les derniers jours
+    // Marge de chaque boutique sur les derniers jours
     getMargins(days = 30) {
         return this.http.get<MarginReport>(`${API_URL}/shops/stats/margins`, { params: { days } });
     }
 
-    // pages ouvertes chaque jour dans chaque boutique
+    // Pages ouvertes chaque jour dans chaque boutique
     getUsage(days = 7) {
         return this.http.get<UsageReport>(`${API_URL}/shops/stats/usage`, { params: { days } });
     }
 
-    // activité d'une boutique : pages ouvertes par jour et pages les plus utilisées
+    // Activité d'une boutique : pages ouvertes par jour et pages les plus utilisées
     getShopUsage(id: number, days = 14) {
         return this.http.get<ShopUsage>(`${API_URL}/shops/${id}/usage`, { params: { days } });
     }
@@ -62,12 +62,12 @@ export class OwnerShopService {
         return this.http.get<OwnedShopDetail>(`${API_URL}/shops/${id}`);
     }
 
-    // lien envoyé par e-mail : le propriétaire ne voit jamais le mot de passe choisi
+    // Lien envoyé par e-mail : le propriétaire ne voit jamais le mot de passe choisi
     sendResetLink(id: number, userId: number) {
         return this.http.post<{ message: string }>(`${API_URL}/shops/${id}/reset-link`, { userId });
     }
 
-    // affiché une seule fois ; la personne devra le changer à sa prochaine connexion
+    // Affiché une seule fois ; la personne devra le changer à sa prochaine connexion
     setTemporaryPassword(id: number, userId: number) {
         return this.http.post<TemporaryPassword>(`${API_URL}/shops/${id}/temporary-password`, {
             userId,
@@ -78,12 +78,12 @@ export class OwnerShopService {
         return this.http.post<CreatedShop>(`${API_URL}/shops`, input);
     }
 
-    // dernier jour payé inclus (AAAA-MM-JJ), ou null pour retirer la date
+    // Dernier jour payé inclus (AAAA-MM-JJ), ou null pour retirer la date
     setPaidUntil(id: number, paidUntil: string | null) {
         return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/paid-until`, { paidUntil });
     }
 
-    // jours d'essai à partir d'aujourd'hui, ou null pour retirer l'essai
+    // Jours d'essai à partir d'aujourd'hui, ou null pour retirer l'essai
     setTrial(id: number, trialDays: number | null) {
         return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/trial`, { trialDays });
     }
@@ -92,7 +92,7 @@ export class OwnerShopService {
         return this.http.patch<OwnedShop>(`${API_URL}/shops/${id}/status`, { status });
     }
 
-    // la boutique est bloquée et gardée 90 jours avant d'être effacée
+    // La boutique est bloquée et gardée 90 jours avant d'être effacée
     deleteShop(id: number) {
         return this.http.delete<OwnedShop>(`${API_URL}/shops/${id}`);
     }

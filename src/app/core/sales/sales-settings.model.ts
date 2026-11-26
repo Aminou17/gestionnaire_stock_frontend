@@ -1,8 +1,8 @@
-// réglages des ventes choisis par l'administrateur
+// Réglages des ventes choisis par l'administrateur
 export interface SalesSettings {
-    // texte devant le numéro du ticket, vide si aucun
+    // Texte devant le numéro du ticket, vide si aucun
     ticket_prefix: string;
-    // remise maximale préremplie à la création d'un produit négociable
+    // Remise maximale préremplie à la création d'un produit négociable
     default_max_discount: number | null;
     updated_at: string | null;
 }

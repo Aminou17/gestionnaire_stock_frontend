@@ -10,7 +10,7 @@ import { SettingsHistoryService } from "../settings-history/settings-history.ser
 import { SettingsShop } from "./settings-shop";
 
 const shop = {
-    name: "Awa Bazin",
+    name: "Adam Ouédraogo",
     address: "Grand marché",
     phone: null,
     tax_id: null,
@@ -80,7 +80,7 @@ describe("SettingsShop", () => {
     it("should fill the form with the saved information", async () => {
         await render();
 
-        expect(input("name").value).toBe("Awa Bazin");
+        expect(input("name").value).toBe("Adam Ouédraogo");
         expect(input("address").value).toBe("Grand marché");
     });
 
@@ -98,7 +98,7 @@ describe("SettingsShop", () => {
 
         expect(updateSettings).toHaveBeenCalledWith(
             expect.objectContaining({
-                name: "Awa Bazin",
+                name: "Adam Ouédraogo",
                 address: "Marché Total",
                 receiptFooter: "Ni repris ni échangé.",
             }),
@@ -172,9 +172,9 @@ describe("SettingsShop", () => {
     it("should preview the ticket header while typing", async () => {
         await render();
 
-        await type("name", "Chez Awa");
+        await type("name", "Chez Adam");
 
-        expect(el.querySelector(".ticket")!.textContent).toContain("Chez Awa");
+        expect(el.querySelector(".ticket")!.textContent).toContain("Chez Adam");
     });
 
     it("should restore the saved values on cancel", async () => {

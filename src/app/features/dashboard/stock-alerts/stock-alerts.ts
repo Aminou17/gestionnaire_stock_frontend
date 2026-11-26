@@ -14,14 +14,14 @@ export class StockAlerts {
     loading = input(false);
     error = input(false);
     notConfigured = input(false);
-    // la page des alertes est réservée à l'admin : l'employé est envoyé vers les produits
+    // La page des alertes est réservée à l'admin : l'employé est envoyé vers les produits
     link = input("/alerts");
     retry = output();
 
-    // les plus urgents d'abord (déjà triés par le backend)
+    // Les plus urgents d'abord (déjà triés par le backend)
     visible = computed(() => this.alerts().slice(0, 5));
 
-    // un stock théorique négatif s'affiche comme 0
+    // Un stock théorique négatif s'affiche comme 0
     stock(alert: LowStockAlert) {
         return Math.max(alert.theoretical_stock, 0);
     }

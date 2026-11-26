@@ -26,7 +26,7 @@ const phoneLength: ValidatorFn = (control) => {
     return !digits || (digits.length >= 8 && digits.length <= 15) ? null : { phone: true };
 };
 
-// la même saisie deux fois, pour éviter une faute de frappe
+// La même saisie deux fois, pour éviter une faute de frappe
 const passwordsMatch = (group: AbstractControl): ValidationErrors | null => {
     const { password, confirmPassword } = group.getRawValue();
     return password === confirmPassword ? null : { mismatch: true };
@@ -56,7 +56,7 @@ export class Register {
     private resizer = inject(LogoResizerService);
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
 
-    // mêmes limites que l'API
+    // Mêmes limites que l'API
     form = this.fb.group(
         {
             shopName: ["", [Validators.required, Validators.maxLength(80)]],
@@ -80,7 +80,7 @@ export class Register {
         { validators: passwordsMatch },
     );
 
-    // piège à robots : champ invisible pour une personne, et durée de remplissage
+    // Piège à robots : champ invisible pour une personne, et durée de remplissage
     website = signal("");
     private startedAt = Date.now();
 
@@ -90,21 +90,21 @@ export class Register {
     done = signal(false);
     error = signal<string | null>(null);
     showPassword = signal(false);
-    // l'adresse e-mail a déjà un compte : rien n'a été créé
+    // L'adresse e-mail a déjà un compte : rien n'a été créé
     emailTaken = signal(false);
 
-    // indicatif proposé au départ : celui du pays où Boutiki démarre
+    // Indicatif proposé au départ : celui du pays où Boutiki démarre
     protected defaultCode = "226";
     protected countries = COUNTRY_OPTIONS;
 
-    // le numéro est vérifié pendant la saisie, comme chez Shopify ou Stripe
+    // Le numéro est vérifié pendant la saisie, comme chez Shopify ou Stripe
     phoneStatus = signal<"idle" | "checking" | "free" | "taken" | "unknown">("idle");
     phoneMessage = signal("");
 
-    // sens de la transition entre les deux étapes
+    // Sens de la transition entre les deux étapes
     direction = signal<"forward" | "back">("forward");
 
-    // aperçu en direct de la boutique
+    // Aperçu en direct de la boutique
     private shopNameValue = toSignal(this.form.controls.shopName.valueChanges, {
         initialValue: "",
     });
@@ -124,7 +124,7 @@ export class Register {
                 filter(() => phone.valid),
                 switchMap((value) =>
                     this.auth.isPhoneAvailable(value).pipe(
-                        // un serveur injoignable ne doit pas bloquer l'inscription : l'API revérifie
+                        // Un serveur injoignable ne doit pas bloquer l'inscription : l'API revérifie
                         catchError(() => of(null)),
                     ),
                 ),
@@ -140,7 +140,7 @@ export class Register {
             });
     }
 
-    // le pays suit l'indicatif tant que la personne ne l'a pas choisi elle-même
+    // Le pays suit l'indicatif tant que la personne ne l'a pas choisi elle-même
     private suggestCountry(phone: string) {
         const country = this.form.controls.country;
         if (country.dirty || !phone) return;
@@ -148,7 +148,7 @@ export class Register {
         country.setValue(countryForCode(splitPhone(phone, this.defaultCode).code));
     }
 
-    // logo facultatif : réduit tout de suite, envoyé avec l'inscription
+    // Logo facultatif : réduit tout de suite, envoyé avec l'inscription
     logo = signal<string | null>(null);
     logoError = signal<string | null>(null);
     dragging = signal(false);
@@ -200,7 +200,7 @@ export class Register {
     }
 
     next() {
-        // des espaces seuls passent Validators.required
+        // Des espaces seuls passent Validators.required
         for (const field of ["shopName", "country", "city"] as const) {
             const control = this.form.controls[field];
             control.setValue(control.value.trim(), { emitEvent: false });
@@ -224,7 +224,7 @@ export class Register {
         this.goTo(1, "#register-shopName");
     }
 
-    // le champ n'existe qu'après l'affichage de l'étape
+    // Le champ n'existe qu'après l'affichage de l'étape
     private goTo(step: 1 | 2, focus: string) {
         this.step.set(step);
         setTimeout(() => this.host.nativeElement.querySelector<HTMLInputElement>(focus)?.focus());
@@ -255,7 +255,7 @@ export class Register {
 
         const logo = this.logo();
 
-        // l'API n'accepte que des emails en minuscules
+        // L'API n'accepte que des emails en minuscules
         this.auth
             .register({
                 shopName,
@@ -284,7 +284,7 @@ export class Register {
                             "Impossible de joindre le serveur. Vérifiez votre connexion.",
                         );
                     } else if (err.status === 409 && err.error?.message?.includes("numéro")) {
-                        // le numéro a été pris entre-temps : retour à l'étape de la boutique
+                        // Le numéro a été pris entre-temps : retour à l'étape de la boutique
                         this.phoneStatus.set("taken");
                         this.phoneMessage.set(err.error.message);
                         this.back();

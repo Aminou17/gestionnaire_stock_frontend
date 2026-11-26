@@ -17,7 +17,7 @@ export class SecurityOverview {
 
     overview = rxResource({ stream: () => this.security.getOverview() });
 
-    // résumé en une phrase, en tête de page
+    // Résumé en une phrase, en tête de page
     status = computed(() => {
         if (!this.overview.hasValue()) return null;
         const { failedLogins24h, lockedAccounts } = this.overview.value();
@@ -40,7 +40,7 @@ export class SecurityOverview {
         return { tone: "warn", text: `À surveiller : ${parts.join(" et ")}.` };
     });
 
-    // hauteur des barres : le jour le plus chargé donne 100 %
+    // Hauteur des barres : le jour le plus chargé donne 100 %
     days = computed(() => {
         if (!this.overview.hasValue()) return [];
         const daily = this.overview.value().daily;
@@ -51,14 +51,14 @@ export class SecurityOverview {
             total: d.failed_logins + d.access_denied,
             loginsHeight: (d.failed_logins / max) * 100,
             deniedHeight: (d.access_denied / max) * 100,
-            // la date est lue à midi pour éviter un décalage de fuseau
+            // La date est lue à midi pour éviter un décalage de fuseau
             date: new Date(d.day + "T12:00:00"),
         }));
     });
 
     hasActivity = computed(() => this.days().some((d) => d.total > 0));
 
-    // part de la boutique la plus visée : barre horizontale
+    // Part de la boutique la plus visée : barre horizontale
     topShops = computed(() => {
         if (!this.overview.hasValue()) return [];
         const shops = this.overview.value().topShops;

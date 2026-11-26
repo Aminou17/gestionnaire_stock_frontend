@@ -2,7 +2,7 @@
     margin-left: auto;
 }
 
-/* deux étapes numérotées, lisibles d'un coup d'oeil */
+/* Deux étapes numérotées, lisibles d'un coup d'oeil */
 .steps {
     display: grid;
     gap: 24px;
@@ -86,7 +86,7 @@
     opacity: 0.4;
 }
 
-/* codes de secours en grille de deux colonnes */
+/* Codes de secours en grille de deux colonnes */
 .backup {
     display: grid;
     gap: 12px;

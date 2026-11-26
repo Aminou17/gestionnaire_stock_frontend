@@ -41,7 +41,7 @@ export class OwnerDashboard {
     );
     sales = computed(() => this.all().reduce((sum, s) => sum + s.sales_last_30_days, 0));
 
-    // boutiques à regarder : suspendues, essai qui se termine ou accès terminé
+    // Boutiques à regarder : suspendues, essai qui se termine ou accès terminé
     toWatch = computed(() =>
         this.all()
             .map((shop) => ({ shop, state: accessStateOf(shop) }))
@@ -60,7 +60,7 @@ export class OwnerDashboard {
             : 0,
     );
 
-    // une phrase sur la sécurité, la même règle que la page Sécurité
+    // Une phrase sur la sécurité, la même règle que la page Sécurité
     alerts = computed(() => {
         if (!this.overview.hasValue()) return null;
         const { failedLogins24h, lockedAccounts } = this.overview.value();

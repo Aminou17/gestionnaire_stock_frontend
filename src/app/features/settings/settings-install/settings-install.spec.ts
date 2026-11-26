@@ -97,7 +97,7 @@ describe("SettingsInstall", () => {
         const { el } = await render({ inAppBrowser: true });
 
         expect(el.querySelector(".alert")?.textContent).toContain("fenêtre intégrée");
-        // le fichier Android reste proposé, le bouton du navigateur non
+        // Le fichier Android reste proposé, le bouton du navigateur non
         expect(el.querySelector("a.big")?.getAttribute("href")).toBe("/boutiki.apk");
         expect(el.querySelector("button.big")).toBeNull();
     });

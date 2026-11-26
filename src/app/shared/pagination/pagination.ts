@@ -14,7 +14,7 @@ import { Icon } from "../icon/icon";
 
 export const PAGE_SIZES = [10, 25, 50, 100];
 
-// numéros affichés : première et dernière page, la page courante et ses voisines, null pour les points de suite
+// Numéros affichés : première et dernière page, la page courante et ses voisines, null pour les points de suite
 export const pageItems = (page: number, pages: number): (number | null)[] => {
     const wanted = new Set([1, pages, page - 1, page, page + 1]);
     const numbers = [...wanted].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
@@ -29,7 +29,7 @@ export const pageItems = (page: number, pages: number): (number | null)[] => {
     return items;
 };
 
-// taille de page gardée d'une visite à l'autre : à appeler dans un champ du composant
+// Taille de page gardée d'une visite à l'autre : à appeler dans un champ du composant
 export const storedPageSize = (key: string, fallback = 25) => {
     const storageKey = `page-size-${key}`;
     let initial = fallback;
@@ -37,7 +37,7 @@ export const storedPageSize = (key: string, fallback = 25) => {
         const saved = Number(localStorage.getItem(storageKey));
         if (PAGE_SIZES.includes(saved)) initial = saved;
     } catch {
-        // stockage indisponible : on garde la valeur par défaut
+        // Stockage indisponible : on garde la valeur par défaut
     }
 
     const size = signal(initial);
@@ -45,13 +45,13 @@ export const storedPageSize = (key: string, fallback = 25) => {
         try {
             localStorage.setItem(storageKey, String(size()));
         } catch {
-            // stockage indisponible : rien à garder
+            // Stockage indisponible : rien à garder
         }
     });
     return size;
 };
 
-// pagination d'une liste déjà chargée en entier : la page revient à 1 quand `resetOn` change
+// Pagination d'une liste déjà chargée en entier : la page revient à 1 quand `resetOn` change
 export const clientPaging = <T>(
     items: () => T[],
     key: string,
@@ -82,7 +82,7 @@ export class Pagination {
     page = model.required<number>();
     pageSize = model.required<number>();
     sizes = input<number[]>(PAGE_SIZES);
-    // posée au bas d'une carte (ordinateur) : filet au-dessus et marges de carte
+    // Posée au bas d'une carte (ordinateur) : filet au-dessus et marges de carte
     attached = input(false);
 
     pages = computed(() => Math.max(1, Math.ceil(this.total() / this.pageSize())));
@@ -90,11 +90,11 @@ export class Pagination {
     first = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * this.pageSize() + 1));
     last = computed(() => Math.min(this.total(), this.page() * this.pageSize()));
 
-    // une seule page : rien à afficher
+    // Une seule page : rien à afficher
     visible = computed(() => this.pages() > 1);
 
     constructor() {
-        // une suppression ou un filtre peut laisser la page courante sans élément
+        // Une suppression ou un filtre peut laisser la page courante sans élément
         effect(() => {
             if (this.total() > 0 && this.page() > this.pages()) this.page.set(this.pages());
         });
@@ -113,7 +113,7 @@ export class Pagination {
         this.scrollToList();
     }
 
-    // ramène le haut de la liste à l'écran seulement s'il en est sorti
+    // Ramène le haut de la liste à l'écran seulement s'il en est sorti
     private scrollToList() {
         const element = this.host.nativeElement;
         const list = element.closest(".card") ?? element.parentElement ?? element;

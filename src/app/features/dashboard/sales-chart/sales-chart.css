@@ -72,7 +72,7 @@
     transition: height 0.4s ease;
 }
 
-/* un petit trait pour les jours sans vente : les 7 jours restent visibles */
+/* Un petit trait pour les jours sans vente : les 7 jours restent visibles */
 .bar.none {
     height: 3px;
     border-radius: 2px;
@@ -90,7 +90,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* le montant en gras est celui d'aujourd'hui, comme sa barre et son jour */
+/* Le montant en gras est celui d'aujourd'hui, comme sa barre et son jour */
 .bar-value.today {
     color: var(--text);
     font-weight: 600;

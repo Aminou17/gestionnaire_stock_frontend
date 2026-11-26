@@ -3,7 +3,7 @@ import { reminderLink, reminderMessage } from "./customer-reminder";
 
 const customer = (changes: Partial<Customer> = {}): Customer => ({
     id: 1,
-    name: "Awa Kouba",
+    name: "Adam Kouba",
     phone: "06 612 34 56",
     note: null,
     is_active: true,
@@ -17,15 +17,15 @@ const customer = (changes: Partial<Customer> = {}): Customer => ({
 
 describe("customer reminder", () => {
     it("should greet the first name and give the amount due", () => {
-        const message = reminderMessage(customer(), "Awa Bazin");
+        const message = reminderMessage(customer(), "Adam Ouédraogo");
 
-        expect(message).toContain("Bonjour Awa,");
-        expect(message).toContain("de la boutique Awa Bazin");
+        expect(message).toContain("Bonjour Adam,");
+        expect(message).toContain("de la boutique Adam Ouédraogo");
         expect(message).toContain("6 500 F");
     });
 
     it("should build a WhatsApp link with the message", () => {
-        const link = reminderLink(customer(), "Awa Bazin", "242");
+        const link = reminderLink(customer(), "Adam Ouédraogo", "242");
 
         expect(link).toMatch(/^https:\/\/wa\.me\/242066123456\?text=/);
         expect(decodeURIComponent(link!)).toContain("6 500 F");
@@ -41,8 +41,8 @@ describe("customer reminder", () => {
     });
 
     it("should use the whole name when it has a single word", () => {
-        expect(reminderMessage(customer({ name: "  Awa  " }), "Boutique")).toContain(
-            "Bonjour Awa,",
+        expect(reminderMessage(customer({ name: "  Adam  " }), "Boutique")).toContain(
+            "Bonjour Adam,",
         );
     });
 

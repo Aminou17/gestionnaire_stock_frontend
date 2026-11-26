@@ -47,7 +47,7 @@ const detail = (overrides: Partial<OwnedShopDetail> = {}): OwnedShopDetail => ({
 const httpError = (status: number, message: string) =>
     throwError(() => new HttpErrorResponse({ status, error: { message } }));
 
-// le dernier formulaire de la carte est celui de l'essai (le premier règle le paiement)
+// Le dernier formulaire de la carte est celui de l'essai (le premier règle le paiement)
 const trialSave = (el: HTMLElement) =>
     Array.from(el.querySelectorAll<HTMLFormElement>(".trial-form"))
         .at(-1)!
@@ -105,7 +105,7 @@ describe("ShopPage", () => {
         ) as HTMLButtonElement;
 
     beforeAll(() => {
-        // jsdom n'implémente pas les fenêtres <dialog> ; d'autres specs posent une version sans événement close, on impose la nôtre
+        // Jsdom n'implémente pas les fenêtres <dialog> ; d'autres specs posent une version sans événement close, on impose la nôtre
         HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
             this.open = true;
         };

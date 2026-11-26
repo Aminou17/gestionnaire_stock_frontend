@@ -15,7 +15,7 @@ import { CountCashDialog } from "./count-cash-dialog/count-cash-dialog";
 import { UncountedCashNotice } from "./uncounted-cash-notice/uncounted-cash-notice";
 import { MoneyToggle } from "../../shared/money/money-toggle";
 
-// heure à partir de laquelle on rappelle de compter la caisse
+// Heure à partir de laquelle on rappelle de compter la caisse
 const COUNTING_REMINDER_HOUR = 19;
 
 @Component({
@@ -36,7 +36,7 @@ const COUNTING_REMINDER_HOUR = 19;
     styleUrl: "./cash.css",
 })
 export class Cash {
-    // la fiche d'une caisse ramène ici avec le bouton Retour
+    // La fiche d'une caisse ramène ici avec le bouton Retour
     protected backState = { backTo: "/cash", backLabel: "Retour à la caisse" };
 
     private cashService = inject(CashSessionService);
@@ -44,39 +44,39 @@ export class Cash {
 
     today = rxResource({ stream: () => this.cashService.getToday() });
 
-    // détail de la session du jour : mouvements et montants du comptage
+    // Détail de la session du jour : mouvements et montants du comptage
     session = rxResource({
         params: () => (this.today.hasValue() ? this.today.value().cash?.id : undefined),
         stream: ({ params }) => this.cashService.getSession(params),
     });
 
     cash = computed(() => (this.today.hasValue() ? this.today.value().cash : null));
-    // caisse d'un jour passé jamais comptée : un rappel, rien n'est bloqué
+    // Caisse d'un jour passé jamais comptée : un rappel, rien n'est bloqué
     uncounted = computed(() =>
         this.today.hasValue() ? this.today.value().uncountedSession : null,
     );
-    // fond de départ tant que la caisse du jour n'existe pas
+    // Fond de départ tant que la caisse du jour n'existe pas
     expectedOpening = computed(() =>
         this.today.hasValue() ? this.today.value().expectedOpening : null,
     );
     isOpen = computed(() => this.cash()?.status === "OPEN");
     isCounted = computed(() => this.cash()?.status === "CLOSED");
 
-    // le soir, on rappelle de compter le tiroir pour ne pas oublier
+    // Le soir, on rappelle de compter le tiroir pour ne pas oublier
     countingTime = computed(() => this.isOpen() && new Date().getHours() >= COUNTING_REMINDER_HOUR);
 
     movements = computed(() => (this.session.hasValue() ? this.session.value().movements : []));
-    // les plus récents en premier, comme un ticket de caisse qui défile
+    // Les plus récents en premier, comme un ticket de caisse qui défile
     latest = computed(() => [...this.movements()].reverse());
     summary = computed(() => summarizeMovements(this.movements()));
 
-    // tout ce qui est sorti du tiroir : remboursements, dépenses et retraits
+    // Tout ce qui est sorti du tiroir : remboursements, dépenses et retraits
     spent = computed(() => {
         const { refunds, expenses, withdrawals } = this.summary();
         return refunds + expenses + withdrawals;
     });
 
-    // la fiche de sa propre caisse ouverte renvoie ici : pas de lien dans ce cas
+    // La fiche de sa propre caisse ouverte renvoie ici : pas de lien dans ce cas
     hasSheet = computed(() => {
         if (!this.session.hasValue()) return false;
         const { status, opened_by } = this.session.value();

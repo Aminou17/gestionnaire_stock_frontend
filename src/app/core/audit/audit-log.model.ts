@@ -5,7 +5,7 @@ export interface AuditLog {
     action: string;
     entity_type: string | null;
     entity_id: number | null;
-    // nom actuel du produit, de la catégorie, du fournisseur ou de l'utilisateur concerné
+    // Nom actuel du produit, de la catégorie, du fournisseur ou de l'utilisateur concerné
     entity_name?: string | null;
     details: Record<string, unknown> | null;
     result: "SUCCESS" | "FAILURE";
@@ -33,7 +33,7 @@ export interface AuditLogFilters {
 // Sécurité : connexions, mots de passe, accès refusés. Activité : tout le reste.
 export type AuditCategory = "activity" | "security";
 
-// même liste que le backend (auditLog.model.js)
+// Même liste que le backend (auditLog.model.js)
 export const SECURITY_ACTIONS = [
     "AUTH_LOGIN_SUCCEEDED",
     "AUTH_LOGIN_FAILED",

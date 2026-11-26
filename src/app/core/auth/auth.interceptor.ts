@@ -12,7 +12,7 @@ import { API_URL } from "../api.config";
 import { AuthService } from "./auth.service";
 import { isUnreachable } from "../offline/network.interceptor";
 
-// routes qui n'ont pas besoin du jeton, ou qui servent à l'obtenir
+// Routes qui n'ont pas besoin du jeton, ou qui servent à l'obtenir
 const PUBLIC_AUTH =
     /\/auth\/(login|register|refresh|logout|verify-email|resend-code|forgot-password|reset-password|phone-available)$/;
 
@@ -21,14 +21,14 @@ const withToken = (req: HttpRequest<unknown>, token: string | null) =>
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const auth = inject(AuthService);
-    // le token ne part que vers notre API, jamais vers un autre domaine
+    // Le token ne part que vers notre API, jamais vers un autre domaine
     const isApi = req.url.startsWith(API_URL);
 
     if (!isApi || PUBLIC_AUTH.test(req.url.split("?")[0])) return next(req);
 
     const canRefresh = !!auth.refreshToken;
 
-    // jeton expiré : on le renouvelle d'abord avec la session de 30 jours de l'appareil
+    // Jeton expiré : on le renouvelle d'abord avec la session de 30 jours de l'appareil
     if (auth.token && auth.tokenExpired() && canRefresh) {
         return renewed(auth, (token) => send(req, next, auth, token, false));
     }
@@ -36,7 +36,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     return send(req, next, auth, auth.token, canRefresh);
 };
 
-// renouvelle le jeton puis relance la requête ; une session refusée déconnecte, une coupure réseau non
+// Renouvelle le jeton puis relance la requête ; une session refusée déconnecte, une coupure réseau non
 function renewed<T>(auth: AuthService, then: (token: string) => Observable<T>) {
     return auth.refresh().pipe(
         catchError((error: HttpErrorResponse) => {
@@ -56,7 +56,7 @@ function send(
 ): Observable<HttpEvent<unknown>> {
     return next(withToken(req, token)).pipe(
         catchError((error: HttpErrorResponse) => {
-            // jeton refusé (horloge décalée, jeton ancien) : un seul renouvellement puis on réessaie
+            // Jeton refusé (horloge décalée, jeton ancien) : un seul renouvellement puis on réessaie
             if (error.status === 401 && retryOn401) {
                 return renewed(auth, (fresh) => send(req, next, auth, fresh, false));
             }

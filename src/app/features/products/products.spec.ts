@@ -46,12 +46,12 @@ describe("Products", () => {
                 in_stock: 2,
                 low_stock: 1,
                 out_of_stock: 1,
-                // le backend n'envoie la valeur du stock qu'à l'admin
+                // Le backend n'envoie la valeur du stock qu'à l'admin
                 ...(isAdmin ? { stock_value: 120000 } : {}),
             },
         };
         getProducts = vi.fn(() => of(page));
-        // jsdom ne gère pas <dialog>
+        // Jsdom ne gère pas <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
         localStorage.removeItem("page-size-products");
@@ -237,7 +237,7 @@ describe("Products", () => {
         el.querySelector<HTMLButtonElement>(".more-btn")!.click();
         await fixture.whenStable();
 
-        // le tableau et les cartes ont chacun leur menu : on ne garde que les libellés
+        // Le tableau et les cartes ont chacun leur menu : on ne garde que les libellés
         const items = [...el.querySelectorAll('[role="menuitem"]')].map((i) => text(i).trim());
         expect([...new Set(items)]).toEqual(["Vendre"]);
     });

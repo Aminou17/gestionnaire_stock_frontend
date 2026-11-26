@@ -21,9 +21,9 @@ describe("HelpForm", () => {
 
     const fill = (fixture: Awaited<ReturnType<typeof render>>) =>
         fixture.componentInstance.form.patchValue({
-            name: "Awa Traoré",
-            email: "Awa@Exemple.com ",
-            shopName: " Chez Awa ",
+            name: "Adam Traoré",
+            email: "Adam@Exemple.com ",
+            shopName: " Chez Adam ",
             reason: "blocked",
             message: "Mon compte est bloqué depuis ce matin.",
         });
@@ -51,8 +51,8 @@ describe("HelpForm", () => {
         fixture.componentInstance.submit();
 
         const sent = service.send.mock.calls[0][0];
-        expect(sent.email).toBe("awa@exemple.com");
-        expect(sent.shopName).toBe("Chez Awa");
+        expect(sent.email).toBe("adam@exemple.com");
+        expect(sent.shopName).toBe("Chez Adam");
         expect(sent.reason).toBe("blocked");
         expect(typeof sent.elapsedMs).toBe("number");
     });
@@ -64,8 +64,8 @@ describe("HelpForm", () => {
         fixture.componentInstance.submit();
         fixture.detectChanges();
 
-        expect((fixture.nativeElement as HTMLElement).textContent).toContain("awa@exemple.com");
-        expect(fixture.componentInstance.sentTo()).toBe("awa@exemple.com");
+        expect((fixture.nativeElement as HTMLElement).textContent).toContain("adam@exemple.com");
+        expect(fixture.componentInstance.sentTo()).toBe("adam@exemple.com");
     });
 
     it("should show the message of the API when the send fails", async () => {

@@ -24,7 +24,7 @@ import { Component, computed, input, signal } from "@angular/core";
 export class Avatar {
     photo = input<string | null | undefined>(null);
 
-    // photo illisible : on retombe sur la silhouette
+    // Photo illisible : on retombe sur la silhouette
     protected failedPhoto = signal<string | null | undefined>(undefined);
 
     protected src = computed(() => {

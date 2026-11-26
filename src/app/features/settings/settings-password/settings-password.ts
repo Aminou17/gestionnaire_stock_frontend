@@ -78,7 +78,7 @@ export class SettingsPassword implements HasUnsavedChanges {
     }
 
     canLeave() {
-        // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
+        // Quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
         if (this.savingPassword()) return false;
 
         const dirty = this.passwordForm.dirty;
@@ -86,7 +86,7 @@ export class SettingsPassword implements HasUnsavedChanges {
         return !dirty || this.leaveDialog().ask();
     }
 
-    // même appel que la page Mot de passe oublié, avec l'adresse du compte connecté
+    // Même appel que la page Mot de passe oublié, avec l'adresse du compte connecté
     sendReset() {
         const email = this.auth.user()?.email;
         if (!email || this.sendingReset()) return;
@@ -115,7 +115,7 @@ export class SettingsPassword implements HasUnsavedChanges {
 
         this.auth.logoutAll().subscribe({
             error: (err) => {
-                // la confirmation reste ouverte : l'erreur s'affiche près des boutons
+                // La confirmation reste ouverte : l'erreur s'affiche près des boutons
                 this.loggingOutAll.set(false);
                 this.logoutAllMessage.set(
                     errorText(err, "Impossible de vous déconnecter partout."),
@@ -129,7 +129,7 @@ export class SettingsPassword implements HasUnsavedChanges {
         if (this.passwordForm.invalid) return;
 
         const { currentPassword, newPassword } = this.passwordForm.getRawValue();
-        // avec un mot de passe provisoire, on repart vers l'application une fois le changement fait
+        // Avec un mot de passe provisoire, on repart vers l'application une fois le changement fait
         const forced = this.auth.user()?.mustChangePassword === true;
 
         this.savingPassword.set(true);

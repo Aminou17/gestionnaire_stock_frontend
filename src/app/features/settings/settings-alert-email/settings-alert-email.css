@@ -23,7 +23,7 @@
     line-height: 1.5;
 }
 
-/* case à cocher dessinée en interrupteur, comme le mode sombre */
+/* Case à cocher dessinée en interrupteur, comme le mode sombre */
 .switch {
     position: relative;
     flex: none;

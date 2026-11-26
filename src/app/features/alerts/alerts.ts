@@ -53,7 +53,7 @@ interface AlertGroup {
     },
 })
 export class Alerts {
-    // pastille du produit sans photo, comme dans la liste Produits
+    // Pastille du produit sans photo, comme dans la liste Produits
     protected initials = productInitials;
     protected tone = categoryTone;
 
@@ -72,7 +72,7 @@ export class Alerts {
     private params = inject(ActivatedRoute).snapshot.queryParamMap;
     protected auth = inject(AuthService);
 
-    // même requête que la cloche et la sidebar
+    // Même requête que la cloche et la sidebar
     alerts = this.alertService.alerts;
     all = computed(() => (this.alerts.hasValue() ? this.alerts.value() : []));
 
@@ -81,7 +81,7 @@ export class Alerts {
         this.rotation.hasValue() ? this.rotation.value().filter((p) => p.to_clear).length : 0,
     );
 
-    // onglet et filtres reviennent tels quels quand on revient d'une fiche produit
+    // Onglet et filtres reviennent tels quels quand on revient d'une fiche produit
     view = signal<View>(
         this.params.get("vue") === "out" || this.params.get("vue") === "low"
             ? (this.params.get("vue") as View)
@@ -90,19 +90,19 @@ export class Alerts {
     search = signal(this.params.get("q") ?? "");
     supplierId = signal(this.params.get("fournisseur") ?? "");
     categoryId = signal(this.params.get("categorie") ?? "");
-    // sur téléphone les deux listes de filtres restent repliées derrière un bouton
+    // Sur téléphone les deux listes de filtres restent repliées derrière un bouton
     filtersOpen = signal(false);
-    // un seul menu ouvert à la fois : "g" + fournisseur ou "r" + produit
+    // Un seul menu ouvert à la fois : "g" + fournisseur ou "r" + produit
     openMenu = signal<string | null>(null);
 
-    // modification du seuil et sourdine directement dans la ligne
+    // Modification du seuil et sourdine directement dans la ligne
     editingId = signal<number | null>(null);
     editValue = signal("");
     busyId = signal<number | null>(null);
     rowError = signal<string | null>(null);
     snoozed = this.alertService.snoozedList;
     snoozeOptions: SnoozeDays[] = [7, 30, 90];
-    // la ligne disparaît tout de suite : on laisse un moyen d'annuler une erreur de choix
+    // La ligne disparaît tout de suite : on laisse un moyen d'annuler une erreur de choix
     snoozedNotice = signal<{ id: number; name: string; days: SnoozeDays } | null>(null);
 
     suppliers = computed(() =>
@@ -134,7 +134,7 @@ export class Alerts {
         return this.filtered().filter((a) => (a.status === "OUT_OF_STOCK") === (view === "out"));
     });
 
-    // un bloc par fournisseur, le plus urgent en premier ; les produits sans fournisseur à la fin
+    // Un bloc par fournisseur, le plus urgent en premier ; les produits sans fournisseur à la fin
     allGroups = computed(() => {
         const byKey = new Map<string, AlertGroup>();
         for (const alert of this.list()) {
@@ -156,14 +156,14 @@ export class Alerts {
         ];
     });
 
-    // la pagination suit l'ordre des blocs : un fournisseur peut donc être coupé entre deux pages
+    // La pagination suit l'ordre des blocs : un fournisseur peut donc être coupé entre deux pages
     paging = clientPaging(
         () => this.allGroups().flatMap((group) => group.items),
         "alerts",
         () => [this.view(), this.search(), this.supplierId(), this.categoryId()].join("|"),
     );
 
-    // les blocs de la page affichée, avec le nombre total de produits de chaque fournisseur
+    // Les blocs de la page affichée, avec le nombre total de produits de chaque fournisseur
     groups = computed(() => {
         const shown = new Set(this.paging.visible().map((alert) => alert.id));
         return this.allGroups()
@@ -175,7 +175,7 @@ export class Alerts {
             .filter((group) => group.items.length > 0);
     });
 
-    // la fiche produit ouverte sait ainsi revenir ici, avec le même onglet et les mêmes filtres
+    // La fiche produit ouverte sait ainsi revenir ici, avec le même onglet et les mêmes filtres
     backState = computed<BackState>(() => {
         const queryParams = {
             vue: this.view() === "all" ? null : this.view(),
@@ -193,10 +193,10 @@ export class Alerts {
 
     private error = computed(() => this.alerts.error() as HttpErrorResponse | undefined);
 
-    // le backend répond 409 tant que le seuil général n'est pas réglé
+    // Le backend répond 409 tant que le seuil général n'est pas réglé
     needsSettings = computed(() => this.error()?.status === 409);
 
-    // un second clic sur la tuile active enlève le filtre
+    // Un second clic sur la tuile active enlève le filtre
     toggleView(view: View) {
         this.view.set(this.view() === view ? "all" : view);
     }
@@ -208,7 +208,7 @@ export class Alerts {
 
         this.menuTrigger = trigger;
         this.openMenu.set(key);
-        // le clavier arrive directement dans le menu
+        // Le clavier arrive directement dans le menu
         afterNextRender(
             () =>
                 this.host.nativeElement
@@ -243,7 +243,7 @@ export class Alerts {
         this.rowError.set(null);
         this.editingId.set(id);
         this.editValue.set(String(current));
-        // autofocus ne marche pas sur un champ ajouté après coup
+        // Autofocus ne marche pas sur un champ ajouté après coup
         afterNextRender(
             () =>
                 this.host.nativeElement
@@ -269,7 +269,7 @@ export class Alerts {
             return;
         }
 
-        // valeur inchangée : pas d'appel inutile
+        // Valeur inchangée : pas d'appel inutile
         if (this.all().find((a) => a.id === id)?.min_stock === minStock) {
             this.editingId.set(null);
             return;
@@ -294,7 +294,7 @@ export class Alerts {
             });
     }
 
-    // la liste des alertes n'a pas les codes-barres : on demande à l'API quel produit le porte
+    // La liste des alertes n'a pas les codes-barres : on demande à l'API quel produit le porte
     onScanned(code: string) {
         this.productService
             .getProducts({
@@ -350,7 +350,7 @@ export class Alerts {
         this.filtersOpen.set(false);
     }
 
-    // les produits sans fournisseur ou sans catégorie n'ont pas d'entrée dans la liste
+    // Les produits sans fournisseur ou sans catégorie n'ont pas d'entrée dans la liste
     private options(pairs: (number | string | null)[][]) {
         const seen = new Map<number, string>();
         for (const [id, name] of pairs) {

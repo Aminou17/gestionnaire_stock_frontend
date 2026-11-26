@@ -10,7 +10,7 @@ describe("LogoResizerService", () => {
         service = TestBed.inject(LogoResizerService);
     });
 
-    // le dessin sur canvas n'existe pas dans jsdom : seuls les refus sont testés ici
+    // Le dessin sur canvas n'existe pas dans jsdom : seuls les refus sont testés ici
     it("should refuse a file that is not an image", async () => {
         const file = new File(["x"], "notes.pdf", { type: "application/pdf" });
 

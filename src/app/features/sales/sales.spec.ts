@@ -13,7 +13,7 @@ const sale = (id: number, status: Sale["status"] = "ACTIVE"): Sale => ({
     id,
     number: id + 100,
     user_id: 6,
-    user_name: "Awa K.",
+    user_name: "Adam K.",
     user_role: "manager",
     total: 3000,
     paid_amount: 3000,
@@ -78,7 +78,7 @@ describe("Sales", () => {
             ],
         }).compileComponents();
 
-        // filtre passé dans l'adresse (lien d'une carte du tableau de bord)
+        // Filtre passé dans l'adresse (lien d'une carte du tableau de bord)
         await TestBed.inject(Router).navigateByUrl(url);
         fixture = TestBed.createComponent(Sales);
         el = fixture.nativeElement;
@@ -93,10 +93,10 @@ describe("Sales", () => {
         expect(text()).toContain("Toutes");
         expect(text()).toContain("3 000 F");
         expect(el.querySelectorAll(".sale-row").length).toBe(2);
-        // une vente normale n'a pas de badge, seul le remboursement est signalé
+        // Une vente normale n'a pas de badge, seul le remboursement est signalé
         expect(el.querySelectorAll(".sale-row .badge").length).toBe(1);
         expect(text()).toContain("Remboursée");
-        // la liste est la même sur ordinateur et sur téléphone
+        // La liste est la même sur ordinateur et sur téléphone
         expect(el.querySelector("table")).toBeNull();
         expect(el.querySelector(".stats")).toBeNull();
     });
@@ -105,7 +105,7 @@ describe("Sales", () => {
         await render();
         const row = el.querySelector(".sale-row")!.textContent!;
 
-        expect(row).not.toContain("Awa K.");
+        expect(row).not.toContain("Adam K.");
         expect(row).not.toMatch(/article/);
     });
 
@@ -186,7 +186,7 @@ describe("Sales", () => {
         expect(text()).toContain("Reste");
     });
 
-    // les filtres sont toujours visibles : plus de panneau à ouvrir
+    // Les filtres sont toujours visibles : plus de panneau à ouvrir
     const open = async () => {
         await fixture.whenStable();
     };
@@ -207,7 +207,7 @@ describe("Sales", () => {
         const filters = getSalesPage.mock.lastCall![0] as SaleFilters;
         expect(filters.from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         expect(filters.from).toBe(filters.to);
-        // c'est le réglage de départ : pas de pastille de filtre en plus
+        // C'est le réglage de départ : pas de pastille de filtre en plus
         expect(el.querySelector(".active-chip")).toBeNull();
     });
 

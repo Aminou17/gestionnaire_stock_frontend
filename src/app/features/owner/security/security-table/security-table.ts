@@ -7,7 +7,7 @@ import type { IconName } from "../../../../shared/icon/icons";
 
 export type RowTone = "danger" | "warning" | "success" | "neutral";
 
-// une ligne affichable, quelle que soit la liste d'origine
+// Une ligne affichable, quelle que soit la liste d'origine
 export interface SecurityRow {
     id: string | number;
     icon: IconName;
@@ -17,10 +17,10 @@ export interface SecurityRow {
     shop: string | null;
     detail: string | null;
     badge: { label: string; tone: RowTone } | null;
-    // date ISO ; note : précision courte sous la date (ex. "dans 12 min")
+    // Date ISO ; note : précision courte sous la date (ex. "dans 12 min")
     when: string;
     note?: string | null;
-    // donnée d'origine, rendue à la page quand la ligne est touchée
+    // Donnée d'origine, rendue à la page quand la ligne est touchée
     raw?: unknown;
 }
 
@@ -46,7 +46,7 @@ export class SecurityTable {
     emptyTitle = input("Rien à signaler");
     emptyText = input<string>();
 
-    // lignes cliquables : touchées, elles ouvrent leur détail
+    // Lignes cliquables : touchées, elles ouvrent leur détail
     clickable = input(false);
 
     retry = output<void>();
@@ -54,7 +54,7 @@ export class SecurityTable {
 
     skeletons = [1, 2, 3, 4, 5, 6];
 
-    // ligne de détails du téléphone : boutique et détail réunis
+    // Ligne de détails du téléphone : boutique et détail réunis
     meta(row: SecurityRow) {
         return [row.shop, row.detail].filter(Boolean).join(" · ");
     }

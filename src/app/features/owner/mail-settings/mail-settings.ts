@@ -15,7 +15,7 @@ import { MailSettings, MailSettingsService } from "../mail-settings.service";
 
 const EMAIL = /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/;
 
-// une espace collée avec l'adresse ne doit pas la rendre invalide
+// Une espace collée avec l'adresse ne doit pas la rendre invalide
 const emailValidator = (control: AbstractControl): ValidationErrors | null =>
     EMAIL.test(String(control.value ?? "").trim()) ? null : { email: true };
 
@@ -45,7 +45,7 @@ export class MailSettingsPage {
         effect(() => {
             if (!this.settings.hasValue()) return;
             const settings = this.settings.value();
-            // un rechargement ne doit pas effacer une saisie en cours
+            // Un rechargement ne doit pas effacer une saisie en cours
             untracked(() => {
                 if (!this.form.dirty) this.fill(settings);
             });
@@ -61,7 +61,7 @@ export class MailSettingsPage {
         return control.touched && control.invalid;
     }
 
-    // le mot de passe est obligatoire tant qu'aucun n'est enregistré
+    // Le mot de passe est obligatoire tant qu'aucun n'est enregistré
     needsPassword() {
         const settings = this.settings.hasValue() ? this.settings.value() : null;
         return !settings?.hasPassword;

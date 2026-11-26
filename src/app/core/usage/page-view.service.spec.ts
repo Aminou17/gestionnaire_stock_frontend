@@ -40,7 +40,7 @@ describe("PageViewService", () => {
     const go = (url: string) => events.next(new NavigationEnd(1, url, url));
 
     it("should send the page that was opened, without the address parameters", () => {
-        go("/customers?search=Awa&phone=0612");
+        go("/customers?search=Adam&phone=0612");
 
         const request = http.expectOne((r) => r.url.endsWith("/usage/page"));
         expect(request.request.body).toEqual({ page: "/customers" });

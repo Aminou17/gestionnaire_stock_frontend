@@ -2,7 +2,7 @@ dialog {
     width: min(440px, calc(100% - 32px));
 }
 
-/* le cadre de focus du navigateur entourait toute la fenêtre ; les boutons gardent le leur */
+/* Le cadre de focus du navigateur entourait toute la fenêtre ; les boutons gardent le leur */
 dialog:focus,
 dialog:focus-visible {
     outline: none;

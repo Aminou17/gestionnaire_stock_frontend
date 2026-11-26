@@ -16,19 +16,19 @@ import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 export class CashMovementList {
     movements = input.required<CashMovement[]>();
     emptyText = input("Aucun mouvement pour le moment.");
-    // la page des mouvements mélange plusieurs jours
+    // La page des mouvements mélange plusieurs jours
     showDate = input(false);
 
     private router = inject(Router);
 
-    // la vente ouverte depuis la liste ramène ici avec le bouton Retour
+    // La vente ouverte depuis la liste ramène ici avec le bouton Retour
     backState() {
         return { backTo: this.router.url, backLabel: this.backLabel() };
     }
 
     backLabel = input("Caisse");
 
-    // seules les ventes et leurs remboursements ont une fiche à ouvrir
+    // Seules les ventes et leurs remboursements ont une fiche à ouvrir
     hasSale(movement: CashMovement) {
         return movement.type === "SALE" || movement.reference_type === "SALE_CANCELLATION";
     }
@@ -45,7 +45,7 @@ export class CashMovementList {
         this.detail().nativeElement.close();
     }
 
-    // ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
+    // Ne rien renvoyer ici : Angular annule le clic si le gestionnaire renvoie false
     onBackdropClick(event: MouseEvent) {
         if (event.target === this.detail().nativeElement) {
             this.close();

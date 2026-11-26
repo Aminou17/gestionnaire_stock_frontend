@@ -21,7 +21,7 @@ describe("AuthLayout", () => {
 
         expect(page.querySelector(".brand-logo")).not.toBeNull();
         expect(page.textContent).toContain("Boutiki");
-        expect(page.textContent).not.toContain("Awa Bazin");
+        expect(page.textContent).not.toContain("Adam Ouédraogo");
     });
 
     it("should lead back to the home page from the brand and from the Accueil link", async () => {

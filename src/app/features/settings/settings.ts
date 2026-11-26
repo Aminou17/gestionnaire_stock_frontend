@@ -22,12 +22,12 @@ interface SettingsLink {
     icon: IconName;
     label: string;
     description: string;
-    // couleur de la pastille d'icône
+    // Couleur de la pastille d'icône
     tone: string;
     adminOnly?: boolean;
 }
 
-// état d'un réglage, affiché à droite de la ligne
+// État d'un réglage, affiché à droite de la ligne
 interface SettingsStatus {
     text: string;
     // ok : actif (point vert), off : désactivé (point gris)
@@ -179,7 +179,7 @@ export class Settings {
     private cashService = inject(CashSettingsService);
     private salesService = inject(SalesSettingsService);
 
-    // les états ne sont lus que pour l'administrateur : le manager n'a pas accès à ces réglages
+    // Les états ne sont lus que pour l'administrateur : le manager n'a pas accès à ces réglages
     private params = () => (this.auth.isAdmin() ? true : undefined);
 
     private shop = rxResource({
@@ -203,7 +203,7 @@ export class Settings {
         stream: () => this.salesService.getSettings(),
     });
 
-    // un état n'apparaît que quand la donnée est arrivée : pas de clignotement à l'ouverture
+    // Un état n'apparaît que quand la donnée est arrivée : pas de clignotement à l'ouverture
     statuses = computed<Record<string, SettingsStatus>>(() => {
         const statuses: Record<string, SettingsStatus> = {};
 
@@ -240,7 +240,7 @@ export class Settings {
             statuses["sales"] = prefix ? { text: `Préfixe : ${prefix}` } : { text: "Sans préfixe" };
         }
 
-        // la fiche d'abonnement n'est pas encore lue ici : toute boutique démarre par un essai
+        // La fiche d'abonnement n'est pas encore lue ici : toute boutique démarre par un essai
         if (this.shopService.subscriptionsEnabled() && this.auth.isAdmin()) {
             statuses["/subscription"] = { text: "Essai gratuit" };
         }
@@ -248,7 +248,7 @@ export class Settings {
         return statuses;
     });
 
-    // l'employé ne voit que son compte
+    // L'employé ne voit que son compte
     groups = computed(() =>
         GROUPS.map((group) => ({
             ...group,

@@ -54,7 +54,7 @@ export class Suppliers {
     activeCount = computed(() => this.all().filter((s) => s.is_active).length);
     deletedCount = computed(() => this.all().filter((s) => !s.is_active).length);
 
-    // la liste est courte, on filtre dans le navigateur
+    // La liste est courte, on filtre dans le navigateur
     list = computed(() => {
         const search = this.search().trim().toLowerCase();
         const showDeleted = this.view() === "deleted";
@@ -75,7 +75,7 @@ export class Suppliers {
 
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
 
-    // suppression
+    // Suppression
     toDelete = signal<Supplier | null>(null);
     deleting = signal(false);
     deleteError = signal<string | null>(null);
@@ -106,7 +106,7 @@ export class Suppliers {
     }
 
     onSaved() {
-        // le fournisseur enregistré doit être visible, quelle que soit la recherche en cours
+        // Le fournisseur enregistré doit être visible, quelle que soit la recherche en cours
         this.search.set("");
         this.view.set("active");
         this.suppliers.reload();

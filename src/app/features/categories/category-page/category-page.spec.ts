@@ -26,7 +26,7 @@ const wax: CategoryDetail = {
     out_of_stock_count: 0,
 };
 
-// ce que le backend ajoute pour l'admin
+// Ce que le backend ajoute pour l'admin
 const adminExtras = {
     stock_value: 245500,
     last_change: {
@@ -60,7 +60,7 @@ describe("CategoryPage", () => {
             imports: [CategoryPage],
             providers: [
                 provideRouter([]),
-                // le formulaire produit (admin) injecte les services HTTP du stock
+                // Le formulaire produit (admin) injecte les services HTTP du stock
                 provideHttpClient(),
                 provideHttpClientTesting(),
                 { provide: ActivatedRoute, useValue: { paramMap: of(convertToParamMap({ id })) } },
@@ -78,7 +78,7 @@ describe("CategoryPage", () => {
                         isOwner: signal(false),
                         user: signal({
                             id: 6,
-                            name: "Awa K.",
+                            name: "Adam K.",
                             email: "a@test.com",
                             role: "manager",
                         }),
@@ -101,7 +101,7 @@ describe("CategoryPage", () => {
         expect(text()).toContain("Pagnes wax imprimés");
         expect(text()).toContain("2026");
         expect(el.querySelector("dd.strong")?.textContent?.trim()).toBe("2");
-        // le nombre de produits et le bouton mènent tous deux aux produits de la catégorie
+        // Le nombre de produits et le bouton mènent tous deux aux produits de la catégorie
         expect(el.querySelector("a.count-link")?.getAttribute("href")).toBe(
             "/products?categoryId=4",
         );
@@ -233,7 +233,7 @@ describe("CategoryPage", () => {
         button!.click();
         await fixture.whenStable();
         expect(restoreCategory).toHaveBeenCalledWith(4);
-        // la fiche est rechargée pour afficher la catégorie active
+        // La fiche est rechargée pour afficher la catégorie active
         expect(getCategory).toHaveBeenCalledTimes(2);
     });
 

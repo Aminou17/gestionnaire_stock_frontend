@@ -73,7 +73,7 @@ describe("ResetPassword", () => {
         await submit("Motdepasse-2026", "Motdepasse-2026");
 
         expect(auth.resetPassword).toHaveBeenCalledWith("a".repeat(64), "Motdepasse-2026");
-        // une session déjà ouverte sur l'appareil est fermée
+        // Une session déjà ouverte sur l'appareil est fermée
         expect(auth.endSession).toHaveBeenCalled();
         expect(el.textContent).toContain("Mot de passe modifié");
     });

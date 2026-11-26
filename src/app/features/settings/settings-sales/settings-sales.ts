@@ -36,7 +36,7 @@ export class SettingsSales implements HasUnsavedChanges {
     private fb = inject(NonNullableFormBuilder);
     private router = inject(Router);
 
-    // on peut arriver ici depuis le ticket de caisse : Retour y ramène
+    // On peut arriver ici depuis le ticket de caisse : Retour y ramène
     back = getBackLink("/settings", "Retour aux paramètres");
     backUrl = this.router.serializeUrl(this.back.link);
 
@@ -44,7 +44,7 @@ export class SettingsSales implements HasUnsavedChanges {
 
     settings = rxResource({ stream: () => this.salesService.getSettings() });
 
-    // mêmes règles que le backend : 10 lettres ou chiffres, remise entière positive ou nulle
+    // Mêmes règles que le backend : 10 lettres ou chiffres, remise entière positive ou nulle
     form = this.fb.group({
         ticketPrefix: ["", Validators.pattern(/^[A-Za-z0-9]{0,10}$/)],
         defaultMaxDiscount: this.fb.control<number | null>(null, [
@@ -54,14 +54,14 @@ export class SettingsSales implements HasUnsavedChanges {
         ]),
     });
 
-    // l'exemple de numéro suit la saisie
+    // L'exemple de numéro suit la saisie
     private prefix = toSignal(this.form.controls.ticketPrefix.valueChanges, { initialValue: "" });
     example = computed(() => formatTicketNumber(12, this.prefix().trim()));
 
     saving = signal(false);
     message = signal<{ ok: boolean; text: string } | null>(null);
 
-    // relit la dernière modification affichée en bas de page après chaque enregistrement
+    // Relit la dernière modification affichée en bas de page après chaque enregistrement
     saveCount = signal(0);
 
     constructor() {
@@ -87,7 +87,7 @@ export class SettingsSales implements HasUnsavedChanges {
     }
 
     canLeave() {
-        // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
+        // Quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
         if (this.saving()) return false;
 
         return !this.form.dirty || this.leaveDialog().ask();
@@ -105,7 +105,7 @@ export class SettingsSales implements HasUnsavedChanges {
         this.saving.set(true);
         this.message.set(null);
 
-        // une saisie pendant l'envoi serait effacée par la réponse du serveur
+        // Une saisie pendant l'envoi serait effacée par la réponse du serveur
         this.form.disable({ emitEvent: false });
 
         const { ticketPrefix, defaultMaxDiscount } = this.form.getRawValue();

@@ -90,7 +90,7 @@ export class Customers {
         stream: ({ params }) => this.customerService.getCustomers(params),
     });
 
-    // compteurs des deux puces : ils suivent la recherche, pas les autres filtres
+    // Compteurs des deux puces : ils suivent la recherche, pas les autres filtres
     totals = rxResource({
         params: () => ({ search: this.search(), status: this.status() }),
         stream: ({ params }) =>
@@ -107,7 +107,7 @@ export class Customers {
                 .pipe(map((res) => res.total)),
     });
 
-    // dernière réponse reçue : gardée pendant le chargement de la suivante
+    // Dernière réponse reçue : gardée pendant le chargement de la suivante
     last = linkedSignal<CustomerPage | undefined, CustomerPage | undefined>({
         source: () => (this.customers.hasValue() ? this.customers.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -118,7 +118,7 @@ export class Customers {
     total = computed(() => this.last()?.total ?? 0);
     dueTotal = computed(() => this.last()?.due_total ?? 0);
 
-    // lien WhatsApp de la relance, vide sans numéro
+    // Lien WhatsApp de la relance, vide sans numéro
     remindLink(customer: Customer) {
         return reminderLink(customer, this.shop.shopName(), this.shop.defaultCountryCode());
     }
@@ -137,14 +137,14 @@ export class Customers {
 
     firstLoad = computed(() => this.customers.isLoading() && !this.last());
 
-    // le tri par défaut suit la puce : les plus grosses dettes d'abord quand on relance
+    // Le tri par défaut suit la puce : les plus grosses dettes d'abord quand on relance
     defaultSort = computed<CustomerSort>(() => (this.unpaid() ? "due" : "recent"));
 
-    // filtres choisis dans la fenêtre (hors recherche, puces et tri par défaut), en petites puces
+    // Filtres choisis dans la fenêtre (hors recherche, puces et tri par défaut), en petites puces
     activeFilters = computed(() => {
         const filters: { key: "status" | "sort"; label: string }[] = [];
         if (this.status() === "inactive") filters.push({ key: "status", label: "Supprimés" });
-        // en vue Crédits, les deux puces de tri montrent déjà le choix
+        // En vue Crédits, les deux puces de tri montrent déjà le choix
         const shownByChips = this.unpaid() && ["due", "oldest_due"].includes(this.sort());
         if (this.sort() !== this.defaultSort() && !shownByChips) {
             filters.push({
@@ -168,7 +168,7 @@ export class Customers {
     }
 
     selectUnpaid(value: boolean) {
-        // un tri choisi à la main est gardé, sinon on suit le tri par défaut de la puce
+        // Un tri choisi à la main est gardé, sinon on suit le tri par défaut de la puce
         const wasDefault =
             this.sort() === this.defaultSort() || (this.unpaid() && this.sort() === "oldest_due");
         this.unpaid.set(value);
@@ -198,7 +198,7 @@ export class Customers {
         this.page.set(1);
     }
 
-    // la fenêtre remet tout à zéro, la puce Crédits garde son choix
+    // La fenêtre remet tout à zéro, la puce Crédits garde son choix
     resetPanel() {
         this.status.set("active");
         this.sort.set(this.defaultSort());
@@ -209,7 +209,7 @@ export class Customers {
         this.customerForm().openNew();
     }
 
-    // le nouveau client s'ouvre tout de suite : on y ajoute ses ventes ou on le relance
+    // Le nouveau client s'ouvre tout de suite : on y ajoute ses ventes ou on le relance
     onSaved(customer: Customer) {
         this.router.navigate(["/customers", customer.id]);
     }

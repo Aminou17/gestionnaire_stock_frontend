@@ -29,7 +29,7 @@ export class SettingsExport {
 
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
 
-    // un seul téléchargement à la fois
+    // Un seul téléchargement à la fois
     busy = signal<ExportKind | null>(null);
     error = signal<{ kind: ExportKind; text: string } | null>(null);
 
@@ -76,7 +76,7 @@ export class SettingsExport {
             },
             error: (err) => {
                 this.busy.set(null);
-                // avec un fichier attendu, le corps de l'erreur n'est pas lisible : on se base sur le statut
+                // Avec un fichier attendu, le corps de l'erreur n'est pas lisible : on se base sur le statut
                 const tooLarge = err instanceof HttpErrorResponse && err.status === 413;
                 this.error.set({
                     kind,

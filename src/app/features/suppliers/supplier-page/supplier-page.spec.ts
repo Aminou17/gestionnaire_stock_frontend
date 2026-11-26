@@ -183,7 +183,7 @@ describe("SupplierPage", () => {
         expect(text()).toContain("Supprimé");
         expect(el.querySelector(".manage")).toBeNull();
         expect(el.querySelector('.sheet a[href^="/stock-entries"]')).toBeNull();
-        // ses livraisons passées restent visibles
+        // Ses livraisons passées restent visibles
         expect(el.querySelector(".preview a")).not.toBeNull();
 
         el.querySelector<HTMLButtonElement>(".sheet .actions .btn-primary")!.click();
@@ -195,7 +195,7 @@ describe("SupplierPage", () => {
 
     it("should go back to the list after deleting", async () => {
         await render();
-        // la fiche est quittée sans rester dans l'historique
+        // La fiche est quittée sans rester dans l'historique
         const navigate = vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
 
         el.querySelector<HTMLButtonElement>(".manage .danger")!.click();

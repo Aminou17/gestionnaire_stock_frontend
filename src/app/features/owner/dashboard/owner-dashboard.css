@@ -102,7 +102,7 @@ h2 {
     font-weight: var(--fw-semibold);
 }
 
-/* lignes de sécurité et de messages dans « À suivre » */
+/* Lignes de sécurité et de messages dans « À suivre » */
 .avatar.alert-icon {
     background: var(--warning-soft);
     color: var(--warning);

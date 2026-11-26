@@ -20,7 +20,7 @@ import { FcfaPipe } from "../../shared/pipes/fcfa.pipe";
 import { MoneyToggle } from "../../shared/money/money-toggle";
 import { Pagination, storedPageSize } from "../../shared/pagination/pagination";
 
-// choix de période de la fenêtre Filtre
+// Choix de période de la fenêtre Filtre
 const PERIOD_CHOICES: { value: Period; label: string }[] = [
     { value: "all", label: "Toutes" },
     { value: "today", label: "Aujourd'hui" },
@@ -29,7 +29,7 @@ const PERIOD_CHOICES: { value: Period; label: string }[] = [
     { value: "custom", label: "Personnalisée" },
 ];
 
-// pastilles sous le titre : "Personnalisée" devient "Dates"
+// Pastilles sous le titre : "Personnalisée" devient "Dates"
 const PERIOD_PILLS: { value: Period; label: string }[] = [
     { value: "today", label: "Aujourd'hui" },
     { value: "week", label: "7 jours" },
@@ -62,7 +62,7 @@ export class Sales {
     private exportService = inject(ExportService);
     protected auth = inject(AuthService);
 
-    // période choisie dans le filtre (aujourd'hui au départ : c'est ce que le vendeur regarde)
+    // Période choisie dans le filtre (aujourd'hui au départ : c'est ce que le vendeur regarde)
     range = signal<PeriodRange>({ period: "all", from: null, to: null });
     status = signal<SaleStatus | null>(null);
     page = signal(1);
@@ -72,7 +72,7 @@ export class Sales {
     paymentMethod = signal<PaymentMethod | null>(null);
     sellerId = signal<number | null>(null);
 
-    // seul l'admin choisit un vendeur, le manager ne voit que ses ventes
+    // Seul l'admin choisit un vendeur, le manager ne voit que ses ventes
     users = rxResource({
         stream: () => (this.auth.isAdmin() ? this.userService.getUsers("all") : of([])),
     });
@@ -93,7 +93,7 @@ export class Sales {
         stream: ({ params }) => this.saleService.getSalesPage(params),
     });
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<SalePage | undefined, SalePage | undefined>({
         source: () => (this.sales.hasValue() ? this.sales.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -105,7 +105,7 @@ export class Sales {
     counters = computed(() => this.last()?.counters);
     firstLoad = computed(() => this.sales.isLoading() && !this.last());
 
-    // les ventes chargées, regroupées par jour (la liste est déjà triée par date)
+    // Les ventes chargées, regroupées par jour (la liste est déjà triée par date)
     days = computed(() => groupByDay(this.list(), this.locale));
 
     tabs = computed(() => {
@@ -142,7 +142,7 @@ export class Sales {
         return value === "UNPAID" ? this.unpaid() : !this.unpaid() && this.status() === value;
     }
 
-    // la recherche part 300 ms après la dernière frappe
+    // La recherche part 300 ms après la dernière frappe
     private searchTimer?: ReturnType<typeof setTimeout>;
 
     onSearch(value: string) {
@@ -163,7 +163,7 @@ export class Sales {
         this.page.set(1);
     }
 
-    // fenêtre Filtre : fenêtre du bas sur téléphone, petit panneau sur ordinateur
+    // Fenêtre Filtre : fenêtre du bas sur téléphone, petit panneau sur ordinateur
     filtersOpen = signal(false);
     periodChoices = PERIOD_CHOICES;
     periodPills = PERIOD_PILLS;
@@ -171,7 +171,7 @@ export class Sales {
     customTo = signal("");
     customError = signal<string | null>(null);
 
-    // carte du haut : elle suit la puce choisie (toutes, à solder, remboursées)
+    // Carte du haut : elle suit la puce choisie (toutes, à solder, remboursées)
     summary = computed(() => {
         const counters = this.counters();
         const plural = (n: number | undefined, word: string) =>
@@ -208,7 +208,7 @@ export class Sales {
         this.customError.set(null);
 
         if (period === "custom") {
-            // on part des 7 derniers jours : il ne reste qu'à ajuster
+            // On part des 7 derniers jours : il ne reste qu'à ajuster
             if (!this.customFrom()) {
                 this.customFrom.set(this.daysAgo(6));
                 this.customTo.set(this.daysAgo(0));
@@ -265,7 +265,7 @@ export class Sales {
     exporting = signal(false);
     exportError = signal<string | null>(null);
 
-    // l'export existant prend la période choisie, pas les autres filtres
+    // L'export existant prend la période choisie, pas les autres filtres
     exportFile(format: ExportFormat) {
         this.exporting.set(true);
         this.exportError.set(null);
@@ -297,7 +297,7 @@ export class Sales {
         this.page.set(1);
     }
 
-    // flèche retour seulement si une page (ex. la caisse) a envoyé vers les ventes
+    // Flèche retour seulement si une page (ex. la caisse) a envoyé vers les ventes
     private from = this.router.currentNavigation()?.extras.state ?? history.state;
     protected backUrl: string | null =
         typeof this.from?.backTo === "string" && this.from.backTo.startsWith("/")
@@ -305,13 +305,13 @@ export class Sales {
             : null;
     protected backLabel: string = this.from?.backLabel ?? "Retour";
 
-    // filtre demandé par le lien qui a ouvert la page (cartes du tableau de bord)
+    // Filtre demandé par le lien qui a ouvert la page (cartes du tableau de bord)
     constructor() {
         const params = inject(ActivatedRoute).snapshot.queryParamMap;
         const period = params.get("period");
         const unpaid = params.get("filter") === "unpaid";
 
-        // les ventes à solder viennent de toutes les dates : on ne les limite pas à aujourd'hui
+        // Les ventes à solder viennent de toutes les dates : on ne les limite pas à aujourd'hui
         if (unpaid) this.selectStatus("UNPAID");
         else if (period === "week" || period === "month") this.selectPeriod(period);
         else this.selectPeriod("today");
@@ -324,7 +324,7 @@ export class Sales {
         this.router.navigate(["/sales", sale.id]);
     }
 
-    // reste à payer sur une vente validée avec acompte
+    // Reste à payer sur une vente validée avec acompte
     due(sale: Sale) {
         return sale.status === "ACTIVE" ? sale.total - sale.paid_amount : 0;
     }
@@ -339,7 +339,7 @@ export class Sales {
         return this.due(sale) > 0 ? "warning" : "success";
     }
 
-    // une liste reste légère : l'heure et le client, le détail est sur la fiche de la vente
+    // Une liste reste légère : l'heure et le client, le détail est sur la fiche de la vente
     subtitle(sale: Sale) {
         const time = formatDate(sale.created_at, "HH:mm", this.locale);
         return sale.customer_name ? `${time} · ${sale.customer_name}` : time;

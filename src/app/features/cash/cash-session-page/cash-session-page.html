@@ -67,7 +67,7 @@
                     }
                 </div>
 
-                <!-- l'admin rectifie un comptage ; chacun peut compter sa propre caisse passée -->
+                <!-- L'admin rectifie un comptage ; chacun peut compter sa propre caisse passée -->
                 @if (cash.status === "UNCOUNTED" || (cash.status === "CLOSED" && auth.isAdmin())) {
                     <button
                         type="button"

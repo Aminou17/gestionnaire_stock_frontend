@@ -11,7 +11,7 @@ const session = (overrides: Partial<UncountedSession> = {}): UncountedSession =>
     sessionDate: isoDaysAgo(1),
     openedAt: `${isoDaysAgo(1)}T08:00:00`,
     openedBy: 2,
-    openedByName: "Awa Kone",
+    openedByName: "Adam Kone",
     balance: 12000,
     count: 1,
     ...overrides,

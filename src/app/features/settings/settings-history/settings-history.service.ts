@@ -13,12 +13,12 @@ interface AuditPage {
     data: SettingsChange[];
 }
 
-// dernière modification d'un réglage, lue dans le journal d'audit (réservé à l'administrateur)
+// Dernière modification d'un réglage, lue dans le journal d'audit (réservé à l'administrateur)
 @Injectable({ providedIn: "root" })
 export class SettingsHistoryService {
     private http = inject(HttpClient);
 
-    // plusieurs actions possibles : le logo et les coordonnées sont deux actions du même ticket
+    // Plusieurs actions possibles : le logo et les coordonnées sont deux actions du même ticket
     getLastChange(actions: string[]) {
         const requests = actions.map((action) =>
             this.http.get<AuditPage>(`${API_URL}/audit-logs`, {

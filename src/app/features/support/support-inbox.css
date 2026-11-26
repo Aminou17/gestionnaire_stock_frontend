@@ -32,7 +32,7 @@
     border-bottom: 1px solid var(--border);
 }
 
-/* la classe globale .tabs ajoute un trait et des marges : on les annule ici */
+/* La classe globale .tabs ajoute un trait et des marges : on les annule ici */
 .tabs {
     display: flex;
     flex: 1;
@@ -305,7 +305,7 @@ textarea.input {
     border-radius: 10px;
 }
 
-/* onglet « Sans compte » : la liste prend toute la largeur, sans volet de conversation */
+/* Onglet « Sans compte » : la liste prend toute la largeur, sans volet de conversation */
 .inbox.help-mode {
     grid-template-columns: 1fr;
 }
@@ -319,7 +319,7 @@ textarea.input {
         grid-template-columns: 1fr;
     }
 
-    /* un volet à la fois sur téléphone */
+    /* Un volet à la fois sur téléphone */
     .inbox.has-detail .list-pane,
     .inbox:not(.has-detail) .detail-pane {
         display: none;
@@ -342,7 +342,7 @@ textarea.input {
     }
 }
 
-/* petit écran : le bouton se réduit au "+" pour laisser la place aux deux onglets */
+/* Petit écran : le bouton se réduit au "+" pour laisser la place aux deux onglets */
 @media (max-width: 479px) {
     .new-thread {
         width: 36px;
@@ -355,7 +355,7 @@ textarea.input {
     }
 }
 
-/* espace propriétaire : l'heure garde une couleur pleine, sans opacité */
+/* Espace propriétaire : l'heure garde une couleur pleine, sans opacité */
 :host-context(app-owner-layout) .time {
     opacity: 1;
     color: var(--text-muted);

@@ -10,9 +10,9 @@ export class UnsavedDialog implements OnDestroy {
 
     private resolve: ((leave: boolean) => void) | null = null;
 
-    // vrai si l'utilisateur choisit de quitter la page
+    // Vrai si l'utilisateur choisit de quitter la page
     ask() {
-        // une seconde demande ne doit pas laisser la première sans réponse
+        // Une seconde demande ne doit pas laisser la première sans réponse
         this.resolve?.(false);
         this.dialog().nativeElement.showModal();
 

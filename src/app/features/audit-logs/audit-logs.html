@@ -26,7 +26,7 @@
         </button>
     </div>
 
-    <!-- période : pastilles visibles, comme sur Ventes et Dépenses -->
+    <!-- Période : pastilles visibles, comme sur Ventes et Dépenses -->
     <div class="periods" role="group" aria-label="Période">
         @for (item of periodPills; track item.value) {
             <button
@@ -53,7 +53,7 @@
         </label>
     </div>
 
-    <!-- les filtres restent visibles : personne et action, plus les échecs sur l'onglet Sécurité -->
+    <!-- Les filtres restent visibles : personne et action, plus les échecs sur l'onglet Sécurité -->
     <div class="filters" [class.open]="filtersOpen()">
         <app-period-filter
             #period
@@ -180,7 +180,7 @@
     <app-pagination class="list-pager" [total]="total()" [(page)]="page" [(pageSize)]="pageSize" />
 }
 
-<!-- une ligne : l'icône du type, la phrase, l'heure ; la précision sous la phrase seulement s'il y en a une -->
+<!-- Une ligne : l'icône du type, la phrase, l'heure ; la précision sous la phrase seulement s'il y en a une -->
 <ng-template #line let-row>
     <span class="kind pill-{{ row.tone }}" aria-hidden="true">
         <app-icon [name]="row.icon" [size]="18" />
@@ -207,7 +207,7 @@
     }}</time>
 </ng-template>
 
-<!-- détail d'un événement : feuille qui monte du bas sur téléphone, fenêtre au centre sur ordinateur -->
+<!-- Détail d'un événement : feuille qui monte du bas sur téléphone, fenêtre au centre sur ordinateur -->
 @if (selected(); as row) {
     <div class="sheet-backdrop detail-backdrop" (click)="selected.set(null)"></div>
 

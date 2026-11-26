@@ -21,7 +21,7 @@ const session = (id: number, overrides: Partial<CashSession> = {}): CashSession 
     closed_at: "2026-11-10T19:00:00",
     opened_by: 1,
     opened_by_name: "Yabre M.",
-    closed_by_name: "Awa K.",
+    closed_by_name: "Adam K.",
     closing_note: null,
     closed_by: null,
     ...overrides,
@@ -85,7 +85,7 @@ describe("CashSessions", () => {
         expect(el.querySelector("table")).toBeNull();
         expect(text()).toContain("Encours");
         expect(text()).toContain("Écartde−500F");
-        // pas de montant inventé pour une caisse encore ouverte
+        // Pas de montant inventé pour une caisse encore ouverte
         expect(el.querySelectorAll(".session-card")[0].querySelector(".session-amount")).toBeNull();
     });
 

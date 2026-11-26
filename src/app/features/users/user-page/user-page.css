@@ -3,7 +3,7 @@
     gap: 12px;
 }
 
-/* même largeur que la fiche fournisseur */
+/* Même largeur que la fiche fournisseur */
 .sheet {
     width: 100%;
     max-width: 720px;
@@ -68,7 +68,7 @@ dl > div {
     border-bottom: 1px solid var(--border);
 }
 
-/* le libellé reste sur une ligne ("E-mail" ne se coupe pas au tiret) */
+/* Le libellé reste sur une ligne ("E-mail" ne se coupe pas au tiret) */
 dt {
     flex-shrink: 0;
     white-space: nowrap;
@@ -99,7 +99,7 @@ dd {
     font-weight: var(--fw-semibold);
 }
 
-/* activité : une ligne par action, la plus récente en haut */
+/* Activité : une ligne par action, la plus récente en haut */
 .activity {
     margin: 0;
     padding: 0;
@@ -182,13 +182,13 @@ dd {
     margin-top: 20px;
 }
 
-/* modifier / supprimer : actions secondaires, comme sur la fiche fournisseur */
+/* Modifier / supprimer : actions secondaires, comme sur la fiche fournisseur */
 .manage {
     display: flex;
     flex-wrap: wrap;
     justify-content: flex-end;
     gap: 4px;
-    /* pas de trait en haut : la dernière ligne de la liste au-dessus en a déjà un */
+    /* Pas de trait en haut : la dernière ligne de la liste au-dessus en a déjà un */
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
 }

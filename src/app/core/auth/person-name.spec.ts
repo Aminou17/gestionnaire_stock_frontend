@@ -17,7 +17,7 @@ describe("person name", () => {
     });
 
     it("should join without extra space", () => {
-        expect(joinName("Awa", "Bazin")).toBe("Awa Bazin");
-        expect(joinName(" Awa ", "")).toBe("Awa");
+        expect(joinName("Adam", "Ouédraogo")).toBe("Adam Ouédraogo");
+        expect(joinName(" Adam ", "")).toBe("Adam");
     });
 });

@@ -1,4 +1,4 @@
-/* même fenêtre que les catégories */
+/* Même fenêtre que les catégories */
 .confirm {
     width: min(480px, calc(100% - 32px));
     padding: 0;

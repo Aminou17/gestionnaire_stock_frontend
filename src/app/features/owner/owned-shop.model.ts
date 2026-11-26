@@ -1,17 +1,17 @@
 export type ShopStatus = "ACTIVE" | "SUSPENDED";
 
-// une boutique cliente vue par le propriétaire : son activité, jamais ses montants
+// Une boutique cliente vue par le propriétaire : son activité, jamais ses montants
 export interface OwnedShop {
     id: number;
     name: string;
     status: ShopStatus;
     created_at: string;
-    // date de suppression : la boutique est effacée pour de bon 90 jours plus tard
+    // Date de suppression : la boutique est effacée pour de bon 90 jours plus tard
     deleted_at: string | null;
     trial_ends_at: string | null;
-    // dernier jour payé inclus (AAAA-MM-JJ)
+    // Dernier jour payé inclus (AAAA-MM-JJ)
     paid_until: string | null;
-    // premier instant sans accès, calculé par l'API
+    // Premier instant sans accès, calculé par l'API
     access_ends_at: string | null;
     admin_name: string | null;
     admin_email: string | null;
@@ -19,7 +19,7 @@ export interface OwnedShop {
     country: string | null;
     city: string | null;
     users_count: number;
-    // les vendeurs créés par l'administrateur, sans lui
+    // Les vendeurs créés par l'administrateur, sans lui
     employees_count: number;
     employees: string[];
     sales_last_30_days: number;
@@ -35,7 +35,7 @@ export interface NewShopInput {
     address?: string;
     email: string;
     password: string;
-    // absent : pas d'essai
+    // Absent : pas d'essai
     trialDays?: number;
 }
 
@@ -58,7 +58,7 @@ export interface ShopAccount {
     created_at: string;
 }
 
-// la fiche d'une boutique : contact, comptes et activité, jamais les montants
+// La fiche d'une boutique : contact, comptes et activité, jamais les montants
 export interface OwnedShopDetail {
     id: number;
     name: string;
@@ -81,7 +81,7 @@ export interface TemporaryPassword {
     password: string;
 }
 
-// marge d'une boutique sur une période : pour réfléchir à un tarif, jamais le détail des ventes
+// Marge d'une boutique sur une période : pour réfléchir à un tarif, jamais le détail des ventes
 export interface ShopMargin {
     shop_id: number;
     name: string;
@@ -89,7 +89,7 @@ export interface ShopMargin {
     revenue: number;
     cost: number;
     margin: number;
-    // marge sur le chiffre d'affaires, en pourcentage ; null sans vente
+    // Marge sur le chiffre d'affaires, en pourcentage ; null sans vente
     margin_rate: number | null;
 }
 
@@ -98,12 +98,12 @@ export interface MarginReport {
     rows: ShopMargin[];
 }
 
-// pages ouvertes dans une boutique un jour donné (AAAA-MM-JJ)
+// Pages ouvertes dans une boutique un jour donné (AAAA-MM-JJ)
 export interface UsageDay {
     shop_id: number;
     day: string;
     views: number;
-    // la part ouverte par les vendeurs
+    // La part ouverte par les vendeurs
     employee_views: number | null;
 }
 
@@ -124,7 +124,7 @@ export interface ShopUsage {
     pages: UsagePage[];
 }
 
-// un accès que le propriétaire peut cocher pour une boutique (formule)
+// Un accès que le propriétaire peut cocher pour une boutique (formule)
 export interface ShopModule {
     key: string;
     group: string;
@@ -134,14 +134,14 @@ export interface ShopModule {
 }
 
 export interface ShopModules {
-    // ce que toute boutique a, quoi qu'il arrive
+    // Ce que toute boutique a, quoi qu'il arrive
     core: string[];
     modules: ShopModule[];
 }
 
-// la page Abonnement est-elle ouverte aux boutiques ?
+// La page Abonnement est-elle ouverte aux boutiques ?
 export interface SubscriptionsState {
     enabled: boolean;
-    // dernier changement ; null si jamais activés
+    // Dernier changement ; null si jamais activés
     changedAt: string | null;
 }

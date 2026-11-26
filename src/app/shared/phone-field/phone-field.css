@@ -12,7 +12,7 @@
     position: relative;
 }
 
-/* le + est dessiné, l'utilisateur ne tape que les chiffres */
+/* Le + est dessiné, l'utilisateur ne tape que les chiffres */
 .plus {
     position: absolute;
     top: 50%;
@@ -31,7 +31,7 @@
     font-size: var(--fs-caption);
 }
 
-/* dans les pages de connexion et d'inscription, le champ prend la taille des autres champs */
+/* Dans les pages de connexion et d'inscription, le champ prend la taille des autres champs */
 .phone-inputs .input {
     height: var(--field-h, 44px);
     font-size: var(--field-font, var(--fs-body));

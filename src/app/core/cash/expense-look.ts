@@ -3,14 +3,14 @@ import { IconName } from "../../shared/icon/icons";
 export interface ExpenseCategory {
     value: string;
     label: string;
-    // nom court pour les pastilles et les carreaux
+    // Nom court pour les pastilles et les carreaux
     short: string;
     icon: IconName;
-    // couleur propre au motif : la même partout (carreaux, barres, listes)
+    // Couleur propre au motif : la même partout (carreaux, barres, listes)
     color: string;
 }
 
-// même liste et même ordre que REASON_CATEGORIES.EXPENSE côté backend
+// Même liste et même ordre que REASON_CATEGORIES.EXPENSE côté backend
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
     {
         value: "SUPPLIES",
@@ -45,7 +45,7 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
     { value: "OTHER", label: "Autre", short: "Autre", icon: "receipt", color: "#64748b" },
 ];
 
-// une dépense sans motif est rangée dans Autre
+// Une dépense sans motif est rangée dans Autre
 export const expenseCategory = (value: string | null): ExpenseCategory =>
     EXPENSE_CATEGORIES.find((category) => category.value === value) ??
     EXPENSE_CATEGORIES[EXPENSE_CATEGORIES.length - 1];

@@ -36,7 +36,7 @@ describe("Contact", () => {
     });
 
     it("connecté : propose d'écrire au support dans l'application", async () => {
-        const { el } = await render({ role: "admin", name: "Fatou Diallo" });
+        const { el } = await render({ role: "admin", name: "Fatou Ouédraogo" });
 
         expect(el.querySelector('a[href="/support/new"]')).not.toBeNull();
         expect(el.textContent).toContain("2 nouvelles");

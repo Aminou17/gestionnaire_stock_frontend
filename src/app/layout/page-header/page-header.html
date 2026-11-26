@@ -1,5 +1,5 @@
 <header [class.detail]="!!back()" [class.home]="home()">
-    <!-- une page avec flèche retour n'a pas besoin du menu : la flèche suffit -->
+    <!-- Une page avec flèche retour n'a pas besoin du menu : la flèche suffit -->
     @if (!auth.isOwner() && !back()) {
         <button
             type="button"

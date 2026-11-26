@@ -24,7 +24,7 @@ export class ExpensePage {
     private toast = inject(ToastService);
 
     protected back = getBackLink("/expenses", "Dépenses");
-    // la fiche de la caisse ramène ici
+    // La fiche de la caisse ramène ici
     protected backState = { backTo: "", backLabel: "Dépense" };
 
     private id = Number(this.route.snapshot.paramMap.get("id"));
@@ -34,7 +34,7 @@ export class ExpensePage {
         stream: ({ params }) => this.movements.getMovement(params),
     });
 
-    // un autre type de mouvement n'a rien à faire sur cette page
+    // Un autre type de mouvement n'a rien à faire sur cette page
     notExpense = computed(() => this.expense.hasValue() && this.expense.value().type !== "EXPENSE");
     look = computed(() =>
         expenseCategory(this.expense.hasValue() ? this.expense.value().reason_category : null),
@@ -44,7 +44,7 @@ export class ExpensePage {
     cancelling = signal(false);
     cancelError = signal<string | null>(null);
 
-    // l'argent revient dans le tiroir ; la ligne reste, marquée annulée
+    // L'argent revient dans le tiroir ; la ligne reste, marquée annulée
     cancel() {
         this.cancelling.set(true);
         this.cancelError.set(null);

@@ -7,7 +7,7 @@
             [disabled]="list().length === 0"
             (picked)="exportFile($event)"
         />
-        <!-- téléphone : les exports se rangent dans un menu, comme sur la page Produits -->
+        <!-- Téléphone : les exports se rangent dans un menu, comme sur la page Produits -->
         <div class="head-menu">
             <button
                 type="button"
@@ -97,7 +97,7 @@
 </div>
 
 <section class="card list-card">
-    <!-- téléphone : trois puces par sens, puis le bouton qui ouvre la fenêtre Filtres -->
+    <!-- Téléphone : trois puces par sens, puis le bouton qui ouvre la fenêtre Filtres -->
     <div class="phone-bar">
         <button
             type="button"
@@ -140,7 +140,7 @@
         }
     </div>
 
-    <!-- sur ordinateur ce bloc se fond dans la page ; sur téléphone c'est la fenêtre qui monte du bas -->
+    <!-- Sur ordinateur ce bloc se fond dans la page ; sur téléphone c'est la fenêtre qui monte du bas -->
     <div class="filters" [class.open]="filtersOpen()">
         <div class="sheet-head">
             <h2>Filtres</h2>
@@ -276,7 +276,7 @@
             }
         </div>
     } @else {
-        <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
+        <!-- Erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
         @if (movements.error()) {
             <div class="alert alert-error list-error" role="alert">
                 {{ errorMessage() }}

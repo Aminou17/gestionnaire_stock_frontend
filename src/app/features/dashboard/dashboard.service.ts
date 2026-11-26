@@ -28,7 +28,7 @@ export class DashboardService {
         return this.http.get<SalesComparison>(`${API_URL}/dashboard/sales-comparison`);
     }
 
-    // les ventes ont déjà leur propre liste sur le tableau de bord : on ne les répète pas dans l'activité
+    // Les ventes ont déjà leur propre liste sur le tableau de bord : on ne les répète pas dans l'activité
     getRecentActivity(limit = 5) {
         return this.http
             .get<{ data: Activity[] }>(`${API_URL}/dashboard/recent-activity`, {

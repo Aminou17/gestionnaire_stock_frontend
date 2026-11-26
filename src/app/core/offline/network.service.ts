@@ -12,12 +12,12 @@ export class NetworkService {
         window.addEventListener("offline", () => this.online.set(false));
     }
 
-    // un appel au serveur est resté sans réponse
+    // Un appel au serveur est resté sans réponse
     markUnreachable() {
         this.online.set(false);
     }
 
-    // un appel a reçu une réponse : le serveur est joignable
+    // Un appel a reçu une réponse : le serveur est joignable
     markReachable() {
         if (!this.online()) this.online.set(true);
     }

@@ -48,7 +48,7 @@
             "
         />
     } @else {
-        <!-- une ligne par caisse, sur téléphone comme sur ordinateur -->
+        <!-- Une ligne par caisse, sur téléphone comme sur ordinateur -->
         <ul class="cards">
             @for (session of list(); track session.id) {
                 <li class="session-card" (click)="openSession(session)">

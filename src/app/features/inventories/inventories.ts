@@ -61,7 +61,7 @@ export class Inventories {
             }),
     });
 
-    // un comptage ouvert sans aucun produit n'a rien à montrer : on ne l'affiche pas
+    // Un comptage ouvert sans aucun produit n'a rien à montrer : on ne l'affiche pas
     todoRows = computed(() =>
         (this.todo.hasValue() ? this.todo.value().data : []).filter(
             (inventory) => inventory.status !== "in_progress" || inventory.itemsCount > 0,
@@ -72,7 +72,7 @@ export class Inventories {
         this.history.hasValue() ? this.history.value().pagination.total : 0,
     );
 
-    // premier chargement : pas de liste à garder à l'écran
+    // Premier chargement : pas de liste à garder à l'écran
     firstLoad = computed(
         () =>
             (this.todo.isLoading() && !this.todo.hasValue()) ||
@@ -84,7 +84,7 @@ export class Inventories {
     tone = (inventory: Inventory) => STATUS_TONES[inventory.status];
     result = (inventory: Inventory) => listResult(inventory, this.auth.isAdmin());
 
-    // un comptage en cours s'ouvre directement sur la saisie, les autres sur leur fiche
+    // Un comptage en cours s'ouvre directement sur la saisie, les autres sur leur fiche
     link(inventory: Inventory) {
         return inventory.status === "in_progress"
             ? ["/inventories", inventory.id, "count"]

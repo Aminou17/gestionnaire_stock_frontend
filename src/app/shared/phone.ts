@@ -6,21 +6,21 @@ export const DEFAULT_COUNTRY_CODE = "242";
 
 const digitsOf = (phone: string) => phone.replace(/\D/g, "");
 
-// vrai pour les numéros qui commencent par +226 ou 00226
+// Vrai pour les numéros qui commencent par +226 ou 00226
 const isInternational = (phone: string) => /^\s*(\+|00)/.test(phone);
 
-// chiffres avec l'indicatif devant, jamais de + ni de 00
+// Chiffres avec l'indicatif devant, jamais de + ni de 00
 const internationalDigits = (phone: string, defaultCode: string) => {
     const digits = digitsOf(phone);
 
     if (isInternational(phone)) return digits.replace(/^00/, "");
-    // un numéro de plus de 9 chiffres qui commence par l'indicatif l'a déjà
+    // Un numéro de plus de 9 chiffres qui commence par l'indicatif l'a déjà
     if (digits.startsWith(defaultCode) && digits.length > 9) return digits;
 
     return defaultCode + digits;
 };
 
-// même numéro avec ou sans l'indicatif de la boutique : même clé (comme l'unicité côté API)
+// Même numéro avec ou sans l'indicatif de la boutique : même clé (comme l'unicité côté API)
 export const phoneKey = (phone: string, defaultCode: string) =>
     digitsOf(phone) ? internationalDigits(phone, defaultCode) : "";
 
@@ -31,7 +31,7 @@ export const splitPhone = (phone: string, defaultCode: string) => {
     if (full.startsWith(defaultCode))
         return { code: defaultCode, national: full.slice(defaultCode.length) };
 
-    // indicatif de 3, 2 puis 1 chiffre : le plus long connu gagne
+    // Indicatif de 3, 2 puis 1 chiffre : le plus long connu gagne
     for (const length of [3, 2, 1]) {
         const code = full.slice(0, length);
         if (COUNTRY_NAMES[code]) return { code, national: full.slice(length) };
@@ -46,18 +46,18 @@ export const groupNational = (national: string) => {
         return national.replace(/(\d{2})(\d{3})(\d{2})(\d{2})/, "$1 $2 $3 $4");
     }
 
-    // nombre impair de chiffres : le premier reste seul, comme 6 12 34 56 78
+    // Nombre impair de chiffres : le premier reste seul, comme 6 12 34 56 78
     const lead = national.length % 2 ? `${national[0]} ` : "";
     return lead + (national.slice(lead ? 1 : 0).match(/\d{1,2}/g) ?? []).join(" ");
 };
 
-// la valeur enregistrée quand l'utilisateur passe par le champ indicatif + numéro
+// La valeur enregistrée quand l'utilisateur passe par le champ indicatif + numéro
 export const toInternational = (code: string, national: string) => {
     const digits = digitsOf(national);
     return digits ? `+${code} ${groupNational(digits)}` : "";
 };
 
-// numéro tapé librement (caisse, ancien format) mis au format international
+// Numéro tapé librement (caisse, ancien format) mis au format international
 export const normalizePhone = (phone: string, defaultCode: string) => {
     const { code, national } = splitPhone(phone, defaultCode);
     return toInternational(code, national);
@@ -66,7 +66,7 @@ export const normalizePhone = (phone: string, defaultCode: string) => {
 export const formatPhone = (phone: string, defaultCode = DEFAULT_COUNTRY_CODE) => {
     const { code, national } = splitPhone(phone, defaultCode);
 
-    // numéro d'un autre pays : on le montre complet, tel qu'il a été saisi
+    // Numéro d'un autre pays : on le montre complet, tel qu'il a été saisi
     if (code !== defaultCode) return phone;
 
     if (national.length === 9 && national.startsWith("0")) return groupNational(national);
@@ -75,7 +75,7 @@ export const formatPhone = (phone: string, defaultCode = DEFAULT_COUNTRY_CODE) =
     return phone;
 };
 
-// toujours avec l'indicatif du pays : +226 66 09 90 60
+// Toujours avec l'indicatif du pays : +226 66 09 90 60
 export const formatInternational = (phone: string, defaultCode = DEFAULT_COUNTRY_CODE) => {
     const { code, national } = splitPhone(phone, defaultCode);
     return `+${code} ${groupNational(national)}`;

@@ -14,7 +14,7 @@
     isolation: isolate;
 }
 
-/* lueurs bleues et violettes qui dérivent doucement derrière tout */
+/* Lueurs bleues et violettes qui dérivent doucement derrière tout */
 .shell::before {
     content: "";
     position: absolute;
@@ -27,7 +27,7 @@
     animation: drift 18s ease-in-out infinite alternate;
 }
 
-/* fine grille qui s'efface vers le bas */
+/* Fine grille qui s'efface vers le bas */
 .shell::after {
     content: "";
     position: absolute;
@@ -122,7 +122,7 @@
     flex-direction: column;
 }
 
-/* le formulaire flotte dans une carte, le fond sombre reste visible tout autour */
+/* Le formulaire flotte dans une carte, le fond sombre reste visible tout autour */
 .content {
     flex: 1;
     display: flex;
@@ -180,7 +180,7 @@ footer {
     text-decoration: underline;
 }
 
-/* tablette : carte un peu plus large et plus aérée */
+/* Tablette : carte un peu plus large et plus aérée */
 @media (min-width: 640px) and (max-width: 1023px) {
     .card {
         max-width: 480px;
@@ -188,7 +188,7 @@ footer {
     }
 }
 
-/* ordinateur : deux colonnes, la carte est centrée dans la hauteur */
+/* Ordinateur : deux colonnes, la carte est centrée dans la hauteur */
 @media (min-width: 1024px) {
     .shell {
         --gutter: 56px;
@@ -196,7 +196,7 @@ footer {
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
     }
 
-    /* l'en-tête suit les deux colonnes : la marque à gauche, « Accueil » au bord droit de la carte */
+    /* L'en-tête suit les deux colonnes : la marque à gauche, « Accueil » au bord droit de la carte */
     .bar {
         position: absolute;
         inset: 0 0 auto 0;

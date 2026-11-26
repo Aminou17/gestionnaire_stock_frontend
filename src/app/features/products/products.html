@@ -1,6 +1,6 @@
 <app-page-header title="Produits">
     @if (auth.isAdmin()) {
-        <!-- télécharger la liste : une icône, le format se choisit ensuite -->
+        <!-- Télécharger la liste : une icône, le format se choisit ensuite -->
         <app-export-menu
             class="icon-only icon-phone"
             ariaLabel="Télécharger la liste des produits"
@@ -67,7 +67,7 @@
 
 <section class="card list-card">
     <div class="toolbar">
-        <!-- chercher ou scanner dans la même barre -->
+        <!-- Chercher ou scanner dans la même barre -->
         <div class="search">
             <app-icon name="search" [size]="18" />
             <input
@@ -106,7 +106,7 @@
             }
         </button>
 
-        <!-- un seul bouton qui active ou coupe les carreaux -->
+        <!-- Un seul bouton qui active ou coupe les carreaux -->
         <button
             type="button"
             class="view-single"
@@ -237,7 +237,7 @@
         }
     </div>
 
-    <!-- téléphone : nombre de produits et valeur du stock sur une ligne discrète -->
+    <!-- Téléphone : nombre de produits et valeur du stock sur une ligne discrète -->
     <div class="summary-line">
         <span class="muted">{{ total() }} produit{{ total() > 1 ? "s" : "" }}</span>
         @if (stockValue() !== undefined) {
@@ -271,7 +271,7 @@
     } @else if (list().length === 0) {
         <p class="empty">Aucun produit à afficher.</p>
     } @else {
-        <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
+        <!-- Erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
         @if (products.error()) {
             <div class="alert alert-error list-error" role="alert">
                 Impossible de charger les produits.
@@ -366,7 +366,7 @@
                 </table>
             </div>
         } @else {
-            <!-- vue grille : un catalogue de grandes photos -->
+            <!-- Vue grille : un catalogue de grandes photos -->
             <ul class="grid">
                 @for (product of list(); track product.id) {
                     <li
@@ -527,5 +527,5 @@
     </div>
 </dialog>
 
-<!-- un code scanné cherche le produit qui le porte -->
+<!-- Un code scanné cherche le produit qui le porte -->
 <app-barcode-scanner #scanner (scanned)="searchBox.value = $event; search.set($event)" />

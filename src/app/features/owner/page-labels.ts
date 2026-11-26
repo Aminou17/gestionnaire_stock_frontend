@@ -38,7 +38,7 @@ const LABELS: Record<string, string> = {
 
 export const pageLabel = (page: string) => LABELS[page] ?? page;
 
-// rubrique de l'application où se range une page, pour regrouper l'activité
+// Rubrique de l'application où se range une page, pour regrouper l'activité
 export const pageSection = (page: string) => {
     const rules: [string, string][] = [
         ["/sales", "Ventes"],
@@ -64,7 +64,7 @@ export const pageSection = (page: string) => {
     );
 };
 
-// pages que l'on peut ouvrir sans choisir un élément précis : sert à repérer celles qui ne sont jamais ouvertes
+// Pages que l'on peut ouvrir sans choisir un élément précis : sert à repérer celles qui ne sont jamais ouvertes
 export const OPENABLE_PAGES = Object.keys(LABELS).filter(
     (page) => !page.includes(":id") && page !== "/support",
 );
@@ -112,7 +112,7 @@ export const accessAttempt = (method: string | undefined, path: string) => {
     return `a essayé ${action} : ${name}`;
 };
 
-// rôle d'un compte, en français
+// Rôle d'un compte, en français
 export const roleLabel = (role: string) =>
     role === "admin"
         ? "Administrateur"

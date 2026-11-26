@@ -1,4 +1,4 @@
-// état d'accès d'une boutique pour son étiquette : essai, payé, délai de grâce, terminé
+// État d'accès d'une boutique pour son étiquette : essai, payé, délai de grâce, terminé
 // (même règle que l'API : la plus tardive de la fin d'essai et du lendemain du dernier jour payé, puis 3 jours de grâce)
 const DAY = 86_400_000;
 export const GRACE_DAYS = 3;
@@ -8,7 +8,7 @@ export type AccessTone = "ok" | "info" | "warn" | "ended";
 export interface AccessLabel {
     label: string;
     tone: AccessTone;
-    // compatibilité avec les anciennes étiquettes d'essai
+    // Compatibilité avec les anciennes étiquettes d'essai
     ended: boolean;
 }
 
@@ -48,6 +48,6 @@ export const accessStateOf = (shop: {
     return { label: paid ? "Abonnement expiré" : "Essai terminé", tone: "ended", ended: true };
 };
 
-// ancien nom, gardé pour les écrans qui n'ont que la fin d'essai
+// Ancien nom, gardé pour les écrans qui n'ont que la fin d'essai
 export const trialStateOf = (trialEndsAt: string | null) =>
     accessStateOf({ trial_ends_at: trialEndsAt });

@@ -15,10 +15,10 @@ import {
 export class SupportService {
     private http = inject(HttpClient);
 
-    // conversations avec une réponse (ou un message pour le propriétaire) pas encore lue
+    // Conversations avec une réponse (ou un message pour le propriétaire) pas encore lue
     unread = signal(0);
 
-    // le propriétaire passe par /support/owner, les utilisateurs par /support
+    // Le propriétaire passe par /support/owner, les utilisateurs par /support
     private base(side: SupportSide) {
         return side === "owner" ? `${API_URL}/support/owner` : `${API_URL}/support`;
     }
@@ -33,7 +33,7 @@ export class SupportService {
         return this.http.get<SupportThread[]>(`${this.base(side)}/threads`);
     }
 
-    // ouvrir une conversation la marque lue
+    // Ouvrir une conversation la marque lue
     getThread(side: SupportSide, id: number) {
         return this.http
             .get<SupportThreadDetail>(`${this.base(side)}/threads/${id}`)

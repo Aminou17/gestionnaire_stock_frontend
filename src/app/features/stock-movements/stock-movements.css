@@ -53,7 +53,7 @@ app-page-header {
     font-size: var(--fs-small);
 }
 
-/* part du type dans la période : un repère visuel, pas une mesure précise */
+/* Part du type dans la période : un repère visuel, pas une mesure précise */
 .stat-track {
     height: 4px;
     margin-top: 8px;
@@ -102,7 +102,7 @@ app-page-header {
     background: var(--violet);
 }
 
-/* miniature du produit, ou ses initiales ; sur téléphone la pastille dit le type */
+/* Miniature du produit, ou ses initiales ; sur téléphone la pastille dit le type */
 .thumb {
     position: relative;
     text-decoration: none;
@@ -178,7 +178,7 @@ app-page-header {
     display: none;
 }
 
-/* sur ordinateur, la fenêtre des filtres se fond dans la page */
+/* Sur ordinateur, la fenêtre des filtres se fond dans la page */
 .filters {
     display: contents;
 }
@@ -377,7 +377,7 @@ td.quantity {
         gap: 12px;
     }
 
-    /* cinq onglets : le dernier prend toute la largeur */
+    /* Cinq onglets : le dernier prend toute la largeur */
     .stat:last-child:nth-child(odd) {
         grid-column: 1 / -1;
     }
@@ -397,7 +397,7 @@ td.quantity {
         padding-right: 10px;
     }
 
-    /* le tableau doit tenir sans défilement : produit et origine passent à la ligne */
+    /* Le tableau doit tenir sans défilement : produit et origine passent à la ligne */
     td {
         white-space: normal;
     }
@@ -429,12 +429,12 @@ td.quantity {
         border: 0;
     }
 
-    /* le filtre produit est repris en puce sous la ligne du haut */
+    /* Le filtre produit est repris en puce sous la ligne du haut */
     .product-filter {
         display: none;
     }
 
-    /* une rangée : le bouton Filtre, qui ouvre la fenêtre (sens, type, période) */
+    /* Une rangée : le bouton Filtre, qui ouvre la fenêtre (sens, type, période) */
     .phone-bar {
         display: flex;
         align-items: center;
@@ -470,7 +470,7 @@ td.quantity {
         margin: 4px 4px 0;
     }
 
-    /* ligne fine, comme la valeur du stock sur la page Produits */
+    /* Ligne fine, comme la valeur du stock sur la page Produits */
     .summary {
         display: block;
         margin: 0;
@@ -528,7 +528,7 @@ td.quantity {
         cursor: pointer;
     }
 
-    /* photo plus grande sur téléphone, pour reconnaître le produit d'un coup d'oeil */
+    /* Photo plus grande sur téléphone, pour reconnaître le produit d'un coup d'oeil */
     .movement-row .thumb {
         width: 52px;
         height: 52px;
@@ -589,7 +589,7 @@ td.quantity {
         overflow: hidden;
         font-size: var(--fs-body);
         line-height: 1.3;
-        /* le nom passe sur 2 lignes au lieu d'être coupé trop tôt */
+        /* Le nom passe sur 2 lignes au lieu d'être coupé trop tôt */
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
     }
@@ -603,7 +603,7 @@ td.quantity {
         font-size: var(--fs-small);
     }
 
-    /* l'auteur est dans le détail : sur téléphone on évite un nom coupé */
+    /* L'auteur est dans le détail : sur téléphone on évite un nom coupé */
     .meta-author {
         display: none;
     }
@@ -730,7 +730,7 @@ tbody tr:focus-visible,
         color: var(--primary-text);
     }
 
-    /* petit compteur sur le coin : le nombre de filtres actifs */
+    /* Petit compteur sur le coin : le nombre de filtres actifs */
     .filter-count {
         position: absolute;
         top: -6px;
@@ -747,7 +747,7 @@ tbody tr:focus-visible,
         font-weight: var(--fw-semibold);
     }
 
-    /* les filtres actifs restent sur la ligne de Tous et Filtre, le nom se coupe si trop long */
+    /* Les filtres actifs restent sur la ligne de Tous et Filtre, le nom se coupe si trop long */
     .active-chip {
         display: inline-flex;
         flex: 0 1 auto;
@@ -772,7 +772,7 @@ tbody tr:focus-visible,
         white-space: nowrap;
     }
 
-    /* la fenêtre des filtres monte du bas, comme sur la page Produits */
+    /* La fenêtre des filtres monte du bas, comme sur la page Produits */
     .filters {
         display: none;
         position: fixed;

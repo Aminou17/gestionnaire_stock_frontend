@@ -7,7 +7,7 @@ app-page-header {
     margin-bottom: -4px;
 }
 
-/* une chronologie se lit mieux sur une largeur limitée */
+/* Une chronologie se lit mieux sur une largeur limitée */
 .top-card,
 .days,
 .list-pager,
@@ -79,7 +79,7 @@ app-page-header {
     padding-left: 40px;
 }
 
-/* sur ordinateur les filtres sont des puces visibles, pas de bouton ni de feuille */
+/* Sur ordinateur les filtres sont des puces visibles, pas de bouton ni de feuille */
 .filter-btn,
 .active-row,
 .sheet-head,
@@ -92,7 +92,7 @@ app-page-header {
     display: contents;
 }
 
-/* sur tablette et ordinateur, les puces passent à la ligne au lieu de défiler */
+/* Sur tablette et ordinateur, les puces passent à la ligne au lieu de défiler */
 @media (min-width: 768px) {
     .filters ::ng-deep app-period-filter.chips .toolbar {
         flex-wrap: wrap;
@@ -116,7 +116,7 @@ app-page-header {
     font-variant-numeric: tabular-nums;
 }
 
-/* rouge seulement quand il y a vraiment quelque chose à regarder */
+/* Rouge seulement quand il y a vraiment quelque chose à regarder */
 .stat strong.alert {
     color: var(--danger);
 }
@@ -183,7 +183,7 @@ app-page-header {
     outline-offset: -2px;
 }
 
-/* initiales de la personne, avec la pastille de couleur du type d'action sur le coin */
+/* Initiales de la personne, avec la pastille de couleur du type d'action sur le coin */
 .who {
     position: relative;
     display: grid;
@@ -322,7 +322,7 @@ app-page-header {
     gap: 12px;
 }
 
-/* détail : fenêtre au centre sur ordinateur */
+/* Détail : fenêtre au centre sur ordinateur */
 .sheet-backdrop.detail-backdrop {
     display: block;
 }
@@ -522,7 +522,7 @@ app-page-header {
         color: var(--primary-text);
     }
 
-    /* nombre de filtres actifs sur le coin du bouton */
+    /* Nombre de filtres actifs sur le coin du bouton */
     .filter-count {
         position: absolute;
         top: -6px;
@@ -573,7 +573,7 @@ app-page-header {
         padding: 0 12px 12px;
     }
 
-    /* la fenêtre des filtres monte du bas */
+    /* La fenêtre des filtres monte du bas */
     .filters {
         display: none;
         position: fixed;
@@ -605,7 +605,7 @@ app-page-header {
         margin-right: -10px;
     }
 
-    /* dans la fenêtre, chaque filtre prend toute la largeur */
+    /* Dans la fenêtre, chaque filtre prend toute la largeur */
     .filters select.chip,
     .filters button.chip {
         justify-content: flex-start;
@@ -636,7 +636,7 @@ app-page-header {
         min-height: 44px;
     }
 
-    /* feuille qui monte du bas */
+    /* Feuille qui monte du bas */
     .detail {
         top: auto;
         bottom: 0;
@@ -653,7 +653,7 @@ app-page-header {
     }
 }
 
-/* onglets Activité / Sécurité : même habillage que les pastilles de période */
+/* Onglets Activité / Sécurité : même habillage que les pastilles de période */
 .tabs {
     gap: 4px;
     margin: 16px 16px 0;
@@ -714,7 +714,7 @@ app-page-header {
     outline-offset: 2px;
 }
 
-/* ligne légère : une icône de couleur, la phrase, l'heure */
+/* Ligne légère : une icône de couleur, la phrase, l'heure */
 .entry {
     grid-template-columns: 36px minmax(0, 1fr) auto;
     min-height: 60px;
@@ -738,7 +738,7 @@ app-page-header {
     display: none;
 }
 
-/* filtres toujours visibles sous la recherche : deux listes côte à côte */
+/* Filtres toujours visibles sous la recherche : deux listes côte à côte */
 .filters {
     position: static;
     display: block;

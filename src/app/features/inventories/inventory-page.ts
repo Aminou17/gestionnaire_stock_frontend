@@ -34,7 +34,7 @@ import { STATUS_TONES, heroSentence, reasonLabel } from "./inventory-look";
 import { InventoryStatusBadge } from "./inventory-status";
 import { InventoryThumb } from "./inventory-thumb";
 
-// un inventaire ne contient que les produits choisis : une seule page suffit
+// Un inventaire ne contient que les produits choisis : une seule page suffit
 const MAX_LINES = 500;
 
 @Component({
@@ -73,7 +73,7 @@ export class InventoryPage {
     private cancelDialog = viewChild(InventoryCancelDialog);
     private lineDialog = viewChild(InventoryLineDialog);
 
-    // les lignes ; l'inventaire du haut vit à part pour ne pas sauter au rechargement
+    // Les lignes ; l'inventaire du haut vit à part pour ne pas sauter au rechargement
     detail = rxResource({
         params: () => ({ id: this.id() }),
         stream: ({ params }) =>
@@ -88,7 +88,7 @@ export class InventoryPage {
     inventory = signal<Inventory | null>(null);
     items = computed(() => (this.detail.hasValue() ? this.detail.value().items : []));
 
-    // les plus gros écarts d'abord, puis l'ordre alphabétique
+    // Les plus gros écarts d'abord, puis l'ordre alphabétique
     sortedItems = computed(() =>
         [...this.items()].sort(
             (a, b) =>
@@ -97,15 +97,15 @@ export class InventoryPage {
         ),
     );
 
-    // détail de la correction : un compte rendu juste après l'avoir faite
+    // Détail de la correction : un compte rendu juste après l'avoir faite
     report = signal<ApplyResult | null>(null);
-    // erreurs séparées : l'export n'a rien à voir avec la correction du stock
+    // Erreurs séparées : l'export n'a rien à voir avec la correction du stock
     exportError = signal(false);
     exporting = signal(false);
     actionError = signal("");
 
     zoom = signal<{ src: string; name: string } | null>(null);
-    // ligne appliquée dont le détail est ouvert
+    // Ligne appliquée dont le détail est ouvert
     expanded = signal<number | null>(null);
 
     isAdmin = this.auth.isAdmin;
@@ -114,10 +114,10 @@ export class InventoryPage {
     sentence = computed(() =>
         this.inventory() ? heroSentence(this.inventory()!, this.isAdmin()) : "",
     );
-    // le stock du logiciel reste caché tant que le comptage est ouvert, même pour l'administrateur
+    // Le stock du logiciel reste caché tant que le comptage est ouvert, même pour l'administrateur
     blind = computed(() => this.inventory()?.status === "in_progress");
 
-    // le menu « … » de l'en-tête : les détails pour tous, exports et annulation pour l'administrateur
+    // Le menu « … » de l'en-tête : les détails pour tous, exports et annulation pour l'administrateur
     menuItems = computed<ActionItem[]>(() => {
         const items: ActionItem[] = [];
 
@@ -153,7 +153,7 @@ export class InventoryPage {
     });
 
     constructor() {
-        // l'inventaire du haut garde son dernier état quand les lignes se rechargent
+        // L'inventaire du haut garde son dernier état quand les lignes se rechargent
         effect(() => {
             if (!this.detail.hasValue()) return;
             const detail = this.detail.value();
@@ -164,7 +164,7 @@ export class InventoryPage {
         });
     }
 
-    // comment une ligne réagit au clic : recompter, corriger ou voir le détail
+    // Comment une ligne réagit au clic : recompter, corriger ou voir le détail
     lineMode(line: InventoryItem) {
         const status = this.inventory()?.status;
 
@@ -231,7 +231,7 @@ export class InventoryPage {
 
     reasonText = reasonLabel;
 
-    // un produit ignoré, expliqué en mots simples
+    // Un produit ignoré, expliqué en mots simples
     skippedText(reason: string) {
         return `${reason}. Son stock n'a pas été modifié.`;
     }

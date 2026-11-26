@@ -25,7 +25,7 @@ export class StockMovementService {
         return this.http.get<StockMovementPage>(`${API_URL}/stock_movements`, { params });
     }
 
-    // ajustement manuel du stock, réservé à l'admin
+    // Ajustement manuel du stock, réservé à l'admin
     adjustStock(input: StockAdjustmentInput) {
         return this.http.post<{ id: number; stock_after: number }>(
             `${API_URL}/stock_movements/adjustments`,
@@ -33,7 +33,7 @@ export class StockMovementService {
         );
     }
 
-    // fichier des mouvements correspondant aux filtres, sans pagination
+    // Fichier des mouvements correspondant aux filtres, sans pagination
     exportFile(filters: Omit<StockMovementFilters, "page" | "limit">, format: ExportFormat) {
         return this.http.get(`${API_URL}/stock_movements/export`, {
             params: { ...this.filterParams(filters), format },

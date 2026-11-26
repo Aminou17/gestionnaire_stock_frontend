@@ -9,7 +9,7 @@ import { NewSaleItem, Sale, SaleDetail, SaleFilters, SalePage, NewSalePayment } 
 const toSale = <T extends Sale | SaleDetail>(sale: T): T => ({
     ...sale,
     total: Number(sale.total),
-    // un backend plus ancien n'envoie pas ces champs : la vente était payée en totalité
+    // Un backend plus ancien n'envoie pas ces champs : la vente était payée en totalité
     paid_amount: sale.paid_amount === undefined ? Number(sale.total) : Number(sale.paid_amount),
 });
 
@@ -44,7 +44,7 @@ export class SaleService {
             .pipe(map((res) => ({ ...res, data: res.data.map(toSale) })));
     }
 
-    // adresse publique du ticket, que le client ouvre depuis WhatsApp sans se connecter
+    // Adresse publique du ticket, que le client ouvre depuis WhatsApp sans se connecter
     getTicketLink(id: number) {
         return this.http.post<{ url: string }>(`${API_URL}/tickets/sales/${id}/link`, {});
     }
@@ -59,7 +59,7 @@ export class SaleService {
                     reference_price: Number(item.reference_price),
                     discount_amount: Number(item.discount_amount),
                 })),
-                // un backend plus ancien n'envoie pas ces champs
+                // Un backend plus ancien n'envoie pas ces champs
                 payment_method: sale.payment_method ?? "CASH",
                 amount_received:
                     sale.amount_received === null || sale.amount_received === undefined
@@ -89,12 +89,12 @@ export class SaleService {
         return this.http.post<{ id: number }>(`${API_URL}/sales`, { items, ...payment });
     }
 
-    // encaisser un acompte ou le solde d'une vente
+    // Encaisser un acompte ou le solde d'une vente
     addPayment(id: number, payment: NewSalePayment & { amountPaid: number }) {
         return this.http.post<{ id: number }>(`${API_URL}/sales/${id}/payments`, payment);
     }
 
-    // rendre une partie d'un article : le stock est remis et le client remboursé
+    // Rendre une partie d'un article : le stock est remis et le client remboursé
     returnItem(id: number, body: { productId: number; quantity: number; reason: string }) {
         return this.http.post<{ amount: number; cashRefunded: number; otherRefunded: number }>(
             `${API_URL}/sales/${id}/returns`,

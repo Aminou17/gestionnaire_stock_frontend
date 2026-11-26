@@ -6,12 +6,12 @@ export interface HelpRequestInput {
     shopName?: string;
     reason: HelpReason;
     message: string;
-    // pièges à robots : champ caché et temps passé sur le formulaire
+    // Pièges à robots : champ caché et temps passé sur le formulaire
     website?: string;
     elapsedMs?: number;
 }
 
-// demande reçue depuis la page de connexion, vue par le propriétaire
+// Demande reçue depuis la page de connexion, vue par le propriétaire
 export interface HelpRequest {
     id: number;
     name: string;

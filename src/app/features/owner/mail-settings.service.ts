@@ -8,7 +8,7 @@ export interface MailSettings {
     hasPassword: boolean;
     unreadable: boolean;
     updatedAt: string | null;
-    // d'où vient le compte qui envoie en ce moment
+    // D'où vient le compte qui envoie en ce moment
     activeSource: "database" | "env" | "none";
 }
 

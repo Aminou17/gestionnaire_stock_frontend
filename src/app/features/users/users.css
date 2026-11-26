@@ -61,7 +61,7 @@ app-page-header {
     cursor: pointer;
 }
 
-/* pas de traits entre les lignes : l'espace suffit */
+/* Pas de traits entre les lignes : l'espace suffit */
 .row:hover,
 .row:has(.name:focus-visible) {
     background: var(--surface-hover);
@@ -95,7 +95,7 @@ app-page-header {
     min-width: 0;
 }
 
-/* le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
+/* Le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
 .name {
     min-width: 0;
     padding: 0;
@@ -249,7 +249,7 @@ app-page-header {
         gap: 12px;
     }
 
-    /* place pour le bouton + flottant */
+    /* Place pour le bouton + flottant */
     .list-card {
         padding-bottom: 88px;
         background: transparent;

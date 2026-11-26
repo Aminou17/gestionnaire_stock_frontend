@@ -11,7 +11,7 @@ import { SaleOutboxService } from "../../core/offline/sale-outbox.service";
 })
 export class LogoutDialog {
     protected auth = inject(AuthService);
-    // les ventes faites sans internet restent sur l'appareil et partiront à la prochaine connexion du même compte
+    // Les ventes faites sans internet restent sur l'appareil et partiront à la prochaine connexion du même compte
     protected outbox = inject(SaleOutboxService);
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("box");

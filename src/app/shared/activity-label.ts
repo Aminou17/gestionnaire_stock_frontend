@@ -68,10 +68,10 @@ export const LABELS: Record<string, string> = {
     ALERT_EMAIL_TEST_SENT: "E-mail d'essai des alertes envoyé",
 };
 
-// une action ajoutée plus tard au backend reste affichée, sans libellé inventé
+// Une action ajoutée plus tard au backend reste affichée, sans libellé inventé
 export const getActivityLabel = (action: string) => LABELS[action] ?? "Autre action";
 
-// une icône par famille d'action, pour repérer le type d'un coup d'oeil
+// Une icône par famille d'action, pour repérer le type d'un coup d'oeil
 export const getActivityIcon = (action: string): IconName => {
     if (action.startsWith("AUTH_")) return "user";
     if (action === "ACCESS_DENIED") return "ban";
@@ -87,7 +87,7 @@ export const getActivityIcon = (action: string): IconName => {
 
 export type ActivityTone = "success" | "info" | "danger" | "violet" | "neutral";
 
-// la couleur dit la nature de l'action : création, modification, suppression, sécurité
+// La couleur dit la nature de l'action : création, modification, suppression, sécurité
 export const getActivityTone = (action: string, failed = false): ActivityTone => {
     if (failed || action.endsWith("_DEACTIVATED") || action.endsWith("_REMOVED")) return "danger";
     if (action === "SALE_CANCELLED" || action === "SALE_ITEM_RETURNED") return "danger";

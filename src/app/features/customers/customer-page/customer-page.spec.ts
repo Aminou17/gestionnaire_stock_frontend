@@ -14,9 +14,9 @@ import { CustomerService } from "../../../core/customers/customer.service";
 import { ShopSettingsService } from "../../../core/shop/shop-settings.service";
 import { LowStockAlertService } from "../../../core/stock/low-stock-alert.service";
 
-const awa: Customer = {
+const adam: Customer = {
     id: 4,
-    name: "Awa Kouba",
+    name: "Adam Kouba",
     phone: "06 123 45 67",
     note: "Passe le samedi",
     is_active: true,
@@ -36,7 +36,7 @@ const sale = (id: number, changes: Partial<CustomerSale> = {}): CustomerSale => 
     paid_amount: 5000,
     returned_amount: 0,
     payment_method: "CASH",
-    user_name: "Awa",
+    user_name: "Adam",
     items_count: 3,
     ...changes,
 });
@@ -48,7 +48,7 @@ describe("CustomerPage", () => {
     let getCustomerSales: ReturnType<typeof vi.fn>;
 
     async function render({
-        customer = awa,
+        customer = adam,
         admin = true,
         sales = [sale(24), sale(14, { paid_amount: 11500, created_at: "2026-10-02T10:00:00Z" })],
         total = 0,
@@ -81,7 +81,7 @@ describe("CustomerPage", () => {
                 {
                     provide: ShopSettingsService,
                     useValue: {
-                        shopName: signal("Awa Bazin"),
+                        shopName: signal("Adam Ouédraogo"),
                         defaultCountryCode: signal("242"),
                         info: signal(null),
                     },
@@ -135,7 +135,7 @@ describe("CustomerPage", () => {
 
     it("should show how long the debt has been open", async () => {
         const eightDaysAgo = new Date(Date.now() - 8 * 86400000).toISOString();
-        await render({ customer: { ...awa, oldest_due_at: eightDaysAgo } });
+        await render({ customer: { ...adam, oldest_due_at: eightDaysAgo } });
 
         expect(el.querySelector(".due-label")!.textContent).toContain("(Depuis 8 jours)");
     });
@@ -146,7 +146,7 @@ describe("CustomerPage", () => {
         remaining_after: 4000,
         payment_method: "CASH",
         created_at: "2026-11-20T10:00:00Z",
-        user_name: "Awa",
+        user_name: "Adam",
         sales: [{ id: 24, number: 24, amount: 2500 }],
     };
 
@@ -205,13 +205,13 @@ describe("CustomerPage", () => {
     });
 
     it("should not show the reminder when nothing is due", async () => {
-        await render({ customer: { ...awa, due_amount: 0 } });
+        await render({ customer: { ...adam, due_amount: 0 } });
 
         expect(el.querySelector(".due-card")).toBeNull();
     });
 
     it("should offer a button to write on WhatsApp to a customer without debt", async () => {
-        await render({ customer: { ...awa, due_amount: 0 } });
+        await render({ customer: { ...adam, due_amount: 0 } });
         const link = el.querySelector<HTMLAnchorElement>(".write")!;
 
         expect(link.textContent).toContain("Écrire sur WhatsApp");
@@ -231,7 +231,7 @@ describe("CustomerPage", () => {
     });
 
     it("should offer to delete a customer who owes nothing", async () => {
-        await render({ customer: { ...awa, due_amount: 0 } });
+        await render({ customer: { ...adam, due_amount: 0 } });
 
         expect(el.querySelector("button.danger")?.textContent).toContain("Supprimer ce client");
     });

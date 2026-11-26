@@ -17,7 +17,7 @@ const line = {
     actualStock: 37,
 } as InventoryItem;
 
-// les trois fenêtres dans un même hôte, pour les ouvrir comme le fait la fiche
+// Les trois fenêtres dans un même hôte, pour les ouvrir comme le fait la fiche
 @Component({
     imports: [InventoryApplyDialog, InventoryCancelDialog, InventoryLineDialog],
     template: `
@@ -56,7 +56,7 @@ describe("Inventory dialogs", () => {
     };
 
     beforeEach(async () => {
-        // jsdom ne gère pas <dialog>
+        // Jsdom ne gère pas <dialog>
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
 
@@ -211,7 +211,7 @@ describe("Inventory dialogs", () => {
             fixture.detectChanges();
             el.querySelector<HTMLButtonElement>("app-inventory-line-dialog .btn-primary")!.click();
 
-            // la quantité n'a pas changé : seule la raison part
+            // La quantité n'a pas changé : seule la raison part
             expect(service["saveItems"]).not.toHaveBeenCalled();
             expect(service["setReason"]).toHaveBeenCalledWith(7, 4, "theft");
             expect(host.saved).toBeDefined();

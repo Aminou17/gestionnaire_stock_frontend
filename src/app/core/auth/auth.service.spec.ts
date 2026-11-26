@@ -10,7 +10,7 @@ describe("AuthService", () => {
     let service: AuthService;
     let httpMock: HttpTestingController;
 
-    const user: User = { id: 1, name: "Awa", email: "awa@test.com", role: "manager" };
+    const user: User = { id: 1, name: "Adam", email: "adam@test.com", role: "manager" };
 
     function setup() {
         TestBed.configureTestingModule({
@@ -31,11 +31,11 @@ describe("AuthService", () => {
         setup();
         const token = fakeToken();
 
-        service.login("awa@test.com", "secret").subscribe();
+        service.login("adam@test.com", "secret").subscribe();
 
         const req = httpMock.expectOne("/api/auth/login");
         expect(req.request.method).toBe("POST");
-        expect(req.request.body).toEqual({ email: "awa@test.com", password: "secret" });
+        expect(req.request.body).toEqual({ email: "adam@test.com", password: "secret" });
         req.flush({ message: "Connexion réussie.", token, user });
 
         expect(localStorage.getItem("token")).toBe(token);
@@ -48,7 +48,7 @@ describe("AuthService", () => {
         setup();
         const token = fakeToken();
 
-        service.login("awa@test.com", "secret", false).subscribe();
+        service.login("adam@test.com", "secret", false).subscribe();
         httpMock.expectOne("/api/auth/login").flush({ message: "", token, user });
 
         expect(sessionStorage.getItem("token")).toBe(token);
@@ -61,7 +61,7 @@ describe("AuthService", () => {
         setup();
 
         expect(service.isLoggedIn()).toBe(true);
-        expect(service.user()?.name).toBe("Awa");
+        expect(service.user()?.name).toBe("Adam");
     });
 
     it("should not be logged in when the token is expired", () => {
@@ -89,35 +89,35 @@ describe("AuthService", () => {
         setup();
 
         service.refreshUser().subscribe();
-        httpMock.expectOne("/api/auth/me").flush({ ...user, name: "Awa B.", role: "admin" });
+        httpMock.expectOne("/api/auth/me").flush({ ...user, name: "Adam B.", role: "admin" });
 
-        expect(service.user()?.name).toBe("Awa B.");
+        expect(service.user()?.name).toBe("Adam B.");
         expect(service.isAdmin()).toBe(true);
-        expect(JSON.parse(localStorage.getItem("user")!).name).toBe("Awa B.");
+        expect(JSON.parse(localStorage.getItem("user")!).name).toBe("Adam B.");
     });
 
     it("should update the profile and keep the new name in the session", () => {
         setup();
 
-        service.updateProfile("Awa", "Traoré", "awa@test.com").subscribe();
+        service.updateProfile("Adam", "Traoré", "adam@test.com").subscribe();
         const req = httpMock.expectOne("/api/auth/me");
         expect(req.request.method).toBe("PUT");
         expect(req.request.body).toEqual({
-            firstName: "Awa",
+            firstName: "Adam",
             lastName: "Traoré",
-            email: "awa@test.com",
+            email: "adam@test.com",
         });
         req.flush({
             id: 1,
-            name: "Awa Traoré",
-            firstName: "Awa",
+            name: "Adam Traoré",
+            firstName: "Adam",
             lastName: "Traoré",
-            email: "awa@test.com",
+            email: "adam@test.com",
             role: "admin",
         });
 
-        expect(service.user()?.name).toBe("Awa Traoré");
-        expect(service.user()?.firstName).toBe("Awa");
+        expect(service.user()?.name).toBe("Adam Traoré");
+        expect(service.user()?.firstName).toBe("Adam");
     });
 
     it("should send both passwords to change the password", () => {
@@ -141,11 +141,11 @@ describe("AuthService", () => {
     it("should post the email to the forgot-password endpoint", () => {
         setup();
 
-        service.forgotPassword("awa@test.com").subscribe();
+        service.forgotPassword("adam@test.com").subscribe();
 
         const req = httpMock.expectOne("/api/auth/forgot-password");
         expect(req.request.method).toBe("POST");
-        expect(req.request.body).toEqual({ email: "awa@test.com" });
+        expect(req.request.body).toEqual({ email: "adam@test.com" });
         expect(req.request.headers.has("Authorization")).toBe(false);
         req.flush({ message: "ok" });
     });

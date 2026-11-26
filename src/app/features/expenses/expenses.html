@@ -12,7 +12,7 @@
     </a>
 </app-page-header>
 
-<!-- période : le mois en cours par défaut, comme un relevé -->
+<!-- Période : le mois en cours par défaut, comme un relevé -->
 <div class="periods" role="group" aria-label="Période">
     @for (item of periods; track item.key) {
         <button
@@ -60,7 +60,7 @@
     <div class="alert alert-error" role="alert">{{ exportError() }}</div>
 }
 
-<!-- une seule carte : le total, puis sa répartition par motif, qui sert aussi de filtre -->
+<!-- Une seule carte : le total, puis sa répartition par motif, qui sert aussi de filtre -->
 <section class="card summary-card tinted" data-tone="danger" aria-label="Total des dépenses">
     <div class="total-head">
         <span class="total-label">Total dépensé</span>

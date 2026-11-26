@@ -4,7 +4,7 @@ import { describeRequest, getAuditChanges, getAuditSentence } from "./audit-sent
 const log = (patch: Partial<AuditLog>): AuditLog => ({
     id: 1,
     user_id: 1,
-    user_name: "Awa",
+    user_name: "Adam",
     action: "PRODUCT_CREATED",
     entity_type: null,
     entity_id: null,
@@ -37,18 +37,18 @@ describe("audit sentence", () => {
 
     it("should write a sentence for each customer action", () => {
         expect(
-            getAuditSentence(log({ action: "CUSTOMER_CREATED", details: { name: "Awa Kouba" } })),
-        ).toEqual({ verb: "a ajouté le client", object: "Awa Kouba" });
+            getAuditSentence(log({ action: "CUSTOMER_CREATED", details: { name: "Adam Kouba" } })),
+        ).toEqual({ verb: "a ajouté le client", object: "Adam Kouba" });
 
         expect(
             getAuditSentence(
                 log({
                     action: "CUSTOMER_DEACTIVATED",
                     entity_type: "customer",
-                    entity_name: "Awa",
+                    entity_name: "Adam",
                 }),
             ),
-        ).toEqual({ verb: "a désactivé le client", object: "Awa" });
+        ).toEqual({ verb: "a désactivé le client", object: "Adam" });
 
         expect(getAuditSentence(log({ action: "CUSTOMER_UPDATED" })).verb).toBe(
             "a modifié le client",

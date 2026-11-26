@@ -59,7 +59,7 @@ describe("NewSale", () => {
     let el: HTMLElement;
     let createSale: ReturnType<typeof vi.fn>;
 
-    // la plupart des tests passent par les carreaux ; sans choix mémorisé la vue dépend des photos
+    // La plupart des tests passent par les carreaux ; sans choix mémorisé la vue dépend des photos
     beforeEach(() => localStorage.setItem("new-sale-view", "grid"));
     afterEach(() => localStorage.removeItem("new-sale-view"));
 
@@ -94,7 +94,7 @@ describe("NewSale", () => {
             imports: [NewSale],
             providers: [
                 provideRouter([]),
-                // le catalogue de l'appareil et la file hors ligne ont leurs propres tests
+                // Le catalogue de l'appareil et la file hors ligne ont leurs propres tests
                 { provide: NetworkService, useValue: { online: signal(true) } },
                 {
                     provide: OfflineCatalogService,
@@ -144,7 +144,7 @@ describe("NewSale", () => {
                         isOwner: signal(false),
                         user: signal({
                             id: 6,
-                            name: "Awa K.",
+                            name: "Adam K.",
                             email: "a@test.com",
                             role: isAdmin ? "admin" : "manager",
                         }),
@@ -168,7 +168,7 @@ describe("NewSale", () => {
         await fixture.whenStable();
     }
 
-    // le champ du prix négocié est replié tant qu'on ne clique pas sur le lien
+    // Le champ du prix négocié est replié tant qu'on ne clique pas sur le lien
     async function openPrice() {
         el.querySelector<HTMLButtonElement>(".price-link")!.click();
         await fixture.whenStable();
@@ -176,7 +176,7 @@ describe("NewSale", () => {
 
     it("should add a product to the cart and compute the total", async () => {
         await render();
-        // sans produit, le pied du panier n'existe pas encore
+        // Sans produit, le pied du panier n'existe pas encore
         expect(el.querySelector(".cart-footer")).toBeNull();
 
         await add(0);
@@ -237,7 +237,7 @@ describe("NewSale", () => {
 
         expect(el.querySelector("app-photo-zoom img")!.getAttribute("src")).toContain("GRANDE");
         expect(el.querySelectorAll(".line").length).toBe(0);
-        // un produit sans photo montre ses initiales, sans bouton de zoom
+        // Un produit sans photo montre ses initiales, sans bouton de zoom
         expect(el.querySelectorAll(".gtile")[0].querySelector(".gcorner")).toBeNull();
         expect(el.querySelectorAll(".gtile")[0].querySelector(".gphoto")!.textContent).toContain(
             "RI",
@@ -310,7 +310,7 @@ describe("NewSale", () => {
     it("should never block the sale because of the cash register", async () => {
         await render();
 
-        // pas de message "caisse fermée" ni de bouton pour l'ouvrir : le serveur l'ouvre tout seul
+        // Pas de message "caisse fermée" ni de bouton pour l'ouvrir : le serveur l'ouvre tout seul
         expect(el.querySelector(".catalog")).not.toBeNull();
         expect(text()).not.toContain("Caisse pas encore ouverte");
         expect(text()).not.toContain("Ouvrir la caisse");
@@ -444,13 +444,13 @@ describe("NewSale", () => {
         });
     });
 
-    // client et paiement partiel sont repliés : on les ouvre d'abord
+    // Client et paiement partiel sont repliés : on les ouvre d'abord
     async function openMore() {
         el.querySelector<HTMLButtonElement>(".free-link")?.click();
         await fixture.whenStable();
     }
 
-    // le montant reçu libre est derrière le bouton "Autre"
+    // Le montant reçu libre est derrière le bouton "Autre"
     async function openOther() {
         [...el.querySelectorAll<HTMLButtonElement>(".chip")]
             .find((chip) => chip.textContent!.trim() === "Autre")!
@@ -492,7 +492,7 @@ describe("NewSale", () => {
         await type("input[placeholder^='Sur ']", "500");
 
         expect(text()).toContain("Reste à payer");
-        // un seul champ de montant : le montant reçu disparaît
+        // Un seul champ de montant : le montant reçu disparaît
         expect(el.querySelector("#received")).toBeNull();
         expect(el.querySelector(".chips")).toBeNull();
         submitBtn().click();
@@ -796,7 +796,7 @@ describe("NewSale", () => {
             expect(el.querySelector(".cart-bar")).toBeNull();
 
             el.querySelector<HTMLButtonElement>(".sheet-close")!.click();
-            // le retour d'historique est asynchrone
+            // Le retour d'historique est asynchrone
             await new Promise((resolve) => setTimeout(resolve, 100));
             await fixture.whenStable();
             expect(el.querySelector(".cart")!.classList).not.toContain("open");
@@ -827,7 +827,7 @@ describe("NewSale", () => {
 
             expect(createSale).not.toHaveBeenCalled();
             expect(el.querySelector(".cart")!.classList).toContain("open");
-            // le panier contient le paiement : le fond s'assombrit comme pour une fenêtre
+            // Le panier contient le paiement : le fond s'assombrit comme pour une fenêtre
             expect(el.querySelector(".sheet-backdrop")).not.toBeNull();
         });
 

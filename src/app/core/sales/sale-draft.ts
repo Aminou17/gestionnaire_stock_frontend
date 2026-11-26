@@ -6,7 +6,7 @@ import { Product } from "../stock/product.model";
 export interface CartLine {
     product: Product;
     quantity: number;
-    // prix accordé : modifiable seulement pour un produit négociable
+    // Prix accordé : modifiable seulement pour un produit négociable
     unitPrice: number;
 }
 
@@ -19,7 +19,7 @@ export class SaleDraft {
     constructor() {
         const auth = inject(AuthService);
 
-        // le panier d'une personne ne doit jamais apparaître chez la suivante
+        // Le panier d'une personne ne doit jamais apparaître chez la suivante
         effect(() => {
             if (!auth.user()) this.cart.set([]);
         });

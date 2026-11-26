@@ -23,7 +23,7 @@ import { formatPhone, toTelLink, toWhatsAppLink } from "../../../shared/phone";
 import { SupplierForm } from "../supplier-form/supplier-form";
 import { BackState, getBackLink } from "../../../core/back-link";
 
-// nombre de livraisons montrées directement sur la fiche
+// Nombre de livraisons montrées directement sur la fiche
 const PREVIEW_SIZE = 5;
 
 import { injectGoBack } from "../../../shared/back-link/back-link";
@@ -41,7 +41,7 @@ export class SupplierPage {
     private router = inject(Router);
     private shop = inject(ShopSettingsService);
 
-    // la fiche produit ouverte sait ainsi revenir ici
+    // La fiche produit ouverte sait ainsi revenir ici
     backState(): BackState {
         return { backTo: this.router.url, backLabel: "Fournisseur" };
     }
@@ -56,7 +56,7 @@ export class SupplierPage {
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
-    // un identifiant qui n'est pas un entier n'est même pas demandé au backend
+    // Un identifiant qui n'est pas un entier n'est même pas demandé au backend
     validId = computed(() => {
         const id = this.id();
         return id !== undefined && Number.isInteger(id) && id > 0;
@@ -69,7 +69,7 @@ export class SupplierPage {
 
     data = computed(() => (this.supplier.hasValue() ? this.supplier.value() : undefined));
 
-    // dernières livraisons du fournisseur, avec les totaux de toutes ses livraisons
+    // Dernières livraisons du fournisseur, avec les totaux de toutes ses livraisons
     entries = rxResource({
         params: () => (this.validId() ? this.id() : undefined),
         stream: ({ params }) =>
@@ -84,7 +84,7 @@ export class SupplierPage {
 
     deliveries = computed(() => (this.entries.hasValue() ? this.entries.value() : undefined));
 
-    // totaux de toutes les livraisons du fournisseur
+    // Totaux de toutes les livraisons du fournisseur
     stats = computed(() => {
         const counters = this.deliveries()?.counters;
         if (!counters) return [];
@@ -103,17 +103,17 @@ export class SupplierPage {
         ];
     });
 
-    // le backend répond 404 pour un fournisseur inexistant
+    // Le backend répond 404 pour un fournisseur inexistant
     notFound = computed(
         () =>
             !this.validId() ||
             (this.supplier.error() as HttpErrorResponse | undefined)?.status === 404,
     );
 
-    // un fournisseur supprimé ne se modifie plus (le backend refuse)
+    // Un fournisseur supprimé ne se modifie plus (le backend refuse)
     canManage = computed(() => !!this.data()?.is_active);
 
-    // absent tant que le backend ne le renvoie pas : on cache alors le bloc
+    // Absent tant que le backend ne le renvoie pas : on cache alors le bloc
     productCount = computed(() => this.data()?.product_count);
 
     protected formatPhone = (phone: string) => formatPhone(phone, this.shop.defaultCountryCode());
@@ -124,7 +124,7 @@ export class SupplierPage {
     restoring = signal(false);
     restoreError = signal<string | null>(null);
 
-    // suppression
+    // Suppression
     deleting = signal(false);
     deleteError = signal<string | null>(null);
 
@@ -169,7 +169,7 @@ export class SupplierPage {
                 next: () => {
                     this.deleting.set(false);
                     this.closeConfirm();
-                    // la fiche supprimée quitte l'historique
+                    // La fiche supprimée quitte l'historique
                     this.goBack("/suppliers");
                 },
                 error: (err: HttpErrorResponse) => {

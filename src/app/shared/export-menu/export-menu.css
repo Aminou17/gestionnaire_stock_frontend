@@ -12,7 +12,7 @@
     gap: 6px;
 }
 
-/* réduit à son icône sur tous les écrans, le nom reste lu par les lecteurs d'écran */
+/* Réduit à son icône sur tous les écrans, le nom reste lu par les lecteurs d'écran */
 :host(.icon-only) .trigger {
     width: 40px;
     min-height: 40px;
@@ -95,12 +95,12 @@
 }
 
 @media (max-width: 767px) {
-    /* l'export sert à la comptabilité : sur téléphone il se fait depuis Paramètres, pas d'icône seule en plus */
+    /* L'export sert à la comptabilité : sur téléphone il se fait depuis Paramètres, pas d'icône seule en plus */
     :host(.icon-phone) {
         display: none;
     }
 
-    /* petite puce réduite à son icône, pour les lignes de résumé */
+    /* Petite puce réduite à son icône, pour les lignes de résumé */
     :host(.compact) .trigger {
         width: 32px;
         min-height: 32px;

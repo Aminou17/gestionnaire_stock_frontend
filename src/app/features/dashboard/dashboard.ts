@@ -60,19 +60,19 @@ export class Dashboard {
     protected auth = inject(AuthService);
     protected stockAlerts = inject(LowStockAlertService);
 
-    // le guard admin renvoie ici l'employé qui ouvre une page réservée
+    // Le guard admin renvoie ici l'employé qui ouvre une page réservée
     reserved = this.route.snapshot.queryParamMap.has("reserved");
 
     today = formatDate(new Date(), "EEEE d MMMM y", this.locale);
 
-    // l'admin voit toute la boutique, le gérant seulement ses ventes
+    // L'admin voit toute la boutique, le gérant seulement ses ventes
     showShop = computed(() => this.auth.isAdmin());
 
     summary = rxResource({ stream: () => this.dashboard.getSummary() });
     dailySales = rxResource({ stream: () => this.dashboard.getDailySales(!this.auth.isAdmin()) });
     activity = rxResource({ stream: () => this.dashboard.getRecentActivity(5) });
     sales = rxResource({ stream: () => this.saleService.getSales(5) });
-    // une page d'une vente suffit : on ne lit que les compteurs (reste à encaisser)
+    // Une page d'une vente suffit : on ne lit que les compteurs (reste à encaisser)
     salesPage = rxResource({
         stream: () =>
             this.auth.isAdmin()
@@ -91,12 +91,12 @@ export class Dashboard {
     salesList = computed(() => (this.sales.hasValue() ? this.sales.value() : []));
     activityList = computed(() => (this.activity.hasValue() ? this.activity.value() : []));
 
-    // le tableau de bord de l'employé n'a pas de bloc d'alertes : seule la vue admin les lit
+    // Le tableau de bord de l'employé n'a pas de bloc d'alertes : seule la vue admin les lit
     alertList = computed(() =>
         this.stockAlerts.alerts.hasValue() ? this.stockAlerts.alerts.value() : [],
     );
 
-    // une boutique neuve n'a pas encore fixé son seuil : le backend répond 409, ce n'est pas une panne
+    // Une boutique neuve n'a pas encore fixé son seuil : le backend répond 409, ce n'est pas une panne
     alertsNotConfigured = computed(() => {
         const error = this.stockAlerts.alerts.error() as {
             status?: number;
@@ -105,14 +105,14 @@ export class Dashboard {
         return (error?.status ?? error?.cause?.status) === 409;
     });
 
-    // nombre de ruptures et de stocks faibles
+    // Nombre de ruptures et de stocks faibles
     alertCounts = computed(() => {
         const alerts = this.alertList();
         const out = alerts.filter((a) => a.status === "OUT_OF_STOCK").length;
         return { out, low: alerts.length - out, total: alerts.length };
     });
 
-    // ce que les clients doivent encore : acomptes pas soldés
+    // Ce que les clients doivent encore : acomptes pas soldés
     dueTotal = computed(() =>
         this.salesPage.hasValue() ? (this.salesPage.value().counters?.due_total ?? 0) : 0,
     );
@@ -132,7 +132,7 @@ export class Dashboard {
         () => this.summary.hasValue() && this.summaryData()?.todayProfit == null,
     );
 
-    // le backend renvoie 30 jours, le dernier étant aujourd'hui
+    // Le backend renvoie 30 jours, le dernier étant aujourd'hui
     lastWeek = computed(() =>
         this.dailySales.hasValue() ? this.dailySales.value().slice(-7) : [],
     );
@@ -145,7 +145,7 @@ export class Dashboard {
     cash = computed(() => this.summaryData()?.cash ?? null);
     cashOpen = computed(() => this.cash()?.status === "OPEN");
 
-    // sous le montant de la carte "En caisse"
+    // Sous le montant de la carte "En caisse"
     cashHint = computed(() => {
         const cash = this.cash();
         if (!cash) return "Pas encore de vente";
@@ -153,7 +153,7 @@ export class Dashboard {
             ? `Depuis ${formatDate(cash.openedAt, "HH:mm", this.locale)}`
             : "Caisse comptée";
     });
-    // caisse d'un jour passé jamais comptée : un rappel, rien n'est bloqué
+    // Caisse d'un jour passé jamais comptée : un rappel, rien n'est bloqué
     uncounted = computed(() => this.summaryData()?.uncountedSession ?? null);
     expectedOpening = computed(() => this.summaryData()?.expectedOpening ?? null);
 
@@ -163,7 +163,7 @@ export class Dashboard {
         return { text, tone: "muted" as const };
     });
 
-    // aucune vente enregistrée : on guide l'administrateur pas à pas, comme Shopify ou Square
+    // Aucune vente enregistrée : on guide l'administrateur pas à pas, comme Shopify ou Square
     firstSteps = computed(() => {
         // salesPage ne se charge que pour l'admin : toutes les ventes de la boutique, pas seulement les miennes
         if (!this.summary.hasValue() || !this.salesPage.hasValue()) return null;

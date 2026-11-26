@@ -38,7 +38,7 @@ app-page-header {
     padding-left: 40px;
 }
 
-/* mêmes pastilles que Produits et Ventes */
+/* Mêmes pastilles que Produits et Ventes */
 .chips {
     display: flex;
     flex-shrink: 0;
@@ -131,7 +131,7 @@ app-page-header {
     gap: 2px;
 }
 
-/* le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
+/* Le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
 .name {
     width: fit-content;
     max-width: 100%;
@@ -236,7 +236,7 @@ textarea.input {
         gap: 12px;
     }
 
-    /* place pour le bouton + flottant */
+    /* Place pour le bouton + flottant */
     .list-card {
         padding-bottom: 88px;
         background: transparent;
@@ -292,7 +292,7 @@ textarea.input {
     }
 }
 
-/* bouton "Restaurer" des catégories supprimées : ne rétrécit pas, icône alignée */
+/* Bouton "Restaurer" des catégories supprimées : ne rétrécit pas, icône alignée */
 .restore-btn {
     display: inline-flex;
     align-items: center;

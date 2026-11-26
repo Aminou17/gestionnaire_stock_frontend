@@ -28,7 +28,7 @@ h2 {
 }
 
 @media (max-width: 640px) {
-    /* quatre parts égales sur une seule ligne */
+    /* Quatre parts égales sur une seule ligne */
     .periods {
         display: grid;
         grid-template-columns: repeat(4, minmax(0, 1fr));

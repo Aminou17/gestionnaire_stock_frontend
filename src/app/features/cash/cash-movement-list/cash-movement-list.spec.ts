@@ -9,7 +9,7 @@ const movement = (overrides: Partial<CashMovement>): CashMovement => ({
     type: "SALE",
     amount: 3000,
     user_id: 2,
-    user_name: "Awa K.",
+    user_name: "Adam K.",
     reference_type: "sale",
     reference_id: 12,
     reason: null,
@@ -81,7 +81,7 @@ describe("CashMovementList", () => {
         await render([movement({})]);
 
         expect(text()).toContain("09:30");
-        expect(text()).toContain("Awa K.");
+        expect(text()).toContain("Adam K.");
     });
 
     it("should open the details of a manual movement", async () => {
@@ -99,7 +99,7 @@ describe("CashMovementList", () => {
         await fixture.whenStable();
 
         expect(dialog.showModal).toHaveBeenCalled();
-        expect(dialog.textContent).toContain("Awa K.");
+        expect(dialog.textContent).toContain("Adam K.");
         expect(dialog.textContent).toContain("taxi du matin");
     });
 

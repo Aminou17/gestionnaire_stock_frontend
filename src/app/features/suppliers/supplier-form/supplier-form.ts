@@ -30,14 +30,14 @@ export class SupplierForm {
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
     private nameInput = viewChild.required<ElementRef<HTMLInputElement>>("nameInput");
 
-    // le fournisseur enregistré, pour que la page se mette à jour
+    // Le fournisseur enregistré, pour que la page se mette à jour
     saved = output<Supplier>();
 
     editing = signal<Supplier | null>(null);
     saving = signal(false);
     formError = signal<string | null>(null);
 
-    // mêmes tailles que les colonnes de la base
+    // Mêmes tailles que les colonnes de la base
     form = inject(NonNullableFormBuilder).group({
         name: ["", [Validators.required, Validators.maxLength(100)]],
         contact: ["", Validators.maxLength(100)],
@@ -107,7 +107,7 @@ export class SupplierForm {
         }
 
         const editing = this.editing();
-        // rien n'a changé : inutile d'appeler le backend
+        // Rien n'a changé : inutile d'appeler le backend
         if (
             editing &&
             editing.name === input.name &&

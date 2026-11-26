@@ -33,7 +33,7 @@
     }
 }
 
-/* grande carte : état en pastille, montant fort, faits en lignes à icône, actions en bas */
+/* Grande carte : état en pastille, montant fort, faits en lignes à icône, actions en bas */
 .summary {
     --tone: var(--primary);
     position: relative;
@@ -43,7 +43,7 @@
     gap: 16px;
     padding: 20px;
     border: 1px solid color-mix(in srgb, var(--tone) 22%, var(--border));
-    /* taches de couleur douces et floues : la teinte de l'état, puis un reflet violet discret */
+    /* Taches de couleur douces et floues : la teinte de l'état, puis un reflet violet discret */
     background:
         radial-gradient(
             80% 90% at 100% 0%,
@@ -171,7 +171,7 @@
     gap: 8px;
 }
 
-/* petit rond vert collé au numéro : ouvre la conversation du client */
+/* Petit rond vert collé au numéro : ouvre la conversation du client */
 .wa-chip {
     width: 26px;
     height: 26px;
@@ -188,7 +188,7 @@
     background: #d3f1e0;
 }
 
-/* trois actions de même hauteur : Ticket et Envoyer en image côte à côte */
+/* Trois actions de même hauteur : Ticket et Envoyer en image côte à côte */
 .summary-actions {
     display: grid;
     grid-template-columns: 1fr 1fr 48px;
@@ -243,14 +243,14 @@
     border-color: var(--text-muted);
 }
 
-/* bouton discret : le mot WhatsApp et son logo suffisent */
+/* Bouton discret : le mot WhatsApp et son logo suffisent */
 .act-image {
     border: 0;
     background: #128c4a;
     color: #fff;
 }
 
-/* même hauteur et même arrondi que Ticket et Envoyer en image */
+/* Même hauteur et même arrondi que Ticket et Envoyer en image */
 .act-more {
     --menu-btn-size: 48px;
     --menu-btn-radius: 14px;
@@ -368,7 +368,7 @@ a.seller:hover {
     color: var(--text-muted);
 }
 
-/* le ticket n'apparaît à l'écran que dans l'aperçu */
+/* Le ticket n'apparaît à l'écran que dans l'aperçu */
 .print-only {
     display: none;
 }
@@ -388,7 +388,7 @@ a.seller:hover {
     }
 }
 
-/* paiement sous le total, comme le bloc "Payé par le client" des logiciels de caisse */
+/* Paiement sous le total, comme le bloc "Payé par le client" des logiciels de caisse */
 .payment {
     margin: 12px 0 0;
     padding-top: 4px;
@@ -423,7 +423,7 @@ a.seller:hover {
     text-align: right;
 }
 
-/* aperçu du ticket : le papier blanc reste blanc en thème sombre */
+/* Aperçu du ticket : le papier blanc reste blanc en thème sombre */
 .ticket-dialog {
     width: min(400px, calc(100% - 16px));
     max-height: calc(100dvh - 32px);
@@ -592,7 +592,7 @@ dd::first-letter {
     object-fit: cover;
 }
 
-/* couleur de la pastille, comme dans les Entrées de stock */
+/* Couleur de la pastille, comme dans les Entrées de stock */
 .av-0 {
     background: var(--primary-soft);
     color: var(--primary-text);
@@ -620,7 +620,7 @@ dd::first-letter {
     min-width: 0;
 }
 
-/* cible tactile de 44 px, et un nom long sans espace ne pousse pas le total hors de la fiche */
+/* Cible tactile de 44 px, et un nom long sans espace ne pousse pas le total hors de la fiche */
 .item-name {
     display: block;
     padding: 12px 0;
@@ -630,7 +630,7 @@ dd::first-letter {
     overflow-wrap: anywhere;
 }
 
-/* le lien couvre toute la ligne */
+/* Le lien couvre toute la ligne */
 .item-name::after {
     content: "";
     position: absolute;
@@ -672,7 +672,7 @@ dd::first-letter {
     font-variant-numeric: tabular-nums;
 }
 
-/* une vente remboursée ne compte plus dans la caisse */
+/* Une vente remboursée ne compte plus dans la caisse */
 .total.cancelled strong {
     color: var(--text-muted);
     text-decoration: line-through;
@@ -744,12 +744,12 @@ dd::first-letter {
     transform: rotate(180deg);
 }
 
-/* la barre du haut (menu, cloche, profil) reste en première ligne, comme sur les autres pages */
+/* La barre du haut (menu, cloche, profil) reste en première ligne, comme sur les autres pages */
 app-page-header {
     order: -1;
 }
 
-/* hors de l'écran mais bien dessiné, pour la photo du ticket */
+/* Hors de l'écran mais bien dessiné, pour la photo du ticket */
 .capture {
     position: fixed;
     top: 0;
@@ -759,7 +759,7 @@ app-page-header {
     pointer-events: none;
 }
 
-/* barre de progression d'un paiement échelonné */
+/* Barre de progression d'un paiement échelonné */
 .progress {
     height: 8px;
     margin-top: 4px;
@@ -779,7 +779,7 @@ app-page-header {
     color: var(--success);
 }
 
-/* téléphone : carte plus compacte, boutons plus bas, aucun mot ni montant coupé */
+/* Téléphone : carte plus compacte, boutons plus bas, aucun mot ni montant coupé */
 @media (max-width: 767px) {
     .summary {
         gap: 12px;
@@ -819,7 +819,7 @@ app-page-header {
         grid-template-columns: 1fr 1fr 42px;
     }
 
-    /* lignes de la fiche : libellé qui se resserre, montant toujours entier et à droite */
+    /* Lignes de la fiche : libellé qui se resserre, montant toujours entier et à droite */
     dl > div {
         min-height: 44px;
         flex-wrap: nowrap;

@@ -156,7 +156,7 @@ describe("StockMovements", () => {
 
         const saleLink = rows[0].querySelector<HTMLAnchorElement>(".sale-link")!;
         expect(saleLink.getAttribute("href")).toBe("/sales/8");
-        // une entrée n'a pas de fiche, pas de lien
+        // Une entrée n'a pas de fiche, pas de lien
         expect(rows[2].querySelector(".sale-link")).toBeNull();
     });
 
@@ -396,7 +396,7 @@ describe("StockMovements", () => {
         fixture.detectChanges();
 
         expect(getMovements).toHaveBeenLastCalledWith(expect.objectContaining({ type: "SALE" }));
-        // le type précis devient une puce retirable sous la ligne du haut
+        // Le type précis devient une puce retirable sous la ligne du haut
         const active = el.querySelector<HTMLButtonElement>(".active-chip")!;
         expect(active.textContent).toContain("Ventes");
         expect(el.querySelector(".filter-count")?.textContent).toContain("1");
@@ -454,7 +454,7 @@ describe("StockMovements", () => {
     });
 
     it("should compute the net of the day with the sign of each movement", async () => {
-        // entrée +4, vente -4, vente -4, remboursement +4, perte manuelle -4
+        // Entrée +4, vente -4, vente -4, remboursement +4, perte manuelle -4
         await render({
             movements: [
                 movement(5, "ENTRY", 5),

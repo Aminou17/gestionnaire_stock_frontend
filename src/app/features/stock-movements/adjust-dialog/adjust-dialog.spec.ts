@@ -28,7 +28,7 @@ describe("AdjustDialog", () => {
             ],
         }).compileComponents();
 
-        // jsdom ne connaît pas showModal
+        // Jsdom ne connaît pas showModal
         HTMLDialogElement.prototype.showModal = vi.fn();
         HTMLDialogElement.prototype.close = vi.fn();
 

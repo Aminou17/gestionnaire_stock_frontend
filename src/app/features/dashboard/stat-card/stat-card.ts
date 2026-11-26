@@ -6,7 +6,7 @@ import { IconName } from "../../../shared/icon/icons";
 import { MoneyToggle } from "../../../shared/money/money-toggle";
 
 type Tone = "primary" | "success" | "warning" | "danger" | "muted";
-// couleur de la carte : fond teinté et liseré
+// Couleur de la carte : fond teinté et liseré
 type CardTone = "primary" | "success" | "warning" | "danger" | "violet";
 
 @Component({
@@ -21,26 +21,26 @@ export class StatCard {
     value = input<string>();
     hint = input<string>();
     tone = input<CardTone>();
-    // la grande carte du haut de page
+    // La grande carte du haut de page
     hero = input(false);
     valueTone = input<Tone>();
     hintTone = input<Tone>("muted");
     link = input<string>();
-    // filtre à ouvrir directement sur la page (ex. { filter: "unpaid" })
+    // Filtre à ouvrir directement sur la page (ex. { filter: "unpaid" })
     linkParams = input<Record<string, string>>();
-    // montant important : un clic le masque en points
+    // Montant important : un clic le masque en points
     money = input(false);
-    // la carte sert d'interrupteur (valeur masquée) au lieu de mener à une page
+    // La carte sert d'interrupteur (valeur masquée) au lieu de mener à une page
     toggles = input(false);
     toggled = output<void>();
     loading = input(false);
     error = input(false);
-    // petite courbe des derniers jours, pour la grande carte
+    // Petite courbe des derniers jours, pour la grande carte
     spark = input<number[]>([]);
 
     sparkLine = computed(() => this.sparkPoints().join(" "));
 
-    // même courbe refermée jusqu'en bas pour colorer la surface dessous
+    // Même courbe refermée jusqu'en bas pour colorer la surface dessous
     sparkArea = computed(() => {
         const points = this.sparkPoints();
         return points.length ? `0,40 ${points.join(" ")} 120,40` : "";

@@ -6,7 +6,7 @@ const movement = (overrides: Partial<CashMovement>): CashMovement => ({
     type: "SALE",
     amount: 1000,
     user_id: 1,
-    user_name: "Awa K.",
+    user_name: "Adam K.",
     reference_type: null,
     reference_id: null,
     reason: null,

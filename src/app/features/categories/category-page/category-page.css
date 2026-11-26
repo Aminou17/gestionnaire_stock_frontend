@@ -3,7 +3,7 @@
     gap: 12px;
 }
 
-/* l'en-tête garde toute la largeur, seule la fiche est limitée (comme une vente) */
+/* L'en-tête garde toute la largeur, seule la fiche est limitée (comme une vente) */
 .sheet {
     width: 100%;
     max-width: 720px;
@@ -24,7 +24,7 @@ dl > div {
     border-bottom: 1px solid var(--border);
 }
 
-/* description : le texte passe sous l'intitulé, il peut être long */
+/* Description : le texte passe sous l'intitulé, il peut être long */
 dl > div.block {
     display: grid;
     gap: 6px;
@@ -54,7 +54,7 @@ dd {
     font-weight: var(--fw-semibold);
 }
 
-/* lien "Ajouter une description" : discret, mais zone de clic confortable */
+/* Lien "Ajouter une description" : discret, mais zone de clic confortable */
 .link-btn {
     display: inline-flex;
     align-items: center;
@@ -69,7 +69,7 @@ dd {
     cursor: pointer;
 }
 
-/* nombre de produits cliquable */
+/* Nombre de produits cliquable */
 .count-link {
     display: inline-flex;
     align-items: center;
@@ -87,7 +87,7 @@ dd {
     margin-top: 20px;
 }
 
-/* modifier / supprimer : actions secondaires, sous les actions principales */
+/* Modifier / supprimer : actions secondaires, sous les actions principales */
 .manage {
     display: flex;
     justify-content: flex-end;
@@ -118,7 +118,7 @@ dd {
     color: var(--danger);
 }
 
-/* badges d'état du stock : cliquables vers les produits concernés */
+/* Badges d'état du stock : cliquables vers les produits concernés */
 .stock-state {
     display: flex;
     flex-wrap: wrap;
@@ -137,7 +137,7 @@ dd {
     font-weight: var(--fw-semibold);
 }
 
-/* aperçu des produits : nom, prix de vente, stock */
+/* Aperçu des produits : nom, prix de vente, stock */
 .preview {
     margin: 0;
     padding: 0;
@@ -172,7 +172,7 @@ dd {
     object-fit: cover;
 }
 
-/* couleur de la pastille selon la catégorie, comme dans la liste Produits */
+/* Couleur de la pastille selon la catégorie, comme dans la liste Produits */
 .av-0 {
     background: var(--primary-soft);
     color: var(--primary-text);
@@ -285,7 +285,7 @@ dd {
         padding: 4px 16px 16px;
     }
 
-    /* action principale en haut, pleine largeur, facile à toucher */
+    /* Action principale en haut, pleine largeur, facile à toucher */
     .actions {
         flex-direction: column-reverse;
     }

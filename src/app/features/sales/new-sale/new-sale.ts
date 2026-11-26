@@ -41,7 +41,7 @@ import { PhotoZoom } from "../../../shared/photo-zoom/photo-zoom";
 import { BarcodeScanner } from "../../../shared/barcode-scanner/barcode-scanner";
 import { FcfaPipe } from "../../../shared/pipes/fcfa.pipe";
 
-// tout le catalogue tient sur une seule liste : la recherche et les catégories suffisent à s'y retrouver
+// Tout le catalogue tient sur une seule liste : la recherche et les catégories suffisent à s'y retrouver
 const CATALOG_LIMIT = 500;
 
 const VIEW_KEY = "new-sale-view";
@@ -67,7 +67,7 @@ export const getMinPrice = (product: Product) =>
     imports: [NgTemplateOutlet, BarcodeScanner, PageHeader, RouterLink, Icon, FcfaPipe, PhotoZoom],
     templateUrl: "./new-sale.html",
     styleUrls: ["./new-sale.css", "./new-sale-cart.css"],
-    // la barre du panier en bas d'écran demande de la place sous la page
+    // La barre du panier en bas d'écran demande de la place sous la page
     host: {
         "[class.has-cart]": "cart().length > 0",
         "(document:click)": "onDocumentClick($event)",
@@ -89,9 +89,9 @@ export class NewSale {
     protected catalog = inject(OfflineCatalogService);
     protected outbox = inject(SaleOutboxService);
 
-    // sans internet, la vente continue avec le catalogue gardé sur l'appareil
+    // Sans internet, la vente continue avec le catalogue gardé sur l'appareil
     offline = computed(() => !this.network.online());
-    // dernière vente encaissée : on reste sur la caisse, la confirmation se referme seule
+    // Dernière vente encaissée : on reste sur la caisse, la confirmation se referme seule
     done = signal<{ kind: "sent" | "queued"; total: number; id?: number } | null>(null);
     private doneTimer?: ReturnType<typeof setTimeout>;
     protected back = getBackLink("/sales", "Ventes");
@@ -101,22 +101,22 @@ export class NewSale {
 
     search = signal("");
     categoryId = signal<number | null>(null);
-    // le panier est gardé hors de la page : il reste quand on change d'écran puis qu'on revient
+    // Le panier est gardé hors de la page : il reste quand on change d'écran puis qu'on revient
     cart = inject(SaleDraft).cart;
     saving = signal(false);
-    // photo agrandie au centre de l'écran
+    // Photo agrandie au centre de l'écran
     zoom = signal<{ src: string; name: string } | null>(null);
     error = signal<string | null>(null);
-    // message bref après un scan
+    // Message bref après un scan
     photoNotice = signal<{ kind: "success" | "error"; text: string } | null>(null);
 
-    // téléphone : le panier est une feuille qui monte du bas
+    // Téléphone : le panier est une feuille qui monte du bas
     // produits en carreaux par défaut (photo bien visible), choix mémorisé
     view = signal<"list" | "grid">(readView() ?? "grid");
-    // sans choix mémorisé, la première liste chargée décide : des carreaux sans photo ne servent à rien
+    // Sans choix mémorisé, la première liste chargée décide : des carreaux sans photo ne servent à rien
     private autoView = readView() === null;
     cartOpen = signal(false);
-    // produits dont le champ de prix négocié est déplié
+    // Produits dont le champ de prix négocié est déplié
     priceOpenIds = signal<ReadonlySet<number>>(new Set());
 
     private searchInput = viewChild<ElementRef<HTMLInputElement>>("searchInput");
@@ -138,7 +138,7 @@ export class NewSale {
                 limit: CATALOG_LIMIT,
             }),
     });
-    // les puces ne montrent que les catégories qui ont des produits
+    // Les puces ne montrent que les catégories qui ont des produits
     categories = rxResource({ stream: () => this.categoryService.getCategories() });
     categoryChips = computed(() =>
         (this.offline()
@@ -149,7 +149,7 @@ export class NewSale {
         ).filter((category) => category.product_count > 0),
     );
 
-    // recherche et pages faites sur l'appareil quand le serveur ne répond pas
+    // Recherche et pages faites sur l'appareil quand le serveur ne répond pas
     private localPage = computed(() => {
         const search = this.search().trim().toLowerCase();
         const categoryId = this.categoryId();
@@ -174,7 +174,7 @@ export class NewSale {
               ? this.products.value().data
               : [],
     );
-    // le dernier total est gardé pendant le chargement d'une autre page
+    // Le dernier total est gardé pendant le chargement d'une autre page
     resultsTotal = linkedSignal<number | undefined, number>({
         source: () =>
             this.offline()
@@ -189,22 +189,22 @@ export class NewSale {
     total = computed(() =>
         this.cart().reduce((sum, line) => sum + line.quantity * line.unitPrice, 0),
     );
-    // total au prix catalogue : l'écart avec le total est la remise accordée
+    // Total au prix catalogue : l'écart avec le total est la remise accordée
     subtotal = computed(() =>
         this.cart().reduce((sum, line) => sum + line.quantity * line.product.sale_price, 0),
     );
     discount = computed(() => Math.max(0, this.subtotal() - this.total()));
-    // paiement : espèces par défaut, comme au comptoir
+    // Paiement : espèces par défaut, comme au comptoir
     paymentMethod = signal<PaymentMethod>("CASH");
     amountReceived = signal<number | null>(null);
 
-    // client facultatif, obligatoire (nom ou téléphone) pour un acompte :
+    // Client facultatif, obligatoire (nom ou téléphone) pour un acompte :
     // un seul champ, une fiche proposée pendant la frappe
     customer = signal<Customer | null>(null);
     customerText = signal("");
-    // téléphone saisi pour un paiement partiel, quand le client n'a pas encore de fiche
+    // Téléphone saisi pour un paiement partiel, quand le client n'a pas encore de fiche
     customerPhoneText = signal("");
-    // client et paiement partiel se règlent dans une fenêtre, le panier n'en montre qu'un résumé
+    // Client et paiement partiel se règlent dans une fenêtre, le panier n'en montre qu'un résumé
     optionsOpen = computed(
         () =>
             this.showDeposit() ||
@@ -213,13 +213,13 @@ export class NewSale {
             this.customerPhoneText() !== "",
     );
     private creditDialog = viewChild.required<ElementRef<HTMLDialogElement>>("creditDialog");
-    // montant reçu libre : caché derrière le bouton "Autre"
+    // Montant reçu libre : caché derrière le bouton "Autre"
     otherOpen = signal(false);
     pickerOpen = signal(false);
     private customerTimer?: ReturnType<typeof setTimeout>;
     customerQuery = signal("");
 
-    // sans texte, on propose les clients les plus récents
+    // Sans texte, on propose les clients les plus récents
     customerResults = rxResource({
         params: () => (this.pickerOpen() ? { search: this.customerQuery() } : undefined),
         stream: ({ params }) =>
@@ -229,7 +229,7 @@ export class NewSale {
         this.customerResults.hasValue() ? this.customerResults.value().rows : [],
     );
 
-    // nom et téléphone : un numéro tapé dans le champ du nom part comme téléphone si l'autre champ est vide
+    // Nom et téléphone : un numéro tapé dans le champ du nom part comme téléphone si l'autre champ est vide
     private typed = computed(() => {
         const text = this.customerText().trim();
         const phone = this.customerPhoneText().trim();
@@ -238,7 +238,7 @@ export class NewSale {
         return /^[0-9+\-.() ]+$/.test(text) ? { name: "", phone: text } : { name: text, phone: "" };
     });
     hasCustomer = computed(() => this.customer() !== null || this.customerText().trim() !== "");
-    // un paiement partiel laisse une dette : il faut un client qu'on peut relancer
+    // Un paiement partiel laisse une dette : il faut un client qu'on peut relancer
     canChase = computed(
         () =>
             this.customer() !== null ||
@@ -256,7 +256,7 @@ export class NewSale {
         this.pickerOpen.set(false);
     }
 
-    // un clic à côté du champ referme la liste
+    // Un clic à côté du champ referme la liste
     onDocumentClick(event: Event) {
         if (!this.pickerOpen()) return;
         if ((event.target as HTMLElement).closest(".picker-zone")) return;
@@ -273,7 +273,7 @@ export class NewSale {
     }
 
     openCredit() {
-        // sans l'accès Clients et crédits : le message d'abonnement, la vente en cours reste intacte
+        // Sans l'accès Clients et crédits : le message d'abonnement, la vente en cours reste intacte
         if (!this.access.allows("customers")) {
             this.access.showLocked("customers");
             return;
@@ -294,12 +294,12 @@ export class NewSale {
         this.customer.set(null);
     }
 
-    // paiement partiel : montant payé maintenant, vide ou 0 = toute la vente reste à crédit
+    // Paiement partiel : montant payé maintenant, vide ou 0 = toute la vente reste à crédit
     showDeposit = signal(false);
     deposit = signal<number | null>(null);
     toPay = computed(() => (this.showDeposit() ? (this.deposit() ?? 0) : this.total()));
     remaining = computed(() => Math.max(0, this.total() - this.toPay()));
-    // sans client, personne ne pourrait réclamer le reste
+    // Sans client, personne ne pourrait réclamer le reste
     needsClient = computed(() => this.toPay() < this.total() && !this.canChase());
     depositError = computed(() => {
         const deposit = this.deposit();
@@ -310,7 +310,7 @@ export class NewSale {
         return null;
     });
 
-    // somme reçue trop faible : on ne valide pas
+    // Somme reçue trop faible : on ne valide pas
     missingAmount = computed(() => {
         const received = this.amountReceived();
         if (this.paymentMethod() !== "CASH" || received === null) return 0;
@@ -322,7 +322,7 @@ export class NewSale {
         return received - this.toPay();
     });
 
-    // montants ronds au-dessus de la somme due, en billets courants : 7 300 donne 7 500, 8 000, 10 000
+    // Montants ronds au-dessus de la somme due, en billets courants : 7 300 donne 7 500, 8 000, 10 000
     cashSuggestions = computed(() => {
         const due = this.toPay();
         if (due <= 0) return [];
@@ -333,7 +333,7 @@ export class NewSale {
         return [...new Set([due, ...rounded])].sort((a, b) => a - b).slice(0, 3);
     });
 
-    // somme encaissée maintenant : le total, ou l'acompte
+    // Somme encaissée maintenant : le total, ou l'acompte
     payNow = computed(() => this.toPay());
 
     toggleDeposit() {
@@ -372,12 +372,12 @@ export class NewSale {
             !this.saving(),
     );
     constructor() {
-        // un panier vidé ferme la feuille
+        // Un panier vidé ferme la feuille
         effect(() => {
             if (this.cart().length === 0 && this.cartOpen()) this.closeCart();
         });
 
-        // catalogue de l'appareil : lu tout de suite, puis remis à jour quand le réseau est là
+        // Catalogue de l'appareil : lu tout de suite, puis remis à jour quand le réseau est là
         void this.catalog.load().then(() => {
             if (!this.offline()) this.catalog.refresh().catch(() => {});
         });
@@ -399,7 +399,7 @@ export class NewSale {
             clearTimeout(this.noticeTimer);
         });
 
-        // arrivée depuis le bouton "Vendre" d'un produit
+        // Arrivée depuis le bouton "Vendre" d'un produit
         const productId = Number(inject(ActivatedRoute).snapshot.queryParamMap.get("productId"));
         if (Number.isInteger(productId) && productId > 0) {
             this.productService
@@ -460,7 +460,7 @@ export class NewSale {
         this.showScanCard(product);
     }
 
-    // la fiche du produit scanné monte en bas de l'écran, avec la quantité dans le panier
+    // La fiche du produit scanné monte en bas de l'écran, avec la quantité dans le panier
     scanCard = signal<{ name: string; price: number; image: string | null; qty: number } | null>(
         null,
     );
@@ -514,11 +514,11 @@ export class NewSale {
         try {
             localStorage.setItem(VIEW_KEY, view);
         } catch {
-            // stockage indisponible : le choix ne sera pas retenu
+            // Stockage indisponible : le choix ne sera pas retenu
         }
     }
 
-    // lignes : un appui ajoute le produit, un second le retire
+    // Lignes : un appui ajoute le produit, un second le retire
     // carreaux et lignes : un appui ajoute un exemplaire, jusqu'au stock disponible
     tapTile(product: Product) {
         const line = this.cart().find((l) => l.product.id === product.id);
@@ -539,7 +539,7 @@ export class NewSale {
         this.categoryId.set(value ? Number(value) : null);
     }
 
-    // la liste ne porte que la miniature : on affiche celle-ci tout de suite, puis la photo en grand
+    // La liste ne porte que la miniature : on affiche celle-ci tout de suite, puis la photo en grand
     zoomImage(product: Product) {
         if (!product.image) return;
 
@@ -572,7 +572,7 @@ export class NewSale {
         this.error.set(null);
     }
 
-    // charge de la vente : produits, paiement, client
+    // Charge de la vente : produits, paiement, client
     private buildSale() {
         const customer = this.customer();
         const { name, phone } = this.typed();
@@ -582,12 +582,12 @@ export class NewSale {
         const items = this.cart().map((line) => ({
             productId: line.product.id,
             quantity: line.quantity,
-            // le backend refuse un prix envoyé pour un produit à prix fixe
+            // Le backend refuse un prix envoyé pour un produit à prix fixe
             ...(line.product.pricing_mode === "NEGOTIABLE" ? { unitPrice: line.unitPrice } : {}),
         }));
         const payment = {
             paymentMethod: method,
-            // montant non saisi : le client a donné le compte juste
+            // Montant non saisi : le client a donné le compte juste
             ...(method === "CASH" && toPay > 0
                 ? { amountReceived: this.amountReceived() ?? toPay }
                 : {}),
@@ -630,7 +630,7 @@ export class NewSale {
         }
     }
 
-    // confirmation courte : on reste sur la caisse pour la vente suivante
+    // Confirmation courte : on reste sur la caisse pour la vente suivante
     private showDone(done: { kind: "sent" | "queued"; total: number; id?: number }) {
         clearTimeout(this.doneTimer);
         this.done.set(done);
@@ -640,7 +640,7 @@ export class NewSale {
         );
     }
 
-    // panier et paiement remis à zéro pour la vente suivante
+    // Panier et paiement remis à zéro pour la vente suivante
     private resetSale() {
         this.closeCart();
         this.cart.set([]);
@@ -740,7 +740,7 @@ export class NewSale {
                 error: (err: HttpErrorResponse) => {
                     this.saving.set(false);
 
-                    // la fiche choisie a été désactivée entre-temps : on la retire
+                    // La fiche choisie a été désactivée entre-temps : on la retire
                     if (
                         err.status === 404 &&
                         customerId &&
@@ -754,20 +754,20 @@ export class NewSale {
                         return;
                     }
 
-                    // le serveur ne répond pas : la vente est gardée sur l'appareil
+                    // Le serveur ne répond pas : la vente est gardée sur l'appareil
                     if (isUnreachable(err.status)) {
                         void this.queueSale();
                         return;
                     }
 
                     this.error.set(err.error?.message ?? "Impossible d'enregistrer la vente.");
-                    // le stock a pu changer entre-temps
+                    // Le stock a pu changer entre-temps
                     this.products.reload();
                 },
             });
     }
 
-    // la feuille prend une entrée d'historique : le bouton retour du téléphone la ferme d'abord
+    // La feuille prend une entrée d'historique : le bouton retour du téléphone la ferme d'abord
     openCart() {
         if (this.cartOpen()) return;
 
@@ -775,7 +775,7 @@ export class NewSale {
         this.cartOpen.set(true);
     }
 
-    // la feuille se ferme tout de suite, puis on retire l'entrée d'historique qu'elle avait ajoutée ;
+    // La feuille se ferme tout de suite, puis on retire l'entrée d'historique qu'elle avait ajoutée ;
     // sans ce garde, deux appels de suite reculaient de deux pages
     closeCart() {
         if (!this.cartOpen()) return;
@@ -788,7 +788,7 @@ export class NewSale {
         this.cartOpen.set(false);
     }
 
-    // glisser l'en-tête vers le bas ferme la feuille
+    // Glisser l'en-tête vers le bas ferme la feuille
     private swipeFrom = 0;
 
     swipeStart(event: TouchEvent) {
@@ -799,9 +799,9 @@ export class NewSale {
         if (event.changedTouches[0].clientY - this.swipeFrom > 60) this.closeCart();
     }
 
-    // barre du bas : vendre tout de suite avec le paiement par défaut (espèces, compte juste)
+    // Barre du bas : vendre tout de suite avec le paiement par défaut (espèces, compte juste)
     quickPay() {
-        // une ligne à corriger ou un champ à remplir : on montre le panier
+        // Une ligne à corriger ou un champ à remplir : on montre le panier
         if (!this.canSubmit()) {
             this.openCart();
             return;

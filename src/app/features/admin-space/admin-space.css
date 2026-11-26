@@ -7,7 +7,7 @@ app-page-header {
     margin-bottom: -4px;
 }
 
-/* bloc : titre avec pastille d'icône, puis contenu */
+/* Bloc : titre avec pastille d'icône, puis contenu */
 .block {
     display: grid;
     gap: 4px;
@@ -24,14 +24,14 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-/* précision à côté du titre : la période ou ce que mesure le stock */
+/* Précision à côté du titre : la période ou ce que mesure le stock */
 .block h2 .note {
     color: var(--text-muted);
     font-size: var(--fs-lead);
     font-weight: var(--fw-regular, 400);
 }
 
-/* choix de la date et de la période */
+/* Choix de la date et de la période */
 .date-field {
     display: flex;
     align-items: center;
@@ -115,7 +115,7 @@ app-page-header {
     font-size: var(--fs-small);
 }
 
-/* bénéfice net : grande carte teintée, verte ou rouge selon le signe */
+/* Bénéfice net : grande carte teintée, verte ou rouge selon le signe */
 .net {
     background: linear-gradient(
         145deg,
@@ -165,7 +165,7 @@ app-page-header {
     margin: 4px 0;
 }
 
-/* chiffres : une ligne par valeur */
+/* Chiffres : une ligne par valeur */
 .figures {
     display: grid;
     gap: 0;
@@ -216,7 +216,7 @@ app-page-header {
     }
 }
 
-/* très petit écran : les cinq choix doivent tenir sans défiler */
+/* Très petit écran : les cinq choix doivent tenir sans défiler */
 @media (max-width: 380px) {
     .periods {
         gap: 2px;

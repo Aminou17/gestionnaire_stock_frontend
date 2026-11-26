@@ -14,7 +14,7 @@ const DAY_LABELS = ["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"];
     styleUrl: "./sales-chart.css",
 })
 export class SalesChart {
-    // l'employé voit "Mes 7 derniers jours"
+    // L'employé voit "Mes 7 derniers jours"
     title = input("7 derniers jours");
     days = input<DailySales[]>([]);
     loading = input(false);
@@ -47,7 +47,7 @@ export class SalesChart {
     });
 }
 
-// trois chiffres au plus, pour que les barres se lisent pareil :
+// Trois chiffres au plus, pour que les barres se lisent pareil :
 // 12500 -> "12,5k", 198500 -> "199k", 246000 -> "246k", 1250000 -> "1,3M"
 function shortAmount(value: number) {
     const abs = Math.abs(value);

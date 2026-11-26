@@ -24,7 +24,7 @@ export class SubscriptionsSwitch {
 
     enabled = () => (this.state.hasValue() ? this.state.value().enabled : false);
 
-    // le changement demandé : activer si éteint, désactiver si allumé
+    // Le changement demandé : activer si éteint, désactiver si allumé
     saving = signal(false);
     notice = signal<{ ok: boolean; text: string } | null>(null);
 

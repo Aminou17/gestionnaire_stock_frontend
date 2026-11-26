@@ -34,11 +34,11 @@ export class AccessEnded {
     downloading = signal<"products" | "sales" | null>(null);
 
     constructor() {
-        // l'état a pu changer depuis la connexion (paiement enregistré entre-temps)
+        // L'état a pu changer depuis la connexion (paiement enregistré entre-temps)
         this.check(false);
     }
 
-    // après un paiement : on relit l'accès et on revient dans la boutique s'il est rouvert
+    // Après un paiement : on relit l'accès et on revient dans la boutique s'il est rouvert
     check(manual = true) {
         this.checking.set(true);
         this.notice.set(null);

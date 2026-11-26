@@ -12,7 +12,7 @@ app-page-header {
     white-space: nowrap;
 }
 
-/* période : pastilles groupées, comme un sélecteur de relevé */
+/* Période : pastilles groupées, comme un sélecteur de relevé */
 .periods {
     display: flex;
     gap: 4px;
@@ -87,7 +87,7 @@ app-page-header {
     font-size: var(--fs-body);
 }
 
-/* une barre de couleurs : la part de chaque motif dans le total */
+/* Une barre de couleurs : la part de chaque motif dans le total */
 .share-bar {
     display: flex;
     gap: 2px;
@@ -157,7 +157,7 @@ app-page-header {
     margin: 0;
 }
 
-/* pastille d'icône à la couleur du motif */
+/* Pastille d'icône à la couleur du motif */
 .cat-icon {
     display: grid;
     flex: none;
@@ -169,7 +169,7 @@ app-page-header {
     color: var(--cat);
 }
 
-/* liste */
+/* Liste */
 .list-card {
     min-width: 0;
     padding: 0;
@@ -239,7 +239,7 @@ app-page-header {
     color: var(--text-muted);
 }
 
-/* dépense annulée : barrée et grisée, elle ne compte plus */
+/* Dépense annulée : barrée et grisée, elle ne compte plus */
 .row.cancelled .row-title,
 .row.cancelled .row-amount {
     text-decoration: line-through;
@@ -251,7 +251,7 @@ app-page-header {
     font-weight: var(--fw-semibold);
 }
 
-/* chaque jour est un bloc séparé : son titre est au-dessus de la carte, les lignes dedans */
+/* Chaque jour est un bloc séparé : son titre est au-dessus de la carte, les lignes dedans */
 .days {
     display: grid;
     gap: 24px;
@@ -403,7 +403,7 @@ app-page-header {
         max-width: none;
     }
 
-    /* la liste ne passe pas sous le bouton flottant */
+    /* La liste ne passe pas sous le bouton flottant */
     .list-card {
         margin-bottom: 72px;
     }

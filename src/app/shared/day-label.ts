@@ -9,7 +9,7 @@ export const getDayLabel = (date: Date, locale: string) => {
     return formatDate(date, "d MMMM y", locale);
 };
 
-// regroupe des éléments déjà triés du plus récent au plus ancien
+// Regroupe des éléments déjà triés du plus récent au plus ancien
 export const groupByDay = <T extends { created_at: string }>(items: T[], locale: string) => {
     const days: { key: string; label: string; items: T[] }[] = [];
     for (const item of items) {

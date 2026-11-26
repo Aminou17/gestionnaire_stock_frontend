@@ -40,7 +40,7 @@ export class CashSessionPage {
 
     private router = inject(Router);
 
-    // retour vers la page d'où l'on vient (Caisse ou Historique), sinon l'historique
+    // Retour vers la page d'où l'on vient (Caisse ou Historique), sinon l'historique
     private back = getBackLink("/cash/sessions", "Retour à l'historique");
     protected backUrl = this.router.serializeUrl(this.back.link);
     protected backLabel = this.back.label;
@@ -63,11 +63,11 @@ export class CashSessionPage {
         return session ? formatDate(session.session_date, "d MMMM y", this.locale) : "Caisse";
     });
     summary = computed(() => summarizeMovements(this.data()?.movements ?? []));
-    // les plus récents en premier, comme sur la page Caisse
+    // Les plus récents en premier, comme sur la page Caisse
     latest = computed(() => [...(this.data()?.movements ?? [])].reverse());
 
     constructor() {
-        // sa propre caisse encore ouverte se suit sur la page Caisse : cette fiche n'apporterait rien
+        // Sa propre caisse encore ouverte se suit sur la page Caisse : cette fiche n'apporterait rien
         effect(() => {
             const cash = this.data();
             if (cash?.status === "OPEN" && cash.opened_by === this.auth.user()?.id) {
@@ -81,7 +81,7 @@ export class CashSessionPage {
         return err instanceof HttpErrorResponse && (err.status === 404 || err.status === 400);
     });
 
-    // le ticket étroit remplace la page le temps de l'impression
+    // Le ticket étroit remplace la page le temps de l'impression
     ticketMode = signal(false);
 
     printTicket() {

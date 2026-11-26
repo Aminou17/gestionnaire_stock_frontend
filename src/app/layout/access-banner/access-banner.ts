@@ -4,7 +4,7 @@ import { RouterLink } from "@angular/router";
 import { AuthService } from "../../core/auth/auth.service";
 import { Icon } from "../../shared/icon/icon";
 
-// rappel affiché 7 jours avant la fin, puis pendant les jours de grâce
+// Rappel affiché 7 jours avant la fin, puis pendant les jours de grâce
 const WARN_DAYS = 7;
 const HIDDEN_KEY = "accessBannerHiddenOn";
 
@@ -19,7 +19,7 @@ const today = () => new Date().toISOString().slice(0, 10);
 export class AccessBanner {
     private auth = inject(AuthService);
 
-    // masqué pour la journée ; pendant la grâce, il revient toujours
+    // Masqué pour la journée ; pendant la grâce, il revient toujours
     private hiddenOn = signal(readHidden());
 
     protected banner = computed(() => {
@@ -39,7 +39,7 @@ export class AccessBanner {
             };
         }
 
-        // le rappel avant l'échéance ne concerne que celui qui paie
+        // Le rappel avant l'échéance ne concerne que celui qui paie
         if (
             (access.state === "trial" || access.state === "paid") &&
             days <= WARN_DAYS &&
@@ -63,7 +63,7 @@ export class AccessBanner {
         try {
             localStorage.setItem(HIDDEN_KEY, today());
         } catch {
-            // stockage indisponible : le bandeau se cache seulement jusqu'au rechargement
+            // Stockage indisponible : le bandeau se cache seulement jusqu'au rechargement
         }
         this.hiddenOn.set(today());
     }

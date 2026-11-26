@@ -37,7 +37,7 @@ app-page-header {
     gap: 16px;
 }
 
-/* libellé et pastille en haut, chiffre en dessous, comme les cartes de l'Accueil */
+/* Libellé et pastille en haut, chiffre en dessous, comme les cartes de l'Accueil */
 .stat {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -151,7 +151,7 @@ tbody tr:hover {
     font-variant-numeric: tabular-nums;
 }
 
-/* quantité reçue : pastille verte, le stock qui monte */
+/* Quantité reçue : pastille verte, le stock qui monte */
 .qty-pill {
     display: inline-flex;
     align-items: center;
@@ -269,7 +269,7 @@ tbody tr:hover {
     outline-offset: 2px;
 }
 
-/* couleur de la pastille selon le produit, comme sur Rotation */
+/* Couleur de la pastille selon le produit, comme sur Rotation */
 .av-0 {
     background: var(--primary-soft);
     color: var(--primary-text);
@@ -326,7 +326,7 @@ tbody tr:hover {
         display: none;
     }
 
-    /* cibles tactiles de 44 px minimum */
+    /* Cibles tactiles de 44 px minimum */
     .empty .btn,
     .list-error .btn {
         height: 44px;
@@ -340,7 +340,7 @@ tbody tr:hover {
         font-size: var(--fs-heading);
     }
 
-    /* place pour le bouton + flottant */
+    /* Place pour le bouton + flottant */
     .list-card {
         padding-bottom: 88px;
         background: transparent;
@@ -352,7 +352,7 @@ tbody tr:hover {
         min-width: 0;
     }
 
-    /* même largeur d'étiquette que "Période" (filtre partagé) pour aligner les deux listes */
+    /* Même largeur d'étiquette que "Période" (filtre partagé) pour aligner les deux listes */
     .supplier-filter > span {
         flex: none;
         width: 88px;
@@ -414,7 +414,7 @@ tbody tr:hover {
         overflow-wrap: anywhere;
     }
 
-    /* le lien couvre toute la carte : un clic n'importe où ouvre la fiche */
+    /* Le lien couvre toute la carte : un clic n'importe où ouvre la fiche */
     .entry-card .product-link::after {
         content: "";
         position: absolute;
@@ -426,7 +426,7 @@ tbody tr:hover {
         background: var(--bg);
     }
 
-    /* la photo et le menu restent cliquables au-dessus du lien */
+    /* La photo et le menu restent cliquables au-dessus du lien */
     .entry-card .thumb,
     .entry-card app-action-menu {
         position: relative;

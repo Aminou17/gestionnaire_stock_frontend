@@ -2,7 +2,7 @@
     display: block;
 }
 
-/* largeur d'un rouleau de caisse, le reste de la feuille reste blanc */
+/* Largeur d'un rouleau de caisse, le reste de la feuille reste blanc */
 .receipt {
     display: grid;
     gap: 16px;
@@ -13,7 +13,7 @@
     color: #000;
     -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
-    /* police de caisse, comme les tickets de supermarché : chasse fixe, chiffres alignés */
+    /* Police de caisse, comme les tickets de supermarché : chasse fixe, chiffres alignés */
     font-family: "Ticket Mono", "Courier New", "Liberation Mono", monospace;
     font-size: 14px;
     font-weight: 400;
@@ -109,7 +109,7 @@
     border-top: 1px dashed #000;
 }
 
-/* le total est la seule ligne en grand */
+/* Le total est la seule ligne en grand */
 .receipt-total {
     align-items: baseline;
     margin: 4px 0 8px;
@@ -138,7 +138,7 @@
     font-weight: 400;
 }
 
-/* détail d'un paiement en espèces : même alignement que les autres montants, en retrait */
+/* Détail d'un paiement en espèces : même alignement que les autres montants, en retrait */
 .receipt-sub {
     padding-left: 12px;
     color: #000;
@@ -146,7 +146,7 @@
     font-weight: 400;
 }
 
-/* coordonnées et mentions légales : papier seulement */
+/* Coordonnées et mentions légales : papier seulement */
 .on-paper {
     display: none;
 }

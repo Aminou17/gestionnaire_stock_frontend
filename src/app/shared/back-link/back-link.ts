@@ -41,7 +41,7 @@ export class BackLink {
     });
 
     protected onClick(event: MouseEvent) {
-        // nouvel onglet ou nouvelle fenêtre : on laisse faire le navigateur
+        // Nouvel onglet ou nouvelle fenêtre : on laisse faire le navigateur
         if (
             event.button !== 0 ||
             event.ctrlKey ||

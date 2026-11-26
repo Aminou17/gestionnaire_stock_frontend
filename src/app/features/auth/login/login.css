@@ -1,4 +1,4 @@
-/* se souvenir de moi et mot de passe oublié sur la même ligne */
+/* Se souvenir de moi et mot de passe oublié sur la même ligne */
 .row {
     display: flex;
     align-items: center;
@@ -30,7 +30,7 @@
     }
 }
 
-/* lien vers l'inscription, sous le formulaire */
+/* Lien vers l'inscription, sous le formulaire */
 .signup {
     margin: 4px 0 0;
     padding-top: 20px;
@@ -54,7 +54,7 @@
     text-decoration: underline;
 }
 
-/* champ du code : gros chiffres espacés, comme dans les applications bancaires */
+/* Champ du code : gros chiffres espacés, comme dans les applications bancaires */
 .code-input {
     height: 64px;
     border-radius: 12px;
@@ -95,7 +95,7 @@
     color: var(--text);
 }
 
-/* aide pour qui n'arrive plus à entrer : discrète, mais toujours visible */
+/* Aide pour qui n'arrive plus à entrer : discrète, mais toujours visible */
 .help-link {
     display: inline-flex;
     align-items: center;

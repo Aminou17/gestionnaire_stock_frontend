@@ -12,12 +12,12 @@ import { InventoryService } from "../../core/stock/inventory.service";
 // error : le serveur a refusé
 export type SaveState = "saved" | "saving" | "offline" | "error";
 
-// quantité comptée, ou null pour retirer le produit du comptage
+// Quantité comptée, ou null pour retirer le produit du comptage
 export type Counts = Record<number, number | null>;
 
 const DEBOUNCE_MS = 800;
 const RETRY_MS = 15_000;
-// un paquet ne dépasse pas ce nombre de lignes (le serveur en accepte 5000)
+// Un paquet ne dépasse pas ce nombre de lignes (le serveur en accepte 5000)
 const CHUNK = 500;
 
 const draftKey = (inventoryId: number) => `inventory-draft-${inventoryId}`;
@@ -30,13 +30,13 @@ export class CountSync {
     private inventoryService = inject(InventoryService);
     private network = inject(NetworkService);
 
-    // saisies pas encore reçues par le serveur
+    // Saisies pas encore reçues par le serveur
     readonly pending = signal<Counts>({});
     readonly state = signal<SaveState>("saved");
     readonly error = signal("");
     readonly pendingCount = computed(() => Object.keys(this.pending()).length);
 
-    // appelé quand le serveur a reçu un paquet : l'inventaire à jour et ce qui vient d'être envoyé
+    // Appelé quand le serveur a reçu un paquet : l'inventaire à jour et ce qui vient d'être envoyé
     onSaved: (inventory: Inventory, sent: Counts) => void = () => {};
 
     private inventoryId = 0;
@@ -45,7 +45,7 @@ export class CountSync {
     private running: Promise<boolean> | null = null;
 
     constructor() {
-        // le réseau revient : on renvoie tout de suite
+        // Le réseau revient : on renvoie tout de suite
         effect(() => {
             if (this.network.online() && this.pendingCount() > 0 && this.state() === "offline") {
                 void this.flush();
@@ -58,19 +58,19 @@ export class CountSync {
         });
     }
 
-    // reprend le brouillon de cet appareil et l'envoie
+    // Reprend le brouillon de cet appareil et l'envoie
     async start(inventoryId: number) {
         this.inventoryId = inventoryId;
 
         const draft = await dbGet<Counts>("kv", draftKey(inventoryId));
         if (draft && Object.keys(draft).length > 0) {
-            // ce qui a déjà été saisi depuis l'ouverture de la page l'emporte sur le brouillon
+            // Ce qui a déjà été saisi depuis l'ouverture de la page l'emporte sur le brouillon
             this.pending.update((current) => ({ ...draft, ...current }));
             await this.flush();
         }
     }
 
-    // enregistre une saisie ; l'envoi part 800 ms après la dernière frappe
+    // Enregistre une saisie ; l'envoi part 800 ms après la dernière frappe
     set(productId: number, value: number | null) {
         this.pending.update((counts) => ({ ...counts, [productId]: value }));
         this.state.set(this.network.online() ? "saving" : "offline");
@@ -80,14 +80,14 @@ export class CountSync {
         this.timer = setTimeout(() => void this.flush(), DEBOUNCE_MS);
     }
 
-    // annule une saisie qui n'a plus rien à envoyer (produit que le serveur ne connaît pas encore)
+    // Annule une saisie qui n'a plus rien à envoyer (produit que le serveur ne connaît pas encore)
     forget(productId: number) {
         this.pending.update(({ [productId]: _, ...rest }) => rest);
         void this.saveDraft();
         if (this.pendingCount() === 0) this.state.set("saved");
     }
 
-    // envoie tout ce qui attend ; vrai si tout est arrivé
+    // Envoie tout ce qui attend ; vrai si tout est arrivé
     flush(): Promise<boolean> {
         clearTimeout(this.timer);
 
@@ -97,7 +97,7 @@ export class CountSync {
         return this.running;
     }
 
-    // vide le brouillon : le comptage est terminé
+    // Vide le brouillon : le comptage est terminé
     async clearDraft() {
         await dbDelete("kv", draftKey(this.inventoryId));
     }
@@ -134,12 +134,12 @@ export class CountSync {
                     );
                     inventory = result.inventory;
                 } catch (err) {
-                    // le produit n'était déjà plus dans le comptage : rien à retirer
+                    // Le produit n'était déjà plus dans le comptage : rien à retirer
                     if ((err as HttpErrorResponse).status !== 404) throw err;
                 }
             }
 
-            // une valeur changée pendant l'envoi reste en attente
+            // Une valeur changée pendant l'envoi reste en attente
             this.pending.update((current) => {
                 const left = { ...current };
                 for (const [productId, value] of entries) {
@@ -155,7 +155,7 @@ export class CountSync {
             return false;
         }
 
-        // de nouvelles saisies sont arrivées pendant l'envoi : le prochain passage les prend
+        // De nouvelles saisies sont arrivées pendant l'envoi : le prochain passage les prend
         if (this.pendingCount() > 0) {
             this.timer = setTimeout(() => void this.flush(), DEBOUNCE_MS);
             return true;

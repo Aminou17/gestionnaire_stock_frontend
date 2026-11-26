@@ -25,7 +25,7 @@ export class InventoryCancelDialog {
         this.dialog().nativeElement.showModal();
     }
 
-    // un clic à côté de la fenêtre la ferme
+    // Un clic à côté de la fenêtre la ferme
     onBackdrop(event: MouseEvent) {
         if (event.target === this.dialog().nativeElement) this.close();
     }

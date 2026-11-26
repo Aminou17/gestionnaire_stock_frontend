@@ -17,7 +17,7 @@ const expense = (overrides: Partial<CashMovementRow>): CashMovementRow => ({
     type: "EXPENSE",
     amount: 2500,
     user_id: 1,
-    user_name: "Awa",
+    user_name: "Adam",
     reference_type: "manual",
     reference_id: null,
     reason_category: "TRANSPORT",
@@ -32,7 +32,7 @@ const auth = {
     useValue: {
         isAdmin: signal(true),
         isOwner: signal(false),
-        user: signal({ id: 1, name: "Awa", email: "a@t.com", role: "admin" }),
+        user: signal({ id: 1, name: "Adam", email: "a@t.com", role: "admin" }),
         roleLabel: signal("Administrateur"),
     },
 };
@@ -262,7 +262,7 @@ describe("NewExpense", () => {
         await render(null);
         const el: HTMLElement = fixture.nativeElement;
 
-        // la caisse s'ouvre toute seule à l'enregistrement : rien ne bloque
+        // La caisse s'ouvre toute seule à l'enregistrement : rien ne bloque
         expect(el.textContent).not.toContain("Caisse pas encore ouverte");
         expect(el.querySelector("form.layout")).not.toBeNull();
     });

@@ -71,7 +71,7 @@
                 (input)="reason.set($any($event.target).value)"
             />
 
-            <!-- photo du reçu : la justification de la dépense, facultative -->
+            <!-- Photo du reçu : la justification de la dépense, facultative -->
             <div class="receipt">
                 @if (receipt(); as photo) {
                     <img class="receipt-thumb" [src]="photo" alt="Reçu joint" />
@@ -102,7 +102,7 @@
         </section>
     </div>
 
-    <!-- résumé et bouton : à droite sur ordinateur, en bas sur téléphone -->
+    <!-- Résumé et bouton : à droite sur ordinateur, en bas sur téléphone -->
     <aside class="side">
         <section class="card summary" [style.--cat]="chosen().color">
             <div class="summary-head">

@@ -34,7 +34,7 @@ export class InventoryLineDialog {
         this.dialog().nativeElement.showModal();
     }
 
-    // un clic à côté de la fenêtre la ferme
+    // Un clic à côté de la fenêtre la ferme
     onBackdrop(event: MouseEvent) {
         if (event.target === this.dialog().nativeElement) this.close();
     }
@@ -56,12 +56,12 @@ export class InventoryLineDialog {
         this.value.set(digits);
     }
 
-    // la même raison touchée deux fois est effacée
+    // La même raison touchée deux fois est effacée
     pickReason(reason: ItemReason) {
         this.reason.set(this.reason() === reason ? null : reason);
     }
 
-    // la raison n'a de sens que sur un écart
+    // La raison n'a de sens que sur un écart
     hasGap = () => !!this.line()?.difference;
 
     save() {
@@ -81,7 +81,7 @@ export class InventoryLineDialog {
         this.saving.set(true);
         this.error.set("");
 
-        // la quantité d'abord, puis la raison ; la page se recharge ensuite
+        // La quantité d'abord, puis la raison ; la page se recharge ensuite
         const quantity$ = saveQuantity
             ? this.inventoryService.saveItems(id, [
                   { productId: line.productId, actualStock: quantity },
@@ -112,7 +112,7 @@ export class InventoryLineDialog {
         }
     }
 
-    // retire le produit du comptage
+    // Retire le produit du comptage
     remove() {
         const line = this.line();
         if (!line || this.saving()) return;

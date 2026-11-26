@@ -43,7 +43,7 @@ export class CustomerService {
         });
     }
 
-    // adresse publique du ticket d'un paiement, à joindre au message WhatsApp
+    // Adresse publique du ticket d'un paiement, à joindre au message WhatsApp
     getPaymentTicketLink(paymentId: number) {
         return this.http.post<{ url: string }>(
             `${API_URL}/tickets/customer-payments/${paymentId}/link`,
@@ -65,7 +65,7 @@ export class CustomerService {
         return this.http.put<Customer>(`${API_URL}/customers/${id}`, input);
     }
 
-    // un seul paiement, réparti par le serveur sur les ventes impayées, les plus anciennes d'abord
+    // Un seul paiement, réparti par le serveur sur les ventes impayées, les plus anciennes d'abord
     payCustomer(id: number, payment: NewSalePayment & { amountPaid: number }) {
         return this.http.post<CustomerPayment>(`${API_URL}/customers/${id}/payments`, payment);
     }

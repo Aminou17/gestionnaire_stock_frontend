@@ -65,7 +65,7 @@ export class Search {
         return [...pages, ...this.foundProducts()];
     });
 
-    // la recherche n'interroge les produits que fenêtre ouverte : à l'ouverture, des produits sont déjà proposés
+    // La recherche n'interroge les produits que fenêtre ouverte : à l'ouverture, des produits sont déjà proposés
     private searchText = computed(() => (this.layout.searchOpen() ? this.query() : null));
 
     constructor() {

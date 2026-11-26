@@ -6,7 +6,7 @@ describe("getRoleLabel", () => {
         expect(getRoleLabel("manager")).toBe("Employé");
     });
 
-    // ancien backend ou donnée manquante : on n'invente pas de rôle
+    // Ancien backend ou donnée manquante : on n'invente pas de rôle
     it("should return an empty label when the role is missing", () => {
         expect(getRoleLabel(undefined)).toBe("");
         expect(getRoleLabel(null)).toBe("");

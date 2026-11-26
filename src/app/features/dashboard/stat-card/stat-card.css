@@ -1,4 +1,4 @@
-/* couleur de la carte : bleu marque, vert = encaissé, orange = à surveiller, rouge = perte, violet = stock */
+/* Couleur de la carte : bleu marque, vert = encaissé, orange = à surveiller, rouge = perte, violet = stock */
 .stat {
     --tone: var(--text-muted);
     position: relative;
@@ -32,7 +32,7 @@
     --tone: var(--violet);
 }
 
-/* dégradé léger de la couleur vers le blanc, comme les cartes de Stripe ou de Linear */
+/* Dégradé léger de la couleur vers le blanc, comme les cartes de Stripe ou de Linear */
 .stat[data-tone] {
     background: linear-gradient(
         145deg,
@@ -49,7 +49,7 @@
     color: var(--text-muted);
 }
 
-/* pastille d'icône pleine : c'est elle qui donne la couleur de la carte */
+/* Pastille d'icône pleine : c'est elle qui donne la couleur de la carte */
 .icon {
     grid-area: icon;
     width: 36px;
@@ -83,7 +83,7 @@
     font-weight: 700;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
-    /* l'espace fine des milliers se lit mal en gras */
+    /* L'espace fine des milliers se lit mal en gras */
     word-spacing: 0.12em;
     white-space: nowrap;
     overflow: hidden;
@@ -102,7 +102,7 @@
     font-size: var(--fs-caption);
 }
 
-/* la grande carte : bleu marque plein, un seul chiffre fort en tête de page */
+/* La grande carte : bleu marque plein, un seul chiffre fort en tête de page */
 .hero,
 .hero[data-tone] {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -139,7 +139,7 @@
     color: #fff;
 }
 
-/* la variation devient une pastille claire sur le bleu */
+/* La variation devient une pastille claire sur le bleu */
 .hero .hint,
 .hero .hint.text-success,
 .hero .hint.text-warning,
@@ -270,7 +270,7 @@
     border-color: var(--tone);
 }
 
-/* le lien couvre toute la carte : un seul arrêt au clavier */
+/* Le lien couvre toute la carte : un seul arrêt au clavier */
 .cover {
     padding: 0;
     border: 0;

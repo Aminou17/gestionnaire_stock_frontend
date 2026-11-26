@@ -46,7 +46,7 @@
     </div>
 }
 
-<!-- le résumé suit la pastille choisie (encaissé, reste à encaisser, remboursé) -->
+<!-- Le résumé suit la pastille choisie (encaissé, reste à encaisser, remboursé) -->
 @if (!firstLoad() && !(sales.error() && list().length === 0)) {
     <section class="summary tinted" [attr.data-tone]="summary().tone" aria-label="Résumé">
         <div class="summary-body">
@@ -88,7 +88,7 @@
             />
         </div>
 
-        <!-- icône de filtre : la liste native s'ouvre au toucher, sans bouton de plus -->
+        <!-- Icône de filtre : la liste native s'ouvre au toucher, sans bouton de plus -->
         <label class="filter-icon" [class.active]="status() !== null || unpaid()">
             <app-icon name="filter" [size]="18" />
             <span class="filter-word">Filtre</span>
@@ -151,7 +151,7 @@
             />
         }
     } @else {
-        <!-- erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
+        <!-- Erreur après un changement de filtre : on ne laisse pas croire que l'ancienne liste correspond -->
         @if (sales.error()) {
             <div class="alert alert-error list-error" role="alert">
                 Impossible de charger les ventes.
@@ -161,7 +161,7 @@
             </div>
         }
 
-        <!-- les ventes regroupées par jour, sur téléphone comme sur ordinateur -->
+        <!-- Les ventes regroupées par jour, sur téléphone comme sur ordinateur -->
         <div class="days">
             @for (day of days(); track day.key) {
                 <section class="day">
@@ -190,7 +190,7 @@
                                     @if (sale.status === "CANCELLED") {
                                         <span class="badge badge-danger">Remboursée</span>
                                     } @else if (due(sale) > 0) {
-                                        <!-- comme sur ordinateur : seules les exceptions ont un badge -->
+                                        <!-- Comme sur ordinateur : seules les exceptions ont un badge -->
                                         <span class="badge badge-warning"
                                             >Reste {{ due(sale) | fcfa }}</span
                                         >

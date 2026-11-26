@@ -7,7 +7,7 @@ const formatter = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 });
 export class FcfaPipe implements PipeTransform {
     transform(value: number | null | undefined, signed = false) {
         if (value === null || value === undefined) return "—";
-        // l'espace fine du français disparaît presque en petit texte ("1300 F") :
+        // L'espace fine du français disparaît presque en petit texte ("1300 F") :
         // on la remplace par une espace insécable normale, bien visible
         const digits = formatter.format(Math.abs(value)).replace(/ /g, " ");
         const amount = `${digits} F`;

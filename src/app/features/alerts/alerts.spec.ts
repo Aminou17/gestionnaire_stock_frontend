@@ -21,7 +21,7 @@ const tissu: LowStockAlert = {
     category_id: 1,
     category_name: "Tissus",
     supplier_id: 1,
-    supplier_name: "Ets Diallo",
+    supplier_name: "Ets Ouédraogo",
     supplier_contact: "Mireille Mavoungou",
     supplier_phone: "06 612 34 56",
     last_entry_at: null,
@@ -98,8 +98,8 @@ describe("Alerts", () => {
                         isOwner: signal(false),
                         user: signal({
                             id: 1,
-                            name: "Awa Bazin",
-                            email: "awa@test.com",
+                            name: "Adam Ouédraogo",
+                            email: "adam@test.com",
                             role,
                         }),
                         roleLabel: signal("Administrateur"),
@@ -172,7 +172,7 @@ describe("Alerts", () => {
         rotationItems = [];
     });
 
-    // jours restants et dernière entrée sont dans le menu de la ligne
+    // Jours restants et dernière entrée sont dans le menu de la ligne
     async function openRowMenu(index: number) {
         el.querySelectorAll<HTMLButtonElement>(".more-btn")[index].click();
         await fixture.whenStable();
@@ -191,7 +191,7 @@ describe("Alerts", () => {
         const heads = el.querySelectorAll(".group-head");
 
         expect(heads.length).toBe(2);
-        expect(heads[0].textContent).toContain("Ets Diallo");
+        expect(heads[0].textContent).toContain("Ets Ouédraogo");
         expect(heads[0].textContent).toContain("Mireille Mavoungou");
         expect(heads[0].querySelector<HTMLAnchorElement>(".order-btn")!.getAttribute("href")).toBe(
             "/alerts/supplier/1",

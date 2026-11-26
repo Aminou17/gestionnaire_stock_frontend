@@ -170,7 +170,7 @@
     <app-user-form (saved)="onSaved()" />
 }
 
-<!-- on ne supprime pas son propre compte et son mot de passe se change dans Mon compte -->
+<!-- On ne supprime pas son propre compte et son mot de passe se change dans Mon compte -->
 @if (data()?.is_active && !isMe()) {
     <app-password-dialog />
 

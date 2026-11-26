@@ -3,14 +3,14 @@ import { Component, LOCALE_ID, inject, input, output, signal } from "@angular/co
 
 export type Period = "today" | "week" | "month" | "all" | "custom";
 
-// période choisie et ses dates (YYYY-MM-DD, null = pas de borne)
+// Période choisie et ses dates (YYYY-MM-DD, null = pas de borne)
 export interface PeriodRange {
     period: Period;
     from: string | null;
     to: string | null;
 }
 
-// nombre de jours à remonter, aujourd'hui compris
+// Nombre de jours à remonter, aujourd'hui compris
 const PERIOD_DAYS: Record<Exclude<Period, "custom">, number | null> = {
     today: 1,
     week: 7,
@@ -37,20 +37,20 @@ export class PeriodFilter {
     private locale = inject(LOCALE_ID);
 
     changed = output<PeriodRange>();
-    // affichage en pastilles, sans libellé visible (Historique des actions)
+    // Affichage en pastilles, sans libellé visible (Historique des actions)
     chips = input(false);
-    // sur téléphone, les filtres s'empilent en pleine largeur (panneau Filtres des Ventes)
+    // Sur téléphone, les filtres s'empilent en pleine largeur (panneau Filtres des Ventes)
     stacked = input(false);
-    // sur téléphone, sans cadre ni défilement : pour le placer dans une fenêtre de filtres
+    // Sur téléphone, sans cadre ni défilement : pour le placer dans une fenêtre de filtres
     flat = input(false);
-    // la période est choisie ailleurs (pastilles de la page) : seuls les filtres projetés restent
+    // La période est choisie ailleurs (pastilles de la page) : seuls les filtres projetés restent
     hidePeriod = input(false);
 
     period = signal<Period>("all");
     customFrom = signal("");
     customTo = signal("");
     customError = signal<string | null>(null);
-    // dernière période personnalisée valide
+    // Dernière période personnalisée valide
     private customRange: { from: string; to: string } | null = null;
 
     today() {
@@ -63,7 +63,7 @@ export class PeriodFilter {
         this.period.set(period);
 
         if (period === "custom") {
-            // on part des 7 derniers jours : l'utilisateur n'a plus qu'à ajuster
+            // On part des 7 derniers jours : l'utilisateur n'a plus qu'à ajuster
             if (!this.customRange) {
                 this.customFrom.set(this.daysAgo(6));
                 this.customTo.set(this.today());

@@ -16,7 +16,7 @@ const inventory = (changes: Partial<Inventory> = {}): Inventory => ({
     countedAt: null,
     appliedAt: null,
     cancelledAt: null,
-    createdBy: { id: 1, name: "Awa", avatar: null },
+    createdBy: { id: 1, name: "Adam", avatar: null },
     countedBy: null,
     appliedBy: null,
     cancelledBy: null,
@@ -58,7 +58,7 @@ describe("inventory look", () => {
         const blind = inventory({ differenceCount: null, differenceValue: null, itemsCount: 12 });
 
         expect(resultSentence(blind, false)).toBe("12 produits comptés");
-        // même si le serveur envoyait les écarts, le gérant ne lit jamais d'argent
+        // Même si le serveur envoyait les écarts, le gérant ne lit jamais d'argent
         expect(resultSentence(inventory(), false)).toBe("30 produits comptés");
     });
 

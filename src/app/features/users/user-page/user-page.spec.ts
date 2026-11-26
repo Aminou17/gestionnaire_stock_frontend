@@ -96,7 +96,7 @@ describe("UserPage", () => {
                     useValue: {
                         isAdmin: signal(true),
                         isOwner: signal(false),
-                        user: signal({ id: 1, name: "Awa", email: "awa@test.com", role: "admin" }),
+                        user: signal({ id: 1, name: "Adam", email: "adam@test.com", role: "admin" }),
                         roleLabel: signal("Administrateur"),
                     },
                 },
@@ -154,7 +154,7 @@ describe("UserPage", () => {
 
     it("should delete then go back to the list", async () => {
         await render();
-        // la fiche est quittée sans rester dans l'historique
+        // La fiche est quittée sans rester dans l'historique
         const navigate = vi.spyOn(TestBed.inject(Router), "navigateByUrl").mockResolvedValue(true);
 
         button("Supprimer")!.click();

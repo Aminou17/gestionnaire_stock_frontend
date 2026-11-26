@@ -51,7 +51,7 @@
             <span class="muted">{{ resultsTotal() }}</span>
         </div>
 
-        <!-- une seule barre : chercher ou scanner, comme sur les caisses du commerce -->
+        <!-- Une seule barre : chercher ou scanner, comme sur les caisses du commerce -->
         <div class="search">
             <app-icon name="search" [size]="18" />
             <input
@@ -76,7 +76,7 @@
             </button>
         </div>
 
-        <!-- catégories en pastilles qui défilent -->
+        <!-- Catégories en pastilles qui défilent -->
         <div class="toolbar">
             <div class="cats" role="group" aria-label="Catégorie">
                 @if (categoryChips().length > 1) {
@@ -461,7 +461,7 @@
                     </div>
 
                     @if (showDeposit()) {
-                        <!-- paiement partiel : le montant se saisit dans la fenêtre client -->
+                        <!-- Paiement partiel : le montant se saisit dans la fenêtre client -->
                     } @else if (paymentMethod() === "CASH") {
                         <div class="chips" role="group" aria-label="Montant reçu">
                             @for (amount of cashSuggestions(); track amount) {
@@ -526,7 +526,7 @@
                         Ajouter un client ou payer une partie
                     </button>
                 } @else {
-                    <!-- client et paiement partiel se règlent dans une fenêtre à part -->
+                    <!-- Client et paiement partiel se règlent dans une fenêtre à part -->
                     <div class="credit-recap" role="group" aria-label="Client et paiement">
                         <div class="credit-recap-text">
                             <strong>{{
@@ -574,7 +574,7 @@
     <div class="sheet-backdrop" aria-hidden="true" (click)="closeCart()"></div>
 }
 
-<!-- téléphone : barre fixe en bas, le catalogue reste visible derrière -->
+<!-- Téléphone : barre fixe en bas, le catalogue reste visible derrière -->
 @if (cart().length > 0 && !cartOpen()) {
     <div class="cart-bar">
         <button type="button" class="bar-info" (click)="openCart()">

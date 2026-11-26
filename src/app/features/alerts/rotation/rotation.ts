@@ -15,10 +15,10 @@ import { categoryTone, productInitials } from "../../products/product-look";
 // CLEAR : en stock et sans vente depuis 60 jours, à solder
 type View = "all" | RotationSpeed | "CLEAR";
 
-// un produit qui sort vite avec moins de 14 jours de stock est à surveiller
+// Un produit qui sort vite avec moins de 14 jours de stock est à surveiller
 const URGENT_DAYS = 14;
 
-// valeurs de ?vue= : la page Alertes envoie ici avec solder, et la fiche produit y revient avec la vue ouverte
+// Valeurs de ?vue= : la page Alertes envoie ici avec solder, et la fiche produit y revient avec la vue ouverte
 const viewParams: Record<string, View> = {
     vite: "FAST",
     normal: "NORMAL",
@@ -66,7 +66,7 @@ export class Rotation {
     zoom = signal<{ src: string; name: string } | null>(null);
     initials = productInitials;
 
-    // la fiche produit ouverte sait ainsi revenir ici, sur le même onglet
+    // La fiche produit ouverte sait ainsi revenir ici, sur le même onglet
     backState = computed<BackState>(() => {
         const vue = Object.keys(viewParams).find((key) => viewParams[key] === this.view());
         const url = this.router.createUrlTree(["/alerts/rotation"], {
@@ -75,7 +75,7 @@ export class Rotation {
         return { backTo: this.router.serializeUrl(url), backLabel: "Rotation" };
     });
 
-    // les produits qui risquent la rupture passent en premier
+    // Les produits qui risquent la rupture passent en premier
     list = computed(() =>
         [...this.filter(this.view())].sort(
             (a, b) => Number(this.isUrgent(b)) - Number(this.isUrgent(a)),

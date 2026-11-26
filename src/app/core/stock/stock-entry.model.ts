@@ -2,7 +2,7 @@ export interface StockEntry {
     id: number;
     product_id: number;
     product_name: string;
-    // miniature en data URL, null sans photo
+    // Miniature en data URL, null sans photo
     image?: string | null;
     supplier_id: number;
     supplier_name: string;
@@ -12,7 +12,7 @@ export interface StockEntry {
     date_creation: string;
 }
 
-// totaux de la période et des filtres choisis
+// Totaux de la période et des filtres choisis
 export interface StockEntryCounters {
     entries: number;
     units: number;

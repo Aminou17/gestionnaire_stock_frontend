@@ -48,7 +48,7 @@ export class SettingsShop implements HasUnsavedChanges {
 
     settings = rxResource({ stream: () => this.shopService.getSettings() });
 
-    // mêmes tailles que les colonnes de la base
+    // Mêmes tailles que les colonnes de la base
     form = this.fb.group({
         name: ["", [Validators.required, Validators.maxLength(80)]],
         address: ["", Validators.maxLength(200)],
@@ -59,7 +59,7 @@ export class SettingsShop implements HasUnsavedChanges {
         receiptFooter: ["", Validators.maxLength(300)],
     });
 
-    // le préfixe se règle dans la page Ventes : sans lui, l'aperçu montre le numéro simple
+    // Le préfixe se règle dans la page Ventes : sans lui, l'aperçu montre le numéro simple
     private salesSettings = rxResource({ stream: () => this.salesSettingsService.getSettings() });
     ticketNumber = computed(() =>
         formatTicketNumber(
@@ -68,7 +68,7 @@ export class SettingsShop implements HasUnsavedChanges {
         ),
     );
 
-    // l'aperçu du ticket et l'en-tête suivent la saisie
+    // L'aperçu du ticket et l'en-tête suivent la saisie
     values = toSignal(
         this.form.valueChanges.pipe(
             startWith(null),
@@ -79,7 +79,7 @@ export class SettingsShop implements HasUnsavedChanges {
 
     logo = computed(() => (this.settings.hasValue() ? this.settings.value().logo : null));
 
-    // deux initiales du nom, affichées tant qu'il n'y a pas de logo
+    // Deux initiales du nom, affichées tant qu'il n'y a pas de logo
     initials = computed(() => {
         const words = this.values().name.trim().split(/\s+/).filter(Boolean);
         return words
@@ -88,13 +88,13 @@ export class SettingsShop implements HasUnsavedChanges {
             .join("");
     });
 
-    // le logo s'enregistre tout de suite, séparément des champs
+    // Le logo s'enregistre tout de suite, séparément des champs
     logoBusy = signal(false);
     logoMessage = signal<{ ok: boolean; text: string } | null>(null);
     private fileInput = viewChild.required<ElementRef<HTMLInputElement>>("fileInput");
 
     saving = signal(false);
-    // relit la dernière modification affichée en bas de page après chaque enregistrement
+    // Relit la dernière modification affichée en bas de page après chaque enregistrement
     saveCount = signal(0);
     private leaveDialog = viewChild.required(UnsavedDialog);
     message = signal<{ ok: boolean; text: string } | null>(null);
@@ -113,7 +113,7 @@ export class SettingsShop implements HasUnsavedChanges {
 
             const settings = this.settings.value();
 
-            // un changement de logo recharge la fiche : la saisie en cours doit survivre
+            // Un changement de logo recharge la fiche : la saisie en cours doit survivre
             untracked(() => {
                 if (this.form.pristine) this.fill(settings);
             });
@@ -124,7 +124,7 @@ export class SettingsShop implements HasUnsavedChanges {
         return countryName(this.form.controls.defaultCountryCode.value);
     }
 
-    // le téléphone de la boutique commence par un autre indicatif (+226) : on propose de le prendre
+    // Le téléphone de la boutique commence par un autre indicatif (+226) : on propose de le prendre
     suggestedCode = computed(() => {
         const { phone, defaultCountryCode } = this.values();
         const digits = /^\s*(\+|00)/.test(phone)
@@ -144,7 +144,7 @@ export class SettingsShop implements HasUnsavedChanges {
         this.form.controls.defaultCountryCode.markAsDirty();
     }
 
-    // chiffres seulement : le + est déjà affiché devant le champ
+    // Chiffres seulement : le + est déjà affiché devant le champ
     onCountryCodeInput(input: HTMLInputElement) {
         const digits = input.value.replace(/\D/g, "").replace(/^0+/, "");
         if (digits !== input.value) {
@@ -159,7 +159,7 @@ export class SettingsShop implements HasUnsavedChanges {
     }
 
     canLeave() {
-        // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
+        // Quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
         if (this.saving() || this.logoBusy()) return false;
 
         return !this.form.dirty || this.leaveDialog().ask();
@@ -177,7 +177,7 @@ export class SettingsShop implements HasUnsavedChanges {
         this.saving.set(true);
         this.message.set(null);
 
-        // une saisie pendant l'envoi serait effacée par la réponse du serveur
+        // Une saisie pendant l'envoi serait effacée par la réponse du serveur
         this.form.disable({ emitEvent: false });
 
         this.shopService
@@ -211,7 +211,7 @@ export class SettingsShop implements HasUnsavedChanges {
         const input = event.target as HTMLInputElement;
         const file = input.files?.[0];
 
-        // le même fichier doit pouvoir être choisi une seconde fois
+        // Le même fichier doit pouvoir être choisi une seconde fois
         input.value = "";
         if (!file) return;
 

@@ -20,12 +20,12 @@ export class ManagerCashBanner {
     cash = input<CashSummary | null>(null);
     loading = input(false);
     error = input(false);
-    // fond de départ annoncé tant que la caisse du jour n'existe pas
+    // Fond de départ annoncé tant que la caisse du jour n'existe pas
     expectedOpening = input<number | null>(null);
     retry = output();
 
     isOpen = computed(() => this.cash()?.status === "OPEN");
-    // comptée aujourd'hui : une nouvelle vente la rouvre toute seule
+    // Comptée aujourd'hui : une nouvelle vente la rouvre toute seule
     isCounted = computed(() => this.cash()?.status === "CLOSED");
     canSell = computed(() => !this.loading() && !this.error());
 

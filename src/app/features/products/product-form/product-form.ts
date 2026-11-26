@@ -49,29 +49,29 @@ export class ProductForm {
 
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
 
-    // identifiant du produit enregistré : la page qui a ouvert le formulaire peut le reprendre
+    // Identifiant du produit enregistré : la page qui a ouvert le formulaire peut le reprendre
     saved = output<number>();
 
     form = this.fb.group(
         {
             name: ["", Validators.required],
-            // facultatifs : 0 veut dire aucun
+            // Facultatifs : 0 veut dire aucun
             categoryId: [0],
             supplierId: [0],
-            // le backend refuse un prix d'achat à 0 à la création
+            // Le backend refuse un prix d'achat à 0 à la création
             purchasePrice: [null as number | null, [Validators.required, Validators.min(1)]],
             salePrice: [null as number | null, [Validators.required, Validators.min(1)]],
             pricingMode: ["FIXED" as PricingMode],
             maxDiscount: [null as number | null, Validators.min(0)],
-            // vide = le produit suit le seuil par défaut
+            // Vide = le produit suit le seuil par défaut
             minStock: [null as number | null, [Validators.min(0), Validators.pattern(/^\d+$/)]],
-            // mêmes caractères que l'API : chiffres, lettres et - . _ /
+            // Mêmes caractères que l'API : chiffres, lettres et - . _ /
             barcode: ["", [Validators.maxLength(64), Validators.pattern(/^[A-Za-z0-9._\-/ ]*$/)]],
         },
         { validators: discountValidator },
     );
 
-    // petit formulaire "Créer une catégorie", ouvert depuis la liste des catégories
+    // Petit formulaire "Créer une catégorie", ouvert depuis la liste des catégories
     categoryForm = this.fb.group({
         name: ["", [Validators.required, Validators.maxLength(100)]],
         description: ["", Validators.maxLength(500)],
@@ -80,7 +80,7 @@ export class ProductForm {
     savingCategory = signal(false);
     categoryError = signal<string | null>(null);
 
-    // petit formulaire "Créer un fournisseur", ouvert depuis la liste des fournisseurs
+    // Petit formulaire "Créer un fournisseur", ouvert depuis la liste des fournisseurs
     supplierForm = this.fb.group({
         name: ["", [Validators.required, Validators.maxLength(100)]],
         telephone: ["", Validators.maxLength(50)],
@@ -91,7 +91,7 @@ export class ProductForm {
 
     productId = signal<number | null>(null);
 
-    // photo : undefined = inchangée, null = retirée, sinon la nouvelle image et sa miniature
+    // Photo : undefined = inchangée, null = retirée, sinon la nouvelle image et sa miniature
     photo = signal<{ image: string; thumb: string } | null | undefined>(undefined);
     currentImage = signal<string | null>(null);
     photoError = signal<string | null>(null);
@@ -99,19 +99,19 @@ export class ProductForm {
         const photo = this.photo();
         return photo === undefined ? this.currentImage() : (photo?.image ?? null);
     });
-    // catégorie du produit modifié, gardée dans la liste même si elle est désactivée
+    // Catégorie du produit modifié, gardée dans la liste même si elle est désactivée
     currentCategoryId = signal<number | null>(null);
     loading = signal(false);
-    // champs facultatifs (code-barres, photo, prix négociable, alerte) : repliés pour un premier produit
+    // Champs facultatifs (code-barres, photo, prix négociable, alerte) : repliés pour un premier produit
     moreOpen = signal(false);
     loadFailed = signal(false);
     saving = signal(false);
     error = signal<string | null>(null);
 
-    // chargement en cours du produit à modifier, annulé si on ferme ou ouvre un autre produit
+    // Chargement en cours du produit à modifier, annulé si on ferme ou ouvre un autre produit
     private loadSub?: Subscription;
 
-    // les listes ne sont chargées qu'à la première ouverture
+    // Les listes ne sont chargées qu'à la première ouverture
     private wanted = signal(false);
     categories = rxResource({
         params: () => this.wanted() || undefined,
@@ -151,7 +151,7 @@ export class ProductForm {
         this.addingCategory.set(true);
     }
 
-    // sans l'accès Achats : le message d'abonnement
+    // Sans l'accès Achats : le message d'abonnement
     showSupplierLocked() {
         this.access.showLocked("purchases");
     }
@@ -164,7 +164,7 @@ export class ProductForm {
 
     pricingMode = computed(() => this.values().pricingMode);
 
-    // champs obligatoires pas encore remplis
+    // Champs obligatoires pas encore remplis
     todo = computed(() => {
         const v = this.values();
         return {
@@ -226,7 +226,7 @@ export class ProductForm {
                     minStock: product.min_stock,
                     barcode: product.barcode ?? "",
                 });
-                // ce qui est déjà renseigné se voit tout de suite
+                // Ce qui est déjà renseigné se voit tout de suite
                 this.moreOpen.set(
                     !!product.barcode ||
                         !!product.image ||
@@ -321,7 +321,7 @@ export class ProductForm {
             return;
         }
 
-        // le fournisseur existe déjà dans la liste : on le choisit au lieu de créer un doublon
+        // Le fournisseur existe déjà dans la liste : on le choisit au lieu de créer un doublon
         const existing = this.supplierList().find(
             (s) => s.name.toLowerCase() === name.trim().toLowerCase(),
         );
@@ -383,7 +383,7 @@ export class ProductForm {
     setMode(mode: PricingMode) {
         this.form.controls.pricingMode.setValue(mode);
 
-        // la remise par défaut des réglages de vente préremplit un champ encore vide
+        // La remise par défaut des réglages de vente préremplit un champ encore vide
         const defaultDiscount = this.salesSettings.hasValue()
             ? this.salesSettings.value().default_max_discount
             : null;
@@ -399,7 +399,7 @@ export class ProductForm {
     submit() {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
-            // une erreur dans un champ replié : on le montre
+            // Une erreur dans un champ replié : on le montre
             const { barcode, maxDiscount, minStock } = this.form.controls;
             if (barcode.invalid || maxDiscount.invalid || minStock.invalid || this.form.errors) {
                 this.moreOpen.set(true);
@@ -432,7 +432,7 @@ export class ProductForm {
 
         request
             .pipe(
-                // la photo part après le produit, qui doit déjà exister
+                // La photo part après le produit, qui doit déjà exister
                 switchMap((product) => {
                     this.productId.set(product.id);
                     if (photo === undefined) return of(product);

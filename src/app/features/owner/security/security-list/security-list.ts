@@ -38,7 +38,7 @@ export class SecurityList {
     private destroyRef = inject(DestroyRef);
     private periodFilter = viewChild(PeriodFilter);
     private detailDialog = viewChild.required<ElementRef<HTMLDialogElement>>("detailDialog");
-    // une minuterie par champ : taper dans l'un ne doit pas annuler la recherche de l'autre
+    // Une minuterie par champ : taper dans l'un ne doit pas annuler la recherche de l'autre
     private emailTimer: ReturnType<typeof setTimeout> | undefined;
     private ipTimer: ReturnType<typeof setTimeout> | undefined;
 
@@ -66,7 +66,7 @@ export class SecurityList {
             this.security.getList<unknown>(this.config.path, this.query(params)),
     });
 
-    // dernier total connu : la pagination ne disparaît pas pendant le chargement de la page suivante
+    // Dernier total connu : la pagination ne disparaît pas pendant le chargement de la page suivante
     total = linkedSignal<Page<unknown> | undefined, number>({
         source: () => (this.list.hasValue() ? this.list.value() : undefined),
         computation: (page, previous) => page?.pagination.total ?? previous?.value ?? 0,
@@ -76,7 +76,7 @@ export class SecurityList {
         this.list.hasValue() ? this.config.toRows(this.view(), this.list.value().data) : [],
     );
 
-    // seules les lignes du journal (accès refusés, mots de passe) ouvrent un détail
+    // Seules les lignes du journal (accès refusés, mots de passe) ouvrent un détail
     clickable = this.kind === "events" || this.kind === "history";
     selected = signal<SecurityEvent | null>(null);
 
@@ -104,7 +104,7 @@ export class SecurityList {
     headings = computed(() => this.config.headings(this.view()));
     has = (name: "shop" | "email" | "ip" | "period") => this.config.filters.includes(name);
 
-    // filtres de la fenêtre (téléphone) : la boutique, l'adresse IP et la période
+    // Filtres de la fenêtre (téléphone) : la boutique, l'adresse IP et la période
     activeFilters = computed(() => {
         const { shopId, ip, from } = this.filters();
         const chips: { key: "shop" | "ip" | "period"; label: string }[] = [];
@@ -147,7 +147,7 @@ export class SecurityList {
         this.page.set(1);
     }
 
-    // on attend la fin de la frappe avant d'interroger le serveur
+    // On attend la fin de la frappe avant d'interroger le serveur
     onSearch(value: string) {
         clearTimeout(this.emailTimer);
         this.emailTimer = setTimeout(() => this.setFilter({ email: value.trim() }), 300);

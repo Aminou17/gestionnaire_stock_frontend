@@ -1,23 +1,23 @@
-// informations imprimées sur les tickets de caisse
+// Informations imprimées sur les tickets de caisse
 export interface ShopSettings {
     name: string;
     address: string | null;
     phone: string | null;
-    // numéro IFU
+    // Numéro IFU
     tax_id: string | null;
     rccm: string | null;
-    // message en bas du ticket, la politique de retour par exemple
+    // Message en bas du ticket, la politique de retour par exemple
     receipt_footer: string | null;
-    // image PNG ou JPEG en data URL, imprimée en haut du ticket
+    // Image PNG ou JPEG en data URL, imprimée en haut du ticket
     logo: string | null;
-    // chiffres seuls, sans + (242, 226)
+    // Chiffres seuls, sans + (242, 226)
     default_country_code: string;
     updated_at: string | null;
-    // fin de l'essai gratuit ; absent ou null : pas d'essai en cours
+    // Fin de l'essai gratuit ; absent ou null : pas d'essai en cours
     trial_ends_at?: string | null;
-    // le propriétaire a activé les abonnements : la page Abonnement existe
+    // Le propriétaire a activé les abonnements : la page Abonnement existe
     subscriptions_enabled?: boolean;
-    // accès retirés à cette boutique par le propriétaire (clés)
+    // Accès retirés à cette boutique par le propriétaire (clés)
     disabled_modules?: string[];
 }
 

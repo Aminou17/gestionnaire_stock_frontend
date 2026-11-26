@@ -20,7 +20,7 @@ export class PendingSalesDialog {
     private dialog = viewChild.required<ElementRef<HTMLDialogElement>>("dialog");
 
     sending = signal(false);
-    // vente dont on confirme la suppression
+    // Vente dont on confirme la suppression
     removing = signal<string | null>(null);
 
     open() {

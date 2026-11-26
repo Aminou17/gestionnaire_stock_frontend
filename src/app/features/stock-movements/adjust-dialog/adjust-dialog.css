@@ -1,4 +1,4 @@
-/* fenêtre centrée, sur téléphone comme sur ordinateur */
+/* Fenêtre centrée, sur téléphone comme sur ordinateur */
 .sheet {
     width: calc(100% - 32px);
     max-width: none;
@@ -93,7 +93,7 @@
     font-weight: var(--fw-medium);
 }
 
-/* choix du produit */
+/* Choix du produit */
 .search {
     position: relative;
     display: block;
@@ -190,7 +190,7 @@
     object-fit: cover;
 }
 
-/* mêmes teintes d'avatar que la liste des mouvements */
+/* Mêmes teintes d'avatar que la liste des mouvements */
 .av-0 {
     background: var(--primary-soft);
     color: var(--primary-text);
@@ -211,7 +211,7 @@
     color: var(--success);
 }
 
-/* produit choisi : son stock actuel en grand */
+/* Produit choisi : son stock actuel en grand */
 .chosen {
     display: flex;
     align-items: center;
@@ -273,7 +273,7 @@
     text-decoration: underline;
 }
 
-/* retirer ou ajouter : deux grands choix colorés */
+/* Retirer ou ajouter : deux grands choix colorés */
 .choice {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -310,7 +310,7 @@
     font-weight: var(--fw-semibold);
 }
 
-/* quantité : boutons moins et plus, grand chiffre au centre */
+/* Quantité : boutons moins et plus, grand chiffre au centre */
 .qty-row {
     display: flex;
     align-items: center;
@@ -376,7 +376,7 @@
     border-color: var(--danger);
 }
 
-/* le stock avant et après, visible avant d'enregistrer */
+/* Le stock avant et après, visible avant d'enregistrer */
 .preview {
     display: flex;
     align-items: center;
@@ -411,7 +411,7 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* pied : toujours visible, même quand le formulaire défile */
+/* Pied : toujours visible, même quand le formulaire défile */
 .sheet-foot {
     display: grid;
     flex-shrink: 0;
@@ -432,7 +432,7 @@
     font-size: var(--fs-body);
 }
 
-/* inactif mais lisible : fond neutre, texte net, pas un bouton fantôme */
+/* Inactif mais lisible : fond neutre, texte net, pas un bouton fantôme */
 .actions .submit:disabled:not(:has(.spinner)) {
     border-color: var(--border);
     background: var(--neutral-soft);
@@ -440,7 +440,7 @@
     opacity: 1;
 }
 
-/* motif : un champ qui déplie une liste courte */
+/* Motif : un champ qui déplie une liste courte */
 .reason-btn {
     display: flex;
     align-items: center;
@@ -470,7 +470,7 @@
     transform: rotate(180deg);
 }
 
-/* menu clair sous le champ ; dans le flux pour ne pas être coupé par le défilement */
+/* Menu clair sous le champ ; dans le flux pour ne pas être coupé par le défilement */
 .reason-list {
     display: grid;
     gap: 2px;
@@ -538,7 +538,7 @@
     background: var(--danger);
 }
 
-/* ce qui manque pour activer le bouton */
+/* Ce qui manque pour activer le bouton */
 .hint {
     margin: 0;
     color: var(--text-muted);

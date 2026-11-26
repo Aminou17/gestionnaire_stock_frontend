@@ -20,9 +20,9 @@ export class PageHeader {
 
     title = input.required<string>();
     subtitle = input<string>();
-    // rubrique du menu affichée au-dessus du titre (ex. "Stock")
+    // Rubrique du menu affichée au-dessus du titre (ex. "Stock")
     section = input<string>();
-    // lien de la flèche retour affichée à côté du titre (ex. "/categories")
+    // Lien de la flèche retour affichée à côté du titre (ex. "/categories")
     back = input<string | UrlTree>();
     backLabel = input("Retour");
     // Accueil : la cloche et le profil restent visibles sur téléphone, ailleurs la page se concentre sur son action

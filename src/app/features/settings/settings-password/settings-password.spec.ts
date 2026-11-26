@@ -35,7 +35,7 @@ describe("SettingsPassword", () => {
                 {
                     provide: AuthService,
                     useValue: {
-                        user: signal({ email: "awa@test.com", mustChangePassword }),
+                        user: signal({ email: "adam@test.com", mustChangePassword }),
                         isAdmin: signal(false),
                         isOwner: signal(false),
                         roleLabel: signal("Employé"),
@@ -163,7 +163,7 @@ describe("SettingsPassword", () => {
         el.querySelector<HTMLButtonElement>(".forgot")!.click();
         await fixture.whenStable();
 
-        expect(forgotPassword).toHaveBeenCalledWith("awa@test.com");
+        expect(forgotPassword).toHaveBeenCalledWith("adam@test.com");
         expect(el.textContent).toContain("Un lien vous a été envoyé par e-mail.");
     });
 
@@ -219,7 +219,7 @@ describe("SettingsPassword", () => {
         await click("Oui, tout fermer");
 
         expect(el.querySelector(".alert-error")?.textContent).toContain("Erreur serveur.");
-        // la confirmation reste ouverte avec l'erreur près des boutons
+        // La confirmation reste ouverte avec l'erreur près des boutons
         expect(buttonByText("Oui, tout fermer")).toBeTruthy();
     });
 });

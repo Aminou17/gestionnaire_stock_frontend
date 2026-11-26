@@ -1,4 +1,4 @@
-// identifiant unique créé par l'appareil : le serveur s'en sert pour ne jamais créer deux fois la même vente ou le même inventaire
+// Identifiant unique créé par l'appareil : le serveur s'en sert pour ne jamais créer deux fois la même vente ou le même inventaire
 export const newRef = () =>
     typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()

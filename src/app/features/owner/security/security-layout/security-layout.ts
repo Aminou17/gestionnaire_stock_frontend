@@ -11,7 +11,7 @@ import { PageHeader } from "../../../../layout/page-header/page-header";
     styleUrl: "./security-layout.css",
 })
 export class SecurityLayout {
-    // libellé court pour le téléphone, long pour l'ordinateur
+    // Libellé court pour le téléphone, long pour l'ordinateur
     tabs = [
         { path: "/owner/security", short: "Aperçu", long: "Vue d'ensemble", exact: true },
         {

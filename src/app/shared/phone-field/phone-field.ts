@@ -20,14 +20,14 @@ let nextId = 0;
 export class PhoneField implements ControlValueAccessor {
     private shop = inject(ShopSettingsService);
 
-    // sans libellé visible (caisse), le champ garde un libellé pour les lecteurs d'écran
+    // Sans libellé visible (caisse), le champ garde un libellé pour les lecteurs d'écran
     label = input("");
     optional = input(false);
     ariaLabel = input("Téléphone");
     invalid = input(false);
     showCountry = input(true);
     placeholder = input("Numéro");
-    // indicatif proposé tant que rien n'est choisi (inscription : la boutique n'existe pas encore)
+    // Indicatif proposé tant que rien n'est choisi (inscription : la boutique n'existe pas encore)
     initialCode = input<string | null>(null);
 
     protected labelId = `phone-field-${nextId++}`;
@@ -77,7 +77,7 @@ export class PhoneField implements ControlValueAccessor {
     }
 
     protected onNumberInput(input: HTMLInputElement) {
-        // un numéro collé avec son indicatif (+226 66 09 90 60) remplit les deux champs
+        // Un numéro collé avec son indicatif (+226 66 09 90 60) remplit les deux champs
         if (/^\s*(\+|00)/.test(input.value)) {
             const { code, national } = splitPhone(input.value, this.shop.defaultCountryCode());
             this.chosenCode.set(code);
@@ -87,7 +87,7 @@ export class PhoneField implements ControlValueAccessor {
             return;
         }
 
-        // le texte reste tel que tapé, il est mis en forme en quittant le champ
+        // Le texte reste tel que tapé, il est mis en forme en quittant le champ
         const typed = input.value.replace(/[^\d ]/g, "");
         input.value = typed;
         this.national.set(typed);
@@ -95,7 +95,7 @@ export class PhoneField implements ControlValueAccessor {
     }
 
     protected onBlur(numberInput: HTMLInputElement) {
-        // un indicatif vidé revient à celui de la boutique
+        // Un indicatif vidé revient à celui de la boutique
         if (!this.chosenCode()) this.chosenCode.set(null);
 
         const grouped = groupNational(this.national().replace(/\D/g, ""));

@@ -12,7 +12,7 @@ app-page-header {
     margin: 0;
 }
 
-/* haut de page : le résultat en une phrase, puis le geste à faire */
+/* Haut de page : le résultat en une phrase, puis le geste à faire */
 .hero {
     display: grid;
     gap: 14px;
@@ -55,7 +55,7 @@ app-page-header {
     width: 100%;
 }
 
-/* le résultat : un grand chiffre, puis ce qu'il veut dire */
+/* Le résultat : un grand chiffre, puis ce qu'il veut dire */
 .result {
     display: grid;
     gap: 2px;
@@ -87,7 +87,7 @@ app-page-header {
     color: var(--text-muted);
 }
 
-/* compte rendu de la correction */
+/* Compte rendu de la correction */
 .report {
     display: grid;
     gap: 12px;
@@ -144,7 +144,7 @@ app-page-header {
     gap: 2px;
 }
 
-/* produits : recherche, trois puces, lignes */
+/* Produits : recherche, trois puces, lignes */
 .products {
     display: grid;
     gap: 12px;
@@ -214,7 +214,7 @@ app-page-header {
     font-size: var(--fs-small);
 }
 
-/* l'écart est le plus grand chiffre de la ligne */
+/* L'écart est le plus grand chiffre de la ligne */
 .figure {
     display: grid;
     justify-items: end;
@@ -236,7 +236,7 @@ app-page-header {
     color: var(--danger);
 }
 
-/* comptage ouvert : la quantité comptée, en neutre */
+/* Comptage ouvert : la quantité comptée, en neutre */
 .gap.counted {
     color: var(--text);
 }
@@ -246,7 +246,7 @@ app-page-header {
     white-space: nowrap;
 }
 
-/* détail d'une ligne corrigée : une phrase */
+/* Détail d'une ligne corrigée : une phrase */
 .detail {
     margin: -4px 0 0;
     padding: 16px 12px 12px;

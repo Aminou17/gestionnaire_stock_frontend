@@ -4,7 +4,7 @@ import { NavigationStart, Router } from "@angular/router";
 import { SwUpdate } from "@angular/service-worker";
 import { filter } from "rxjs";
 
-// vérifier s'il existe une nouvelle version toutes les 30 minutes
+// Vérifier s'il existe une nouvelle version toutes les 30 minutes
 const CHECK_EVERY = 30 * 60 * 1000;
 
 // Sans ce service, une nouvelle version restait téléchargée mais jamais affichée.
@@ -12,7 +12,7 @@ const CHECK_EVERY = 30 * 60 * 1000;
 // ce qui ne fait perdre aucune saisie en cours.
 @Injectable({ providedIn: "root" })
 export class AppUpdateService {
-    // absent quand le service worker n'est pas fourni (tests)
+    // Absent quand le service worker n'est pas fourni (tests)
     private sw = inject(SwUpdate, { optional: true });
     private router = inject(Router);
     private document = inject(DOCUMENT);
@@ -27,7 +27,7 @@ export class AppUpdateService {
             .pipe(filter((event) => event.type === "VERSION_READY"))
             .subscribe(() => (this.ready = true));
 
-        // copie abîmée sur l'appareil : on repart de la version en ligne
+        // Copie abîmée sur l'appareil : on repart de la version en ligne
         sw.unrecoverable.subscribe(() => this.document.location.reload());
 
         this.router.events
@@ -40,7 +40,7 @@ export class AppUpdateService {
                     .catch(() => {});
             });
 
-        // au retour sur l'application et à intervalle régulier
+        // Au retour sur l'application et à intervalle régulier
         this.document.addEventListener("visibilitychange", () => {
             if (this.document.visibilityState === "visible") this.check();
         });
@@ -49,7 +49,7 @@ export class AppUpdateService {
     }
 
     private check() {
-        // le service worker n'est pas encore installé, ou pas d'internet : on réessaiera
+        // Le service worker n'est pas encore installé, ou pas d'internet : on réessaiera
         this.sw?.checkForUpdate().catch(() => {});
     }
 }

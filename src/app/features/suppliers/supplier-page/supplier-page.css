@@ -3,7 +3,7 @@
     gap: 12px;
 }
 
-/* l'en-tête garde toute la largeur, seule la fiche est limitée (comme une vente) */
+/* L'en-tête garde toute la largeur, seule la fiche est limitée (comme une vente) */
 .sheet {
     width: 100%;
     max-width: 720px;
@@ -24,7 +24,7 @@ dl > div {
     border-bottom: 1px solid var(--border);
 }
 
-/* description : le texte passe sous l'intitulé, il peut être long */
+/* Description : le texte passe sous l'intitulé, il peut être long */
 dl > div.block {
     display: grid;
     gap: 6px;
@@ -38,7 +38,7 @@ dl > div.block {
     overflow-wrap: anywhere;
 }
 
-/* le libellé reste sur une ligne ("E-mail" ne se coupe pas au tiret) */
+/* Le libellé reste sur une ligne ("E-mail" ne se coupe pas au tiret) */
 dt {
     flex-shrink: 0;
     white-space: nowrap;
@@ -64,7 +64,7 @@ dd {
     margin-top: 20px;
 }
 
-/* modifier / supprimer : actions secondaires, sous les actions principales */
+/* Modifier / supprimer : actions secondaires, sous les actions principales */
 .manage {
     display: flex;
     justify-content: flex-end;
@@ -103,7 +103,7 @@ dd {
     color: var(--danger);
 }
 
-/* téléphone et email : un toucher suffit pour appeler ou écrire */
+/* Téléphone et email : un toucher suffit pour appeler ou écrire */
 .contact-link {
     display: inline-flex;
     align-items: center;
@@ -169,7 +169,7 @@ dd {
     font-weight: var(--fw-medium);
 }
 
-/* totaux des livraisons */
+/* Totaux des livraisons */
 .stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -205,7 +205,7 @@ dd {
     font-weight: var(--fw-semibold);
 }
 
-/* dernières livraisons : produit, date, quantité reçue */
+/* Dernières livraisons : produit, date, quantité reçue */
 .preview {
     margin: 0;
     padding: 0;
@@ -311,7 +311,7 @@ dd {
         padding: 4px 16px 16px;
     }
 
-    /* action principale en haut, pleine largeur, facile à toucher */
+    /* Action principale en haut, pleine largeur, facile à toucher */
     .actions {
         flex-direction: column-reverse;
     }

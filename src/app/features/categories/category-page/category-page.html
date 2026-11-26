@@ -45,7 +45,7 @@
                     }
                 </dd>
             </div>
-            <!-- catégorie créée avant que la date soit enregistrée : la ligne n'apprendrait rien -->
+            <!-- Catégorie créée avant que la date soit enregistrée : la ligne n'apprendrait rien -->
             @if (category.created_at) {
                 <div>
                     <dt>Créée le</dt>
@@ -105,7 +105,7 @@
                     </dd>
                 </div>
             }
-            <!-- prix d'achat et journal d'audit : réservés à l'admin (le backend ne les envoie qu'à lui) -->
+            <!-- Prix d'achat et journal d'audit : réservés à l'admin (le backend ne les envoie qu'à lui) -->
             @if (category.stock_value !== undefined && category.product_count > 0) {
                 <div>
                     <dt>Valeur du stock <small class="muted">(prix d'achat)</small></dt>
@@ -132,7 +132,7 @@
             }
         </dl>
 
-        <!-- aperçu des premiers produits : la fiche montre ce que contient la catégorie -->
+        <!-- Aperçu des premiers produits : la fiche montre ce que contient la catégorie -->
         @if (category.is_active && category.product_count > 0) {
             <h2 class="section-title">Produits</h2>
             @if (products.isLoading() && preview().length === 0) {
@@ -241,7 +241,7 @@
 </section>
 
 @if (canManage()) {
-    <!-- le produit créé ici change le nombre de produits de la catégorie -->
+    <!-- Le produit créé ici change le nombre de produits de la catégorie -->
     <app-product-form (saved)="category.reload()" />
 
     <dialog
@@ -323,7 +323,7 @@
             </h2>
 
             @if (deleteBlocked()) {
-                <!-- le backend refuserait : on l'explique tout de suite -->
+                <!-- Le backend refuserait : on l'explique tout de suite -->
                 <p class="muted">
                     « {{ data()?.name }} » contient {{ data()?.product_count }} produit{{
                         (data()?.product_count ?? 0) > 1 ? "s" : ""

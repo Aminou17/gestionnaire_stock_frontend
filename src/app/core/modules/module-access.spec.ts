@@ -41,7 +41,7 @@ describe("module access", () => {
         expect(access.allows("audit")).toBe(false);
         expect(access.allowsPath("/audit-logs")).toBe(false);
         expect(access.allowsPath("/sales")).toBe(true);
-        // un lien relatif des réglages
+        // Un lien relatif des réglages
         expect(access.allowsPath("export")).toBe(false);
         expect(access.allowsPath("alert-email")).toBe(true);
         expect(access.allowsPath(undefined)).toBe(true);

@@ -9,7 +9,7 @@ h2 {
     font-size: var(--fs-heading);
 }
 
-/* texte court et boutons sur la même ligne */
+/* Texte court et boutons sur la même ligne */
 .intro {
     display: flex;
     flex-wrap: wrap;
@@ -124,7 +124,7 @@ h2 {
     line-height: 1.45;
 }
 
-/* interrupteur : grand, facile à toucher */
+/* Interrupteur : grand, facile à toucher */
 .switch {
     position: relative;
     flex: none;
@@ -163,7 +163,7 @@ h2 {
     outline-offset: 3px;
 }
 
-/* barre d'enregistrement : reste en bas de l'écran, visible dès qu'il y a un changement */
+/* Barre d'enregistrement : reste en bas de l'écran, visible dès qu'il y a un changement */
 .savebar {
     position: sticky;
     bottom: 12px;

@@ -1,4 +1,4 @@
-/* le contenu d'une étape glisse dans le sens du déplacement */
+/* Le contenu d'une étape glisse dans le sens du déplacement */
 .panel {
     display: grid;
     gap: 16px;
@@ -17,12 +17,12 @@
     align-items: start;
 }
 
-/* prénom et nom : pas d'icône */
+/* Prénom et nom : pas d'icône */
 .float.no-icon .input {
     padding-left: 14px;
 }
 
-/* dépôt du logo : zone en pointillés, qui s'allume quand on glisse un fichier dessus */
+/* Dépôt du logo : zone en pointillés, qui s'allume quand on glisse un fichier dessus */
 .drop {
     display: flex;
     align-items: center;
@@ -101,7 +101,7 @@
     font-size: var(--fs-small);
 }
 
-/* sur téléphone on ne glisse rien */
+/* Sur téléphone on ne glisse rien */
 @media (hover: none) {
     .drag-hint {
         display: none;
@@ -125,7 +125,7 @@
     clip: rect(0 0 0 0);
 }
 
-/* bouton principal : vert une fois la boutique créée */
+/* Bouton principal : vert une fois la boutique créée */
 .btn-primary.btn-block.success {
     background: linear-gradient(180deg, #22c55e, #15803d);
     box-shadow:
@@ -134,7 +134,7 @@
     opacity: 1;
 }
 
-/* mention légale, discrète */
+/* Mention légale, discrète */
 .switch {
     margin: 0;
     padding-top: 16px;
@@ -202,7 +202,7 @@
     }
 }
 
-/* progression discrète : deux traits et un texte */
+/* Progression discrète : deux traits et un texte */
 .progress {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -225,7 +225,7 @@
     font-size: var(--fs-small);
 }
 
-/* hors de l'écran plutôt que display: none, que certains robots savent ignorer */
+/* Hors de l'écran plutôt que display: none, que certains robots savent ignorer */
 .trap {
     position: absolute;
     left: -10000px;

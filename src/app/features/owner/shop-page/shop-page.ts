@@ -39,7 +39,7 @@ export class ShopPage {
         return [detail?.city, detail?.country].filter(Boolean).join(", ");
     });
 
-    // jours avant l'effacement définitif d'une boutique supprimée
+    // Jours avant l'effacement définitif d'une boutique supprimée
     purgeLabel = computed(() => {
         const deletedAt = this.shop.hasValue() ? this.shop.value().deleted_at : null;
         if (!deletedAt) return "";
@@ -49,7 +49,7 @@ export class ShopPage {
         return left > 1 ? `Effacée pour de bon dans ${left} jours` : "Effacée pour de bon demain";
     });
 
-    // un seul statut lisible : supprimée, suspendue, essai ou paiement en cours, sinon active
+    // Un seul statut lisible : supprimée, suspendue, essai ou paiement en cours, sinon active
     status = computed(() => {
         if (!this.shop.hasValue()) return null;
         const detail = this.shop.value();
@@ -77,7 +77,7 @@ export class ShopPage {
         else if (action === "delete") this.askDelete();
     }
 
-    // résultat des actions de la page (lien envoyé, essai modifié)
+    // Résultat des actions de la page (lien envoyé, essai modifié)
     message = signal<{ ok: boolean; text: string } | null>(null);
     busy = signal(false);
 
@@ -86,7 +86,7 @@ export class ShopPage {
         this.message.set({ ok: false, text: err.error?.message ?? fallback });
     }
 
-    // lien envoyé par e-mail à la personne
+    // Lien envoyé par e-mail à la personne
     sendLink(account: ShopAccount) {
         this.busy.set(true);
         this.message.set(null);
@@ -100,7 +100,7 @@ export class ShopPage {
         });
     }
 
-    // mot de passe provisoire : confirmation, puis affichage unique
+    // Mot de passe provisoire : confirmation, puis affichage unique
     tempAccount = signal<ShopAccount | null>(null);
     tempPassword = signal<string | null>(null);
     tempError = signal<string | null>(null);
@@ -158,7 +158,7 @@ export class ShopPage {
         if (this.busy()) event.preventDefault();
     }
 
-    // le mot de passe ne reste pas en mémoire une fois la fenêtre fermée
+    // Le mot de passe ne reste pas en mémoire une fois la fenêtre fermée
     onPasswordClosed() {
         this.tempPassword.set(null);
         this.tempAccount.set(null);
@@ -170,7 +170,7 @@ export class ShopPage {
         );
     }
 
-    // essai : durée à partir d'aujourd'hui, vide pour le retirer
+    // Essai : durée à partir d'aujourd'hui, vide pour le retirer
     trialDays = signal<number | null>(null);
 
     saveTrial() {
@@ -200,7 +200,7 @@ export class ShopPage {
         });
     }
 
-    // payé jusqu'au : date choisie, ou prolongation à partir de la dernière date payée (ou d'aujourd'hui)
+    // Payé jusqu'au : date choisie, ou prolongation à partir de la dernière date payée (ou d'aujourd'hui)
     paidUntil = signal("");
 
     extendPaid(months: number) {
@@ -209,7 +209,7 @@ export class ShopPage {
         const base = current && current >= today ? current : today;
 
         const [year, month, day] = base.split("-").map(Number);
-        // même jour le mois suivant, ramené au dernier jour du mois si besoin (31 janvier donne 28 février)
+        // Même jour le mois suivant, ramené au dernier jour du mois si besoin (31 janvier donne 28 février)
         const target = new Date(Date.UTC(year, month - 1 + months, 1));
         const lastDay = new Date(
             Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),

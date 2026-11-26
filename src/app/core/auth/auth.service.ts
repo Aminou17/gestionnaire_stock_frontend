@@ -11,42 +11,42 @@ export type UserRole = "owner" | "admin" | "manager";
 
 export interface User {
     id: number;
-    // nom complet : prénom, espace, nom
+    // Nom complet : prénom, espace, nom
     name: string;
     firstName?: string;
     lastName?: string;
     email: string;
     role: UserRole;
     avatar?: string | null;
-    // mot de passe provisoire donné par le service client : à changer avant tout le reste
+    // Mot de passe provisoire donné par le service client : à changer avant tout le reste
     mustChangePassword?: boolean;
-    // double authentification du propriétaire
+    // Double authentification du propriétaire
     twoFactorEnabled?: boolean;
 }
 
-// accès de la boutique : essai, payé, délai de grâce, terminé ; null pour le propriétaire
+// Accès de la boutique : essai, payé, délai de grâce, terminé ; null pour le propriétaire
 export type AccessState = "unlimited" | "trial" | "paid" | "grace" | "ended" | "suspended";
 
 export interface Access {
     state: AccessState;
     endsAt: string | null;
-    // jours avant la fin (pendant la grâce : avant la coupure)
+    // Jours avant la fin (pendant la grâce : avant la coupure)
     daysLeft: number | null;
     blocked: boolean;
-    // accès terminé : c'était un essai ou une période payée
+    // Accès terminé : c'était un essai ou une période payée
     lastPeriod?: "trial" | "paid";
 }
 
 interface LoginResponse {
     message: string;
     token: string;
-    // session de 30 jours de cet appareil, pour obtenir un nouveau jeton sans se reconnecter
+    // Session de 30 jours de cet appareil, pour obtenir un nouveau jeton sans se reconnecter
     refreshToken: string;
     user: User;
     access: Access | null;
 }
 
-// propriétaire avec la double authentification : le mot de passe ne suffit pas, il faut encore un code
+// Propriétaire avec la double authentification : le mot de passe ne suffit pas, il faut encore un code
 export interface TwoFactorChallenge {
     twoFactorRequired: true;
     twoFactorToken: string;
@@ -91,7 +91,7 @@ export class AuthService {
     user = this._user.asReadonly();
     access = this._access.asReadonly();
     isAdmin = computed(() => this._user()?.role === "admin");
-    // propriétaire du logiciel : il gère les boutiques, pas une boutique
+    // Propriétaire du logiciel : il gère les boutiques, pas une boutique
     isOwner = computed(() => this._user()?.role === "owner");
     roleLabel = computed(() => getRoleLabel(this._user()?.role));
 
@@ -103,7 +103,7 @@ export class AuthService {
         return this.storage.getItem("refreshToken");
     }
 
-    // le jeton court expire après 1 h ; tant que la session de l'appareil existe, il se renouvelle tout seul
+    // Le jeton court expire après 1 h ; tant que la session de l'appareil existe, il se renouvelle tout seul
     isLoggedIn() {
         const token = this._token();
         if (!token) return false;
@@ -114,14 +114,14 @@ export class AuthService {
         return false;
     }
 
-    // expiré ou sur le point de l'être : on le renouvelle avant d'envoyer la requête
+    // Expiré ou sur le point de l'être : on le renouvelle avant d'envoyer la requête
     tokenExpired(marginSeconds = 30) {
         const token = this._token();
         const exp = token ? tokenExpiry(token) : null;
         return !exp || exp * 1000 < Date.now() + marginSeconds * 1000;
     }
 
-    // un seul renouvellement à la fois, partagé par les requêtes qui l'attendent
+    // Un seul renouvellement à la fois, partagé par les requêtes qui l'attendent
     refresh(): Observable<string> {
         if (this.refreshing) return this.refreshing;
 
@@ -149,7 +149,7 @@ export class AuthService {
         this._access.set(access);
     }
 
-    // l'API a refusé une requête car l'essai ou l'abonnement est terminé
+    // L'API a refusé une requête car l'essai ou l'abonnement est terminé
     markAccessEnded() {
         const access = this._access();
         if (!access?.blocked) {
@@ -168,14 +168,14 @@ export class AuthService {
             .post<LoginResponse | TwoFactorChallenge>(`${API_URL}/auth/login`, { email, password })
             .pipe(
                 tap((res) => {
-                    // avec la double authentification, la session s'ouvre à l'étape du code
+                    // Avec la double authentification, la session s'ouvre à l'étape du code
                     if (!("twoFactorRequired" in res)) this.openSession(res, remember);
                 }),
                 map((res) => ("twoFactorRequired" in res ? res : null)),
             );
     }
 
-    // deuxième étape : le jeton reçu avec le mot de passe et un code (ou un code de secours)
+    // Deuxième étape : le jeton reçu avec le mot de passe et un code (ou un code de secours)
     verifyTwoFactor(twoFactorToken: string, code: string, remember = true) {
         return this.http
             .post<LoginResponse>(`${API_URL}/auth/2fa/verify`, { twoFactorToken, code })
@@ -186,7 +186,7 @@ export class AuthService {
         return this.http.post<TwoFactorSetup>(`${API_URL}/auth/2fa/setup`, {});
     }
 
-    // renvoie les codes de secours, visibles une seule fois
+    // Renvoie les codes de secours, visibles une seule fois
     enableTwoFactor(code: string) {
         return this.http.post<{ backupCodes: string[] }>(`${API_URL}/auth/2fa/enable`, { code });
     }
@@ -198,19 +198,19 @@ export class AuthService {
         });
     }
 
-    // l'état de la double authentification est lu sur le compte : on le met à jour sans recharger
+    // L'état de la double authentification est lu sur le compte : on le met à jour sans recharger
     setTwoFactorEnabled(enabled: boolean) {
         const user = this._user();
         if (user) this.saveUser({ ...user, twoFactorEnabled: enabled });
     }
 
-    // la boutique est créée ; le commerçant confirme ensuite son e-mail avec le code reçu
+    // La boutique est créée ; le commerçant confirme ensuite son e-mail avec le code reçu
     // website et elapsedMs servent de piège à robots
     register(data: RegisterData & { website: string; elapsedMs: number }) {
         return this.http.post<RegisterResult>(`${API_URL}/auth/register`, data);
     }
 
-    // code à 6 chiffres reçu par e-mail : l'adresse est confirmée et la personne est connectée
+    // Code à 6 chiffres reçu par e-mail : l'adresse est confirmée et la personne est connectée
     verifyEmail(email: string, code: string) {
         return this.http
             .post<LoginResponse>(`${API_URL}/auth/verify-email`, { email, code })
@@ -221,7 +221,7 @@ export class AuthService {
         return this.http.post<{ message: string }>(`${API_URL}/auth/resend-code`, { email });
     }
 
-    // le numéro est-il déjà celui d'une autre boutique ?
+    // Le numéro est-il déjà celui d'une autre boutique ?
     isPhoneAvailable(phone: string) {
         return this.http.get<{ available: boolean; message?: string }>(
             `${API_URL}/auth/phone-available`,
@@ -240,7 +240,7 @@ export class AuthService {
         });
     }
 
-    // le serveur a refusé une requête : le mot de passe provisoire n'est pas encore changé
+    // Le serveur a refusé une requête : le mot de passe provisoire n'est pas encore changé
     requirePasswordChange() {
         const user = this._user();
         if (user && !user.mustChangePassword) this.saveUser({ ...user, mustChangePassword: true });
@@ -258,7 +258,7 @@ export class AuthService {
         this.saveAccess(res.access ?? null);
     }
 
-    // le nom, le rôle ou l'accès de la boutique ont pu changer depuis la connexion
+    // Le nom, le rôle ou l'accès de la boutique ont pu changer depuis la connexion
     refreshUser() {
         return this.http.get<User & { access?: Access | null }>(`${API_URL}/auth/me`).pipe(
             tap(({ access, ...user }) => {
@@ -272,13 +272,13 @@ export class AuthService {
     updateProfile(firstName: string, lastName: string, email: string) {
         return this.http.put<User>(`${API_URL}/auth/me`, { firstName, lastName, email }).pipe(
             tap((user) => {
-                // la réponse ne renvoie pas la photo : on garde celle qu'on a
+                // La réponse ne renvoie pas la photo : on garde celle qu'on a
                 this.saveUser({ ...user, avatar: this._user()?.avatar });
             }),
         );
     }
 
-    // image en data URL, ou null pour retirer la photo
+    // Image en data URL, ou null pour retirer la photo
     updateAvatar(avatar: string | null) {
         return this.http
             .put<User>(`${API_URL}/auth/me/avatar`, { avatar })
@@ -290,7 +290,7 @@ export class AuthService {
         this._user.set(user);
     }
 
-    // sert à ré-afficher une valeur masquée : ne change ni le token ni la session
+    // Sert à ré-afficher une valeur masquée : ne change ni le token ni la session
     verifyPassword(password: string) {
         return this.http.post<{ message: string }>(`${API_URL}/auth/verify-password`, { password });
     }
@@ -306,7 +306,7 @@ export class AuthService {
             )
             .pipe(
                 tap((res) => {
-                    // les anciennes sessions sont refusées par le backend : celle-ci garde l'appareil connecté
+                    // Les anciennes sessions sont refusées par le backend : celle-ci garde l'appareil connecté
                     this.storage.setItem("token", res.token);
                     if (res.refreshToken) this.storage.setItem("refreshToken", res.refreshToken);
                     this._token.set(res.token);
@@ -317,13 +317,13 @@ export class AuthService {
             );
     }
 
-    // les boutons Déconnexion demandent d'abord confirmation ; logout() déconnecte tout de suite
+    // Les boutons Déconnexion demandent d'abord confirmation ; logout() déconnecte tout de suite
     logoutAsked = signal(false);
 
     logout() {
         this.logoutAsked.set(false);
 
-        // la session de l'appareil est fermée côté serveur ; sans réseau, elle expirera seule
+        // La session de l'appareil est fermée côté serveur ; sans réseau, elle expirera seule
         const refreshToken = this.refreshToken;
         if (refreshToken) {
             this.http
@@ -335,7 +335,7 @@ export class AuthService {
         this.router.navigate(["/login"]);
     }
 
-    // ferme les sessions de tous les appareils, puis celle-ci
+    // Ferme les sessions de tous les appareils, puis celle-ci
     logoutAll() {
         return this.http.post(`${API_URL}/auth/logout-all`, {}).pipe(
             tap(() => {
@@ -345,7 +345,7 @@ export class AuthService {
         );
     }
 
-    // fin de session sans changer de page (après un nouveau mot de passe choisi avec le lien reçu)
+    // Fin de session sans changer de page (après un nouveau mot de passe choisi avec le lien reçu)
     endSession() {
         this.clearSession();
     }
@@ -360,12 +360,12 @@ export class AuthService {
         this._token.set(null);
         this._user.set(null);
         this._access.set(null);
-        // la valeur du stock ne reste pas visible pour le prochain connecté
+        // La valeur du stock ne reste pas visible pour le prochain connecté
         this.secret.revealed.set(false);
     }
 }
 
-// valeur corrompue dans le stockage : on repart d'une session vide au lieu de planter
+// Valeur corrompue dans le stockage : on repart d'une session vide au lieu de planter
 function readJson<T>(storage: Storage, key: string): T | null {
     try {
         return JSON.parse(storage.getItem(key) ?? "null");
@@ -376,7 +376,7 @@ function readJson<T>(storage: Storage, key: string): T | null {
 
 function tokenExpiry(token: string): number | null {
     try {
-        // le payload d'un JWT est en base64url
+        // Le payload d'un JWT est en base64url
         const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
         return JSON.parse(atob(payload)).exp ?? null;
     } catch {

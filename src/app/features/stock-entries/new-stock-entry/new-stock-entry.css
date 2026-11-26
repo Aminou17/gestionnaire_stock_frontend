@@ -39,7 +39,7 @@ app-page-header {
     font-size: var(--fs-heading);
 }
 
-/* numéro d'étape dans une pastille de couleur */
+/* Numéro d'étape dans une pastille de couleur */
 .step {
     --tone: var(--primary);
     display: grid;
@@ -67,7 +67,7 @@ app-page-header {
     white-space: nowrap;
 }
 
-/* recherche et résultats juste en dessous */
+/* Recherche et résultats juste en dessous */
 .picker {
     position: relative;
 }
@@ -186,7 +186,7 @@ app-page-header {
     opacity: 0.6;
 }
 
-/* code scanné inconnu */
+/* Code scanné inconnu */
 .unknown {
     display: flex;
     flex-wrap: wrap;
@@ -232,7 +232,7 @@ app-page-header {
     font-size: var(--fs-small);
 }
 
-/* lignes de la livraison */
+/* Lignes de la livraison */
 .lines {
     display: grid;
     gap: 8px;
@@ -360,7 +360,7 @@ app-page-header {
     outline-offset: -2px;
 }
 
-/* fournisseur */
+/* Fournisseur */
 .supplier-row {
     display: flex;
     align-items: center;
@@ -398,7 +398,7 @@ app-page-header {
     gap: 8px;
 }
 
-/* résumé */
+/* Résumé */
 .side {
     position: sticky;
     top: 16px;
@@ -455,7 +455,7 @@ app-page-header {
     white-space: nowrap;
 }
 
-/* vignette du produit : photo ou initiales */
+/* Vignette du produit : photo ou initiales */
 .thumb {
     display: grid;
     flex-shrink: 0;
@@ -474,7 +474,7 @@ app-page-header {
     object-fit: cover;
 }
 
-/* couleur de la pastille selon la catégorie, comme dans la liste */
+/* Couleur de la pastille selon la catégorie, comme dans la liste */
 .av-0 {
     background: var(--primary-soft);
     color: var(--primary-text);
@@ -525,7 +525,7 @@ app-page-header {
         display: none;
     }
 
-    /* la ligne passe sur deux rangées : nom en haut, quantité dessous */
+    /* La ligne passe sur deux rangées : nom en haut, quantité dessous */
     .line {
         flex-wrap: wrap;
     }

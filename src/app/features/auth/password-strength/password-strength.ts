@@ -50,7 +50,7 @@ export class PasswordStrength {
     steps = [1, 2, 3, 4];
     level = computed(() => passwordLevel(this.password()));
 
-    // critères affichés sous la jauge, cochés au fil de la saisie
+    // Critères affichés sous la jauge, cochés au fil de la saisie
     criteria = computed(() => {
         const password = this.password();
 

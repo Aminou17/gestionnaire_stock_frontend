@@ -43,7 +43,7 @@ export class ProductPage {
 
     back = getBackLink("/products", "Produits");
 
-    // le formulaire n'existe que pour l'admin
+    // Le formulaire n'existe que pour l'admin
     private form = viewChild(ProductForm);
     private adjustDialog = viewChild(AdjustDialog);
     private history = viewChild(ProductMovements);
@@ -55,14 +55,14 @@ export class ProductPage {
     );
 
     product = rxResource({
-        // un identifiant illisible dans l'adresse ne lance aucune requête
+        // Un identifiant illisible dans l'adresse ne lance aucune requête
         params: () => (Number.isInteger(this.id()) ? this.id() : undefined),
         stream: ({ params }) => this.productService.getProduct(params!),
     });
 
     data = computed(() => (this.product.hasValue() ? this.product.value() : undefined));
 
-    // le backend répond 404 pour un produit inexistant ou supprimé
+    // Le backend répond 404 pour un produit inexistant ou supprimé
     notFound = computed(
         () => (this.product.error() as HttpErrorResponse | undefined)?.status === 404,
     );
@@ -72,7 +72,7 @@ export class ProductPage {
         return err?.error?.message ?? "Impossible de charger le produit.";
     });
 
-    // marge en francs et en pourcentage, seulement si le prix d'achat est connu (admin)
+    // Marge en francs et en pourcentage, seulement si le prix d'achat est connu (admin)
     margin = computed(() => {
         const product = this.data();
         const percent = product ? marginPercent(product.sale_price, product.purchase_price) : null;
@@ -144,7 +144,7 @@ export class ProductPage {
         this.router.navigate(["/sales/new"], { queryParams: { productId: this.id() } });
     }
 
-    // menu des trois points : la photo ne peut être retirée que si elle existe
+    // Menu des trois points : la photo ne peut être retirée que si elle existe
     menuItems = computed<ActionItem[]>(() => [
         { id: "adjust", label: "Corriger la quantité", icon: "stock-entry" },
         ...(this.data()?.image
@@ -160,7 +160,7 @@ export class ProductPage {
         else if (id === "delete") this.askDelete();
     }
 
-    // message de confirmation après un ajustement du stock
+    // Message de confirmation après un ajustement du stock
     private toast = inject(ToastService);
 
     adjust() {

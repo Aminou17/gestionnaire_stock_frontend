@@ -65,7 +65,7 @@
     min-width: 0;
 }
 
-/* un nom de boutique long passe sur deux lignes au plus */
+/* Un nom de boutique long passe sur deux lignes au plus */
 .brand-name {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -123,14 +123,14 @@
     opacity: 0.7;
 }
 
-/* liens, paramètres et aide défilent ensemble ; seul le profil reste fixe en bas */
+/* Liens, paramètres et aide défilent ensemble ; seul le profil reste fixe en bas */
 .scroll {
     flex: 1;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
 
-    /* une ombre en bas indique qu'il reste des liens plus bas ; elle disparaît en fin de liste */
+    /* Une ombre en bas indique qu'il reste des liens plus bas ; elle disparaît en fin de liste */
     background:
         linear-gradient(var(--sidebar-bg), var(--sidebar-bg)) bottom / 100% 20px no-repeat local,
         linear-gradient(transparent, rgb(0 0 0 / 0.35)) bottom / 100% 20px no-repeat scroll;
@@ -184,7 +184,7 @@ nav .group .arrow {
     transition: transform 0.2s;
 }
 
-/* un libellé long comme Réapprovisionnement ne pousse pas la pastille hors du menu */
+/* Un libellé long comme Réapprovisionnement ne pousse pas la pastille hors du menu */
 nav .label {
     min-width: 0;
     overflow: hidden;
@@ -212,7 +212,7 @@ nav .group .label + .arrow {
     display: none;
 }
 
-/* les pages d'un groupe n'ont pas d'icône : le trait à gauche suffit à les rattacher */
+/* Les pages d'un groupe n'ont pas d'icône : le trait à gauche suffit à les rattacher */
 .children a {
     height: 34px;
 }
@@ -221,7 +221,7 @@ nav .group .label + .arrow {
     display: none;
 }
 
-/* groupe fermé qui contient la page affichée */
+/* Groupe fermé qui contient la page affichée */
 nav .group.has-active {
     color: var(--sidebar-text-strong);
     font-weight: var(--fw-semibold);
@@ -280,7 +280,7 @@ nav a.active {
     text-decoration: none;
 }
 
-/* ordinateur : Paramètres et Abonnement restent visibles en bas de la liste */
+/* Ordinateur : Paramètres et Abonnement restent visibles en bas de la liste */
 @media (min-width: 1024px) {
     .secondary {
         position: sticky;
@@ -483,7 +483,7 @@ nav a.active {
         display: none;
     }
 
-    /* barre étroite : les pages du groupe s'affichent à plat */
+    /* Barre étroite : les pages du groupe s'affichent à plat */
     .collapsed .children {
         display: grid;
         margin-left: 0;
@@ -517,7 +517,7 @@ nav a.active {
         position: relative;
     }
 
-    /* l'étiquette du nombre d'alertes devient un point sur l'icône */
+    /* L'étiquette du nombre d'alertes devient un point sur l'icône */
     .collapsed .count {
         position: absolute;
         top: 6px;
@@ -535,7 +535,7 @@ nav a.active {
         background: transparent;
     }
 
-    /* le menu du profil s'ouvre à droite de la barre étroite */
+    /* Le menu du profil s'ouvre à droite de la barre étroite */
     .collapsed .popup {
         left: calc(100% + 8px);
         right: auto;
@@ -546,7 +546,7 @@ nav a.active {
 
 /* Sous 1024px la sidebar devient un tiroir */
 @media (max-width: 1023px) {
-    /* tiroir un peu plus large : Réapprovisionnement, sa pastille et sa flèche tiennent */
+    /* Tiroir un peu plus large : Réapprovisionnement, sa pastille et sa flèche tiennent */
     .sidebar {
         width: min(288px, 85vw);
         transform: translateX(-100%);
@@ -569,7 +569,7 @@ nav a.active {
         border-bottom: 0;
     }
 
-    /* le menu réduit n'existe que sur ordinateur */
+    /* Le menu réduit n'existe que sur ordinateur */
     .collapse {
         display: none;
     }
@@ -587,7 +587,7 @@ nav a.active {
     }
 }
 
-/* rubrique : nom et, dessous, la page affichée */
+/* Rubrique : nom et, dessous, la page affichée */
 nav .group {
     height: auto;
     min-height: 36px;
@@ -615,7 +615,7 @@ nav .group .group-text + .arrow {
     opacity: 0.6;
 }
 
-/* fenêtre des carreaux, au-dessus de la page */
+/* Fenêtre des carreaux, au-dessus de la page */
 .launcher-backdrop {
     position: fixed;
     inset: 0;
@@ -763,13 +763,13 @@ nav .group .group-text + .arrow {
     outline-offset: 2px;
 }
 
-/* la page affichée : bord coloré */
+/* La page affichée : bord coloré */
 .tile.active {
     border-color: var(--tone);
     box-shadow: inset 0 0 0 1px var(--tone);
 }
 
-/* une couleur par carreau, toujours la même place */
+/* Une couleur par carreau, toujours la même place */
 .tiles li:nth-child(6n + 2) .tile {
     --tone: var(--violet);
 }
@@ -829,7 +829,7 @@ nav .group .group-text + .arrow {
     }
 }
 
-/* téléphone : deux carreaux par ligne, fenêtre posée en bas de l'écran */
+/* Téléphone : deux carreaux par ligne, fenêtre posée en bas de l'écran */
 @media (max-width: 599px) {
     .launcher {
         top: auto;
@@ -842,7 +842,7 @@ nav .group .group-text + .arrow {
         animation-name: sheet-in;
     }
 
-    /* trois par ligne, icône au-dessus du nom, comme une grille d'applications */
+    /* Trois par ligne, icône au-dessus du nom, comme une grille d'applications */
     .tiles {
         gap: 8px;
     }
@@ -874,7 +874,7 @@ nav .group .group-text + .arrow {
     }
 }
 
-/* cadenas : la fonction fait partie de l'abonnement */
+/* Cadenas : la fonction fait partie de l'abonnement */
 .lock {
     margin-left: auto;
     flex: none;

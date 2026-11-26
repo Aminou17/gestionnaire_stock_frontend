@@ -4,7 +4,7 @@ import type { IconName } from "../../shared/icon/icons";
 
 const fcfa = new FcfaPipe();
 
-// couleur de la pastille et de la tuile de chaque statut ; bleu : la couleur de la marque
+// Couleur de la pastille et de la tuile de chaque statut ; bleu : la couleur de la marque
 export const STATUS_TONES: Record<InventoryStatus, "primary" | "warning" | "success" | "neutral"> =
     {
         in_progress: "primary",
@@ -45,7 +45,7 @@ const timeText = (value: string) => timeFormat.format(new Date(value)).replace("
 // "23 nov. à 17h09"
 export const longDate = (value: string) => `${shortDate(value)} à ${timeText(value)}`;
 
-// le nom donné à l'ouverture, sinon la date et l'heure de début
+// Le nom donné à l'ouverture, sinon la date et l'heure de début
 export const inventoryTitle = (inventory: Inventory) =>
     inventory.name || longDate(inventory.startedAt);
 
@@ -80,7 +80,7 @@ export const listResult = (inventory: Inventory, isAdmin: boolean) => {
 
     if (!showValue) return { text, tone: "neutral" as const };
 
-    // l'espace insécable garde le « F » avec son montant à la ligne
+    // L'espace insécable garde le « F » avec son montant à la ligne
     const amount = fcfa.transform(value, true).replace(" F", "\u00a0F");
     return {
         text: `${text} · ${amount}`,
@@ -88,7 +88,7 @@ export const listResult = (inventory: Inventory, isAdmin: boolean) => {
     };
 };
 
-// un comptage ouvert ou terminé depuis plus d'un jour : le stock a pu bouger depuis
+// Un comptage ouvert ou terminé depuis plus d'un jour : le stock a pu bouger depuis
 export const isOld = (inventory: Inventory) =>
     (inventory.status === "in_progress" || inventory.status === "counted") &&
     Date.now() - new Date(inventory.startedAt).getTime() > 86_400_000;
@@ -113,7 +113,7 @@ export const ageText = (inventory: Inventory) => {
     return `${days} jour${days > 1 ? "s" : ""}`;
 };
 
-// les raisons proposées pour un écart, dans l'ordre d'affichage
+// Les raisons proposées pour un écart, dans l'ordre d'affichage
 export const REASONS: { value: ItemReason; label: string }[] = [
     { value: "breakage", label: "Casse" },
     { value: "theft", label: "Vol" },

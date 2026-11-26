@@ -1,6 +1,6 @@
 import { ManualMovementType } from "./cash.model";
 
-// même liste que REASON_CATEGORIES côté backend (cashMovement.service.js)
+// Même liste que REASON_CATEGORIES côté backend (cashMovement.service.js)
 export const CASH_REASONS: Record<ManualMovementType, { value: string; label: string }[]> = {
     DEPOSIT: [
         { value: "CHANGE", label: "Monnaie pour la caisse" },

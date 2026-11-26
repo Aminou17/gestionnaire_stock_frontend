@@ -29,9 +29,9 @@ export class LegalPage {
     protected auth = inject(AuthService);
 
     title = input.required<string>();
-    // texte court sous le titre
+    // Texte court sous le titre
     intro = input<string>();
-    // date de dernière mise à jour
+    // Date de dernière mise à jour
     updated = input<string>();
     sections = input<LegalSection[]>([]);
 
@@ -49,7 +49,7 @@ export class LegalPage {
     private location = inject(Location);
 
     protected back() {
-        // ouverte depuis l'application : on recule ; lien ouvert directement : accueil à la place
+        // Ouverte depuis l'application : on recule ; lien ouvert directement : accueil à la place
         if (this.router.lastSuccessfulNavigation()?.previousNavigation) this.location.back();
         else this.router.navigateByUrl("/", { replaceUrl: true });
     }
@@ -65,11 +65,11 @@ export class LegalPage {
 
         const target = this.host.nativeElement.querySelector<HTMLElement>(`[id="${id}"]`);
         target?.scrollIntoView({ behavior: "smooth", block: "start" });
-        // l'adresse garde l'ancre pour pouvoir partager le lien d'une section
+        // L'adresse garde l'ancre pour pouvoir partager le lien d'une section
         history.replaceState(history.state, "", `${location.pathname}#${id}`);
     }
 
-    // met en avant dans le sommaire la section en cours de lecture
+    // Met en avant dans le sommaire la section en cours de lecture
     private watchSections() {
         if (typeof IntersectionObserver === "undefined") return;
 

@@ -31,7 +31,7 @@ describe("ExportMenu", () => {
     });
 
     it("should open the popover when the button is pressed", () => {
-        // jsdom ne connaît pas l'API popover
+        // Jsdom ne connaît pas l'API popover
         panel().showPopover = vi.fn();
 
         trigger().click();

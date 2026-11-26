@@ -8,9 +8,9 @@ import { HelpRequests } from "./help-requests";
 
 const request = (overrides: Partial<HelpRequest> = {}): HelpRequest => ({
     id: 4,
-    name: "Awa Traoré",
-    email: "awa@exemple.com",
-    shop_name: "Chez Awa",
+    name: "Adam Traoré",
+    email: "adam@exemple.com",
+    shop_name: "Chez Adam",
     reason: "blocked",
     message: "Mon compte est bloqué.",
     status: "OPEN",
@@ -40,7 +40,7 @@ describe("HelpRequests", () => {
     };
 
     beforeAll(() => {
-        // jsdom n'implémente pas les fenêtres <dialog>
+        // Jsdom n'implémente pas les fenêtres <dialog>
         HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
             this.open = true;
         };
@@ -54,9 +54,9 @@ describe("HelpRequests", () => {
         const text = (fixture.nativeElement as HTMLElement).textContent;
 
         expect(service["getRequests"]).toHaveBeenCalledWith("OPEN");
-        expect(text).toContain("Awa Traoré");
+        expect(text).toContain("Adam Traoré");
         expect(text).toContain("Mon compte est bloqué ou suspendu");
-        expect(text).toContain("Chez Awa");
+        expect(text).toContain("Chez Adam");
     });
 
     it("should send the answer by e-mail and reload the list", async () => {

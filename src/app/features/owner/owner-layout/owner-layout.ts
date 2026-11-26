@@ -14,7 +14,7 @@ interface OwnerLink {
     path: string;
     label: string;
     icon: IconName;
-    // seule la page d'accueil doit être exacte, sinon elle resterait allumée partout
+    // Seule la page d'accueil doit être exacte, sinon elle resterait allumée partout
     exact?: boolean;
 }
 
@@ -31,7 +31,7 @@ export class OwnerLayout {
     protected theme = inject(ThemeService);
     protected support = inject(SupportService);
     private help = inject(HelpService);
-    // conversations des boutiques non lues, et demandes sans compte à traiter
+    // Conversations des boutiques non lues, et demandes sans compte à traiter
     protected messagesBadge = computed(() => this.support.unread() + this.help.open());
     protected productName = PRODUCT_NAME;
 
@@ -44,7 +44,7 @@ export class OwnerLayout {
     ];
 
     constructor() {
-        // les nouveaux messages des boutiques apparaissent sans recharger la page
+        // Les nouveaux messages des boutiques apparaissent sans recharger la page
         const refresh = () => {
             this.support.refreshUnread("owner");
             this.help.refreshOpen();

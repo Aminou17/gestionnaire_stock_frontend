@@ -20,7 +20,7 @@ export interface PendingSale {
     soldAt: string;
     items: NewSaleItem[];
     payment: NewSalePayment;
-    // de quoi afficher la vente sans le serveur
+    // De quoi afficher la vente sans le serveur
     summary: {
         total: number;
         lines: { name: string; quantity: number; unitPrice: number }[];
@@ -46,7 +46,7 @@ export class SaleOutboxService {
     private all = signal<PendingSale[]>([]);
     private syncing = false;
 
-    // seulement les ventes du compte connecté
+    // Seulement les ventes du compte connecté
     readonly pending = computed(() => {
         const userId = this.auth.user()?.id;
         return this.all()
@@ -62,7 +62,7 @@ export class SaleOutboxService {
         void this.reload();
         this.catalog.registerPending(() => this.pending().flatMap((sale) => sale.items));
 
-        // retour du réseau : on envoie tout de suite
+        // Retour du réseau : on envoie tout de suite
         effect(() => {
             if (this.network.online() && this.auth.user()) void this.sync();
         });
@@ -108,7 +108,7 @@ export class SaleOutboxService {
         this.all.update((list) => list.filter((sale) => sale.clientRef !== clientRef));
     }
 
-    // une vente refusée peut être réessayée après correction (produit remis en vente)
+    // Une vente refusée peut être réessayée après correction (produit remis en vente)
     async retry(clientRef: string) {
         const sale = this.all().find((s) => s.clientRef === clientRef);
         if (!sale) return;
@@ -123,7 +123,7 @@ export class SaleOutboxService {
 
         try {
             for (const sale of this.pending()) {
-                // une vente refusée attend qu'on la vérifie ;
+                // Une vente refusée attend qu'on la vérifie ;
                 if (sale.status === "error") continue;
 
                 await this.put({ ...sale, status: "sending" });
@@ -142,13 +142,13 @@ export class SaleOutboxService {
                 } catch (err) {
                     const error = err as HttpErrorResponse;
 
-                    // toujours sans réseau : on s'arrête là, rien n'est perdu
+                    // Toujours sans réseau : on s'arrête là, rien n'est perdu
                     if (error.status === 0 || error.status === 429 || error.status >= 500) {
                         await this.put({ ...sale, status: "waiting", attempts: sale.attempts + 1 });
                         break;
                     }
 
-                    // session expirée : l'intercepteur s'en charge, la vente reste en attente
+                    // Session expirée : l'intercepteur s'en charge, la vente reste en attente
                     if (error.status === 401) {
                         await this.put({ ...sale, status: "waiting" });
                         break;
@@ -170,7 +170,7 @@ export class SaleOutboxService {
             this.toast.show(
                 sent === 1 ? "1 vente hors ligne envoyée." : `${sent} ventes hors ligne envoyées.`,
             );
-            // le stock réel vient du serveur
+            // Le stock réel vient du serveur
             this.catalog.refresh().catch(() => {});
         }
     }

@@ -1,10 +1,10 @@
-// une photo de plusieurs mégaoctets serait décodée en entier pour rien
+// Une photo de plusieurs mégaoctets serait décodée en entier pour rien
 const MAX_FILE_SIZE = 12 * 1024 * 1024;
 
-// le serveur refuse au-delà de 150 000 caractères
+// Le serveur refuse au-delà de 150 000 caractères
 const MAX_LENGTH = 140000;
 
-// réduit la photo d'un reçu (le plus grand côté à 1100 px) en JPEG, en baissant la qualité jusqu'à ce qu'elle tienne
+// Réduit la photo d'un reçu (le plus grand côté à 1100 px) en JPEG, en baissant la qualité jusqu'à ce qu'elle tienne
 export const resizeReceipt = (file: File, maxSide = 1100) =>
     new Promise<string>((resolve, reject) => {
         if (!file.type.startsWith("image/")) {

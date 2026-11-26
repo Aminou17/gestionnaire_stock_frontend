@@ -38,7 +38,7 @@ export class TwoFactorCard {
     });
 
     constructor() {
-        // l'état vient du serveur : il peut avoir changé depuis la connexion
+        // L'état vient du serveur : il peut avoir changé depuis la connexion
         // si la mise à jour échoue, on garde l'état connu depuis la connexion (rien à afficher de plus)
         this.auth
             .refreshUser()
@@ -55,7 +55,7 @@ export class TwoFactorCard {
         this.destroyRef.onDestroy(() => clearTimeout(this.copiedTimer));
     }
 
-    // clé en groupes de 4 lettres, plus facile à recopier
+    // Clé en groupes de 4 lettres, plus facile à recopier
     get spacedKey() {
         return (
             this.setup()
@@ -112,7 +112,7 @@ export class TwoFactorCard {
             });
     }
 
-    // un code de 6 chiffres complet part tout seul
+    // Un code de 6 chiffres complet part tout seul
     onCodeInput() {
         if (this.codeControl.valid && !this.busy()) this.enable();
     }

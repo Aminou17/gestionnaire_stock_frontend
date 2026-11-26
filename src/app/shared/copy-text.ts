@@ -6,7 +6,7 @@ export async function copyText(text: string): Promise<boolean> {
             await navigator.clipboard.writeText(text);
             return true;
         } catch {
-            // on retente avec le champ caché
+            // On retente avec le champ caché
         }
     }
 
@@ -15,7 +15,7 @@ export async function copyText(text: string): Promise<boolean> {
     field.setAttribute("readonly", "");
     field.style.position = "fixed";
     field.style.opacity = "0";
-    // dans une fenêtre modale, seul ce qui est dans la fenêtre reçoit la sélection
+    // Dans une fenêtre modale, seul ce qui est dans la fenêtre reçoit la sélection
     (document.querySelector("dialog[open]") ?? document.body).appendChild(field);
 
     try {

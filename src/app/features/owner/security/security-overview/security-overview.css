@@ -119,7 +119,7 @@
     background: var(--warning);
 }
 
-/* courbe en barres : une colonne par jour, les deux séries empilées */
+/* Courbe en barres : une colonne par jour, les deux séries empilées */
 .chart {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));

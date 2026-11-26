@@ -4,7 +4,7 @@
     max-width: 640px;
 }
 
-/* sans cela, la carte ne rétrécit pas sous la largeur de ses boutons */
+/* Sans cela, la carte ne rétrécit pas sous la largeur de ses boutons */
 :host > * {
     min-width: 0;
 }
@@ -74,7 +74,7 @@ button.photo:focus-visible {
     object-fit: cover;
 }
 
-/* petit appareil photo : on voit que la photo se change */
+/* Petit appareil photo : on voit que la photo se change */
 .photo-badge {
     cursor: pointer;
     position: absolute;
@@ -279,12 +279,12 @@ dd {
     }
 }
 
-/* la barre du haut (menu, cloche, profil) reste en première ligne, comme sur les autres pages */
+/* La barre du haut (menu, cloche, profil) reste en première ligne, comme sur les autres pages */
 app-page-header {
     order: -1;
 }
 
-/* sur ordinateur : la fiche à gauche, l'historique à droite */
+/* Sur ordinateur : la fiche à gauche, l'historique à droite */
 @media (min-width: 1024px) {
     :host {
         grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
@@ -311,7 +311,7 @@ app-page-header {
     outline-offset: 2px;
 }
 
-/* zone de clic de 44px autour de la petite pastille */
+/* Zone de clic de 44px autour de la petite pastille */
 .photo-badge::after {
     content: "";
     position: absolute;

@@ -38,11 +38,11 @@ export class InventoryApplyDialog {
         });
     }
 
-    // un comptage de plus d'un jour : on le dit au moment de corriger
+    // Un comptage de plus d'un jour : on le dit au moment de corriger
     old = () => isOld(this.inventory());
     age = () => ageText(this.inventory());
 
-    // un clic à côté de la fenêtre la ferme
+    // Un clic à côté de la fenêtre la ferme
     onBackdrop(event: MouseEvent) {
         if (event.target === this.dialog().nativeElement) this.close();
     }
@@ -56,7 +56,7 @@ export class InventoryApplyDialog {
         if (!this.applying()) this.dialog().nativeElement.close();
     }
 
-    // ce qui s'est passé depuis le comptage, en phrases courtes
+    // Ce qui s'est passé depuis le comptage, en phrases courtes
     movementLines() {
         const totals = this.movements()?.totals;
         if (!totals) return [];

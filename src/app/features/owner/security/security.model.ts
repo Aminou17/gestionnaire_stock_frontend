@@ -19,7 +19,7 @@ export interface SecurityOverview {
     daily: { day: string; failed_logins: number; access_denied: number }[];
 }
 
-// connexion échouée : une ligne par tentative
+// Connexion échouée : une ligne par tentative
 export interface FailedLogin {
     id: number;
     email: string | null;
@@ -30,7 +30,7 @@ export interface FailedLogin {
     suspicious: boolean;
 }
 
-// connexions échouées regroupées par adresse IP
+// Connexions échouées regroupées par adresse IP
 export interface FailedLoginIp {
     ip_address: string | null;
     attempts: number;
@@ -50,7 +50,7 @@ export interface LockedAccount {
     locked_until: string;
 }
 
-// accès refusé, changement ou réinitialisation de mot de passe
+// Accès refusé, changement ou réinitialisation de mot de passe
 export interface SecurityEvent {
     id: number;
     action: string;
@@ -65,7 +65,7 @@ export interface SecurityEvent {
     created_at: string;
 }
 
-// filtres communs aux listes ; les champs inutiles pour une liste sont ignorés
+// Filtres communs aux listes ; les champs inutiles pour une liste sont ignorés
 export interface SecurityFilters {
     shopId: number | null;
     email: string;

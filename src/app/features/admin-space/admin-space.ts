@@ -48,7 +48,7 @@ export class AdminSpace {
         return { from: this.today, to: this.today };
     });
 
-    // pas de requête tant que les dates choisies sont fausses
+    // Pas de requête tant que les dates choisies sont fausses
     balance = rxResource({
         params: () => (this.customError() ? undefined : { date: this.range().to, ...this.range() }),
         stream: ({ params }) => this.reports.getBalance(params),
@@ -65,7 +65,7 @@ export class AdminSpace {
         return from === to ? short(from) : `${short(from)} au ${short(to)}`;
     });
 
-    // nom de la période, écrit à côté du titre « Sur la période »
+    // Nom de la période, écrit à côté du titre « Sur la période »
     periodName = computed(() => {
         const names = {
             today: "Aujourd'hui",
@@ -78,7 +78,7 @@ export class AdminSpace {
         return period === "custom" ? this.periodLabel() : names[period];
     });
 
-    // le stock est compté à la fin de la période : actuel tant que la période va jusqu'à aujourd'hui
+    // Le stock est compté à la fin de la période : actuel tant que la période va jusqu'à aujourd'hui
     stockLabel = computed(() => {
         const { to } = this.range();
         return to === this.today
@@ -86,7 +86,7 @@ export class AdminSpace {
             : `Stock au ${formatDate(to, "d MMM", this.locale)}`;
     });
 
-    // ce que représente le stock affiché sous le titre du stock
+    // Ce que représente le stock affiché sous le titre du stock
     stockNote = computed(() =>
         this.range().to === this.today
             ? "Actuellement disponible en boutique"

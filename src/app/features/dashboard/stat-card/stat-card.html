@@ -19,7 +19,7 @@
 
     <span class="label">{{ label() }}</span>
     @if (toggles()) {
-        <!-- l'œil de la valeur masquée prend la place de l'icône, au-dessus du bouton qui couvre la carte -->
+        <!-- L'œil de la valeur masquée prend la place de l'icône, au-dessus du bouton qui couvre la carte -->
         <span class="eye"><ng-content /></span>
     } @else {
         <span class="icon"><app-icon [name]="icon()" [size]="18" /></span>

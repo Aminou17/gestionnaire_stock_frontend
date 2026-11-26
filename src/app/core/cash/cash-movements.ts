@@ -4,11 +4,11 @@ import { getReasonLabel } from "./cash-reasons";
 export const isRefund = (movement: CashMovement) =>
     ["SALE_CANCELLATION", "SALE_RETURN"].includes(movement.reference_type ?? "");
 
-// les ventes et les dépôts entrent dans le tiroir, le reste en sort
+// Les ventes et les dépôts entrent dans le tiroir, le reste en sort
 export const isIncome = (movement: CashMovement) =>
     movement.type === "SALE" || movement.type === "DEPOSIT";
 
-// l'argent d'une dépense annulée revient dans le tiroir
+// L'argent d'une dépense annulée revient dans le tiroir
 export const isExpenseCancellation = (movement: CashMovement) =>
     movement.reference_type === "EXPENSE_CANCELLATION";
 
@@ -23,11 +23,11 @@ export const getMovementLabel = (movement: CashMovement) => {
               ? "Dépense"
               : "Retrait";
     const reason = getReasonLabel(movement.type, movement.reason_category);
-    // le motif Autre n'apprend rien : la précision écrite suffit
+    // Le motif Autre n'apprend rien : la précision écrite suffit
     return reason && movement.reason_category !== "OTHER" ? `${base} · ${reason}` : base;
 };
 
-// détail de ce qui a fait bouger la caisse depuis le fond de caisse
+// Détail de ce qui a fait bouger la caisse depuis le fond de caisse
 export const summarizeMovements = (movements: CashMovement[]) => {
     const total = (keep: (movement: CashMovement) => boolean) =>
         movements.filter(keep).reduce((sum, movement) => sum + movement.amount, 0);
@@ -36,7 +36,7 @@ export const summarizeMovements = (movements: CashMovement[]) => {
         sales: total((m) => m.type === "SALE"),
         deposits: total((m) => m.type === "DEPOSIT" && !isExpenseCancellation(m)),
         refunds: total(isRefund),
-        // une dépense annulée ne compte plus
+        // Une dépense annulée ne compte plus
         expenses: total((m) => m.type === "EXPENSE") - total(isExpenseCancellation),
         withdrawals: total((m) => m.type === "WITHDRAWAL" && !isRefund(m)),
     };

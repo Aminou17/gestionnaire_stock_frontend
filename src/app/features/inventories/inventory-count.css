@@ -66,7 +66,7 @@ app-page-header {
     padding-left: 40px;
 }
 
-/* résultats de la recherche, juste sous la barre */
+/* Résultats de la recherche, juste sous la barre */
 .results {
     display: grid;
     gap: 2px;
@@ -151,7 +151,7 @@ app-page-header {
     cursor: pointer;
 }
 
-/* le titre de l'état vide se coupe en deux lignes égales */
+/* Le titre de l'état vide se coupe en deux lignes égales */
 .empty {
     text-wrap: balance;
 }
@@ -172,7 +172,7 @@ app-page-header {
     transition: opacity 0.15s;
 }
 
-/* une ligne : la photo et le nom en haut, la saisie en dessous */
+/* Une ligne : la photo et le nom en haut, la saisie en dessous */
 .line {
     display: grid;
     gap: 12px;
@@ -190,7 +190,7 @@ app-page-header {
     border-left-color: var(--success);
 }
 
-/* produit ajouté, quantité à saisir : le champ est mis en avant */
+/* Produit ajouté, quantité à saisir : le champ est mis en avant */
 .line:not(.counted) .count {
     border-color: var(--primary);
     background: var(--primary-soft);
@@ -311,7 +311,7 @@ app-page-header {
     border-radius: var(--radius);
 }
 
-/* barre du bas : le bouton principal reste à portée du pouce */
+/* Barre du bas : le bouton principal reste à portée du pouce */
 .bar {
     position: sticky;
     bottom: 16px;
@@ -330,7 +330,7 @@ app-page-header {
 }
 
 @media (max-width: 767px) {
-    /* la page remplit l'écran : la barre reste en bas même quand la liste est courte */
+    /* La page remplit l'écran : la barre reste en bas même quand la liste est courte */
     :host {
         min-height: calc(100dvh - var(--bottom-nav-height) - 96px);
     }

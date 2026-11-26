@@ -5,7 +5,7 @@
     max-width: 720px;
 }
 
-/* carte de profil : un résumé qui mène à la page du profil */
+/* Carte de profil : un résumé qui mène à la page du profil */
 .profile {
     display: flex;
     align-items: center;
@@ -96,7 +96,7 @@
     background: var(--surface-hover);
 }
 
-/* pastille pleine à dégradé, comme les cartes du tableau de bord */
+/* Pastille pleine à dégradé, comme les cartes du tableau de bord */
 .item-icon {
     display: grid;
     place-items: center;
@@ -121,7 +121,7 @@
     font-weight: var(--fw-semibold);
 }
 
-/* une seule ligne : le texte trop long se termine par des points de suite */
+/* Une seule ligne : le texte trop long se termine par des points de suite */
 .item-text small {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -129,7 +129,7 @@
     font-size: var(--fs-small);
 }
 
-/* état du réglage, discret ; le point colore seulement le sens (actif ou non) */
+/* État du réglage, discret ; le point colore seulement le sens (actif ou non) */
 .status {
     display: inline-flex;
     align-items: center;

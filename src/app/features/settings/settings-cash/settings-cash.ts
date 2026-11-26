@@ -30,7 +30,7 @@ export class SettingsCash implements HasUnsavedChanges {
     form = this.fb.group({ blindClose: true });
 
     saving = signal(false);
-    // relit la dernière modification affichée en bas de page après chaque enregistrement
+    // Relit la dernière modification affichée en bas de page après chaque enregistrement
     saveCount = signal(0);
     private leaveDialog = viewChild.required(UnsavedDialog);
     message = signal<{ ok: boolean; text: string } | null>(null);
@@ -53,7 +53,7 @@ export class SettingsCash implements HasUnsavedChanges {
     }
 
     canLeave() {
-        // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
+        // Quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
         if (this.saving()) return false;
 
         return !this.form.dirty || this.leaveDialog().ask();
@@ -72,7 +72,7 @@ export class SettingsCash implements HasUnsavedChanges {
         this.saving.set(true);
         this.message.set(null);
 
-        // une saisie pendant l'envoi serait effacée par la réponse du serveur
+        // Une saisie pendant l'envoi serait effacée par la réponse du serveur
         this.form.disable({ emitEvent: false });
 
         this.cashService

@@ -232,7 +232,7 @@ app-page-header {
     border-top: 1px solid var(--border);
 }
 
-/* sur petit écran, les montants passent avant la liste des mouvements */
+/* Sur petit écran, les montants passent avant la liste des mouvements */
 @media (max-width: 1023px) {
     .main,
     .side {
@@ -256,7 +256,7 @@ app-page-header {
     }
 }
 
-/* ticket de clôture : invisible à l'écran, imprimé en 80 mm */
+/* Ticket de clôture : invisible à l'écran, imprimé en 80 mm */
 .ticket {
     display: none;
 }

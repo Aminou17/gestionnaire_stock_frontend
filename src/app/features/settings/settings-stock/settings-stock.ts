@@ -27,7 +27,7 @@ export class SettingsStock implements HasUnsavedChanges {
 
     settings = rxResource({ stream: () => this.stockService.getSettings() });
 
-    // vide tant qu'aucun seuil n'existe en base, plutôt qu'un 0 inventé
+    // Vide tant qu'aucun seuil n'existe en base, plutôt qu'un 0 inventé
     form = this.fb.group({
         minStock: this.fb.control<number | null>(null, [
             Validators.required,
@@ -38,7 +38,7 @@ export class SettingsStock implements HasUnsavedChanges {
     });
 
     saving = signal(false);
-    // relit la dernière modification affichée en bas de page après chaque enregistrement
+    // Relit la dernière modification affichée en bas de page après chaque enregistrement
     saveCount = signal(0);
     private leaveDialog = viewChild.required(UnsavedDialog);
     message = signal<{ ok: boolean; text: string } | null>(null);
@@ -55,7 +55,7 @@ export class SettingsStock implements HasUnsavedChanges {
         effect(() => {
             if (!this.settings.hasValue()) return;
 
-            // pas encore de ligne en base : le backend renvoie null
+            // Pas encore de ligne en base : le backend renvoie null
             const minStock = this.settings.value()?.min_stock ?? null;
             untracked(() => this.form.reset({ minStock }));
         });
@@ -67,7 +67,7 @@ export class SettingsStock implements HasUnsavedChanges {
     }
 
     canLeave() {
-        // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
+        // Quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
         if (this.saving()) return false;
 
         return !this.form.dirty || this.leaveDialog().ask();
@@ -87,7 +87,7 @@ export class SettingsStock implements HasUnsavedChanges {
         this.saving.set(true);
         this.message.set(null);
 
-        // une saisie pendant l'envoi serait effacée par la réponse du serveur
+        // Une saisie pendant l'envoi serait effacée par la réponse du serveur
         this.form.disable({ emitEvent: false });
 
         this.stockService

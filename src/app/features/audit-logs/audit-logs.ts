@@ -41,7 +41,7 @@ import {
     getAuditSentence,
 } from "../../core/audit/audit-sentence";
 
-// une ligne du journal ; plusieurs connexions de suite d'une même personne n'en font qu'une
+// Une ligne du journal ; plusieurs connexions de suite d'une même personne n'en font qu'une
 interface Row {
     log: AuditLog;
     times: string[];
@@ -52,11 +52,11 @@ interface Row {
     initials: string;
     icon: IconName;
     tone: ActivityTone;
-    // détail : une feuille s'ouvre seulement s'il y a quelque chose de plus à lire
+    // Détail : une feuille s'ouvre seulement s'il y a quelque chose de plus à lire
     hasDetail: boolean;
 }
 
-// fiches que l'on peut ouvrir depuis une ligne du journal
+// Fiches que l'on peut ouvrir depuis une ligne du journal
 const ENTITY_LINKS: Record<string, string> = {
     sale: "/sales",
     product: "/products",
@@ -97,7 +97,7 @@ export class AuditLogs {
     filtersOpen = signal(false);
     selected = signal<Row | null>(null);
 
-    // les actions de l'onglet, triées par libellé
+    // Les actions de l'onglet, triées par libellé
     actions = computed(() => {
         const security = this.tab() === "security";
         return Object.entries(LABELS)
@@ -123,7 +123,7 @@ export class AuditLogs {
         stream: ({ params }) => this.auditService.getLogs(params),
     });
 
-    // compteurs en haut de l'onglet Sécurité, sur la période et la personne choisies
+    // Compteurs en haut de l'onglet Sécurité, sur la période et la personne choisies
     stats = [
         {
             action: "ACCESS_DENIED",
@@ -144,7 +144,7 @@ export class AuditLogs {
     protected getAuditAuthor = getAuditAuthor;
     protected getAuditFirstName = getAuditFirstName;
 
-    // dernière réponse reçue : on la garde pendant le chargement de la suivante
+    // Dernière réponse reçue : on la garde pendant le chargement de la suivante
     last = linkedSignal<AuditLogPage | undefined, AuditLogPage | undefined>({
         source: () => (this.logs.hasValue() ? this.logs.value() : undefined),
         computation: (next, previous) => next ?? previous?.value,
@@ -164,7 +164,7 @@ export class AuditLogs {
     firstLoad = computed(() => this.logs.isLoading() && !this.last());
     filtered = computed(() => this.activeFilters().length > 0 || this.search() !== "");
 
-    // les filtres posés, en puces avec croix sous la barre de recherche
+    // Les filtres posés, en puces avec croix sous la barre de recherche
     activeFilters = computed(() => {
         const filters: { key: "period" | "user" | "action" | "failures"; label: string }[] = [];
         if (this.userId() !== null) filters.push({ key: "user", label: this.userName() });
@@ -185,15 +185,15 @@ export class AuditLogs {
     selectTab(tab: AuditCategory) {
         if (this.tab() === tab) return;
         this.tab.set(tab);
-        // une action de l'autre onglet ne donnerait aucun résultat
+        // Une action de l'autre onglet ne donnerait aucun résultat
         this.action.set(null);
         this.onlyFailures.set(false);
         this.page.set(1);
-        // pas de lignes de l'ancien onglet pendant le chargement du nouveau
+        // Pas de lignes de l'ancien onglet pendant le chargement du nouveau
         this.last.set(undefined);
     }
 
-    // on attend la fin de la frappe avant d'interroger le serveur
+    // On attend la fin de la frappe avant d'interroger le serveur
     onSearch(value: string) {
         clearTimeout(this.searchTimer);
         this.searchTimer = setTimeout(() => {
@@ -202,7 +202,7 @@ export class AuditLogs {
         }, 300);
     }
 
-    // pastilles sous le titre : Aujourd'hui, 7 jours, 30 jours, Tout
+    // Pastilles sous le titre : Aujourd'hui, 7 jours, 30 jours, Tout
     periodPills = [
         { value: "today", label: "Aujourd'hui" },
         { value: "week", label: "7 jours" },
@@ -229,7 +229,7 @@ export class AuditLogs {
         this.page.set(1);
     }
 
-    // un clic sur un compteur filtre la liste, un second clic retire le filtre
+    // Un clic sur un compteur filtre la liste, un second clic retire le filtre
     toggleAction(action: string) {
         this.selectAction(this.action() === action ? "" : action);
     }
@@ -264,12 +264,12 @@ export class AuditLogs {
         this.selected.set(row);
     }
 
-    // une adresse IPv4 arrive sous la forme ::ffff:127.0.0.1
+    // Une adresse IPv4 arrive sous la forme ::ffff:127.0.0.1
     cleanIp(ip: string) {
         return ip.replace(/^::ffff:/, "");
     }
 
-    // deux lettres : "Awa Bazin" donne AB, un email donne ses deux premières lettres
+    // Deux lettres : "Adam Ouédraogo" donne AD, un email donne ses deux premières lettres
     private initialsOf(author: string) {
         const words = author.split(/[\s@.]+/).filter(Boolean);
         const letters = words.length > 1 ? words[0][0] + words[1][0] : author.slice(0, 2);
@@ -282,7 +282,7 @@ export class AuditLogs {
     }
 
     private entityLink(log: AuditLog) {
-        // une connexion concerne le compte de son auteur, un lien vers lui n'apprend rien
+        // Une connexion concerne le compte de son auteur, un lien vers lui n'apprend rien
         if (SECURITY_ACTIONS.includes(log.action) && log.action !== "USER_PASSWORD_RESET") {
             return null;
         }
@@ -290,7 +290,7 @@ export class AuditLogs {
         return path && log.entity_id ? [path, log.entity_id] : null;
     }
 
-    // phrase, modifications et lien calculés une fois par ligne, pas à chaque rendu
+    // Phrase, modifications et lien calculés une fois par ligne, pas à chaque rendu
     private toRows(logs: AuditLog[]) {
         const groups: { log: AuditLog; times: string[] }[] = [];
         for (const log of logs) {
@@ -322,7 +322,7 @@ export class AuditLogs {
                 initials: this.initialsOf(author),
                 icon: failed ? "alert" : getActivityIcon(log.action),
                 tone: getActivityTone(log.action, failed),
-                // sans fiche à ouvrir, la ligne montre son détail plutôt que de rester muette
+                // Sans fiche à ouvrir, la ligne montre son détail plutôt que de rester muette
                 hasDetail: times.length > 1 || changes.length > 0 || link === null,
             };
         });

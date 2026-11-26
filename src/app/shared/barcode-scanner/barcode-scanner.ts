@@ -29,7 +29,7 @@ export class BarcodeScanner {
     private video = viewChild.required<ElementRef<HTMLVideoElement>>("video");
 
     status = signal<"starting" | "scanning" | "found" | "error">("starting");
-    // dernier code lu, montré le temps du flash vert
+    // Dernier code lu, montré le temps du flash vert
     code = signal("");
     message = signal("");
     torch = signal<boolean | null>(null);
@@ -65,7 +65,7 @@ export class BarcodeScanner {
                 getBarcodeDetector(),
             ]);
 
-            // fermé pendant le chargement
+            // Fermé pendant le chargement
             if (!this.open) {
                 stream.getTracks().forEach((track) => track.stop());
                 return;
@@ -108,7 +108,7 @@ export class BarcodeScanner {
                     }
                 }
             } catch {
-                // image illisible : on essaie la suivante
+                // Image illisible : on essaie la suivante
             }
 
             this.timer = setTimeout(tick, 120);
@@ -134,7 +134,7 @@ export class BarcodeScanner {
         if (code) this.done(code);
     }
 
-    // lecture réussie : bip, vibration et flash vert un instant, puis on rend le code
+    // Lecture réussie : bip, vibration et flash vert un instant, puis on rend le code
     private found(code: string) {
         this.status.set("found");
         this.code.set(code.trim());
@@ -148,7 +148,7 @@ export class BarcodeScanner {
         this.scanned.emit(code.trim());
     }
 
-    // petit "bip" de caisse, sans fichier son
+    // Petit "bip" de caisse, sans fichier son
     private beep() {
         try {
             const Audio = window.AudioContext;
@@ -165,7 +165,7 @@ export class BarcodeScanner {
             tone.stop(context.currentTime + 0.16);
             tone.onended = () => void context.close();
         } catch {
-            // pas de son : la vibration et le flash suffisent
+            // Pas de son : la vibration et le flash suffisent
         }
     }
 

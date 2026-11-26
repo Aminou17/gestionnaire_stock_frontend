@@ -114,7 +114,7 @@ describe("Sidebar", () => {
             "Employés",
             "Historique des actions",
         ]);
-        // l'ajustement du stock passe par la page Produits
+        // L'ajustement du stock passe par la page Produits
         const adjust = [...el.querySelectorAll<HTMLAnchorElement>("nav a")].find((a) =>
             a.textContent?.includes("Corriger la quantité"),
         )!;
@@ -156,7 +156,7 @@ describe("Sidebar", () => {
         el.querySelector<HTMLButtonElement>("button.group")!.click();
         await stable();
 
-        // clic avec Ctrl : le lien ne navigue pas, le menu doit quand même se refermer
+        // Clic avec Ctrl : le lien ne navigue pas, le menu doit quand même se refermer
         el.querySelector(".tile")!.dispatchEvent(
             new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }),
         );
@@ -210,7 +210,7 @@ describe("Sidebar", () => {
         el.querySelector<HTMLButtonElement>(".profile-btn")!.click();
         await stable();
         el.querySelector<HTMLButtonElement>(".popup .logout")!.click();
-        // un seul clic ne déconnecte pas : il ouvre la confirmation
+        // Un seul clic ne déconnecte pas : il ouvre la confirmation
         expect(logoutAsked()).toBe(true);
     });
 

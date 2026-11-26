@@ -91,7 +91,7 @@ describe("OwnerDashboard", () => {
         expect(text).toContain("Boutique suspendue");
         expect(text).not.toContain("Sécurité");
         expect(fixture.componentInstance.sales()).toBe(10);
-        // la marge de la boutique qui a vendu, et l'activité de la semaine
+        // La marge de la boutique qui a vendu, et l'activité de la semaine
         expect(text).toContain("Marge par boutique");
         expect(text).toContain("30 000 F");
         expect(text).toContain("12 pages");

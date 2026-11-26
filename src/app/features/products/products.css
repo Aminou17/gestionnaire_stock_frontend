@@ -13,7 +13,7 @@ app-page-header {
     gap: 16px;
 }
 
-/* libellé et pastille en haut, chiffre en dessous, comme les cartes de l'Accueil */
+/* Libellé et pastille en haut, chiffre en dessous, comme les cartes de l'Accueil */
 .stat {
     position: relative;
     display: grid;
@@ -144,7 +144,7 @@ app-page-header {
     cursor: pointer;
 }
 
-/* nombre de filtres actifs, sur le coin du bouton */
+/* Nombre de filtres actifs, sur le coin du bouton */
 .filter-count {
     position: absolute;
     top: -6px;
@@ -301,7 +301,7 @@ tbody tr:hover {
     gap: 8px;
 }
 
-/* le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
+/* Le nom est un vrai bouton pour le clavier, toute la ligne reste cliquable */
 .name-link {
     padding: 0;
     border: 0;
@@ -410,13 +410,13 @@ td.num small {
     gap: 10px;
 }
 
-/* petit ordinateur et tablette : la barre ne tient pas sur une ligne */
+/* Petit ordinateur et tablette : la barre ne tient pas sur une ligne */
 @media (max-width: 1365px) {
     .toolbar {
         flex-wrap: wrap;
     }
 
-    /* ligne 1 : recherche et bascule, ligne 2 : les trois filtres */
+    /* Ligne 1 : recherche et bascule, ligne 2 : les trois filtres */
     .search {
         order: 1;
     }
@@ -474,7 +474,7 @@ td.num small {
         display: none;
     }
 
-    /* téléphone : le bouton "Nouveau produit" reste dans l'en-tête, avec ses mots (plus de "+" flottant) */
+    /* Téléphone : le bouton "Nouveau produit" reste dans l'en-tête, avec ses mots (plus de "+" flottant) */
     .new-product {
         padding: 0 14px;
     }
@@ -499,7 +499,7 @@ td.num small {
         min-width: 0;
     }
 
-    /* les filtres restent sous la recherche, visibles : catégorie, statut et tri en deux colonnes */
+    /* Les filtres restent sous la recherche, visibles : catégorie, statut et tri en deux colonnes */
     .filters {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -524,7 +524,7 @@ td.num small {
         font-size: var(--fs-caption);
     }
 
-    /* compteurs : une rangée fine de pastilles qui servent de filtres */
+    /* Compteurs : une rangée fine de pastilles qui servent de filtres */
     .chips {
         display: flex;
         gap: 4px;
@@ -563,7 +563,7 @@ td.num small {
         list-style: none;
     }
 
-    /* carte compacte : photo, nom et stock, prix */
+    /* Carte compacte : photo, nom et stock, prix */
     .product-card {
         display: flex;
         align-items: center;
@@ -634,7 +634,7 @@ td.num small {
     }
 }
 
-/* un seul bouton qui active ou coupe les carreaux */
+/* Un seul bouton qui active ou coupe les carreaux */
 .view-single {
     display: grid;
     width: 44px;
@@ -654,7 +654,7 @@ td.num small {
     color: var(--primary-text);
 }
 
-/* vue grille : une vignette nette par produit, texte centré dessous */
+/* Vue grille : une vignette nette par produit, texte centré dessous */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(176px, 1fr));
@@ -733,7 +733,7 @@ td.num small {
     outline-offset: 2px;
 }
 
-/* valeur du stock : le chiffre clé de l'admin, juste au-dessus des compteurs */
+/* Valeur du stock : le chiffre clé de l'admin, juste au-dessus des compteurs */
 .value-card {
     display: flex;
     align-items: center;
@@ -775,7 +775,7 @@ td.num small {
     }
 }
 
-/* téléphone : le filtre reste après la recherche, la grille passe à deux colonnes */
+/* Téléphone : le filtre reste après la recherche, la grille passe à deux colonnes */
 @media (max-width: 767px) {
     .filter-btn {
         order: 2;
@@ -785,7 +785,7 @@ td.num small {
         order: 3;
     }
 
-    /* carreaux compacts : vignette nette et texte dessous */
+    /* Carreaux compacts : vignette nette et texte dessous */
     .grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
@@ -797,13 +797,13 @@ td.num small {
         padding: 12px;
     }
 
-    /* la liste se termine au-dessus du bouton flottant */
+    /* La liste se termine au-dessus du bouton flottant */
     .list-card {
         padding-bottom: 88px;
     }
 }
 
-/* petit écran : la carte laisse plus de place au nom */
+/* Petit écran : la carte laisse plus de place au nom */
 @media (max-width: 399px) {
     .product-card {
         gap: 8px;
@@ -820,13 +820,13 @@ td.num small {
     }
 }
 
-/* téléphone : haut de page fin et léger */
+/* Téléphone : haut de page fin et léger */
 @media (max-width: 767px) {
     :host {
         gap: 8px;
     }
 
-    /* sur téléphone la valeur du stock reste une barre fine et blanche */
+    /* Sur téléphone la valeur du stock reste une barre fine et blanche */
     .value-card {
         gap: 8px;
         margin-bottom: 0;
@@ -875,7 +875,7 @@ td.num small {
     }
 }
 
-/* scan d'un code-barres, à côté de la recherche */
+/* Scan d'un code-barres, à côté de la recherche */
 .scan-btn {
     display: grid;
     place-items: center;
@@ -899,7 +899,7 @@ td.num small {
     }
 }
 
-/* recherche : le scan est un bouton dans le champ, à droite */
+/* Recherche : le scan est un bouton dans le champ, à droite */
 .search .input {
     padding-right: 48px;
 }
@@ -955,7 +955,7 @@ td.num small {
     box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
 }
 
-/* téléphone : une seule barre (recherche, filtre, affichage), puis les pastilles */
+/* Téléphone : une seule barre (recherche, filtre, affichage), puis les pastilles */
 @media (max-width: 767px) {
     .value-card {
         display: none;
@@ -1009,7 +1009,7 @@ td.num small {
     }
 }
 
-/* les filtres sont maintenant sous la barre de recherche, dans leur propre rangée */
+/* Les filtres sont maintenant sous la barre de recherche, dans leur propre rangée */
 .list-card > .filters {
     padding: 0 16px 12px;
 }
@@ -1021,7 +1021,7 @@ td.num small {
     }
 }
 
-/* filtres : un bouton Filtre ouvre catégorie, statut et tri, rien d'ouvert par défaut sur téléphone */
+/* Filtres : un bouton Filtre ouvre catégorie, statut et tri, rien d'ouvert par défaut sur téléphone */
 @media (max-width: 767px) {
     .list-card > .filters {
         display: none;
@@ -1052,7 +1052,7 @@ td.num small {
         border-radius: 12px;
     }
 
-    /* le statut de stock passe dans le panneau Filtre : plus de rangée de pastilles */
+    /* Le statut de stock passe dans le panneau Filtre : plus de rangée de pastilles */
     .list-card .chips {
         display: none;
     }

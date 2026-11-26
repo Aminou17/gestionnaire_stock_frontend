@@ -60,7 +60,7 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
             if (!this.settings.hasValue()) return;
 
             const settings = this.settings.value();
-            // un rechargement ne doit pas effacer une saisie en cours
+            // Un rechargement ne doit pas effacer une saisie en cours
             untracked(() => {
                 if (!this.form.dirty) this.fill(settings);
             });
@@ -70,7 +70,7 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
     private fill(settings: AlertEmailSettings) {
         this.form.reset({
             enabled: settings.enabled,
-            // par défaut, le résumé va à l'adresse de connexion de l'administrateur
+            // Par défaut, le résumé va à l'adresse de connexion de l'administrateur
             recipient: settings.recipient ?? this.auth.user()?.email ?? "",
             sendHour: settings.sendHour,
             onlyIfAlerts: settings.onlyIfAlerts,
@@ -86,7 +86,7 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
         return control.touched && control.invalid;
     }
 
-    // le test part avec les réglages enregistrés : il faut une adresse enregistrée et rien en attente
+    // Le test part avec les réglages enregistrés : il faut une adresse enregistrée et rien en attente
     canTest() {
         return this.settings.hasValue() && !!this.settings.value().recipient && !this.form.dirty;
     }
@@ -138,7 +138,7 @@ export class SettingsAlertEmail implements HasUnsavedChanges {
             });
     }
 
-    // le test utilise les réglages enregistrés, pas ceux en cours de saisie
+    // Le test utilise les réglages enregistrés, pas ceux en cours de saisie
     sendTest() {
         this.testing.set(true);
         this.message.set(null);

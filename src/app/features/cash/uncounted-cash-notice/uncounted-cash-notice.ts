@@ -30,7 +30,7 @@ export class UncountedCashNotice {
         return `du ${label}`;
     });
 
-    // ligne du dessous : combien on attend, et s'il en reste d'autres
+    // Ligne du dessous : combien on attend, et s'il en reste d'autres
     details = computed(() => {
         const session = this.session();
         const parts: string[] = [];

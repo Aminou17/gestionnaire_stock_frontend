@@ -55,7 +55,7 @@
     }
 }
 
-/* téléphone : au-dessus de la barre du bas */
+/* Téléphone : au-dessus de la barre du bas */
 @media (max-width: 767px) {
     .zone {
         bottom: calc(80px + env(safe-area-inset-bottom));

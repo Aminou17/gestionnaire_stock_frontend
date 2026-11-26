@@ -71,7 +71,7 @@
         min-width: 0;
     }
 
-    /* les deux dates côte à côte, sous le sélecteur */
+    /* Les deux dates côte à côte, sous le sélecteur */
     .custom-range {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -92,7 +92,7 @@
     }
 }
 
-/* une seule ligne de pastilles qui défile sur téléphone */
+/* Une seule ligne de pastilles qui défile sur téléphone */
 :host(.chips) .toolbar {
     flex-wrap: nowrap;
     gap: 8px;
@@ -114,14 +114,14 @@
 }
 
 @media (max-width: 767px) {
-    /* le fondu à droite montre qu'il reste des filtres à faire défiler */
+    /* Le fondu à droite montre qu'il reste des filtres à faire défiler */
     :host(.chips) .toolbar {
         padding: 12px 48px 12px 12px;
         border-bottom: 1px solid var(--border);
         mask-image: linear-gradient(to right, #000 85%, transparent);
     }
 
-    /* peu de pastilles : elles passent à la ligne plutôt que d'être coupées */
+    /* Peu de pastilles : elles passent à la ligne plutôt que d'être coupées */
     :host(.chips.wrap) .toolbar {
         flex-wrap: wrap;
         padding: 12px;

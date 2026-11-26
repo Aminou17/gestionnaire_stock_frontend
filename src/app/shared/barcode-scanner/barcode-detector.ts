@@ -21,7 +21,7 @@ export function getBarcodeDetector(): Promise<Detector> {
                 const formats = FORMATS.filter((format) => supported.includes(format));
                 if (formats.includes("ean_13")) return new native({ formats }) as Detector;
             } catch {
-                // détecteur présent mais inutilisable : on prend la version WebAssembly
+                // Détecteur présent mais inutilisable : on prend la version WebAssembly
             }
         }
 

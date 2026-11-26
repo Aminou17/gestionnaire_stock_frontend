@@ -14,12 +14,12 @@ import { MainLayout } from "./layout/main-layout/main-layout";
 
 const comingSoon = () => import("./features/coming-soon/coming-soon").then((m) => m.ComingSoon);
 
-// pages pas encore développées : [chemin, titre, réservée à l'admin]
+// Pages pas encore développées : [chemin, titre, réservée à l'admin]
 const upcoming: [string, string, boolean][] = [];
 
 export const routes: Routes = [
     {
-        // visiteur : la page d'accueil ; déjà connecté : directement le tableau de bord
+        // Visiteur : la page d'accueil ; déjà connecté : directement le tableau de bord
         path: "",
         pathMatch: "full",
         title: "Boutiki · Gérez votre boutique, sans prise de tête",
@@ -27,7 +27,7 @@ export const routes: Routes = [
         loadComponent: () => import("./features/landing/landing").then((m) => m.Landing),
     },
     {
-        // le lien reçu par e-mail s'ouvre même si quelqu'un est déjà connecté sur cet appareil
+        // Le lien reçu par e-mail s'ouvre même si quelqu'un est déjà connecté sur cet appareil
         path: "reset-password",
         component: AuthLayout,
         children: [
@@ -42,7 +42,7 @@ export const routes: Routes = [
         ],
     },
     {
-        // pages publiques : visibles avec ou sans session
+        // Pages publiques : visibles avec ou sans session
         path: "privacy",
         title: "Politique de confidentialité",
         loadComponent: () => import("./features/legal/privacy/privacy").then((m) => m.Privacy),
@@ -95,7 +95,7 @@ export const routes: Routes = [
         ],
     },
     {
-        // essai ou abonnement terminé : une page à part, sans le menu dont les pages sont fermées
+        // Essai ou abonnement terminé : une page à part, sans le menu dont les pages sont fermées
         path: "access-ended",
         component: AuthLayout,
         canActivate: [authGuard, shopGuard],
@@ -363,7 +363,7 @@ export const routes: Routes = [
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
             },
             {
-                // le sommaire et les pages personnelles sont ouverts à l'employé, le reste à l'administrateur
+                // Le sommaire et les pages personnelles sont ouverts à l'employé, le reste à l'administrateur
                 path: "settings",
                 children: [
                     {
@@ -382,7 +382,7 @@ export const routes: Routes = [
                                 (m) => m.SettingsShop,
                             ),
                     },
-                    // le ticket de caisse se règle maintenant dans Ma boutique
+                    // Le ticket de caisse se règle maintenant dans Ma boutique
                     { path: "receipt", redirectTo: "shop" },
                     {
                         path: "stock",
@@ -523,7 +523,7 @@ export const routes: Routes = [
                 loadComponent: () =>
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
             },
-            // les demandes sans compte sont un onglet de la boîte de messages
+            // Les demandes sans compte sont un onglet de la boîte de messages
             { path: "help", redirectTo: "support?onglet=sans-compte" },
             {
                 path: "security",

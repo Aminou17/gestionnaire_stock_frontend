@@ -18,7 +18,7 @@ import { HasUnsavedChanges } from "../unsaved-changes.guard";
 import { UnsavedDialog } from "../unsaved-dialog/unsaved-dialog";
 import { getBackLink } from "../../../core/back-link";
 
-// une session ouverte avant l'arrivée du prénom et du nom n'a que le nom complet
+// Une session ouverte avant l'arrivée du prénom et du nom n'a que le nom complet
 const namesOf = (user: User | null) => {
     if (!user) return { firstName: "", lastName: "" };
     if (user.firstName !== undefined)
@@ -58,7 +58,7 @@ export class SettingsAccount implements HasUnsavedChanges {
 
     private formValue = toSignal(this.profileForm.valueChanges);
 
-    // l'en-tête montre le nom tel qu'il sera enregistré, pendant la saisie
+    // L'en-tête montre le nom tel qu'il sera enregistré, pendant la saisie
     fullName = computed(() => {
         const value = this.formValue();
         if (!value) return this.auth.user()?.name ?? "";
@@ -77,7 +77,7 @@ export class SettingsAccount implements HasUnsavedChanges {
     sendingReset = signal(false);
     resetMessage = signal<{ ok: boolean; text: string } | null>(null);
 
-    // même service que la page Mot de passe oublié, avec l'adresse du compte connecté
+    // Même service que la page Mot de passe oublié, avec l'adresse du compte connecté
     sendReset() {
         const email = this.auth.user()?.email;
         if (!email || this.sendingReset()) return;
@@ -115,7 +115,7 @@ export class SettingsAccount implements HasUnsavedChanges {
     }
 
     canLeave() {
-        // quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
+        // Quitter pendant l'envoi annulerait la requête sans que l'on sache si elle a abouti
         if (this.savingProfile()) return false;
 
         const dirty = this.profileForm.dirty;
@@ -173,7 +173,7 @@ export class SettingsAccount implements HasUnsavedChanges {
         this.profileMessage.set(null);
         this.profileForm.disable({ emitEvent: false });
 
-        // le backend n'accepte que les adresses en minuscules
+        // Le backend n'accepte que les adresses en minuscules
         this.auth
             .updateProfile(firstName.trim(), lastName.trim(), email.trim().toLowerCase())
             .pipe(takeUntilDestroyed(this.destroyRef))

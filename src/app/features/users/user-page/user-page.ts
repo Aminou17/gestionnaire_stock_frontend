@@ -51,7 +51,7 @@ export class UserPage {
         inject(ActivatedRoute).paramMap.pipe(map((params) => Number(params.get("id")))),
     );
 
-    // un identifiant qui n'est pas un entier n'est même pas demandé au backend
+    // Un identifiant qui n'est pas un entier n'est même pas demandé au backend
     validId = computed(() => {
         const id = this.id();
         return id !== undefined && Number.isInteger(id) && id > 0;
@@ -92,7 +92,7 @@ export class UserPage {
 
     lastLogin = computed(() => formatLastLogin(this.data()?.last_login_at ?? null, this.locale));
 
-    // dans une journée, les mêmes actions qui se suivent tiennent sur une ligne ("4 fois")
+    // Dans une journée, les mêmes actions qui se suivent tiennent sur une ligne ("4 fois")
     activityDays = computed(() =>
         this.activity.hasValue()
             ? groupByDay(this.activity.value(), this.locale).map((day) => ({
@@ -151,7 +151,7 @@ export class UserPage {
                 next: () => {
                     this.deleting.set(false);
                     this.closeConfirm();
-                    // la fiche supprimée quitte l'historique
+                    // La fiche supprimée quitte l'historique
                     this.goBack("/users");
                 },
                 error: (err: HttpErrorResponse) => {
@@ -188,7 +188,7 @@ export class UserPage {
     }
 }
 
-// regroupe les actions identiques qui se suivent ; la liste va de la plus récente à la plus ancienne
+// Regroupe les actions identiques qui se suivent ; la liste va de la plus récente à la plus ancienne
 const mergeRepeats = <T extends { action: string; result: string; created_at: string }>(
     items: T[],
 ) => {

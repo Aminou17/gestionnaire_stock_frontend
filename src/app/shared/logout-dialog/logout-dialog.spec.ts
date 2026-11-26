@@ -10,7 +10,7 @@ describe("LogoutDialog", () => {
     const logoutAsked = signal(false);
     const pending = signal(0);
 
-    // jsdom ne connaît pas showModal : on imite l'ouverture et l'évènement close
+    // Jsdom ne connaît pas showModal : on imite l'ouverture et l'évènement close
     beforeEach(() => {
         HTMLDialogElement.prototype.showModal = function () {
             this.setAttribute("open", "");

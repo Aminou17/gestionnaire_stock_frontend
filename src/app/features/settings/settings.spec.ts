@@ -28,7 +28,7 @@ describe("Settings", () => {
                 {
                     provide: ShopSettingsService,
                     useValue: {
-                        getSettings: () => of({ name: "Chez Awa", logo: null }),
+                        getSettings: () => of({ name: "Chez Adam", logo: null }),
                         subscriptionsEnabled: () => subscriptionsOpen,
                     },
                 },
@@ -56,8 +56,8 @@ describe("Settings", () => {
                         isOwner: signal(false),
                         user: signal({
                             id: 1,
-                            name: "Awa Traoré",
-                            email: "awa@test.com",
+                            name: "Adam Traoré",
+                            email: "adam@test.com",
                             role: "admin",
                         }),
                         roleLabel: signal("Administrateur"),
@@ -80,7 +80,7 @@ describe("Settings", () => {
 
         const profile = el.querySelector(".profile")!.textContent!;
 
-        expect(profile).toContain("awa@test.com");
+        expect(profile).toContain("adam@test.com");
         expect(profile).toContain("Administrateur");
     });
 
@@ -130,10 +130,10 @@ describe("Settings", () => {
 
         const text = el.textContent!;
 
-        expect(text).not.toContain("Chez Awa");
+        expect(text).not.toContain("Chez Adam");
         expect(text).toContain("Seuil : 5");
         expect(text).toContain("Activé à 08:00");
-        // le logiciel est gratuit pendant le lancement : aucune trace d'abonnement
+        // Le logiciel est gratuit pendant le lancement : aucune trace d'abonnement
         expect(text).not.toContain("Essai gratuit");
         expect(text).not.toContain("Abonnement");
     });

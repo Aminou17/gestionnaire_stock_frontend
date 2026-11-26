@@ -53,7 +53,7 @@ describe("Register", () => {
     function fillAccount() {
         component.form.patchValue({
             firstName: "Fatou",
-            lastName: "Diallo",
+            lastName: "Ouédraogo",
             email: "Fatou@Exemple.com",
             password: "Boutique-2026!",
             confirmPassword: "Boutique-2026!",
@@ -145,13 +145,13 @@ describe("Register", () => {
             country: "Burkina Faso",
             city: "Ouagadougou",
             firstName: "Fatou",
-            lastName: "Diallo",
+            lastName: "Ouédraogo",
             email: "fatou@exemple.com",
             password: "Boutique-2026!",
             website: "",
             elapsedMs: expect.any(Number),
         });
-        // l'adresse se confirme avec le code reçu avant d'entrer dans la boutique
+        // L'adresse se confirme avec le code reçu avant d'entrer dans la boutique
         expect(router.navigate).toHaveBeenCalledWith(["/verify-email"], {
             queryParams: { email: "fatou@exemple.com" },
         });

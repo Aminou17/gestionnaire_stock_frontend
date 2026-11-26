@@ -41,7 +41,7 @@ export class UserForm {
     formError = signal<string | null>(null);
     showPassword = signal(false);
 
-    // le backend refuse qu'on change son propre rôle
+    // Le backend refuse qu'on change son propre rôle
     isSelf = computed(() => this.editing()?.id === this.auth.user()?.id);
 
     roles: { value: UserRole; label: string; hint: string }[] = [
@@ -57,7 +57,7 @@ export class UserForm {
         },
     ];
 
-    // mêmes limites que le backend (50 pour le prénom et le nom, 100 pour l'email, mot de passe de 8 caractères au moins)
+    // Mêmes limites que le backend (50 pour le prénom et le nom, 100 pour l'email, mot de passe de 8 caractères au moins)
     form = inject(NonNullableFormBuilder).group({
         firstName: ["", [Validators.required, Validators.maxLength(50)]],
         lastName: ["", Validators.maxLength(50)],
@@ -85,10 +85,10 @@ export class UserForm {
             role: user?.role ?? "manager",
             password: user ? "" : generatePassword(),
         });
-        // un mot de passe est proposé d'emblée : il reste visible pour le transmettre
+        // Un mot de passe est proposé d'emblée : il reste visible pour le transmettre
         if (!user) this.showPassword.set(true);
 
-        // le mot de passe ne se change pas ici, mais depuis Nouveau mot de passe
+        // Le mot de passe ne se change pas ici, mais depuis Nouveau mot de passe
         if (user) this.form.controls.password.disable();
         else this.form.controls.password.enable();
 
@@ -173,7 +173,7 @@ export class UserForm {
         request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
             next: (res) => {
                 this.saving.set(false);
-                // son propre nom est aussi affiché dans l'en-tête
+                // Son propre nom est aussi affiché dans l'en-tête
                 if (this.isSelf()) this.auth.refreshUser().subscribe({ error: () => {} });
                 this.close();
                 this.saved.emit(res.user);
