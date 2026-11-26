@@ -1,6 +1,9 @@
 <div class="heading">
     <span class="mark" aria-hidden="true"><app-icon name="box" [size]="22" /></span>
-    @if (step() === 1) {
+    @if (google(); as account) {
+        <h1>Bienvenue {{ account.firstName }}</h1>
+        <p>Dernière étape : votre boutique. Votre compte Google est prêt.</p>
+    } @else if (step() === 1) {
         <h1>Créer ma boutique</h1>
         <p>Prête en une minute. Vous pourrez tout modifier ensuite.</p>
     } @else {
@@ -9,11 +12,25 @@
     }
 </div>
 
-<div class="progress" role="img" [attr.aria-label]="'Étape ' + step() + ' sur 2'">
-    <span class="bar on"></span>
-    <span class="bar" [class.on]="step() === 2"></span>
-    <small>Étape {{ step() }} sur 2</small>
-</div>
+@if (google(); as account) {
+    <p class="google-account">
+        <app-icon name="mail" [size]="16" />
+        <span>{{ account.email }}</span>
+        <button type="button" class="text-link" (click)="leaveGoogle()">Changer</button>
+    </p>
+} @else {
+    @if (step() === 1) {
+        <app-google-button text="signup_with" (credential)="onGoogle($event)" />
+    }
+}
+
+@if (!google()) {
+    <div class="progress" role="img" [attr.aria-label]="'Étape ' + step() + ' sur 2'">
+        <span class="bar on"></span>
+        <span class="bar" [class.on]="step() === 2"></span>
+        <small>Étape {{ step() }} sur 2</small>
+    </div>
+}
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
     <!-- Piège à robots : invisible et ignoré par les lecteurs d'écran, seul un robot le remplit -->
@@ -38,7 +55,7 @@
         </div>
     }
 
-    @if (step() === 1) {
+    @if (step() === 1 || google()) {
         <div class="panel" [class.from-left]="direction() === 'back'">
             <div class="group">
                 <div class="float">
@@ -185,10 +202,24 @@
             </div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">
-            Continuer
-            <app-icon name="chevron-right" [size]="18" />
-        </button>
+        @if (google()) {
+            <button
+                type="submit"
+                class="btn btn-primary btn-block"
+                [disabled]="loading() || done()"
+            >
+                @if (loading()) {
+                    <span class="spinner"></span> Création…
+                } @else {
+                    Créer ma boutique
+                }
+            </button>
+        } @else {
+            <button type="submit" class="btn btn-primary btn-block">
+                Continuer
+                <app-icon name="chevron-right" [size]="18" />
+            </button>
+        }
     } @else {
         <div class="panel" [class.from-left]="direction() === 'back'">
             <div class="names">

@@ -233,3 +233,26 @@
     height: 1px;
     overflow: hidden;
 }
+
+/* Compte Google choisi : l'adresse reste visible, avec un lien pour en changer */
+.google-account {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface-2, transparent);
+    color: var(--text-muted);
+    font-size: var(--fs-body);
+}
+
+.google-account span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--text);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

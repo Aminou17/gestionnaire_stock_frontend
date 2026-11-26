@@ -5,6 +5,7 @@ import { of, throwError } from "rxjs";
 
 import { Login } from "./login";
 import { AuthService } from "../../../core/auth/auth.service";
+import { GoogleSignIn } from "../../../core/auth/google-sign-in";
 
 describe("Login", () => {
     let fixture: ComponentFixture<Login>;
@@ -13,17 +14,31 @@ describe("Login", () => {
     let auth: {
         login: ReturnType<typeof vi.fn>;
         verifyTwoFactor: ReturnType<typeof vi.fn>;
+        loginWithGoogle: ReturnType<typeof vi.fn>;
         isOwner: () => boolean;
         user: () => { mustChangePassword?: boolean } | null;
     };
     let router: Router;
 
     beforeEach(async () => {
-        auth = { login: vi.fn(), verifyTwoFactor: vi.fn(), isOwner: () => false, user: () => null };
+        auth = {
+            login: vi.fn(),
+            verifyTwoFactor: vi.fn(),
+            loginWithGoogle: vi.fn(),
+            isOwner: () => false,
+            user: () => null,
+        };
 
         await TestBed.configureTestingModule({
             imports: [Login],
-            providers: [provideRouter([]), { provide: AuthService, useValue: auth }],
+            providers: [
+                provideRouter([]),
+                { provide: AuthService, useValue: auth },
+                {
+                    provide: GoogleSignIn,
+                    useValue: { load: () => Promise.resolve(null), onCredential: () => {} },
+                },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(Login);
@@ -198,5 +213,39 @@ describe("Login", () => {
             component.backToPassword();
             expect(component.step()).toBe("password");
         });
+    });
+
+    it("should enter the app after a Google sign-in on a known account", () => {
+        auth.loginWithGoogle.mockReturnValue(of(true));
+
+        component.onGoogle("jeton-google");
+
+        expect(auth.loginWithGoogle).toHaveBeenCalledWith("jeton-google");
+        expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+    });
+
+    it("should send an unknown Google account to the shop creation", () => {
+        auth.loginWithGoogle.mockReturnValue(of(false));
+
+        component.onGoogle("jeton-google");
+
+        expect(router.navigate).toHaveBeenCalledWith(["/register"]);
+    });
+
+    it("should show the API message when Google sign-in fails", () => {
+        auth.loginWithGoogle.mockReturnValue(
+            throwError(
+                () =>
+                    new HttpErrorResponse({
+                        status: 403,
+                        error: { message: "Ce compte se connecte avec son mot de passe." },
+                    }),
+            ),
+        );
+
+        component.onGoogle("jeton-google");
+
+        expect(component.error()).toBe("Ce compte se connecte avec son mot de passe.");
+        expect(component.loading()).toBe(false);
     });
 });

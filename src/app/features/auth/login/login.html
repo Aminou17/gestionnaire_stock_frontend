@@ -60,11 +60,13 @@
         <p>Connectez-vous pour gérer votre boutique.</p>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
-        @if (error()) {
-            <div class="alert alert-error" role="alert">{{ error() }}</div>
-        }
+    @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+    }
 
+    <app-google-button text="signin_with" (credential)="onGoogle($event)" />
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <div class="group">
             <div class="float">
                 <app-icon name="mail" [size]="18" />

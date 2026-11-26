@@ -18,6 +18,7 @@ import { Icon } from "../../../shared/icon/icon";
 import { PhoneField } from "../../../shared/phone-field/phone-field";
 import { splitPhone } from "../../../shared/phone";
 import { LogoResizerService } from "../../settings/logo-resizer.service";
+import { GoogleButton } from "../google-button/google-button";
 import { PasswordStrength } from "../password-strength/password-strength";
 
 // 8 à 15 chiffres avec l'indicatif, comme l'API
@@ -45,7 +46,7 @@ type Field =
 
 @Component({
     selector: "app-register",
-    imports: [ReactiveFormsModule, RouterLink, Icon, PasswordStrength, PhoneField],
+    imports: [ReactiveFormsModule, RouterLink, Icon, PasswordStrength, PhoneField, GoogleButton],
     templateUrl: "./register.html",
     styleUrls: ["../auth-form.css", "./register.css"],
 })
@@ -103,6 +104,9 @@ export class Register {
 
     // Sens de la transition entre les deux étapes
     direction = signal<"forward" | "back">("forward");
+
+    // Compte Google en attente de sa boutique : seule l'étape de la boutique reste à remplir
+    google = this.auth.googleSignup;
 
     // Aperçu en direct de la boutique
     private shopNameValue = toSignal(this.form.controls.shopName.valueChanges, {
@@ -199,8 +203,8 @@ export class Register {
         return control.touched && control.invalid;
     }
 
-    next() {
-        // Des espaces seuls passent Validators.required
+    // Des espaces seuls passent Validators.required
+    private shopStepValid() {
         for (const field of ["shopName", "country", "city"] as const) {
             const control = this.form.controls[field];
             control.setValue(control.value.trim(), { emitEvent: false });
@@ -209,9 +213,79 @@ export class Register {
         this.form.controls.phone.markAsTouched();
 
         const { shopName, phone, country, city } = this.form.controls;
-        if (shopName.invalid || phone.invalid || country.invalid || city.invalid) return;
+        if (shopName.invalid || phone.invalid || country.invalid || city.invalid) return false;
 
-        if (this.phoneStatus() === "taken") return;
+        return this.phoneStatus() !== "taken";
+    }
+
+    onGoogle(credential: string) {
+        this.loading.set(true);
+        this.error.set(null);
+
+        this.auth.loginWithGoogle(credential).subscribe({
+            next: (loggedIn) => {
+                this.loading.set(false);
+                // Compte déjà inscrit : on l'ouvre ; sinon la page passe en mode Google
+                if (loggedIn) this.router.navigate([this.auth.isOwner() ? "/owner" : "/dashboard"]);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.loading.set(false);
+                this.error.set(err.error?.message ?? "Une erreur est survenue, réessayez.");
+            },
+        });
+    }
+
+    // Choisir une autre adresse : on repart de l'inscription normale
+    leaveGoogle() {
+        this.auth.googleSignup.set(null);
+    }
+
+    private submitGoogle() {
+        const google = this.google();
+        if (!google || !this.shopStepValid()) return;
+
+        this.loading.set(true);
+        this.error.set(null);
+
+        const { shopName, phone, country, city } = this.form.getRawValue();
+        const logo = this.logo();
+
+        this.auth
+            .registerWithGoogle({
+                credential: google.credential,
+                shopName,
+                phone,
+                country,
+                city,
+                ...(logo ? { logo } : {}),
+            })
+            .subscribe({
+                next: () => {
+                    this.done.set(true);
+                    this.router.navigate(["/dashboard"]);
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.loading.set(false);
+                    if (err.status === 0 || err.status >= 502) {
+                        this.error.set(
+                            "Impossible de joindre le serveur. Vérifiez votre connexion.",
+                        );
+                    } else if (err.status === 409 && err.error?.message?.includes("numéro")) {
+                        this.phoneStatus.set("taken");
+                        this.phoneMessage.set(err.error.message);
+                    } else if (err.status === 401) {
+                        // Le jeton Google dure environ une heure
+                        this.leaveGoogle();
+                        this.error.set("La connexion avec Google a expiré, recommencez.");
+                    } else {
+                        this.error.set(err.error?.message ?? "Une erreur est survenue, réessayez.");
+                    }
+                },
+            });
+    }
+
+    next() {
+        if (!this.shopStepValid()) return;
 
         this.error.set(null);
         this.direction.set("forward");
@@ -231,6 +305,11 @@ export class Register {
     }
 
     submit() {
+        if (this.google()) {
+            this.submitGoogle();
+            return;
+        }
+
         if (this.step() === 1) {
             this.next();
             return;

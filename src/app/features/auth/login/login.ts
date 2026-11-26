@@ -6,10 +6,11 @@ import { Router, RouterLink } from "@angular/router";
 import { AuthService } from "../../../core/auth/auth.service";
 import { PRODUCT_NAME } from "../../../core/brand";
 import { Icon } from "../../../shared/icon/icon";
+import { GoogleButton } from "../google-button/google-button";
 
 @Component({
     selector: "app-login",
-    imports: [ReactiveFormsModule, RouterLink, Icon],
+    imports: [ReactiveFormsModule, RouterLink, Icon, GoogleButton],
     templateUrl: "./login.html",
     styleUrls: ["../auth-form.css", "./login.css"],
 })
@@ -71,6 +72,26 @@ export class Login {
                     });
                     return;
                 }
+                this.error.set(this.messageFor(err));
+            },
+        });
+    }
+
+    onGoogle(credential: string) {
+        this.loading.set(true);
+        this.error.set(null);
+
+        this.auth.loginWithGoogle(credential).subscribe({
+            next: (loggedIn) => {
+                if (loggedIn) {
+                    this.enterApp();
+                    return;
+                }
+                // Première visite avec ce compte Google : il reste à créer la boutique
+                this.router.navigate(["/register"]);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.loading.set(false);
                 this.error.set(this.messageFor(err));
             },
         });

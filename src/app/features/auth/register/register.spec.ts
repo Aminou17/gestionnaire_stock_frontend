@@ -1,10 +1,12 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { HttpErrorResponse } from "@angular/common/http";
 import { Router, provideRouter } from "@angular/router";
+import { signal } from "@angular/core";
 import { of, throwError } from "rxjs";
 
 import { Register } from "./register";
-import { AuthService } from "../../../core/auth/auth.service";
+import { AuthService, GoogleSignup } from "../../../core/auth/auth.service";
+import { GoogleSignIn } from "../../../core/auth/google-sign-in";
 
 describe("Register", () => {
     let fixture: ComponentFixture<Register>;
@@ -13,6 +15,10 @@ describe("Register", () => {
     let auth: {
         register: ReturnType<typeof vi.fn>;
         isPhoneAvailable: ReturnType<typeof vi.fn>;
+        loginWithGoogle: ReturnType<typeof vi.fn>;
+        registerWithGoogle: ReturnType<typeof vi.fn>;
+        googleSignup: ReturnType<typeof signal<GoogleSignup | null>>;
+        isOwner: () => boolean;
     };
     let router: Router;
 
@@ -20,11 +26,22 @@ describe("Register", () => {
         auth = {
             register: vi.fn(() => of({ verificationRequired: true, email: "fatou@exemple.com" })),
             isPhoneAvailable: vi.fn(() => of({ available: true })),
+            loginWithGoogle: vi.fn(),
+            registerWithGoogle: vi.fn(() => of({})),
+            googleSignup: signal<GoogleSignup | null>(null),
+            isOwner: () => false,
         };
 
         await TestBed.configureTestingModule({
             imports: [Register],
-            providers: [provideRouter([]), { provide: AuthService, useValue: auth }],
+            providers: [
+                provideRouter([]),
+                { provide: AuthService, useValue: auth },
+                {
+                    provide: GoogleSignIn,
+                    useValue: { load: () => Promise.resolve(null), onCredential: () => {} },
+                },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(Register);
@@ -228,5 +245,50 @@ describe("Register", () => {
         zone.dispatchEvent(new Event("dragleave"));
         await fixture.whenStable();
         expect(zone.classList).not.toContain("dragging");
+    });
+
+    describe("with a Google account", () => {
+        beforeEach(async () => {
+            auth.googleSignup.set({
+                credential: "jeton-google",
+                email: "adam@example.com",
+                firstName: "Adam",
+                lastName: "Ouédraogo",
+            });
+            fixture.detectChanges();
+            await fixture.whenStable();
+        });
+
+        it("should only ask for the shop and show the Google address", () => {
+            expect(el.textContent).toContain("Bienvenue Adam");
+            expect(el.textContent).toContain("adam@example.com");
+            expect(el.querySelector("#register-shopName")).not.toBeNull();
+            expect(el.querySelector("#register-password")).toBeNull();
+        });
+
+        it("should create the shop with the Google credential", async () => {
+            component.form.patchValue({
+                shopName: "Chez Adam",
+                phone: "+22670123456",
+                country: "Burkina Faso",
+                city: "Ouagadougou",
+            });
+            await submit();
+
+            expect(auth.registerWithGoogle).toHaveBeenCalledWith({
+                credential: "jeton-google",
+                shopName: "Chez Adam",
+                phone: "+22670123456",
+                country: "Burkina Faso",
+                city: "Ouagadougou",
+            });
+            expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
+        });
+
+        it("should not call the API when the shop is incomplete", async () => {
+            await submit();
+
+            expect(auth.registerWithGoogle).not.toHaveBeenCalled();
+        });
     });
 });

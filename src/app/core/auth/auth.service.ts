@@ -74,6 +74,23 @@ export interface RegisterData {
     logo?: string;
 }
 
+// Compte Google sans boutique : il reste à la créer (nom, téléphone, pays, ville)
+export interface GoogleSignup {
+    credential: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+}
+
+export interface GoogleRegisterData {
+    credential: string;
+    shopName: string;
+    phone: string;
+    country: string;
+    city: string;
+    logo?: string;
+}
+
 @Injectable({ providedIn: "root" })
 export class AuthService {
     private http = inject(HttpClient);
@@ -173,6 +190,43 @@ export class AuthService {
                 }),
                 map((res) => ("twoFactorRequired" in res ? res : null)),
             );
+    }
+
+    // Compte Google en attente de sa boutique, gardé en mémoire entre la connexion et l'inscription
+    googleSignup = signal<GoogleSignup | null>(null);
+
+    // Renvoie true si la session est ouverte ; false si cette adresse n'a pas encore de boutique
+    loginWithGoogle(credential: string) {
+        return this.http
+            .post<
+                | LoginResponse
+                | { registrationRequired: true; email: string; firstName: string; lastName: string }
+            >(`${API_URL}/auth/google`, { credential })
+            .pipe(
+                map((res) => {
+                    if ("registrationRequired" in res) {
+                        this.googleSignup.set({
+                            credential,
+                            email: res.email,
+                            firstName: res.firstName,
+                            lastName: res.lastName,
+                        });
+                        return false;
+                    }
+                    this.openSession(res, true);
+                    return true;
+                }),
+            );
+    }
+
+    // La boutique est créée et la session ouverte : l'adresse est déjà confirmée par Google
+    registerWithGoogle(data: GoogleRegisterData) {
+        return this.http.post<LoginResponse>(`${API_URL}/auth/google/register`, data).pipe(
+            tap((res) => {
+                this.openSession(res, true);
+                this.googleSignup.set(null);
+            }),
+        );
     }
 
     // Deuxième étape : le jeton reçu avec le mot de passe et un code (ou un code de secours)
