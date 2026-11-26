@@ -7,10 +7,13 @@
                 <span class="brand-sub">par {{ companyName }}</span>
             </span>
         </a>
-        <a class="home" routerLink="/">
-            <app-icon name="chevron-left" [size]="16" />
-            Accueil
-        </a>
+        <div class="bar-actions">
+            <app-theme-toggle />
+            <a class="home" routerLink="/">
+                <app-icon name="chevron-left" [size]="16" />
+                Accueil
+            </a>
+        </div>
     </header>
 
     <!-- Ordinateur seulement : la marque et un aperçu du logiciel à côté du formulaire -->

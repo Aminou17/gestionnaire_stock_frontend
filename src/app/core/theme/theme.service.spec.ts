@@ -2,33 +2,63 @@ import { TestBed } from "@angular/core/testing";
 
 import { ThemeService } from "./theme.service";
 
+function systemPrefers(dark: boolean) {
+    vi.stubGlobal("matchMedia", () => ({
+        matches: dark,
+        addEventListener: () => {},
+    }));
+}
+
 describe("ThemeService", () => {
     beforeEach(() => localStorage.clear());
+    afterEach(() => vi.unstubAllGlobals());
 
-    // Le système de l'utilisateur est en sombre, mais l'app doit démarrer en clair
-    it("should start in light mode when nothing is saved", () => {
-        window.matchMedia = (() => ({ matches: true })) as any;
+    it("should follow a dark phone by default", () => {
+        systemPrefers(true);
+
+        expect(TestBed.inject(ThemeService).theme()).toBe("dark");
+    });
+
+    it("should stay light on a light phone by default", () => {
+        systemPrefers(false);
+
+        expect(TestBed.inject(ThemeService).theme()).toBe("light");
+    });
+
+    it("should prefer the saved choice over the phone setting", () => {
+        systemPrefers(true);
+        localStorage.setItem("theme", "light");
+
+        expect(TestBed.inject(ThemeService).theme()).toBe("light");
+    });
+
+    it("should save only a deliberate choice", () => {
+        systemPrefers(true);
         const service = TestBed.inject(ThemeService);
+
+        expect(localStorage.getItem("theme")).toBeNull();
+
+        service.toggle();
 
         expect(service.theme()).toBe("light");
+        expect(localStorage.getItem("theme")).toBe("light");
     });
 
-    it("should restore the saved theme", () => {
+    it("should restore a saved dark theme on a light phone", () => {
+        systemPrefers(false);
         localStorage.setItem("theme", "dark");
-        const service = TestBed.inject(ThemeService);
 
-        expect(service.theme()).toBe("dark");
+        expect(TestBed.inject(ThemeService).theme()).toBe("dark");
     });
 
-    it("should toggle and apply the theme to the document", () => {
+    it("should apply the theme to the document", () => {
+        systemPrefers(false);
         localStorage.setItem("theme", "light");
         const service = TestBed.inject(ThemeService);
 
         service.toggle();
         TestBed.tick();
 
-        expect(service.theme()).toBe("dark");
         expect(document.documentElement.dataset["theme"]).toBe("dark");
-        expect(localStorage.getItem("theme")).toBe("dark");
     });
 });
