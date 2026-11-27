@@ -12,7 +12,6 @@ import { RouterLink } from "@angular/router";
 
 import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
 import { Icon } from "../../shared/icon/icon";
-import { ThemeToggle } from "../../shared/theme-toggle/theme-toggle";
 import type { IconName } from "../../shared/icon/icons";
 
 interface Reason {
@@ -51,7 +50,7 @@ interface Step {
 // Page d'accueil publique : choisir entre se connecter et créer sa boutique
 @Component({
     selector: "app-landing",
-    imports: [RouterLink, Icon, NgTemplateOutlet, ThemeToggle],
+    imports: [RouterLink, Icon, NgTemplateOutlet],
     templateUrl: "./landing.html",
     styleUrl: "./landing.css",
     host: { "[class.animated]": "animated" },

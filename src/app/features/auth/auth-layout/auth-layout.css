@@ -82,6 +82,12 @@
     font-size: var(--fs-caption);
 }
 
+.bar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .home {
     display: inline-flex;
     align-items: center;
@@ -207,7 +213,7 @@ footer {
     }
 
     .brand,
-    .home {
+    .bar-actions {
         pointer-events: auto;
     }
 
@@ -215,10 +221,13 @@ footer {
         margin-left: var(--gutter);
     }
 
-    .home {
+    .bar-actions {
         justify-self: center;
         justify-content: flex-end;
         width: min(440px, calc(100% - 2 * var(--gutter)));
+    }
+
+    .home {
         padding-right: 0;
     }
 
