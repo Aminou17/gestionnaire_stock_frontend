@@ -2,13 +2,13 @@
 
 :host {
     /* Hauteur d'un champ */
-    --field-h: 48px;
+    --field-h: 44px;
     /* Coins communs aux champs et au bouton, proches de ceux du bouton Google */
     --field-radius: 6px;
-    --field-font: 16px;
-    --field-label: 14px;
-    /* Place du libellé au-dessus du champ : 20 px de texte et 6 px d'écart */
-    --label-h: 26px;
+    --field-font: 15px;
+    --field-label: 13px;
+    /* Place du libellé au-dessus du champ : 18 px de texte et 6 px d'écart */
+    --label-h: 24px;
     /* Bord assez foncé pour voir le champ sur le blanc, dans les deux thèmes */
     --field-border: color-mix(in srgb, var(--text-muted) 70%, var(--surface));
     display: grid;
@@ -18,12 +18,19 @@
 
 form {
     display: grid;
-    gap: 16px;
+    gap: 14px;
+}
+
+/* iPhone zoome la page sur un champ en dessous de 16 px : on garde 16 px là seulement */
+@supports (-webkit-touch-callout: none) {
+    :host {
+        --field-font: 16px;
+    }
 }
 
 @media (min-width: 1024px) {
     :host {
-        --field-h: 44px;
+        --field-h: 42px;
     }
 }
 
@@ -94,7 +101,7 @@ form {
     margin-bottom: 6px;
     font-size: var(--field-label);
     font-weight: var(--fw-medium);
-    line-height: 20px;
+    line-height: 18px;
 }
 
 ::ng-deep app-phone-field .input {
@@ -125,10 +132,9 @@ form {
     transition: color 0.15s;
 }
 
-/* L'exemple gris a la taille du texte tapé ; 16 px évite aussi le zoom de l'iPhone */
 .float .input::placeholder,
 ::ng-deep app-phone-field .input::placeholder {
-    font-size: 16px;
+    font-size: inherit;
 }
 
 .float > app-icon ::ng-deep svg {
@@ -147,8 +153,7 @@ form {
     border-radius: var(--field-radius);
     border-color: var(--field-border);
     background: var(--surface);
-    /* 16 px au moins : en dessous, iPhone zoome la page à l'ouverture du clavier */
-    font-size: 16px;
+    font-size: var(--field-font);
     transition:
         background 0.15s,
         border-color 0.15s,
@@ -185,7 +190,7 @@ form {
     color: var(--text);
     font-size: var(--field-label);
     font-weight: var(--fw-medium);
-    line-height: 20px;
+    line-height: 18px;
     pointer-events: none;
 }
 

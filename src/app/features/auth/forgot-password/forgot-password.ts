@@ -25,12 +25,16 @@ export class ForgotPassword {
     // La réponse est la même que l'adresse ait un compte ou non
     sent = signal(false);
 
+    // Les erreurs ne s'affichent qu'après le premier appui sur le bouton, pas en passant d'un champ à l'autre
+    protected submitted = signal(false);
+
     hasError(code: string) {
         const control = this.form.controls.email;
-        return control.touched && control.hasError(code);
+        return this.submitted() && control.hasError(code);
     }
 
     submit() {
+        this.submitted.set(true);
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;

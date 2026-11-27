@@ -37,12 +37,16 @@ export class Login {
     error = signal<string | null>(null);
     showPassword = signal(false);
 
+    // Les erreurs ne s'affichent qu'après le premier appui sur le bouton, pas en passant d'un champ à l'autre
+    protected submitted = signal(false);
+
     hasError(field: "email" | "password", code: string) {
         const control = this.form.controls[field];
-        return control.touched && control.hasError(code);
+        return this.submitted() && control.hasError(code);
     }
 
     submit() {
+        this.submitted.set(true);
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;

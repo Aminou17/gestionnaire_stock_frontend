@@ -101,14 +101,17 @@ export class Register {
             });
     }
 
+    // Les erreurs ne s'affichent qu'après le premier appui sur le bouton, pas en passant d'un champ à l'autre
+    protected submitted = signal(false);
+
     hasError(field: Field, code: string) {
         const control = this.form.controls[field];
-        return control.touched && control.hasError(code);
+        return this.submitted() && control.hasError(code);
     }
 
     isInvalid(field: Field) {
         const control = this.form.controls[field];
-        return control.touched && control.invalid;
+        return this.submitted() && control.invalid;
     }
 
     // Le pays vient de l'indicatif ; la ville et le reste se complètent dans les paramètres
@@ -140,6 +143,7 @@ export class Register {
     }
 
     submit() {
+        this.submitted.set(true);
         const google = this.google();
         if (google) {
             this.submitGoogle(google.credential);

@@ -62,6 +62,13 @@ describe("Login", () => {
         expect(component).toBeTruthy();
     });
 
+    it("should not show any error when leaving an empty field before sending", async () => {
+        component.form.markAllAsTouched();
+        fixture.detectChanges();
+
+        expect(fixture.nativeElement.querySelector(".field-error")).toBeNull();
+    });
+
     it("should show validation errors and not call the API when the form is empty", async () => {
         await submit();
 

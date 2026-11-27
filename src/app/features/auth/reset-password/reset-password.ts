@@ -49,13 +49,16 @@ export class ResetPassword {
     expired = signal(false);
     done = signal(false);
     showPassword = signal(false);
+    // Les erreurs ne s'affichent qu'après le premier appui sur le bouton, pas en passant d'un champ à l'autre
+    protected submitted = signal(false);
 
     invalid(name: "newPassword" | "confirmPassword") {
         const control = this.form.controls[name];
-        return control.touched && control.invalid;
+        return this.submitted() && control.invalid;
     }
 
     submit() {
+        this.submitted.set(true);
         if (this.form.invalid) {
             this.form.markAllAsTouched();
             return;
