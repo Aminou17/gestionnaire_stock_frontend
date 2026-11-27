@@ -1,54 +1,27 @@
 /* Bouton principal : vert une fois la boutique créée */
 .btn-primary.btn-block.success {
-    background: linear-gradient(180deg, #22c55e, #15803d);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        0 8px 20px rgba(21, 128, 61, 0.28);
+    background: var(--success);
     opacity: 1;
 }
 
-.reassurance {
-    margin: -6px 0 0;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-/* Mention légale, discrète */
-.switch {
-    margin: 0;
-    padding-top: 6px;
-    border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 13px;
-}
-
-.switch a {
-    font-weight: var(--fw-semibold);
-    text-decoration: none;
-}
-
-.switch a:hover {
-    text-decoration: underline;
-}
-
+/* Mention légale, en petit tout en bas de la carte */
 .legal {
-    margin: -6px 0 0;
-    text-align: center;
+    margin: -8px 0 0;
     color: var(--text-muted);
-    font-size: 13px;
-    line-height: 1.4;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: center;
 }
 
 .legal a {
-    color: var(--text);
+    color: inherit;
     text-decoration: underline;
-    text-decoration-color: color-mix(in srgb, var(--text) 30%, transparent);
+    text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
     text-underline-offset: 2px;
 }
 
 .legal a:hover {
+    color: var(--text);
     text-decoration-color: currentColor;
 }
 
@@ -71,14 +44,14 @@
 .google-account {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     margin: 0;
-    padding: 0 6px 0 14px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    background: var(--surface-2, transparent);
+    padding: 0 4px 0 14px;
+    min-height: var(--field-h);
+    border-radius: var(--field-radius);
+    background: var(--soft-line);
     color: var(--text-muted);
-    font-size: var(--fs-body);
+    font-size: 14px;
 }
 
 .google-account span {
@@ -91,6 +64,8 @@
 }
 
 .google-account .text-link {
-    min-height: 40px;
-    font-size: 13px;
+    min-height: 36px;
+    padding: 0 10px;
+    color: var(--primary-text);
+    font-size: 14px;
 }

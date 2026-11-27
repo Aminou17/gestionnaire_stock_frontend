@@ -1,24 +1,18 @@
-/* Styles communs : connexion, inscription, mot de passe oublié et nouveau mot de passe */
+/* Styles communs : connexion, inscription, mot de passe oublié, nouveau mot de passe et code reçu */
 
 :host {
-    /* Hauteur d'un champ */
     --field-h: 44px;
-    /* Coins communs aux champs et au bouton, proches de ceux du bouton Google */
-    --field-radius: 6px;
+    --field-radius: 10px;
     --field-font: 15px;
-    --field-label: 13px;
-    /* Place du libellé au-dessus du champ : 18 px de texte et 6 px d'écart */
-    --label-h: 0px;
-    /* Bord assez foncé pour voir le champ sur le blanc, dans les deux thèmes */
-    --field-border: color-mix(in srgb, var(--text-muted) 70%, var(--surface));
+    /* Couleurs calculées depuis le thème : elles marchent en clair comme en sombre */
+    --field-border: color-mix(in srgb, var(--text) 15%, var(--surface));
+    --field-border-hover: color-mix(in srgb, var(--text) 28%, var(--surface));
+    --field-placeholder: color-mix(in srgb, var(--text) 45%, var(--surface));
+    --field-ring: color-mix(in srgb, var(--primary) 18%, transparent);
+    --soft-line: color-mix(in srgb, var(--text) 9%, var(--surface));
     display: grid;
-    gap: 10px;
-    animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-form {
-    display: grid;
-    gap: 14px;
+    gap: 20px;
+    animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 /* iPhone zoome la page sur un champ en dessous de 16 px : on garde 16 px là seulement */
@@ -28,53 +22,37 @@ form {
     }
 }
 
-@media (min-width: 1024px) {
-    :host {
-        --field-h: 42px;
-    }
+form {
+    display: grid;
+    gap: 12px;
 }
 
-/* Petit logo au-dessus du titre, sur ordinateur seulement (le bandeau de marque couvre le téléphone) */
-.mark {
-    display: none;
-    width: 44px;
-    height: 44px;
-    margin-bottom: 24px;
-    place-items: center;
-    border-radius: 14px;
-    background: linear-gradient(145deg, #3b82f6, #1d4ed8);
-    color: #fff;
-    box-shadow:
-        0 8px 20px rgba(37, 99, 235, 0.3),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-@media (min-width: 1024px) {
-    .mark {
-        display: none;
-    }
-}
+/* --- En-tête */
 
 .heading h1 {
-    margin: 0 0 4px;
-    font-size: 20px;
+    margin: 0;
+    font-size: 22px;
     font-weight: var(--fw-semibold);
     letter-spacing: -0.02em;
-    line-height: 1.2;
+    line-height: 1.25;
 }
 
 .heading p {
-    margin: 0;
+    margin: 6px 0 0;
     color: var(--text-muted);
     font-size: 14px;
-    line-height: 1.45;
+    line-height: 1.5;
+}
+
+.mark {
+    display: none;
 }
 
 /* Pastille d'état en haut des pages de mot de passe */
 .status {
     width: 44px;
     height: 44px;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
     display: grid;
     place-items: center;
     border-radius: 12px;
@@ -92,14 +70,19 @@ form {
     color: var(--warning);
 }
 
-/* Le numéro suit le même rythme que les autres champs */
-::ng-deep app-phone-field .field {
-    gap: 0;
+/* --- Champs : le nom du champ est écrit dedans, le libellé reste pour les lecteurs d'écran */
+
+.group {
+    display: grid;
+    gap: 6px;
 }
 
-/* Le nom du champ est écrit dans le champ ; le libellé reste pour les lecteurs d'écran */
-::ng-deep app-phone-field .field > span,
-.float label {
+.float {
+    position: relative;
+}
+
+.float label,
+:host ::ng-deep app-phone-field .field > span {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -108,75 +91,42 @@ form {
     white-space: nowrap;
 }
 
-::ng-deep app-phone-field .input {
-    height: var(--field-h);
-    border-color: var(--field-border);
-    border-radius: var(--field-radius);
-}
-
-/* Champ : libellé fixe au-dessus, icône dans le champ (le libellé suit l'input dans le HTML) */
-.group {
-    display: grid;
-    gap: 2px;
-}
-
-.float {
-    position: relative;
-    padding-top: var(--label-h);
-}
-
-.float > app-icon {
-    display: flex;
-    position: absolute;
-    left: 14px;
-    top: calc(var(--label-h) + var(--field-h) / 2);
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
-    transition: color 0.15s;
-}
-
-.float .input::placeholder,
-::ng-deep app-phone-field .input::placeholder {
-    font-size: inherit;
-}
-
-.float > app-icon ::ng-deep svg {
-    width: 16px;
-    height: 16px;
-}
-
-.float:focus-within > app-icon {
-    color: var(--primary);
-}
-
-/* Champ en creux : fond teinté, filet très léger, anneau bleu au focus */
 .float .input {
     height: var(--field-h);
     padding: 0 14px;
+    border: 1px solid var(--field-border);
     border-radius: var(--field-radius);
-    border-color: var(--field-border);
     background: var(--surface);
+    color: var(--text);
     font-size: var(--field-font);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     transition:
-        background 0.15s,
         border-color 0.15s,
         box-shadow 0.15s;
 }
 
-/* Un champ avec icône laisse la place à l'icône */
+.float .input::placeholder,
+:host ::ng-deep app-phone-field .input::placeholder {
+    color: var(--field-placeholder);
+    opacity: 1;
+}
+
 .float:has(> app-icon) .input {
     padding-left: 42px;
 }
 
+.float.has-toggle .input,
+.float.has-status .input {
+    padding-right: 48px;
+}
+
 .float .input:hover:not(:focus, .invalid) {
-    border-color: var(--text-muted);
+    border-color: var(--field-border-hover);
 }
 
 .float .input:focus {
     border-color: var(--primary);
-    background: var(--surface);
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent);
+    box-shadow: 0 0 0 3px var(--field-ring);
 }
 
 .float .input.invalid {
@@ -184,21 +134,58 @@ form {
 }
 
 .float .input.invalid:focus {
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--danger) 14%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 16%, transparent);
 }
 
-.float.has-toggle .input,
-.float.has-status .input {
-    padding-right: calc(var(--field-h) + 4px);
+.float > app-icon {
+    display: flex;
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--field-placeholder);
+    pointer-events: none;
+    transition: color 0.15s;
 }
 
-/* Pastille verte quand le champ est valide */
+.float > app-icon ::ng-deep svg {
+    width: 18px;
+    height: 18px;
+}
+
+.float:focus-within > app-icon {
+    color: var(--primary);
+}
+
+/* Œil du mot de passe */
+.toggle {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--field-placeholder);
+    cursor: pointer;
+}
+
+.toggle:hover {
+    background: var(--soft-line);
+    color: var(--text);
+}
+
+/* Pastille verte quand l'e-mail est complet */
 .valid-mark {
     position: absolute;
-    right: 16px;
-    top: calc(var(--label-h) + var(--field-h) / 2);
-    width: 20px;
-    height: 20px;
+    right: 14px;
+    top: 50%;
+    width: 18px;
+    height: 18px;
     display: grid;
     place-items: center;
     transform: translateY(-50%);
@@ -209,26 +196,115 @@ form {
     animation: pop 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.4) both;
 }
 
-.toggle {
-    position: absolute;
-    right: 2px;
-    top: var(--label-h);
-    width: var(--field-h);
+/* Numéro : l'indicatif et le numéro forment un seul champ, séparés par un trait */
+:host ::ng-deep app-phone-field .field {
+    gap: 0;
+}
+
+:host ::ng-deep app-phone-field .phone-inputs {
+    grid-template-columns: 76px 1fr;
+    gap: 0;
     height: var(--field-h);
-    display: grid;
-    place-items: center;
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius);
+    background: var(--surface);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    overflow: hidden;
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+:host ::ng-deep app-phone-field .phone-inputs:hover:not(:focus-within, :has(.invalid)) {
+    border-color: var(--field-border-hover);
+}
+
+:host ::ng-deep app-phone-field .phone-inputs:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--field-ring);
+}
+
+:host ::ng-deep app-phone-field .phone-inputs:has(.invalid) {
+    border-color: var(--danger);
+}
+
+:host ::ng-deep app-phone-field .phone-inputs .input {
+    height: 100%;
     border: 0;
-    border-radius: 10px;
+    border-radius: 0;
     background: transparent;
+    box-shadow: none;
+    font-size: var(--field-font);
+}
+
+:host ::ng-deep app-phone-field .phone-inputs .input:focus {
+    box-shadow: none;
+}
+
+:host ::ng-deep app-phone-field .code {
+    border-right: 1px solid var(--field-border);
+}
+
+:host ::ng-deep app-phone-field .code .input {
+    padding-left: 26px;
+}
+
+:host ::ng-deep app-phone-field .plus {
+    left: 14px;
+    color: var(--text);
+    font-size: var(--field-font);
+}
+
+/* --- Messages sous les champs */
+
+.field-error {
+    color: var(--danger);
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.hint {
     color: var(--text-muted);
-    cursor: pointer;
+    font-size: 13px;
 }
 
-.toggle:hover {
-    background: var(--primary-soft);
-    color: var(--primary-text);
+.alert {
+    border-radius: var(--field-radius);
+    padding: 10px 14px;
+    font-size: 14px;
+    line-height: 1.45;
 }
 
+/* --- Boutons */
+
+.btn.btn-block {
+    height: var(--field-h);
+    min-height: var(--field-h);
+    margin-top: 4px;
+    border-radius: var(--field-radius);
+    font-size: 15px;
+    font-weight: var(--fw-semibold);
+}
+
+.btn-primary.btn-block {
+    background: var(--primary);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    transition:
+        background 0.15s,
+        transform 0.1s;
+}
+
+.btn-primary.btn-block:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.btn-primary.btn-block:active:not(:disabled) {
+    transform: scale(0.99);
+}
+
+.btn:focus-visible,
 .toggle:focus-visible,
 .text-link:focus-visible,
 .forgot:focus-visible {
@@ -236,63 +312,9 @@ form {
     outline-offset: 2px;
 }
 
-.field-error {
-    color: var(--danger);
-    font-size: var(--fs-small);
-}
-
-.hint {
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-}
-
-.alert {
-    border-radius: 12px;
-    padding: 12px 16px;
-    font-size: var(--fs-body);
-    line-height: 1.45;
-}
-
-/* Boutons larges, plus hauts que les boutons de l'application */
-.btn.btn-block {
-    height: var(--field-h);
-    min-height: var(--field-h);
-    border-radius: var(--field-radius);
-    font-size: 15px;
-}
-
-.btn-primary.btn-block {
-    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        0 8px 20px rgba(37, 99, 235, 0.28);
-    transition:
-        transform 0.15s,
-        box-shadow 0.15s,
-        filter 0.15s;
-}
-
-.btn-primary.btn-block:hover:not(:disabled) {
-    background: linear-gradient(180deg, #3b82f6, #1d4ed8);
-    filter: brightness(1.06);
-    transform: translateY(-1px);
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.25),
-        0 12px 24px rgba(37, 99, 235, 0.34);
-}
-
-.btn-primary.btn-block:active:not(:disabled) {
-    transform: none;
-}
-
-.btn:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
-}
-
 .text-link {
     justify-self: center;
-    min-height: 44px;
+    min-height: 40px;
     display: inline-flex;
     align-items: center;
     gap: 4px;
@@ -301,42 +323,43 @@ form {
     background: none;
     color: var(--text-muted);
     font: inherit;
-    font-size: var(--fs-body);
-    cursor: pointer;
+    font-size: 14px;
     font-weight: var(--fw-medium);
     text-decoration: none;
+    cursor: pointer;
 }
 
 .text-link:hover {
     color: var(--text);
 }
 
-.forgot:hover {
-    text-decoration: underline;
-}
-
 .forgot {
-    font-size: var(--fs-body);
+    color: var(--primary-text);
+    font-size: 14px;
     font-weight: var(--fw-medium);
     text-decoration: none;
 }
 
-/* Séparateur avec un mot au milieu */
-.or {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
+.forgot:hover {
+    text-decoration: underline;
 }
 
-.or::before,
-.or::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: color-mix(in srgb, var(--border) 70%, transparent);
+/* Lien vers l'autre formulaire, en bas de la carte */
+.switch {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+}
+
+.switch a {
+    color: var(--primary-text);
+    font-weight: var(--fw-semibold);
+    text-decoration: none;
+}
+
+.switch a:hover {
+    text-decoration: underline;
 }
 
 @keyframes pop {
@@ -349,20 +372,12 @@ form {
 @keyframes rise {
     from {
         opacity: 0;
-        transform: translateY(8px);
+        transform: translateY(6px);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    :host {
-        animation: none;
-    }
-
-    .float > app-icon,
-    .btn-primary.btn-block {
-        transition: none;
-    }
-
+    :host,
     .valid-mark {
         animation: none;
     }

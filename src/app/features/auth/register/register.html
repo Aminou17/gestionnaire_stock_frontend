@@ -5,6 +5,11 @@
         <p>Il ne reste que votre numéro.</p>
     } @else {
         <h1>Créer ma boutique</h1>
+        @if (free()) {
+            <p class="reassurance">Gratuit, sans carte bancaire.</p>
+        } @else {
+            <p>Prête en quelques minutes.</p>
+        }
     }
 </div>
 
@@ -163,7 +168,9 @@
                     Le mot de passe ne doit pas dépasser 72 caractères.
                 </small>
             }
-            <app-password-hint [password]="form.controls.password.value" />
+            @if (!isInvalid("password")) {
+                <app-password-hint [password]="form.controls.password.value" />
+            }
         </div>
     }
 
@@ -181,10 +188,6 @@
             Créer ma boutique
         }
     </button>
-
-    @if (free()) {
-        <p class="reassurance">Gratuit, sans carte bancaire</p>
-    }
 </form>
 
 <p class="switch">Déjà un compte ? <a routerLink="/login">Se connecter</a></p>

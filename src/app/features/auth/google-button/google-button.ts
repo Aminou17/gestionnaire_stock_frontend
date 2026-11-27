@@ -1,6 +1,7 @@
 import { Component, ElementRef, OnInit, inject, input, output, signal } from "@angular/core";
 
 import { GoogleButtonText, GoogleSignIn } from "../../../core/auth/google-sign-in";
+import { ThemeService } from "../../../core/theme/theme.service";
 
 // Bouton « Continuer avec Google » ; rien ne s'affiche si Google n'est pas configuré
 @Component({
@@ -25,8 +26,8 @@ import { GoogleButtonText, GoogleSignIn } from "../../../core/auth/google-sign-i
         .or {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin: 4px 0 0;
+            gap: 14px;
+            margin: 18px 0 0;
             color: var(--text-muted);
             font-size: 13px;
         }
@@ -36,13 +37,14 @@ import { GoogleButtonText, GoogleSignIn } from "../../../core/auth/google-sign-i
             content: "";
             flex: 1;
             height: 1px;
-            background: var(--border);
+            background: color-mix(in srgb, var(--text) 10%, var(--surface));
         }
     `,
 })
 export class GoogleButton implements OnInit {
     private google = inject(GoogleSignIn);
     private host = inject<ElementRef<HTMLElement>>(ElementRef);
+    private theme = inject(ThemeService);
 
     text = input<GoogleButtonText>("continue_with");
     credential = output<string>();
@@ -61,7 +63,8 @@ export class GoogleButton implements OnInit {
 
         id.renderButton(target, {
             type: "standard",
-            theme: "outline",
+            // En mode sombre, un bouton noir plutôt qu'un bloc blanc dans la carte
+            theme: this.theme.theme() === "dark" ? "filled_black" : "outline",
             size: "large",
             shape: "rectangular",
             text: this.text(),

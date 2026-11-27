@@ -1,4 +1,4 @@
-/* Se souvenir de moi et mot de passe oublié sur la même ligne */
+/* Rester connecté et mot de passe oublié sur la même ligne */
 .row {
     display: flex;
     align-items: center;
@@ -7,58 +7,57 @@
 }
 
 .remember {
-    white-space: nowrap;
     display: flex;
     align-items: center;
     gap: 8px;
     min-height: 36px;
     color: var(--text-muted);
-    font-size: var(--fs-body);
+    font-size: 14px;
+    white-space: nowrap;
     cursor: pointer;
 }
 
 .remember input {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
     margin: 0;
     accent-color: var(--primary);
 }
 
-@media (max-width: 360px) {
+@media (max-width: 340px) {
     .row {
         flex-wrap: wrap;
     }
 }
 
-/* Lien vers l'inscription, sous le formulaire */
-.signup {
-    margin: 0;
-    padding-top: 0;
-    border-top: 1px solid var(--border);
-    color: var(--text-muted);
-    font-size: 13px;
-    text-align: center;
-}
-
-.signup a {
+/* Aide pour qui n'arrive plus à entrer : discrète, mais toujours visible */
+.help-link {
     display: inline-flex;
     align-items: center;
-    min-height: 44px;
-    padding: 0 4px;
-    color: var(--primary-text);
-    font-weight: var(--fw-semibold);
+    justify-content: center;
+    gap: 6px;
+    justify-self: center;
+    min-height: 32px;
+    margin-top: -10px;
+    color: var(--text-muted);
+    font-size: 13px;
     text-decoration: none;
 }
 
-.signup a:hover {
-    text-decoration: underline;
+.help-link:hover {
+    color: var(--text);
+}
+
+.help-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
 
 /* Champ du code : gros chiffres espacés, comme dans les applications bancaires */
 .code-input {
-    height: 64px;
+    height: 60px;
     border-radius: 12px;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: var(--fw-semibold);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.4em;
@@ -80,41 +79,18 @@
     align-items: center;
     gap: 4px;
     width: fit-content;
-    min-height: 44px;
+    min-height: 36px;
     margin: 0 0 -8px;
     padding: 0;
     border: 0;
     background: none;
     color: var(--text-muted);
     font: inherit;
+    font-size: 14px;
     font-weight: var(--fw-medium);
     cursor: pointer;
 }
 
 .back:hover {
     color: var(--text);
-}
-
-/* Aide pour qui n'arrive plus à entrer : discrète, mais toujours visible */
-.help-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    min-height: 32px;
-    margin-top: -12px;
-    color: var(--text-muted);
-    font-size: var(--fs-small);
-    font-weight: var(--fw-medium);
-    text-decoration: none;
-}
-
-.help-link:hover {
-    color: var(--primary-text);
-    text-decoration: underline;
-}
-
-.help-link:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: 2px;
 }

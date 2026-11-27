@@ -57,15 +57,16 @@
     <div class="heading">
         <span class="mark" aria-hidden="true"><app-icon name="box" [size]="22" /></span>
         <h1>Content de vous revoir</h1>
+        <p>Connectez-vous pour retrouver votre boutique.</p>
     </div>
-
-    @if (error()) {
-        <div class="alert alert-error" role="alert">{{ error() }}</div>
-    }
 
     <app-google-button text="signin_with" (credential)="onGoogle($event)" />
 
     <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        @if (error()) {
+            <div class="alert alert-error" role="alert">{{ error() }}</div>
+        }
+
         <div class="group">
             <div class="float">
                 <app-icon name="mail" [size]="18" />
@@ -138,7 +139,7 @@
         </button>
     </form>
 
-    <p class="signup">
+    <p class="switch">
         Pas encore de compte ?
         <a routerLink="/register">Créer ma boutique</a>
     </p>
