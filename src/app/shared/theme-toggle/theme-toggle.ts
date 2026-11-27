@@ -15,7 +15,7 @@ import { Icon } from "../icon/icon";
             "
             (click)="theme.toggle()"
         >
-            <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="20" />
+            <app-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="18" />
         </button>
     `,
     styles: `
@@ -23,10 +23,10 @@ import { Icon } from "../icon/icon";
             display: grid;
             flex: none;
             place-items: center;
-            width: 44px;
-            height: 44px;
+            width: 36px;
+            height: 36px;
             border: 1px solid rgba(255, 255, 255, 0.22);
-            border-radius: 12px;
+            border-radius: 10px;
             background: rgba(255, 255, 255, 0.08);
             color: #fff;
             cursor: pointer;

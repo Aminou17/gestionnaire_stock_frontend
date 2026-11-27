@@ -510,8 +510,8 @@ h1 {
 /* en-tête : les pages défilent seules, 4 secondes chacune */
 .slides img {
     transition: none;
-    animation: slide 16s ease-in-out infinite;
-    animation-delay: calc(var(--i, 0) * 4s);
+    animation: slide 10s ease-in-out infinite;
+    animation-delay: calc(var(--i, 0) * 2.5s);
 }
 
 /* l'image entrante passe par-dessus la précédente, qui disparaît seulement une fois couverte :

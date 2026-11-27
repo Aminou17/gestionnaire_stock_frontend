@@ -1,0 +1,79 @@
+<app-page-header title="Envoi" section="Espace propriétaire" back="/owner/announcements" />
+
+@if (error()) {
+    <div class="alert alert-error" role="alert">{{ error() }}</div>
+}
+
+@if (sent.isLoading() && !sent.hasValue()) {
+    <div class="card block"><div class="skeleton line"></div></div>
+} @else if (sent.error()) {
+    <div class="alert alert-error" role="alert">Impossible de charger cet envoi.</div>
+} @else if (sent.hasValue()) {
+    @let item = sent.value();
+
+    <section class="card block">
+        <h2>{{ item.subject }}</h2>
+        <small class="muted">
+            {{ item.scheduled ? "Partira le" : "Envoyé le" }}
+            {{ item.send_at | date: "d MMMM y 'à' HH:mm" }}
+        </small>
+        <p class="body">{{ item.body }}</p>
+
+        <app-receipt-totals [announcement]="item" />
+
+        @if (item.scheduled) {
+            <div class="actions">
+                @if (confirming()) {
+                    <span>Annuler cet envoi ?</span>
+                    <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        [disabled]="busy()"
+                        (click)="cancel()"
+                    >
+                        Oui, annuler
+                    </button>
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="confirming.set(false)"
+                    >
+                        Non
+                    </button>
+                } @else {
+                    <a
+                        class="btn btn-outline btn-sm"
+                        [routerLink]="['/owner/announcements', item.id, 'edit']"
+                    >
+                        Modifier
+                    </a>
+                    <button
+                        type="button"
+                        class="btn btn-outline btn-sm"
+                        (click)="confirming.set(true)"
+                    >
+                        Annuler l'envoi
+                    </button>
+                }
+            </div>
+        }
+    </section>
+
+    <section class="card block">
+        <h2>Boutiques</h2>
+        <ul class="recipients">
+            @for (shop of item.recipients; track shop.shop_id) {
+                @let state = status(shop, item.scheduled);
+                <li>
+                    <a [routerLink]="['/owner/shops', shop.shop_id]">{{ shop.shop_name }}</a>
+                    <span class="badge" [ngClass]="'badge-' + state.badge">{{ state.label }}</span>
+                    @if (shop.thread_id) {
+                        <a class="reply" [routerLink]="['/owner/support', shop.thread_id]">
+                            Voir la réponse
+                        </a>
+                    }
+                </li>
+            }
+        </ul>
+    </section>
+}

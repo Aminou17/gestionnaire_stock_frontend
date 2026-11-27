@@ -15,13 +15,13 @@ import { ToastService } from "../../../shared/toast/toast.service";
 
 // Exemples de précision selon le motif choisi
 const PLACEHOLDERS: Record<string, string> = {
-    SUPPLIES: "Ex. Sachets et rouleau de ticket",
-    TRANSPORT: "Ex. Taxi pour livrer un client",
-    FOOD: "Ex. Déjeuner de l'équipe",
-    SALARY: "Ex. Avance sur salaire de Moussa",
-    BILLS: "Ex. Facture d'électricité de novembre",
-    REPAIR: "Ex. Réparation de la porte",
-    OTHER: "Ex. Dépense exceptionnelle",
+    SUPPLIES: "Ex: Sachets et rouleau de ticket",
+    TRANSPORT: "Ex: Taxi pour livrer un client",
+    FOOD: "Ex: Déjeuner de l'équipe",
+    SALARY: "Ex: Avance sur salaire de Moussa",
+    BILLS: "Ex: Facture d'électricité de novembre",
+    REPAIR: "Ex: Réparation de la porte",
+    OTHER: "Ex: Dépense exceptionnelle",
 };
 
 import { BackLink, injectGoBack } from "../../../shared/back-link/back-link";

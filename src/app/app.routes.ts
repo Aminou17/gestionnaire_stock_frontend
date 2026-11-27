@@ -342,6 +342,12 @@ export const routes: Routes = [
                     ),
             },
             {
+                path: "messages",
+                title: "Messages",
+                canActivate: [adminGuard],
+                loadComponent: () => import("./features/messages/messages").then((m) => m.Messages),
+            },
+            {
                 path: "support",
                 title: "Assistance",
                 data: { side: "user" },
@@ -522,6 +528,38 @@ export const routes: Routes = [
                 data: { side: "owner" },
                 loadComponent: () =>
                     import("./features/support/support-inbox").then((m) => m.SupportInbox),
+            },
+            {
+                path: "announcements",
+                title: "Envois",
+                loadComponent: () =>
+                    import("./features/owner/announcements/announcements").then(
+                        (m) => m.Announcements,
+                    ),
+            },
+            {
+                path: "announcements/new",
+                title: "Nouvel envoi",
+                loadComponent: () =>
+                    import("./features/owner/announcements/announcement-form/announcement-form").then(
+                        (m) => m.AnnouncementForm,
+                    ),
+            },
+            {
+                path: "announcements/:id",
+                title: "Envoi",
+                loadComponent: () =>
+                    import("./features/owner/announcements/announcement-page/announcement-page").then(
+                        (m) => m.AnnouncementPage,
+                    ),
+            },
+            {
+                path: "announcements/:id/edit",
+                title: "Modifier l'envoi",
+                loadComponent: () =>
+                    import("./features/owner/announcements/announcement-form/announcement-form").then(
+                        (m) => m.AnnouncementForm,
+                    ),
             },
             // Les demandes sans compte sont un onglet de la boîte de messages
             { path: "help", redirectTo: "support?onglet=sans-compte" },

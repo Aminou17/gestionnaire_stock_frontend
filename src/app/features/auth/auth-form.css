@@ -1,28 +1,30 @@
 /* Styles communs : connexion, inscription, mot de passe oublié et nouveau mot de passe */
 
 :host {
-    /* Hauteur d'un champ : confortable au doigt sur téléphone, plus compacte avec une souris */
-    --field-h: 44px;
+    /* Hauteur d'un champ */
+    --field-h: 48px;
+    /* Coins communs aux champs et au bouton, proches de ceux du bouton Google */
+    --field-radius: 6px;
     --field-font: 16px;
-    --field-label: var(--fs-body);
+    --field-label: 14px;
+    /* Place du libellé au-dessus du champ : 20 px de texte et 6 px d'écart */
+    --label-h: 26px;
+    /* Bord assez foncé pour voir le champ sur le blanc, dans les deux thèmes */
+    --field-border: color-mix(in srgb, var(--text-muted) 70%, var(--surface));
     display: grid;
-    gap: 20px;
+    gap: 10px;
     animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
-}
-
-@media (min-width: 1024px) {
-    :host {
-        --field-h: 42px;
-    }
-
-    .heading h1 {
-        font-size: 26px;
-    }
 }
 
 form {
     display: grid;
-    gap: 12px;
+    gap: 16px;
+}
+
+@media (min-width: 1024px) {
+    :host {
+        --field-h: 44px;
+    }
 }
 
 /* Petit logo au-dessus du titre, sur ordinateur seulement (le bandeau de marque couvre le téléphone) */
@@ -47,8 +49,8 @@ form {
 }
 
 .heading h1 {
-    margin: 0 0 8px;
-    font-size: 22px;
+    margin: 0 0 4px;
+    font-size: 20px;
     font-weight: var(--fw-semibold);
     letter-spacing: -0.02em;
     line-height: 1.2;
@@ -57,18 +59,18 @@ form {
 .heading p {
     margin: 0;
     color: var(--text-muted);
-    font-size: 15px;
-    line-height: 1.5;
+    font-size: 14px;
+    line-height: 1.45;
 }
 
 /* Pastille d'état en haut des pages de mot de passe */
 .status {
-    width: 56px;
-    height: 56px;
-    margin-bottom: 16px;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 10px;
     display: grid;
     place-items: center;
-    border-radius: 18px;
+    border-radius: 12px;
     background: var(--primary-soft);
     color: var(--primary);
 }
@@ -83,26 +85,55 @@ form {
     color: var(--warning);
 }
 
+/* Le numéro suit le même rythme que les autres champs */
+::ng-deep app-phone-field .field {
+    gap: 0;
+}
+
+::ng-deep app-phone-field .field > span {
+    margin-bottom: 6px;
+    font-size: var(--field-label);
+    font-weight: var(--fw-medium);
+    line-height: 20px;
+}
+
+::ng-deep app-phone-field .input {
+    height: var(--field-h);
+    border-color: var(--field-border);
+    border-radius: var(--field-radius);
+}
+
 /* Champ : libellé fixe au-dessus, icône dans le champ (le libellé suit l'input dans le HTML) */
 .group {
     display: grid;
-    gap: 6px;
+    gap: 2px;
 }
 
 .float {
     position: relative;
-    padding-top: 24px;
+    padding-top: var(--label-h);
 }
 
 .float > app-icon {
-    display: block;
+    display: flex;
     position: absolute;
     left: 14px;
-    top: calc(24px + var(--field-h) / 2);
+    top: calc(var(--label-h) + var(--field-h) / 2);
     transform: translateY(-50%);
     color: var(--text-muted);
     pointer-events: none;
     transition: color 0.15s;
+}
+
+/* L'exemple gris a la taille du texte tapé ; 16 px évite aussi le zoom de l'iPhone */
+.float .input::placeholder,
+::ng-deep app-phone-field .input::placeholder {
+    font-size: 16px;
+}
+
+.float > app-icon ::ng-deep svg {
+    width: 16px;
+    height: 16px;
 }
 
 .float:focus-within > app-icon {
@@ -113,8 +144,8 @@ form {
 .float .input {
     height: var(--field-h);
     padding: 0 14px;
-    border-radius: 10px;
-    border-color: var(--border);
+    border-radius: var(--field-radius);
+    border-color: var(--field-border);
     background: var(--surface);
     /* 16 px au moins : en dessous, iPhone zoome la page à l'ouverture du clavier */
     font-size: 16px;
@@ -129,8 +160,8 @@ form {
     padding-left: 42px;
 }
 
-.float .input:hover:not(:focus) {
-    border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+.float .input:hover:not(:focus, .invalid) {
+    border-color: var(--text-muted);
 }
 
 .float .input:focus {
@@ -149,10 +180,10 @@ form {
 
 .float label {
     position: absolute;
-    left: 2px;
+    left: 0;
     top: 0;
     color: var(--text);
-    font-size: var(--fs-body);
+    font-size: var(--field-label);
     font-weight: var(--fw-medium);
     line-height: 20px;
     pointer-events: none;
@@ -175,7 +206,7 @@ form {
 .valid-mark {
     position: absolute;
     right: 16px;
-    top: calc(24px + var(--field-h) / 2);
+    top: calc(var(--label-h) + var(--field-h) / 2);
     width: 20px;
     height: 20px;
     display: grid;
@@ -191,7 +222,7 @@ form {
 .toggle {
     position: absolute;
     right: 2px;
-    top: 24px;
+    top: var(--label-h);
     width: var(--field-h);
     height: var(--field-h);
     display: grid;
@@ -216,13 +247,11 @@ form {
 }
 
 .field-error {
-    padding-left: 4px;
     color: var(--danger);
     font-size: var(--fs-small);
 }
 
 .hint {
-    padding-left: 4px;
     color: var(--text-muted);
     font-size: var(--fs-small);
 }
@@ -236,9 +265,10 @@ form {
 
 /* Boutons larges, plus hauts que les boutons de l'application */
 .btn.btn-block {
-    height: 46px;
-    border-radius: 10px;
-    font-size: var(--fs-body);
+    height: var(--field-h);
+    min-height: var(--field-h);
+    border-radius: var(--field-radius);
+    font-size: 15px;
 }
 
 .btn-primary.btn-block {

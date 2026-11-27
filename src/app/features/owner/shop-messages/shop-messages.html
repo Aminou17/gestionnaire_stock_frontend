@@ -1,0 +1,49 @@
+<section class="card">
+    <div class="head">
+        <h2>Messages</h2>
+        <a
+            class="btn btn-outline btn-sm"
+            routerLink="/owner/announcements/new"
+            [queryParams]="{ shop: shopId() }"
+        >
+            Écrire
+        </a>
+    </div>
+
+    @if (history.error()) {
+        <p class="muted" role="alert">Impossible de charger les messages.</p>
+    } @else if (history.hasValue() && !history.value().length) {
+        <p class="muted">Aucun message envoyé à cette boutique.</p>
+    } @else if (history.hasValue()) {
+        <ul>
+            @for (entry of history.value(); track entry.id) {
+                @let state = status(entry, entry.scheduled);
+                <li>
+                    <div class="text">
+                        <strong>{{ entry.subject }}</strong>
+                        <small class="muted">
+                            {{ entry.send_at | date: "d MMM y 'à' HH:mm" }}
+                            @if (entry.kind !== "MANUAL") {
+                                · automatique
+                            }
+                        </small>
+                        @if (entry.received_at) {
+                            <small class="muted">
+                                Reçu le {{ entry.received_at | date: "d MMM 'à' HH:mm" }}
+                                @if (entry.read_at) {
+                                    · lu le {{ entry.read_at | date: "d MMM 'à' HH:mm" }}
+                                }
+                            </small>
+                        }
+                    </div>
+                    <span class="badge" [ngClass]="'badge-' + state.badge">{{ state.label }}</span>
+                    @if (entry.thread_id) {
+                        <a class="reply" [routerLink]="['/owner/support', entry.thread_id]">
+                            Voir la réponse
+                        </a>
+                    }
+                </li>
+            }
+        </ul>
+    }
+</section>

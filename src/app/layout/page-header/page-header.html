@@ -32,6 +32,9 @@
         <ng-content />
 
         @if (auth.isAdmin()) {
+            @if (!inMessages) {
+                <app-message-button />
+            }
             <app-notifications />
         }
 

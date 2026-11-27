@@ -126,7 +126,7 @@
                             type="text"
                             formControlName="address"
                             maxlength="200"
-                            placeholder="Ex. Marché Total, Brazzaville"
+                            placeholder="Ex: Marché Total, Brazzaville"
                             autocomplete="street-address"
                         />
                     </label>
@@ -138,7 +138,7 @@
                             type="tel"
                             formControlName="phone"
                             maxlength="40"
-                            placeholder="Ex. +242 06 123 45 67"
+                            placeholder="Ex: +242 06 123 45 67"
                             autocomplete="tel"
                         />
                     </label>
@@ -168,7 +168,7 @@
                         </div>
                         @if (invalid("defaultCountryCode")) {
                             <small class="field-error" role="alert">
-                                1 à 4 chiffres, sans 0 au début (ex. 242).
+                                1 à 4 chiffres, sans 0 au début (ex: 242).
                             </small>
                         }
                         @if (suggestedCode(); as code) {
@@ -238,7 +238,7 @@
                             rows="3"
                             formControlName="receiptFooter"
                             maxlength="300"
-                            placeholder="Ex. Échange possible sous 7 jours avec ce ticket."
+                            placeholder="Ex: Échange possible sous 7 jours avec ce ticket."
                         ></textarea>
                         <small class="muted counter"
                             >{{ values().receiptFooter.length }} / 300</small

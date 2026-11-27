@@ -19,14 +19,14 @@ import { GoogleButtonText, GoogleSignIn } from "../../../core/auth/google-sign-i
         .google {
             display: flex;
             justify-content: center;
-            min-height: 44px;
+            min-height: 40px;
         }
 
         .or {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin: 16px 0 0;
+            margin: 4px 0 0;
             color: var(--text-muted);
             font-size: 13px;
         }
@@ -63,7 +63,7 @@ export class GoogleButton implements OnInit {
             type: "standard",
             theme: "outline",
             size: "large",
-            shape: "pill",
+            shape: "rectangular",
             text: this.text(),
             locale: "fr",
             width,

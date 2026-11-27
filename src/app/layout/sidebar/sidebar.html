@@ -140,9 +140,13 @@
                         <app-icon name="user" [size]="16" />
                         Mon profil
                     </a>
-                    <a routerLink="/support" role="menuitem" (click)="close()">
+                    <a
+                        [routerLink]="auth.isAdmin() ? '/messages' : '/support'"
+                        role="menuitem"
+                        (click)="close()"
+                    >
                         <app-icon name="message" [size]="16" />
-                        Messages au support
+                        {{ auth.isAdmin() ? "Messages" : "Mes conversations" }}
                         @if (support.unread() > 0) {
                             <span class="count">{{ support.unread() }}</span>
                         }

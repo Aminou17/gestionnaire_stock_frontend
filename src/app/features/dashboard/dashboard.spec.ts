@@ -150,6 +150,7 @@ describe("Dashboard", () => {
                             value: signal(alerts),
                             hasValue: () => true,
                             isLoading: signal(false),
+                            status: signal("resolved"),
                             error: signal(undefined),
                             reload: () => {},
                         },
@@ -165,6 +166,28 @@ describe("Dashboard", () => {
     }
 
     const text = () => el.textContent!.replace(/\s/g, " ");
+
+    it("should refresh the figures every 30 seconds while the page is visible", async () => {
+        vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+        await render();
+        const reload = vi.spyOn(fixture.componentInstance, "reloadSummary");
+        const visibility = vi.spyOn(document, "visibilityState", "get");
+
+        visibility.mockReturnValue("hidden");
+        vi.advanceTimersByTime(30_000);
+        expect(reload).not.toHaveBeenCalled();
+
+        visibility.mockReturnValue("visible");
+        vi.advanceTimersByTime(30_000);
+        expect(reload).toHaveBeenCalledTimes(1);
+
+        fixture.destroy();
+        vi.advanceTimersByTime(30_000);
+        expect(reload).toHaveBeenCalledTimes(1);
+
+        visibility.mockRestore();
+        vi.useRealTimers();
+    });
 
     it("should show the stock cards to the admin", async () => {
         await render();

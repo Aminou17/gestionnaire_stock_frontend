@@ -81,7 +81,7 @@
             [linkParams]="{ period: 'today' }"
             icon="trending-up"
             [spark]="weekTrend()"
-            [loading]="dailySales.isLoading()"
+            [loading]="dailySales.status() === 'loading'"
             [error]="!!dailySales.error()"
             [value]="todaySales()?.netTotal ?? 0 | fcfa"
             [hint]="salesHint().text"
@@ -94,7 +94,7 @@
             [money]="true"
             link="/cash"
             icon="banknote"
-            [loading]="summary.isLoading()"
+            [loading]="summary.status() === 'loading'"
             [error]="!!summary.error()"
             [value]="cash()?.balance ?? 0 | fcfa"
             [hint]="cashHint()"
@@ -107,7 +107,7 @@
             link="/sales"
             [linkParams]="{ filter: 'unpaid' }"
             icon="wallet"
-            [loading]="salesPage.isLoading()"
+            [loading]="salesPage.status() === 'loading'"
             [error]="!!salesPage.error()"
             [value]="dueTotal() | fcfa"
             [hint]="dueHint()"
@@ -120,7 +120,7 @@
             icon="tag"
             link="/sales"
             [linkParams]="{ period: 'today' }"
-            [loading]="summary.isLoading()"
+            [loading]="summary.status() === 'loading'"
             [error]="!!summary.error() || profitMissing()"
             [value]="summaryData()?.todayProfit ?? 0 | fcfa"
         />
@@ -132,7 +132,7 @@
             [toggles]="true"
             (toggled)="secret.toggle()"
             icon="package"
-            [loading]="summary.isLoading()"
+            [loading]="summary.status() === 'loading'"
             [error]="!!summary.error()"
             [value]="secret.revealed() ? (summaryData()?.stockValue | fcfa) : '••••••••'"
         >
@@ -143,14 +143,14 @@
     <section class="grid">
         <app-sales-chart
             [days]="lastWeek()"
-            [loading]="dailySales.isLoading()"
+            [loading]="dailySales.status() === 'loading'"
             [error]="!!dailySales.error()"
             (retry)="dailySales.reload()"
         />
 
         <app-stock-alerts
             [alerts]="alertList()"
-            [loading]="stockAlerts.alerts.isLoading()"
+            [loading]="stockAlerts.alerts.status() === 'loading'"
             [error]="!!stockAlerts.alerts.error() && !alertsNotConfigured()"
             [notConfigured]="alertsNotConfigured()"
             link="/alerts"
@@ -161,14 +161,14 @@
     <section class="grid grid-bottom">
         <app-recent-sales
             [sales]="salesList()"
-            [loading]="sales.isLoading()"
+            [loading]="sales.status() === 'loading'"
             [error]="!!sales.error()"
             (retry)="sales.reload()"
         />
 
         <app-recent-activity
             [items]="activityList()"
-            [loading]="activity.isLoading()"
+            [loading]="activity.status() === 'loading'"
             [error]="!!activity.error()"
             (retry)="activity.reload()"
         />
@@ -181,7 +181,7 @@
         <app-manager-cash-banner
             class="m-cash"
             [cash]="cash()"
-            [loading]="summary.isLoading()"
+            [loading]="summary.status() === 'loading'"
             [error]="!!summary.error()"
             [expectedOpening]="expectedOpening()"
             (retry)="summary.reload()"
@@ -225,7 +225,7 @@
                 link="/sales"
                 icon="trending-up"
                 [spark]="weekTrend()"
-                [loading]="dailySales.isLoading()"
+                [loading]="dailySales.status() === 'loading'"
                 [error]="!!dailySales.error()"
                 [value]="todaySales()?.netTotal ?? 0 | fcfa"
                 [hint]="salesHint().text"
@@ -236,7 +236,7 @@
                 class="m-chart"
                 title="Mes ventes sur 7 jours"
                 [days]="lastWeek()"
-                [loading]="dailySales.isLoading()"
+                [loading]="dailySales.status() === 'loading'"
                 [error]="!!dailySales.error()"
                 (retry)="dailySales.reload()"
             />
@@ -247,7 +247,7 @@
             title="Mes dernières ventes"
             linkLabel="Voir tout"
             [sales]="salesList()"
-            [loading]="sales.isLoading()"
+            [loading]="sales.status() === 'loading'"
             [error]="!!sales.error()"
             (retry)="sales.reload()"
         />

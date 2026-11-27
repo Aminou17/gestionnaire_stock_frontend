@@ -2,10 +2,7 @@
     <header class="bar">
         <a class="brand" routerLink="/" aria-label="{{ productName }}, retour à l'accueil">
             <img class="brand-logo" src="/icons/icon-192.png" alt="" width="40" height="40" />
-            <span class="brand-text">
-                <span class="brand-name">{{ productName }}</span>
-                <span class="brand-sub">par {{ companyName }}</span>
-            </span>
+            <span class="brand-name">{{ productName }}</span>
         </a>
         <div class="bar-actions">
             <app-theme-toggle />
@@ -19,41 +16,64 @@
     <!-- Ordinateur seulement : la marque et un aperçu du logiciel à côté du formulaire -->
     <aside class="showcase" aria-label="Présentation de {{ productName }}">
         <div class="pitch">
-            <span class="eyebrow">Gestion de boutique</span>
-            <h2>Gérez votre boutique, <span>sans prise de tête.</span></h2>
+            <span class="eyebrow">Gestion de commerce</span>
+            <h2>Gérez votre boutique <span>facilement.</span></h2>
 
             <ul class="perks">
                 <li>
                     <span class="perk-icon"><app-icon name="cart" [size]="18" /></span>
                     <span>
-                        <strong>Vendez en quelques secondes</strong>
-                        Scan, espèces ou Mobile Money, ticket par WhatsApp.
+                        <strong>Vente rapide</strong>
+                        Encaissez et envoyez le reçu par WhatsApp.
+                    </span>
+                </li>
+                <li>
+                    <span class="perk-icon"><app-icon name="wifi" [size]="18" /></span>
+                    <span>
+                        <strong>Même sans internet</strong>
+                        Continuez à vendre quand le réseau coupe.
                     </span>
                 </li>
                 <li>
                     <span class="perk-icon"><app-icon name="box" [size]="18" /></span>
                     <span>
-                        <strong>Un stock toujours juste</strong>
-                        Chaque vente met à jour vos quantités et vos alertes.
+                        <strong>Stock bien suivi</strong>
+                        Soyez alerté dès que le stock est bas.
                     </span>
                 </li>
                 <li>
-                    <span class="perk-icon"><app-icon name="banknote" [size]="18" /></span>
+                    <span class="perk-icon"><app-icon name="users" [size]="18" /></span>
                     <span>
-                        <strong>Une caisse sans mauvaise surprise</strong>
-                        L'argent du tiroir, mouvement par mouvement.
+                        <strong>Crédits des clients</strong>
+                        Sachez qui vous doit, et combien.
+                    </span>
+                </li>
+                <li>
+                    <span class="perk-icon"><app-icon name="trending-up" [size]="18" /></span>
+                    <span>
+                        <strong>Votre bénéfice</strong>
+                        Voyez ce que vous gagnez chaque jour.
+                    </span>
+                </li>
+                <li>
+                    <span class="perk-icon"><app-icon name="phone" [size]="18" /></span>
+                    <span>
+                        <strong>Sur votre téléphone</strong>
+                        Suivez votre boutique en direct, même de loin.
                     </span>
                 </li>
             </ul>
         </div>
 
         <div class="devices" aria-hidden="true">
-            <div class="d-browser">
-                <div class="d-bar"><i></i><i></i><i></i></div>
-                <img src="/landing/pc-accueil.webp" alt="" width="2000" height="1250" />
-            </div>
-            <div class="d-phone">
-                <img src="/landing/tel-produits.webp" alt="" width="900" height="1948" />
+            <div class="stage">
+                <div class="d-browser">
+                    <div class="d-bar"><i></i><i></i><i></i></div>
+                    <img src="/landing/pc-accueil.webp" alt="" width="2000" height="1250" />
+                </div>
+                <div class="d-phone">
+                    <img src="/landing/tel-produits.webp" alt="" width="900" height="1948" />
+                </div>
             </div>
         </div>
     </aside>
@@ -66,9 +86,7 @@
 
             <footer>
                 <span>© {{ year }} {{ productName }} · {{ companyName }}</span>
-                <nav class="legal-links" aria-label="Informations légales">
-                    <a routerLink="/privacy">Confidentialité</a>
-                    <a routerLink="/terms">Conditions</a>
+                <nav class="legal-links" aria-label="Aide">
                     <a routerLink="/contact">Contact</a>
                 </nav>
             </footer>

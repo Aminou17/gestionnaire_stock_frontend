@@ -3,13 +3,16 @@ import {
     Component,
     DestroyRef,
     ElementRef,
+    computed,
     inject,
     signal,
     viewChild,
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
+import { toSignal } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 
+import { AuthService } from "../../core/auth/auth.service";
 import { COMPANY_NAME, PRODUCT_NAME } from "../../core/brand";
 import { Icon } from "../../shared/icon/icon";
 import type { IconName } from "../../shared/icon/icons";
@@ -82,12 +85,17 @@ export class Landing {
         "Installation comme une application",
     ];
 
-    atouts: Atout[] = [
-        { icon: "check", title: "Gratuit", text: "Sans carte bancaire" },
+    // La mention « gratuit » suit l'interrupteur des abonnements
+    protected free = toSignal(inject(AuthService).isFree(), { initialValue: false });
+
+    atouts = computed<Atout[]>(() => [
+        this.free()
+            ? { icon: "check", title: "Gratuit", text: "Sans carte bancaire" }
+            : { icon: "phone", title: "Sur téléphone", text: "Et aussi sur ordinateur" },
         { icon: "zap", title: "Sans internet", text: "Les ventes partent au retour du réseau" },
         { icon: "message", title: "Ticket WhatsApp", text: "Envoyé au client en un geste" },
         { icon: "banknote", title: "Mobile Money", text: "Avec les espèces, dans la caisse" },
-    ];
+    ]);
 
     reasons: Reason[] = [
         {

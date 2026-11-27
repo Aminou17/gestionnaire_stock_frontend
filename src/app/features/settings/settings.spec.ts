@@ -1,15 +1,10 @@
 import { signal } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
-import { of } from "rxjs";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { ThemeService } from "../../core/theme/theme.service";
-import { CashSettingsService } from "../../core/cash/cash-settings.service";
-import { SalesSettingsService } from "../../core/sales/sales-settings.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
-import { AlertEmailService } from "../../core/stock/alert-email.service";
-import { StockSettingsService } from "../../core/stock/stock-settings.service";
 import { Settings } from "./settings";
 
 describe("Settings", () => {
@@ -28,25 +23,8 @@ describe("Settings", () => {
                 {
                     provide: ShopSettingsService,
                     useValue: {
-                        getSettings: () => of({ name: "Chez Adam", logo: null }),
                         subscriptionsEnabled: () => subscriptionsOpen,
                     },
-                },
-                {
-                    provide: StockSettingsService,
-                    useValue: { getSettings: () => of({ id: 1, min_stock: 5 }) },
-                },
-                {
-                    provide: AlertEmailService,
-                    useValue: { getSettings: () => of({ enabled: true, sendHour: 8 }) },
-                },
-                {
-                    provide: CashSettingsService,
-                    useValue: { getSettings: () => of({ blind_close: false }) },
-                },
-                {
-                    provide: SalesSettingsService,
-                    useValue: { getSettings: () => of({ ticket_prefix: "" }) },
                 },
                 { provide: ThemeService, useValue: { theme, toggle } },
                 {
@@ -89,13 +67,13 @@ describe("Settings", () => {
 
         expect(hrefs()).toEqual([
             "/shop",
+            "/account",
+            "/password",
             "/stock",
             "/alert-email",
             "/cash",
             "/sales",
             "/export",
-            "/account",
-            "/password",
             "/contact",
             "/privacy",
             "/terms",
@@ -125,23 +103,12 @@ describe("Settings", () => {
         subscriptionsOpen = false;
     });
 
-    it("should show the state of the main settings for the administrator", async () => {
+    it("should show nothing on the right of the settings rows", async () => {
         await render();
 
-        const text = el.textContent!;
-
-        expect(text).not.toContain("Chez Adam");
-        expect(text).toContain("Seuil : 5");
-        expect(text).toContain("Activé à 08:00");
-        // Le logiciel est gratuit pendant le lancement : aucune trace d'abonnement
-        expect(text).not.toContain("Essai gratuit");
-        expect(text).not.toContain("Abonnement");
-    });
-
-    it("should not read the settings for the manager", async () => {
-        await render(false);
-
         expect(el.querySelector(".status")).toBeNull();
+        // Le logiciel est gratuit pendant le lancement : aucune trace d'abonnement
+        expect(el.textContent).not.toContain("Abonnement");
     });
 
     it("should ask to log out", async () => {

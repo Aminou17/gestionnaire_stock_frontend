@@ -23,9 +23,11 @@
     <section class="hero">
         <div class="wrap hero-inner">
             <div class="hero-text">
-                <span class="pill rise" style="--i: 0">
-                    <app-icon name="check" [size]="14" /> Totalement gratuit
-                </span>
+                @if (free()) {
+                    <span class="pill rise" style="--i: 0">
+                        <app-icon name="check" [size]="14" /> Totalement gratuit
+                    </span>
+                }
                 <h1 class="rise" style="--i: 1">Gérez votre boutique, sans prise de tête.</h1>
                 <p class="lead rise" style="--i: 2">
                     Ventes, caisse et stock au même endroit, avec des alertes avant la rupture.
@@ -80,7 +82,7 @@
 
     <section class="atouts" aria-label="Les points forts">
         <ul class="wrap atouts-list">
-            @for (atout of atouts; track atout.title; let i = $index) {
+            @for (atout of atouts(); track atout.title; let i = $index) {
                 <li class="atout reveal" [style.--i]="i">
                     <span class="atout-icon"><app-icon [name]="atout.icon" [size]="20" /></span>
                     <span class="atout-text">
@@ -311,7 +313,13 @@
     <section class="final">
         <div class="wrap final-inner reveal">
             <h2>Envie d'essayer ?</h2>
-            <p>Totalement gratuit, sans carte bancaire.</p>
+            <p>
+                {{
+                    free()
+                        ? "Totalement gratuit, sans carte bancaire."
+                        : "Créez votre boutique en quelques minutes."
+                }}
+            </p>
             <div #finalCta class="cta cta-center">
                 <a routerLink="/register" class="cta-main">
                     <app-icon name="store" [size]="20" />

@@ -2,7 +2,17 @@
     [title]="title()"
     [subtitle]="subtitle()"
     [section]="isOwner ? 'Espace propriétaire' : undefined"
-/>
+>
+    @if (isOwner) {
+        <a routerLink="/owner/announcements" class="btn btn-outline btn-sm">
+            Envois aux boutiques
+        </a>
+    }
+</app-page-header>
+
+@if (showTabs && !threadId() && !composing) {
+    <app-message-tabs />
+}
 
 <div
     class="inbox"
@@ -144,7 +154,7 @@
                         class="input"
                         name="subject"
                         maxlength="120"
-                        placeholder="Ex. Problème pour ouvrir la caisse"
+                        placeholder="Ex: Problème pour ouvrir la caisse"
                         [ngModel]="subject()"
                         (ngModelChange)="subject.set($event)"
                     />

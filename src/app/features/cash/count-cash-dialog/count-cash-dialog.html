@@ -88,7 +88,7 @@
                     step="1"
                     inputmode="numeric"
                     formControlName="actualAmount"
-                    placeholder="Ex. 50000"
+                    placeholder="Ex: 50000"
                     (input)="edited.set(true)"
                     [class.invalid]="
                         form.controls.actualAmount.touched && form.controls.actualAmount.invalid
@@ -131,7 +131,7 @@
                         maxlength="300"
                         autocomplete="off"
                         formControlName="closingNote"
-                        placeholder="Ex. erreur de monnaie rendue"
+                        placeholder="Ex: erreur de monnaie rendue"
                     />
                 </label>
             }

@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from "@angular/core";
+import { Component, DestroyRef, OnInit, inject } from "@angular/core";
 import { RouterOutlet } from "@angular/router";
 
+import { AnnouncementService } from "../../core/announcements/announcement.service";
 import { AuthService } from "../../core/auth/auth.service";
 import { LayoutService } from "../layout.service";
 import { LogoutDialog } from "../../shared/logout-dialog/logout-dialog";
@@ -51,10 +52,19 @@ export class MainLayout implements OnInit {
 
     private catalog = inject(OfflineCatalogService);
     private network = inject(NetworkService);
+    private announcements = inject(AnnouncementService);
+    private destroyRef = inject(DestroyRef);
 
     ngOnInit() {
         // Une 401 est déjà gérée par l'intercepteur
         this.auth.refreshUser().subscribe({ error: () => {} });
+
+        // Les nouveaux messages apparaissent sans recharger la page
+        if (this.auth.isAdmin()) {
+            this.announcements.refreshUnread();
+            const timer = setInterval(() => this.announcements.refreshUnread(), 60_000);
+            this.destroyRef.onDestroy(() => clearInterval(timer));
+        }
 
         // Catalogue gardé dès l'ouverture : la vente marche même si la coupure arrive avant
         if (!this.auth.isOwner() && this.network.online()) {

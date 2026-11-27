@@ -33,12 +33,12 @@ describe("AuthLayout", () => {
         expect(links).toEqual(["/", "/"]);
     });
 
-    it("should link to the legal pages once, in the page footer", async () => {
+    it("should keep only the contact link in the footer", async () => {
         const page = await render();
         const links = Array.from(page.querySelectorAll(".legal-links a")).map((link) =>
             link.getAttribute("href"),
         );
 
-        expect(links).toEqual(["/privacy", "/terms", "/contact"]);
+        expect(links).toEqual(["/contact"]);
     });
 });

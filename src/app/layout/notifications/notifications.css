@@ -264,12 +264,6 @@ h3 {
 }
 
 @media (max-width: 767px) {
-    .icon-btn {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-    }
-
     .dot {
         top: 1px;
         right: 1px;

@@ -2,13 +2,9 @@
     <span class="mark" aria-hidden="true"><app-icon name="box" [size]="22" /></span>
     @if (google(); as account) {
         <h1>Bienvenue {{ account.firstName }}</h1>
-        <p>Dernière étape : votre boutique. Votre compte Google est prêt.</p>
-    } @else if (step() === 1) {
-        <h1>Créer ma boutique</h1>
-        <p>Prête en une minute. Vous pourrez tout modifier ensuite.</p>
+        <p>Il ne reste que votre numéro.</p>
     } @else {
-        <h1>Votre compte</h1>
-        <p>Vous serez l'administrateur de {{ previewName() }}.</p>
+        <h1>Créer ma boutique</h1>
     }
 </div>
 
@@ -19,17 +15,7 @@
         <button type="button" class="text-link" (click)="leaveGoogle()">Changer</button>
     </p>
 } @else {
-    @if (step() === 1) {
-        <app-google-button text="signup_with" (credential)="onGoogle($event)" />
-    }
-}
-
-@if (!google()) {
-    <div class="progress" role="img" [attr.aria-label]="'Étape ' + step() + ' sur 2'">
-        <span class="bar on"></span>
-        <span class="bar" [class.on]="step() === 2"></span>
-        <small>Étape {{ step() }} sur 2</small>
-    </div>
+    <app-google-button text="signup_with" (credential)="onGoogle($event)" />
 }
 
 <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
@@ -55,326 +41,148 @@
         </div>
     }
 
-    @if (step() === 1 || google()) {
-        <div class="panel" [class.from-left]="direction() === 'back'">
-            <div class="group">
-                <div class="float">
-                    <app-icon name="store" [size]="18" />
-                    <input
-                        id="register-shopName"
-                        class="input"
-                        type="text"
-                        formControlName="shopName"
-                        autocomplete="organization"
-                        placeholder="Ex. Chez Fatou"
-                        maxlength="80"
-                        [class.invalid]="isInvalid('shopName')"
-                        [attr.aria-invalid]="isInvalid('shopName')"
-                    />
-                    <label for="register-shopName">Nom de la boutique</label>
-                </div>
-                @if (hasError("shopName", "required")) {
-                    <small class="field-error" role="alert">
-                        Le nom de la boutique est obligatoire.
-                    </small>
-                }
-            </div>
-
-            <div class="group">
-                <app-phone-field
-                    formControlName="phone"
-                    label="Téléphone de la boutique"
-                    [initialCode]="defaultCode"
-                    [showCountry]="false"
-                    [invalid]="isInvalid('phone') || phoneStatus() === 'taken'"
-                />
-                @if (phoneStatus() === "taken") {
-                    <small class="field-error" role="alert">
-                        {{ phoneMessage() }}
-                        <a routerLink="/login">Vous avez déjà un compte ?</a>
-                    </small>
-                } @else if (hasError("phone", "required")) {
-                    <small class="field-error" role="alert">
-                        Le numéro de téléphone est obligatoire.
-                    </small>
-                } @else if (isInvalid("phone")) {
-                    <small class="field-error" role="alert">Le numéro n'est pas valide.</small>
-                } @else if (phoneStatus() === "checking") {
-                    <small class="hint">Vérification du numéro…</small>
-                } @else if (phoneStatus() === "free") {
-                    <small class="hint ok">Numéro disponible.</small>
-                }
-            </div>
-
-            <div class="places">
-                <div class="group">
-                    <div class="float no-icon">
-                        <input
-                            id="register-country"
-                            class="input"
-                            type="text"
-                            formControlName="country"
-                            autocomplete="country-name"
-                            placeholder="Ex. Burkina Faso"
-                            list="register-countries"
-                            maxlength="80"
-                            [class.invalid]="isInvalid('country')"
-                            [attr.aria-invalid]="isInvalid('country')"
-                        />
-                        <label for="register-country">Pays</label>
-                        <datalist id="register-countries">
-                            @for (name of countries; track name) {
-                                <option [value]="name"></option>
-                            }
-                        </datalist>
-                    </div>
-                    @if (isInvalid("country")) {
-                        <small class="field-error" role="alert">Obligatoire.</small>
-                    }
-                </div>
-
-                <div class="group">
-                    <div class="float no-icon">
-                        <input
-                            id="register-city"
-                            class="input"
-                            type="text"
-                            formControlName="city"
-                            autocomplete="address-level2"
-                            placeholder="Ex. Bobo-Dioulasso"
-                            maxlength="80"
-                            [class.invalid]="isInvalid('city')"
-                            [attr.aria-invalid]="isInvalid('city')"
-                        />
-                        <label for="register-city">Ville</label>
-                    </div>
-                    @if (isInvalid("city")) {
-                        <small class="field-error" role="alert">Obligatoire.</small>
-                    }
-                </div>
-            </div>
-
-            <div class="group">
+    @if (!google()) {
+        <div class="group">
+            <div class="float">
+                <app-icon name="user" [size]="18" />
                 <input
-                    #logoInput
-                    class="visually-hidden"
-                    type="file"
-                    accept="image/png,image/jpeg"
-                    tabindex="-1"
-                    aria-label="Logo de la boutique"
-                    (change)="onLogoChosen($event)"
+                    id="register-name"
+                    aria-required="true"
+                    class="input"
+                    type="text"
+                    formControlName="adminName"
+                    autocomplete="name"
+                    placeholder="Ex: Fatou Ouédraogo"
+                    maxlength="50"
+                    [class.invalid]="isInvalid('adminName')"
+                    [attr.aria-invalid]="isInvalid('adminName')"
                 />
-                <div
-                    class="drop"
-                    [class.dragging]="dragging()"
-                    [class.has-logo]="logo()"
-                    (dragover)="onDragOver($event)"
-                    (dragleave)="dragging.set(false)"
-                    (drop)="onDrop($event)"
+                <label for="register-name"
+                    >Votre nom <span class="required-mark" aria-hidden="true">*</span></label
                 >
-                    <button type="button" class="drop-main" (click)="logoInput.click()">
-                        <span class="drop-icon">
-                            @if (logo(); as logoUrl) {
-                                <img [src]="logoUrl" alt="Aperçu du logo" />
-                            } @else {
-                                <app-icon name="upload" [size]="20" />
-                            }
-                        </span>
-                        <span class="drop-text">
-                            @if (logo()) {
-                                <strong>Logo ajouté</strong>
-                                <small>Touchez pour le changer</small>
-                            } @else {
-                                <strong>Ajouter un logo</strong>
-                                <small> PNG ou JPEG, facultatif </small>
-                            }
-                        </span>
-                    </button>
-                    @if (logo()) {
-                        <button type="button" class="btn btn-outline btn-sm" (click)="removeLogo()">
-                            Retirer
-                        </button>
-                    }
-                </div>
-                @if (logoError()) {
-                    <small class="field-error" role="alert">{{ logoError() }}</small>
-                }
             </div>
-        </div>
-
-        @if (google()) {
-            <button
-                type="submit"
-                class="btn btn-primary btn-block"
-                [disabled]="loading() || done()"
-            >
-                @if (loading()) {
-                    <span class="spinner"></span> Création…
-                } @else {
-                    Créer ma boutique
-                }
-            </button>
-        } @else {
-            <button type="submit" class="btn btn-primary btn-block">
-                Continuer
-                <app-icon name="chevron-right" [size]="18" />
-            </button>
-        }
-    } @else {
-        <div class="panel" [class.from-left]="direction() === 'back'">
-            <div class="names">
-                <div class="group">
-                    <div class="float no-icon">
-                        <input
-                            id="register-firstName"
-                            class="input"
-                            type="text"
-                            formControlName="firstName"
-                            autocomplete="given-name"
-                            maxlength="50"
-                            [class.invalid]="isInvalid('firstName')"
-                            [attr.aria-invalid]="isInvalid('firstName')"
-                        />
-                        <label for="register-firstName">Prénom</label>
-                    </div>
-                    @if (isInvalid("firstName")) {
-                        <small class="field-error" role="alert">Obligatoire.</small>
-                    }
-                </div>
-
-                <div class="group">
-                    <div class="float no-icon">
-                        <input
-                            id="register-lastName"
-                            class="input"
-                            type="text"
-                            formControlName="lastName"
-                            autocomplete="family-name"
-                            maxlength="50"
-                            [class.invalid]="isInvalid('lastName')"
-                            [attr.aria-invalid]="isInvalid('lastName')"
-                        />
-                        <label for="register-lastName">Nom</label>
-                    </div>
-                    @if (isInvalid("lastName")) {
-                        <small class="field-error" role="alert">Obligatoire.</small>
-                    }
-                </div>
-            </div>
-
-            <div class="group">
-                <div class="float has-status">
-                    <app-icon name="mail" [size]="18" />
-                    <input
-                        id="register-email"
-                        class="input"
-                        type="email"
-                        formControlName="email"
-                        autocomplete="email"
-                        placeholder="vous@exemple.com"
-                        [class.invalid]="isInvalid('email')"
-                        [attr.aria-invalid]="isInvalid('email')"
-                    />
-                    <label for="register-email">Adresse e-mail</label>
-                    @if (form.controls.email.valid) {
-                        <span class="valid-mark" aria-hidden="true">
-                            <app-icon name="check" [size]="12" />
-                        </span>
-                    }
-                </div>
-                @if (hasError("email", "required")) {
-                    <small class="field-error" role="alert"
-                        >L'adresse e-mail est obligatoire.</small
-                    >
-                } @else if (hasError("email", "email") || hasError("email", "pattern")) {
-                    <small class="field-error" role="alert"
-                        >L'adresse e-mail n'est pas valide.</small
-                    >
-                }
-            </div>
-
-            <div class="group">
-                <div class="float has-toggle">
-                    <app-icon name="key" [size]="18" />
-                    <input
-                        id="register-password"
-                        class="input"
-                        [type]="showPassword() ? 'text' : 'password'"
-                        formControlName="password"
-                        autocomplete="new-password"
-                        [class.invalid]="isInvalid('password')"
-                        [attr.aria-invalid]="isInvalid('password')"
-                    />
-                    <label for="register-password">Mot de passe</label>
-                    <button
-                        type="button"
-                        class="toggle"
-                        [attr.aria-pressed]="showPassword()"
-                        [attr.aria-label]="
-                            showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
-                        "
-                        (click)="showPassword.set(!showPassword())"
-                    >
-                        <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="18" />
-                    </button>
-                </div>
-                @if (hasError("password", "required")) {
-                    <small class="field-error" role="alert">Le mot de passe est obligatoire.</small>
-                } @else if (hasError("password", "minlength")) {
-                    <small class="field-error" role="alert">
-                        Le mot de passe doit contenir au moins 8 caractères.
-                    </small>
-                } @else if (hasError("password", "maxlength")) {
-                    <small class="field-error" role="alert">
-                        Le mot de passe ne doit pas dépasser 72 caractères.
-                    </small>
-                }
-                <app-password-strength [password]="form.controls.password.value" />
-            </div>
-
-            <div class="group">
-                <div class="float">
-                    <app-icon name="check" [size]="18" />
-                    <input
-                        id="register-confirm"
-                        class="input"
-                        [type]="showPassword() ? 'text' : 'password'"
-                        formControlName="confirmPassword"
-                        autocomplete="new-password"
-                        [class.invalid]="
-                            isInvalid('confirmPassword') ||
-                            (form.controls.confirmPassword.touched && form.hasError('mismatch'))
-                        "
-                    />
-                    <label for="register-confirm">Confirmer le mot de passe</label>
-                </div>
-                @if (form.controls.confirmPassword.touched && form.hasError("mismatch")) {
-                    <small class="field-error" role="alert">
-                        Les deux mots de passe ne sont pas identiques.
-                    </small>
-                }
-            </div>
-        </div>
-
-        <button
-            type="submit"
-            class="btn btn-primary btn-block"
-            [class.success]="done()"
-            [disabled]="loading() || done()"
-        >
-            @if (done()) {
-                <app-icon name="check" [size]="18" /> Boutique créée
-            } @else if (loading()) {
-                <span class="spinner"></span> Création…
-            } @else {
-                Créer ma boutique
+            @if (isInvalid("adminName")) {
+                <small class="field-error" role="alert">Votre nom est obligatoire.</small>
             }
-        </button>
+        </div>
+    }
 
-        <button type="button" class="text-link" [disabled]="loading() || done()" (click)="back()">
-            <app-icon name="chevron-left" [size]="16" />
-            Modifier la boutique
-        </button>
+    <div class="group">
+        <app-phone-field
+            formControlName="phone"
+            label="Numéro de téléphone"
+            autocomplete="tel-national"
+            placeholder="70 12 34 56"
+            [required]="true"
+            [initialCode]="defaultCode"
+            [showCountry]="false"
+            [invalid]="isInvalid('phone') || phoneStatus() === 'taken'"
+        />
+        @if (phoneStatus() === "taken") {
+            <small class="field-error" role="alert">
+                {{ phoneMessage() }}
+                <a routerLink="/login">Vous avez déjà un compte ?</a>
+            </small>
+        } @else if (hasError("phone", "required")) {
+            <small class="field-error" role="alert">
+                Le numéro de téléphone est obligatoire.
+            </small>
+        } @else if (isInvalid("phone")) {
+            <small class="field-error" role="alert">Le numéro n'est pas valide.</small>
+        }
+    </div>
+
+    @if (!google()) {
+        <div class="group">
+            <div class="float has-status">
+                <app-icon name="mail" [size]="18" />
+                <input
+                    id="register-email"
+                    aria-required="true"
+                    class="input"
+                    type="email"
+                    formControlName="email"
+                    autocomplete="email"
+                    placeholder="vous@exemple.com"
+                    [class.invalid]="isInvalid('email')"
+                    [attr.aria-invalid]="isInvalid('email')"
+                />
+                <label for="register-email"
+                    >Adresse e-mail <span class="required-mark" aria-hidden="true">*</span></label
+                >
+                @if (form.controls.email.valid) {
+                    <span class="valid-mark" aria-hidden="true">
+                        <app-icon name="check" [size]="12" />
+                    </span>
+                }
+            </div>
+            @if (hasError("email", "required")) {
+                <small class="field-error" role="alert">L'adresse e-mail est obligatoire.</small>
+            } @else if (hasError("email", "email") || hasError("email", "pattern")) {
+                <small class="field-error" role="alert">L'adresse e-mail n'est pas valide.</small>
+            }
+        </div>
+
+        <div class="group">
+            <div class="float has-toggle">
+                <app-icon name="key" [size]="18" />
+                <input
+                    id="register-password"
+                    aria-required="true"
+                    class="input"
+                    [type]="showPassword() ? 'text' : 'password'"
+                    formControlName="password"
+                    autocomplete="new-password"
+                    [class.invalid]="isInvalid('password')"
+                    [attr.aria-invalid]="isInvalid('password')"
+                />
+                <label for="register-password"
+                    >Mot de passe <span class="required-mark" aria-hidden="true">*</span></label
+                >
+                <button
+                    type="button"
+                    class="toggle"
+                    [attr.aria-pressed]="showPassword()"
+                    [attr.aria-label]="
+                        showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+                    "
+                    (click)="showPassword.set(!showPassword())"
+                >
+                    <app-icon [name]="showPassword() ? 'eye-off' : 'eye'" [size]="18" />
+                </button>
+            </div>
+            @if (hasError("password", "required")) {
+                <small class="field-error" role="alert">Le mot de passe est obligatoire.</small>
+            } @else if (hasError("password", "minlength")) {
+                <small class="field-error" role="alert">
+                    Le mot de passe doit contenir au moins 8 caractères.
+                </small>
+            } @else if (hasError("password", "maxlength")) {
+                <small class="field-error" role="alert">
+                    Le mot de passe ne doit pas dépasser 72 caractères.
+                </small>
+            }
+            <app-password-hint [password]="form.controls.password.value" />
+        </div>
+    }
+
+    <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [class.success]="done()"
+        [disabled]="loading() || done()"
+    >
+        @if (done()) {
+            <app-icon name="check" [size]="18" /> Boutique créée
+        } @else if (loading()) {
+            <span class="spinner"></span> Création…
+        } @else {
+            Créer ma boutique
+        }
+    </button>
+
+    @if (free()) {
+        <p class="reassurance">Gratuit, sans carte bancaire</p>
     }
 </form>
 

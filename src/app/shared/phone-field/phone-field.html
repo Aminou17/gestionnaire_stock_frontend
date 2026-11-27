@@ -2,6 +2,9 @@
     @if (label()) {
         <span [id]="labelId">
             {{ label() }}
+            @if (required()) {
+                <span class="required-mark" aria-hidden="true">*</span>
+            }
             @if (optional()) {
                 <small class="muted">(facultatif)</small>
             }
@@ -32,10 +35,11 @@
             type="tel"
             inputmode="tel"
             maxlength="20"
-            autocomplete="off"
+            [attr.autocomplete]="autocomplete()"
             [placeholder]="placeholder()"
             [attr.aria-label]="label() ? 'Numéro de téléphone' : ariaLabel()"
             [attr.aria-invalid]="invalid()"
+            [attr.aria-required]="required() || null"
             [value]="national()"
             [disabled]="disabled()"
             [class.invalid]="invalid()"

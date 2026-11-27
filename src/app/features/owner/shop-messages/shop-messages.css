@@ -1,0 +1,50 @@
+:host {
+    display: block;
+}
+
+section {
+    padding: 16px;
+}
+
+.head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+h2 {
+    margin: 0;
+    font-size: 17px;
+}
+
+p {
+    margin: 10px 0 0;
+}
+
+ul {
+    margin: 10px 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+}
+
+.text {
+    display: grid;
+    flex: 1;
+    min-width: 180px;
+    gap: 2px;
+}
+
+.reply {
+    color: var(--primary-text);
+    font-size: var(--fs-small);
+}

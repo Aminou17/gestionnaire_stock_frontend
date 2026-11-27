@@ -23,12 +23,16 @@ export class PhoneField implements ControlValueAccessor {
     // Sans libellé visible (caisse), le champ garde un libellé pour les lecteurs d'écran
     label = input("");
     optional = input(false);
+    // Affiche l'étoile des champs obligatoires
+    required = input(false);
     ariaLabel = input("Téléphone");
     invalid = input(false);
     showCountry = input(true);
     placeholder = input("Numéro");
     // Indicatif proposé tant que rien n'est choisi (inscription : la boutique n'existe pas encore)
     initialCode = input<string | null>(null);
+    // "off" par défaut : à la caisse, le numéro saisi est celui d'un client
+    autocomplete = input("off");
 
     protected labelId = `phone-field-${nextId++}`;
     protected disabled = signal(false);

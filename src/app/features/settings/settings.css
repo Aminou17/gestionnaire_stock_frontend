@@ -129,33 +129,15 @@
     font-size: var(--fs-small);
 }
 
-/* État du réglage, discret ; le point colore seulement le sens (actif ou non) */
+/* Abonnement : essai en cours ou rubrique à débloquer */
 .status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
     flex-shrink: 1;
     min-width: 0;
-    max-width: 40%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: var(--text-muted);
     font-size: var(--fs-small);
-}
-
-.status[data-state]::before {
-    content: "";
-    flex-shrink: 0;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--text-muted);
-    opacity: 0.5;
-}
-
-.status[data-state="locked"]::before {
-    display: none;
 }
 
 .status[data-state="locked"] {
@@ -164,11 +146,6 @@
     gap: 4px;
     color: var(--primary-text);
     font-weight: var(--fw-medium);
-}
-
-.status[data-state="ok"]::before {
-    background: var(--success);
-    opacity: 1;
 }
 
 .theme-toggle,
@@ -224,10 +201,4 @@
     margin: 0;
     text-align: center;
     font-size: var(--fs-caption);
-}
-
-@media (max-width: 420px) {
-    .status {
-        max-width: 32%;
-    }
 }

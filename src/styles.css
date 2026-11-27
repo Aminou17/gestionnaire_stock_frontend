@@ -938,3 +938,8 @@ app-owner-layout .card {
     font-display: swap;
     src: url("/fonts/ticket-mono-bold.ttf") format("truetype");
 }
+
+/* Étoile des champs obligatoires */
+.required-mark {
+    color: var(--danger);
+}

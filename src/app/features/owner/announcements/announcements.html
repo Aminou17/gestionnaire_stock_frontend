@@ -1,0 +1,48 @@
+<app-page-header title="Envois aux boutiques" section="Espace propriétaire" back="/owner/support">
+    <a routerLink="/owner/announcements/new" class="btn btn-primary btn-sm">
+        <app-icon name="plus" [size]="16" />
+        Nouveau
+    </a>
+</app-page-header>
+
+@if (sent.isLoading() && !sent.hasValue()) {
+    <div class="card loading">
+        <div class="skeleton line"></div>
+        <div class="skeleton line"></div>
+    </div>
+} @else if (sent.error()) {
+    <div class="alert alert-error" role="alert">
+        Impossible de charger les envois.
+        <button type="button" class="btn btn-outline btn-sm" (click)="sent.reload()">
+            Réessayer
+        </button>
+    </div>
+} @else if (!sent.value()?.length) {
+    <div class="card">
+        <app-empty-state
+            icon="message"
+            title="Aucun envoi"
+            text="Écrivez à une ou plusieurs boutiques."
+        />
+    </div>
+} @else {
+    <ul class="list">
+        @for (item of sent.value(); track item.id) {
+            <li>
+                <a class="card sent" [routerLink]="['/owner/announcements', item.id]">
+                    <span class="head">
+                        <strong>{{ item.subject }}</strong>
+                        @if (item.scheduled) {
+                            <span class="badge badge-violet">Programmé</span>
+                        }
+                    </span>
+                    <small class="muted">
+                        {{ item.scheduled ? "Partira le" : "Envoyé le" }}
+                        {{ item.send_at | date: "d MMMM y 'à' HH:mm" }}
+                    </small>
+                    <app-receipt-totals [announcement]="item" />
+                </a>
+            </li>
+        }
+    </ul>
+}

@@ -33,10 +33,9 @@
                             <span class="status" data-state="locked">
                                 <app-icon name="lock" [size]="13" /> Abonnement
                             </span>
-                        } @else if (statuses()[link.path]; as status) {
-                            <span class="status" [attr.data-state]="status.state ?? null">
-                                {{ status.text }}
-                            </span>
+                        } @else if (link.path === "/subscription") {
+                            <!-- La fiche d'abonnement n'est pas lue ici : toute boutique démarre par un essai -->
+                            <span class="status">Essai gratuit</span>
                         }
 
                         <app-icon name="chevron-right" [size]="18" class="chevron" />

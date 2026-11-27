@@ -10,6 +10,7 @@ import { PageHeader } from "../../../layout/page-header/page-header";
 import { ActionItem, ActionMenu } from "../../../shared/action-menu/action-menu";
 import { Icon } from "../../../shared/icon/icon";
 import { ShopAccount } from "../owned-shop.model";
+import { ShopMessages } from "../shop-messages/shop-messages";
 import { OwnerShopService } from "../owner-shop.service";
 import { accessStateOf } from "../trial-state";
 import { copyText } from "../../../shared/copy-text";
@@ -17,7 +18,16 @@ import { getBackLink } from "../../../core/back-link";
 
 @Component({
     selector: "app-shop-page",
-    imports: [DatePipe, NgClass, FormsModule, RouterLink, PageHeader, Icon, ActionMenu],
+    imports: [
+        DatePipe,
+        NgClass,
+        FormsModule,
+        RouterLink,
+        PageHeader,
+        Icon,
+        ActionMenu,
+        ShopMessages,
+    ],
     templateUrl: "./shop-page.html",
     styleUrls: ["../../../shared/dialog/dialog.css", "./shop-page.css"],
 })

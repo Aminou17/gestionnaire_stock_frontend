@@ -434,7 +434,7 @@ describe("NewSale", () => {
 
         [...el.querySelectorAll<HTMLButtonElement>(".method")][1].click();
         await fixture.whenStable();
-        expect(el.querySelector("input[placeholder^='Ex. PP']")).toBeNull();
+        expect(el.querySelector("input[placeholder^='Ex: PP']")).toBeNull();
         expect(submitBtn().disabled).toBe(false);
 
         expect(text()).not.toContain("tiroir-caisse");

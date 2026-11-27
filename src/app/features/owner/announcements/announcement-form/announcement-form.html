@@ -1,0 +1,131 @@
+<app-page-header
+    [title]="id ? 'Modifier l\'envoi' : 'Nouvel envoi'"
+    section="Espace propriétaire"
+    [back]="back"
+/>
+
+<form class="card" (submit)="$event.preventDefault(); submit()" novalidate>
+    @if (error()) {
+        <div class="alert alert-error" role="alert">{{ error() }}</div>
+    }
+
+    <label class="field">
+        <span>Sujet</span>
+        <input
+            class="input"
+            type="text"
+            name="subject"
+            maxlength="120"
+            [ngModel]="subject()"
+            (ngModelChange)="subject.set($event)"
+        />
+    </label>
+
+    <label class="field">
+        <span>Message</span>
+        <textarea
+            class="input"
+            rows="5"
+            name="body"
+            maxlength="2000"
+            [ngModel]="body()"
+            (ngModelChange)="body.set($event)"
+        ></textarea>
+    </label>
+
+    <label class="field">
+        <span>Bouton dans le message</span>
+        <select
+            class="input"
+            name="action"
+            [ngModel]="action()"
+            (ngModelChange)="action.set($event)"
+        >
+            <option value="">Aucun</option>
+            <option value="shop">Compléter ma boutique</option>
+            <option value="products">Voir mes produits</option>
+        </select>
+    </label>
+
+    <fieldset>
+        <legend>Destinataires</legend>
+        <label class="choice">
+            <input
+                type="radio"
+                name="audience"
+                [checked]="audience() === 'ALL'"
+                (change)="audience.set('ALL')"
+            />
+            Toutes les boutiques actives ({{ shops().length }})
+        </label>
+        <label class="choice">
+            <input
+                type="radio"
+                name="audience"
+                [checked]="audience() === 'SELECTED'"
+                (change)="audience.set('SELECTED')"
+            />
+            Choisir
+            @if (audience() === "SELECTED") {
+                ({{ selected().length }})
+            }
+        </label>
+
+        @if (audience() === "SELECTED") {
+            <ul class="shops">
+                @for (shop of shops(); track shop.id) {
+                    <li>
+                        <label class="choice">
+                            <input
+                                type="checkbox"
+                                [checked]="selected().includes(shop.id)"
+                                (change)="toggleShop(shop.id)"
+                            />
+                            {{ shop.name }}
+                        </label>
+                    </li>
+                }
+            </ul>
+        }
+    </fieldset>
+
+    <fieldset>
+        <legend>Envoi</legend>
+        <label class="choice">
+            <input
+                type="radio"
+                name="when"
+                [checked]="!scheduled()"
+                (change)="scheduled.set(false)"
+            />
+            Maintenant
+        </label>
+        <label class="choice">
+            <input
+                type="radio"
+                name="when"
+                [checked]="scheduled()"
+                (change)="scheduled.set(true)"
+            />
+            Programmer
+        </label>
+
+        @if (scheduled()) {
+            <input
+                class="input"
+                type="datetime-local"
+                name="sendAt"
+                aria-label="Date et heure d'envoi"
+                [ngModel]="sendAt()"
+                (ngModelChange)="sendAt.set($event)"
+            />
+        }
+    </fieldset>
+
+    <button type="submit" class="btn btn-primary" [disabled]="!ready() || saving()">
+        @if (saving()) {
+            <span class="spinner"></span>
+        }
+        {{ scheduled() ? "Programmer" : "Envoyer" }}
+    </button>
+</form>

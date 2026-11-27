@@ -19,6 +19,7 @@ describe("Register", () => {
         registerWithGoogle: ReturnType<typeof vi.fn>;
         googleSignup: ReturnType<typeof signal<GoogleSignup | null>>;
         isOwner: () => boolean;
+        isFree: ReturnType<typeof vi.fn>;
     };
     let router: Router;
 
@@ -30,6 +31,7 @@ describe("Register", () => {
             registerWithGoogle: vi.fn(() => of({})),
             googleSignup: signal<GoogleSignup | null>(null),
             isOwner: () => false,
+            isFree: vi.fn(() => of(true)),
         };
 
         await TestBed.configureTestingModule({
@@ -57,30 +59,37 @@ describe("Register", () => {
         await fixture.whenStable();
     }
 
-    async function goToAccountStep() {
+    function fillForm() {
         component.form.patchValue({
-            shopName: "Chez Fatou",
+            adminName: "Fatou Ouédraogo",
             phone: "+226 70 12 34 56",
-            country: "Burkina Faso",
-            city: "Ouagadougou",
-        });
-        await submit();
-    }
-
-    function fillAccount() {
-        component.form.patchValue({
-            firstName: "Fatou",
-            lastName: "Ouédraogo",
             email: "Fatou@Exemple.com",
             password: "Boutique-2026!",
-            confirmPassword: "Boutique-2026!",
         });
     }
 
-    it("should start on the shop step", () => {
-        expect(component.step()).toBe(1);
-        expect(el.textContent).toContain("Nom de la boutique");
-        expect(el.querySelector("#register-firstName")).toBeNull();
+    it("should ask only for the name, phone, email and password on one page", () => {
+        const labels = [...el.querySelectorAll("form label, form .field > span")]
+            .map((label) => label.textContent!.replace("*", "").trim())
+            .filter((label) => label !== "Site web");
+
+        expect(labels).toEqual([
+            "Votre nom",
+            "Numéro de téléphone",
+            "Adresse e-mail",
+            "Mot de passe",
+        ]);
+        expect(el.querySelector(".legal")?.textContent).toContain("conditions d'utilisation");
+    });
+
+    it("should say the software is free only while it is", async () => {
+        expect(el.querySelector(".reassurance")?.textContent).toContain("Gratuit");
+
+        auth.isFree.mockReturnValue(of(false));
+        const paid = TestBed.createComponent(Register);
+        await paid.whenStable();
+
+        expect(paid.nativeElement.querySelector(".reassurance")).toBeNull();
     });
 
     it("should warn while typing when the phone number is already used", async () => {
@@ -98,71 +107,30 @@ describe("Register", () => {
         expect(el.textContent).toContain("déjà utilisé");
     });
 
-    it("should stay on the shop step while the phone number is taken", async () => {
-        component.form.patchValue({
-            shopName: "Chez Fatou",
-            phone: "+226 70 12 34 56",
-            country: "Burkina Faso",
-            city: "Ouagadougou",
-        });
+    it("should not send while the phone number is taken", async () => {
+        fillForm();
         component.phoneStatus.set("taken");
         await submit();
 
-        expect(component.step()).toBe(1);
+        expect(auth.register).not.toHaveBeenCalled();
     });
 
-    it("should suggest the country from the phone code", () => {
-        component.form.controls.phone.setValue("+221 77 123 45 67");
-
-        expect(component.form.controls.country.value).toBe("Sénégal");
-    });
-
-    it("should not leave the shop step without a shop name", async () => {
-        await submit();
-
-        expect(component.step()).toBe(1);
-        expect(el.textContent).toContain("Le nom de la boutique est obligatoire.");
-    });
-
-    it("should show separate first and last name fields on the account step", async () => {
-        await goToAccountStep();
-
-        expect(component.step()).toBe(2);
-        expect(el.querySelector("#register-firstName")).not.toBeNull();
-        expect(el.querySelector("#register-lastName")).not.toBeNull();
-        expect(el.textContent).toContain("Chez Fatou");
-    });
-
-    it("should go back to the shop step and keep the typed values", async () => {
-        await goToAccountStep();
-
-        el.querySelector<HTMLButtonElement>(".text-link")!.click();
-        await fixture.whenStable();
-
-        expect(component.step()).toBe(1);
-        expect(component.form.controls.shopName.value).toBe("Chez Fatou");
-    });
-
-    it("should show errors and not call the API when the account is incomplete", async () => {
-        await goToAccountStep();
+    it("should show errors and not call the API when the form is empty", async () => {
         await submit();
 
         expect(auth.register).not.toHaveBeenCalled();
+        expect(el.textContent).toContain("Votre nom est obligatoire.");
         expect(el.textContent).toContain("Le mot de passe est obligatoire.");
     });
 
-    it("should register with first name, last name and a lowercase email", async () => {
-        await goToAccountStep();
-        fillAccount();
+    it("should register with the country of the phone code and a lowercase email", async () => {
+        fillForm();
         await submit();
 
         expect(auth.register).toHaveBeenCalledWith({
-            shopName: "Chez Fatou",
+            adminName: "Fatou Ouédraogo",
             phone: "+226 70 12 34 56",
             country: "Burkina Faso",
-            city: "Ouagadougou",
-            firstName: "Fatou",
-            lastName: "Ouédraogo",
             email: "fatou@exemple.com",
             password: "Boutique-2026!",
             website: "",
@@ -185,8 +153,7 @@ describe("Register", () => {
             ),
         );
 
-        await goToAccountStep();
-        fillAccount();
+        fillForm();
         await submit();
 
         expect(el.querySelector('[role="alert"]')?.textContent).toContain(
@@ -195,27 +162,14 @@ describe("Register", () => {
         expect(router.navigate).not.toHaveBeenCalled();
     });
 
-    it("should refuse the account when the two passwords differ", async () => {
-        await goToAccountStep();
-        fillAccount();
-        component.form.patchValue({ confirmPassword: "Autre-mot-2026" });
-        await submit();
-
-        expect(auth.register).not.toHaveBeenCalled();
-        expect(el.textContent).toContain("Les deux mots de passe ne sont pas identiques.");
-    });
-
-    it("should show the password strength while typing", async () => {
-        await goToAccountStep();
+    it("should validate the password rule while typing", async () => {
         component.form.patchValue({ password: "Boutique-2026!" });
         await fixture.whenStable();
 
-        expect(el.querySelector("app-password-strength")?.textContent).toContain("Excellent");
+        expect(el.querySelector("app-password-hint small")?.classList).toContain("met");
     });
 
     it("should tick the email only when it looks complete", async () => {
-        await goToAccountStep();
-
         component.form.patchValue({ email: "fatou@exemple" });
         await fixture.whenStable();
         expect(el.querySelector(".valid-mark")).toBeNull();
@@ -226,25 +180,12 @@ describe("Register", () => {
     });
 
     it("should show the success state on the button once the shop is created", async () => {
-        await goToAccountStep();
-        fillAccount();
+        fillForm();
         await submit();
 
         const button = el.querySelector<HTMLButtonElement>('button[type="submit"]')!;
         expect(button.textContent).toContain("Boutique créée");
         expect(button.disabled).toBe(true);
-    });
-
-    it("should light up the logo zone while a file is dragged over it", async () => {
-        const zone = el.querySelector(".drop")!;
-
-        zone.dispatchEvent(new Event("dragover", { cancelable: true }));
-        await fixture.whenStable();
-        expect(zone.classList).toContain("dragging");
-
-        zone.dispatchEvent(new Event("dragleave"));
-        await fixture.whenStable();
-        expect(zone.classList).not.toContain("dragging");
     });
 
     describe("with a Google account", () => {
@@ -259,33 +200,28 @@ describe("Register", () => {
             await fixture.whenStable();
         });
 
-        it("should only ask for the shop and show the Google address", () => {
+        it("should only ask for the phone number", () => {
             expect(el.textContent).toContain("Bienvenue Adam");
             expect(el.textContent).toContain("adam@example.com");
-            expect(el.querySelector("#register-shopName")).not.toBeNull();
+            expect(el.querySelector('input[type="tel"]')).not.toBeNull();
+            expect(el.querySelector("#register-name")).toBeNull();
+            expect(el.querySelector("#register-email")).toBeNull();
             expect(el.querySelector("#register-password")).toBeNull();
         });
 
-        it("should create the shop with the Google credential", async () => {
-            component.form.patchValue({
-                shopName: "Chez Adam",
-                phone: "+22670123456",
-                country: "Burkina Faso",
-                city: "Ouagadougou",
-            });
+        it("should create the shop with the Google credential and the phone", async () => {
+            component.form.patchValue({ phone: "+226 70 12 34 56" });
             await submit();
 
             expect(auth.registerWithGoogle).toHaveBeenCalledWith({
                 credential: "jeton-google",
-                shopName: "Chez Adam",
-                phone: "+22670123456",
+                phone: "+226 70 12 34 56",
                 country: "Burkina Faso",
-                city: "Ouagadougou",
             });
             expect(router.navigate).toHaveBeenCalledWith(["/dashboard"]);
         });
 
-        it("should not call the API when the shop is incomplete", async () => {
+        it("should not call the API without a phone number", async () => {
             await submit();
 
             expect(auth.registerWithGoogle).not.toHaveBeenCalled();

@@ -1,0 +1,88 @@
+<app-page-header title="Messages" />
+
+<app-message-tabs />
+
+@if (messages.isLoading() && !messages.hasValue()) {
+    <div class="card loading">
+        <div class="skeleton line"></div>
+        <div class="skeleton line"></div>
+    </div>
+} @else if (messages.error()) {
+    <div class="alert alert-error" role="alert">
+        Impossible de charger les messages.
+        <button type="button" class="btn btn-outline btn-sm" (click)="messages.reload()">
+            Réessayer
+        </button>
+    </div>
+} @else if (!messages.value()?.length) {
+    <div class="card">
+        <app-empty-state icon="message" title="Aucun message" />
+    </div>
+} @else {
+    <ul class="list">
+        @for (message of messages.value(); track message.id) {
+            <li class="card message" [class.unread]="!message.read_at">
+                <button
+                    type="button"
+                    class="head"
+                    [attr.aria-expanded]="openId() === message.id"
+                    (click)="toggle(message)"
+                >
+                    <span class="head-text">
+                        <strong>{{ message.subject }}</strong>
+                        <small class="muted">{{
+                            message.send_at | date: "d MMMM 'à' HH:mm"
+                        }}</small>
+                    </span>
+                    @if (!message.read_at) {
+                        <span class="badge badge-primary">Nouveau</span>
+                    } @else if (message.replied_at) {
+                        <span class="badge badge-success">Répondu</span>
+                    }
+                    <app-icon name="chevron-right" [size]="18" class="chevron" />
+                </button>
+
+                @if (openId() === message.id) {
+                    <div class="content">
+                        <p class="body">{{ message.body }}</p>
+
+                        @if (message.action; as action) {
+                            <a class="btn btn-primary btn-sm" [routerLink]="actions[action].link">
+                                {{ actions[action].label }}
+                            </a>
+                        }
+
+                        @if (message.thread_id) {
+                            <a class="thread-link" [routerLink]="['/support', message.thread_id]">
+                                Voir la conversation
+                            </a>
+                        } @else {
+                            <form class="reply" (submit)="$event.preventDefault(); send(message)">
+                                @if (error()) {
+                                    <div class="alert alert-error" role="alert">{{ error() }}</div>
+                                }
+                                <textarea
+                                    class="input"
+                                    rows="2"
+                                    maxlength="2000"
+                                    name="reply"
+                                    aria-label="Votre réponse"
+                                    placeholder="Répondre…"
+                                    [ngModel]="reply()"
+                                    (ngModelChange)="reply.set($event)"
+                                ></textarea>
+                                <button
+                                    type="submit"
+                                    class="btn btn-outline btn-sm"
+                                    [disabled]="!reply().trim() || sending()"
+                                >
+                                    Envoyer
+                                </button>
+                            </form>
+                        }
+                    </div>
+                }
+            </li>
+        }
+    </ul>
+}

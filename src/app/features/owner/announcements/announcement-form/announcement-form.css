@@ -1,0 +1,55 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+form {
+    display: grid;
+    gap: 16px;
+    max-width: 640px;
+    padding: 16px;
+}
+
+textarea.input {
+    height: auto;
+    padding-block: 10px;
+    resize: vertical;
+}
+
+fieldset {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+legend {
+    margin-bottom: 4px;
+    font-weight: var(--fw-semibold);
+}
+
+.choice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    cursor: pointer;
+}
+
+.choice input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary);
+}
+
+.shops {
+    max-height: 240px;
+    margin: 0;
+    padding: 4px 12px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    list-style: none;
+}

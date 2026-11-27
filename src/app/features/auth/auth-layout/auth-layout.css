@@ -49,7 +49,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 20px 20px 18px;
+    padding: 8px 16px 6px;
 }
 
 .brand {
@@ -67,19 +67,10 @@
     box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
 }
 
-.brand-text {
-    display: grid;
-}
-
 .brand-name {
     font-size: 18px;
     font-weight: var(--fw-bold);
     letter-spacing: -0.01em;
-}
-
-.brand-sub {
-    color: rgba(226, 232, 240, 0.7);
-    font-size: var(--fs-caption);
 }
 
 .bar-actions {
@@ -135,14 +126,14 @@
     flex-direction: column;
     align-items: center;
     width: 100%;
-    padding: 8px 16px calc(20px + env(safe-area-inset-bottom));
+    padding: 0 12px calc(8px + env(safe-area-inset-bottom));
 }
 
 .card {
     width: 100%;
     max-width: 420px;
     margin: auto 0;
-    padding: 24px 20px 20px;
+    padding: 12px 16px 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     background: var(--surface);
@@ -160,7 +151,7 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 4px 20px;
-    padding-top: 24px;
+    padding-top: 6px;
     color: rgba(226, 232, 240, 0.7);
     font-size: var(--fs-small);
     text-align: center;
@@ -176,7 +167,7 @@ footer {
 .legal-links a {
     display: inline-flex;
     align-items: center;
-    min-height: 36px;
+    min-height: 28px;
     color: inherit;
     text-decoration: none;
 }
@@ -189,8 +180,8 @@ footer {
 /* Tablette : carte un peu plus large et plus aérée */
 @media (min-width: 640px) and (max-width: 1023px) {
     .card {
-        max-width: 480px;
-        padding: 36px 36px 28px;
+        max-width: 458px;
+        padding: 28px 28px 22px;
     }
 }
 
@@ -208,7 +199,7 @@ footer {
         inset: 0 0 auto 0;
         display: grid;
         grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-        padding: 28px 0;
+        padding: 12px 0;
         pointer-events: none;
     }
 
@@ -238,8 +229,7 @@ footer {
         height: 100dvh;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        padding: 128px 0 0 var(--gutter);
+        padding: 112px 0 24px var(--gutter);
         overflow: hidden;
     }
 
@@ -274,8 +264,9 @@ footer {
 
     .perks {
         display: grid;
-        gap: 18px;
-        max-width: 460px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px 24px;
+        max-width: 680px;
         margin: 0;
         padding: 0;
         list-style: none;
@@ -309,19 +300,27 @@ footer {
         backdrop-filter: blur(6px);
     }
 
-    /* l'ordinateur déborde du bas et de la droite ; le téléphone se pose sur son coin, sans cacher le contenu.
+    /* Les captures prennent la place qui reste sous les arguments et rétrécissent avec elle, sans être coupées.
        Pas de rotation 3D : elle rend le texte des captures flou. */
     .devices {
         position: relative;
-        flex: none;
-        height: 340px;
-        margin-top: 24px;
+        flex: 1;
+        min-height: 0;
+        margin-top: 32px;
+        container-type: size;
+    }
+
+    /* La largeur suit aussi la hauteur disponible : 1.32 est le rapport largeur / hauteur de l'ensemble */
+    .stage {
+        position: relative;
+        width: min(100cqw, 132cqh);
+        aspect-ratio: 1.32;
     }
 
     .d-browser {
         position: absolute;
         left: 0;
-        bottom: -80px;
+        top: 0;
         width: 96%;
         overflow: hidden;
         border: 1px solid rgba(255, 255, 255, 0.16);
@@ -354,7 +353,7 @@ footer {
     .d-phone {
         position: absolute;
         right: 6%;
-        bottom: -150px;
+        bottom: 0;
         width: 24%;
         padding: 6px;
         border-radius: 26px;
@@ -372,15 +371,23 @@ footer {
         border-radius: 20px;
     }
 
+    /* Écran trop bas : des captures minuscules ne montrent plus rien */
+    @container (max-height: 220px) {
+        .stage {
+            display: none;
+        }
+    }
+
+    /* La place de l'en-tête et du pied de page est réservée : la carte ne passe jamais dessous */
     .content {
         justify-content: center;
-        padding: 0 var(--gutter);
+        padding: 64px var(--gutter) 52px;
     }
 
     .card {
         margin: 0;
         max-width: 440px;
-        padding: 36px 36px 28px;
+        padding: 24px 32px 20px;
     }
 
     footer {
@@ -389,6 +396,23 @@ footer {
         left: 0;
         right: 0;
         padding: 0 var(--gutter);
+    }
+}
+
+/* Portable peu haut : les marges se resserrent pour que la page tienne sans défiler */
+@media (min-width: 1024px) and (max-height: 720px) {
+    .content {
+        padding-top: 56px;
+        padding-bottom: 40px;
+    }
+
+    .card {
+        padding-top: 14px;
+        padding-bottom: 12px;
+    }
+
+    footer {
+        bottom: 8px;
     }
 }
 

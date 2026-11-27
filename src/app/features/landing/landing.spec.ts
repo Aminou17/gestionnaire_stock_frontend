@@ -1,15 +1,20 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { provideRouter } from "@angular/router";
+import { of } from "rxjs";
 
 import { Landing } from "./landing";
+import { AuthService } from "../../core/auth/auth.service";
 
 describe("Landing", () => {
     let fixture: ComponentFixture<Landing>;
 
-    async function render() {
+    async function render(free = true) {
         await TestBed.configureTestingModule({
             imports: [Landing],
-            providers: [provideRouter([])],
+            providers: [
+                provideRouter([]),
+                { provide: AuthService, useValue: { isFree: () => of(free) } },
+            ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(Landing);
@@ -30,6 +35,18 @@ describe("Landing", () => {
         expect(hero.querySelector("h1")!.textContent).toContain(
             "Gérez votre boutique, sans prise de tête.",
         );
+    });
+
+    it("should announce the software as free while subscriptions are off", async () => {
+        const page = await render();
+
+        expect(page.textContent).toContain("Totalement gratuit");
+    });
+
+    it("should not promise it is free once subscriptions are on", async () => {
+        const page = await render(false);
+
+        expect(page.textContent).not.toMatch(/gratuit/i);
     });
 
     it("should keep a sign in link in the header", async () => {

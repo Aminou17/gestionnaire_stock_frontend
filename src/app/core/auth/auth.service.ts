@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable, computed, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
-import { Observable, finalize, map, shareReplay, tap } from "rxjs";
+import { Observable, catchError, finalize, map, of, shareReplay, tap } from "rxjs";
 
 import { API_URL } from "../api.config";
 import { SecretValues } from "../../shared/secret/secret-values";
@@ -63,15 +63,11 @@ export interface RegisterResult {
 }
 
 export interface RegisterData {
-    shopName: string;
-    firstName: string;
-    lastName: string;
+    adminName: string;
     email: string;
     password: string;
     phone: string;
     country: string;
-    city: string;
-    logo?: string;
 }
 
 // Compte Google sans boutique : il reste à la créer (nom, téléphone, pays, ville)
@@ -84,11 +80,8 @@ export interface GoogleSignup {
 
 export interface GoogleRegisterData {
     credential: string;
-    shopName: string;
     phone: string;
     country: string;
-    city: string;
-    logo?: string;
 }
 
 @Injectable({ providedIn: "root" })
@@ -273,6 +266,14 @@ export class AuthService {
 
     resendCode(email: string) {
         return this.http.post<{ message: string }>(`${API_URL}/auth/resend-code`, { email });
+    }
+
+    // Le logiciel est-il gratuit en ce moment ? Sans réponse du serveur, rien n'est promis
+    isFree() {
+        return this.http.get<{ free: boolean }>(`${API_URL}/auth/offer`).pipe(
+            map((offer) => offer.free),
+            catchError(() => of(false)),
+        );
     }
 
     // Le numéro est-il déjà celui d'une autre boutique ?

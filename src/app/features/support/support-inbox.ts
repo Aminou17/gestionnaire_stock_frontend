@@ -10,7 +10,9 @@ import { SupportSide, SupportThread } from "../../core/support/support.model";
 import { HelpService } from "../../core/help/help.service";
 import { SupportService } from "../../core/support/support.service";
 import { HelpRequests } from "../owner/help-requests/help-requests";
+import { AuthService } from "../../core/auth/auth.service";
 import { PageHeader } from "../../layout/page-header/page-header";
+import { MessageTabs } from "../messages/message-tabs/message-tabs";
 import { BackLink } from "../../shared/back-link/back-link";
 import { EmptyState } from "../../shared/empty-state/empty-state";
 import { Icon } from "../../shared/icon/icon";
@@ -34,6 +36,7 @@ export const MAX_MESSAGE = 2000;
         Icon,
         EmptyState,
         HelpRequests,
+        MessageTabs,
     ],
     templateUrl: "./support-inbox.html",
     styleUrl: "./support-inbox.css",
@@ -48,6 +51,8 @@ export class SupportInbox {
 
     protected side: SupportSide = this.route.snapshot.data["side"];
     protected isOwner = this.side === "owner";
+    // Les onglets « nouvelles / conversations » sont pour l'administrateur d'une boutique
+    protected showTabs = !this.isOwner && inject(AuthService).isAdmin();
     protected base = this.isOwner ? "/owner/support" : "/support";
 
     // "new" ouvre le formulaire d'un nouveau message
@@ -116,11 +121,11 @@ export class SupportInbox {
     }
 
     protected title() {
-        return this.isOwner ? "Messages" : "Assistance";
+        return this.isOwner || this.showTabs ? "Messages" : "Assistance";
     }
 
     protected subtitle() {
-        return this.isOwner ? undefined : "Réponse en moins de 3 h en général";
+        return this.isOwner || this.showTabs ? undefined : "Réponse en moins de 3 h en général";
     }
 
     private fail(err: HttpErrorResponse) {

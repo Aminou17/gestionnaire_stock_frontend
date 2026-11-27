@@ -2,6 +2,7 @@ import { TestBed } from "@angular/core/testing";
 import { ActivatedRoute, provideRouter, Router } from "@angular/router";
 import { of } from "rxjs";
 
+import { AnnouncementService } from "../../core/announcements/announcement.service";
 import { AuthService } from "../../core/auth/auth.service";
 import { HelpService } from "../../core/help/help.service";
 import { SupportThread, SupportThreadDetail } from "../../core/support/support.model";
@@ -58,6 +59,7 @@ describe("SupportInbox", () => {
             sendMessage: vi.fn(() => of({})),
             setStatus: vi.fn(() => of({})),
             refreshUnread: vi.fn(),
+            unread: vi.fn(() => 0),
         };
 
         await TestBed.configureTestingModule({
@@ -65,6 +67,7 @@ describe("SupportInbox", () => {
             providers: [
                 provideRouter([]),
                 { provide: SupportService, useValue: service },
+                { provide: AnnouncementService, useValue: { unread: () => 2 } },
                 {
                     provide: HelpService,
                     useValue: {
@@ -101,6 +104,20 @@ describe("SupportInbox", () => {
         fixture.detectChanges();
         return fixture;
     };
+
+    it("réunit les nouvelles et les conversations de l'administrateur dans la même boîte", async () => {
+        const fixture = await render({ side: "user" });
+        const tabs = fixture.nativeElement.querySelector("app-message-tabs");
+
+        expect(tabs.textContent).toContain("Boutiki");
+        expect(tabs.textContent).toContain("Mes conversations");
+    });
+
+    it("n'affiche pas ces onglets au propriétaire", async () => {
+        const fixture = await render({ side: "owner" });
+
+        expect(fixture.nativeElement.querySelector("app-message-tabs")).toBeNull();
+    });
 
     it("liste seulement les conversations en cours au départ", async () => {
         const fixture = await render({ side: "user" });

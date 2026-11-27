@@ -1,5 +1,5 @@
-import { formatDate } from "@angular/common";
-import { Component, LOCALE_ID, computed, inject } from "@angular/core";
+import { DOCUMENT, formatDate } from "@angular/common";
+import { Component, DestroyRef, LOCALE_ID, computed, inject } from "@angular/core";
 import { rxResource } from "@angular/core/rxjs-interop";
 import { ActivatedRoute, RouterLink } from "@angular/router";
 import { EMPTY } from "rxjs";
@@ -25,6 +25,8 @@ import { SalesChart } from "./sales-chart/sales-chart";
 import { ManagerCashBanner } from "./manager-cash-banner/manager-cash-banner";
 import { StatCard } from "./stat-card/stat-card";
 import { StockAlerts } from "./stock-alerts/stock-alerts";
+
+const REFRESH_EVERY = 30_000;
 
 @Component({
     selector: "app-dashboard",
@@ -59,6 +61,30 @@ export class Dashboard {
     private route = inject(ActivatedRoute);
     protected auth = inject(AuthService);
     protected stockAlerts = inject(LowStockAlertService);
+
+    private document = inject(DOCUMENT);
+
+    constructor() {
+        // L'accueil suit la boutique tout seul : toutes les 30 secondes, et dès qu'on revient dessus
+        const timer = setInterval(() => this.refresh(), REFRESH_EVERY);
+        const onVisible = () => this.refresh();
+        this.document.addEventListener("visibilitychange", onVisible);
+
+        inject(DestroyRef).onDestroy(() => {
+            clearInterval(timer);
+            this.document.removeEventListener("visibilitychange", onVisible);
+        });
+    }
+
+    // Rien quand la page est cachée ou sans réseau : les chiffres affichés restent à l'écran
+    private refresh() {
+        if (this.document.visibilityState !== "visible" || !navigator.onLine) return;
+
+        this.reloadSummary();
+        this.sales.reload();
+        this.activity.reload();
+        if (this.auth.isAdmin()) this.stockAlerts.alerts.reload();
+    }
 
     // Le guard admin renvoie ici l'employé qui ouvre une page réservée
     reserved = this.route.snapshot.queryParamMap.has("reserved");

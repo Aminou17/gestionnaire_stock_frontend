@@ -1,15 +1,10 @@
 import { Component, computed, inject } from "@angular/core";
-import { rxResource } from "@angular/core/rxjs-interop";
 import { RouterLink } from "@angular/router";
 
 import { AuthService } from "../../core/auth/auth.service";
 import { PRODUCT_NAME, COMPANY_NAME } from "../../core/brand";
 import { ModuleAccess } from "../../core/modules/module-access";
-import { CashSettingsService } from "../../core/cash/cash-settings.service";
-import { SalesSettingsService } from "../../core/sales/sales-settings.service";
 import { ShopSettingsService } from "../../core/shop/shop-settings.service";
-import { AlertEmailService } from "../../core/stock/alert-email.service";
-import { StockSettingsService } from "../../core/stock/stock-settings.service";
 import { ThemeService } from "../../core/theme/theme.service";
 import { InstallService } from "../../core/pwa/install.service";
 import { PageHeader } from "../../layout/page-header/page-header";
@@ -25,13 +20,6 @@ interface SettingsLink {
     // Couleur de la pastille d'icône
     tone: string;
     adminOnly?: boolean;
-}
-
-// État d'un réglage, affiché à droite de la ligne
-interface SettingsStatus {
-    text: string;
-    // ok : actif (point vert), off : désactivé (point gris)
-    state?: "ok" | "off";
 }
 
 interface SettingsGroup {
@@ -50,6 +38,25 @@ const GROUPS: SettingsGroup[] = [
                 icon: "store",
                 label: "Ma boutique",
                 description: "Nom, logo, coordonnées et ticket",
+            },
+        ],
+    },
+    {
+        title: "Mon compte",
+        links: [
+            {
+                path: "account",
+                tone: "#3b82f6",
+                icon: "user",
+                label: "Mon profil",
+                description: "Nom, e-mail et photo",
+            },
+            {
+                path: "password",
+                tone: "#ec4899",
+                icon: "key",
+                label: "Mot de passe",
+                description: "Modifier votre mot de passe",
             },
         ],
     },
@@ -100,25 +107,6 @@ const GROUPS: SettingsGroup[] = [
                 icon: "download",
                 label: "Sauvegarde et export",
                 description: "Produits, ventes et mouvements",
-            },
-        ],
-    },
-    {
-        title: "Mon compte",
-        links: [
-            {
-                path: "account",
-                tone: "#3b82f6",
-                icon: "user",
-                label: "Mon profil",
-                description: "Nom, e-mail et photo",
-            },
-            {
-                path: "password",
-                tone: "#ec4899",
-                icon: "key",
-                label: "Mot de passe",
-                description: "Modifier votre mot de passe",
             },
         ],
     },
@@ -174,79 +162,6 @@ export class Settings {
 
     private shopService = inject(ShopSettingsService);
     private access = inject(ModuleAccess);
-    private stockService = inject(StockSettingsService);
-    private alertEmailService = inject(AlertEmailService);
-    private cashService = inject(CashSettingsService);
-    private salesService = inject(SalesSettingsService);
-
-    // Les états ne sont lus que pour l'administrateur : le manager n'a pas accès à ces réglages
-    private params = () => (this.auth.isAdmin() ? true : undefined);
-
-    private shop = rxResource({
-        params: this.params,
-        stream: () => this.shopService.getSettings(),
-    });
-    private stock = rxResource({
-        params: this.params,
-        stream: () => this.stockService.getSettings(),
-    });
-    private alertEmail = rxResource({
-        params: this.params,
-        stream: () => this.alertEmailService.getSettings(),
-    });
-    private cash = rxResource({
-        params: this.params,
-        stream: () => this.cashService.getSettings(),
-    });
-    private sales = rxResource({
-        params: this.params,
-        stream: () => this.salesService.getSettings(),
-    });
-
-    // Un état n'apparaît que quand la donnée est arrivée : pas de clignotement à l'ouverture
-    statuses = computed<Record<string, SettingsStatus>>(() => {
-        const statuses: Record<string, SettingsStatus> = {};
-
-        if (this.shop.hasValue()) {
-            const shop = this.shop.value();
-            statuses["shop"] = {
-                text: shop.logo ? "Logo ajouté" : "Sans logo",
-                state: shop.logo ? "ok" : "off",
-            };
-        }
-
-        if (this.stock.hasValue()) {
-            const stock = this.stock.value();
-            statuses["stock"] = stock
-                ? { text: `Seuil : ${stock.min_stock}` }
-                : { text: "Non défini", state: "off" };
-        }
-
-        if (this.alertEmail.hasValue()) {
-            const email = this.alertEmail.value();
-            statuses["alert-email"] = email.enabled
-                ? { text: `Activé à ${String(email.sendHour).padStart(2, "0")}:00`, state: "ok" }
-                : { text: "Désactivé", state: "off" };
-        }
-
-        if (this.cash.hasValue()) {
-            statuses["cash"] = {
-                text: this.cash.value().blind_close ? "À l'aveugle" : "Solde visible",
-            };
-        }
-
-        if (this.sales.hasValue()) {
-            const prefix = this.sales.value().ticket_prefix;
-            statuses["sales"] = prefix ? { text: `Préfixe : ${prefix}` } : { text: "Sans préfixe" };
-        }
-
-        // La fiche d'abonnement n'est pas encore lue ici : toute boutique démarre par un essai
-        if (this.shopService.subscriptionsEnabled() && this.auth.isAdmin()) {
-            statuses["/subscription"] = { text: "Essai gratuit" };
-        }
-
-        return statuses;
-    });
 
     // L'employé ne voit que son compte
     groups = computed(() =>
