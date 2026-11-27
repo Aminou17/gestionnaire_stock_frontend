@@ -75,7 +75,7 @@
                     type="email"
                     formControlName="email"
                     autocomplete="email"
-                    placeholder="vous@exemple.com"
+                    placeholder="Adresse e-mail"
                     [class.invalid]="hasError('email', 'required') || hasError('email', 'email')"
                     [attr.aria-invalid]="
                         hasError('email', 'required') || hasError('email', 'email')
@@ -95,6 +95,7 @@
                 <app-icon name="key" [size]="18" />
                 <input
                     id="password"
+                    placeholder="Mot de passe"
                     class="input"
                     [type]="showPassword() ? 'text' : 'password'"
                     formControlName="password"
