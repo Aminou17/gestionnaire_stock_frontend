@@ -2,7 +2,8 @@
 
 :host {
     --field-h: 44px;
-    --field-radius: 10px;
+    /* Proche des coins du bouton Google, pour que tout le formulaire se ressemble */
+    --field-radius: 8px;
     --field-font: 15px;
     /* Couleurs calculées depuis le thème : elles marchent en clair comme en sombre */
     --field-border: color-mix(in srgb, var(--text) 15%, var(--surface));
@@ -13,6 +14,13 @@
     display: grid;
     gap: 20px;
     animation: rise 0.35s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Ordinateur : même hauteur que le bouton Google, qui fait toujours 40 px */
+@media (min-width: 1024px) {
+    :host {
+        --field-h: 40px;
+    }
 }
 
 /* iPhone zoome la page sur un champ en dessous de 16 px : on garde 16 px là seulement */

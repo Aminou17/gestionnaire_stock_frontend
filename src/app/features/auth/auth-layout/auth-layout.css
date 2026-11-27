@@ -132,8 +132,9 @@
 .card {
     width: 100%;
     max-width: 420px;
-    /* Téléphone : la carte suit l'en-tête au lieu de flotter au milieu d'un grand vide */
-    margin: 12px 0 auto;
+    /* Téléphone : la carte reste dans le haut de l'écran, avec un peu d'air sous l'en-tête
+       quand elle est courte, sans laisser tout le vide en bas */
+    margin: clamp(12px, 8vh, 64px) 0 auto;
     padding: 24px 20px 22px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
@@ -176,6 +177,13 @@ footer {
 .legal-links a:hover {
     color: #fff;
     text-decoration: underline;
+}
+
+/* Petit téléphone : l'air au-dessus de la carte passe après le formulaire */
+@media (max-width: 639px) and (max-height: 760px) {
+    .card {
+        margin-top: 12px;
+    }
 }
 
 /* Tablette : carte un peu plus large et plus aérée */
